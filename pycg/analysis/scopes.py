@@ -43,7 +43,7 @@ class Scope:
         "star_import",
         "dynamic",
         "imports",
-        "functions",
+        "definitions",
         "reads",
     )
 
@@ -70,7 +70,7 @@ class Scope:
         self.star_import = False
         self.dynamic = False
         self.imports = {}
-        self.functions = {}
+        self.definitions = {}
         self.reads = set()
 
     def __repr__(self):
@@ -123,10 +123,10 @@ class ModuleScopes:
             return None
         return scope.imports.get(name)
 
-    def function_definition(self, scope, name):
+    def definition(self, scope, name):
         if name in scope.shared or scope.star_import or scope.dynamic:
             return None
-        return scope.functions.get(name)
+        return scope.definitions.get(name)
 
     def inline(self, reader, binder):
         key = (reader, binder)
@@ -307,8 +307,8 @@ class _Collector:
         self.scope_of_node[node] = scope
         return scope
 
-    def _bind(self, scope, name, unbinds=False, imported=None, function=None):
-        _bind(scope, name, imported=imported, function=function)
+    def _bind(self, scope, name, unbinds=False, imported=None, definition=None):
+        _bind(scope, name, imported=imported, definition=definition)
         name = scope.mangle(name)
         for loop in self._loops:
             names = self.loop_bindings_by_node[loop]
@@ -327,7 +327,7 @@ class _Collector:
 
     def _visit_FunctionDef(self, node, scope):
         plain = None if node.decorator_list or scope.kind == CLASS else node
-        self._bind(scope, node.name, function=plain)
+        self._bind(scope, node.name, definition=plain)
         function = self._new_scope(FUNCTION, node, scope, node.name)
         self._bind_parameters(node.args, function)
         self._push(node.decorator_list + self._defaults(node.args), scope)
@@ -343,7 +343,8 @@ class _Collector:
         self._push([node.body], function, ())
 
     def _visit_ClassDef(self, node, scope):
-        self._bind(scope, node.name)
+        plain = None if node.decorator_list or scope.kind == CLASS else node
+        self._bind(scope, node.name, definition=plain)
         body = self._new_scope(CLASS, node, scope, node.name)
         keywords = [keyword.value for keyword in node.keywords]
         self._push(node.decorator_list + node.bases + keywords, scope)
@@ -491,14 +492,14 @@ class _Collector:
         self._bind(scope, node.name.id)
 
 
-def _bind(scope, name, parameter=False, imported=None, function=None):
+def _bind(scope, name, parameter=False, imported=None, definition=None):
     name = scope.mangle(name)
     if scope.imports.get(name, imported) != imported:
         imported = None
     scope.imports[name] = imported
-    if scope.functions.get(name, function) is not function:
-        function = None
-    scope.functions[name] = function
+    if scope.definitions.get(name, definition) is not definition:
+        definition = None
+    scope.definitions[name] = definition
     scope.bound.setdefault(name, None)
     scope.defined.setdefault(name, None)
     if not parameter:

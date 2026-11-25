@@ -159,3 +159,43 @@ def test_limit_a_body_that_only_reads_its_namespace_is_not_refused(tmp_path):
     )
 
     assert callees(graph, "main.C.run") == ["main.C.f"]
+
+
+def test_limit_a_new_that_allocates_through_a_builtin_base_is_not_decided(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Base(str):
+            def __new__(cls, value):
+                return super().__new__(cls, value)
+        class Loud(Base):
+            def __getattr__(self, name): pass
+        class Quiet(Base):
+            def speak(self): pass
+        Loud("a")
+        Quiet("b").speak()
+        """,
+    )
+
+    assert "main.Loud.__getattr__" in callees(graph, "main")
+
+
+def test_limit_a_store_of_class_outside_new_is_not_seen(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Base:
+            def __new__(cls):
+                instance = super().__new__(cls)
+                retag(instance)
+                return instance
+            def speak(self): pass
+        class Other:
+            def speak(self): pass
+        def retag(obj):
+            obj.__class__ = Other
+        Base().speak()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.Base.__new__", "main.Base.speak"]

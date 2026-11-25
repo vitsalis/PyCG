@@ -2678,6 +2678,49 @@ comes after the instances of the class saturated: it then sees none.
 - A class with no `__init__` in its MRO gives no edge; an outside base
   gives the edge `caller → base.__init__`.
 
+**A `__new__` that allocates.** One analysis of a `__new__` that several
+classes inherit gives each of their calls the instances of all of them,
+although Python's `object.__new__(cls)` makes an instance of exactly
+`cls`. In three sentences:
+
+1. A `__new__` *allocates* when every value it returns is
+   `object.__new__(cls)`, `super().__new__(cls, ...)` or
+   `super(C, cls).__new__(cls, ...)`, directly or through a local name
+   that only such calls bind; `cls` is its first parameter, which it never
+   rebinds, it stores no `__class__`, `object` and `super` are the
+   builtins, `C` is the class whose body defines the method (its only
+   binding, without a decorator), and the zero-argument `super()` reads
+   that class's `__class__` cell.
+2. A class *gets its own instance* from `__new__` when in each of its MROs
+   every class that defines `__new__`, up to the first that calls
+   `object.__new__` or to the end, defines one that allocates, and every
+   outside class on the way is described by the stubs, derives from no
+   builtin type but `object` and has no `__new__` of its own
+   (`Hierarchy.new_may_give_another`).
+3. A call of such a class keeps, of what `__new__` returns, only the
+   instances of the called class (and every object that is not an
+   instance of an analysed class); `__init__` runs on those.
+
+The decision is read from the MROs like a lookup: it is made when the
+class is ready and walked again when its MROs grow. It only turns from
+"its own instance" to "may give another", never back: MROs only grow, an
+exhaustive order or a class that becomes unknown always may give another,
+and what a class body defines and how its `__new__` returns are fixed by
+the builder. The call holds back the instances of other classes until
+then and gives them when the decision turns, so the instances that it
+gives in the end do not depend on the order in which the instances, the
+bases and the decision arrive
+(`tests/test_order_independence.py`, "a late base whose new gives another
+object").
+
+- Limit: a builtin base other than `object` (`str`, `tuple`, `type`)
+  allocates in C, and the stubs do not say that its `__new__` gives an
+  instance of exactly `cls`, so such a class is not decided and keeps every
+  result (`test_limit_a_new_that_allocates_through_a_builtin_base_is_not_decided`).
+- Limit: a store of `__class__` outside `__new__` changes the class of the
+  instance after the call; the analysis keeps the class that the call made
+  (`test_limit_a_store_of_class_outside_new_is_not_seen`).
+
 #### Classes that Python does not instantiate
 
 Two refusals of Python make a call of a class give no instance and run no

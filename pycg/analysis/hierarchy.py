@@ -36,6 +36,8 @@ _UNLESS_DESCRIPTOR_ITSELF = ("<the descriptor itself>",)
 
 _UNLESS_DEFAULT_MEMBER = ("<the default>",)
 
+_UNLESS_NEW_GIVES_THE_CLASS = ("<a __new__ that gives the class>",)
+
 _OUTSIDE_GIVES_DEFAULT, _OUTSIDE_GIVES_OVERRIDE, _OUTSIDE_GIVES_INHERITED = (
     "default",
     "override",
@@ -142,6 +144,28 @@ class Hierarchy:
 
     def python_method(self, cls, name):
         return self.lookup(cls, name, None, None, _UNLESS_PYTHONS_OWN_METHOD)
+
+    def new_may_give_another(self, cls):
+        return self.lookup(cls, "__new__", None, None, _UNLESS_NEW_GIVES_THE_CLASS)
+
+    def _new_may_give_another(self, cls):
+        if cls.exhaustive:
+            return True
+        for mro in cls.mros:
+            for base in mro:
+                if isinstance(base, External):
+                    if not self._allocates_with_object([base]):
+                        return True
+                    continue
+                if base.uses_namespace:
+                    return True
+                if "__new__" not in base.defines:
+                    continue
+                if base.allocator is None:
+                    return True
+                if base.allocator == "object":
+                    break
+        return False
 
     def descriptor_itself(self, cls):
         return self.lookup(cls, "__get__", None, None, _UNLESS_DESCRIPTOR_ITSELF)
@@ -275,6 +299,10 @@ class Hierarchy:
             if _python_may_define(cls, attr):
                 name = f"{BUILTIN_OBJECT}.{attr}"
                 self.add_object(dst, self.external(name, 1))
+            return
+        if unless == _UNLESS_NEW_GIVES_THE_CLASS:
+            if self._new_may_give_another(cls):
+                self.add_object(dst, self.external(f"{BUILTIN_OBJECT}.{attr}", 1))
             return
         if unless == _UNLESS_DEFAULT_MEMBER:
             if self._default_may_answer(cls, attr):

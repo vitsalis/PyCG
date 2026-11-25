@@ -37,6 +37,34 @@ class C(A, B):
 C().f()
 """
 
+LATE_FACTORY_BASE = """
+import sys
+class Allocating:
+    def __new__(cls):
+        return super().__new__(cls)
+class Factory:
+    def __new__(cls):
+        return Real()
+class Real:
+    def run(self): pass
+def late():
+    return Factory
+Base = Allocating
+if sys.argv:
+    Base = late()
+class Made(Base):
+    def run(self): pass
+class Loud(Allocating):
+    def __getattr__(self, name): pass
+class Quiet(Allocating):
+    def run(self): pass
+def made():
+    Made().run()
+def quiet():
+    Loud()
+    Quiet().run()
+"""
+
 BASE_FROM_A_CALL = """
 class A:
     def f(self): pass
@@ -1328,6 +1356,7 @@ Child()
 Base().helper()
 """,
     "two bases": TWO_BASES,
+    "a late base whose new gives another object": LATE_FACTORY_BASE,
     "base from a call": BASE_FROM_A_CALL,
     "external base and __getattr__": EXTERNAL_BASE_AND_GETATTR,
     "bases on a cycle": BASES_ON_A_CYCLE,
@@ -2050,6 +2079,18 @@ def test_programs_give_the_same_results_under_every_order(
 
 
 EXPECTED_CALLEES = {
+    "a late base whose new gives another object": (
+        "main.made",
+        "main.",
+        [
+            "main.Allocating.__new__",
+            "main.Factory.__new__",
+            "main.Loud.__getattr__",
+            "main.Made.run",
+            "main.Quiet.run",
+            "main.Real.run",
+        ],
+    ),
     "library operations sharing an origin": (
         "main.use",
         "main.",

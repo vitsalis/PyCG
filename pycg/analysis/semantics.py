@@ -671,17 +671,18 @@ class Analysis(
         self.solver.attach(
             default, Each(self._python_new, cls, call, results=(call.dst,))
         )
-        new = self._implicit_call(cls, "__new__", call, call.dst)
+        new = self._implicit_call(cls, "__new__", call, None)
         if new not in self._new_results:
             instances = self._class_instances.setdefault(cls, set())
-            returned = _Returned(self, call, instances)
+            returned = _Returned(self, call, cls, instances)
             self._new_results[new] = returned
             self.solver.attach(
                 self.lookup(cls, "__new__", cls),
                 Each(self._new, cls, new, results=(new.dst,)),
             )
-            self.solver.attach(new.dst, Each(returned.by_new))
             self.solver.attach(cls.instances, Each(returned.of_class))
+        if call.dst is not None:
+            self._new_results[new].add_dst(call.dst)
 
     def add_init_subclass(self, cls, keywords, double_star, caller, site):
         origin = ("init_subclass", site)
@@ -777,6 +778,7 @@ class Analysis(
 
     def _new(self, method, cls, call):
         if not isinstance(method, External):
+            self._new_results[call].start(call.dst)
             self.call_bound(method, (cls,), call)
 
     def call_dunder(self, obj, name, call, dst, unless=()):
@@ -927,14 +929,61 @@ class Call(Constraint):
 
 
 class _Returned:
-    __slots__ = ("analysis", "call", "returned", "instances", "sees")
+    __slots__ = (
+        "analysis",
+        "call",
+        "cls",
+        "returned",
+        "instances",
+        "sees",
+        "dst",
+        "dsts",
+        "held",
+        "another",
+    )
 
-    def __init__(self, analysis, call, instances):
+    def __init__(self, analysis, call, cls, instances):
         self.analysis = analysis
         self.call = call
+        self.cls = cls
         self.returned = set()
         self.instances = instances
         self.sees = False
+        self.dst = None
+        self.dsts = []
+        self.held = []
+        self.another = False
+
+    def add_dst(self, dst):
+        if dst not in self.dsts:
+            self.dsts.append(dst)
+            if self.dst is not None:
+                self.analysis.add_edge(self.dst, dst)
+
+    def start(self, new):
+        if self.dst is not None:
+            return
+        analysis = self.analysis
+        self.dst = analysis.node()
+        for dst in self.dsts:
+            analysis.add_edge(self.dst, dst)
+        analysis.solver.attach(new, Each(self.by_its_new, results=(self.dst,)))
+        release = Each(self.release, results=(self.dst,))
+        analysis.solver.attach(analysis.new_may_give_another(self.cls), release)
+        analysis.solver.attach(self.dst, Each(self.by_new))
+
+    def by_its_new(self, obj):
+        if type(obj) is Instance and obj.cls is not self.cls and not self.another:
+            self.held.append(obj)
+        else:
+            self.analysis.add_object(self.dst, obj)
+
+    def release(self, marker):
+        if not self.another:
+            self.another = True
+            for obj in self.held:
+                self.analysis.add_object(self.dst, obj)
+            self.held = []
 
     def by_new(self, obj):
         self.returned.add(obj)
