@@ -392,6 +392,25 @@ def test_builtins_reached_through_the_module_are_the_builtins(tmp_path):
     ]
 
 
+def test_a_builtin_variable_by_its_bare_name_is_the_value_of_its_stub_type(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import builtins
+        def bare():
+            exit(1)
+        def through_module():
+            builtins.quit(1)
+        if exit is not None:
+            help()
+        """,
+    )
+
+    assert callees(graph, "main.bare") == ["_sitebuiltins.Quitter.__call__"]
+    assert callees(graph, "main.through_module") == ["_sitebuiltins.Quitter.__call__"]
+    assert callees(graph, "main") == ["_sitebuiltins._Helper.__call__"]
+
+
 LAZY_MODULES = {
     "report.py": "def setup(): pass\ndef build(): pass\nsetup()\n",
     "audit.py": "def record(): pass\nrecord()\n",

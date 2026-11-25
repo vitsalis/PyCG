@@ -58,6 +58,7 @@ class ModuleBuilder(
         self._variables = {}
         self._untracked_nodes_by_scope = {}
         self._builtin_globals = {}
+        self._builtin_values = {}
         self._names_bound_to_importlib = set()
         self._import_module_names = set()
         self._flow = Flow(self.analysis)
@@ -148,8 +149,7 @@ class ModuleBuilder(
             module_value = self._value_of(self.scopes.module, name)
             return self._join([value, module_value]), unknown
         if scope.kind == MODULE and name in BUILTIN_NAMES:
-            builtin = self.analysis.external(f"{BUILTIN_MODULE}.{name}")
-            value = self._join([value, self.analysis.constant(builtin)])
+            value = self._join([value, self._builtin_value(name)])
             return value, unknown
         return value, (truth or UNKNOWN, values)
 
@@ -161,8 +161,7 @@ class ModuleBuilder(
             return self._variable(scope, name)
         value, unbound = definition[:2]
         if unbound and name in BUILTIN_NAMES:
-            builtin = self.analysis.external(f"{BUILTIN_MODULE}.{name}")
-            return self._join([value, self.analysis.constant(builtin)])
+            return self._join([value, self._builtin_value(name)])
         return value
 
     def _reaching(self, scope, name):
@@ -229,10 +228,15 @@ class ModuleBuilder(
         if name not in self._builtin_globals:
             node = self.analysis.node()
             self.analysis.add_edge(self.analysis.field(self.module, name), node)
-            builtin = self.analysis.external(f"{BUILTIN_MODULE}.{name}")
-            self.analysis.add_object(node, builtin)
+            self.analysis.add_edge(self._builtin_value(name), node)
             self._builtin_globals[name] = node
         return self._builtin_globals[name]
+
+    def _builtin_value(self, name):
+        if name not in self._builtin_values:
+            value = self.analysis.imported_value(f"builtins.{name}")
+            self._builtin_values[name] = value
+        return self._builtin_values[name]
 
     def _is_builtin_reference(self, node, name):
         if not (isinstance(node, ast.Name) and node.id == name):

@@ -323,11 +323,13 @@ and computes its name when asked.
   not depend on the interpreter that runs the analysis; or a name that the
   interpreter gives every module and the stubs do not list, `__name__`,
   `__doc__`, `__spec__`, `__loader__`, `__package__`, `__debug__`) reads
-  the module field (a star import may set it) and
-  `External(<builtin>.name)`. The module `builtins` is that
-  namespace: `builtins.getattr` and `from builtins import getattr` give
-  `External(<builtin>.getattr)`, which is a root, so the rules of modelled
-  builtins apply to it.
+  the module field (a star import may set it) and what `builtins.name`
+  gives: `External(<builtin>.name)`, or for a variable of the stub a value
+  of its type (`exit` is a `_sitebuiltins.Quitter`, so `exit(1)` calls
+  `Quitter.__call__`; see *Typed outside values*). The module `builtins`
+  is that namespace: `builtins.getattr` and `from builtins import getattr`
+  give `External(<builtin>.getattr)`, which is a root, so the rules of
+  modelled builtins apply to it.
 - `Field(object, name)`: an attribute of an object.
 - Container nodes: one field per constant index or key, `unknown` for the
   elements stored under other keys, and `keys` for the keys of a dict.
