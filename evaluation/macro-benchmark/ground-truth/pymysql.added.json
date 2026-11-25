@@ -84,12 +84,22 @@
         "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
         "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
       ],
+      "_hashlib._OneShotHash.digest": [
+        "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
+        "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
+        "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
+      ],
       "_sha2.SHA512Type.digest": [
         "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
         "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
         "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
       ],
-      "_sha512.sha512.digest": [
+      "_sha512.SHA384Type.digest": [
+        "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
+        "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
+        "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
+      ],
+      "_sha512.SHA512Type.digest": [
         "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
         "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
         "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
@@ -98,6 +108,11 @@
         "pymysql._auth 87:23 call  hashlib.sha512(password)",
         "pymysql._auth 93:23 call  hashlib.sha512(h[32:] + scramble)",
         "pymysql._auth 103:23 call  hashlib.sha512(R + A + scramble)"
+      ],
+      "hashlib.sha512.digest": [
+        "pymysql._auth 87:40 call  hashlib.sha512(password).digest()",
+        "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()",
+        "pymysql._auth 103:48 call  hashlib.sha512(R + A + scramble).digest()"
       ],
       "nacl.bindings.crypto_core_ed25519_scalar_add": [
         "pymysql._auth 108:54 call  _nacl_bindings.crypto_core_ed25519_scalar_add(ks, r)"
@@ -121,33 +136,47 @@
       ]
     },
     "pymysql._auth.scramble_caching_sha2": {
+      "_hashlib._OneShotHash.digest": [
+        "pymysql._auth 200:41 call  hashlib.sha256(password).digest()",
+        "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()",
+        "pymysql._auth 202:43 call  hashlib.sha256(p2 + nonce).digest()"
+      ],
       "_sha2.SHA256Type.digest": [
         "pymysql._auth 200:41 call  hashlib.sha256(password).digest()",
         "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()",
         "pymysql._auth 202:43 call  hashlib.sha256(p2 + nonce).digest()"
       ],
-      "_sha256.sha256.digest": [
+      "_sha256.SHA256Type.digest": [
+        "pymysql._auth 200:41 call  hashlib.sha256(password).digest()",
+        "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()",
+        "pymysql._auth 202:43 call  hashlib.sha256(p2 + nonce).digest()"
+      ],
+      "hashlib.sha256.digest": [
         "pymysql._auth 200:41 call  hashlib.sha256(password).digest()",
         "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()",
         "pymysql._auth 202:43 call  hashlib.sha256(p2 + nonce).digest()"
       ]
     },
     "pymysql._auth.scramble_native_password": {
+      "_hashlib._OneShotHash.digest": [
+        "pymysql._auth 33:39 call  sha1_new(password).digest()",
+        "pymysql._auth 34:37 call  sha1_new(stage1).digest()"
+      ],
+      "_sha1.SHA1Type.digest": [
+        "pymysql._auth 33:39 call  sha1_new(password).digest()",
+        "pymysql._auth 34:37 call  sha1_new(stage1).digest()",
+        "pymysql._auth 38:22 call  s.digest()"
+      ],
+      "_sha1.SHA1Type.update": [
+        "pymysql._auth 36:13 call  s.update(message[:SCRAMBLE_LENGTH])",
+        "pymysql._auth 37:13 call  s.update(stage2)"
+      ],
       "_sha1.sha.digest": [
         "pymysql._auth 33:39 call  sha1_new(password).digest()",
         "pymysql._auth 34:37 call  sha1_new(stage1).digest()",
         "pymysql._auth 38:22 call  s.digest()"
       ],
       "_sha1.sha.update": [
-        "pymysql._auth 36:13 call  s.update(message[:SCRAMBLE_LENGTH])",
-        "pymysql._auth 37:13 call  s.update(stage2)"
-      ],
-      "_sha1.sha1.digest": [
-        "pymysql._auth 33:39 call  sha1_new(password).digest()",
-        "pymysql._auth 34:37 call  sha1_new(stage1).digest()",
-        "pymysql._auth 38:22 call  s.digest()"
-      ],
-      "_sha1.sha1.update": [
         "pymysql._auth 36:13 call  s.update(message[:SCRAMBLE_LENGTH])",
         "pymysql._auth 37:13 call  s.update(stage2)"
       ]
@@ -1924,7 +1953,7 @@
       "pkt is a MysqlPacket: the argument (see 165:34) or the packet of _roundtrip"
     ],
     "pymysql._auth 200:41 call  hashlib.sha256(password).digest()": [
-      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha256.sha256 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha256.py), _sha2.SHA256Type from CPython 3.12 (the precedent of validators, trx_address.py:33)"
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH (on PyPy 3.11 hashlib.sha256 is _hashlib.openssl_sha256, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with non-empty data a _hashlib._OneShotHash, :40-57), or by hashlib's documented fallback the builtin object, named by the attribute under which its module exports the type (batch 8, a C type exported under a module attribute other than its type name): _sha256.SHA256Type on CPython 3.9 to 3.11 (Modules/sha256module.c 3.9.25 :720, 3.10.22 :725, 3.11.18 :728), _sha2.SHA256Type from CPython 3.12; on PyPy the class _sha256.sha256 (lib_pypy/_sha256.py:206 in 3.9, :218 in 3.10 and 3.11), which PyPy's hashlib fallback binds as hashlib.sha256 (lib-python/3/hashlib.py:98 in 3.9 and 3.10, :97 in 3.11), so its public alias names it there (ruling-names-2) (pymysql.md, Corrections of 2026-11-25)"
     ],
     "pymysql._auth 201:35 call  hashlib.sha256(p1).digest()": [
       "the SHA-256 object of hashlib.sha256 (see 200:41)"
@@ -1942,7 +1971,7 @@
       "conn is a Connection (see 118:22)"
     ],
     "pymysql._auth 33:39 call  sha1_new(password).digest()": [
-      "hashlib.new(\"sha1\") returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _sha1.sha1 object; on PyPy the fallback _sha1.sha1 is a function that returns a _sha1.sha (the precedent of path, judgement J6); pymysql supports CPython 3.9+ and PyPy (judgement J2)"
+      "hashlib.new(\"sha1\") returns an OpenSSL _hashlib.HASH (with non-empty data on PyPy 3.11 a _hashlib._OneShotHash: hashlib.new is __hash_new, lib-python/3/hashlib.py:160, and _hashlib.new returns the one-shot object for non-empty data, lib_pypy/_hashlib/__init__.py:40-57), or by hashlib's documented fallback the object of the factory _sha1.sha1: on CPython the builtin SHA-1 type, which _sha1 exports as SHA1Type (3.9.25 Modules/sha1module.c:560 to 3.15.2 :353; batch 8, a C type exported under a module attribute other than its type name); on PyPy the fallback _sha1.sha1 is a function that returns a _sha1.sha (lib_pypy/_sha1.py:129, 359 in 3.10 and 3.11; the precedent of path, judgement J6); pymysql supports CPython 3.9+ and PyPy (judgement J2; pymysql.md, Corrections of 2026-11-25)"
     ],
     "pymysql._auth 34:37 call  sha1_new(stage1).digest()": [
       "the SHA-1 object of hashlib.new (see 33:39)"
@@ -1957,7 +1986,7 @@
       "s is the SHA-1 object of sha1_new() (see 33:39)"
     ],
     "pymysql._auth 87:40 call  hashlib.sha512(password).digest()": [
-      "hashlib.sha512 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha512.sha512 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha512.py), _sha2.SHA512Type from CPython 3.12 (the precedent of validators for SHA-256)"
+      "hashlib.sha512 returns an OpenSSL _hashlib.HASH (on PyPy 3.11 hashlib.sha512 is _hashlib.openssl_sha512, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with non-empty data a _hashlib._OneShotHash, :40-57), or by hashlib's documented fallback the builtin object, named by the attribute under which its module exports the type (batch 8, a C type exported under a module attribute other than its type name): _sha512.SHA512Type on CPython 3.9 (3.9.25 Modules/sha512module.c:778), _sha512.SHA384Type on CPython 3.10 and 3.11 (sha512module.c sets SHA384Type to the SHA-384 type and then overwrites it with the SHA-512 type: 3.10.22 :782, :788; 3.11.18 :785, :791), _sha2.SHA512Type from CPython 3.12; on PyPy the class _sha512.sha512 (lib_pypy/_sha512.py:234 in 3.9, :245 in 3.10 and 3.11), which PyPy's hashlib fallback binds as hashlib.sha512 (lib-python/3/hashlib.py:102 in 3.9 and 3.10, :101 in 3.11), so its public alias names it there (ruling-names-2) (pymysql.md, Corrections of 2026-11-25)"
     ],
     "pymysql._auth 93:49 call  hashlib.sha512(h[32:] + scramble).digest()": [
       "the SHA-512 object of hashlib.sha512 (see 87:40)"
