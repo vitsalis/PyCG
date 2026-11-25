@@ -203,7 +203,7 @@ by that class; its values are `http.cookies.Morsel` (`Morsel.get`, a
 dict method, named by the receiver's class); `os.environ.get` is
 `collections.abc.Mapping.get`; `hashlib.sha1(...).digest()` is
 `_hashlib.HASH.digest` and, by hashlib's documented fallback,
-`_sha1.sha1.digest`; `ipaddress.ip_network` results are `IPv4Network` or
+`_sha1.SHA1Type.digest` (Corrections of 2026-11-25); `ipaddress.ip_network` results are `IPv4Network` or
 `IPv6Network` (`subnet_of` for both).
 
 ## Default rejections
@@ -275,3 +275,24 @@ the stub lead to subscripts (`_abnf.py:203-205`, `_app.py:668-669`),
 concatenation (`continuous_frame.add`), or builtin and library calls
 (`repr`, `str`, `gzip`, `zlib`, `array.array`): no further pair.
 
+## Corrections of 2026-11-25
+
+Batch 8's ruling "A C type exported under a module attribute other than
+its type name" (the referee's `b8-ruling-c-type-names-1.md`) names a method
+of an outside class by the attribute under which the defining extension
+module exports the type, on each admitted implementation and version; a
+factory names only its own call. websocket-client admits CPython 3.10 and
+later only (`setup.py`, `python_requires=">=3.10"`). hashlib's fallback
+for SHA-1 calls the factory `_sha1.sha1` (`Lib/hashlib.py`), whose object
+has the builtin SHA-1 type; `_sha1` exports that type as `SHA1Type` on
+every admitted version (`Modules/sha1module.c` 3.10.22 `:568-570`, 3.11.18
+`:571`, 3.12.16 `:354`, 3.13.18 `:356`, 3.14.10 `:371`, 3.15.2 `:353`; the
+batch-8 dependency sources). No admitted runtime is left for the type
+name.
+
+| Site | Caller | Edge removed | Edge added |
+|---|---|---|---|
+| `_handshake.py:215:53` `hashlib.sha1(value).digest()` | `_handshake._validate` | `_sha1.sha1.digest` | `_sha1.SHA1Type.digest` |
+
+`_hashlib.HASH.digest` stays. One graph edge renamed (outside): 648
+edges, 202 in the package, 446 outside.

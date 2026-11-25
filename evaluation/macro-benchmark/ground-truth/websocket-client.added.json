@@ -583,7 +583,7 @@
       ]
     },
     "websocket._handshake._validate": {
-      "_sha1.sha1.digest": [
+      "_sha1.SHA1Type.digest": [
         "websocket._handshake 215:53 call  hashlib.sha1(value).digest()"
       ]
     },
@@ -1189,7 +1189,7 @@
       "the isinstance test at line 135 fixes dict (B4)"
     ],
     "websocket._handshake 215:53 call  hashlib.sha1(value).digest()": [
-      "hashlib.sha1 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _sha1.sha1 (README \"Versions and configuration\"; bottle bottle.py:2918, path)"
+      "hashlib.sha1 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the object of the factory _sha1.sha1 (README \"Versions and configuration\"; bottle bottle.py:2918, path): the builtin SHA-1 type, which _sha1 exports as SHA1Type on every admitted CPython (Modules/sha1module.c 3.10.22 :568-570, 3.11.18 :571, 3.12.16 :354, 3.13.18 :356, 3.14.10 :371, 3.15.2 :353; batch 8, a C type exported under a module attribute other than its type name; websocket-client.md, Corrections of 2026-11-25)"
     ],
     "websocket._http 116:28 call  Proxy.create( proxy_type=proxy_type, host=proxy.proxy_hos...": [
       "runs only on the side of the optional import where python-socks is importable (HAVE_PYTHON_SOCKS, line 94); python-socks is not installed, so the name is the missing module's access path (J1)"
