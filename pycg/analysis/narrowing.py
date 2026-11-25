@@ -2,17 +2,30 @@ import ast
 
 from .annotations import CLASS, INSTANCE
 from .flow import UNKNOWN
-from .hierarchy import BUILTIN_TYPE, MAY_DERIVE, MAY_LACK, NOT_NOMINAL
+from .hierarchy import (
+    BUILTIN_TYPE,
+    MAY_DERIVE,
+    MAY_LACK,
+    MAY_LACK_METHOD,
+    NOT_NOMINAL,
+)
 from .model import (
+    BoundMethod,
+    BuiltinMethod,
     Class,
+    Closure,
     Const,
     Container,
     Coroutine,
     External,
+    Function,
     Generator,
     Instance,
+    Module,
     Pattern,
+    ReturnsArgument,
     Typed,
+    UnknownExternal,
 )
 from .outside import outside_name
 from .solver import Each
@@ -23,6 +36,18 @@ TYPE_PATH = "builtins.type"
 COROUTINE_PATH = "types.CoroutineType"
 
 CLASS_PREDICATES = {"inspect.iscoroutine": COROUTINE_PATH}
+
+CALLABLE = "<callable>"
+
+_CALLABLE_OBJECTS = (
+    Function,
+    BoundMethod,
+    ReturnsArgument,
+    Closure,
+    BuiltinMethod,
+    Class,
+)
+_EXACT_OBJECTS = (Const, Pattern, Container, Generator, Coroutine)
 
 ANALYSED, EXACTLY, BELOW = "analysed", "exactly", "below"
 
@@ -56,6 +81,8 @@ class ClassTestBuilder:
             for checker, as_class in CLASS_TESTS.items():
                 if self._is_builtin_reference(node.func, checker):
                     return args[1], as_class
+        if len(args) == 1 and self._is_builtin_reference(node.func, "callable"):
+            return CALLABLE, False
         if len(args) == 1:
             path = CLASS_PREDICATES.get(self._imported_function(node.func))
             if path is not None:
@@ -100,6 +127,11 @@ class ClassTestBuilder:
         if key not in self._narrowed_nodes:
             _, _, value, classes, as_class = self._class_tests_by_call[test]
             narrowed = self.analysis.node()
+            if classes is CALLABLE:
+                if value is not None:
+                    self.analysis.callable_filter(value, narrowed, holds)
+                self._narrowed_nodes[key] = narrowed
+                return narrowed
             if value is not None:
                 self.analysis.class_filter(value, classes, narrowed, as_class, holds)
             if holds and classes is not None:
@@ -152,6 +184,43 @@ class _Alternative:
 
 
 class ClassTests:
+    def callable_filter(self, source, dst, holds):
+        each = Each(self._callable_value, dst, holds, results=(dst,))
+        self.solver.attach(source, each)
+
+    def _callable_value(self, obj, dst, holds):
+        if isinstance(obj, Instance):
+            if holds:
+                found = self.lookup(obj.cls, "__call__", obj)
+            else:
+                found = self.relation(obj.cls, "__call__", MAY_LACK_METHOD)
+            passing = Each(self._pass_callable, obj, dst, results=(dst,))
+            self.solver.attach(found, passing)
+            return
+        callable_ = self._callable(obj)
+        if callable_ is None or callable_ == holds:
+            self.add_object(dst, obj)
+
+    def _pass_callable(self, _method, obj, dst):
+        self.add_object(dst, obj)
+
+    def _callable(self, obj):
+        if isinstance(obj, _CALLABLE_OBJECTS):
+            return True
+        if isinstance(obj, _EXACT_OBJECTS):
+            return False if obj.exact else None
+        if isinstance(obj, Module):
+            return False
+        if isinstance(obj, Typed):
+            return True if self.stubs.member(obj.cls, "__call__") else None
+        if isinstance(obj, External) and not isinstance(obj, UnknownExternal):
+            kinds = {d.kind for d in self.stub_definitions(obj) or ()}
+            if kinds and kinds <= {"function", "class"}:
+                return True
+            if kinds == {"module"}:
+                return False
+        return None
+
     def tested_classes(self, classes, dst, as_class, owner):
         key = (classes, dst, as_class)
         if key in self._tested_classes:

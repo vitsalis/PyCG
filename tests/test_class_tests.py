@@ -1360,3 +1360,49 @@ def test_a_final_class_of_the_stubs_filters_whatever_its_protocol_bases(tmp_path
     )
 
     assert callees(graph, "main.parse") == ["<builtin>.isinstance"]
+
+
+def test_callable_keeps_the_values_that_may_be_called(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import os
+        class Action:
+            def __call__(self): pass
+            def inside(self): pass
+        class Made:
+            def __init__(self): pass
+            def after(self): pass
+        def task(): pass
+        def run(value):
+            if callable(value):
+                value.inside()
+                value()
+            else:
+                value.after()
+        def guard(value):
+            if not callable(value):
+                return
+            value()
+        for value in (task, Action(), A(), [A()], "a", os, len, Made):
+            run(value)
+            guard(value)
+        """,
+    )
+
+    assert callees(graph, "main.run") == [
+        "<builtin>.callable",
+        "<builtin>.len",
+        "main.A.after",
+        "main.Action.__call__",
+        "main.Action.inside",
+        "main.Made.__init__",
+        "main.task",
+    ]
+    assert callees(graph, "main.guard") == [
+        "<builtin>.callable",
+        "<builtin>.len",
+        "main.Action.__call__",
+        "main.Made.__init__",
+        "main.task",
+    ]

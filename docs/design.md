@@ -1078,7 +1078,16 @@ tuple of classes. In the branch where the test fails, it gets the values
 that may not be instances of `C`. `issubclass(x, C)` does the same with
 classes. `inspect.iscoroutine(x)` is `isinstance(x, types.CoroutineType)`
 (`CLASS_PREDICATES`), called through a name or a module that an import of
-`inspect` binds.
+`inspect` binds. `callable(x)` tests the type of `x` for `__call__`: where
+it holds, `x` gets its values that may be called, and where it fails those
+that may not. A function, a method, a class and an outside function or
+class are called; an exact constant, container, generator or coroutine and
+a module are not; an instance of an analysed class may be called if some
+MRO of its class finds `__call__`, and may not if some MRO lacks it (an
+outside base counts where its stub declares it); a typed value whose stub
+class declares `__call__` is called, and any other value (a typed value
+without it, which a subclass may give one, an alias, an unknown value)
+passes both branches.
 
 ```python
 def load(parser, stream):

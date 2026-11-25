@@ -44,6 +44,7 @@ _OUTSIDE_GIVES_DEFAULT, _OUTSIDE_GIVES_OVERRIDE, _OUTSIDE_GIVES_INHERITED = (
 
 MAY_DERIVE = ("<may derive>",)
 MAY_LACK = ("<may lack>",)
+MAY_LACK_METHOD = ("<may lack the method>",)
 NOT_NOMINAL = ("<not nominal>",)
 
 _MODULES_OF_ABCS = frozenset({"abc", "typing", "typing_extensions", "_collections_abc"})
@@ -209,6 +210,10 @@ class Hierarchy:
         return self.lookup(cls, other, None, None, relation)
 
     def _may_relate(self, cls, other, relation):
+        if relation == MAY_LACK_METHOD:
+            if cls.exhaustive:
+                return other not in cls.defines
+            return not all(_defines_method(mro, other) for mro in cls.mros)
         if relation == NOT_NOMINAL:
             return any(
                 isinstance(base, External) and not self.nominal_outside(base)
@@ -272,7 +277,7 @@ class Hierarchy:
                 name = f"{BUILTIN_OBJECT}.{attr}"
                 self.add_object(dst, self.external(name, 1))
             return
-        if unless in (MAY_DERIVE, MAY_LACK, NOT_NOMINAL):
+        if unless in (MAY_DERIVE, MAY_LACK, MAY_LACK_METHOD, NOT_NOMINAL):
             if self._may_relate(cls, attr, unless):
                 self.add_object(dst, self.external(BUILTIN_OBJECT))
             return
@@ -767,6 +772,15 @@ def _python_may_define(cls, name):
 
 def is_property(obj):
     return isinstance(obj, External) and obj.name == f"{BUILTIN_MODULE}.property"
+
+
+def _defines_method(classes, name):
+    return any(
+        name in base.defines
+        if isinstance(base, Class)
+        else isinstance(base, External) and _outside_defines(base.name, name)
+        for base in classes
+    )
 
 
 def _defines(classes, names):
