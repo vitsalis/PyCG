@@ -27,6 +27,7 @@ from .model import (
     Const,
     Container,
     External,
+    Function,
     Generator,
     Instance,
     Signature,
@@ -106,6 +107,7 @@ MRO_ENTRIES = {
     "typing_extensions.TypedDict": "builtins.dict",
 }
 TYPES_SAYING_NOTHING = frozenset({OBJECT})
+METHOD_TYPE = "types.MethodType"
 STRING_CONSTANT_CLASSES = {str: "builtins.str", bytes: "builtins.bytes"}
 
 FUNCTION_TYPES = frozenset(
@@ -366,6 +368,8 @@ class Outside:
                 self._subclasses(receivers[0], call)
                 return
         for definition in definitions:
+            if definition.path == METHOD_TYPE and call.dst is not None:
+                self._make_method(call)
             if definition.kind == "class" and definition.path in CONTAINER_CLASSES:
                 entry = CONTAINER_CLASSES[definition.path][1]
                 self.apply_rule(entry, call, receiver)
@@ -436,6 +440,26 @@ class Outside:
                 entry = REFLECTION_CALLS.get(definition.path)
                 if entry is not None:
                     self.apply_rule(entry, call, None)
+
+    def _make_method(self, call):
+        if len(call.args) != 2 or call.star or call.keywords or None in call.args:
+            return
+        function, receiver = call.args
+        each = Each(
+            self._method_function,
+            receiver,
+            call,
+            kinds=(Function,),
+            results=(call.dst,),
+        )
+        self.solver.attach(function, each)
+
+    def _method_function(self, function, receiver, call):
+        each = Each(self._bound_to, function, call, results=(call.dst,))
+        self.solver.attach(receiver, each)
+
+    def _bound_to(self, obj, function, call):
+        self.add_object(call.dst, self.bound_method(obj, function))
 
     def call_back_library(self, call, overloads):
         back = self.site_call(call.caller, call.site, ("call back",), [None])

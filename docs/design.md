@@ -1635,6 +1635,11 @@ or a list:
     every stub `__getattr__` adds 83% to the time of hypothesis.
   - Limit: the `restype` that a program stores on a foreign function is
     not read: a call gives what the stub of `__call__` gives.
+- **Bound methods made by a call.** `types.MethodType` is the class of
+  bound methods: a call `types.MethodType(f, obj)` with two positional
+  arguments gives, for each analysed function `f` and each value `obj`,
+  the method of `f` bound to `obj`, as a load of `f` through an instance
+  does, so calling it calls `f` with `obj` first.
 - **Opened files.** `open`, `io.open`, `os.fdopen` and `pathlib.Path.open`
   give the class that `io.open` makes for their mode and buffering, where
   the stubs give one overload per kind of mode (their `Literal` modes
