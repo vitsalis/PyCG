@@ -347,14 +347,14 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
     reject validators.hashes.sha256: another function; the name sha256 here is hashlib.sha256 (btc_address.py:4)
 23:52 call  sha256(header).digest()
     -> _hashlib.HASH.digest
-    -> _sha256.sha256.digest
+    -> _sha256.SHA256Type.digest
     -> _sha2.SHA256Type.digest
-    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object; validators supports CPython 3.11 and later, where hashlib.sha256 is a factory, so each class is named by the attribute that its module exports (README, batch 8 "A C type exported under a module attribute other than its type name", b8-ruling-c-type-names-1.md; "Public class aliases by configuration", ruling-names-2.md): _hashlib.HASH, _sha256.SHA256Type on CPython 3.11 (Modules/sha256module.c:728 of 3.11.18; type name _sha256.sha256 at :570), and _sha2.SHA256Type from 3.12 (sha2module.c:547, 855 of 3.12.16) (validators.md, Corrections of 2026-11-25)
 23:62 call  sha256(sha256(header).digest()).digest()
     -> _hashlib.HASH.digest
-    -> _sha256.sha256.digest
+    -> _sha256.SHA256Type.digest
     -> _sha2.SHA256Type.digest
-    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object; validators supports CPython 3.11 and later, where hashlib.sha256 is a factory, so each class is named by the attribute that its module exports (README, batch 8 "A C type exported under a module attribute other than its type name", b8-ruling-c-type-names-1.md; "Public class aliases by configuration", ruling-names-2.md): _hashlib.HASH, _sha256.SHA256Type on CPython 3.11 (Modules/sha256module.c:728 of 3.11.18; type name _sha256.sha256 at :570), and _sha2.SHA256Type from 3.12 (sha2module.c:547, 855 of 3.12.16) (validators.md, Corrections of 2026-11-25)
 
 [validators.crypto_addresses.btc_address.btc_address]
 53:19 call  re.compile(r"^(bc|tb)[0-3][02-9ac-hj-np-z]{14,74}$")
@@ -436,14 +436,14 @@ default reject validators.utils.ValidationError.__repr__, validators.utils.Valid
     reject validators.hashes.sha256: another function; the name sha256 here is hashlib.sha256 (import hashlib, trx_address.py:4)
 33:67 call  hashlib.sha256(address[:-4]).digest()
     -> _hashlib.HASH.digest
-    -> _sha256.sha256.digest
+    -> _sha256.SHA256Type.digest
     -> _sha2.SHA256Type.digest
-    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object; validators supports CPython 3.11 and later, where hashlib.sha256 is a factory, so each class is named by the attribute that its module exports (README, batch 8 "A C type exported under a module attribute other than its type name", b8-ruling-c-type-names-1.md; "Public class aliases by configuration", ruling-names-2.md): _hashlib.HASH, _sha256.SHA256Type on CPython 3.11 (Modules/sha256module.c:728 of 3.11.18; type name _sha256.sha256 at :570), and _sha2.SHA256Type from 3.12 (sha2module.c:547, 855 of 3.12.16) (validators.md, Corrections of 2026-11-25)
 33:77 call  hashlib.sha256(hashlib.sha256(address[:-4]).digest()).dig...
     -> _hashlib.HASH.digest
-    -> _sha256.sha256.digest
+    -> _sha256.SHA256Type.digest
     -> _sha2.SHA256Type.digest
-    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object; validators supports CPython 3.11 and later, where hashlib.sha256 is a factory, so each class is named by the attribute that its module exports (README, batch 8 "A C type exported under a module attribute other than its type name", b8-ruling-c-type-names-1.md; "Public class aliases by configuration", ruling-names-2.md): _hashlib.HASH, _sha256.SHA256Type on CPython 3.11 (Modules/sha256module.c:728 of 3.11.18; type name _sha256.sha256 at :570), and _sha2.SHA256Type from 3.12 (sha2module.c:547, 855 of 3.12.16) (validators.md, Corrections of 2026-11-25)
 
 [validators.crypto_addresses.trx_address.trx_address]
 60:22 call  re.compile(r"^[T][a-km-zA-HJ-NP-Z1-9]{33}$")

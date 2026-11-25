@@ -111,8 +111,9 @@ the optional import runs too: `eth_address -> <builtin>.ImportError`
 **J4. SHA-256 receivers (`btc_address.py:23`, `trx_address.py:33`).** The
 factory is `hashlib.sha256` (the trace's `_hashlib.openssl_sha256` has that
 alias). Its result has `.digest()` on `_hashlib.HASH`, and, by hashlib's
-documented fallback without OpenSSL's SHA-256, on `_sha256.sha256` (CPython
-3.11) or `_sha2.SHA256Type` (3.12 and later). This is the precedent of
+documented fallback without OpenSSL's SHA-256, on `_sha256.SHA256Type`
+(CPython 3.11) or `_sha2.SHA256Type` (3.12 and later; see "Corrections of
+2026-11-25"). This is the precedent of
 markdown2 (`markdown2.py:150`) applied to 3.11 and later. 4 edges from
 reading only. The candidate `validators.hashes.sha256` is rejected at the
 four factory calls: there the name is hashlib's.
@@ -232,3 +233,25 @@ needed. Every other outside name is of the standard library or a builtin.
   `urllib.parse.parse_qs` through an admitted `str` subclass; no edge change.
 - Metadata, the note at `utils.py:40:52`: applied. `func` can also be a
   client callable instance; still no package callee.
+
+## Corrections of 2026-11-25
+
+**The builtin SHA-256 object (J4).** At `btc_address.py:23:52` and
+`23:62` (`_validate_old_btc_address`) and `trx_address.py:33:67` and
+`33:77` (`_validate_trx_checksum_address`), `_sha256.sha256.digest` is
+renamed `_sha256.SHA256Type.digest` (2 edges renamed; 422 edges, 152
+inside, 270 outside, unchanged in number). Batch 8's ruling "A C type
+exported under a module attribute other than its type name"
+(`selection/batch-8-proposal/rulings/b8-ruling-c-type-names-1.md`) names
+an outside C type by the attribute under which its module exports it, and
+by its type name only where no attribute is exported. A public class alias
+would come first ("Public class aliases by configuration",
+`ruling-names-2.md`), but validators admits CPython only, where
+`hashlib.sha256` is a factory.
+
+| Runtime | Builtin fallback | Type name | Exported as | Name |
+|---|---|---|---|---|
+| CPython 3.11 | `_sha256.sha256` (`Lib/hashlib.py:95-97` of 3.11.18) | `_sha256.sha256` (`Modules/sha256module.c:570`) | `SHA256Type` (`PyModule_AddObject`, `:728`) | `_sha256.SHA256Type` |
+| CPython 3.12 to 3.15 | `_sha2.sha256` | `_sha2.SHA256Type` (`Modules/sha2module.c:547` of 3.12.16, `:540` of 3.15.2) | `SHA256Type` (`PyModule_AddType`, `:855`, `:867`) | `_sha2.SHA256Type` |
+
+`_hashlib.HASH.digest` (OpenSSL) and `_sha2.SHA256Type.digest` stay.
