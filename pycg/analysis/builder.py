@@ -51,6 +51,7 @@ class ModuleBuilder(
         self.scopes = analyse_scopes(tree, module.name)
         self.type_only_names = {}
         self.star_imported_modules = []
+        self.outside_star_imported_modules = []
         self._scope = self.scopes.module
         self._function = None
         self._classes = {}
@@ -822,6 +823,9 @@ class ModuleBuilder(
                 imported = self.imports.handle_import(name, node.level)
                 if imported is not None:
                     self.star_imported_modules.append(imported)
+                elif holder is not None:
+                    self.outside_star_imported_modules.append(holder)
+                    self.analysis.add_external_module(holder)
                 continue
             member = self._scope.mangle(alias.name)
             name = f"{source}.{alias.name}" if source else alias.name

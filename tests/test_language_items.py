@@ -338,6 +338,32 @@ child.run()
     assert callees(graph, "main") == []
 
 
+def test_a_star_import_of_an_outside_module_binds_the_exports_of_its_stub(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": """
+from facade import *
+from glob import *
+from string import *
+def use():
+    join("a", "b")
+    escape("a")
+    has_magic("a")
+    Template("a").substitute()
+""",
+            "facade.py": "from os.path import *\n",
+        },
+    )
+
+    assert callees(graph, "main.use") == [
+        "glob.escape",
+        "os.path.join",
+        "string.Template",
+        "string.Template.substitute",
+    ]
+
+
 def test_builtins_reached_through_the_module_are_the_builtins(tmp_path):
     graph = graph_of(
         tmp_path,

@@ -40,6 +40,7 @@ class Program:
         self._entry_module_names = set()
         self._entry_only_files_by_name = {}
         self._star_imported_modules_by_importer = {}
+        self._outside_star_imported_modules_by_importer = {}
         self._exports_by_module = {}
         self._modules_declaring_all = set()
 
@@ -151,6 +152,9 @@ class Program:
             self.modules[name].status = "partial"
             self.modules[name].cause = _cause(error)
         self._star_imported_modules_by_importer[name] = builder.star_imported_modules
+        self._outside_star_imported_modules_by_importer[name] = (
+            builder.outside_star_imported_modules
+        )
         declared = _declared_all_names(tree)
         if declared is None:
             public = [
@@ -196,6 +200,7 @@ class Program:
                     self._exports_by_module.setdefault(package, {})[attribute] = None
 
     def _link_star_imports(self):
+        self._link_outside_star_imports()
         changed = True
         while changed:
             changed = False
@@ -219,6 +224,28 @@ class Program:
                         self.analysis.field(holder_module, name),
                         self.analysis.field(importer_module, name),
                     )
+
+    def _link_outside_star_imports(self):
+        by_importer = self._outside_star_imported_modules_by_importer
+        for importer, holders in by_importer.items():
+            importer_module = self.analysis.module(importer)
+            for holder in holders:
+                for name in self._outside_exports(holder):
+                    importer_module.defines.add(name)
+                    self.analysis.add_edge(
+                        self.analysis.imported_value(f"{holder}.{name}"),
+                        self.analysis.field(importer_module, name),
+                    )
+                    if importer not in self._modules_declaring_all:
+                        self._exports_by_module[importer][name] = None
+
+    def _outside_exports(self, holder):
+        data = self.analysis.stubs.module(holder)
+        if data is None:
+            return []
+        if "all" in data:
+            return data["all"]
+        return [name for name in data["names"] if not name.startswith("_")]
 
 
 def _common_directory(paths):

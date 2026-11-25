@@ -3713,7 +3713,16 @@ binds at run time (see *Code that cannot run*), which include the public
 submodules that imports attach to a package (an import anywhere in the
 program counts, not only one that runs before the star import). A star
 import also imports the submodules that `__all__` lists; discovery builds
-them.
+them. A star import of an outside module binds what its stub exports: the
+stub's `__all__` (`all` in the data), else the public names that the stub
+has; each name has the value that `from m import name` gives (see *Typed
+outside values*), and a module without `__all__` passes them on to its
+own star importers. An outside module without a stub exports nothing.
+
+- Limit: an outside module's exports are those of its stub, and a stub
+  lists only the names that a type checker sees: the public names that the
+  module imports without re-exporting them (`os` in a module that does
+  `import os`) are exported at run time and not bound by the analysis.
 
 **Loads on a module.** A load gives the module-level variable, or a
 submodule. A load of a name that the module does not bind at run time (by
