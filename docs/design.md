@@ -2926,8 +2926,10 @@ name that may be any of many strings (`typing`'s `__getattr__` forwards every
 missing name) would turn one access into a load of every name in the program.
 What else the name holds gives no name: `name: str` with the constants `"a"`
 and `"b"` loads `a` and `b`, and the attributes that the other values name are
-missed. The `__name__` of an analysed function is a str constant, the name of
-its `def` (`<lambda>` for a lambda), so `getattr(obj, f.__name__)` loads the
+missed. A module's `__name__` is a str constant, its name, and also
+`"__main__"` for an entry module, which may run as a script. The
+`__name__` of an analysed function is a str constant, the name of its
+`def` (`<lambda>` for a lambda), so `getattr(obj, f.__name__)` loads the
 attribute of that name; a name that the code stores there is one too.
 
 A load (`getattr`, `hasattr`) does not count against the bound the names
