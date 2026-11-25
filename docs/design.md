@@ -2281,9 +2281,9 @@ Limits:
   exception for `BaseException`, a subclass of `list` for `Iterable`
   (`test_limit_a_builtin_protocol_names_no_class_below_it_through_a_concrete_class`).
 - The admission through abstract classes, with the stubs' bases, has a
-  measured cost. On the 40 development packages, the 30 older ones get 40
+  measured cost. On the 40 development packages, the 30 older ones get 41
   false edges inside the package and no true one (cachetools 20,
-  marshmallow 19, h11 1); more-itertools gets 2,142 true and 334 false
+  marshmallow 20, h11 1); more-itertools gets 2,142 true and 334 false
   edges, 182 of the false ones at parameters whose annotation is wider than
   the documented contract (numbers, mappings, matrices and the helpers
   they reach). Batch 6's recall inside the packages rises from 0.383 to
@@ -2414,9 +2414,20 @@ C.attr
 - An outside class of the MRO that the stubs describe gives what its stub
   hierarchy has, named through the base as the code names it
   (`collections.abc.MutableMapping.popitem`), and a name that it does not
-  have continues the walk, as Python's MRO puts the outside base's own
-  bases (`object` last) after the other bases. An outside class without
+  have continues the walk. The MRO holds an outside base as one class,
+  without its own bases, so its whole stub hierarchy is searched where the
+  base stands. Python's C3 order puts them there too unless another base
+  shares one (`class E(KeyError, Mine)`: `KeyError`, `LookupError`,
+  `Exception`, `BaseException`, then `Mine`). An outside class without
   stubs gives `External(base.attr)` and may define any name.
+  - Limit: C3 puts a base that two bases share after both of them, and
+    the analysis does not see that an outside base shares it. tablib's
+    `HeadersNeeded(TablibException, AttributeError)`, with
+    `TablibException(Exception)`, has the MRO `TablibException`,
+    `AttributeError`, `Exception`, `BaseException`; the analysis searches
+    `Exception` and `BaseException` before `AttributeError`, so
+    `HeadersNeeded()` gives `<builtin>.Exception.__init__` where Python
+    runs `AttributeError.__init__`.
 - A base that the class statement replaces stands as the replacement
   (`MRO_ENTRIES`): `typing.NamedTuple` as `tuple`, through its
   `__mro_entries__`, and `typing.TypedDict` (also from
