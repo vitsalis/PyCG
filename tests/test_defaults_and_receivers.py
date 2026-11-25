@@ -61,6 +61,21 @@ def test_defaults_of_functions_that_no_analysed_code_calls_flow(tmp_path):
     assert callees(graph, "main.Service.run") == ["main.g"]
 
 
+def test_a_function_that_only_calls_itself_still_gets_its_defaults(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def g(): pass
+        def fold(items, combine=g):
+            combine()
+            if items:
+                fold(items[1:], combine=combine)
+        """,
+    )
+
+    assert callees(graph, "main.fold") == ["main.fold", "main.g"]
+
+
 def test_method_with_a_real_receiver_gets_no_outside_instance(tmp_path):
     graph = main_graph(
         tmp_path,
