@@ -453,6 +453,25 @@ use(Able(), Names())
     assert inside(graph, "main.use") == []
 
 
+def test_repeat_gives_its_object_where_it_is_advanced(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def make():
+    return itertools.repeat(Item(), 2)
+def use(items):
+    for item in items:
+        item.ping()
+    for other in itertools.chain(itertools.repeat(Other())):
+        other.ping()
+use(make())
+""",
+    )
+
+    assert inside(graph, "main.make") == []
+    assert inside(graph, "main.use") == ["main.Item.ping", "main.Other.ping"]
+
+
 def test_limit_list_concatenation_iterates_a_list_subclass(tmp_path):
     graph = graph_of(
         tmp_path,
