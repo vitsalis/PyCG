@@ -284,9 +284,13 @@ class Solver:
 
     def objects(self, node):
         node = _find_representative(node)
-        if node.done is self._saturated_set:
+        done = node.done
+        if done is self._saturated_set:
             return [self.saturated]
-        objects = node.done.union(*_received(node), self._added_by_node.get(node, ()))
+        added = self._added_by_node.get(node)
+        if node.inbox is None and added is None:
+            return list(self._ordered(done)) if done else []
+        objects = done.union(*_received(node), added or ())
         return sorted(objects, key=self._number_by_object.__getitem__)
 
     def holds(self, node, obj):
@@ -707,24 +711,27 @@ def _cycle_components(starts):
         index[start] = low[start] = len(index)
         stack.append(start)
         on_stack.add(start)
-        work = [(start, _successors(start))]
+        work = [[start, _successor_list(start), 0]]
         while work:
-            node, successors = work[-1]
-            for successor in successors:
+            frame = work[-1]
+            node, successors, position = frame
+            count = len(successors)
+            while position < count:
+                successor = successors[position]
+                position += 1
                 edges += 1
                 if successor not in index:
-                    index[successor] = low[successor] = len(index)
-                    stack.append(successor)
-                    on_stack.add(successor)
-                    work.append((successor, _successors(successor)))
                     break
                 if successor in on_stack:
-                    low[node] = min(low[node], index[successor])
+                    known = index[successor]
+                    if known < low[node]:
+                        low[node] = known
             else:
                 work.pop()
                 if work:
                     parent = work[-1][0]
-                    low[parent] = min(low[parent], low[node])
+                    if low[node] < low[parent]:
+                        low[parent] = low[node]
                 if low[node] == index[node]:
                     component = []
                     while True:
@@ -736,11 +743,25 @@ def _cycle_components(starts):
                     if len(component) > 1:
                         component.reverse()
                         components.append(component)
+                continue
+            frame[2] = position
+            index[successor] = low[successor] = len(index)
+            stack.append(successor)
+            on_stack.add(successor)
+            work.append([successor, _successor_list(successor), 0])
     return components, len(index) + edges
 
 
-def _successors(node):
-    return (_find_representative(dst) for dst, _ in _successors_with_searched(node))
+def _successor_list(node):
+    successors = node.successors
+    if successors is None:
+        return ()
+    if type(successors) is not dict:
+        successors = (successors,)
+    return [
+        dst if dst.representative is None else _find_representative(dst)
+        for dst in successors
+    ]
 
 
 def _successors_with_searched(node):
