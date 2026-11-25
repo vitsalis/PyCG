@@ -174,8 +174,8 @@ access path:
 ## Validation
 
 ```sh
-python micro-benchmark/validate.py                                # Every case
-python micro-benchmark/validate.py micro-benchmark/snippets/a/b  # One case
+python evaluation/micro-benchmark/validate.py                                           # Every case
+python evaluation/micro-benchmark/validate.py evaluation/micro-benchmark/snippets/a/b  # One case
 ```
 
 This command:
@@ -373,7 +373,7 @@ needs a manual check.
 6. Run the validator on the case and fix the case until it reports `ok`:
 
    ```sh
-   python micro-benchmark/validate.py micro-benchmark/snippets/<category>/<case>
+   python evaluation/micro-benchmark/validate.py evaluation/micro-benchmark/snippets/<category>/<case>
    ```
 
 > **Important**: Never derive ground truth from PyCG output. A ground truth

@@ -1,5 +1,5 @@
 RUN := uv run --locked
-LINTED := pycg tests tools micro-benchmark/validate.py evaluation
+LINTED := pycg tests tools evaluation
 INPUTS := evaluation/container/Dockerfile.inputs
 PROJECTS := evaluation/macro-benchmark/projects
 METRICS := evaluation/metrics.json

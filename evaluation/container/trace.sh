@@ -119,12 +119,12 @@ docker_cli build --pull=false --network=default \
 
 step="3 prepare the mount of the tracer"
 if [ "$dry_run" = 0 ]; then
-    mkdir -p "$work/tracer/evaluation/macro-benchmark" "$work/tracer/micro-benchmark" \
+    mkdir -p "$work/tracer/evaluation/macro-benchmark" "$work/tracer/evaluation/micro-benchmark" \
         "$work/tracer/benchmark"
     cp "$repository/evaluation/macro-benchmark/trace.py" \
         "$repository/evaluation/macro-benchmark/projects.py" \
         "$work/tracer/evaluation/macro-benchmark/"
-    cp "$repository/micro-benchmark/validate.py" "$work/tracer/micro-benchmark/"
+    cp "$repository/evaluation/micro-benchmark/validate.py" "$work/tracer/evaluation/micro-benchmark/"
     cp "$here/entry.sh" "$work/tracer/"
     cp "$benchmark/projects.toml" "$work/tracer/benchmark/"
     for plugin in $(helper plugins "$benchmark" "$name"); do

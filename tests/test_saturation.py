@@ -417,7 +417,12 @@ def test_the_saturated_value_takes_no_branch_of_a_rule(tmp_path, program):
     assert capped_edges(tmp_path / "capped", source) <= full
 
 
-SNIPPETS = Path(__file__).resolve().parent.parent / "micro-benchmark" / "snippets"
+SNIPPETS = (
+    Path(__file__).resolve().parent.parent
+    / "evaluation"
+    / "micro-benchmark"
+    / "snippets"
+)
 CASES = sorted(path for path in SNIPPETS.glob("*/*") if path.is_dir())
 
 

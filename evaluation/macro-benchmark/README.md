@@ -1523,8 +1523,8 @@ only tag), age or release-count thresholds, and a filter on recent commits
 ## Ground-truth conventions
 
 The names and edge rules are those of
-[`micro-benchmark/README.md`](../micro-benchmark/README.md). These are the
-differences:
+[`evaluation/micro-benchmark/README.md`](../micro-benchmark/README.md). These
+are the differences:
 
 - **Scope.** The analysed source is the importable package: the `packages`
   of `projects.toml` (package directories, or module files such as
@@ -3100,10 +3100,11 @@ code.
 ### What the tracer does
 
 1. It checks the checkout and the environment (see Precautions).
-2. In the child, it starts the tracer of `micro-benchmark/validate.py`,
-   imports pytest and the `plugins`, and runs `pytest <pytest_args> -c
-   <config> --rootdir=. --confcutdir=. -p no:cacheprovider
-   --continue-on-collection-errors [--deselect=...]` in the checkout.
+2. In the child, it starts the tracer of
+   `evaluation/micro-benchmark/validate.py`, imports pytest and the
+   `plugins`, and runs `pytest <pytest_args> -c <config> --rootdir=.
+   --confcutdir=. -p no:cacheprovider --continue-on-collection-errors
+   [--deselect=...]` in the checkout.
 3. It names the calls with the validator's rules. The code that runs is in
    three zones: the package; library code (the standard library, builtins,
    and the installed `dependencies` of `projects.toml`); and client code
@@ -3273,7 +3274,7 @@ The script:
    then removed), and the project's source at
    `/inputs/macro-benchmark/projects/<name>`; not PyCG, and a user with the
    fixed uid 10001;
-3. copies `trace.py`, `projects.py`, `micro-benchmark/validate.py`,
+3. copies `trace.py`, `projects.py`, `evaluation/micro-benchmark/validate.py`,
    `evaluation/container/entry.sh`, the `projects.toml` and the project's
    plugins into a temporary directory, and makes an empty output
    directory;
@@ -3403,7 +3404,7 @@ other versions of the installed packages can give another trace.
 - **Tracer defect T1**, a known limit of every committed trace. `trace.py`
   overrides the validator's `on_call` and calls `super().on_call(...)`,
   which adds a frame, so the validator's `sys._getframe(1)`
-  (`micro-benchmark/validate.py:439` and `449`) reads the frame of
+  (`evaluation/micro-benchmark/validate.py:439` and `449`) reads the frame of
   `trace.py`, not the frame that made the call. So every trace misses the
   calls in module code that `exec` runs (fastjsonschema: `compile ->
   <builtin>.type`), the call of a `@contextmanager` generator function by

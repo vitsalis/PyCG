@@ -1,6 +1,6 @@
 """Compare the call graph of each micro-benchmark snippet with its expectation.
 
-Every directory ``micro-benchmark/snippets/<category>/<name>/`` is one case:
+Every directory ``evaluation/micro-benchmark/snippets/<category>/<name>/`` is one case:
 PyCG analyses its ``main.py`` and the result must equal ``callgraph.json``.
 """
 
@@ -12,7 +12,12 @@ import pytest
 
 from pycg.pycg import CallGraphGenerator
 
-SNIPPETS = Path(__file__).resolve().parent.parent / "micro-benchmark" / "snippets"
+SNIPPETS = (
+    Path(__file__).resolve().parent.parent
+    / "evaluation"
+    / "micro-benchmark"
+    / "snippets"
+)
 
 KNOWN_FAILURES_FILE = Path(__file__).resolve().parent / "known_failures.txt"
 

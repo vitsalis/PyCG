@@ -27,7 +27,7 @@ Check micro-benchmark ground truth against the calls a snippet really makes.
 
 Each case runs in its own child process. The child traces the run with
 sys.monitoring and names every call edge with the benchmark naming scheme
-(see micro-benchmark/README.md). A callee outside the snippet takes the
+(see evaluation/micro-benchmark/README.md). A callee outside the snippet takes the
 name from callgraph.json that resolves to the same function, so that
 os.path.join matches posixpath.join. The child writes the edges to a JSON
 file and the parent compares them with callgraph.json. The exit status is

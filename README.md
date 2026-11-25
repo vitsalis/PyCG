@@ -156,8 +156,9 @@ uv run make format  # sort imports and format the code
 ```
 
 Each micro-benchmark case is a directory
-`micro-benchmark/snippets/<category>/<name>/` that contains a `main.py` and the
-expected `callgraph.json`. The tests find new case directories automatically.
+`evaluation/micro-benchmark/snippets/<category>/<name>/` that contains a
+`main.py` and the expected `callgraph.json`. The tests find new case
+directories automatically.
 To run one case:
 ```
 uv run pytest "tests/test_micro_benchmark.py::test_call_graph[classes/call]"

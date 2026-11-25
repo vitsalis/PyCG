@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 BENCHMARK_DIR = Path(__file__).resolve().parent
-MICRO_BENCHMARK = BENCHMARK_DIR.parents[1] / "micro-benchmark"
+MICRO_BENCHMARK = BENCHMARK_DIR.parent / "micro-benchmark"
 _PROJECT_NAME_PATTERN = re.compile(r"[A-Za-z0-9_.-]+")
 CONFIG_PATH = BENCHMARK_DIR / "projects.toml"
 SOURCES = Path("/inputs/macro-benchmark/projects")

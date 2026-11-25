@@ -7,7 +7,11 @@ import pytest
 
 EVALUATION = Path(__file__).resolve().parents[1]
 REPOSITORY = EVALUATION.parent
-NOT_SCANNED = (EVALUATION / "tests", EVALUATION / "macro-benchmark" / "projects")
+NOT_SCANNED = (
+    EVALUATION / "tests",
+    EVALUATION / "macro-benchmark" / "projects",
+    EVALUATION / "micro-benchmark" / "snippets",
+)
 OWN = "our own checkout"
 FETCH = "runs in the build of the inputs image"
 MAINTAIN = "runs in the maintenance image"

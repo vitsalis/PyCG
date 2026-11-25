@@ -16,6 +16,7 @@ from pycg.pycg import CallGraphGenerator
 
 SNIPPETS = (
     Path(__file__).resolve().parent.parent
+    / "evaluation"
     / "micro-benchmark"
     / "snippets"
     / "descriptors"

@@ -11,7 +11,8 @@ pytestmark = pytest.mark.slow
 
 if sys.version_info < (3, 14):
     pytest.skip(
-        "trace.py loads micro-benchmark/validate.py, which needs Python 3.14",
+        "trace.py loads evaluation/micro-benchmark/validate.py, "
+        "which needs Python 3.14",
         allow_module_level=True,
     )
 

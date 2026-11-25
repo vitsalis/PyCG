@@ -3,7 +3,7 @@ back an argument that it binds to a parameter typed as a callable; of other
 outside code, only `re.sub` and `re.subn` call back, their replacement.
 
 The call belongs to the scope that called the builtin
-(micro-benchmark/README.md, "Callbacks").
+(evaluation/micro-benchmark/README.md, "Callbacks").
 """
 
 from programs import callees, main_graph

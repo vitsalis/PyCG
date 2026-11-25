@@ -33,19 +33,23 @@ CHECKS = {
 FULL = {"lint": ("make", "lint"), "test": ("make", "test")}
 TRIGGERS = {
     "engine": ("pycg/", "tools/", "tests/", "pyproject.toml", "uv.lock"),
-    "micro": ("micro-benchmark/", *MICRO_TESTS),
+    "micro": ("evaluation/micro-benchmark/", *MICRO_TESTS),
     "evaluation": (
         "evaluation/",
-        "micro-benchmark/validate.py",
         "AGENTS.md",
         "pyproject.toml",
         "uv.lock",
     ),
 }
-EXCLUDED = {"engine": MICRO_TESTS}
+EXCLUDED = {
+    "engine": MICRO_TESTS,
+    "evaluation": (
+        "evaluation/micro-benchmark/snippets/",
+        "evaluation/micro-benchmark/README.md",
+    ),
+}
 EVAL_PATHS = (
     "pycg/",
-    "micro-benchmark/",
     "evaluation/",
     "tools/",
     "tests/known_failures.txt",
@@ -64,7 +68,7 @@ def scoped(changed):
     names = ["lint"]
     for name, patterns in TRIGGERS.items():
         excluded = EXCLUDED.get(name, ())
-        if any(under(p, patterns) and p not in excluded for p in changed):
+        if any(under(p, patterns) and not under(p, excluded) for p in changed):
             names.append(name)
     return names
 

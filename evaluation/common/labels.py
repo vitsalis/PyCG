@@ -16,7 +16,7 @@ PROTECTED = (
     "evaluation/macro-benchmark/projects.toml",
     "evaluation/macro-benchmark/test-environments/",
     "evaluation/common/same_function.json",
-    "micro-benchmark/snippets/**/callgraph.json",
+    "evaluation/micro-benchmark/snippets/**/callgraph.json",
     "tests/known_failures.txt",
     "evaluation/metrics.json",
     ".github/",

@@ -1,7 +1,7 @@
 """Call backs: the builtins that apply a function (`map`, `sorted` with a
-key) call it, from the scope that called the builtin (micro-benchmark/
-README.md, "Callbacks"); other outside code calls nothing that the analysed
-code passes it.
+key) call it, from the scope that called the builtin
+(evaluation/micro-benchmark/README.md, "Callbacks"); other outside code
+calls nothing that the analysed code passes it.
 """
 
 import pytest

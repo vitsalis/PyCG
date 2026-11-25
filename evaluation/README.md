@@ -1,7 +1,7 @@
 # Evaluation
 
 Measures PyCG on two benchmarks and scores its call graphs: the
-micro-benchmark (`micro-benchmark/` at the root of the repository) and the
+micro-benchmark (`micro-benchmark/` here) and the
 macro-benchmark (`macro-benchmark/` here: 40 real packages with
 hand-written ground truths). Standard library only. The analysed sources
 are data: PyCG reads them, and no script imports or runs them.
@@ -101,6 +101,7 @@ floors, and cannot re-base them.
 | `metrics.json` | The best value of each gated value, the margin, and the digest of the benchmark |
 | `common/same_function.json` | Names of one function of the standard library, which the scorer matches as one callee |
 | `common/lookup.py` | The static lookup of standard-library names that `tests/test_same_function_table.py` checks the table with |
+| `micro-benchmark/` | One small program per language feature with its ground truth, and the validator that runs them (`micro-benchmark/README.md`) |
 | `macro-benchmark/` | The projects, ground truths, traces and their tools (`macro-benchmark/README.md`) |
 | `compose.yaml`, `container/Dockerfile.inputs`, `container/fetch.py` | The inputs image: the sources of the macro-benchmark, fetched when the image is built |
 | `container/Dockerfile.trace`, `container/trace_entry.py`, `container/trace.sh`, `container/trace_helper.py`, `container/entry.sh` | Records the trace of one project in a container |
@@ -351,9 +352,9 @@ maintainer's rule of 2026-11-14): the repository holds no submodule,
 `projects.toml` is the only lock of every source of the benchmark, and the
 maintenance commands that need the network run in the target `maintain` of
 `container/Dockerfile.inputs`. `tests/test_no_host_git.py` keeps an
-inventory of every place in `evaluation/` (but its tests and the copied
-sources) that writes a git command line (a list or tuple whose first item is
-`"git"`) or imports a network client, each stated as git on our own
+inventory of every place in `evaluation/` (but its tests, the copied
+sources and the micro-benchmark's snippets) that writes a git command line
+(a list or tuple whose first item is `"git"`) or imports a network client, each stated as git on our own
 checkout, a step of the build of the inputs image, or a step of the
 maintenance image. A new place fails the test until it is stated, and a
 stated place that is gone fails it too. It reads the syntax trees only: it

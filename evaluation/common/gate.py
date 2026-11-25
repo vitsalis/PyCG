@@ -9,7 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 MACRO = Path("evaluation/macro-benchmark")
 SAME_FUNCTION = Path("evaluation/common/same_function.json")
-SNIPPETS = Path("micro-benchmark/snippets")
+SNIPPETS = Path("evaluation/micro-benchmark/snippets")
 SNIPPET_FILES = ("callgraph.json", "requires-python")
 DESCRIPTION = """The gate of the evaluation: the values of a result against their floors
 (evaluation/README.md, "The gate"). RESULT is the result.json of `loop.py
