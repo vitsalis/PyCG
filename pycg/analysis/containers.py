@@ -219,10 +219,41 @@ class Containers:
             self._compare_keys(key, caller, site, stored)
 
     def _compare_keys(self, key, caller, site, stored):
+        pairing = self._key_lookup(caller, site)
+        self.solver.attach(key, Each(pairing.key))
+        self.solver.attach(stored, Each(pairing.stored, kinds=(Instance, Class)))
+
+    def _subscript_keyed(self, container, subscript):
+        key, dst, src = subscript.key, subscript.dst, subscript.src
+        if dst is not None:
+            if subscript.reads is None:
+                subscript.reads = _KeyedGroup(self.read_key, dst, dst)
+                self.solver.attach(key, subscript.reads)
+            subscript.reads.add(container)
+            self._keyed.append((key, container, dst, True))
+        if is_dict(container):
+            self.add_edge(key, self.keys(container))
+        if src is not None:
+            if subscript.writes is None:
+                subscript.writes = _KeyedGroup(self.write_key, src, None)
+                self.solver.attach(key, subscript.writes)
+            subscript.writes.add(container)
+            self._keyed.append((key, container, src, False))
+
+    def _key_lookup(self, caller, site):
         compare = self.site_call(caller, site, ("hash_eq",), [None])
         compared = self._compared_keys.setdefault(compare, set())
-        pairing = _KeyLookup(self, compare, compared)
-        self.solver.attach(key, Each(pairing.key))
+        return _KeyLookup(self, compare, compared)
+
+    def _hash_subscript_key(self, subscript, stored):
+        key = (subscript.key, subscript.caller, subscript.site)
+        pairing = self._subscript_keys.get(key)
+        if pairing is None:
+            call = self.site_call(subscript.caller, subscript.site, ("hash",))
+            self.add_special_call(subscript.key, "__hash__", call)
+            pairing = self._key_lookup(subscript.caller, subscript.site)
+            self._subscript_keys[key] = pairing
+            self.solver.attach(subscript.key, Each(pairing.key))
         self.solver.attach(stored, Each(pairing.stored, kinds=(Instance, Class)))
 
     def key_store(self, container):
@@ -402,11 +433,13 @@ class Containers:
             if obj is None:
                 return
         if isinstance(obj, Container):
-            self.read_keyed(obj, subscript.key, subscript.dst)
-            self.write_keyed(obj, subscript.key, subscript.src)
+            if subscript.key is None:
+                self.read_keyed(obj, None, subscript.dst)
+                self.write_keyed(obj, None, subscript.src)
+            else:
+                self._subscript_keyed(obj, subscript)
             if is_dict(obj) and subscript.key is not None:
-                stored = self.keys(obj)
-                self.add_hash(subscript.key, subscript.caller, subscript.site, stored)
+                self._hash_subscript_key(subscript, self.keys(obj))
             if obj.factory is not None and subscript.dst is not None:
                 self.call_factory(obj, subscript)
         elif isinstance(obj, (Instance, Class)):
@@ -690,6 +723,40 @@ class _Keyed(Constraint):
         self.access(key, self.container, self.node)
 
 
+class _KeyedGroup(Constraint):
+    __slots__ = ("access", "node", "result", "containers", "keys", "other_keys")
+
+    def __init__(self, access, node, result):
+        self.access = access
+        self.node = node
+        self.result = result
+        self.containers = []
+        self.keys = []
+        self.other_keys = set()
+
+    def results(self):
+        return (self.result,)
+
+    def add(self, container):
+        self.containers.append(container)
+        for key in self.keys:
+            self._pair(key, container)
+
+    def apply(self, key):
+        if isinstance(key, TypeForm):
+            return
+        self.keys.append(key)
+        for container in list(self.containers):
+            self._pair(key, container)
+
+    def _pair(self, key, container):
+        if not isinstance(key, (Const, Pattern)):
+            if container in self.other_keys:
+                return
+            self.other_keys.add(container)
+        self.access(key, container, self.node)
+
+
 class _Site(Constraint):
     __slots__ = ("analysis", "caller", "site")
 
@@ -718,11 +785,13 @@ class _Access(_Site):
 
 
 class _Subscript(_Access):
-    __slots__ = ("key",)
+    __slots__ = ("key", "reads", "writes")
 
     def __init__(self, analysis, key, dst, src, delete, caller, site):
         super().__init__(analysis, dst, src, delete, caller, site)
         self.key = key
+        self.reads = None
+        self.writes = None
 
     def apply(self, obj):
         self.analysis.apply_subscript(obj, self)

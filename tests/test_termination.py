@@ -784,6 +784,7 @@ COUNTED = {
 
 NOT_COUNTED = {
     "_dict_hubs",
+    "_subscript_keys",
     "_stub_definitions",
     "_library_calls",
     "_typed_callbacks",
