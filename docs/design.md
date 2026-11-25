@@ -3263,7 +3263,16 @@ methods return.
 Python falls back to it; `repr()` calls `__repr__`; `format()` and f-strings
 call `__format__` with the format spec (the empty string by default), and
 `__str__` and `__repr__` where Python falls back to them; an f-string field
-with `!s`, `!r` or `!a` converts as `str()` or `repr()` does. The
+with `!s`, `!r` or `!a` converts as `str()` or `repr()` does. The fallback
+to `__repr__` stops at a class of the MRO, analysed or outside, that defines
+`__str__` before `object`: an outside class counts where its stub declares
+`__str__` (`BaseException`), and `str`, `bytes` and `bytearray` count
+although their stubs omit the `__str__` that CPython gives them
+(`STR_DEFINED_BEYOND_STUBS`), so a subclass of `str` that defines only
+`__repr__` never has it called by `str()` or `format()`. What library code
+then calls back stays a limit: `OSError.__str__` calls `repr()` of its
+filename, so formatting an `OSError` about a `path.Path` runs
+`Path.__repr__`, which the analysis does not see. The
 `__iter__` and `__contains__` of a builtin class never call what Python
 falls back to without them: a subclass of `list` that defines
 `__getitem__` iterates with `list.__iter__` and tests `in` with
