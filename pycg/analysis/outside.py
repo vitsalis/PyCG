@@ -486,11 +486,7 @@ class Outside:
         entry = definition.entry
         skip = 1 if entry.get("d") == "classmethod" and not receivers else 0
         if skip and definition.owner is not None:
-            if external is not None and "." in external.name:
-                receivers = (self.external(external.name.rpartition(".")[0]),)
-            else:
-                public = self.stubs.public_name(definition.owner)
-                receivers = (self.external(outside_name(public)),)
+            receivers = (self._class_method_owner(definition, external),)
         signatures = entry["s"]
         fitting = [
             index
@@ -524,6 +520,15 @@ class Outside:
                 each = Each(self._new_instance, call, results=(call.dst,))
                 self.solver.attach(call.args[0], each)
         return overloads
+
+    def _class_method_owner(self, definition, external):
+        if external is not None and "." in external.name:
+            holder = self.external(external.name.rpartition(".")[0])
+            found = self.stub_definitions(holder)
+            if found is None or any(d.kind == "class" for d in found):
+                return holder
+        public = self.stubs.public_name(definition.owner)
+        return self.external(outside_name(public))
 
     def _new_instance(self, obj, call):
         match obj:
