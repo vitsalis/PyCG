@@ -608,3 +608,16 @@ def test_limit_a_key_built_from_a_name_of_a_constant_reads_every_entry(tmp_path)
     )
 
     assert callees(graph, "main.read") == ["main.f", "main.g"]
+
+
+def test_the_name_of_a_module_is_a_string(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": "from pkg.mod import parent\nparent()\n",
+            "pkg/__init__.py": "",
+            "pkg/mod.py": "def parent():\n    return __name__.rpartition('.')\n",
+        },
+    )
+
+    assert callees(graph, "pkg.mod.parent") == ["<builtin>.str.rpartition"]

@@ -78,6 +78,10 @@ class ModuleBuilder(
         self._stub_aliases = {}
 
     def build(self):
+        name = self.analysis.field(self.module, "__name__")
+        self.analysis.add_object(name, self.analysis.const(self.module.name))
+        if self.is_entry:
+            self.analysis.add_object(name, self.analysis.const("__main__"))
         try:
             self._statements(self.tree.body)
         finally:
