@@ -226,3 +226,52 @@ R3 concern the tools and the README, not this ledger.
 ## Round 4 source-first audit (2026-11-16)
 
 Adds IPSet.__eq__ and IPSet.__ne__ calls to BaseIP.__hash__ for supported PyPy dictionary equality. No removed pairs or node changes: 382 nodes, 1224 pairs. Full coverage: 1222 baseline pairs, 4383 inventory sites, 382 bodies, 71 default candidates, zero exclusions. Four independent metadata groups cover optimized modes, retained error witnesses, the complete site denominator, and PyPy bin/copy exclusions. Current judgements 17-20 and the retained round-4 evidence give witnesses and pinned interpreter sources. No target/dependency code or test gates were executed by the primary auditor.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-netaddr-csv` (58f7130, PR #101) against `main`
+(a044b5c): one outside edge added in `netaddr.json`, `netaddr.added.json`,
+`netaddr.ledger` and `netaddr.md`, and `evaluation/metrics.json`
+re-based; no other file changed. I read `netaddr/eui/ieee.py`,
+`pyproject.toml` and `docs/source/reference/compatibility.rst` from the
+inputs image, `Modules/_csv.c` of CPython 3.7.17 to 3.15.2 and
+`pypy/module/_csv/` of PyPy 3.8 v7.3.11 to 3.11 v7.3.23 from the
+dependency sources, and the same two PyPy files of PyPy 3.7 v7.3.9,
+fetched in a container at the commit of the tag `release-pypy3.7-v7.3.9`
+of the PyPy repository (`3a614a6737a119273a601c86eae9ee822a60d607`),
+read as text. Nothing ran; no PyCG output was read.
+
+netaddr admits CPython and PyPy 3.7 to 3.12 (`compatibility.rst:7-14`,
+`requires-python = ">=3.7"`, `pyproject.toml:33`), and later CPython
+versions (the last classifier is no upper bound).
+
+| Site | Edge | Verdict | Evidence |
+|---|---|---|---|
+| `eui/ieee.py:75:29` `self.writer.writerow(data)` | `eui.ieee.FileIndexer.update -> _csv.Writer.writerow` | agree | `self.writer` is only set at `ieee.py:67`, to `_csv.writer(self.fh, lineterminator='\n')` (`import csv as _csv`, `:36`), an object of the type `_csv.writer` (CPython 3.10.22 `Modules/_csv.c:1425`). `_csv` exports that type as `Writer` on CPython 3.10.22 `:1719`, 3.11.18 `:1753`, 3.12.16 `:1776`, 3.13.18 `:1760`, 3.14.10 and 3.15.2 `:1799` (all checked) |
+| same site | `-> _csv.writer.writerow` kept | agree | CPython 3.7.17, 3.8.20 and 3.9.25 export the factories only (`:1585-1587`, `:1595-1597`, `:1641-1643`; their module init adds `_dialects`, `Dialect`, `Error`, no writer type); PyPy exports the factory `writer` only (`moduledef.py:86` in 3.7 v7.3.9 and 3.8 to 3.11) with the TypeDef `'_csv.writer'` (`interp_writer.py:166-167` in 3.7 and 3.8, 3.9; `:172-173` in 3.10; `:185-186` in 3.11). One name per runtime, as the ruling requires |
+
+Nothing missed. `csv.reader` at `ieee.py:277:31` is the factory's own call
+(the ruling: "A factory function names its own call"), and the loop over
+the reader is implicit; no other module of the package uses `csv`. No
+other outside callee of `netaddr.json` falls under the ruling: `io.*`,
+`zipfile.*`, `re.Pattern` and `xml.sax.expatreader.ExpatParser` are
+public paths, and `_socket.inet_ntop` and `_socket.inet_pton` are
+functions.
+
+Counts. Callee lines 1833 to 1834, 1225 edges (625 inside, 600 outside),
+957 of 1225 traced (78.1%), 268 from reading only: as `check.py netaddr`
+reports, which passes with the source in place, as do `--origin` (added
+268: 119 / 149) and `--report`. `gate.benchmark_digest()` on the branch
+gives `b9a7ec7225ee4ca809f1881f0dfd4f485c4be17bf55a3ef5d68982ead94831bd`,
+the recorded digest. The `make eval` numbers and the macro outside P come
+from PyCG's output, which I did not read.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| A1 | netaddr admits PyPy 3.7, but the evidence for `_csv.writer` covers PyPy 3.8 to 3.11 only; PyPy 3.7 v7.3.9 has the same factory and type name (`moduledef.py:86`, `interp_writer.py:166-167` at `3a614a6737a119273a601c86eae9ee822a60d607`) | `netaddr.md`, "Corrections of 2026-11-25" ("PyPy 3.8 to 3.11 export the factories only"), and the commit message | add PyPy 3.7 v7.3.9 with this evidence |
+
+**Verdict.** The edge stands and nothing is missed. A1 completes the
+evidence; no edge depends on it.
+
+A1 was applied before the merge (`netaddr.md` and the commit message now
+include PyPy 3.7 v7.3.9). The audit is closed.
