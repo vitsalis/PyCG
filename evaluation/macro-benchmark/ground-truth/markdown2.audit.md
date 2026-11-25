@@ -197,3 +197,40 @@ accounts for all four round-3 additions. Normal/-O/-OO union, Python bounds
 and realized interpreter support are documented in the current judgement.
 No target, dependency, tests or generated code ran. Root owns acceptance
 and structural/origin gates; this audit does not claim those checks ran.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-markdown2-sha256` (b6f38bb, PR #111) against `main`
+(2130a69): one outside edge renamed and two added in `markdown2.json`,
+`markdown2.added.json`, `markdown2.ledger` and `markdown2.md`;
+`evaluation/metrics.json` is not recorded yet. I read `lib/markdown2.py`
+and `setup.py` from the inputs image, and CPython 3.9.25 to 3.15.2 and
+PyPy 3.9 to 3.11 from the dependency sources, as text. Nothing ran; no
+PyCG output was read. markdown2 admits CPython 3.9 and later
+(`setup.py:59`) and PyPy (its Round 3 section).
+
+| Site | Change | Verdict | Evidence |
+|---|---|---|---|
+| `markdown2.py:150:70` `sha256(SECRET_SALT + s.encode("utf-8")).hexdigest()` (`_hash_text`) | `_sha256.SHA256Type.hexdigest` added | agree | `sha256` is `hashlib.sha256` (`from hashlib import sha256`, `:125`); CPython 3.9 to 3.11 export the fallback object's type as `SHA256Type` (`sha256module.c:720`, `:725`, `:728`), and `hashlib.sha256` is a factory there |
+| the same | `_sha256.sha256.hexdigest` renamed `hashlib.sha256.hexdigest` | agree | PyPy's fallback class `_sha256.sha256` (`lib_pypy/_sha256.py:206` in 3.9, `:218` in 3.10 and 3.11) is cached as `hashlib.sha256`; at a direct constructor the alias names it (ruling-names-2) |
+| the same | `_hashlib._OneShotHash.hexdigest` added | agree | on PyPy 3.11 `hashlib.sha256` is `_hashlib.openssl_sha256` (`lib-python/3/hashlib.py:307`), made by `make_new_hash` (`lib_pypy/_hashlib/__init__.py:367-374`), and `new` returns a `_OneShotHash` for non-empty data (`:40-57`; `hexdigest` `:84`); `SECRET_SALT = urandom(16)` (`:146`) makes the data never empty |
+
+Kept, rightly: `_hashlib.HASH.hexdigest`, `_sha2.SHA256Type.hexdigest`.
+Nothing missed: `:150` is the package's only hash object (the other "md5"
+matches are the prefix of the hash text). This is the same reading as
+pymysql's `scramble_caching_sha2` in the audit of the same day.
+
+Counts. 883 edges (286 inside, 597 outside), 752 traced (85.2%), callee
+lines 1429: as `check.py markdown2` reports, which passes with the source
+in place, as do `--origin` and `--report`. The `make eval` numbers come
+from PyCG's output, which I did not read.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| R1 | Remark: J13 keeps its old text after the new first sentence ("CPython 3.9 and 3.11 name the fallback class `_sha256.sha256`", "none of these concrete classes" has a public alias), which the correction contradicts; the correction says so in its last paragraph, but J13 would read more simply if the old sentences went | `markdown2.md`, J13 | optional |
+
+**Verdict.** Closed: the rename and the two additions stand, and nothing
+is missed. One remark, no finding.
+
+R1 was applied before the merge (J13 rewritten without the superseded
+sentences). The audit is closed.
