@@ -79,6 +79,25 @@ def test_super_reaches_an_external_base(tmp_path):
     ]
 
 
+def test_super_with_an_outside_class_looks_up_after_it(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Mixin:
+            def __init__(self): pass
+        class Results(dict, Mixin):
+            def __init__(self):
+                super(dict, self).__init__()
+        Results()
+        """,
+    )
+
+    assert callees(graph, "main.Results.__init__") == [
+        "<builtin>.super",
+        "main.Mixin.__init__",
+    ]
+
+
 def test_super_reads_a_property_of_a_base(tmp_path):
     graph = main_graph(
         tmp_path,
