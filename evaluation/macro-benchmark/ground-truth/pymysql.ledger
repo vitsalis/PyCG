@@ -77,15 +77,17 @@ default reject pymysql.cursors.Cursor.__next__: no cursor is iterated or unpacke
     note: sha1_new is the module's partial(hashlib.new, "sha1") (line 21); calling it runs functools.partial.__call__, which calls hashlib.new back (library code: no edge)
 33:39 call  sha1_new(password).digest()
     -> _hashlib.HASH.digest
-    -> _sha1.sha1.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha1.SHA1Type.digest
     -> _sha1.sha.digest
-    note: hashlib.new("sha1") returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin _sha1.sha1 object; on PyPy the fallback _sha1.sha1 is a function that returns a _sha1.sha (the precedent of path, judgement J6); pymysql supports CPython 3.9+ and PyPy (judgement J2)
+    note: hashlib.new("sha1") returns an OpenSSL _hashlib.HASH (with non-empty data on PyPy 3.11 a _hashlib._OneShotHash: hashlib.new is __hash_new, lib-python/3/hashlib.py:160, and _hashlib.new returns the one-shot object for non-empty data, lib_pypy/_hashlib/__init__.py:40-57), or by hashlib's documented fallback the object of the factory _sha1.sha1: on CPython the builtin SHA-1 type, which _sha1 exports as SHA1Type (3.9.25 Modules/sha1module.c:560 to 3.15.2 :353; batch 8, a C type exported under a module attribute other than its type name); on PyPy the fallback _sha1.sha1 is a function that returns a _sha1.sha (lib_pypy/_sha1.py:129, 359 in 3.10 and 3.11; the precedent of path, judgement J6); pymysql supports CPython 3.9+ and PyPy (judgement J2; pymysql.md, Corrections of 2026-11-25)
 34:22 call  sha1_new(stage1)
     -> functools.partial.__call__
     note: sha1_new is the module's partial(hashlib.new, "sha1") (line 21)
 34:37 call  sha1_new(stage1).digest()
     -> _hashlib.HASH.digest
-    -> _sha1.sha1.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha1.SHA1Type.digest
     -> _sha1.sha.digest
     note: the SHA-1 object of hashlib.new (see 33:39)
 35:17 call  sha1_new()
@@ -93,17 +95,17 @@ default reject pymysql.cursors.Cursor.__next__: no cursor is iterated or unpacke
     note: sha1_new is the module's partial(hashlib.new, "sha1") (line 21)
 36:13 call  s.update(message[:SCRAMBLE_LENGTH])
     -> _hashlib.HASH.update
-    -> _sha1.sha1.update
+    -> _sha1.SHA1Type.update
     -> _sha1.sha.update
     note: s is the SHA-1 object of sha1_new() (see 33:39)
 37:13 call  s.update(stage2)
     -> _hashlib.HASH.update
-    -> _sha1.sha1.update
+    -> _sha1.SHA1Type.update
     -> _sha1.sha.update
     note: s is the SHA-1 object of sha1_new() (see 33:39)
 38:22 call  s.digest()
     -> _hashlib.HASH.digest
-    -> _sha1.sha1.digest
+    -> _sha1.SHA1Type.digest
     -> _sha1.sha.digest
     note: s is the SHA-1 object of sha1_new() (see 33:39)
 39:21 call  _my_crypt(result, stage1)
@@ -144,16 +146,22 @@ default reject pymysql.cursors.Cursor.__next__: no cursor is iterated or unpacke
     -> hashlib.sha512
 87:40 call  hashlib.sha512(password).digest()
     -> _hashlib.HASH.digest
-    -> _sha512.sha512.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha512.SHA384Type.digest
+    -> _sha512.SHA512Type.digest
+    -> hashlib.sha512.digest
     -> _sha2.SHA512Type.digest
-    note: hashlib.sha512 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha512.sha512 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha512.py), _sha2.SHA512Type from CPython 3.12 (the precedent of validators for SHA-256)
+    note: hashlib.sha512 returns an OpenSSL _hashlib.HASH (on PyPy 3.11 hashlib.sha512 is _hashlib.openssl_sha512, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with non-empty data a _hashlib._OneShotHash, :40-57), or by hashlib's documented fallback the builtin object, named by the attribute under which its module exports the type (batch 8, a C type exported under a module attribute other than its type name): _sha512.SHA512Type on CPython 3.9 (3.9.25 Modules/sha512module.c:778), _sha512.SHA384Type on CPython 3.10 and 3.11 (sha512module.c sets SHA384Type to the SHA-384 type and then overwrites it with the SHA-512 type: 3.10.22 :782, :788; 3.11.18 :785, :791), _sha2.SHA512Type from CPython 3.12; on PyPy the class _sha512.sha512 (lib_pypy/_sha512.py:234 in 3.9, :245 in 3.10 and 3.11), which PyPy's hashlib fallback binds as hashlib.sha512 (lib-python/3/hashlib.py:102 in 3.9 and 3.10, :101 in 3.11), so its public alias names it there (ruling-names-2) (pymysql.md, Corrections of 2026-11-25)
 90:22 call  _scalar_clamp(h[:32])
     -> pymysql._auth._scalar_clamp
 93:23 call  hashlib.sha512(h[32:] + scramble)
     -> hashlib.sha512
 93:49 call  hashlib.sha512(h[32:] + scramble).digest()
     -> _hashlib.HASH.digest
-    -> _sha512.sha512.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha512.SHA384Type.digest
+    -> _sha512.SHA512Type.digest
+    -> hashlib.sha512.digest
     -> _sha2.SHA512Type.digest
     note: the SHA-512 object of hashlib.sha512 (see 87:40)
 96:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(r)
@@ -169,7 +177,10 @@ default reject pymysql.cursors.Cursor.__next__: no cursor is iterated or unpacke
     -> hashlib.sha512
 103:48 call  hashlib.sha512(R + A + scramble).digest()
     -> _hashlib.HASH.digest
-    -> _sha512.sha512.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha512.SHA384Type.digest
+    -> _sha512.SHA512Type.digest
+    -> hashlib.sha512.digest
     -> _sha2.SHA512Type.digest
     note: the SHA-512 object of hashlib.sha512 (see 87:40)
 106:57 call  _nacl_bindings.crypto_core_ed25519_scalar_reduce(k)
@@ -269,21 +280,27 @@ default reject pymysql.cursors.Cursor.__next__: no cursor is iterated or unpacke
     -> hashlib.sha256
 200:41 call  hashlib.sha256(password).digest()
     -> _hashlib.HASH.digest
-    -> _sha256.sha256.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha256.SHA256Type.digest
+    -> hashlib.sha256.digest
     -> _sha2.SHA256Type.digest
-    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object: _sha256.sha256 on CPython 3.9 to 3.11 and on PyPy (a class of lib_pypy/_sha256.py), _sha2.SHA256Type from CPython 3.12 (the precedent of validators, trx_address.py:33)
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH (on PyPy 3.11 hashlib.sha256 is _hashlib.openssl_sha256, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with non-empty data a _hashlib._OneShotHash, :40-57), or by hashlib's documented fallback the builtin object, named by the attribute under which its module exports the type (batch 8, a C type exported under a module attribute other than its type name): _sha256.SHA256Type on CPython 3.9 to 3.11 (Modules/sha256module.c 3.9.25 :720, 3.10.22 :725, 3.11.18 :728), _sha2.SHA256Type from CPython 3.12; on PyPy the class _sha256.sha256 (lib_pypy/_sha256.py:206 in 3.9, :218 in 3.10 and 3.11), which PyPy's hashlib fallback binds as hashlib.sha256 (lib-python/3/hashlib.py:98 in 3.9 and 3.10, :97 in 3.11), so its public alias names it there (ruling-names-2) (pymysql.md, Corrections of 2026-11-25)
 201:24 call  hashlib.sha256(p1)
     -> hashlib.sha256
 201:35 call  hashlib.sha256(p1).digest()
     -> _hashlib.HASH.digest
-    -> _sha256.sha256.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha256.SHA256Type.digest
+    -> hashlib.sha256.digest
     -> _sha2.SHA256Type.digest
     note: the SHA-256 object of hashlib.sha256 (see 200:41)
 202:24 call  hashlib.sha256(p2 + nonce)
     -> hashlib.sha256
 202:43 call  hashlib.sha256(p2 + nonce).digest()
     -> _hashlib.HASH.digest
-    -> _sha256.sha256.digest
+    -> _hashlib._OneShotHash.digest
+    -> _sha256.SHA256Type.digest
+    -> hashlib.sha256.digest
     -> _sha2.SHA256Type.digest
     note: the SHA-256 object of hashlib.sha256 (see 200:41)
 204:20 call  bytearray(p1)

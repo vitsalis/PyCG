@@ -28,8 +28,9 @@ none of it was followed.
   (`check.py --report pymysql --without-candidates`, 695) and every site of
   the default `Cursor.__iter__` were read again; no site calls package code
   that no candidate names. Nothing is left for the writer.
-- Graph: 216 nodes, 617 edges (311 inside, 306 outside); the trace
-  confirms 132 (21.4%); 49 of 198 functions run.
+- Graph: 216 nodes, 623 edges (311 inside, 312 outside); the trace
+  confirms 132 (21.2%); 49 of 198 functions run (after the Corrections
+  of 2026-11-25).
 - Audit applied (2026-11-23, `pymysql.audit.md`; the referee's ruling
   `b7-ruling-pymysql.md`, adopted by the lead): F1 and F2 remove 2 inside
   edges (J6, J9 below); F3 corrects the notes at `_auth.py` 165:34 and
@@ -84,12 +85,15 @@ branch (`connections.py:1249-1250`) runs, but it makes no call.
 (`_auth.py:21`): its calls are `functools.partial.__call__`; partial calls
 `hashlib.new` back (library code, no edge). The hash objects follow the
 precedents of path (J6) and validators: OpenSSL's `_hashlib.HASH`, or by
-hashlib's documented fallback the builtin object. SHA-1: `_sha1.sha1`, and
-on PyPy `_sha1.sha` (the fallback `_sha1.sha1` is a function there). SHA-256
-and SHA-512: `_sha256.sha256` and `_sha512.sha512` on CPython 3.9 to 3.11
-and on PyPy (classes of `lib_pypy/_sha256.py:206/218` and `_sha512.py:234/245`
-in PyPy 3.9, 3.10 and 3.11), `_sha2.SHA256Type` and `_sha2.SHA512Type` from
-CPython 3.12. The factories keep their imported paths (`hashlib.sha256`,
+hashlib's documented fallback the builtin object, named by the attribute
+under which its module exports the type (Corrections of 2026-11-25).
+SHA-1: `_sha1.SHA1Type` on CPython, and on PyPy `_sha1.sha` (the fallback
+`_sha1.sha1` is a function there). SHA-256: `_sha256.SHA256Type` on CPython
+3.9 to 3.11, `_sha2.SHA256Type` from 3.12, on PyPy `hashlib.sha256` (the
+public alias of PyPy's class). SHA-512: `_sha512.SHA512Type` on CPython 3.9,
+`_sha512.SHA384Type` on 3.10 and 3.11, `_sha2.SHA512Type` from 3.12, on
+PyPy `hashlib.sha512` (classes of `lib_pypy/_sha256.py:206/218` and
+`_sha512.py:234/245` in PyPy 3.9, 3.10 and 3.11). The factories keep their imported paths (`hashlib.sha256`,
 `hashlib.sha512`).
 
 **J3. `_auth.scramble_old_password`** (`connections.py:1100`): the module
@@ -229,3 +233,40 @@ do. The earlier argument (the module constants' hashes are far from 0 to
 - `err.X(...)` in `connections.py` and `cursors.py` are value sites only
   because the class body of `Connection` binds the same names
   (`connections.py:1255-1264`); each is the class of `pymysql.err`.
+
+## Corrections of 2026-11-25
+
+Two referee rulings, adopted by the lead, decide the names of the builtin
+hash objects. Batch 8's "A C type exported under a module attribute other
+than its type name" (`b8-ruling-c-type-names-1.md`) names a method of an
+outside class by the attribute under which the defining extension module
+exports the type, on each admitted runtime; the type name stays only on a
+runtime that exports none, a factory names only its own call, and an
+attribute that a module overwrites names what it holds last. The
+corrections' ruling on public aliases (`ruling-names-2.md`; README,
+"Rulings for the corrections of 2026-11-25") puts a direct public class
+alias first in each implementation, version and configuration where the
+attribute holds the receiver's class, also when the alias exists only in
+that configuration; a factory is no class alias. pymysql admits CPython
+3.9 and later and PyPy 3.9 to 3.11 (J2). The sources are the batch-8
+dependency set (CPython and PyPy).
+
+| Site | Caller | Edge removed | Edge added | Evidence |
+|---|---|---|---|---|
+| `_auth.py:33:39`, `34:37`, `38:22` | `_auth.scramble_native_password` | `_sha1.sha1.digest` | `_sha1.SHA1Type.digest` | `_sha1` exports the SHA-1 type as `SHA1Type` on every admitted CPython (`Modules/sha1module.c` 3.9.25 `:560`, 3.10.22 `:568-570`, 3.11.18 `:571`, 3.12.16 `:354`, 3.13.18 `:356`, 3.14.10 `:371`, 3.15.2 `:353`); `_sha1.sha1` is the factory on CPython and on PyPy (`lib_pypy/_sha1.py:347` in 3.9, `:359` in 3.10 and 3.11), whose object, `_sha1.sha`, is already named |
+| `_auth.py:36:13`, `37:13` | `_auth.scramble_native_password` | `_sha1.sha1.update` | `_sha1.SHA1Type.update` | as above |
+| `_auth.py:200:41`, `201:35`, `202:43` | `_auth.scramble_caching_sha2` | none | `_sha256.SHA256Type.digest` | CPython 3.9 to 3.11 export the SHA-256 type as `SHA256Type` (`Modules/sha256module.c` 3.9.25 `:720`, 3.10.22 `:725`, 3.11.18 `:728`); `hashlib.sha256` is a factory there |
+| the same | the same | `_sha256.sha256.digest` | `hashlib.sha256.digest` | on PyPy, hashlib's fallback binds `hashlib.sha256` to the class `_sha256.sha256` (`lib-python/3/hashlib.py:98` in 3.9 and 3.10, `:97` in 3.11; the class `lib_pypy/_sha256.py:206` in 3.9, `:218` in 3.10 and 3.11), so the public alias names it |
+| `_auth.py:87:40`, `93:49`, `103:48` | `_auth.ed25519_password` | none | `_sha512.SHA512Type.digest` | CPython 3.9 exports the SHA-512 type as `SHA512Type` (`Modules/sha512module.c` 3.9.25 `:778`) |
+| the same | the same | none | `_sha512.SHA384Type.digest` | CPython 3.10 and 3.11 set `SHA384Type` to the SHA-384 type and then overwrite it with the SHA-512 type (3.10.22 `:782`, `:788`; 3.11.18 `:785`, `:791`), so the attribute holds the SHA-512 type |
+| the same | the same | `_sha512.sha512.digest` | `hashlib.sha512.digest` | on PyPy, hashlib's fallback binds `hashlib.sha512` to the class `_sha512.sha512` (`lib-python/3/hashlib.py:102` in 3.9 and 3.10, `:101` in 3.11; the class `lib_pypy/_sha512.py:234` in 3.9, `:245` in 3.10 and 3.11) |
+| `_auth.py:33:39`, `34:37`, `87:40`, `93:49`, `103:48`, `200:41`, `201:35`, `202:43` | `scramble_native_password`, `ed25519_password`, `scramble_caching_sha2` | none | `_hashlib._OneShotHash.digest` | on PyPy 3.11, `_hashlib.new(name, string)` returns a `_hashlib._OneShotHash` when `string` is non-empty (`lib_pypy/_hashlib/__init__.py:40-57`; its `digest`, `:79`); `hashlib.new` reaches it through `__hash_new` (`lib-python/3/hashlib.py:160`), and the named constructors are `_hashlib.openssl_*`, which `make_new_hash` makes to call `new(name, string)` (`lib_pypy/_hashlib/__init__.py:367-374`; `lib-python/3/hashlib.py:307` binds them); each of these sites hashes data that can be non-empty (the password, the scramble, `stage1`, `p1`, `p2 + nonce`). The class is named as the receiver's class (micro-benchmark naming; avro `protocol.py:108:59`). `36:13` to `38:22` start from `sha1_new()` with no data, a `_hashlib.HASH` |
+
+These are direct named constructors (`hashlib.sha256(...)`,
+`hashlib.sha512(...)`), whose OpenSSL constructors make no separate
+builtin fallback (ruling-names-2), so the fallback object always comes
+with the alias. What stays: `_hashlib.HASH.*`; `_sha2.SHA256Type` and
+`_sha2.SHA512Type` (CPython 3.12 and later); `_sha1.sha.*` (PyPy's SHA-1
+class; `hashlib.sha1` is a factory on both implementations, so no hashlib
+name there). Four graph edges renamed and six added (all outside): 623
+edges, 311 in the package, 312 outside.
