@@ -163,14 +163,8 @@ td.number, th.number { text-align: right; font-variant-numeric: tabular-nums; }
 <script type="application/json" id="pycg-document">@@PYCG_DOCUMENT@@</script>
 <script id="pycg-logic">
 "use strict";
-/*
- * The logic of the page, without the DOM: indexes, callers and callees
- * under the filters, search, the tree and the module map. Every function
- * works on the index that buildIndex makes once.
- */
 const PyCG = (() => {
   const FORMAT = "pycg/1";
-  /* The implicit constructs and the unresolved causes of docs/format.md, in one line each. */
   const IMPLICIT = new Map([
     ["attribute", "a load or store of an attribute: a property, __get__, __set__, __getattr__, __setattr__"],
     ["await", "await, async with or async for: __await__"],
@@ -216,12 +210,7 @@ const PyCG = (() => {
     return Array.isArray(site.end) ? site.end : [site.line, site.col];
   }
 
-  /*
-   * Sites in the order of the document: those in the module of the listed
-   * definition, then those of another definition of the name, by module;
-   * then by start, end and implicit construct.
-   */
-  function bySite(a, b) {
+  function bySiteInDocumentOrder(a, b) {
     const x = endOf(a);
     const y = endOf(b);
     return (
@@ -246,11 +235,6 @@ const PyCG = (() => {
     return definition && Array.isArray(definition.lines) ? definition.lines[0] : 0;
   }
 
-  /*
-   * Two sites of a caller can start at the same place of one module
-   * (`a.get().strip()`). Their labels then show their ends, which tell
-   * them apart.
-   */
   function markSameStarts(index, list) {
     if (list.length < 2) return;
     const starts = new Map();
@@ -262,11 +246,6 @@ const PyCG = (() => {
     }
   }
 
-  /*
-   * `line:col`, with the end when the caller has another site with the same
-   * start, and after the file of the site's module when it is not the
-   * module of the listed definition.
-   */
   function siteLabel(index, site) {
     let label = site.line + ":" + site.col;
     if (index.showEnd.has(site)) {
@@ -457,11 +436,10 @@ const PyCG = (() => {
 
   function grouped(rows) {
     const list = [...rows.values()];
-    for (const row of list) row.sites.sort(bySite);
+    for (const row of list) row.sites.sort(bySiteInDocumentOrder);
     return list;
   }
 
-  /* The callees of `name`, one row per callee with its sites in `name`. */
   function callees(index, name, filters) {
     const rows = new Map();
     for (const site of index.calls.get(name) || []) {
@@ -472,10 +450,9 @@ const PyCG = (() => {
         rows.get(callee).sites.push(site);
       }
     }
-    return grouped(rows).sort((a, b) => bySite(a.sites[0], b.sites[0]) || compare(a.name, b.name));
+    return grouped(rows).sort((a, b) => bySiteInDocumentOrder(a.sites[0], b.sites[0]) || compare(a.name, b.name));
   }
 
-  /* The callers of `name`, one row per caller with its sites that call `name`. */
   function callers(index, name, filters) {
     if (!calleeShown(index, name, filters)) return [];
     const rows = new Map();
@@ -506,15 +483,10 @@ const PyCG = (() => {
     return (index.calls.get(name) || []).filter((site) => site.unresolved);
   }
 
-  /*
-   * The rows under `name` in a callers or callees tree. `path` holds the
-   * names from the selected node down to `name`: a row on it is marked
-   * recursive and is not expanded again.
-   */
-  function expand(index, name, direction, filters, path) {
+  function expand(index, name, direction, filters, namesFromSelected) {
     const rows = direction === "callers" ? callers(index, name, filters) : callees(index, name, filters);
     const more = direction === "callers" ? hasCallers : hasCallees;
-    const onPath = new Set(path);
+    const onPath = new Set(namesFromSelected);
     for (const row of rows) {
       row.recursive = onPath.has(row.name);
       row.expandable = !row.recursive && more(index, row.name, filters);
@@ -531,11 +503,6 @@ const PyCG = (() => {
     );
   }
 
-  /*
-   * Names that match `query`, best first: the whole name, a dotted tail
-   * (the last part, or `Class.method`), the start of the last part, the
-   * start of any part, then any substring. Case is ignored.
-   */
   function search(index, query, limit) {
     const text = query.trim().toLowerCase();
     if (text === "") return {total: 0, entries: []};
@@ -575,12 +542,6 @@ const PyCG = (() => {
     return [...map].sort((a, b) => b[1] - a[1] || compare(a[0], b[0]));
   }
 
-  /*
-   * One row per module: the call edges from it to each other module, to
-   * itself, and to outside names; and the edges into it. An edge is a
-   * distinct caller and callee with at least one site, in the module's
-   * code, that the filters show.
-   */
   function moduleMap(index, filters) {
     const rows = new Map();
     for (const name of index.moduleNames) {
@@ -661,10 +622,6 @@ const PyCG = (() => {
 </script>
 <script id="pycg-ui">
 "use strict";
-/*
- * The page: header, call hierarchy and module map. Every name comes from
- * the analysed code, so text goes into the page as text nodes only.
- */
 (() => {
   const CHUNK = 200;
   const MODULE_CHUNK = 500;
@@ -740,8 +697,6 @@ const PyCG = (() => {
     moduleRows: null,
   };
 
-  /* Names */
-
   function nameParts(name, shown) {
     const text = shown === undefined ? name : shown;
     const at = text.lastIndexOf(".");
@@ -779,7 +734,6 @@ const PyCG = (() => {
     return badges;
   }
 
-  /* The other files of a module's name, which the analysis does not read. */
   function shadowMark(files) {
     return [
       h("span", {class: "badge shadows", title: "Other files of this module's name; PyCG does not analyse them"}, "shadows"),
@@ -803,8 +757,6 @@ const PyCG = (() => {
     return h("span", {class: "sites", title}, shown);
   }
 
-  /* Lists that grow by CHUNK items on demand */
-
   function chunked(list, items, render) {
     let shown = 0;
     function step() {
@@ -823,8 +775,6 @@ const PyCG = (() => {
     step();
     return list;
   }
-
-  /* Header */
 
   function filterBox(key, label) {
     const input = h("input", {type: "checkbox", id: "filter-" + key, checked: true});
@@ -868,8 +818,6 @@ const PyCG = (() => {
       filterBox("implicit", "implicit calls"),
       filterBox("unresolved", "unresolved sites"))
   );
-
-  /* Sidebar: search and tree */
 
   const searchInput = h("input", {
     type: "search",
@@ -998,8 +946,6 @@ const PyCG = (() => {
   }
 
   chunked(treeList, PyCG.children(index, null), (name) => treeItem(name, null));
-
-  /* Call hierarchy */
 
   const card = h("section", {class: "card", "aria-label": "Selected node"});
   const callersPane = h("section", {class: "pane pane-callers", id: "callers", "aria-label": "Callers"});
@@ -1157,8 +1103,6 @@ const PyCG = (() => {
     pane(calleesPane, "Callees", "callees", name);
   }
 
-  /* Module map */
-
   const moduleFilter = h("input", {type: "search", placeholder: "Filter modules", "aria-label": "Filter modules"});
   const moduleInfo = h("span", {class: "hint"});
   const tableBody = h("tbody");
@@ -1295,8 +1239,6 @@ const PyCG = (() => {
     if (row && row.scrollIntoView) row.scrollIntoView({block: "nearest"});
   }
 
-  /* Views, selection and the address */
-
   function show(view) {
     state.view = view;
     hierarchy.hidden = view !== "hierarchy";
@@ -1322,7 +1264,6 @@ const PyCG = (() => {
     }
   }
 
-  /* Show `name`, and put it in the address so that Back returns to the last one. */
   function select(name) {
     show("hierarchy");
     showNode(name);

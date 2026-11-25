@@ -209,6 +209,108 @@ the validator is not run. The validator reports it as `skipped`.
 `tests/test_benchmark_validator.py` runs the validator on the whole benchmark.
 The validator needs Python 3.14 or later and is tested on Python 3.15.
 
+### How the validator observes calls
+
+The child process registers each code object of a snippet module when the
+module starts. It keeps the code objects alive, so that their ids stay
+unique. It reads the snippet without running snippet code.
+
+- **When a call is recorded**: A snippet function is recorded when its code
+  starts (`PY_START`), so implicit calls and callbacks from builtins are
+  seen too. A generator or coroutine function is recorded at its call
+  (`CALL`): calling it creates a generator or coroutine and does not run the
+  body. Every callee outside the snippet is recorded at its call.
+- **Scopes without a node**: Generator expressions, `__annotate__`, `<generic
+  parameters of ...>`, and the lazily evaluated scopes of `type X = ...`
+  values and of type parameter bounds, constraints and defaults. These last
+  are recognised by their only parameter, `.format`, a name that source code
+  cannot use. A class body's names nest under it; its calls belong to the
+  scope around it.
+- **The caller**: The node of the nearest snippet frame, skipping library
+  frames. In a thread without a snippet frame, it is the scope that called
+  the thread's `start()`. Calls in a string passed to `eval` or `exec` belong
+  to the snippet scope that runs it. `CALL` events in library code stay
+  enabled: a call there can start a thread or call a snippet generator
+  function (`contextlib.contextmanager`).
+- **Threads**: The `CALL` event of `threading.Thread.start` comes before
+  `start()` runs, which raises `RuntimeError` if `Thread.__init__` did not
+  run or the thread is started already. The validator reads these checks
+  statically (`_initialized`, `_started._flag`): properties such as
+  `Thread.ident` can raise on such a thread.
+- **`with`**: Python 3.14+ fetches `__enter__` and `__exit__` with
+  `LOAD_SPECIAL` and calls `__enter__` right after it. It calls `__exit__`
+  after loading `None` three times (`LOAD_CONST`, or from Python 3.15
+  `LOAD_COMMON_CONSTANT`). These loads have the source position of the
+  `with` item, like the `LOAD_SPECIAL`. An explicit call `item.__enter__()`
+  can have that position too, but not these loads.
+- **`assert`**: The `CALL` that creates the `AssertionError` of an `assert`
+  has the source position of the instruction that loads `AssertionError`,
+  which only an `assert` statement loads as a common constant.
+- **`raise Cls`**: It creates an instance without a `CALL` event. On the
+  `RAISE` event, the validator checks that the operand is a name or a chain
+  of attributes (`raise E`, `raise A.B from None`) that evaluates to the
+  class, by reading it again in the frame without side effects.
+- **Inlined builtins**: For a call `name(<genexpr>)` of `any`, `all`, `tuple`
+  and, from Python 3.15, `list` and `set`, Python 3.14+ compiles a check
+  `name is builtin` (`LOAD_COMMON_CONSTANT`, `IS_OP 0`, `POP_JUMP_IF_FALSE`
+  to the real call) and a loop in place of the call. The check and the
+  loop's `FOR_ITER` have the source position of the name. The validator
+  finds these calls in the source file. The inlined builtin starts consuming
+  its generator expression in the loop, after the argument is evaluated, so
+  the call is recorded when the generator expression starts while its
+  caller is at that `FOR_ITER`.
+- **Coroutines without a call event**: The interpreter calls a coroutine
+  method without a `CALL` event (`__anext__` in `async for`), and so does
+  builtin code (`anext`). A coroutine records the file, line and function
+  name of the frame that created it (`cr_origin`). If that is a line of the
+  snippet code that awaits it, the edge belongs to the scope of that code.
+  For a coroutine that a call expression there created, this gives the edge
+  of the `CALL` event again. The tracking of origins is a setting per
+  thread, so every event turns it on in its thread: a new thread gets an
+  event (its first call) before it can create a coroutine.
+- **Running no snippet code**: `isinstance()` reads `obj.__class__` when the
+  real type does not match, which runs a `__class__` property of a snippet
+  class (a lazy proxy), so the validator tests the real type. It recognises
+  a snippet class by its `__module__` and reads no attribute of the module
+  object: a snippet can replace a module in `sys.modules` with an object
+  that runs code on access. Attributes are read with
+  `inspect.getattr_static`. A namespace is read as a plain dict, and only if
+  it is a dict: `dict.__getitem__` would still call a `__missing__` of a
+  subclass, and a class body can have a mapping from `__prepare__` with
+  snippet methods. The variables of a function are read through its frame.
+  Only builtin descriptors are bound.
+- **Names of outside callees**: A function outside the snippet is named from
+  the module whose globals it uses and the qualified name of its code
+  (`contextlib.contextmanager.helper`): wrappers made with `functools.wraps`
+  carry the `__module__` and `__qualname__` of the function they wrap. That
+  name is used only when no expected name resolves to the function.
+  Different paths to one function give different objects (a bound method, a
+  classmethod bound to its class, a method found on a subclass); all map to
+  the one object stored in the namespace that defines it. A builtin method
+  bound to a class or an instance is named by the first class in the lookup
+  order (for a class: its MRO, then its metaclass's) whose descriptor gives
+  this method when bound to the same object; two builtin methods are equal
+  if they have the same self and the same C function. The first class that
+  defines the name can be a snippet class that overrides the method
+  (`super().__init_subclass__()` in an `__init_subclass__`).
+- **Stubs**: The finder of missing modules is the last entry of
+  `sys.meta_path`. It stubs a module that snippet code imports, but not a
+  missing submodule of a real package (a real error) or a module that a
+  library probes for. The classes behind the stubs have the `__module__`
+  `validate`, not `__main__`, which in the child process is the snippet's
+  module. A method of a stub has the `__module__` and `__qualname__` of its
+  path (`ext.Cls.name`), which name the edge of its call; the methods of
+  those classes themselves give no edge. The stub `__init_subclass__`
+  ignores class keyword arguments: they are for the missing base class. A
+  snippet class derives from the proxy of a stub in place of the stub: one
+  subclass of the stub, with its name, that all snippet classes share, so
+  the MRO and duplicate bases are as for a real base. For each name that a
+  snippet class defines, the proxy holds the stub with the longer path, so
+  `super().name` finds it. That is the object that attribute lookup on the
+  stub gives, so the shared names change no attribute; names that the
+  stub's own classes define are left out. The names are in place before
+  `type.__new__` runs any class hook.
+
 ### Limits
 
 The validator cannot observe or name these calls. A case that depends on them

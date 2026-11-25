@@ -1,7 +1,3 @@
-"""Build the document that PyCG writes (docs/format.md) from the analysis
-of a program. Every part is sorted, so the document does not depend on the
-order of the analysis."""
-
 import os
 import re
 from functools import cache
@@ -18,17 +14,11 @@ from pycg.analysis.model import (
 )
 from pycg.formats import FORMAT
 
-# The commit of typeshed that the stub data comes from, as its README states.
-_STUB_README = Path(__file__).resolve().parent.parent / "analysis/stub_data/README.md"
+_STUB_DATA_README_PATH = (
+    Path(__file__).resolve().parent.parent / "analysis/stub_data/README.md"
+)
 
-# The implicit construct that makes the calls of each role of the engine
-# (see `Analysis.site_call`; the class statement's steps are roles of one
-# name). A role that a builtin also makes while it runs a call expression
-# (`list(x)` iterates, `str(x)` converts, `getattr(o, n)` loads) belongs to
-# that call where its site is the call's; `len(x)`, `sorted(key=f)`,
-# `map(f, xs)`, `filter(f, xs)`, `reversed(x)` and `type(name, bases, dict)`
-# only make calls of that kind.
-CONSTRUCTS = {
+IMPLICIT_CONSTRUCT_BY_ROLE = {
     "accessor": "attribute",
     "await": "await",
     "call back": None,
@@ -65,9 +55,7 @@ CONSTRUCTS = {
     "type": None,
 }
 
-# The roles of constructs that are always written as such, also at the site
-# of a call expression (`with f():`, `if f():`, `{f(): v}`).
-_WRITTEN = frozenset(
+_ROLES_IMPLICIT_AT_CALL_EXPRESSION = frozenset(
     {
         "await",
         "class statement",
@@ -87,10 +75,9 @@ _WRITTEN = frozenset(
     }
 )
 
-_ITERATION = frozenset({"iterate", "index", "callable"})
+_ROLES_ITERATION = frozenset({"iterate", "index", "callable"})
 
-# The roles of an attribute access, with its kind (Load, Store, Delete).
-_ACCESSES = frozenset({"accessor", "getattr", "hook", "property"})
+_ROLES_ATTRIBUTE_ACCESS = frozenset({"accessor", "getattr", "hook", "property"})
 
 
 def build(program, package_name=None, package_version=None):
@@ -100,7 +87,7 @@ def build(program, package_name=None, package_version=None):
     callees = {name for sites in calls.values() for s in sites for name in s["callees"]}
     extensions = program.extension_modules
     outside = {
-        name: {"known": _known(name, analysis.external_callees, extensions)}
+        name: {"known": _outside_known(name, analysis.external_callees, extensions)}
         for name in sorted(callees)
         if name not in definitions
     }
@@ -109,7 +96,7 @@ def build(program, package_name=None, package_version=None):
         "tool": {
             "name": "pycg",
             "version": __version__,
-            "typeshed": _typeshed(),
+            "typeshed": _typeshed_commit(),
             "cap": program.analysis.solver.cap,
         },
         "package": {"name": package_name, "version": package_version},
@@ -121,13 +108,7 @@ def build(program, package_name=None, package_version=None):
     }
 
 
-def _known(name, external_callees, extensions):
-    """How the analysis knows the outside callee `name`: "extension" for a
-    name in an extension module of the package, else as the engine
-    recorded it (see `Analysis.external_callees`). A callee that the engine
-    did not record as outside is a name that the builtin models give to
-    analysed code that does not define it (`functools.partial.__call__`,
-    which an analysed `functools.wraps` returns): "stub"."""
+def _outside_known(name, external_callees, extensions):
     parts = name.split(".")
     if any(".".join(parts[:end]) in extensions for end in range(1, len(parts))):
         return "extension"
@@ -161,9 +142,6 @@ def _relative(path, root):
 
 
 def _definitions(program):
-    """Each module, function and class by name. Of two definitions of one
-    name, a module comes before a function and a function before a class
-    (the call graph has no class nodes), then the first by position."""
     analysis = program.analysis
     found = {}
     for name in sorted(program.modules):
@@ -196,11 +174,6 @@ def _definitions(program):
 
 
 def _mro(cls):
-    """The names of the linearization of `cls`: the analysed classes and
-    the outside classes where the analysis stops, whose own linearization
-    is outside code; one of analysed classes only ends with `object`. A
-    class whose order is not known (a saturated base or metaclass) lists
-    itself only."""
     if cls.unknown:
         return [cls.name]
     names = [base.name for base in cls.mro]
@@ -214,8 +187,6 @@ def _position(function):
 
 
 def _exports(program):
-    """Each name that a module binds to a module, class or function of
-    another qualified name, with the sorted names of those."""
     analysis = program.analysis
     exports = {}
     for name in sorted(program.modules):
@@ -235,58 +206,51 @@ def _exports(program):
 
 
 def _calls(program, definitions):
-    """The call sites of each caller, by the source module of each site,
-    then by position and construct. The definitions of one name share the
-    name's sites, as in the classic call graph; a site in another module
-    than the name's definition (`definitions`) names its module."""
     analysis = program.analysis
     expressions = {(caller, site) for caller, site, _ in analysis.call_expressions}
     records = {}
     for (caller, site, construct), callees in analysis.site_edges.items():
-        at_call = (caller, site) in expressions
+        at_call_expression = (caller, site) in expressions
         iterated = (caller, site) in analysis.iterated_expressions
-        word = _word(construct, at_call, iterated)
-        records.setdefault((caller, site, word), set()).update(callees)
+        implicit = _implicit_construct(construct, at_call_expression, iterated)
+        records.setdefault((caller, site, implicit), set()).update(callees)
     causes = analysis.unresolved_calls()
     for caller, site in causes:
         records.setdefault((caller, site, None), set())
     functions = {}
     for function in sorted(analysis.functions, key=_position):
         functions.setdefault(function.name, []).append(function)
-    # The sites of each caller by source module, start, end and construct:
-    # records of one node and construct are one site (a loop's `__iter__`
-    # and `__next__`), and no source overwrites another.
     calls = {}
-    for (caller, site, word), callees in records.items():
-        module, start, end = _parts(site)
-        if not _in_code(caller, module, start[0], program.modules, functions):
-            # Python's code that the caller runs makes the call (see
-            # `_in_code`): the site is the caller's definition.
-            first = functions[caller][0]
-            module = first.module
-            start = (first.lineno, first.col_offset)
-            end = (first.end_lineno, first.end_col_offset)
+    for (caller, site, implicit), callees in records.items():
+        module, start, end = _site_parts(site)
+        if not _caller_code_has_line(
+            caller, module, start[0], program.modules, functions
+        ):
+            first_definition = functions[caller][0]
+            module = first_definition.module
+            start = (first_definition.lineno, first_definition.col_offset)
+            end = (first_definition.end_lineno, first_definition.end_col_offset)
         own = definitions[caller]["module"]
-        key = ("" if module == own else module, start, end, word or "")
+        key = ("" if module == own else module, start, end, implicit or "")
         site_record = calls.setdefault(caller, {}).setdefault(key, [set(), None])
         site_record[0].update(callees)
         if (caller, site) in causes:
             site_record[1] = causes[caller, site]
     return {
         caller: [
-            _record(key, callees, cause)
+            _site_record(key, callees, cause)
             for key, (callees, cause) in sorted(calls[caller].items())
         ]
         for caller in sorted(calls)
     }
 
 
-def _record(key, callees, cause):
-    module, start, end, word = key
+def _site_record(key, callees, cause):
+    module, start, end, implicit = key
     record = {"line": start[0], "col": start[1], "end": list(end)}
     record["callees"] = sorted(callees)
-    if word:
-        record["implicit"] = word
+    if implicit:
+        record["implicit"] = implicit
     elif not callees:
         record["unresolved"] = cause
     if module:
@@ -294,13 +258,7 @@ def _record(key, callees, cause):
     return record
 
 
-def _in_code(caller, module, line, modules, functions):
-    """Whether the code of `caller` (the module of that name, or the
-    functions of that name) has line `line` of `module`. A call has its
-    site in its caller's code, but for the accessor that a class's own
-    attribute hook calls (`C.__setattr__ -> C.value`): the access is
-    elsewhere, and the hook's body runs Python's code that calls the
-    accessor."""
+def _caller_code_has_line(caller, module, line, modules, functions):
     if caller in modules and module == caller:
         return True
     return caller not in functions or any(
@@ -309,38 +267,39 @@ def _in_code(caller, module, line, modules, functions):
     )
 
 
-def _word(construct, at_call, iterated):
-    """The implicit construct of the calls of `construct` (see
-    `semantics._construct`), or None for a call expression; `at_call` if
-    their site is that of a call expression, `iterated` if a statement or
-    a comprehension iterates the expression at the site."""
+def _implicit_construct(construct, at_call_expression, iterated):
     if construct == "call":
         return None
     if construct == "decorator":
         return "decorator"
     role = construct[0]
-    if at_call and role not in _WRITTEN and not (role in _ITERATION and iterated):
+    iterated_by_statement = role in _ROLES_ITERATION and iterated
+    if (
+        at_call_expression
+        and role not in _ROLES_IMPLICIT_AT_CALL_EXPRESSION
+        and not iterated_by_statement
+    ):
         return None
     if construct == ("subscript", "__delitem__"):
         return "delete"
-    if role in _ACCESSES and construct[1] == "Delete":
+    if role in _ROLES_ATTRIBUTE_ACCESS and construct[1] == "Delete":
         return "delete"
-    return CONSTRUCTS[role]
+    return IMPLICIT_CONSTRUCT_BY_ROLE[role]
 
 
-# A site: `module:line:col#end_line:end_col`, the span of the construct's
-# `ast` node, and for the fields of a literal format `#index` (see the
-# builder's `_site`).
-_SITE = re.compile(r"(.*):(\d+):(\d+)#(\d+):(\d+)(?:#\d+)?")
+_SITE_PATTERN = re.compile(r"(.*):(\d+):(\d+)#(\d+):(\d+)(?:#\d+)?")
 
 
-def _parts(site):
-    """The module, the start (line, column) and the end of `site`."""
-    module, line, col, end_line, end_col = _SITE.fullmatch(site).groups()
-    return module, (int(line), int(col)), (int(end_line), int(end_col))
+def _site_parts(site):
+    match = _SITE_PATTERN.fullmatch(site)
+    assert match is not None, site
+    module, line, column, end_line, end_column = match.groups()
+    return module, (int(line), int(column)), (int(end_line), int(end_column))
 
 
 @cache
-def _typeshed():
-    match = re.search(r"`([0-9a-f]{40})`", _STUB_README.read_text(encoding="utf-8"))
+def _typeshed_commit():
+    readme = _STUB_DATA_README_PATH.read_text(encoding="utf-8")
+    match = re.search(r"`([0-9a-f]{40})`", readme)
+    assert match is not None, _STUB_DATA_README_PATH
     return match[1]

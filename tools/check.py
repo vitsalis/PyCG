@@ -1,7 +1,11 @@
-"""The checks before pushing, scoped to what a change touches.
+import argparse
+import subprocess
+import sys
+import time
+from pathlib import Path
 
-    python tools/check.py [--base REF] [--full]
-    python tools/check.py [--base REF] --detect-eval OUTPUTS
+DESCRIPTION = """\
+The checks before pushing, scoped to what a change touches.
 
 The change is the diff of the working tree, untracked files included,
 against the merge base of REF (default origin/main) and HEAD. `lint` always
@@ -16,12 +20,6 @@ A diff that cannot be read runs every scoped check.
 prints the reason as Markdown. It is true when the change touches
 EVAL_PATHS, and when the diff cannot be read.
 """
-
-import argparse
-import subprocess
-import sys
-import time
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MICRO_TESTS = ("tests/test_micro_benchmark.py", "tests/test_benchmark_validator.py")
@@ -115,9 +113,9 @@ def detect_eval(changed, base):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+        description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
     )
-    parser.add_argument("--base", default="origin/main")
+    parser.add_argument("--base", default="origin/main", metavar="REF")
     parser.add_argument("--full", action="store_true")
     parser.add_argument("--detect-eval", type=Path, metavar="OUTPUTS")
     args = parser.parse_args(argv)
