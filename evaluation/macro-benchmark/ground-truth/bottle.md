@@ -29,7 +29,7 @@ end of this file).
 
 | Nodes | Edges (inside / outside) | Confirmed by the trace | From reading only | Rejected trace edges | Functions run | Ledger entries | Value sites | Default rejections |
 |---|---|---|---|---|---|---|---|---|
-| 386 | 1503 (647 / 856) | 1014 (67.5%) | 489 | 14 | 291 of 385 | 1836 | 181 | 46 |
+| 386 | 1505 (647 / 858) | 1014 (67.4%) | 491 | 14 | 291 of 385 | 1836 | 181 | 46 |
 
 **How the ledger was drafted.** The writer read the whole module. A scratch
 script merged the writer's decisions into the skeleton; it filled only
@@ -426,3 +426,63 @@ __doc__ assignment remains executable under -OO. No further edge change follows.
 
 Evidence: audits/2026-11-15/pass-4/bottle/, including source freeze,
 fallback-witnesses.json, pair/site/body/default coverage and review.md.
+
+## Corrections of 2026-11-25
+
+Three outside names change: two results of the optional ujson keep their
+missing-module path where bottle forwards them, and the builtin SHA-1
+object gets the attribute under which `_sha1` exports its type.
+
+**ujson.** `bottle.py:81-84` imports `dumps` and `loads` from ujson and
+falls back to json; both sides run ("Judgements"). bottle declares no
+requirement for ujson; the edges do not depend on which of its releases are
+admitted, because the names are access paths and every release read behaves
+alike (batch 7: an unpinned installation is not support for every historical
+release). The releases read, each fetched in a container
+by its PyPI SHA-256 and read as text, never run, give one answer on Python
+3: `dumps` returns a `str` and `loads` returns a `dict` for a JSON object.
+
+| Release | SHA-256 of the sdist | `dumps` on Python 3 | `loads` of an object |
+|---|---|---|---|
+| 1.35 (the last 1.x) | `f66073e5506e91d204ab0c614a148d5aa938bdbf104751be66f8ad7a222f5f86` | `PyString_FromString` (`python/objToJSON.c:1086`), which is `PyUnicode_FromString` on Python 3 (`python/py_defines.h:51`) | `PyDict_New` (`python/JSONtoObj.c:83`) |
+| 2.0.3 (the last for Python 2.7) | `bd2deffc983827510e5145fb66e4cc0f577480c62fe0b4882139f8f7d27ae9a3` | as 1.35 (`python/objToJSON.c:844`, `py_defines.h:51`) | `PyDict_New` (`python/JSONtoObj.c:83`) |
+| 5.13.0 (the last 5.x) | `d62e3d7625384c08082abad81a077af587fdef2761bb14c3822f4234b8d07d75` | `PyUnicode_DecodeUTF8` (`src/ujson/python/objToJSON.c:867`) | `PyDict_New` (`src/ujson/python/JSONtoObj.c:119`) |
+| 6.1.0 (the latest) | `aef7ea4cd9e2e9f8a35c4538a9780d58c80d76c5da66a8dad269b4cc6d930c29` | `PyUnicode_DecodeUTF8` (`src/ujson/encode.c:817`) | `PyDict_New` (`src/ujson/decode.c:661`) |
+
+On Python 2 these releases return a byte `str` from `dumps`; that
+difference has no branch in bottle, so it is named for Python 3
+("Judgements", J2). The rules: a missing library's result keeps its access
+path through assignment and the package's returns and forwarding (batch
+7, einops; pgvector), its actual behaviour decides what runs (batch 8,
+honcho J6), and at a concrete-type `isinstance` test the B4 name comes
+beside the retained path (batch 7, websocket-client).
+
+| Site | Caller | Edge added | Flow |
+|---|---|---|---|
+| `bottle.py:1046:29` `out.encode(response.charset)` | `Bottle._cast` | `ujson.dumps.encode` | `JSONPlugin.apply.wrapper` returns `dumps(rv)` (2032, 2035) through `Route.call` and `_handle` to `wsgi`'s `self._cast(...)` (1104), or stores it as an `HTTPResponse` body (2037) that `_cast` casts again (1061); the `str` passes `isinstance(out, unicode)` (1045) |
+| `bottle.py:2438:39` `source.items()` | `ConfigDict.load_dict` | `ujson.loads.items` | `_main` passes `json_loads(fp.read())` for a `.json` config file (4650); on Python 3 `json_loads` is the lambda of line 114, which returns `json_lds(touni(s))`, and on Python 2 it is `json_lds` itself (143) |
+
+`<builtin>.str.encode` and `<builtin>.dict.items` stay. No other package
+call takes these results: the values that `load_dict`'s loop unpacks have
+no path, `BaseRequest.json` (1298) returns its result to the client, and
+the error page's `{{e.body}}` converts the body with `touni`
+(`<builtin>.str`, 157) before any method call.
+
+**SHA-1.** `hashlib.sha1(tob(etag)).hexdigest()` (`bottle.py:2918:49`,
+`static_file`) gets the builtin SHA-1 object when OpenSSL does not provide
+SHA-1 (`Lib/hashlib.py`: `_sha1.sha1`, a factory, CPython 3.8.20
+`:85-87`). Batch 8's ruling "A C type exported under a module attribute
+other than its type name" names its methods by the attribute that `_sha1`
+exports, `SHA1Type`, on every admitted CPython 3: 3.8.20
+`Modules/sha1module.c:559`, 3.9.25 `:560`, 3.10.22 `:568-570`, 3.11.18
+`:571`, 3.12.16 `:354`, 3.13.18 `:356`, 3.14.10 `:371`, 3.15.2 `:353`
+(the CPython sources of the batch-8 dependency set). bottle admits no
+alternative implementation, and Python 2.7's library naming follows
+Python 3, so no runtime keeps the type name.
+
+| Site | Caller | Edge removed | Edge added |
+|---|---|---|---|
+| `bottle.py:2918:49` | `static_file` | `_sha1.sha1.hexdigest` | `_sha1.SHA1Type.hexdigest` |
+
+`_hashlib.HASH.hexdigest` stays. Two graph edges added and one renamed
+(all outside): 1505 edges, 647 in the package, 858 outside.

@@ -1296,6 +1296,8 @@ default reject bottle.HeaderProperty.__set__: the assigned attribute is not a He
     -> <builtin>.isinstance
 1046:29 call  out.encode(response.charset)
     -> <builtin>.str.encode
+    -> ujson.dumps.encode
+    note: out can be the result of ujson.dumps that JSONPlugin's wrapper returns (2032:38) or stores as an HTTPResponse body (2037:32, cast again at line 1061), when ujson imports (an optional import, not installed: a missing module): the stub result keeps its path through the package's returns (batch 7, einops), and every ujson release returns a str on Python 3, so isinstance(out, unicode) holds and the B4 name stays beside it (batch 7, websocket-client; bottle.md, Corrections of 2026-11-25)
     reject bottle.BaseResponse.charset: response.charset is the argument, loaded at 1046:39
 1046:39 getattr  response.charset
     -> bottle.BaseResponse.charset
@@ -3145,6 +3147,8 @@ default reject bottle.HeaderProperty.__set__: the assigned attribute is not a He
 [bottle.ConfigDict.load_dict]
 2438:39 call  source.items()
     -> <builtin>.dict.items
+    -> ujson.loads.items
+    note: _main passes json_loads(fp.read()) (4650:37): with ujson importable, the result of ujson.loads, through the lambda of line 114 on Python 3 (json_lds is ujson.loads); a missing module, so the stub result keeps its path through the package's forwarding (batch 7, einops and pgvector); ujson.loads returns a dict for a JSON object, so the loop runs (bottle.md, Corrections of 2026-11-25)
     reject bottle.MultiDict.items: source is a dict (the documented dictionary structure; the package passes dicts: lines 530, 2395, 2442, 4650)
 2439:26 call  isinstance(key, basestring)
     -> <builtin>.isinstance
@@ -3650,8 +3654,8 @@ default reject bottle.HeaderProperty.__set__: the assigned attribute is not a He
     -> bottle.tob
 2918:49 call  hashlib.sha1(tob(etag)).hexdigest()
     -> _hashlib.HASH.hexdigest
-    -> _sha1.sha1.hexdigest
-    note: The documented CPython hashlib fallback selects _sha1.sha1 when OpenSSL does not provide SHA-1; pinned CPython 3.8/3.11/3.12 sources establish _sha1.sha1.hexdigest alongside _hashlib.HASH.hexdigest. static_file builds the digest from its own stat-derived etag bytes. Bottle has no current explicit PyPy support declaration, so the PyPy-only _sha1.sha.hexdigest is outside the user-selected interpreter scope.
+    -> _sha1.SHA1Type.hexdigest
+    note: The documented CPython hashlib fallback selects _sha1.sha1 (a factory) when OpenSSL does not provide SHA-1; its object is the builtin SHA-1 type, which _sha1 exports as SHA1Type on every admitted CPython 3 (3.8.20 Modules/sha1module.c:559, 3.9.25 :560, 3.10.22 :568-570, 3.11.18 :571, 3.12.16 :354, 3.13.18 :356, 3.14.10 :371, 3.15.2 :353), so _sha1.SHA1Type.hexdigest beside _hashlib.HASH.hexdigest (batch 8, a C type exported under a module attribute other than its type name; bottle.md, Corrections of 2026-11-25). Python 2.7's library naming follows Python 3 (Judgements). static_file builds the digest from its own stat-derived etag bytes. Bottle has no explicit PyPy support declaration, so the PyPy-only _sha1.sha.hexdigest is outside the interpreter scope.
 2922:23 call  getenv('HTTP_IF_NONE_MATCH')
     -> <builtin>.dict.get
     note: getenv is request.environ.get (line 2879), the get of the WSGI environ dict
