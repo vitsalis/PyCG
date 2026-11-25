@@ -25,7 +25,10 @@ evidence is in Sublist3r-review.json (audit record `2026-11-15/Sublist3r-review.
   DNS record method after subscription, and string methods inferred from
   opaque requests header results.
 - Name the lock by its documented `_thread.LockType` path; the later
-  `threading.Lock` alias does not make another class or edge.
+  `threading.Lock` alias does not make another class or edge. (Superseded
+  on 2026-11-25 by the corrections' ruling on public aliases:
+  `threading.Lock` on CPython 3.13 and later; see Corrections of
+  2026-11-25.)
 - Include eleven historical Python 3 regex names and the two historical
   `_BoundedSemaphore` methods. The Python 3.4 recommendation is not a
   minimum supported version.
@@ -184,12 +187,14 @@ client entrypoint. The README documents `sublist3r.main` as the API.
    (line 602), but then `super().__init__` (line 604) runs
    `enumratorBaseThreaded.__init__`, which stores its parameter `lock`
    (line 264). DNSdumpster passes none, so `self.lock` is the default
-   `threading.Lock()` of line 260. Its documented public class path is
-   `_thread.LockType`, so the callees are `_thread.LockType.acquire` and
-   `.release`. The later `threading.Lock` alias is the same class, not a
-   second target. `portscan` keeps its `BoundedSemaphore`: include both
-   `threading.BoundedSemaphore` and historical `threading._BoundedSemaphore`
-   method names across admitted Python 3 versions.
+   `threading.Lock()` of line 260. Its type is exported as
+   `_thread.LockType`, and CPython 3.13 and later make `threading.Lock` a
+   public class alias of it, so the callees are `_thread.LockType.acquire`
+   and `.release` (CPython 3.0 to 3.12) and `threading.Lock.acquire` and
+   `.release` (3.13 and later; Corrections of 2026-11-25). `portscan`
+   keeps its `BoundedSemaphore`: include both `threading.BoundedSemaphore`
+   and historical `threading._BoundedSemaphore` method names across
+   admitted Python 3 versions.
 
 10. **Names of `multiprocessing` objects (doubtful).** I named each method by
     the public path of the class of the receiver:
@@ -225,7 +230,9 @@ client entrypoint. The README documents `sublist3r.main` as the API.
     - requests: the same rule retains `requests.Session`,
       `requests.Session.get` and `.post` from the imported paths.
     - `hashlib.sha1(...).hexdigest()` has both `_hashlib.HASH.hexdigest`
-      and `_sha1.sha1.hexdigest`. The standard library selects its builtin
+      and the builtin SHA-1 type's method, `_sha1.SHA1Type.hexdigest`
+      (CPython 3.4 and later) and `_sha1.sha1.hexdigest` (3.0 to 3.3;
+      Corrections of 2026-11-25). The standard library selects its builtin
       SHA-1 implementation when OpenSSL or its SHA-1 constructor is unavailable.
       CPython 3.4 and 3.12 source names that fallback type `_sha1.sha1`; the
       Python 3.12 hashlib documentation explicitly describes the fallback.
@@ -304,10 +311,10 @@ nodes (the value sites above).
 | Sites | 1732: 513 explicit calls and 1219 implicit sites (none with a package candidate) |
 | Sites with candidates / value sites | 135 / 2 |
 | Ledger entries | 513 |
-| Callee lines / rejection lines / exclusion lines / notes | 570 / 46 / 2 / 103 |
+| Callee lines / rejection lines / exclusion lines / notes | 573 / 46 / 2 / 103 |
 | Default rejections | 0 |
 | Nodes | 102 (3 modules, 99 functions) |
-| Edges | 457: 143 in the package, 314 to 104 callees outside |
+| Edges | 460: 143 in the package, 317 to 107 callees outside |
 | Edges that the trace confirms | none: no trace |
 | Edges that only Windows makes | 12 (judgement 3) |
 | Package functions without a caller | 1 (`enumratorBase.extract_domains`) |
@@ -366,3 +373,49 @@ Source, inputs and inventories were frozen before baseline comparison.
 No target, dependency, test, generated code, PyCG or network enumeration ran.
 There is no trace; all 457 edges remain from source reading. Root verification,
 independent final review and installation follow this handoff.
+
+## Corrections of 2026-11-25
+
+Batch 8's ruling "A C type exported under a module attribute other than
+its type name" (the referee's `b8-ruling-c-type-names-1.md`) names a method
+of an outside class by a public alias where one exists, otherwise by the
+attribute under which the defining extension module exports the type, on
+each admitted runtime; the type name stays only where no attribute
+exists. Names are the union over runtimes, never two aliases on one
+runtime, and earlier usage does not bind. Sublist3r admits CPython 2.7
+and every Python 3 (judgement 1; Python 2 library names follow Python 3,
+judgement 2), no other implementation. CPython 3.0.1, 3.1.5, 3.2.6, 3.3.7,
+3.4.10, 3.5.10 and 3.6.15 were read at their tags' commits
+(`Modules/sha1module.c` and `Lib/hashlib.py`, fetched in a container from
+github.com/python/cpython by commit: 4ca04b6, c37a4fd, 439d885, 17bf6b4,
+e76cbc7, 426b022, b74b1f3); 3.7 to 3.15 are the batch-8 dependency
+sources.
+
+| Site | Caller | Edge added | Evidence |
+|---|---|---|---|
+| `sublist3r.py:554:127` `hashlib.sha1(...).hexdigest()` | `NetcraftEnum.get_cookies` | `_sha1.SHA1Type.hexdigest` | `_sha1` exports the builtin SHA-1 type as `SHA1Type` from 3.4: 3.4.10 `sha1module.c:558`, 3.5.10 and 3.6.15 `:560`, 3.7.17 and 3.8.20 `:559`, 3.9.25 `:560`, 3.10.22 `:568-570`, 3.11.18 `:571`, 3.12.16 `:354`, 3.13.18 `:356`, 3.14.10 `:371`, 3.15.2 `:353` |
+
+`_sha1.sha1.hexdigest` stays for CPython 3.0 to 3.3, whose `sha1module.c`
+exports no attribute for the type (type name `_sha1.sha1`, 3.0.1 `:451`,
+3.3.7 `:446`; `hashlib.py` takes the factory `_sha1.sha1`), and
+`_hashlib.HASH.hexdigest` stays. One graph edge added (outside): 458
+edges, 143 in the package, 315 outside.
+
+The lock of judgement 9 follows the corrections' ruling on public aliases
+(`ruling-names-2.md`; README, "Rulings for the corrections of
+2026-11-25"): a direct public class alias names a class in each version
+where the attribute holds it, also when the alias appears only in later
+versions; a factory is no class alias.
+
+| Site | Caller | Edge added | Evidence |
+|---|---|---|---|
+| `sublist3r.py:611:26` `self.lock.acquire()` | `DNSdumpster.check_host` | `threading.Lock.acquire` | the lock is the default `threading.Lock()` of `sublist3r.py:260`, stored at `:264` by the initializer that `:604` calls; CPython 3.13 lists `Lock` in `__all__` and binds `_LockType = _thread.LockType` and `Lock = _LockType` (3.13.18 `Lib/threading.py:28`, `:38`, `:120`; 3.14.10 `:38`, `:124`; 3.15.2 `:39`, `:125`) |
+| `sublist3r.py:621:26` `self.lock.release()` | `DNSdumpster.check_host` | `threading.Lock.release` | as at 611 |
+
+`_thread.LockType.acquire` and `.release` stay for CPython 3.0 to 3.12,
+where `threading.Lock` is the factory `_allocate_lock` (3.0.1
+`Lib/threading.py:80` to 3.12.16 `:122`) and `_thread` exports the type as
+`LockType` (3.0.1 `Modules/_threadmodule.c:740` to 3.12.16 `:1675`; type
+name `_thread.lock`). Judgement 9 identified one class but suppressed its
+later name; the ruling adds that name for the later versions. Two graph
+edges added (outside): 460 edges, 143 in the package, 317 outside.
