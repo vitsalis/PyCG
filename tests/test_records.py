@@ -284,3 +284,32 @@ def test_a_call_after_the_instances_of_its_class_saturated_shares_none(tmp_path)
     assert "main.C.__init__" in graph["main.early"]
     assert "main.C.__init__" not in graph["main.late"]
     assert "main.C.__new__" in graph["main.late"]
+
+
+def test_the_instances_of_a_class_iterated_at_a_site_share_one_record(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class Indexed:
+                def __getitem__(self, index): return index
+            class Plain:
+                pass
+            def loop(values):
+                for value in values:
+                    pass
+            loop(Indexed()); loop(Indexed()); loop(Indexed())
+            loop(Plain()); loop(Plain())
+            """
+        },
+    )
+    analysis = generator.program.analysis
+
+    records = {
+        cls.name: sequences for (cls, *_), sequences in analysis._sequences.items()
+    }
+    assert sorted(records) == ["main.Indexed", "main.Plain"]
+    assert len(records["main.Indexed"].objects) == 3
+    assert records["main.Indexed"].found and not records["main.Plain"].found
+    assert len(records["main.Plain"].objects) == 2
+    assert "main.Indexed.__getitem__" in generator.output()["main.loop"]

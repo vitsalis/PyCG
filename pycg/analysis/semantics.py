@@ -119,6 +119,7 @@ class Analysis(
         self._constants = {}
         self._subscriptions = set()
         self._compared_keys = {}
+        self._sequences = {}
         self._dict_hubs = {}
         self._subscript_keys = {}
         self._watches = {}
