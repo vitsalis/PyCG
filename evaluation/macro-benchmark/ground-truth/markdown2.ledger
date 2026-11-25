@@ -352,9 +352,11 @@ default reject markdown2.Admonitions.sub, markdown2.Alerts.sub, markdown2.Fenced
     -> <builtin>.str.encode
 150:70 call  sha256(SECRET_SALT + s.encode("utf-8")).hexdigest()
     -> _hashlib.HASH.hexdigest
-    -> _sha256.sha256.hexdigest
+    -> _hashlib._OneShotHash.hexdigest
+    -> _sha256.SHA256Type.hexdigest
     -> _sha2.SHA256Type.hexdigest
-    note: The public hashlib.sha256 factory uses _hashlib.HASH with OpenSSL, or the builtin fallback without _hashlib/its algorithm. Supported CPython 3.9 and 3.11 define the fallback receiver as _sha256.sha256; 3.12 defines _sha2.SHA256Type. These concrete classes have no public hashlib class alias. Retained primary hashlib and C type/factory/hexdigest sources establish all three receivers.
+    -> hashlib.sha256.hexdigest
+    note: The public hashlib.sha256 factory uses _hashlib.HASH with OpenSSL (on PyPy 3.11 hashlib.sha256 is _hashlib.openssl_sha256, made by make_new_hash, lib_pypy/_hashlib/__init__.py:367-374, which calls new(name, string): with this non-empty data a _hashlib._OneShotHash, :40-57), or the builtin fallback without _hashlib/its algorithm. On CPython 3.9 to 3.11 the fallback _sha256.sha256 is a factory whose object has the builtin SHA-256 type, which _sha256 exports as SHA256Type (Modules/sha256module.c 3.9.25 :720, 3.10.22 :725, 3.11.18 :728); 3.12 and later export it as _sha2.SHA256Type; on PyPy the fallback is the class _sha256.sha256 (lib_pypy/_sha256.py:206 in 3.9, :218 in 3.10 and 3.11), which PyPy's hashlib binds as hashlib.sha256 (lib-python/3/hashlib.py:98 in 3.9 and 3.10, :97 in 3.11), so its public alias names it (ruling-names-2). Batch 8, a C type exported under a module attribute other than its type name; markdown2.md, Corrections of 2026-11-25.
 
 [markdown2.markdown_path]
 182:21 call  codecs.open(path, 'r', encoding)

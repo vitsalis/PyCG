@@ -243,15 +243,18 @@ underscore does not remove a function or its valid body edges.
   `codecs.open` returns a `codecs.StreamReaderWriter` over a binary file.
   `fp.read()` is `codecs.StreamReaderWriter.read`; `fp.close()` goes
   through `StreamReaderWriter.__getattr__` to `io.BufferedReader.close`.
-- **J13. `sha256(...).hexdigest()`** (150:70):
-  `_hashlib.HASH.hexdigest`, `_sha256.sha256.hexdigest` and
-  `_sha2.SHA256Type.hexdigest`. The public factory selects OpenSSL when
-  available and the builtin implementation otherwise. CPython 3.9 and 3.11
-  name the fallback class `_sha256.sha256`; CPython 3.12 names it
-  `_sha2.SHA256Type`. All are supported runtimes, and none of these concrete
-  classes has a public `hashlib` class alias. The factory itself remains
-  `hashlib.sha256`. This accounts for platform/version alternatives without
-  changing package or library internals.
+- **J13. `sha256(...).hexdigest()`** (150:70): the public factory
+  `hashlib.sha256` selects OpenSSL when available (`_hashlib.HASH`, and
+  `_hashlib._OneShotHash` on PyPy 3.11 for this non-empty data) and the
+  builtin implementation otherwise. The builtin class is named per runtime
+  (Corrections of 2026-11-25): `_sha256.SHA256Type` on CPython 3.9 to
+  3.11, where `_sha256` exports the type under that attribute;
+  `_sha2.SHA256Type` on CPython 3.12 and later; and on PyPy, whose
+  fallback binds the class itself as `hashlib.sha256`, `hashlib.sha256`.
+  So the callees are `_hashlib.HASH.hexdigest`,
+  `_hashlib._OneShotHash.hexdigest`, `_sha256.SHA256Type.hexdigest`,
+  `_sha2.SHA256Type.hexdigest` and `hashlib.sha256.hexdigest`. The call of
+  the factory itself remains `hashlib.sha256`.
 
 ## Default rejections
 
@@ -304,12 +307,12 @@ five functions of `ItalicAndBoldProcessor` (abstract, no package subclass),
 | Sites needing a decision before defaults | 1445 |
 | Sites with candidates / value sites | 538 / 13 |
 | Ledger entries | 1317 (1288 call, 27 decorator, 1 getattr, 1 op) |
-| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 1427 / 91 (33) / 1 / 77 |
+| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 1429 / 91 (33) / 1 / 77 |
 | Default rejections | 10 candidates in 2 lines, deciding 241 sites |
 | Nodes | 197 (1 module, 196 functions) |
-| Edges | 881: 286 in the package, 595 outside |
-| Graph edges with a trace name or alias | 752 of 881 (85.4%) |
-| Edges only from reading | 129 |
+| Edges | 883: 286 in the package, 597 outside |
+| Graph edges with a trace name or alias | 752 of 883 (85.2%) |
+| Edges only from reading | 131 |
 | Trace edges rejected | 1 |
 | Functions that the tests run | 180 of 196 |
 
@@ -385,3 +388,30 @@ new pair: the constructor already normalizes its extras, the emacs group
 excludes newlines, and a None regex match still fails before group entry.
 Removing docstrings gives no new call in __repr__; normal-mode doctest
 callbacks remain in the union. Source-owned DEBUG=False remains false.
+
+## Corrections of 2026-11-25
+
+Two referee rulings, adopted by the lead, decide the names of the builtin
+hash object. Batch 8's "A C type exported under a module attribute other
+than its type name" (`b8-ruling-c-type-names-1.md`) names a method of an
+outside class by the attribute under which the defining extension module
+exports the type, on each admitted runtime; a factory names only its own
+call. The corrections' ruling on public aliases (`ruling-names-2.md`;
+README, "Rulings for the corrections of 2026-11-25") puts a direct public
+class alias first in each implementation, version and configuration where
+the attribute holds the receiver's class; a factory is no class alias.
+markdown2 admits CPython 3.9 and later and PyPy (`setup.py:59`,
+`python_requires=">=3.9, <4"`; the section "Round 3: supported PyPy cache
+wrappers").
+
+| Site | Caller | Edge removed | Edge added | Evidence |
+|---|---|---|---|---|
+| `markdown2.py:150:70` `sha256(...).hexdigest()` | `_hash_text` | none | `_sha256.SHA256Type.hexdigest` | on CPython 3.9 to 3.11 hashlib's fallback calls the factory `_sha256.sha256`, whose object has the builtin SHA-256 type, which `_sha256` exports as `SHA256Type` (`Modules/sha256module.c` 3.9.25 `:720`, 3.10.22 `:725`, 3.11.18 `:728`; the batch-8 dependency sources); `hashlib.sha256` is a factory there |
+| the same | the same | `_sha256.sha256.hexdigest` | `hashlib.sha256.hexdigest` | on PyPy, hashlib's fallback binds `hashlib.sha256` to the class `_sha256.sha256` (`lib-python/3/hashlib.py:98` in 3.9 and 3.10, `:97` in 3.11; the class `lib_pypy/_sha256.py:206` in 3.9, `:218` in 3.10 and 3.11), so the public alias names it; `sha256` is a direct named constructor (`from hashlib import sha256`, `markdown2.py:125`), which makes no separate builtin fallback (ruling-names-2) |
+| the same | the same | none | `_hashlib._OneShotHash.hexdigest` | on PyPy 3.11, `hashlib.sha256` is `_hashlib.openssl_sha256` (`lib-python/3/hashlib.py:307` binds it), which `make_new_hash` makes to call `new(name, string)` (`lib_pypy/_hashlib/__init__.py:367-374`), and `new` returns a `_hashlib._OneShotHash` for non-empty data (`:40-57`; its `hexdigest`, `:84`); `SECRET_SALT + s.encode("utf-8")` is never empty. The class is named as the receiver's class (micro-benchmark naming; avro `protocol.py:108:59`) |
+
+What stays: `_hashlib.HASH.hexdigest`; `_sha2.SHA256Type.hexdigest`
+(CPython 3.12 and later). J13's earlier reading that CPython names the
+fallback class `_sha256.sha256` took the factory for the type. One graph
+edge renamed and two added (outside): 883 edges, 286 in the package, 597
+outside.
