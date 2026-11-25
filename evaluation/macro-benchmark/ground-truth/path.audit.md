@@ -326,3 +326,43 @@ because the getattr sites are 44% and carry nearly no edges.
 
 To do after the writer applies or answers F1 to F3 and W1, W2, and after the
 referee rules on L1 and L2.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-path-wcio` (f3e5295, PR #106) against `main`
+(14798e4): four outside edges renamed and six added in `path.json`,
+`path.added.json`, `path.ledger` and `path.md`; `evaluation/metrics.json`
+is not recorded yet (the lead records it at the merge). I read
+`path/__init__.py` from the inputs image, and CPython 3.9.25 to 3.15.2 and
+PyPy 3.9 v7.3.16, 3.10 v7.3.19 and 3.11 v7.3.23 from the dependency
+sources, as text. Nothing ran; no PyCG output was read.
+
+| Site | Change | Verdict | Evidence |
+|---|---|---|---|
+| `__init__.py:816:43` `f.read(size)` | `io._WindowsConsoleIO.read` renamed `_io._WindowsConsoleIO.read` | agree | `io` imports the class outside `__all__` only to register it (`Lib/io.py:95-99` of 3.9.25, `110-114` of 3.10.22, `111-115` of 3.11.18, `95-99` of 3.12.16, `94-98` of 3.15.2; PyPy `lib-python/3/io.py:95-99` of 3.9, `110-114` of 3.10, `111-115` of 3.11), so it has no public alias (batch 7, the pyfiglet ruling, which names this very class `_io._WindowsConsoleIO`). CPython: type name `"_io._WindowsConsoleIO"` (`winconsoleio.c:1117` of 3.9.25, `:1129` of 3.10.22, `:1131` of 3.11.18, `.name` `:1234` of 3.12.16, `:1269` of 3.15.2), added to `_io` by `ADD_TYPE` (`_iomodule.c:737` of 3.9.25, `:752` of 3.10.22, `:704` of 3.12.16, `:710` of 3.15.2). PyPy on Windows: `_io` exports `W_WinConsoleIO` (TypeDef `'_io.WinConsoleIO'`, with `read`) as `_WindowsConsoleIO` (`moduledef.py:33` of 3.9, `:34` of 3.10 and 3.11; `interp_win32consoleio.py:523`, `531` of 3.9, `528-537` of 3.10), and `open` makes it for a console name (`interp_io.py:113-116` of 3.11) |
+| `979:21`, `990:44`, `1000:47` | `_sha1.sha1.X` renamed `_sha1.SHA1Type.X` | agree | `hashlib.new(hash_name)` (`977`) falls back to the factory `_sha1.sha1`; `_sha1` exports its type as `SHA1Type` on CPython 3.9 to 3.15 (checked in the bottle audit); on PyPy `_sha1.sha1` is a function returning the class `_sha1.sha`, so `_sha1.sha1` names no class on any runtime |
+| the three sites | `_md5.MD5Type.X` added | agree | CPython 3.9 to 3.15: type name `"_md5.md5"` (`md5module.c:467` of 3.9.25, `.name` `:495` of 3.10.22, `:252` of 3.15.2), exported as `MD5Type` (`:583`, `:591`, `:594` of 3.11.18, `:355` of 3.12.16, `:358` of 3.15.2); `hashlib.md5` is a factory there, so no class alias |
+| the three sites | `hashlib.md5.X` added, `_md5.md5.X` kept | agree | PyPy's `_md5` exports the class `W_MD5` (TypeDef `'_md5_md5'`) as `md5` (`moduledef.py:22` in 3.9 to 3.11), and hashlib's fallback caches `_md5.md5` (`hashlib.py:94` of 3.9, `:94` of 3.10) and binds it as `hashlib.md5` when OpenSSL lacks MD5 (ruling-names-2, H2); at `hashlib.new` the private name stays beside the alias (the lead's decision at avro `schema.py:337`) |
+| the three sites | `_sha1.sha.X`, `_hashlib.HASH.X` kept | agree | PyPy's `_sha1.sha` (`lib_pypy/_sha1.py:117`, `update` `:219`, `digest` `:265`, `hexdigest` `:314` of 3.9; `:129` of 3.10 and 3.11) and `_hashlib.HASH` (`lib_pypy/_hashlib/__init__.py:34` of 3.9, `:57` of 3.10); CPython's `_hashlib` exports `HASH` |
+
+Nothing missed. The two hash names in scope are md5 and sha1 (J6), and
+`977` is the only hash constructor; the console stream reaches only the
+lambda at `816` unbuffered (J7). No other outside callee of `path.json`
+falls under the rulings: the other `io` classes are in `io.__all__`,
+`re.Pattern` and `re.Match` are public, `functools.partial` is public on
+both implementations, and `types.GeneratorType` is public.
+
+Counts. 680 edges (422 inside, 258 outside), 487 traced (71.6%), 193 from
+reading only: as `check.py path` reports, which passes with the source in
+place, as do `--origin` and `--report`. The `make eval` numbers come from
+PyCG's output, which I did not read.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| A1 | path admits PyPy 3.9 (`requires-python = ">=3.9"`, section "PyPy"), and `path.md` still says "PyPy 3.9 sources were not provided" and assumes them; the dependency sources now hold PyPy 3.9 v7.3.16, which gives the same names for every PyPy name of this correction (lines in the table above) | `path.md`, section "PyPy" (last paragraph) and "Corrections of 2026-11-25" (the console table says "PyPy 3.10 and 3.11", the hash table "PyPy 3.10, 3.11") | cite PyPy 3.9 v7.3.16 with this evidence |
+
+**Verdict.** The four renames and the six additions stand, and nothing is
+missed. A1 completes the evidence; no edge depends on it.
+
+A1 was applied before the merge (`path.md` and its correction tables cite
+PyPy 3.9 v7.3.16). The audit is closed.
