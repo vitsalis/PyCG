@@ -93,7 +93,8 @@ default reject itables.typing._SubscriptableFallback.__getitem__: the only insta
     -> itables.config.load_config_file
 106:39 call  config.items()
     -> <builtin>.dict.items
-    note: load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables
+    -> tomli.load.items
+    note: load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables. On Python 3.9 and 3.10 the declared config extra installs tomli (pyproject.toml: tomli;python_version<"3.11"), not installed in the test environment: for an itables.toml file (or any ITABLES_CONFIG file not named pyproject.toml) the value is the tomli.load result itself, which keeps its missing-module path through the return of typing.cast (it returns val unchanged) and of load_config_file (itables.md, Corrections of 2026-11-25); the sub-dict tool.itables is a subscript of it and has no path
 
 == itables.datatables_format
 
@@ -2907,7 +2908,8 @@ default reject itables.typing._SubscriptableFallback.__getitem__: the only insta
     -> <builtin>.print
 29:35 call  config.items()
     -> <builtin>.dict.items
-    note: load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables
+    -> tomli.load.items
+    note: load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables; on Python 3.9 and 3.10 with tomli, the tomli.load result itself for an itables.toml file, as at config.py:106:39 (itables.md, Corrections of 2026-11-25)
 30:14 call  print(f" {key}: {value}")
     -> <builtin>.print
 
@@ -3160,10 +3162,12 @@ default reject itables.typing._SubscriptableFallback.__getitem__: the only insta
 277:6 call  ( kwargs.get if typed_dict is ITableOptions else kwargs.p...
     -> <builtin>.dict.get
     -> <builtin>.dict.pop
-    note: the callee is the bound get or pop of kwargs, annotated dict[str, Any] (B4); the package passes dicts (config.py:97, javascript.py:423, 1415, 1563)
+    -> tomli.load.get
+    note: the callee is the bound get or pop of kwargs, annotated dict[str, Any] (B4); the package passes dicts (config.py:97, javascript.py:423, 1415, 1563). config.py:97 also forwards the tomli.load result of an itables.toml file on Python 3.9 and 3.10, with typed_dict ITableOptions, so get: tomli.load.get (the annotation does not rename a forwarded stub value, batch 7 pgvector; itables.md, Corrections of 2026-11-25)
 281:6 call  ( kwargs.get if typed_dict is ITableOptions else kwargs.p...
     -> <builtin>.dict.get
     -> <builtin>.dict.pop
+    -> tomli.load.get
     note: as at 277:6
 284:36 call  check_itable_argument_names(set(kwargs), typed_dict)
     -> itables.typing.check_itable_argument_names
@@ -3187,6 +3191,8 @@ default reject itables.typing._SubscriptableFallback.__getitem__: the only insta
     -> <builtin>.ImportError
 329:35 call  kwargs.items()
     -> <builtin>.dict.items
+    -> tomli.load.items
+    note: check_itable_arguments forwards kwargs (287:36); from config.py:97 it can be the tomli.load result of an itables.toml file on Python 3.9 and 3.10 that sets warn_on_unexpected_option_type (itables.md, Corrections of 2026-11-25)
 337:23 call  check_type( {key: value}, typed_dict, collection_check_st...
     -> typeguard.check_type
 343:28 call  str(typed_dict.__annotations__[key])

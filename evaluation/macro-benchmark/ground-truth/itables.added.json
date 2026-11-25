@@ -32,6 +32,9 @@
       ],
       "itables.config.load_config_file": [
         "itables.config 105:34 call  load_config_file(config_file)"
+      ],
+      "tomli.load.items": [
+        "itables.config 106:39 call  config.items()"
       ]
     },
     "itables.datatables_format._format_narwhals_series": {
@@ -966,6 +969,11 @@
         "itables.show_config 34:25 call  Path.cwd()"
       ]
     },
+    "itables.show_config.show_config": {
+      "tomli.load.items": [
+        "itables.show_config 29:35 call  config.items()"
+      ]
+    },
     "itables.streamlit": {
       "itables.typing._SubscriptableFallback.__getitem__": [
         "itables.streamlit 26:21 getitem  Unpack[ITableOptions]"
@@ -1074,6 +1082,15 @@
     "itables.typing.check_itable_argument_types": {
       "<builtin>.ImportError": [
         "itables.typing 323:26 call  ImportError( \"The `warn_on_unexpected_option_type` option..."
+      ],
+      "tomli.load.items": [
+        "itables.typing 329:35 call  kwargs.items()"
+      ]
+    },
+    "itables.typing.check_itable_arguments": {
+      "tomli.load.get": [
+        "itables.typing 277:6 call  ( kwargs.get if typed_dict is ITableOptions else kwargs.p...",
+        "itables.typing 281:6 call  ( kwargs.get if typed_dict is ITableOptions else kwargs.p..."
       ]
     },
     "itables.widget": {
@@ -1275,7 +1292,7 @@
   },
   "notes": {
     "itables.config 106:39 call  config.items()": [
-      "load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables"
+      "load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables. On Python 3.9 and 3.10 the declared config extra installs tomli (pyproject.toml: tomli;python_version<\"3.11\"), not installed in the test environment: for an itables.toml file (or any ITABLES_CONFIG file not named pyproject.toml) the value is the tomli.load result itself, which keeps its missing-module path through the return of typing.cast (it returns val unchanged) and of load_config_file (itables.md, Corrections of 2026-11-25); the sub-dict tool.itables is a subscript of it and has no path"
     ],
     "itables.config 41:34 call  config_file.exists()": [
       "Path construction returns PosixPath or WindowsPath on the corresponding supported platform; parent/path joining and with_suffix preserve that concrete class. These calls use a constructed/joined path, not the Path class itself. Path.cwd and explicit Path constructors remain valid separate edges."
@@ -1451,6 +1468,9 @@
     "itables.shiny 42:21 getitem  Unpack[ITableOptions]": [
       "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"
     ],
+    "itables.show_config 29:35 call  config.items()": [
+      "load_config_file returns the dict that tomllib.load returns, or its sub-dict tool.itables; on Python 3.9 and 3.10 with tomli, the tomli.load result itself for an itables.toml file, as at config.py:106:39 (itables.md, Corrections of 2026-11-25)"
+    ],
     "itables.show_config 34:16 call  show_config(Path.cwd())": [
       "the block under `if __name__ == \"__main__\":` is code of the module"
     ],
@@ -1471,6 +1491,15 @@
     ],
     "itables.typing 129:28 getitem  NotRequired[ Union[ Sequence[Union[int, str, Mapping[str,...": [
       "NotRequired is the _SubscriptableFallback instance (typing.py:35-40) on Python 3.9 and 3.10 when `from typing_extensions import NotRequired, Unpack` fails; before Python 3.14 the annotations of a class body are evaluated when it runs; judgement J1"
+    ],
+    "itables.typing 277:6 call  ( kwargs.get if typed_dict is ITableOptions else kwargs.p...": [
+      "the callee is the bound get or pop of kwargs, annotated dict[str, Any] (B4); the package passes dicts (config.py:97, javascript.py:423, 1415, 1563). config.py:97 also forwards the tomli.load result of an itables.toml file on Python 3.9 and 3.10, with typed_dict ITableOptions, so get: tomli.load.get (the annotation does not rename a forwarded stub value, batch 7 pgvector; itables.md, Corrections of 2026-11-25)"
+    ],
+    "itables.typing 281:6 call  ( kwargs.get if typed_dict is ITableOptions else kwargs.p...": [
+      "as at 277:6"
+    ],
+    "itables.typing 329:35 call  kwargs.items()": [
+      "check_itable_arguments forwards kwargs (287:36); from config.py:97 it can be the tomli.load result of an itables.toml file on Python 3.9 and 3.10 that sets warn_on_unexpected_option_type (itables.md, Corrections of 2026-11-25)"
     ],
     "itables.widget 38:25 getitem  Unpack[ITableOptions]": [
       "on Python 3.9 and 3.10, when `from typing_extensions import NotRequired, Unpack` fails, Unpack is the _SubscriptableFallback instance (typing.py:35-40); the annotation is evaluated when the def runs (no `from __future__ import annotations`); judgement J1"

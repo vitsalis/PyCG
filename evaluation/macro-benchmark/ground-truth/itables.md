@@ -201,7 +201,9 @@ not prove that every class ran; source evidence decides the receiver set.
    (`widget/__init__.py:40`), `dash.Output`,
    `dash.development.base_component._explicitize_args` and
    `Component.__init__`, `tomli.load` (the other side of the optional
-   import of `tomllib`, `config.py:16-22`). `_streamlit_component_func`
+   import of `tomllib`, `config.py:16-22`), and the methods of its result,
+   `tomli.load.items` and `tomli.load.get` (Corrections of 2026-11-25).
+   `_streamlit_component_func`
    (`streamlit.py:30`) is the stub instance that the component call
    returns; calling it is the stub (micro-benchmark `external/decorator`),
    and its lambda `on_selected_rows_change` is rejected because ordinary
@@ -295,11 +297,11 @@ its outside callee.
 | Required-entry sites | 1989 |
 | Sites with candidates / value sites | 1049 / 6 |
 | Ledger entries | 1361 (1236 call, 87 getitem, 31 setattr, 5 decorator, 2 getattr) |
-| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 1559 / 58 (0) / 0 / 113 |
+| Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 1564 / 58 (0) / 0 / 114 |
 | Default rejections | 1, deciding 706 sites |
 | Nodes | 150 (21 modules, 129 functions) |
-| Edges | 926: 188 in the package, 738 outside |
-| Graph edges with a trace name or alias | 610 of 926 (65.9%) |
+| Edges | 930: 188 in the package, 742 outside |
+| Graph edges with a trace name or alias | 610 of 930 (65.6%) |
 | Trace edges rejected | 4 |
 | Functions that the tests run | 104 of 129 |
 
@@ -361,3 +363,54 @@ resolve Dash wrapper binding, AnyWidget/trait callbacks, dataframe/Index/dtype
 identities, historical constructors and the NumPy object-string witness.
 No target, dependency, test or generated code was imported or executed.
 Structural/origin acceptance checks are performed by the root reviewer.
+
+## Corrections of 2026-11-25
+
+The result of `tomli.load` keeps its missing-module path where the package
+forwards it. The rules: the optional import's both sides run
+("Judgements"); a declared dependency requirement, also an extra, admits
+the releases that satisfy it on an admitted Python (batch 7, "Which
+releases of a dependency are admitted"; batch 8, "Which releases of a
+dependency are read"); a library that the test environment lacks keeps
+its access path, and its actual behaviour decides what runs (batch 8,
+honcho J6); a stub result keeps its path through assignment and
+forwarding through package functions, and concrete type evidence does
+not replace it (batch 7, einops); an annotation does not rename a
+forwarded stub value (batch 7, pgvector); a subscript of a stub value has
+no path ("Callees outside the package").
+
+The evidence. `pyproject.toml:48` declares the extra `config = ["tomli;
+python_version<\"3.11\"", "platformdirs"]`, so on CPython 3.9 and 3.10
+`import tomli as tomllib` (`config.py:20`) binds the installed tomli.
+tomli is not installed in the test environment: a missing module. tomli
+2.4.1 (the release that the project's `pixi.lock:18077` pins, wheel
+`tomli-2.4.1-py3-none-any.whl`, PyPI SHA-256
+`0d85819802132122da43cb86656f8d1f8c6587d54ae7dcaf30e90533028b49fe`,
+fetched and read in a container, never run; `requires_python >=3.8`, the
+pure wheel that CPython 3.9 and 3.10 install) reads the binary file and
+returns a dict (`tomli/_parser.py:144-153`, `:224`), so the package's
+code after the call runs. `load_config_file` keeps that result for every
+file not named `pyproject.toml` (an `itables.toml` that `get_config_file`
+finds, `config.py:53-55`, or any `ITABLES_CONFIG` file, `:34-45`):
+`config.py:85` assigns it, `:89-94` subscripts only a `pyproject.toml`,
+`:97` forwards it to `check_itable_arguments` with `ITableOptions`, and
+`:100` returns it through `typing.cast`, which returns its argument
+unchanged (`Lib/typing.py`, CPython 3.9.25 `:1375-1383`, 3.10.22
+`:1737-1745`). The callee name does not depend on the tomli release
+(the access path), so no other release is read for it.
+
+| Site | Caller | Edge added | Why |
+|---|---|---|---|
+| `config.py:106:39` | `config.set_options_from_config_file` | `tomli.load.items` | `config` is `load_config_file`'s return (`:105`) |
+| `show_config.py:29:35` | `show_config.show_config` | `tomli.load.items` | `config` is `load_config_file`'s return (`:27`); `:16` passes with tomli and platformdirs installed |
+| `typing.py:277:6`, `281:6` | `typing.check_itable_arguments` | `tomli.load.get` | `kwargs` from `config.py:97`, `typed_dict is ITableOptions`, so `kwargs.get` |
+| `typing.py:329:35` | `typing.check_itable_argument_types` | `tomli.load.items` | `kwargs` forwarded at `typing.py:287`, when the file sets `warn_on_unexpected_option_type` and typeguard imports (`:321`; the extra `check_type`, `typeguard>=4.4.1`) |
+
+`<builtin>.dict.items`, `.get` and `.pop` stay at these sites (tomllib on
+3.11 and later, the `pyproject.toml` sub-dict, and the other callers'
+dicts). `kwargs.pop` gets no `tomli.load.pop`: the only caller that passes
+the config passes `ITableOptions` (`config.py:97`). No other explicit call
+takes the result: `config.py:62` and `:90` are `in` tests (implicit, no
+outside edge), and the loop at `:106` unpacks items, which have no path.
+Four graph edges added (outside), none removed: 930 edges, 188 in the
+package, 742 outside.
