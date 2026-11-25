@@ -376,7 +376,11 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
 [jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags]
 96:24 call  data.get('writeable', True)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 
 [jsonpickle.ext.numpy.NumpyNDArrayHandler.flatten]
 100:27 call  self.flatten_dtype(obj.dtype.newbyteorder('N'), data)
@@ -427,10 +431,18 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     -> jsonpickle.ext.numpy.NumpyBaseHandler.restore_dtype
 112:67 call  data.get('order', 'C')
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 114:25 call  data.get('shape', None)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 116:30 call  arr.reshape(shape)
     -> numpy.ndarray.reshape
 118:27 call  self.restore_flags(data, arr)
@@ -443,7 +455,11 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
 [jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.restore_byteorder]
 151:29 call  data.get('byteorder', None)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 153:47 call  arr.dtype.newbyteorder(byteorder)
     -> numpy.dtype.newbyteorder
     -> numpy.dtypes.BoolDType.newbyteorder
@@ -563,20 +579,36 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     -> numpy.array
 216:67 call  data.get('order', 'C')
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 217:33 call  data.get('shape', None)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 219:38 call  arr.reshape(shape)
     -> numpy.ndarray.reshape
 221:33 call  np.ndarray( buffer=buf, dtype=dtype, shape=data.get('shap...
     -> numpy.ndarray
 224:35 call  data.get('shape')
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 225:35 call  data.get('order', 'C')
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the dict of the base array of a view, which NumpyNDArrayHandlerView.restore takes with data.get('base') (line 327) and forwards through self.context.restore (line 333) to this handler, the path is that of the get call: ujson.loads.get.get, yaml.safe_load.get.get
 226:23 call  np.ndarray( buffer=buf, dtype=dtype, shape=data.get('shap...
     -> numpy.ndarray.copy
 227:39 call  self.restore_byteorder(data, arr)
@@ -662,7 +694,11 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
 [jsonpickle.ext.numpy.NumpyNDArrayHandlerView.restore]
 327:24 call  data.get('base', None)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    -> ujson.loads.get.get
+    -> yaml.safe_load.get.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; for the base array's own dict, forwarded at line 333 as described, this call is ujson.loads.get.get or yaml.safe_load.get.get (the base of a view is an array that owns its data, so its dict has no base and the else branch, lines 343-346, does not run for it)
 330:24 call  super()
     -> <builtin>.super
 330:34 call  super().restore(data)
@@ -705,16 +741,24 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     note: the receiver is the dtype that restore_dtype rebuilds from a dtype string of flatten_dtype, a class of the set R (the referee, ruling (e) after Codex audit round 1), named one by one; numpy.dtype.newbyteorder stays as the name of the older admitted releases
 343:69 call  data.get('byteorder', '|')
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; only a view's own dict reaches this branch (the base of a view has no base)
 344:31 call  data.get('shape')
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; only a view's own dict reaches this branch (the base of a view has no base)
 345:32 call  data.get('offset', 0)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; only a view's own dict reaches this branch (the base of a view has no base)
 346:33 call  data.get('strides', None)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the array; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; only a view's own dict reaches this branch (the base of a view has no base)
 349:31 call  self.restore_flags(data, arr)
     -> jsonpickle.ext.numpy.NumpyNDArrayHandler.restore_flags
 
@@ -854,19 +898,26 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     note: compression is the constructor argument, zlib by default; the docstring (lines 69-71) also names bz2 and None, but no package code and no test passes bz2, and a module that a client passes is a client value (B2, B5; audit F2)
 79:59 call  buf.encode()
     -> <builtin>.str.encode
+    -> ujson.dumps.encode
+    -> yaml.dump.encode
     reject jsonpickle.backend.JSONBackend.encode, jsonpickle.pickler.encode: buf is a str, the output of encode or the literal '' (lines 199, 348, 378, 397, 418)
+    note: with the ujson or the yaml backend, buf is the str that ujson.dumps or yaml.dump returns (load_backend stores getattr(yaml, 'dump'), backend.py:101-103, 131): JSONBackend.backend_encode returns the encoder's result (backend.py:232), pickler.encode returns it unchanged (pickler.py:198), and PandasDfHandler.flatten (199, 202) and PandasIndexHandler.flatten (348, 349) pass it here; every admitted ujson (1.19 to 6.0.0) and PyYAML (3.10 to 6.0.3) release returns a str (ujson PyUnicode on Python 3; yaml.dump_all writes to io.StringIO when encoding is None and returns getvalue()), so the str method runs and the result keeps its access path beside <builtin>.str.encode (README, batch 7, einops and websocket-client; the bottle precedent, Bottle._cast -> ujson.dumps.encode; jsonpickle.md, Corrections of 2026-11-25)
 81:39 call  b64encode(buf)
     -> jsonpickle.util.b64encode
 
 [jsonpickle.ext.pandas.PandasProcessor.restore_pandas]
 91:20 call  data.get('txt', True)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; restore_pandas returns meta inside a tuple that its callers unpack, so meta keeps no path
 95:28 call  b64decode(data['values'])
     -> jsonpickle.util.b64decode
 96:24 call  data.get('comp', False)
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; restore_pandas returns meta inside a tuple that its callers unpack, so meta keeps no path
 97:50 call  self.compression.decompress(buf)
     -> zlib.decompress
     note: compression is the constructor argument, zlib by default; the docstring (lines 69-71) also names bz2 and None, but no package code and no test passes bz2, and a module that a client passes is a client value (B2, B5; audit F2)
@@ -875,7 +926,9 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     reject jsonpickle.backend.JSONBackend.decode, jsonpickle.unpickler.decode: the receiver is the bytes that decompress returns
 98:24 call  data.get('meta', {})
     -> <builtin>.dict.get
-    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (handlers.py:88 binds get); data is the decoded JSON dict of the pandas object; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25; restore_pandas returns meta inside a tuple that its callers unpack, so meta keeps no path
 
 [jsonpickle.ext.pandas.make_read_csv_params]
 103:34 call  context.restore(meta.get('dtypes', {}), reset=False)
@@ -1419,7 +1472,9 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     -> threading.Lock
 271:20 call  data.get('locked', False)
     -> <builtin>.dict.get
-    note: a value site by name only (line 88 binds get); data is the decoded JSON dict of the lock
+    -> ujson.loads.get
+    -> yaml.safe_load.get
+    note: a value site by name only (line 88 binds get); data is the decoded JSON dict of the lock; with the ujson or the yaml backend (backend.py:238 calls ujson.loads or yaml.safe_load, both missing modules), the decoded object of the document's top level reaches here itself: decode passes it to restore (unpickler.py:130-131), restore to _restore (448), _restore to the restore function that _restore_tags selects (430), and _restore_object to the handler (895); a missing-library result keeps its access path through this forwarding (README, batch 7, einops and pgvector), the dict that every admitted ujson and PyYAML release returns decides what runs (batch 8, honcho J6), and the B4 name stays beside the retained path (batch 7, websocket-client; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items); jsonpickle.md, Corrections of 2026-11-25
 272:25 call  lock.acquire()
     -> threading.Lock.acquire
     -> _thread.LockType.acquire
@@ -2589,9 +2644,14 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     note: no callee: stage1 is what the client reconstructor returns (line 583); its __dict__ is an attribute of a client object, which is opaque (B5, cachetools C2; judgement J9, audit F3). The edge to dict.items stays through lines 600 and 607
 595:41 call  state.setdefault(k, v)
     -> <builtin>.dict.setdefault
-    note: state is the restored third item of the reduce entry; a value without setdefault raises AttributeError, which line 597 catches
+    -> ujson.loads.setdefault
+    -> yaml.safe_load.setdefault
+    note: state is the restored third item of the reduce entry; a value without setdefault raises AttributeError, which line 597 catches; ujson.loads.setdefault and yaml.safe_load.setdefault: a witness from the package's own output (audit F1): encode {k: r} with keys=True, k a client K with plain attributes and r a client R whose __reduce__ returns (R, (), k); the pickler gives the dict id 0 (pickler.py:864), escapes k through a nested encode on the same context (765-772), which gives k id 1 (747) and flattens its attributes without ids, then flattens r with id 2 and its state as {"py/id": 1} (747-754, 670); decode with keys=True and the ujson or the yaml backend where K cannot be imported (on_missing 'ignore'): _restore_dict makes the dict ref 0 (unpickler.py:918), the nested key decode (677) reaches _restore_object, which finds no class and returns self._mkref(obj) (899-902), so _objs[1] is the dict that ujson.loads or yaml.safe_load made; `data[k] = result = self._restore(v)` (945) restores the value before the unhashable-key assignment fails, so _restore_reduce (proxy ref 2, 559) gets that dict as state through _restore_id (629); the dict keeps the access path of the missing module through the package's storage in _objs (README, batch 7, einops; ruling-fabric-1.md: package storage and forwarding); jsonpickle.md, Corrections of 2026-11-25; R has no __setstate__ (line 587 raises AttributeError) and a non-empty __dict__ (594)
 600:48 call  state.items()
     -> <builtin>.dict.items
+    -> ujson.loads.items
+    -> yaml.safe_load.items
+    note: ujson.loads.items and yaml.safe_load.items: the witness of 595:41, with an R that has __slots__ and no __dict__, so line 594 raises AttributeError and line 600 runs
 601:36 call  setattr(stage1, k, v)
     -> <builtin>.setattr
 605:51 call  stage1.__dict__.update(dict_state)
@@ -2696,7 +2756,9 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     -> <builtin>.list.pop
 739:36 call  k.startswith('__')
     -> <builtin>.str.startswith
-    note: k is an attribute name, a str key of the decoded object
+    -> ujson.loads.startswith
+    -> yaml.safe_load.startswith
+    note: k is an attribute name, a str key of the decoded object; with keys=True, restore_key (line 721) is _restore_pickled_key, which decodes a key that the pickler escaped (a str attribute name that starts with json://, pickler.py:791-792, of an instance __dict__ flattened at pickler.py:731) with decode(..., backend=self.backend) (unpickler.py:677): with the ujson or the yaml backend that nested decode returns the str that ujson.loads or yaml.safe_load made, unchanged (_restore_tags selects _passthrough for a str, lines 973-974), so k keeps the access path of the missing module beside <builtin>.str.startswith (README, batch 7, einops and websocket-client; jsonpickle.md, Corrections of 2026-11-25)
 741:32 call  setattr(instance, k, value)
     -> <builtin>.setattr
 746:32 call  setattr(instance, f'_{k}', value)
@@ -3338,7 +3400,9 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
 [jsonpickle.util.items]
 626:26 call  obj.items()
     -> <builtin>.dict.items
-    note: the package passes dicts: an exact dict (pickler.py:447), an instance __dict__ (pickler.py:731, 855, 897), the decoded JSON dicts and state dicts (unpickler.py:711, 926, 939, 953); a client dict subclass (pickler.py:713) is a client object, whose items is client code (B5)
+    -> ujson.loads.items
+    -> yaml.safe_load.items
+    note: the package passes dicts: an exact dict (pickler.py:447), an instance __dict__ (pickler.py:731, 855, 897), the decoded JSON dicts and state dicts (unpickler.py:711, 926, 939, 953); a client dict subclass (pickler.py:713) is a client object, whose items is client code (B5); with the ujson or the yaml backend (backend.py:238), the decoded dict of the document's top level reaches here itself through decode (unpickler.py:130-131), restore (448), _restore (430) and _restore_dict (926, 939, 953) or, for an object without a handler, _restore_object_instance_variables and _restore_from_dict (813, 711): it keeps the access path of ujson.loads or yaml.safe_load (README, batch 7, einops and pgvector; batch 8, honcho J6: every admitted ujson and PyYAML release returns a dict; batch 7, websocket-client: <builtin>.dict.items stays beside it; the bottle precedent, ConfigDict.load_dict -> ujson.loads.items; jsonpickle.md, Corrections of 2026-11-25). Nested dicts come from subscripts and unpacking and keep no path
 
 == jsonpickle.version
 
