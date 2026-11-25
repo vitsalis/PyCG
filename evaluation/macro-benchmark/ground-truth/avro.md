@@ -84,6 +84,10 @@ PyPy releases unless one is named):
   `lib-python/3/hashlib.py` imports `_sha256` and `_sha512` in both
   releases), `_sha3.sha3_*` (`lib_pypy/_sha3/__init__.py`), `_blake2.blake2b`
   and `blake2s` (`lib_pypy/_blake2/__init__.py:157-166` in 3.10, `:160-169` in 3.11, set the names).
+  Where hashlib binds such a class to its public attribute, that alias
+  names it (Corrections of 2026-11-25): `hashlib.blake2b` and `.blake2s`
+  replace `_blake2.*`; `hashlib.md5`, the SHA-2 and the SHA-3 aliases come
+  beside the private names.
 - zlib exports the Decompress type itself as `decompressobj`
   (`pypy/module/zlib/moduledef.py:30`; TypeDef `'Decompress'` without a
   module, `interp_zlib.py:399` in 3.10, `:422` in 3.11): its public path is
@@ -234,8 +238,12 @@ holds only parsed JSON: no edge.
 **J5. Hash objects.** (PyPy's names: see "PyPy".) `Schema.fingerprint` calls `hashlib.new` for any
 name of `hashlib.algorithms_guaranteed` (its docstring). `h.digest()`
 (`schema.py:338:24`) names `_hashlib.HASH.digest` (OpenSSL),
-`_blake2.blake2b.digest` and `_blake2.blake2s.digest` (hashlib never takes
-blake2 from OpenSSL, `__block_openssl_constructor`), and the documented
+`hashlib.blake2b.digest` and `hashlib.blake2s.digest` (hashlib never takes
+blake2 from OpenSSL, `__block_openssl_constructor`, and binds the builtin
+classes to those public names; Corrections of 2026-11-25), the public
+aliases of the fallback classes where hashlib binds them (`hashlib.md5`,
+`sha224`, `sha256`, `sha384`, `sha512`, `sha3_224` to `sha3_512`;
+Corrections of 2026-11-25), and the documented
 fallback's builtin classes, each named by its module's exported type
 attribute where the runtime has one (b8-ruling-c-type-names-1, adopted by
 the lead): `_md5.MD5Type` (`Modules/md5module.c`, 3.10.22 `:591` to 3.15.2
@@ -254,7 +262,8 @@ The ruling removed `_sha1.sha1.digest`, which names neither runtime's
 class. shake_128 and shake_256 objects need a length, so
 `digest()` cannot bind: no edge. `Protocol.__init__`'s `hashlib.md5`
 digest has `_hashlib.HASH.digest`, `_hashlib._OneShotHash.digest` (PyPy
-3.11), `_md5.MD5Type.digest` (CPython) and `_md5.md5.digest` (PyPy). Precedents:
+3.11), `_md5.MD5Type.digest` (CPython) and `hashlib.md5.digest` (PyPy's
+class `_md5.md5` by its public alias; Corrections of 2026-11-25). Precedents:
 markdown2 J13, path J6, pymysql J2.
 
 **J6. The default validator.** `PrimitiveSchema.validate` looks the type
@@ -428,11 +437,11 @@ lead (J1 confirmed), Q2 by the referee (b8-ruling-avro-1, J8).
 | | Count |
 |---|---|
 | Sites | 3231 (1669 call, 103 decorator, 10 with, 106 iter, 216 op, 270 getitem, 44 setitem, 2 delitem, 651 getattr, 16 setattr, 144 format); 2329 with candidates; 18 value sites |
-| Ledger entries | 2152 (2386 callee lines, 446 rejection lines of which 419 `reject *`, 340 notes, no exclusion) |
+| Ledger entries | 2152 (2395 callee lines, 446 rejection lines of which 419 `reject *`, 340 notes, no exclusion) |
 | Nodes | 458 (19 modules, 439 functions) |
-| Edges | 1754: 1050 in the package, 704 outside |
-| Confirmed by the trace | 837 of 1754 (47.7%); the trace has 847 edges |
-| From reading only | 917 (inside 530, outside 387) |
+| Edges | 1763: 1050 in the package, 713 outside |
+| Confirmed by the trace | 837 of 1763 (47.5%); the trace has 847 edges |
+| From reading only | 926 (inside 530, outside 396) |
 | Rejected trace edges | 10 |
 | Functions that the tests run | 246 of 439 (the `load_tests` cases, the tether modules, `tool`, `__main__` and `ipc`'s transport do not run) |
 
@@ -440,4 +449,48 @@ lead (J1 confirmed), Q2 by the referee (b8-ruling-avro-1, J8).
 
 | Project | Trace edges | Rejected | Traced edges in the graph (inside / outside) | Added (inside / outside) | Graph edges (inside / outside) |
 | --- | --- | --- | --- | --- | --- |
-| avro | 847 | 10 | 837 (520 / 317) | 917 (530 / 387) | 1754 (1050 / 704) |
+| avro | 847 | 10 | 837 (520 / 317) | 926 (530 / 396) | 1763 (1050 / 713) |
+
+## Corrections of 2026-11-25
+
+The corrections' ruling on public aliases (the referee's
+`ruling-names-2.md`, adopted by the lead; README, "Rulings for the
+corrections of 2026-11-25") puts a direct public class alias first in each
+implementation, version and configuration where the attribute actually
+holds the receiver's class, also for an alias that exists only in some
+configurations; a factory is no class alias. Without such an alias,
+b8-ruling-c-type-names-1 still names the exported type attribute, then the
+type name. avro admits CPython 3.10 and later and PyPy 3.10 and 3.11
+("Versions, implementations and platforms"). Sources: the batch-8
+dependency set; `C10` is `cpython/3.10.22/`, `P10` and `P11` are
+`pypy/pypy3.10-v7.3.19/` and `pypy/pypy3.11-v7.3.23/`.
+
+`Schema.fingerprint`, `schema.py:338:24` `h.digest()`, where `h` is
+`hashlib.new(algorithm, ...)` (337):
+
+| Edge | Change | Evidence |
+|---|---|---|
+| `hashlib.blake2b.digest`, `hashlib.blake2s.digest` | added; `_blake2.blake2b.digest` and `_blake2.blake2s.digest` removed | hashlib never takes BLAKE2 from OpenSSL (`__block_openssl_constructor`, `C10/Lib/hashlib.py:78-80`, `:126-129`; `P10` `:79-81`) and binds the builtin classes to the public names (`C10` `:102-105`, `:257-261`, the same lines through 3.14.10, 3.15.2 `:109`; `P10` `:105`, `P11` `:104`); the types are the classes `_blake2` exports (`C10/Modules/_blake2/blake2module.c:85`, `:107`; `P10/lib_pypy/_blake2/__init__.py:163`, `:166`, `P11` `:166`, `:169`). The alias holds the class on every admitted runtime, so no private name is left |
+| `hashlib.sha3_224.digest` to `hashlib.sha3_512.digest` | added | where OpenSSL lacks SHA-3 the fallback binds the builtin classes to the public names (`C10/Lib/hashlib.py:106-111`, `:130-141`, `:257-261`; `P10` `:109`, `P11` `:108`); the classes are `_sha3`'s (`C10/Modules/_sha3/sha3module.c:775-778`; `P10/lib_pypy/_sha3/__init__.py:100`, `:105`, `:110`, `:115`) |
+| `hashlib.md5.digest`, `hashlib.sha224.digest`, `hashlib.sha256.digest`, `hashlib.sha384.digest`, `hashlib.sha512.digest` | added | PyPy's fallback binds its classes to the public names (`P10/lib-python/3/hashlib.py:94`, `:97`, `:98`, `:101`, `:102`; `P11` `:93`, `:96`, `:97`, `:100`, `:101`); the classes: `P10/pypy/module/_md5/moduledef.py:22`, `P10/lib_pypy/_sha256.py:218`, `:242`, `_sha512.py:245`, `:269`. On CPython these attributes hold factories, so the exported-type names stay |
+
+The private names stay beside the aliases at this site: `_md5.md5`,
+`_sha256.sha224`, `_sha256.sha256`, `_sha512.sha384`, `_sha512.sha512`
+(PyPy) and `_sha3.sha3_*` (CPython and PyPy). `hashlib.new` probes and
+builds with the security-default setting, while the attribute's OpenSSL
+constructor is chosen by a probe with `usedforsecurity=False`
+(`C10/Lib/hashlib.py:126-141`, `:152-166`; `Modules/_hashopenssl.c:331`),
+so a builtin object can come without the public attribute holding its
+class; the referee left this open, and the lead decided that the private
+names stay, since no source excludes that configuration. `_sha512.sha384`
+also stays for CPython 3.10 and 3.11 (b8-ruling-c-type-names-1).
+
+`Protocol.__init__`, `protocol.py:108:59` `hashlib.md5(...).digest()`:
+`_md5.md5.digest` becomes `hashlib.md5.digest`. A direct named constructor
+makes no separate builtin fallback (ruling-names-2), so on PyPy the
+fallback object always comes with `hashlib.md5` holding its class (the
+evidence above). `_md5.MD5Type.digest` (CPython) and the OpenSSL names
+stay.
+
+Eleven graph edges added, two removed and one renamed (all outside):
+1763 edges, 1050 in the package, 713 outside.
