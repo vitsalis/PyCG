@@ -1,9 +1,3 @@
-"""Attribute loads and stores, and the names of externals.
-
-`Attributes` is part of `Analysis` (see semantics.py), whose objects, nodes
-and constraints it uses.
-"""
-
 from .builtin_models import PROPERTY_ACCESSORS
 from .hierarchy import EXPLICIT
 from .model import (
@@ -26,36 +20,13 @@ from .model import (
 )
 from .solver import Constraint, Each
 
-# An attribute load extends an external name by one step, up to this many
-# steps past the root of the name, and never with an attribute that is already
-# among those steps; so a loop such as `x = x.parent` adds one name. An
-# element of an external is that external, and the result of calling one
-# without stubs has no name, so no name grows past its root by more than these
-# steps, but for one more step that names a member of a stubbed outside base
-# (`base_member_external`).
-MAX_EXTERNAL_STEPS = 2
+EXTERNAL_STEPS_PAST_ROOT_MAX = 2
 
-# The descriptor methods that an access calls: an analysed class's, and the
-# bound method of an outside base that the stubs describe, which runs by its
-# stub (the builtin `property`'s by its rule); a plain external, an outside
-# base without stubs, is not called. Where an outside base resolves `__get__`
-# (`property` aside), the instance is also the value of a load (see
-# `Hierarchy.descriptor_itself`).
 ANALYSED_METHODS = (Function, BoundMethod, Instance, Wrapper, Class)
 
 
 class Attributes:
     def _descriptor(self, obj, receiver, method, hook, access):
-        """Run the descriptor `obj`, found on the class of the instance
-        `receiver`, for `access`, which calls its `method` (`__get__`,
-        `__set__` or `__delete__`); return whether `obj` is one. A property
-        is: it calls its accessor (`fget`...) with the instance. So is an
-        instance: it calls the method that its class resolves with the
-        instance (and the class, for `__get__`; see `ANALYSED_METHODS`); a
-        load also gets the instance itself where no class resolves
-        `__get__` or an outside one other than `property` does (see
-        `descriptor_itself`). The accessor runs from `hook` (see
-        `_call_accessor`)."""
         if isinstance(obj, Wrapper) and obj.kind == "property":
             accessor = self.field(obj, PROPERTY_ACCESSORS[method])
             self._call_accessor(accessor, receiver, (receiver,), hook, access)
@@ -74,12 +45,6 @@ class Attributes:
         self.add_object(dst, obj)
 
     def _class_attribute(self, obj, cls, load):
-        """Add `obj`, found on `cls` by a load through the class, to the
-        result of `load`. An instance whose class defines `__get__` calls
-        it with None and `cls` instead, from the scope of the load (see
-        `_descriptor`); a property loaded through its class is itself; a
-        `Fallback` (the `__getattr__` of the metaclass) is called with the
-        attribute name."""
         if isinstance(obj, Fallback):
             self.call(obj.method, load.named_call())
             return
@@ -96,20 +61,10 @@ class Attributes:
         self.solver.attach(found, each)
 
     def _class_get(self, method, call):
-        """Call the `__get__` method `method` with `call`, but property's
-        own: with None for the instance, it gives the property, as
-        `_itself` does."""
         if not (isinstance(method, BoundMethod) and _is_property_method(method)):
             self.call(method, call)
 
     def _call_accessor(self, accessor, receiver, prefix, hook, access, kinds=None):
-        """Call the accessors in the node `accessor` (of the `kinds`, if
-        given) with the arguments `prefix` before those of `access`, made
-        through the instance `receiver`. Python's own attribute `hook` calls
-        them from the scope of the access, where it may run (see
-        `python_method`); a hook that the class defines is their caller,
-        whatever its body does. `hook` is None for a `super()` load, which
-        no hook of the class runs."""
         if hook is None:
             self._accessor_from(None, accessor, prefix, access, kinds)
             return
@@ -127,10 +82,6 @@ class Attributes:
         self.solver.attach(found, from_access)
 
     def _accessor_from(self, hook, accessor, prefix, access, kinds):
-        """Call the accessors in `accessor` for `access` from the function
-        of the hook object `hook` (a function or a method of one), or else
-        from the scope of the access: an external hook
-        (`object.__setattr__`) is Python's own."""
         function = hook.function if isinstance(hook, BoundMethod) else hook
         caller = function.name if isinstance(function, Function) else None
         call = access.accessor_call(caller)
@@ -140,11 +91,6 @@ class Attributes:
         self.solver.attach(accessor, accessors)
 
     def _module_getattr(self, function, module, attr, load):
-        """A load of the name `attr`, which `module` does not bind, calls the
-        module's `__getattr__` with the name (PEP 562), implicitly from the
-        scope of the load, and gets its result. The objects of the field
-        arrive during the solve, when every module is built and linked, so
-        `defines` is complete."""
         if attr in module.defines:
             return
         name = self.constant(self.const(attr))
@@ -153,10 +99,6 @@ class Attributes:
         self.call(function, call)
 
     def add_name_lookup(self, base, attr, dst):
-        """dst ⊇ base.attr as a name that nothing evaluates (in a string
-        annotation): what a module binds, what a class defines in its MROs
-        (not a metaclass's `__getattr__`, and a descriptor is not run), and
-        the name of an outside object. No hook runs, so no call is made."""
         self.solver.attach(base, Each(self._name_lookup, attr, dst, results=(dst,)))
 
     def _name_lookup(self, obj, attr, dst):
@@ -192,11 +134,8 @@ class Attributes:
                     self.add_namespace(obj, dst)
             case Instance():
                 self.read_field(obj, attr, dst)
-                # The class side of the load, once the class may answer.
                 cls = obj.cls
                 self.later(cls, attr, obj, None, EXPLICIT, self._deliver_load, load)
-                # The call of the hook is one per site, shared by every
-                # receiver: it is made at once (see `_Access.hook_call`).
                 hook, call = "__getattribute__", load.hook_call(dst)
                 self.later(cls, hook, obj, None, (), self._call_hook, hook, call)
             case External():
@@ -210,7 +149,6 @@ class Attributes:
             case Const() | Pattern():
                 self.load_builtin_attribute(obj, obj.type_name, attr, dst)
             case Coroutine():
-                # A method of the coroutine type, named by its public path.
                 self.add_object(dst, self.external(f"types.CoroutineType.{attr}", 2))
             case Super():
                 receiver = obj.receiver
@@ -221,24 +159,16 @@ class Attributes:
                 else:
                     each = Each(self._class_attribute, owner, load, results=(dst,))
                     self.solver.attach(found, each)
-                    # The class may also be an instance of the class of
-                    # `super()` (in a method of its metaclass).
                     through = Each(
                         self._super_metaclass, obj, load, kinds=(Class,), results=(dst,)
                     )
                     self.solver.attach(receiver.metaclass, through)
 
     def _super_metaclass(self, meta, sup, load):
-        """`super(C, cls)` where the class `cls` is an instance of C: look
-        in the MROs of its metaclass `meta` after C, bound to `cls`."""
         found = self.lookup(meta, load.attr, sup.receiver, sup.cls, EXPLICIT)
         self.add_edge(found, load.dst)
 
     def store(self, obj, attr, src, store):
-        """`obj.attr = src`. An instance also calls its class's
-        `__setattr__`, and the setter of a property that its class defines.
-        The instance's field gets `src` either way."""
-        # What the code stores on an external is not tracked.
         if isinstance(obj, (Module, Function, Class, Instance)):
             self.add_edge(src, self.field(obj, attr))
         if isinstance(obj, (Class, Instance)):
@@ -261,29 +191,18 @@ class Attributes:
         self.solver.attach(found, Each(self._deliver_store, obj, store))
 
     def deliver(self, obj, receiver, load, hook):
-        """Add `obj`, found on the class of the instance `receiver`, to the
-        result of `load`. A descriptor runs `__get__` instead, through `hook`
-        (see `_descriptor`), and a `Fallback` calls `__getattr__` with the
-        attribute name."""
         if isinstance(obj, Fallback):
             self.call(obj.method, load.named_call())
         elif not self._descriptor(obj, receiver, "__get__", hook, load):
             self.add_object(load.dst, obj)
 
     def delete(self, obj, attr, delete):
-        """`del obj.attr`: an instance calls its class's `__delattr__`, and
-        the deleter of a property that its class defines."""
         if isinstance(obj, Instance):
             found = self.lookup(obj.cls, attr, obj)
             self.solver.attach(found, Each(self._deliver_delete, obj, delete))
             self._call_hook(obj, "__delattr__", delete.hook_call(None))
 
     def _call_hook(self, instance, hook, call):
-        """Call the attribute hook `hook` that an analysed class of
-        `instance` defines, with `call`, the hook call of an access (see
-        `_Access.hook_call`). An external class's hook is Python's, whose
-        loads, stores and deletions the analysis models itself; its result
-        is not an external."""
         found = self.lookup(instance.cls, hook, instance)
         each = Each(self._call_analysed_hook, call, results=(call.dst,))
         self.solver.attach(found, each)
@@ -296,27 +215,16 @@ class Attributes:
         self._descriptor(obj, receiver, "__delete__", "__delattr__", delete)
 
     def _deliver_store(self, obj, receiver, store):
-        """Run `__set__` of `obj`, found on the class of the instance
-        `receiver`, if it is a descriptor (see `store`)."""
         self._descriptor(obj, receiver, "__set__", "__setattr__", store)
 
     def add_external_module(self, name):
-        """Record that the code imports the external module `name`.
-
-        `import a.b.c` binds `a`; reaching `a.b` or `a.b.c` by attribute
-        then gives a module, which is a root like any import.
-        """
         parts = name.split(".")
         for end in range(2, len(parts) + 1):
             self._external_modules.add(".".join(parts[:end]))
 
     def external_attribute(self, external, attr, dst):
-        """dst ⊇ external.attr, within the bound of external names; past it,
-        the external without a name. Every external that is not a root is
-        made here. What the stubs describe gives what they say (see
-        outside.py)."""
         bounded = (
-            external.steps < MAX_EXTERNAL_STEPS
+            external.steps < EXTERNAL_STEPS_PAST_ROOT_MAX
             and attr not in external.steps_past_root()
         )
         definitions = self.stub_definitions(external)
@@ -328,25 +236,18 @@ class Attributes:
             self.add_object(dst, self.unknown_external)
 
     def base_member_external(self, base, attr):
-        """The outside name of the member `attr` that a lookup through an
-        analysed class finds in its outside base `base`, which the stubs
-        describe: one step past the base, which may pass the bound by one
-        (a stub class has finitely many members). A base past the bound, a
-        member class of such a base, names no member."""
-        if base.steps > MAX_EXTERNAL_STEPS:
+        if base.steps > EXTERNAL_STEPS_PAST_ROOT_MAX:
             return self.unknown_external
         return self.external(f"{base.name}.{attr}", base.steps + 1)
 
     def _add_external_attribute(self, external, attr, dst, steps):
         name = f"{external.name}.{attr}"
-        # A submodule of an imported module, and a builtin, are roots.
         if name in self._external_modules or external.name == BUILTIN_MODULE:
             steps = 0
         self.add_object(dst, self.external(name, steps))
 
 
 def _is_property_method(method):
-    """Whether the bound method `method` is a method of `property`."""
     function = method.function
     return isinstance(function, External) and function.name.startswith(
         f"{BUILTIN_MODULE}.property."
@@ -354,8 +255,6 @@ def _is_property_method(method):
 
 
 class _Access(Constraint):
-    """An attribute load, store or deletion in the scope named `caller`."""
-
     __slots__ = (
         "analysis",
         "attr",
@@ -376,7 +275,6 @@ class _Access(Constraint):
         self._hook_calls = {}
 
     def named_call(self):
-        """The implicit call of `__getattr__` with the attribute name."""
         if self._named_call is None:
             name = self.analysis.constant(self.analysis.const(self.attr))
             role = ("getattr", type(self).__name__, self.attr)
@@ -386,9 +284,6 @@ class _Access(Constraint):
         return self._named_call
 
     def hook_call(self, dst):
-        """The implicit call of an attribute hook with the attribute name
-        and the other arguments (`__setattr__(name, value)`), whose result
-        goes to `dst`."""
         if dst not in self._hook_calls:
             name = self.analysis.constant(self.analysis.const(self.attr))
             role = ("hook", type(self).__name__, self.attr)
@@ -398,10 +293,6 @@ class _Access(Constraint):
         return self._hook_calls[dst]
 
     def accessor_call(self, caller):
-        """The implicit call of a descriptor's accessor that the access
-        runs, from the scope named `caller`, or from the scope of the access
-        if None, with the access's arguments; the instance (and the class,
-        for `__get__`) come before them (see `Attributes._descriptor`)."""
         if caller not in self._accessor_calls:
             self._accessor_calls[caller] = self.analysis.site_call(
                 self.caller if caller is None else caller,
@@ -464,10 +355,6 @@ class Delete(_Access):
 
 
 class _Deliver(Constraint):
-    """Adds the class attribute that a load through the instance `receiver`
-    found to the result of the load (see `Attributes.deliver` for
-    `hook`)."""
-
     __slots__ = ("analysis", "receiver", "load", "hook")
 
     def __init__(self, analysis, receiver, load, hook):

@@ -150,10 +150,12 @@ class Program:
             )
             self.modules[name].status = "partial"
             self.modules[name].cause = _cause(error)
-        self._star_imported_modules_by_importer[name] = builder.star_imports
+        self._star_imported_modules_by_importer[name] = builder.star_imported_modules
         declared = _declared_all_names(tree)
         if declared is None:
-            public = [n for n in builder.defined if not n.startswith("_")]
+            public = [
+                n for n in builder.names_bound_at_run_time if not n.startswith("_")
+            ]
             self._exports_by_module[name] = dict.fromkeys(public)
         else:
             self._exports_by_module[name] = dict.fromkeys(declared)
