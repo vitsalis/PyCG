@@ -2869,6 +2869,21 @@ missed. The `__name__` of an analysed function is a str constant, the name of
 its `def` (`<lambda>` for a lambda), so `getattr(obj, f.__name__)` loads the
 attribute of that name; a name that the code stores there is one too.
 
+A load (`getattr`, `hasattr`) does not count against the bound the names
+that the body of an analysed class binds, when the code reads that class's
+namespace by its name (`C.__dict__` or `vars(C)`, `C` a name that resolves
+to the binding of the class statement): those names are what such a loop
+over the namespace holds. The names are fixed before the solve, from the
+source, so the count still grows only as the name node grows.
+
+- Limit: the exemption follows the name, not where it comes from: once the
+  code reads `C.__dict__`, a load by a name that holds five names of `C`
+  loads them all, whatever produced them
+  (`test_limit_a_read_namespace_exempts_its_names_from_any_origin`).
+- Limit: a namespace read through any other expression (`type(self).__dict__`,
+  `self.__class__.__dict__`, `module.C.__dict__`) exempts nothing, and a
+  store or a deletion counts every name.
+
 A str that the code builds from a constant part and another value is a
 `Pattern` of its constant prefix and suffix (`patterns.py`): `"visit_" +
 kind`, `"visit_%s" % kind`, `"visit_{}".format(kind)`, `f"visit_{kind}"`,
@@ -4275,7 +4290,7 @@ closure of the standard library. The document records it (`tool.cap`).
 
 | Bound | Value | Why | Past it |
 |---|---|---|---|
-| Names that a computed attribute name may hold (`getattr`, `hasattr`, `setattr`, `delattr`; `DYNAMIC_NAMES_MAX`) | 4 str constants | Precision and cost: a name that may be any of many strings would load every name in the program | The access is dynamic and gets no more names (see *Computed attribute names*) |
+| Names that a computed attribute name may hold (`getattr`, `hasattr`, `setattr`, `delattr`; `DYNAMIC_NAMES_MAX`) | 4 str constants, besides, for a load, the names of a class whose namespace the code reads by name | Precision and cost: a name that may be any of many strings would load every name in the program | The access is dynamic and gets no more names (see *Computed attribute names*) |
 | Alternative MROs of a class (`HIERARCHIES_PER_CLASS_MAX`) | 8 | Cost: the hierarchies are the product of the candidates of each base expression | One exhaustive order stands for all of them and finds every definition (see *Alternative hierarchies*) |
 | Steps of an outside name past its root (`EXTERNAL_STEPS_PAST_ROOT_MAX`) | 2; 3 for a member found in a stubbed outside base | Termination and precision: loads on generic values would make names without end, which no code calls; a stub class has finitely many members. Only attribute loads extend a name: the result of a call of code without stubs has none | One external without a name (see *External names*) |
 | Receivers that a call passes before its arguments (`RECEIVERS_PER_CALL_MAX`) | 3 | Termination: callables that pass receivers on add one at each step (`C.__new__ = D`, `D.__new__ = C`) | The outermost receivers are dropped (see *Termination*) |

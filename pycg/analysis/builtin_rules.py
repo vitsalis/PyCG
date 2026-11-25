@@ -528,7 +528,10 @@ class BuiltinRules:
                 for name in self.solver.objects(access.name)
                 if isinstance(name, Const) and isinstance(name.value, str)
             )
-            if len(names) > DYNAMIC_NAMES_MAX:
+            counted = names
+            if access.src is None and not access.delete:
+                counted = [n for n in names if n not in self._namespace_names_read]
+            if len(counted) > DYNAMIC_NAMES_MAX:
                 access.dynamic = True
                 continue
             for name in names:
