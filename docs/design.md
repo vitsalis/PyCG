@@ -2637,7 +2637,10 @@ metaclasses after the starting class.
 class whose metaclass is `C` or derives from it, or `C` or a subclass of
 it (the instances of `C` and the family of `C`, which only grow as bases
 and metaclasses arrive). For any other receiver Python raises
-`TypeError`, so there is no object. A second argument that is neither an
+`TypeError`, so there is no object. A first argument that is an outside
+class (`super(dict, self)` in a subclass of `dict`) gives `Super(C, r)`
+for each receiver `r` whose class has `C` in some MRO, so the lookup
+starts after that outside base. A second argument that is neither an
 instance nor a class of the analysed code (an outside value, a typed
 value, a constant) gives no object, as before. `super()` without
 arguments takes the class around it and its first parameter, and pairs

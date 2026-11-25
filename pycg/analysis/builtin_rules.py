@@ -557,6 +557,10 @@ class BuiltinRules:
         self.solver.attach(cls, each)
 
     def _super_class(self, cls, obj, call, explicit):
+        if isinstance(cls, External) and explicit:
+            each = Each(self._super_after_outside, cls, call.dst, results=(call.dst,))
+            self.solver.attach(obj, each)
+            return
         if not isinstance(cls, Class):
             return
         if explicit:
@@ -564,6 +568,11 @@ class BuiltinRules:
         else:
             each = Each(self._super_object, cls, call.dst, results=(call.dst,))
             self.solver.attach(obj, each)
+
+    def _super_after_outside(self, obj, cls, dst):
+        owner = obj.cls if isinstance(obj, Instance) else obj
+        if isinstance(owner, Class) and any(cls in mro for mro in owner.mros):
+            self.add_object(dst, self.super_object(cls, obj))
 
     def _super_object(self, obj, cls, dst):
         if isinstance(obj, (Instance, Class)):
