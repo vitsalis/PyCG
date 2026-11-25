@@ -43,6 +43,7 @@ class Scope:
         "star_import",
         "dynamic",
         "imports",
+        "functions",
         "reads",
     )
 
@@ -69,6 +70,7 @@ class Scope:
         self.star_import = False
         self.dynamic = False
         self.imports = {}
+        self.functions = {}
         self.reads = set()
 
     def __repr__(self):
@@ -120,6 +122,11 @@ class ModuleScopes:
         if name in scope.shared or scope.star_import or scope.dynamic:
             return None
         return scope.imports.get(name)
+
+    def function_definition(self, scope, name):
+        if name in scope.shared or scope.star_import or scope.dynamic:
+            return None
+        return scope.functions.get(name)
 
     def inline(self, reader, binder):
         key = (reader, binder)
@@ -300,8 +307,8 @@ class _Collector:
         self.scope_of_node[node] = scope
         return scope
 
-    def _bind(self, scope, name, unbinds=False, imported=None):
-        _bind(scope, name, imported=imported)
+    def _bind(self, scope, name, unbinds=False, imported=None, function=None):
+        _bind(scope, name, imported=imported, function=function)
         name = scope.mangle(name)
         for loop in self._loops:
             names = self.loop_bindings_by_node[loop]
@@ -319,7 +326,8 @@ class _Collector:
         return arguments.defaults + [d for d in arguments.kw_defaults if d is not None]
 
     def _visit_FunctionDef(self, node, scope):
-        self._bind(scope, node.name)
+        plain = None if node.decorator_list or scope.kind == CLASS else node
+        self._bind(scope, node.name, function=plain)
         function = self._new_scope(FUNCTION, node, scope, node.name)
         self._bind_parameters(node.args, function)
         self._push(node.decorator_list + self._defaults(node.args), scope)
@@ -483,11 +491,14 @@ class _Collector:
         self._bind(scope, node.name.id)
 
 
-def _bind(scope, name, parameter=False, imported=None):
+def _bind(scope, name, parameter=False, imported=None, function=None):
     name = scope.mangle(name)
     if scope.imports.get(name, imported) != imported:
         imported = None
     scope.imports[name] = imported
+    if scope.functions.get(name, function) is not function:
+        function = None
+    scope.functions[name] = function
     scope.bound.setdefault(name, None)
     scope.defined.setdefault(name, None)
     if not parameter:

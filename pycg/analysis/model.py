@@ -87,6 +87,20 @@ class Signature:
             or name in self.keyword_only
         )
 
+    def binds(self, given, keywords, optional):
+        if given > len(self.positional) and self.vararg is None:
+            return False
+        filled = set(self.positional[:given])
+        for name in keywords:
+            if self.accepts_keyword(name):
+                if name in filled:
+                    return False
+                filled.add(name)
+            elif self.kwarg is None:
+                return False
+        required = (*self.positional, *self.keyword_only)
+        return all(name in filled for name in required if name not in optional)
+
 
 class Function(Object):
     __slots__ = (

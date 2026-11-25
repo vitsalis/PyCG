@@ -1296,6 +1296,18 @@ function defined there is not a node), and its imports import nothing.
   one, what follows it and its `else` block cannot run.
 - The message of an `assert` runs only where the test may be false; an
   `assert` whose test is always false ends the path.
+- A statement whose expression, or the value that it assigns, is a call
+  that cannot bind its arguments (see *A call that cannot bind its
+  arguments gives no edge*) ends the path: Python raises `TypeError`
+  there. This is decided while building, so only where the callee is
+  known from the syntax: a name whose one binding in its scope is a `def`
+  without decorators outside a class body
+  (`ModuleScopes.function_definition`), and a call without `*` or `**`
+  arguments (`warn(0, 13, msg)` for `def warn(major, minor, cause,
+  fix)`).
+
+  - Limit: a call nested in the statement's expression that cannot bind
+    (`print(warn(0))`) raises too, but ends no path.
 - The operands of `and`, `or` and conditional expressions are pruned the
   same way.
 - A module that the analysis does not otherwise bind `__name__` in, and
