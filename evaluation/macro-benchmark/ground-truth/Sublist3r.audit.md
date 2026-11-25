@@ -220,3 +220,88 @@ Source, inputs and inventories were frozen before baseline comparison.
 No target, dependency, test, generated code, PyCG or network enumeration ran.
 There is no trace; all 457 edges remain from source reading. Root verification,
 independent final review and installation follow this handoff.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-sublist3r-hash` (9f14e75, PR #103) against `main`
+(2130a69): one outside edge added in `Sublist3r.json`,
+`Sublist3r.added.json`, `Sublist3r.ledger` and `Sublist3r.md`, and
+`evaluation/metrics.json` re-based; no other file changed. I read
+`sublist3r.py` from the inputs image; `Modules/sha1module.c`,
+`Lib/hashlib.py` and `Modules/_hashopenssl.c` of CPython 3.0.1, 3.1.5,
+3.2.6, 3.3.7, 3.4.10, 3.5.10 and 3.6.15, fetched in a container at the
+commits of their tags (4ca04b67f00edabe86072446f059adcb70eafcdd,
+c37a4fdf5472b9460cc38885342ef59bce05753f,
+439d88542ef77d5c867b8298e4c2c6be4a412a5e,
+17bf6b4671ec02d80ad29b278639d5307baddeb5,
+e76cbc781044ee01b059f3702c580e66266b84c5,
+426b022776672fdf3d71ddd98d89af341c88080f,
+b74b1f36993a4e1700869133f3be13dd60ef4e40; the writer's abbreviations
+match), with `Modules/_sre.c` of 3.0.1 and 3.6.15; and CPython 3.7.17 to
+3.15.2 from the dependency sources. Nothing ran; no PyCG output was read.
+
+| Site | Edge | Verdict | Evidence |
+|---|---|---|---|
+| `sublist3r.py:554:127` `hashlib.sha1(...).hexdigest()` | `NetcraftEnum.get_cookies -> _sha1.SHA1Type.hexdigest` | agree | `hashlib`'s builtin fallback is the factory `_sha1.sha1` (3.0.1 `Lib/hashlib.py:59-60`, 3.3.7 `:69-70`, 3.4.10 `:75-76`, 3.6.15 `:80-81`); its objects have `tp_name` `"_sha1.sha1"`. `_sha1` exports the type as `SHA1Type` from 3.4: 3.4.10 `sha1module.c:558`, 3.5.10 and 3.6.15 `:560`, and the lines cited for 3.7.17 to 3.15.2 (checked in the bottle audit of the same day) |
+| same site | `-> _sha1.sha1.hexdigest` kept | agree | CPython 3.0.1, 3.1.5, 3.2.6 and 3.3.7 return `PyModule_Create(&_sha1module)` with no attribute for the type (`sha1module.c:554`, `559`, `559`, `554`; `tp_name` at `:451`, `451`, `451`, `446`), so the type name is the fallback; one name per runtime |
+| same site | `-> _hashlib.HASH.hexdigest` kept | agree | `_hashlib` exports `HASH` on every Python 3 read (3.0.1 `_hashopenssl.c:550` to 3.6.15 `:1059`; `PyModule_AddType` from 3.9) |
+
+Python 2.7 is named for Python 3 (judgement 2), and no other
+implementation is admitted (judgement 1). Nothing missed under the ruling
+apart from the lock that the lead holds for the referee (`611`, `621`):
+`_sre.SRE_Pattern.findall` and `.match` are right for CPython 3.0 to 3.6,
+whose `_sre` sets only `MAGIC`, `CODESIZE` and `copyright` (3.6.15 also
+`MAXREPEAT` and `MAXGROUPS`) (3.0.1 `_sre.c:3916-3928`, 3.6.15 `:2940-2964`; type name
+`"_sre.SRE_Pattern"` at `:2622`, `:2757`), and `re.Pattern` is the public
+alias from 3.7; `io.TextIOWrapper`, `socket.socket` and the
+`multiprocessing` and `threading` classes are public paths.
+
+Counts. Callee lines 570 to 571, 458 edges (143 inside, 315 outside, to
+105 outside callees), no trace: as `check.py Sublist3r` reports, which
+passes with the source in place, as do `--origin` and `--report`.
+`gate.benchmark_digest()` on the branch gives
+`8fd786e5de753a84b83eee1c76591e74d35c317320f8a8f6e5b6726819e080bf`, the
+recorded digest. The `make eval` numbers and the macro outside R come
+from PyCG's output, which I did not read.
+
+**Verdict.** Closed: the edge stands, the kept names are right, and
+nothing is missed. No finding.
+
+### Addendum: the lock names of ruling-names-2
+
+The writer's second commit (748e2e7, local, message `wip`) applies the
+referee's `ruling-names-2.md` (README, "Rulings for the corrections of
+2026-11-25"): two outside edges added, none removed, in
+`Sublist3r.json`, `Sublist3r.added.json`, `Sublist3r.ledger` and
+`Sublist3r.md`. I read `threading.py` and `_threadmodule.c` of CPython
+3.0.1, 3.3.7 and 3.6.15 at the tag commits above, and of 3.7.17 and 3.12.16
+to 3.15.2 from the dependency sources.
+
+| Site | Edge | Verdict | Evidence |
+|---|---|---|---|
+| `sublist3r.py:611:26` `self.lock.acquire()` | `DNSdumpster.check_host -> threading.Lock.acquire` | agree | `DNSdumpster.__init__` sets a `BoundedSemaphore` (`602`), then `super().__init__` (`604`) runs `enumratorBaseThreaded.__init__`, which stores its default `lock=threading.Lock()` (`260`, `264`). On CPython 3.13.18 `Lib/threading.py` lists `Lock` (`:28`), binds `_LockType = _thread.LockType` (`:38`) and `Lock = _LockType` (`:120`); 3.14.10 `:38`, `:124`; 3.15.2 `:39`, `:125`: a public class alias that holds the receiver's class, which takes precedence there (ruling-names-2) |
+| `sublist3r.py:621:26` `self.lock.release()` | `DNSdumpster.check_host -> threading.Lock.release` | agree | the same receiver |
+| both sites | `_thread.LockType.acquire`, `.release` kept | agree | on CPython 3.0 to 3.12 `threading.Lock` is the factory `_allocate_lock` (3.0.1 `threading.py:80`, 3.3.7 `:68`, 3.6.15 `:72`, 3.7.17 `:73`, 3.12.16 `:122`), not a class alias, and `_thread` exports the type (`tp_name` `"_thread.lock"`) as `LockType` (3.0.1 `_threadmodule.c:740`, 3.3.7 `:1319`, 3.6.15 `:1395`, 3.7.17 `:1390`, 3.12.16 `:1675`); one name per runtime |
+
+Nothing missed: the package calls methods of a `threading.Lock` only at
+611 and 621 (the locks of `528`, `679`, `731`, `770` and `815` are never
+called, and `portscan`'s `858` and `869` use its `BoundedSemaphore`, `854`),
+and there is no `with` on a lock. The constructor call `threading.Lock`
+(`260:99`, `528:35`) keeps its name. `check.py Sublist3r`, `--origin` and
+`--report` pass on 748e2e7 with the source in place: 460 edges (143
+inside, 317 outside, to 107 outside callees), callee lines 573, notes 103,
+as `Sublist3r.md` states.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| B1 | `evaluation/metrics.json` is not re-based: its `benchmark_sha256` is still `8fd786e5…`, while the digest of 748e2e7 is `73497299b30c5eb228aa452b57d11dea11a8ccccd034f62b5b0ac3b6958edcaa` | `evaluation/metrics.json` | run `make eval-record` and record the change of the outside metrics in the commit message |
+| B2 | the commit message is `wip`: it states neither the ruling, the edges, the counts nor the measurement | 748e2e7 | write the message (or fold the commit into the branch's one commit) in the style of 9f14e75 |
+| B3 | one prose line of judgement 9 runs past 80 columns (``.release` (3.13 and later; Corrections of 2026-11-25). `portscan` keeps…``) | `Sublist3r.md`, judgement 9 | rewrap |
+
+**Verdict of the addendum.** The two edges stand and the kept names are
+right; B1 to B3 must be fixed before the merge, and no edge depends on
+them.
+
+B1 to B3 were applied before the merge: the lock commit is folded into the
+correction commit with a full message, `metrics.json` is re-recorded on
+main, and judgement 9 is rewrapped. The audit is closed.
