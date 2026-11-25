@@ -247,6 +247,7 @@ class Expressions:
         if none_keywords:
             self.analysis.none_keywords[self._caller, self._site(node)] = none_keywords
         result = self.analysis.node()
+        applies = isinstance(node.func, ast.Call) and len(args) == 1
         self.analysis.add_call(
             callee,
             self._caller,
@@ -256,6 +257,7 @@ class Expressions:
             self._site(node),
             star,
             double_star,
+            applies=applies and not (keywords or star or double_star),
         )
         return result
 
