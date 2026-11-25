@@ -1,0 +1,2567 @@
+# Call-site ledger of toolz at 451af60dec590a6010e2babdbf391ea8f815122f.
+# Hand-written from the source; judgements in toolz.md.
+default reject toolz.__getattr__: the module __getattr__ of toolz runs only when an attribute lookup on the module toolz fails; no receiver here is that module with a missing attribute
+default reject toolz.functoolz.Compose.__eq__: no Compose reaches this comparison or key lookup (B3: a package object where any value is accepted is not considered; the roles that admit a Compose are judgement J1)
+default reject toolz.functoolz.Compose.__hash__: no Compose is hashed here (B3; the roles that admit a Compose are judgement J1)
+default reject toolz.functoolz.curry.__eq__: no curry reaches this comparison or key lookup (B3; the roles that admit a curry are judgement J1)
+default reject toolz.functoolz.curry.__hash__: no curry is hashed here (B3; the roles that admit a curry are judgement J1)
+default reject toolz.sandbox.core.EqualityHashKey.__eq__: no EqualityHashKey reaches this comparison or key lookup (B3; EqualityHashKey keys reach only unique's key role and the methods of the class)
+default reject toolz.sandbox.core.EqualityHashKey.__hash__: no EqualityHashKey is hashed here (B3; EqualityHashKey keys reach only unique's key role)
+
+== tlz._build_tlz
+
+[tlz._build_tlz]
+91:23 call  TlzLoader()
+    -> tlz._build_tlz.TlzLoader.__init__
+92:21 call  sys.meta_path.append(tlz_loader)
+    -> <builtin>.list.append
+    note: sys.meta_path is a list; the import system consults the appended finder at later imports, whose callbacks belong to the import_module calls of TlzLoader (J9)
+93:23 call  tlz_loader.exec_module(sys.modules['tlz'])
+    -> tlz._build_tlz.TlzLoader.exec_module
+
+[tlz._build_tlz.TlzLoader._load_toolz]
+18:54 call  fullname.partition('.')
+    -> <builtin>.str.partition
+    reject toolz.itertoolz.partition: fullname is the str name of a module; this is str.partition
+    note: fullname is the module name (a str) that the import system or exec_module passes
+20:34 call  ''.join(['cytoolz', dot, submodules])
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal ''
+21:42 call  import_module(module_name)
+    -> importlib.import_module
+    -> tlz._build_tlz.TlzLoader.find_spec
+    note: cytoolz is optional and not a dependency; both outcomes of the import run (J9). The import system asks every finder of sys.meta_path for cytoolz (or a submodule of it) when no earlier finder finds it, so the appended TlzLoader.find_spec is called back (it returns None for a name outside tlz)
+25:34 call  ''.join(['toolz', dot, submodules])
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal ''
+26:40 call  import_module(module_name)
+    -> importlib.import_module
+    -> tlz._build_tlz.TlzLoader.find_spec
+    note: a toolz submodule that the path finder does not find (test_tlz imports tlz.badsubmodulename) reaches the appended TlzLoader.find_spec, which returns None (J9)
+30:30 call  ImportError(fullname)
+    -> <builtin>.ImportError
+
+[tlz._build_tlz.TlzLoader.find_module]
+34:54 call  fullname.partition('.')
+    -> <builtin>.str.partition
+    reject toolz.itertoolz.partition: fullname is the str name of a module; this is str.partition
+    note: find_module is never called by the import system (TlzLoader has find_spec); as an uncalled method its fullname is a module name, a str
+
+[tlz._build_tlz.TlzLoader.load_module]
+41:26 call  ModuleSpec(fullname, self)
+    -> importlib.machinery.ModuleSpec
+42:36 call  self.create_module(spec)
+    -> tlz._build_tlz.TlzLoader.create_module
+44:25 call  self.exec_module(module)
+    -> tlz._build_tlz.TlzLoader.exec_module
+
+[tlz._build_tlz.TlzLoader.find_spec]
+48:54 call  fullname.partition('.')
+    -> <builtin>.str.partition
+    reject toolz.itertoolz.partition: fullname is the str name of a module; this is str.partition
+    note: the import system passes the module name, a str
+50:30 call  ModuleSpec(fullname, self)
+    -> importlib.machinery.ModuleSpec
+
+[tlz._build_tlz.TlzLoader.create_module]
+53:32 call  types.ModuleType(spec.name)
+    -> types.ModuleType
+
+[tlz._build_tlz.TlzLoader.exec_module]
+56:38 call  self._load_toolz(module.__name__)
+    -> tlz._build_tlz.TlzLoader._load_toolz
+    reject toolz.functoolz.Compose.__name__, toolz.functoolz.excepts.__name__: module is a module object (sys.modules['tlz'] or one that create_module made); its __name__ is a str in its namespace
+56:46 getattr  module.__name__
+    reject *: module is a module object; __name__ is a str in its namespace
+57:34 call  toolz_mods.get('cytoolz')
+    -> <builtin>.dict.get
+    reject toolz.itertoolz.get: toolz_mods is the dict that _load_toolz returns; this is dict.get
+    note: _load_toolz returns the dict rv
+58:34 call  toolz_mods.get('toolz')
+    -> <builtin>.dict.get
+    reject toolz.itertoolz.get: toolz_mods is the dict that _load_toolz returns; this is dict.get
+    note: _load_toolz returns the dict rv
+59:31 call  module.__dict__.update(toolz.merge(fast_mod.__dict__, mod...
+    -> <builtin>.dict.update
+59:43 call  toolz.merge(fast_mod.__dict__, module.__dict__)
+    -> toolz.dicttoolz.merge
+    reject toolz.curried.exceptions.merge: toolz.merge is toolz.dicttoolz.merge (toolz/__init__.py imports dicttoolz with *); the curried merge lives in toolz.curried
+62:57 call  package.partition('.')
+    -> <builtin>.str.partition
+    reject toolz.itertoolz.partition: package is the __package__ of a module, a str; this is str.partition
+    note: package is fast_mod.__package__, tested against None before
+63:41 call  ''.join(['tlz', dot, submodules])
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal ''
+64:23 getattr  module.__doc__
+    reject *: module is a module object; __doc__ is an entry of its namespace, not a descriptor of a package class
+65:39 getattr  fast_mod.__doc__
+    reject *: fast_mod is a module (of toolz or cytoolz); __doc__ is an entry of its namespace
+73:44 call  fast_mod.__dict__.items()
+    -> <builtin>.dict.items
+74:39 call  slow_mod.__dict__.get(k)
+    -> <builtin>.dict.get
+    reject toolz.itertoolz.get: the receiver is the __dict__ of a module, a dict; this is dict.get
+    note: slow_mod is a module; its __dict__ is a dict
+76:21 call  hash(tv)
+    -> <builtin>.hash
+    -> toolz.functoolz.curry.__hash__
+    note: tv is a value of the namespace of a toolz module: functions, classes, modules, and curries (toolz.flip, toolz.memoize, the toolz.curried names, toolz.curried.exceptions.merge and merge_with, the curried operator functions); hash calls curry.__hash__ on a curry. No Compose or EqualityHashKey is a value of a module namespace
+79:19 op  tv in self.always_from_toolz
+    -> toolz.functoolz.curry.__hash__
+    reject toolz.functoolz.curry.__eq__: the set holds only toolz.pipe, a function; a package curry of a module namespace has the hash of a tuple of package objects, which equals hash(toolz.pipe) for no program by its choice
+    note: tv is a namespace value (as at 76:21) or None; the set membership test hashes a curry
+82:27 call  isinstance(v, types.ModuleType)
+    -> <builtin>.isinstance
+83:47 getattr  fast_mod.__name__
+    reject *: fast_mod is a module; __name__ is a str in its namespace
+85:46 getattr  v.__name__
+    reject *: v is a module (the isinstance test above); __name__ is a str in its namespace
+85:64 call  v.__name__.partition('.')
+    -> <builtin>.str.partition
+    reject toolz.itertoolz.partition: the receiver is the str name of a module; this is str.partition
+    note: v is a module; its __name__ is a str
+86:38 call  ''.join(['tlz', dot, submodules])
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal ''
+87:42 call  import_module(module_name)
+    -> importlib.import_module
+    -> tlz._build_tlz.TlzLoader.find_spec
+    -> tlz._build_tlz.TlzLoader.create_module
+    -> tlz._build_tlz.TlzLoader.exec_module
+    note: importing a tlz submodule that is not yet in sys.modules makes the import system call the appended TlzLoader back: find_spec returns a ModuleSpec with this loader, then create_module and exec_module run (J9)
+
+== toolz
+
+[toolz]
+22:42 call  functoolz._sigs.create_signature_registry()
+    -> toolz._signatures.create_signature_registry
+
+[toolz.__getattr__]
+29:21 call  version("toolz")
+    -> importlib.metadata.version
+30:16 call  globals()
+    -> <builtin>.globals
+32:25 call  AttributeError(f"module {__name__!r} has no attribute {na...
+    -> <builtin>.AttributeError
+32:35 format  {__name__!r}
+    reject *: __name__ is the str name of the module
+32:65 format  {name!r}
+    reject *: name is the attribute name that the attribute lookup passes, a str
+
+== toolz._signatures
+
+[toolz._signatures]
+43:29 call  dict( abs=[ lambda x: None], all=[ lambda iterable: None]...
+    -> <builtin>.dict
+240:29 call  module_info[builtins].update( breakpoint=[ lambda *args, ...
+    -> <builtin>.dict.update
+268:30 call  dict( cmp_to_key=[ (0, lambda mycmp: None)], partial=[ la...
+    -> <builtin>.dict
+280:30 call  dict( accumulate=[ (0, lambda iterable, func=None: None)]...
+    -> <builtin>.dict
+335:29 call  dict( __abs__=[ lambda a: None], __add__=[ lambda a, b: N...
+    -> <builtin>.dict
+579:28 call  dict( curry=[ (0, lambda *args, **kwargs: None)], excepts...
+    -> <builtin>.dict
+592:38 call  dict( Compose=[ (0, lambda funcs: None)], InstancePropert...
+    -> <builtin>.dict
+
+[toolz._signatures.num_pos_args]
+603:15 call  sum(1 for x in sigspec.parameters.values() if x.kind == x...
+    -> <builtin>.sum
+603:52 call  sigspec.parameters.values()
+    -> types.MappingProxyType.values
+    note: sigspec is the inspect.Signature of a registry lambda (expand_sig); Signature.parameters is a mappingproxy
+
+[toolz._signatures.get_exclude_keywords]
+612:21 call  any(x.kind == x.VAR_KEYWORD for x in sigspec.parameters.v...
+    -> <builtin>.any
+613:56 call  sigspec.parameters.values()
+    -> types.MappingProxyType.values
+616:20 call  list(sigspec.parameters.values())
+    -> <builtin>.list
+616:46 call  sigspec.parameters.values()
+    -> types.MappingProxyType.values
+617:17 call  tuple(x.name for x in pos_args)
+    -> <builtin>.tuple
+
+[toolz._signatures.signature_or_spec]
+622:33 call  inspect.signature(func)
+    -> inspect.signature
+    note: func is a registry lambda (expand_sig) or the callable that a curry wraps (curry._should_curry: a package function, the class EqualityHashKey or excepts, a builtin or a client callable; curry.__init__ unwraps a curry, so it is never one). inspect.signature of a function, a lambda or one of these classes reads no package descriptor (excepts defines no __signature__); client callables are opaque
+
+[toolz._signatures.expand_sig]
+644:18 call  isinstance(sig, tuple)
+    -> <builtin>.isinstance
+645:15 call  len(sig)
+    -> <builtin>.len
+647:30 call  isinstance(sig[-1], tuple)
+    -> <builtin>.isinstance
+    note: an assert; -O removes it, and the graph is the union of both modes
+651:36 call  signature_or_spec(func)
+    -> toolz._signatures.signature_or_spec
+654:36 call  signature_or_spec(func)
+    -> toolz._signatures.signature_or_spec
+655:36 call  num_pos_args(sigspec)
+    -> toolz._signatures.num_pos_args
+657:43 call  get_exclude_keywords(num_pos_only, sigspec)
+    -> toolz._signatures.get_exclude_keywords
+
+[toolz._signatures.create_signature_registry]
+665:42 call  module_info.items()
+    -> <builtin>.dict.items
+666:22 call  isinstance(module, str)
+    -> <builtin>.isinstance
+667:35 call  import_module(module)
+    -> importlib.import_module
+668:37 call  info.items()
+    -> <builtin>.dict.items
+669:23 call  hasattr(module, name)
+    -> <builtin>.hasattr
+    note: module is builtins, functools, itertools, operator, toolz or toolz.functoolz; every name tested on toolz exists, so its module __getattr__ does not run
+670:33 call  tuple(expand_sig(sig) for sig in sigs)
+    -> <builtin>.tuple
+670:44 call  expand_sig(sig)
+    -> toolz._signatures.expand_sig
+671:27 setitem  signatures[getattr(module, name)]
+    -> toolz.functoolz.curry.__hash__
+    note: the keys are builtins, classes and functions of the stdlib modules, the classes curry, excepts, juxt, Compose and InstanceProperty, and the curries toolz.flip and toolz.memoize, whose hash is curry.__hash__; no two keys of one program are equal curries
+671:35 call  getattr(module, name)
+    -> <builtin>.getattr
+
+[toolz._signatures.check_valid]
+677:11 call  len(args)
+    -> <builtin>.len
+680:22 call  dict(kwargs)
+    -> <builtin>.dict
+682:23 call  kwargs.pop(item, None)
+    -> <builtin>.dict.pop
+684:13 call  func(*args, **kwargs)
+    -> toolz._signatures.<lambda2>
+    -> toolz._signatures.<lambda3>
+    -> toolz._signatures.<lambda4>
+    -> toolz._signatures.<lambda5>
+    -> toolz._signatures.<lambda9>
+    -> toolz._signatures.<lambda10>
+    -> toolz._signatures.<lambda11>
+    -> toolz._signatures.<lambda15>
+    -> toolz._signatures.<lambda16>
+    -> toolz._signatures.<lambda17>
+    -> toolz._signatures.<lambda18>
+    -> toolz._signatures.<lambda19>
+    -> toolz._signatures.<lambda20>
+    -> toolz._signatures.<lambda23>
+    -> toolz._signatures.<lambda24>
+    -> toolz._signatures.<lambda25>
+    -> toolz._signatures.<lambda26>
+    -> toolz._signatures.<lambda27>
+    -> toolz._signatures.<lambda28>
+    -> toolz._signatures.<lambda29>
+    -> toolz._signatures.<lambda30>
+    -> toolz._signatures.<lambda31>
+    -> toolz._signatures.<lambda32>
+    -> toolz._signatures.<lambda33>
+    -> toolz._signatures.<lambda38>
+    -> toolz._signatures.<lambda39>
+    -> toolz._signatures.<lambda40>
+    -> toolz._signatures.<lambda41>
+    -> toolz._signatures.<lambda42>
+    -> toolz._signatures.<lambda43>
+    -> toolz._signatures.<lambda44>
+    -> toolz._signatures.<lambda45>
+    -> toolz._signatures.<lambda46>
+    -> toolz._signatures.<lambda47>
+    -> toolz._signatures.<lambda48>
+    -> toolz._signatures.<lambda49>
+    -> toolz._signatures.<lambda50>
+    -> toolz._signatures.<lambda51>
+    -> toolz._signatures.<lambda52>
+    -> toolz._signatures.<lambda53>
+    -> toolz._signatures.<lambda54>
+    -> toolz._signatures.<lambda55>
+    -> toolz._signatures.<lambda56>
+    -> toolz._signatures.<lambda58>
+    -> toolz._signatures.<lambda59>
+    -> toolz._signatures.<lambda60>
+    -> toolz._signatures.<lambda61>
+    -> toolz._signatures.<lambda62>
+    -> toolz._signatures.<lambda63>
+    -> toolz._signatures.<lambda64>
+    -> toolz._signatures.<lambda65>
+    -> toolz._signatures.<lambda68>
+    -> toolz._signatures.<lambda69>
+    -> toolz._signatures.<lambda70>
+    -> toolz._signatures.<lambda71>
+    -> toolz._signatures.<lambda72>
+    -> toolz._signatures.<lambda73>
+    -> toolz._signatures.<lambda74>
+    -> toolz._signatures.<lambda75>
+    -> toolz._signatures.<lambda76>
+    -> toolz._signatures.<lambda77>
+    -> toolz._signatures.<lambda78>
+    -> toolz._signatures.<lambda79>
+    -> toolz._signatures.<lambda80>
+    -> toolz._signatures.<lambda86>
+    -> toolz._signatures.<lambda87>
+    -> toolz._signatures.<lambda88>
+    -> toolz._signatures.<lambda89>
+    -> toolz._signatures.<lambda90>
+    -> toolz._signatures.<lambda91>
+    -> toolz._signatures.<lambda92>
+    -> toolz._signatures.<lambda93>
+    -> toolz._signatures.<lambda94>
+    -> toolz._signatures.<lambda95>
+    -> toolz._signatures.<lambda96>
+    -> toolz._signatures.<lambda97>
+    -> toolz._signatures.<lambda98>
+    -> toolz._signatures.<lambda99>
+    -> toolz._signatures.<lambda100>
+    -> toolz._signatures.<lambda101>
+    -> toolz._signatures.<lambda102>
+    -> toolz._signatures.<lambda103>
+    -> toolz._signatures.<lambda107>
+    -> toolz._signatures.<lambda108>
+    -> toolz._signatures.<lambda112>
+    -> toolz._signatures.<lambda113>
+    -> toolz._signatures.<lambda114>
+    -> toolz._signatures.<lambda115>
+    -> toolz._signatures.<lambda116>
+    -> toolz._signatures.<lambda117>
+    -> toolz._signatures.<lambda118>
+    -> toolz._signatures.<lambda119>
+    -> toolz._signatures.<lambda120>
+    -> toolz._signatures.<lambda121>
+    -> toolz._signatures.<lambda122>
+    -> toolz._signatures.<lambda123>
+    -> toolz._signatures.<lambda124>
+    -> toolz._signatures.<lambda125>
+    -> toolz._signatures.<lambda126>
+    -> toolz._signatures.<lambda127>
+    -> toolz._signatures.<lambda128>
+    -> toolz._signatures.<lambda129>
+    -> toolz._signatures.<lambda130>
+    -> toolz._signatures.<lambda131>
+    -> toolz._signatures.<lambda132>
+    -> toolz._signatures.<lambda133>
+    -> toolz._signatures.<lambda134>
+    -> toolz._signatures.<lambda135>
+    -> toolz._signatures.<lambda136>
+    -> toolz._signatures.<lambda137>
+    -> toolz._signatures.<lambda138>
+    -> toolz._signatures.<lambda139>
+    -> toolz._signatures.<lambda140>
+    -> toolz._signatures.<lambda141>
+    -> toolz._signatures.<lambda142>
+    -> toolz._signatures.<lambda143>
+    -> toolz._signatures.<lambda144>
+    -> toolz._signatures.<lambda145>
+    -> toolz._signatures.<lambda149>
+    -> toolz._signatures.<lambda150>
+    -> toolz._signatures.<lambda151>
+    -> toolz._signatures.<lambda154>
+    -> toolz._signatures.<lambda155>
+    -> toolz._signatures.<lambda156>
+    -> toolz._signatures.<lambda157>
+    -> toolz._signatures.<lambda158>
+    -> toolz._signatures.<lambda159>
+    -> toolz._signatures.<lambda160>
+    -> toolz._signatures.<lambda161>
+    -> toolz._signatures.<lambda162>
+    -> toolz._signatures.<lambda215>
+    -> toolz._signatures.<lambda217>
+    -> toolz._signatures.<lambda218>
+    -> toolz._signatures.<lambda219>
+    -> toolz._signatures.<lambda220>
+    -> toolz._signatures.<lambda221>
+    -> toolz._signatures.<lambda222>
+    -> toolz._signatures.<lambda223>
+    -> toolz._signatures.<lambda224>
+    -> toolz._signatures.<lambda227>
+    -> toolz._signatures.<lambda228>
+    -> toolz._signatures.<lambda229>
+    -> toolz._signatures.<lambda230>
+    -> toolz._signatures.<lambda232>
+    -> toolz._signatures.<lambda233>
+    -> toolz._signatures.<lambda234>
+    -> toolz._signatures.<lambda235>
+    -> toolz._signatures.<lambda237>
+    -> toolz._signatures.<lambda238>
+    -> toolz._signatures.<lambda239>
+    -> toolz._signatures.<lambda240>
+    -> toolz._signatures.<lambda241>
+    -> toolz._signatures.<lambda242>
+    -> toolz._signatures.<lambda243>
+    -> toolz._signatures.<lambda244>
+    -> toolz._signatures.<lambda245>
+    -> toolz._signatures.<lambda246>
+    -> toolz._signatures.<lambda247>
+    -> toolz._signatures.<lambda249>
+    -> toolz._signatures.<lambda250>
+    -> toolz._signatures.<lambda251>
+    -> toolz._signatures.<lambda256>
+    -> toolz._signatures.<lambda257>
+    -> toolz._signatures.<lambda258>
+    -> toolz._signatures.<lambda259>
+    -> toolz._signatures.<lambda260>
+    -> toolz._signatures.<lambda261>
+    -> toolz._signatures.<lambda262>
+    -> toolz._signatures.<lambda263>
+    -> toolz._signatures.<lambda264>
+    -> toolz._signatures.<lambda265>
+    -> toolz._signatures.<lambda266>
+    -> toolz._signatures.<lambda267>
+    -> toolz._signatures.<lambda268>
+    -> toolz._signatures.<lambda269>
+    -> toolz._signatures.<lambda270>
+    -> toolz._signatures.<lambda271>
+    -> toolz._signatures.<lambda272>
+    -> toolz._signatures.<lambda273>
+    -> toolz._signatures.<lambda274>
+    -> toolz._signatures.<lambda276>
+    -> toolz._signatures.<lambda278>
+    -> toolz._signatures.<lambda280>
+    -> toolz._signatures.<lambda281>
+    -> toolz._signatures.<lambda282>
+    -> toolz._signatures.<lambda283>
+    -> toolz._signatures.<lambda284>
+    -> toolz._signatures.<lambda285>
+    -> toolz._signatures.<lambda286>
+    -> toolz._signatures.<lambda287>
+    -> toolz._signatures.<lambda288>
+    -> toolz._signatures.<lambda289>
+    -> toolz._signatures.<lambda290>
+    reject toolz.functoolz.curry.func: func is a lambda of the signature registry, not the property of a curry
+    note: func is the lambda of a registry entry (expand_sig keeps it as the second item); check_valid runs for every entry of a registered callable that reaches is_valid_args through _check_sigspec: on PyPy every registered key does (the PyPy _check_sigspec, functoolz.py:942), on CPython a key without a signature. The callables come from the client (is_valid_args is public; its docstring names builtins, and the tests pass map, dict, int, sorted, max, bytearray) and from curry._should_curry (the curried builtins, operator functions and excepts). So every lambda that the registry holds on an admitted runtime is a callee, the six package-object keys (curry, flip, juxt, memoize, Compose, InstanceProperty) included: is_valid_args and is_partial_args form one documented introspection role (J4, ruled by b8-ruling-toolz-1, referee, adopted by the lead, 2026-11-24): 193 lambdas; the 97 excluded below are 51 unavailable names and 46 overwritten entries
+    exclude toolz._signatures.<lambda6>, toolz._signatures.<lambda7>, toolz._signatures.<lambda8>, toolz._signatures.<lambda12>, toolz._signatures.<lambda13>, toolz._signatures.<lambda14>, toolz._signatures.<lambda21>, toolz._signatures.<lambda22>, toolz._signatures.<lambda34>, toolz._signatures.<lambda35>, toolz._signatures.<lambda36>, toolz._signatures.<lambda37>, toolz._signatures.<lambda57>, toolz._signatures.<lambda66>, toolz._signatures.<lambda67>, toolz._signatures.<lambda81>, toolz._signatures.<lambda82>, toolz._signatures.<lambda83>, toolz._signatures.<lambda84>, toolz._signatures.<lambda85>, toolz._signatures.<lambda104>, toolz._signatures.<lambda105>, toolz._signatures.<lambda106>, toolz._signatures.<lambda109>, toolz._signatures.<lambda110>, toolz._signatures.<lambda111>, toolz._signatures.<lambda146>, toolz._signatures.<lambda147>, toolz._signatures.<lambda148>, toolz._signatures.<lambda152>, toolz._signatures.<lambda153>, toolz._signatures.<lambda169>, toolz._signatures.<lambda170>, toolz._signatures.<lambda175>, toolz._signatures.<lambda180>, toolz._signatures.<lambda191>, toolz._signatures.<lambda208>, toolz._signatures.<lambda211>, toolz._signatures.<lambda216>, toolz._signatures.<lambda225>, toolz._signatures.<lambda226>, toolz._signatures.<lambda231>, toolz._signatures.<lambda236>, toolz._signatures.<lambda248>, toolz._signatures.<lambda252>, toolz._signatures.<lambda253>, toolz._signatures.<lambda254>, toolz._signatures.<lambda255>, toolz._signatures.<lambda275>, toolz._signatures.<lambda277>, toolz._signatures.<lambda279>: registered for a name that no admitted runtime has in its module (Python 2 builtins, itertools and operator names, among them the dunders __delslice__, __div__, __getslice__, __idiv__, __irepeat__, __repeat__ and __setslice__, and operator._compare_digest, which `from _operator import *` does not import); hasattr fails and create_signature_registry skips them (51 lambdas)
+    exclude toolz._signatures.<lambda1>, toolz._signatures.<lambda163>, toolz._signatures.<lambda164>, toolz._signatures.<lambda165>, toolz._signatures.<lambda166>, toolz._signatures.<lambda167>, toolz._signatures.<lambda168>, toolz._signatures.<lambda171>, toolz._signatures.<lambda172>, toolz._signatures.<lambda173>, toolz._signatures.<lambda174>, toolz._signatures.<lambda176>, toolz._signatures.<lambda177>, toolz._signatures.<lambda178>, toolz._signatures.<lambda179>, toolz._signatures.<lambda181>, toolz._signatures.<lambda182>, toolz._signatures.<lambda183>, toolz._signatures.<lambda184>, toolz._signatures.<lambda185>, toolz._signatures.<lambda186>, toolz._signatures.<lambda187>, toolz._signatures.<lambda188>, toolz._signatures.<lambda189>, toolz._signatures.<lambda190>, toolz._signatures.<lambda192>, toolz._signatures.<lambda193>, toolz._signatures.<lambda194>, toolz._signatures.<lambda195>, toolz._signatures.<lambda196>, toolz._signatures.<lambda197>, toolz._signatures.<lambda198>, toolz._signatures.<lambda199>, toolz._signatures.<lambda200>, toolz._signatures.<lambda201>, toolz._signatures.<lambda202>, toolz._signatures.<lambda203>, toolz._signatures.<lambda204>, toolz._signatures.<lambda205>, toolz._signatures.<lambda206>, toolz._signatures.<lambda207>, toolz._signatures.<lambda209>, toolz._signatures.<lambda210>, toolz._signatures.<lambda212>, toolz._signatures.<lambda213>, toolz._signatures.<lambda214>: overwritten in the registry: operator.__x__ is operator.x on every admitted runtime (Lib/operator.py assigns the aliases after its `from _operator import *`), and operator._abs is builtins.abs; the later entry (the plain name, operator's _abs) replaces the value of the same key (46 lambdas: 45 dunder aliases and builtins.abs)
+
+[toolz._signatures._is_valid_args]
+692:13 op  func not in signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: func comes from _check_sigspec (J3): a curry (toolz.flip, toolz.memoize, or any curry on PyPy, where the registry path runs for every key) is hashed; a curry equal to toolz.flip or toolz.memoize but not identical (toolz.flip() returns curry(flip) with the same func, args and keywords) collides with the stored key, and the dict compares them with curry.__eq__
+694:22 getitem  signatures[func]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13; func is in signatures here
+695:15 call  any(check_valid(sig, args, kwargs) for sig in sigs)
+    -> <builtin>.any
+695:27 call  check_valid(sig, args, kwargs)
+    -> toolz._signatures.check_valid
+
+[toolz._signatures.check_partial]
+701:11 call  len(args)
+    -> <builtin>.len
+702:44 call  len(args)
+    -> <builtin>.len
+705:22 call  dict(kwargs)
+    -> <builtin>.dict
+707:23 call  kwargs.pop(item, None)
+    -> <builtin>.dict.pop
+708:27 call  is_partial_args(func, args, kwargs, sigspec)
+    -> toolz.functoolz.is_partial_args
+
+[toolz._signatures._is_partial_args]
+713:13 op  func not in signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+715:22 getitem  signatures[func]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+716:15 call  any(check_partial(sig, args, kwargs) for sig in sigs)
+    -> <builtin>.any
+716:29 call  check_partial(sig, args, kwargs)
+    -> toolz._signatures.check_partial
+
+[toolz._signatures.check_arity]
+723:20 call  is_arity(n, func, sigspec)
+    -> toolz.functoolz.is_arity
+
+[toolz._signatures._is_arity]
+727:13 op  func not in signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+729:22 getitem  signatures[func]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+730:26 call  check_arity(n, sig)
+    -> toolz._signatures.check_arity
+731:11 call  all(checks)
+    -> <builtin>.all
+733:13 call  any(checks)
+    -> <builtin>.any
+
+[toolz._signatures.check_varargs]
+740:23 call  has_varargs(func, sigspec)
+    -> toolz.functoolz.has_varargs
+
+[toolz._signatures._has_varargs]
+744:13 op  func not in signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+746:22 getitem  signatures[func]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+747:28 call  check_varargs(sig)
+    -> toolz._signatures.check_varargs
+748:11 call  all(checks)
+    -> <builtin>.all
+750:13 call  any(checks)
+    -> <builtin>.any
+
+[toolz._signatures.check_keywords]
+759:24 call  has_keywords(func, sigspec)
+    -> toolz.functoolz.has_keywords
+
+[toolz._signatures._has_keywords]
+763:13 op  func not in signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+765:22 getitem  signatures[func]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+766:29 call  check_keywords(sig)
+    -> toolz._signatures.check_keywords
+767:11 call  all(checks)
+    -> <builtin>.all
+769:13 call  any(checks)
+    -> <builtin>.any
+
+[toolz._signatures.check_required_args]
+776:29 call  num_required_args(func, sigspec)
+    -> toolz.functoolz.num_required_args
+
+[toolz._signatures._num_required_args]
+780:13 op  func not in signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+782:22 getitem  signatures[func]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: as at 692:13 (J3)
+783:32 call  check_required_args(sig)
+    -> toolz._signatures.check_required_args
+785:11 call  all(x == val for x in vals)
+    -> <builtin>.all
+
+== toolz.compatibility
+
+[toolz.compatibility]
+2:14 call  warnings.warn("The toolz.compatibility module is no longe...
+    -> warnings.warn
+13:15 call  hasattr(sys, 'pypy_version_info')
+    -> <builtin>.hasattr
+27:34 call  operator.methodcaller('items')
+    -> operator.methodcaller
+28:33 call  operator.methodcaller('keys')
+    -> operator.methodcaller
+29:35 call  operator.methodcaller('values')
+    -> operator.methodcaller
+
+== toolz.curried
+
+[toolz.curried]
+58:25 call  toolz.curry(toolz.accumulate)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.accumulate: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+59:20 call  toolz.curry(toolz.assoc)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.assoc: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+60:23 call  toolz.curry(toolz.assoc_in)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.assoc_in: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+61:19 call  toolz.curry(toolz.cons)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.cons: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+62:22 call  toolz.curry(toolz.countby)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.recipes.countby: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+63:21 call  toolz.curry(toolz.dissoc)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.dissoc: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+64:17 call  toolz.curry(toolz.do)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.functoolz.do: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+65:19 call  toolz.curry(toolz.drop)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.drop: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+66:22 call  toolz.curry(toolz.excepts)
+    -> toolz.functoolz.curry.__init__
+67:21 call  toolz.curry(toolz.filter)
+    -> toolz.functoolz.curry.__init__
+68:18 call  toolz.curry(toolz.get)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.get: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+69:21 call  toolz.curry(toolz.get_in)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.get_in: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+70:22 call  toolz.curry(toolz.groupby)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.groupby: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+71:24 call  toolz.curry(toolz.interpose)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.interpose: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+72:25 call  toolz.curry(toolz.itemfilter)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.itemfilter: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+73:22 call  toolz.curry(toolz.itemmap)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.itemmap: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+74:22 call  toolz.curry(toolz.iterate)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.iterate: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+75:19 call  toolz.curry(toolz.join)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.join: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+76:24 call  toolz.curry(toolz.keyfilter)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.keyfilter: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+77:21 call  toolz.curry(toolz.keymap)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.keymap: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+78:18 call  toolz.curry(toolz.map)
+    -> toolz.functoolz.curry.__init__
+79:21 call  toolz.curry(toolz.mapcat)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.mapcat: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+80:18 call  toolz.curry(toolz.nth)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.nth: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+81:22 call  toolz.curry(toolz.partial)
+    -> toolz.functoolz.curry.__init__
+82:24 call  toolz.curry(toolz.partition)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.partition: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+83:28 call  toolz.curry(toolz.partition_all)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.partition_all: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+84:26 call  toolz.curry(toolz.partitionby)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.recipes.partitionby: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+85:20 call  toolz.curry(toolz.peekn)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.peekn: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+86:20 call  toolz.curry(toolz.pluck)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.pluck: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+87:28 call  toolz.curry(toolz.random_sample)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.random_sample: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+88:21 call  toolz.curry(toolz.reduce)
+    -> toolz.functoolz.curry.__init__
+89:23 call  toolz.curry(toolz.reduceby)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.reduceby: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+90:21 call  toolz.curry(toolz.remove)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.remove: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+91:29 call  toolz.curry(toolz.sliding_window)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.sliding_window: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+92:21 call  toolz.curry(toolz.sorted)
+    -> toolz.functoolz.curry.__init__
+93:19 call  toolz.curry(toolz.tail)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.tail: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+94:19 call  toolz.curry(toolz.take)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.take: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+95:23 call  toolz.curry(toolz.take_nth)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.take_nth: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+96:19 call  toolz.curry(toolz.topk)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.topk: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+97:21 call  toolz.curry(toolz.unique)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.itertoolz.unique: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+98:24 call  toolz.curry(toolz.update_in)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.update_in: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+99:24 call  toolz.curry(toolz.valfilter)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.valfilter: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+100:21 call  toolz.curry(toolz.valmap)
+    -> toolz.functoolz.curry.__init__
+    reject toolz.dicttoolz.valmap: passed to curry, which stores it in a functools.partial; it runs when the curry is called (curry.__call__)
+
+== toolz.curried.exceptions
+
+[toolz.curried.exceptions]
+7:2 decorator  @toolz.curry
+    -> toolz.functoolz.curry.__init__
+12:2 decorator  @toolz.curry
+    -> toolz.functoolz.curry.__init__
+17:39 getattr  toolz.merge_with.__doc__
+    reject *: toolz.merge_with is the function toolz.dicttoolz.merge_with; __doc__ of a function is no package descriptor
+18:29 getattr  toolz.merge.__doc__
+    reject *: toolz.merge is the function toolz.dicttoolz.merge; __doc__ of a function is no package descriptor
+
+[toolz.curried.exceptions.merge_with]
+9:28 call  toolz.merge_with(func, d, *dicts, **kwargs)
+    -> toolz.dicttoolz.merge_with
+    reject toolz.curried.exceptions.merge_with: toolz.merge_with is toolz.dicttoolz.merge_with; this module's curried merge_with is not an attribute of toolz
+
+[toolz.curried.exceptions.merge]
+14:23 call  toolz.merge(d, *dicts, **kwargs)
+    -> toolz.dicttoolz.merge
+    reject toolz.curried.exceptions.merge: toolz.merge is toolz.dicttoolz.merge; this module's curried merge is not an attribute of toolz
+
+== toolz.curried.operator
+
+[toolz.curried.operator]
+12:7 call  locals()
+    -> <builtin>.locals
+12:16 call  locals().update( {name: f if name in IGNORE else curry(f)...
+    -> <builtin>.dict.update
+13:42 call  curry(f)
+    -> toolz.functoolz.curry.__init__
+    note: f is a callable of the operator module (functions and the classes attrgetter, itemgetter, methodcaller)
+14:25 call  vars(operator)
+    -> <builtin>.vars
+14:41 call  vars(operator).items()
+    -> <builtin>.dict.items
+14:55 call  callable(f)
+    -> <builtin>.callable
+
+== toolz.dicttoolz
+
+[toolz.dicttoolz._get_factory]
+12:25 call  kwargs.pop('factory', dict)
+    -> <builtin>.dict.pop
+14:24 call  TypeError("{}() got an unexpected keyword argument " "'{}...
+    -> <builtin>.TypeError
+15:38 call  "{}() got an unexpected keyword argument " "'{}'".format(...
+    -> <builtin>.str.format
+    reject *: the fields format f.__name__ (the str name of merge, merge_with or dissoc) and a keyword name, a str
+15:41 getattr  f.__name__
+    reject *: f is the function merge, merge_with or dissoc (its only callers); __name__ of a function is no package property
+15:65 call  kwargs.popitem()
+    -> <builtin>.dict.popitem
+
+[toolz.dicttoolz.merge]
+33:11 call  len(dicts)
+    -> <builtin>.len
+33:42 call  isinstance(dicts[0], Mapping)
+    -> <builtin>.isinstance
+35:27 call  _get_factory(merge, kwargs)
+    -> toolz.dicttoolz._get_factory
+    reject toolz.dicttoolz.merge: passed for its __name__ only; _get_factory does not call it
+    reject toolz.curried.exceptions.merge: merge here is this module's function
+37:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default of _get_factory) or a client factory (the tests pass lambdas and CustomMapping; opaque)
+39:18 call  rv.update(d)
+    -> <builtin>.dict.update
+    note: rv is what factory() returned: a dict for the default; a client factory's object is opaque (B5)
+
+[toolz.dicttoolz.merge_with]
+58:11 call  len(dicts)
+    -> <builtin>.len
+58:42 call  isinstance(dicts[0], Mapping)
+    -> <builtin>.isinstance
+60:27 call  _get_factory(merge_with, kwargs)
+    -> toolz.dicttoolz._get_factory
+    reject toolz.dicttoolz.merge_with: passed for its __name__ only; _get_factory does not call it
+    reject toolz.curried.exceptions.merge_with: merge_with here is this module's function
+62:37 call  collections.defaultdict(lambda: [].append)
+    -> collections.defaultdict
+    -> toolz.dicttoolz.merge_with.<lambda1>
+    note: the defaultdict calls its factory back at values[k] (65:19) for a missing key, in this function
+64:28 call  d.items()
+    -> <builtin>.dict.items
+    note: the docstring documents dictionaries (B4: dict); other client mappings are opaque
+65:22 call  values[k](v)
+    -> <builtin>.list.append
+    note: values[k] is the bound append of a list that merge_with.<lambda1> made
+67:21 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default of _get_factory) or a client factory (opaque)
+68:29 call  values.items()
+    -> collections.defaultdict.items
+69:25 call  func(v.__self__)
+    -> toolz.itertoolz.first
+    reject toolz.functoolz.curry.func: func is the merging function, not the property of a curry
+    note: func is a client function (sum, tuple, list in the tests; opaque) or first, which the docstring passes (dicttoolz.py:52, merge_with(first, ...); a documented example, B2); curried.exceptions.merge_with forwards its func here
+
+[toolz.dicttoolz.valmap]
+84:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+85:14 call  rv.update(zip(d.keys(), map(func, d.values())))
+    -> <builtin>.dict.update
+    -> toolz.functoolz.identity
+    -> toolz.functoolz.Compose.__call__
+    -> toolz.functoolz.curry.__call__
+    -> toolz.itertoolz.frequencies
+    -> toolz.itertoolz.concat
+    note: the documented compose output (FO) includes the one-argument compose, which returns its admitted input unchanged (functoolz.py:673; the funcy precedent): a curry, frequencies or concat (README.rst:67, doc/source/parallelism.rst:53; Codex round 1 M01-M03)
+    note: dict.update consumes the zip and the map, which calls func: a client function (opaque), identity (test_dicttoolz.py:249) or a Compose (doc/source/streaming-analytics.rst:91 and :101, valmap(compose(sum, pluck(2)), ...)); J1, J5
+85:18 call  zip(d.keys(), map(func, d.values()))
+    -> <builtin>.zip
+85:25 call  d.keys()
+    -> <builtin>.dict.keys
+    note: the docstring documents a dictionary (B4); the dicts that the package makes (groupby's result in the documented pipe) are dicts
+85:32 call  map(func, d.values())
+    -> <builtin>.map
+85:47 call  d.values()
+    -> <builtin>.dict.values
+
+[toolz.dicttoolz.keymap]
+100:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+101:14 call  rv.update(zip(map(func, d.keys()), d.values()))
+    -> <builtin>.dict.update
+    -> toolz.functoolz.identity
+    note: dict.update consumes the zip and the map, which calls func: a client function or identity (test_dicttoolz.py:248)
+101:18 call  zip(map(func, d.keys()), d.values())
+    -> <builtin>.zip
+101:22 call  map(func, d.keys())
+    -> <builtin>.map
+101:35 call  d.keys()
+    -> <builtin>.dict.keys
+101:48 call  d.values()
+    -> <builtin>.dict.values
+
+[toolz.dicttoolz.itemmap]
+116:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+117:14 call  rv.update(map(func, d.items()))
+    -> <builtin>.dict.update
+    -> toolz.functoolz.identity
+    note: dict.update consumes the map, which calls func: a client function (reversed in the tests) or identity (test_dicttoolz.py:250)
+117:18 call  map(func, d.items())
+    -> <builtin>.map
+117:32 call  d.items()
+    -> <builtin>.dict.items
+
+[toolz.dicttoolz.valfilter]
+134:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+135:24 call  d.items()
+    -> <builtin>.dict.items
+136:21 call  predicate(v)
+    note: predicate is a client function (the tests and documented examples pass lambdas, iseven and callable); no package function is passed for this role
+
+[toolz.dicttoolz.keyfilter]
+154:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+155:24 call  d.items()
+    -> <builtin>.dict.items
+156:21 call  predicate(k)
+    note: predicate is a client function (lambdas and iseven in the tests and doc/source/tips-and-tricks.rst); no package function is passed for this role
+
+[toolz.dicttoolz.itemfilter]
+177:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+178:24 call  d.items()
+    -> <builtin>.dict.items
+179:21 call  predicate(item)
+    note: predicate is a client function (isvalid in the docstring, lambdas in the tests); no package function is passed for this role
+
+[toolz.dicttoolz.assoc]
+195:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+196:14 call  d2.update(d)
+    -> <builtin>.dict.update
+
+[toolz.dicttoolz.dissoc]
+214:27 call  _get_factory(dissoc, kwargs)
+    -> toolz.dicttoolz._get_factory
+    reject toolz.dicttoolz.dissoc: passed for its __name__ only; _get_factory does not call it
+215:17 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default of _get_factory) or a client factory (opaque)
+217:11 call  len(keys)
+    -> <builtin>.len
+217:23 call  len(d)
+    -> <builtin>.len
+218:18 call  d2.update(d)
+    -> <builtin>.dict.update
+223:24 call  set(d)
+    -> <builtin>.set
+224:36 call  remaining.difference_update(keys)
+    -> <builtin>.set.difference_update
+
+[toolz.dicttoolz.assoc_in]
+242:21 call  update_in(d, keys, lambda x: value, value, factory)
+    -> toolz.dicttoolz.update_in
+    reject toolz.dicttoolz.assoc_in.<lambda1>: passed as func; update_in calls it (dicttoolz.py:297, 299)
+
+[toolz.dicttoolz.update_in]
+279:14 call  iter(keys)
+    -> <builtin>.iter
+280:13 call  next(ks)
+    -> <builtin>.next
+282:25 call  factory()
+    -> <builtin>.dict
+    note: factory is dict (the default) or a client factory (opaque)
+283:14 call  rv.update(d)
+    -> <builtin>.dict.update
+288:28 call  factory()
+    -> <builtin>.dict
+    note: as at 282:25
+289:25 call  dtemp.update(d)
+    -> <builtin>.dict.update
+291:32 call  factory()
+    -> <builtin>.dict
+    note: as at 282:25
+297:24 call  func(d[k])
+    -> toolz.dicttoolz.assoc_in.<lambda1>
+    reject toolz.functoolz.curry.func: func is the updating function, not the property of a curry
+    note: func is a client function (inc, str, lambdas in the tests; opaque) or assoc_in's lambda (dicttoolz.py:242)
+299:24 call  func(default)
+    -> toolz.dicttoolz.assoc_in.<lambda1>
+    reject toolz.functoolz.curry.func: func is the updating function, not the property of a curry
+    note: as at 297:24
+
+[toolz.dicttoolz.get_in]
+335:22 call  reduce(operator.getitem, keys, coll)
+    -> functools.reduce
+    note: reduce calls operator.getitem back (a library callable, no edge); no package class defines __getitem__
+
+== toolz.functoolz
+
+[toolz.functoolz]
+18:15 call  hasattr(sys, 'pypy_version_info')
+    -> <builtin>.hasattr
+231:6 decorator  @instanceproperty
+    -> toolz.functoolz.instanceproperty
+235:6 decorator  @instanceproperty
+    -> toolz.functoolz.instanceproperty
+273:6 decorator  @instanceproperty
+    -> toolz.functoolz.instanceproperty
+277:6 decorator  @instanceproperty
+    -> toolz.functoolz.instanceproperty
+281:6 decorator  @instanceproperty
+    -> toolz.functoolz.instanceproperty
+393:2 decorator  @curry
+    -> toolz.functoolz.curry.__init__
+515:6 decorator  @instanceproperty(classval=__doc__)
+    -> functools.partial.__call__
+    -> toolz.functoolz.instanceproperty
+    note: the decorator is the functools.partial that instanceproperty(classval=...) returned (functoolz.py:143); applying it calls instanceproperty back with the fget
+515:22 call  instanceproperty(classval=__doc__)
+    -> toolz.functoolz.instanceproperty
+    reject toolz.functoolz.Compose.__doc__, toolz.functoolz.excepts.__doc__: __doc__ here is the class docstring, a str that the class body bound before the def
+535:6 decorator  @property
+    -> <builtin>.property
+568:6 decorator  @instanceproperty
+    -> toolz.functoolz.instanceproperty
+574:35 call  instanceproperty(attrgetter('first'))
+    -> toolz.functoolz.instanceproperty
+574:46 call  attrgetter('first')
+    -> operator.attrgetter
+628:43 call  _InstanceAnnotations(_combined_annotations)
+    -> toolz.functoolz._InstanceAnnotations.__init__
+    reject toolz.functoolz.Compose._combined_annotations: stored as fget; _InstanceAnnotations.__get__ calls it (functoolz.py:487)
+649:40 call  instanceproperty(_get_annotate)
+    -> toolz.functoolz.instanceproperty
+    reject toolz.functoolz.Compose._get_annotate: stored as the fget of an InstanceProperty; InstanceProperty.__get__ calls it (functoolz.py:162)
+799:2 decorator  @curry
+    -> toolz.functoolz.curry.__init__
+872:6 decorator  @instanceproperty(classval=__doc__)
+    -> functools.partial.__call__
+    -> toolz.functoolz.instanceproperty
+    note: as at 515:6
+872:22 call  instanceproperty(classval=__doc__)
+    -> toolz.functoolz.instanceproperty
+    reject toolz.functoolz.Compose.__doc__, toolz.functoolz.excepts.__doc__: __doc__ here is the class docstring, a str that the class body bound before the def
+904:6 decorator  @property
+    -> <builtin>.property
+
+[toolz.functoolz.apply]
+42:24 call  TypeError('func argument is required')
+    -> <builtin>.TypeError
+44:16 call  func(*args, **kwargs)
+    reject toolz.functoolz.curry.func: func is the first argument, not the property of a curry
+    note: func is a client function (double and inc in the docstring and the tests; opaque); no package function is passed to apply
+
+[toolz.functoolz.thread_first]
+78:18 call  reduce(evalform_front, forms, val)
+    -> functools.reduce
+    -> toolz.functoolz.thread_first.evalform_front
+
+[toolz.functoolz.thread_first.evalform_front]
+72:20 call  callable(form)
+    -> <builtin>.callable
+73:24 call  form(val)
+    note: form is a client function of thread_first (double, inc in the docstring and the tests); no package function is passed there
+74:22 call  isinstance(form, tuple)
+    -> <builtin>.isinstance
+77:24 call  func(*args)
+    reject toolz.functoolz.curry.func: func is the head of a client tuple, not the property of a curry
+    note: func is the head of a client tuple (add, pow, operator.add in the docstring and the tests); opaque
+
+[toolz.functoolz.thread_last]
+117:18 call  reduce(evalform_back, forms, val)
+    -> functools.reduce
+    -> toolz.functoolz.thread_last.evalform_back
+
+[toolz.functoolz.thread_last.evalform_back]
+111:20 call  callable(form)
+    -> <builtin>.callable
+112:24 call  form(val)
+    note: form is a client function of thread_last (double, inc in the docstring and the tests); no package function is passed there
+113:22 call  isinstance(form, tuple)
+    -> <builtin>.isinstance
+116:24 call  func(*args)
+    reject toolz.functoolz.curry.func: func is the head of a client tuple, not the property of a curry
+    note: func is the head of a client tuple (map, filter, add, pow, operator.add in the docstring and the tests); opaque
+
+[toolz.functoolz.instanceproperty]
+143:23 call  partial(instanceproperty, fset=fset, fdel=fdel, doc=doc, ...
+    -> functools.partial
+    reject toolz.functoolz.instanceproperty: stored in the partial; the decorator application calls it (functoolz.py:515, 872)
+145:28 call  InstanceProperty(fget=fget, fset=fset, fdel=fdel, doc=doc...
+    -> toolz.functoolz.InstanceProperty.__init__
+
+[toolz.functoolz.InstanceProperty.__init__]
+157:26 call  property.__init__(self, fget=fget, fset=fset, fdel=fdel, ...
+    -> <builtin>.property.__init__
+    reject *: an explicit call of property.__init__, the builtin initializer
+
+[toolz.functoolz.InstanceProperty.__get__]
+162:32 call  property.__get__(self, obj, type)
+    -> <builtin>.property.__get__
+    -> toolz.functoolz.curry.func
+    -> toolz.functoolz.curry.__signature__
+    -> toolz.functoolz.curry.args
+    -> toolz.functoolz.curry.keywords
+    -> toolz.functoolz.curry.func_name
+    -> toolz.functoolz.Compose.__doc__
+    -> toolz.functoolz.Compose.__signature__
+    -> toolz.functoolz.Compose._get_annotate
+    -> toolz.functoolz.excepts.__doc__
+    reject *: an explicit call of the builtin property.__get__, which calls the fget back
+    note: property.__get__ calls the fget of this InstanceProperty back: the package's instanceproperties are curry.func, __signature__, args, keywords, func_name, Compose.__doc__, __signature__, __wrapped__ (attrgetter('first'), a library callable: no edge), __annotate__ (_get_annotate, Python 3.14 and later) and excepts.__doc__; a client's instanceproperty has a client fget (opaque)
+
+[toolz.functoolz.InstanceProperty.__reduce__]
+165:56 getattr  self.__doc__
+    reject *: the __doc__ of a property instance is a builtin member, no package descriptor
+
+[toolz.functoolz.curry.__init__]
+199:28 call  TypeError('__init__() takes at least 2 arguments (1 given)')
+    -> <builtin>.TypeError
+201:24 call  callable(func)
+    -> <builtin>.callable
+202:28 call  TypeError("Input must be callable")
+    -> <builtin>.TypeError
+206:20 call  hasattr(func, 'func')
+    -> <builtin>.hasattr
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: func is a curry where curry.bind, curry.__get__ or a client (curry(f) on a curry, test_functoolz.py:291) passes one; hasattr loads its func through the InstanceProperty
+207:24 call  hasattr(func, 'args')
+    -> <builtin>.hasattr
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: as at 206:20
+208:24 call  hasattr(func, 'keywords')
+    -> <builtin>.hasattr
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: as at 206:20
+209:27 call  isinstance(func.args, tuple)
+    -> <builtin>.isinstance
+    reject toolz.functoolz.curry.args: func.args is loaded at 209:33, through InstanceProperty.__get__
+209:33 getattr  func.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: func is a curry (InstanceProperty) or a functools.partial (builtin attributes)
+212:21 getattr  func.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: func is a curry (InstanceProperty) or a functools.partial (builtin attributes)
+213:31 call  _kwargs.update(func.keywords)
+    -> <builtin>.dict.update
+    reject toolz.functoolz.curry.keywords: func.keywords is loaded at 213:37, through InstanceProperty.__get__
+213:37 getattr  func.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: func is a curry (InstanceProperty) or a functools.partial (builtin attributes)
+214:27 call  _kwargs.update(kwargs)
+    -> <builtin>.dict.update
+216:25 getattr  func.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: func is a curry (InstanceProperty) or a functools.partial (builtin attributes)
+217:25 getattr  func.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: func is a curry (InstanceProperty) or a functools.partial (builtin attributes)
+220:36 call  partial(func, *args, **kwargs)
+    -> functools.partial
+222:36 call  partial(func, *args)
+    -> functools.partial
+224:31 call  getattr(func, '__doc__', None)
+    -> <builtin>.getattr
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: func is the callable that the curry wraps (never a curry: a curry was unwrapped above); for the class excepts (toolz.curried.excepts) the type's __doc__ getter calls the InstanceProperty of excepts.__doc__ with no instance, which returns classval
+225:32 call  getattr(func, '__name__', '<curry>')
+    -> <builtin>.getattr
+    reject toolz.functoolz.Compose.__name__, toolz.functoolz.excepts.__name__: func is never a Compose or an excepts instance (B3); on the class excepts, __name__ is the type's own name
+226:34 call  getattr(func, '__module__', None)
+    -> <builtin>.getattr
+227:36 call  getattr(func, '__qualname__', None)
+    -> <builtin>.getattr
+
+[toolz.functoolz.curry.func]
+233:30 getattr  self._partial.func
+    reject *: self._partial is a functools.partial; func is its builtin attribute
+
+[toolz.functoolz.curry.__signature__]
+237:32 call  inspect.signature(self.func)
+    -> inspect.signature
+    reject toolz.functoolz.curry.func: self.func is loaded at 237:38, through InstanceProperty.__get__
+    note: self.func is the wrapped callable (never a curry): a package function, the class EqualityHashKey or excepts, a builtin or a client callable; inspect.signature reads no package descriptor of these (excepts has no __signature__); client callables are opaque
+237:38 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+238:21 getattr  self.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; args is an InstanceProperty
+239:25 getattr  self.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; keywords is an InstanceProperty
+240:27 call  is_partial_args(self.func, args, keywords, sig)
+    -> toolz.functoolz.is_partial_args
+    reject toolz.functoolz.curry.func: self.func is loaded at 240:33
+240:33 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+241:28 call  TypeError('curry object has incorrect arguments')
+    -> <builtin>.TypeError
+243:22 call  list(sig.parameters.values())
+    -> <builtin>.list
+243:44 call  sig.parameters.values()
+    -> types.MappingProxyType.values
+245:33 call  len(args)
+    -> <builtin>.len
+269:29 call  newparams.append(param.replace(default=default, kind=kind))
+    -> <builtin>.list.append
+269:43 call  param.replace(default=default, kind=kind)
+    -> inspect.Parameter.replace
+271:27 call  sig.replace(parameters=newparams)
+    -> inspect.Signature.replace
+
+[toolz.functoolz.curry.args]
+275:30 getattr  self._partial.args
+    reject *: self._partial is a functools.partial; args is its builtin attribute
+
+[toolz.functoolz.curry.keywords]
+279:30 getattr  self._partial.keywords
+    reject *: self._partial is a functools.partial; keywords is its builtin attribute
+
+[toolz.functoolz.curry.func_name]
+283:21 getattr  self.__name__
+    reject *: self is a curry; __name__ is the str that __init__ stored in its __dict__
+
+[toolz.functoolz.curry.__str__]
+286:19 call  str(self.func)
+    -> <builtin>.str
+    reject toolz.functoolz.curry.func: self.func is loaded at 286:25
+    reject *: self.func is the wrapped callable, never a curry, a Compose or an EqualityHashKey (curry.__init__ unwraps curries; B3)
+286:25 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+
+[toolz.functoolz.curry.__repr__]
+289:20 call  repr(self.func)
+    -> <builtin>.repr
+    reject toolz.functoolz.curry.func: self.func is loaded at 289:26
+    reject *: self.func is the wrapped callable, never a curry, a Compose or an EqualityHashKey (B3)
+289:26 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+
+[toolz.functoolz.curry.__hash__]
+292:20 call  hash((self.func, self.args, frozenset(self.keywords.items...
+    -> <builtin>.hash
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.Compose.__hash__
+    note: hashing the tuple hashes the wrapped callable and each bound argument; the documented curries bind curries and Composes (doc/source/streaming-analytics.rst:38 map(get([1, 2])), :87 groupby(get(3)), :101 valmap(compose(sum, pluck(2)))), whose hashes are curry.__hash__ and Compose.__hash__ (J2)
+292:27 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+292:38 getattr  self.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; args is an InstanceProperty
+293:31 call  frozenset(self.keywords.items())
+    -> <builtin>.frozenset
+    note: the keyword values that the tests and the documentation bind (a key function such as second, factories, str, caches) are no curry, Compose or EqualityHashKey; the default rejections hold
+293:37 getattr  self.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; keywords is an InstanceProperty
+293:51 call  self.keywords.items()
+    -> <builtin>.dict.items
+293:63 getattr  self.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; keywords is an InstanceProperty
+
+[toolz.functoolz.curry.__eq__]
+297:27 call  isinstance(other, curry)
+    -> <builtin>.isinstance
+297:51 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+297:65 getattr  other.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: other is a curry here (the isinstance test before it); func is an InstanceProperty
+298:22 getattr  self.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; args is an InstanceProperty
+298:27 op  self.args == other.args
+    -> toolz.functoolz.curry.__eq__
+    -> toolz.functoolz.Compose.__eq__
+    note: comparing the tuples of bound arguments compares their items; documented curries bind curries and Composes (as at 292:20; J2)
+298:36 getattr  other.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: other is a curry here; args is an InstanceProperty
+298:50 getattr  self.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; keywords is an InstanceProperty
+298:68 getattr  other.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: other is a curry here; keywords is an InstanceProperty
+
+[toolz.functoolz.curry.__ne__]
+301:31 call  self.__eq__(other)
+    -> toolz.functoolz.curry.__eq__
+    reject *: self is a curry (or a client subclass that inherits __eq__)
+
+[toolz.functoolz.curry.__call__]
+305:33 call  self._partial(*args, **kwargs)
+    -> functools.partial.__call__
+    -> toolz.itertoolz.accumulate
+    -> toolz.dicttoolz.assoc
+    -> toolz.dicttoolz.assoc_in
+    -> toolz.itertoolz.cons
+    -> toolz.recipes.countby
+    -> toolz.dicttoolz.dissoc
+    -> toolz.functoolz.do
+    -> toolz.itertoolz.drop
+    -> toolz.functoolz.excepts.__init__
+    -> toolz.itertoolz.get
+    -> toolz.dicttoolz.get_in
+    -> toolz.itertoolz.groupby
+    -> toolz.itertoolz.interpose
+    -> toolz.dicttoolz.itemfilter
+    -> toolz.dicttoolz.itemmap
+    -> toolz.itertoolz.iterate
+    -> toolz.itertoolz.join
+    -> toolz.dicttoolz.keyfilter
+    -> toolz.dicttoolz.keymap
+    -> toolz.itertoolz.mapcat
+    -> toolz.itertoolz.nth
+    -> toolz.itertoolz.partition
+    -> toolz.itertoolz.partition_all
+    -> toolz.recipes.partitionby
+    -> toolz.itertoolz.peekn
+    -> toolz.itertoolz.pluck
+    -> toolz.itertoolz.random_sample
+    -> toolz.itertoolz.reduceby
+    -> toolz.itertoolz.remove
+    -> toolz.itertoolz.sliding_window
+    -> toolz.itertoolz.tail
+    -> toolz.itertoolz.take
+    -> toolz.itertoolz.take_nth
+    -> toolz.itertoolz.topk
+    -> toolz.itertoolz.unique
+    -> toolz.dicttoolz.update_in
+    -> toolz.dicttoolz.valfilter
+    -> toolz.dicttoolz.valmap
+    -> toolz.functoolz.memoize
+    -> toolz.functoolz.flip
+    -> toolz.curried.exceptions.merge_with
+    -> toolz.curried.exceptions.merge
+    -> toolz.sandbox.core.EqualityHashKey.__init__
+    -> toolz.itertoolz.second
+    -> toolz.functoolz.curry.__call__
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    note: self._partial is the functools.partial of the wrapped callable; it calls it back (J1). The curried sorted in a composition consumes the lazy map that the previous curry made: compose(sorted, map(get(0))) calls the bound get curry, compose(sorted, pluck([0])) and pluck([]) call getter's lambdas (curry outputs in compose, README.rst:67, doc/source/streaming-analytics.rst:38, :91; FO; Codex round 1 M15-M17). The package's own curries wrap the toolz.curried functions (toolz/curried/__init__.py:58-100: package functions, the class excepts and the builtins filter, map, partial, reduce, sorted), memoize and flip (@curry), toolz.curried.exceptions.merge and merge_with (@toolz.curry) and the operator functions; the tests and docstrings curry EqualityHashKey (sandbox tests, core.py:13). The curried sorted calls its key back: the tests pass second (test_curried.py:332). Client functions are opaque
+307:34 call  self._should_curry(args, kwargs, exc)
+    -> toolz.functoolz.curry._should_curry
+308:33 call  self.bind(*args, **kwargs)
+    -> toolz.functoolz.curry.bind
+
+[toolz.functoolz.curry._should_curry]
+312:21 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+313:21 getattr  self.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; args is an InstanceProperty
+314:17 getattr  self.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; keywords is an InstanceProperty
+315:26 call  dict(self.keywords, **kwargs)
+    -> <builtin>.dict
+    reject toolz.functoolz.curry.keywords: self.keywords is loaded at 315:32
+315:32 getattr  self.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; keywords is an InstanceProperty
+317:62 call  _sigs.signature_or_spec(func)
+    -> toolz._signatures.signature_or_spec
+318:49 call  has_varargs(func, sigspec)
+    -> toolz.functoolz.has_varargs
+322:27 call  is_partial_args(func, args, kwargs, sigspec)
+    -> toolz.functoolz.is_partial_args
+330:31 call  is_valid_args(func, args, kwargs, sigspec)
+    -> toolz.functoolz.is_valid_args
+
+[toolz.functoolz.curry.bind]
+338:20 call  type(self)
+    -> <builtin>.type
+338:26 call  type(self)(self, *args, **kwargs)
+    -> toolz.functoolz.curry.__init__
+    note: type(self) is curry, or a client subclass that inherits curry.__init__ (test_functoolz.py:507)
+
+[toolz.functoolz.curry.call]
+341:29 call  self._partial(*args, **kwargs)
+    -> functools.partial.__call__
+    -> toolz.itertoolz.accumulate
+    -> toolz.dicttoolz.assoc
+    -> toolz.dicttoolz.assoc_in
+    -> toolz.itertoolz.cons
+    -> toolz.recipes.countby
+    -> toolz.dicttoolz.dissoc
+    -> toolz.functoolz.do
+    -> toolz.itertoolz.drop
+    -> toolz.functoolz.excepts.__init__
+    -> toolz.itertoolz.get
+    -> toolz.dicttoolz.get_in
+    -> toolz.itertoolz.groupby
+    -> toolz.itertoolz.interpose
+    -> toolz.dicttoolz.itemfilter
+    -> toolz.dicttoolz.itemmap
+    -> toolz.itertoolz.iterate
+    -> toolz.itertoolz.join
+    -> toolz.dicttoolz.keyfilter
+    -> toolz.dicttoolz.keymap
+    -> toolz.itertoolz.mapcat
+    -> toolz.itertoolz.nth
+    -> toolz.itertoolz.partition
+    -> toolz.itertoolz.partition_all
+    -> toolz.recipes.partitionby
+    -> toolz.itertoolz.peekn
+    -> toolz.itertoolz.pluck
+    -> toolz.itertoolz.random_sample
+    -> toolz.itertoolz.reduceby
+    -> toolz.itertoolz.remove
+    -> toolz.itertoolz.sliding_window
+    -> toolz.itertoolz.tail
+    -> toolz.itertoolz.take
+    -> toolz.itertoolz.take_nth
+    -> toolz.itertoolz.topk
+    -> toolz.itertoolz.unique
+    -> toolz.dicttoolz.update_in
+    -> toolz.dicttoolz.valfilter
+    -> toolz.dicttoolz.valmap
+    -> toolz.functoolz.memoize
+    -> toolz.functoolz.flip
+    -> toolz.curried.exceptions.merge_with
+    -> toolz.curried.exceptions.merge
+    -> toolz.sandbox.core.EqualityHashKey.__init__
+    -> toolz.itertoolz.second
+    note: as at 305:33
+
+[toolz.functoolz.curry.__get__]
+346:21 call  curry(self, instance)
+    -> toolz.functoolz.curry.__init__
+
+[toolz.functoolz.curry.__reduce__]
+349:21 getattr  self.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; func is an InstanceProperty
+350:26 call  getattr(func, '__module__', None)
+    -> <builtin>.getattr
+351:27 call  getattr(func, '__qualname__', None)
+    -> <builtin>.getattr
+353:31 call  getattr(func, '__name__', None)
+    -> <builtin>.getattr
+    reject toolz.functoolz.Compose.__name__, toolz.functoolz.excepts.__name__: func is the wrapped callable, never a Compose or an excepts instance (B3)
+357:32 call  import_module(modname)
+    -> importlib.import_module
+358:39 call  qualname.split('.')
+    -> <builtin>.str.split
+359:30 call  isinstance(obj, curry)
+    -> <builtin>.isinstance
+360:33 call  attrs.append('func')
+    -> <builtin>.list.append
+361:31 getattr  obj.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: obj is a curry here (the isinstance test before it)
+362:30 call  getattr(obj, attr, None)
+    -> <builtin>.getattr
+    -> toolz.functoolz.curry.__get__
+    reject toolz.__getattr__: the attribute names come from the client's __qualname__; by B3 (the aiocache clause) a client name reaches an attribute hook only where the tests or the documentation use it, and the tested names on the module toolz (toolz.functoolz..., test_serialization.py:190) exist
+    note: obj walks the module and the classes along the qualname; a curry stored on a class (a method decorated with @toolz.curry, test_serialization.py:74-109) is found through curry.__get__ with no instance
+365:29 call  attrs.append(attr)
+    -> <builtin>.list.append
+366:26 call  isinstance(obj, curry)
+    -> <builtin>.isinstance
+366:47 getattr  obj.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: obj is a curry here (the isinstance test before it)
+368:36 call  '.'.join(attrs)
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal '.'
+369:26 format  {modname}
+    reject *: modname is a str
+369:36 format  {qualname}
+    reject *: qualname is a str
+372:25 call  tuple((k, v) for k, v in self.__dict__.items() if k not i...
+    -> <builtin>.tuple
+372:64 call  self.__dict__.items()
+    -> <builtin>.dict.items
+374:22 call  type(self)
+    -> <builtin>.type
+374:41 getattr  self.args
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; args is an InstanceProperty
+374:52 getattr  self.keywords
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: self is a curry; keywords is an InstanceProperty
+
+[toolz.functoolz._restore_curry]
+380:18 call  isinstance(func, str)
+    -> <builtin>.isinstance
+381:40 call  func.rsplit(':', 1)
+    -> <builtin>.str.rsplit
+382:28 call  import_module(modname)
+    -> importlib.import_module
+383:35 call  qualname.split('.')
+    -> <builtin>.str.split
+384:26 call  getattr(obj, attr)
+    -> <builtin>.getattr
+    -> toolz.functoolz.curry.__get__
+    reject toolz.__getattr__: the path is one that curry.__reduce__ resolved to a curry, so every attribute exists in its namespace
+    note: as at 362:30; a curry on a class is found through curry.__get__
+387:20 getattr  obj.func
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: obj is the curry that the pickled path names
+388:14 call  cls(func, *args, **(kwargs or {}))
+    -> toolz.functoolz.curry.__init__
+    note: cls is type(self) of the pickled curry (curry.__reduce__): curry or a client subclass that inherits its __init__
+389:24 call  obj.__dict__.update(userdict)
+    -> <builtin>.dict.update
+
+[toolz.functoolz.memoize]
+434:39 call  has_keywords(func)
+    -> toolz.functoolz.has_keywords
+436:28 call  is_arity(1, func)
+    -> toolz.functoolz.is_arity
+466:31 getattr  func.__name__
+    reject *: func is a client callable or a curry (test_functoolz.py:106), whose __name__ is a str in its __dict__; no Compose or excepts is passed to memoize (B3)
+469:26 getattr  func.__doc__
+    reject *: func is a client callable or a curry, whose __doc__ is in its __dict__ (no descriptor)
+
+[toolz.functoolz.memoize.key]
+449:30 call  frozenset(kwargs.items())
+    -> <builtin>.frozenset
+449:43 call  kwargs.items()
+    -> <builtin>.dict.items
+
+[toolz.functoolz.memoize.memof]
+456:16 call  key(args, kwargs)
+    -> toolz.functoolz.memoize.key
+    note: key is memoize's own key function (one of the three definitions, one node) or a client key (opaque)
+460:28 call  TypeError("Arguments to memoized function must be hashable")
+    -> <builtin>.TypeError
+462:37 call  func(*args, **kwargs)
+    -> toolz.functoolz.curry.__call__
+    reject toolz.functoolz.curry.func: func is the memoized callable, not the property of a curry
+    note: func is a client callable (opaque) or a curry, which the tests memoize (test_functoolz.py:106)
+
+[toolz.functoolz._InstanceAnnotations.__get__]
+487:50 call  self.fget(obj)
+    -> toolz.functoolz.Compose._combined_annotations
+    note: the only _InstanceAnnotations (a private class) is Compose.__annotations__, whose fget is Compose._combined_annotations (functoolz.py:628)
+
+[toolz.functoolz.Compose.__init__]
+499:22 call  tuple(reversed(funcs))
+    -> <builtin>.tuple
+499:31 call  reversed(funcs)
+    -> <builtin>.reversed
+
+[toolz.functoolz.Compose.__call__]
+504:25 call  self.first(*args, **kwargs)
+    -> toolz.functoolz.Compose.__call__
+    -> toolz.functoolz.curry.__call__
+    -> toolz.itertoolz.frequencies
+    -> toolz.itertoolz.concat
+    reject toolz.itertoolz.first: self.first is the slot of the composition; the function first is not a documented or tested argument of compose
+    note: self.first is the last argument of compose (J1, the compose role): a client callable (opaque), a Compose (test_functoolz.py:822, complement(complement(iseven)); :702), a curry (README.rst:67 map(stem); doc/source/streaming-analytics.rst:91 pluck(2); functoolz.py:787 do(log.append); test_functoolz.py:700), frequencies (README.rst:67) or concat (doc/source/parallelism.rst:53); the variadic role does not fix a documented function to its example position
+506:20 call  f(ret)
+    -> toolz.functoolz.Compose.__call__
+    -> toolz.functoolz.curry.__call__
+    -> toolz.itertoolz.frequencies
+    -> toolz.itertoolz.concat
+    -> operator.not_
+    note: f is one of the other arguments of compose (as at 504:25), or operator.not_, which complement puts first (functoolz.py:737)
+
+[toolz.functoolz.Compose.__doc__]
+529:29 call  composed_doc(*reversed((self.first,) + self.funcs))
+    -> toolz.functoolz.Compose.__doc__.composed_doc
+529:39 call  reversed((self.first,) + self.funcs)
+    -> <builtin>.reversed
+
+[toolz.functoolz.Compose.__doc__.composed_doc]
+524:22 format  {fs[0].__name__}
+    reject *: the formatted value is a __name__, a str
+524:29 getattr  fs[0].__name__
+    -> toolz.functoolz.Compose.__name__
+    reject toolz.functoolz.excepts.__name__: no excepts is an argument of compose (B3)
+    note: fs holds the composed callables (J1); a nested Compose's __name__ is the property Compose.__name__
+524:39 format  {composed_doc(*fs[1:])}
+    reject *: composed_doc returns a str
+524:52 call  composed_doc(*fs[1:])
+    -> toolz.functoolz.Compose.__doc__.composed_doc
+
+[toolz.functoolz.Compose.__name__]
+538:31 call  '_of_'.join( f.__name__ for f in reversed((self.first,) +...
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal '_of_'
+539:19 getattr  f.__name__
+    -> toolz.functoolz.Compose.__name__
+    reject toolz.functoolz.excepts.__name__: no excepts is an argument of compose (B3)
+    note: as at 524:29
+539:45 call  reversed((self.first,) + self.funcs)
+    -> <builtin>.reversed
+542:24 call  type(self)
+    -> <builtin>.type
+542:31 getattr  type(self).__name__
+    reject *: the name of a class comes from the type's own __name__ descriptor, which takes precedence over the property in the class
+
+[toolz.functoolz.Compose.__repr__]
+545:50 call  '{.__class__.__name__}{!r}'.format( self, tuple(reversed(...
+    -> <builtin>.str.format
+    -> toolz.functoolz.Compose.__repr__
+    -> toolz.functoolz.curry.__repr__
+    reject toolz.functoolz.Compose.__name__, toolz.functoolz.excepts.__name__: {.__class__.__name__} reads the name of the class Compose through the type's own descriptor
+    reject toolz.functoolz.curry.__str__, toolz.sandbox.core.EqualityHashKey.__repr__, toolz.sandbox.core.EqualityHashKey.__str__: !r calls repr; no EqualityHashKey is composed (B3)
+    note: {!r} formats the tuple of the composed callables with repr, which calls the __repr__ of a nested Compose or a curry (J1)
+546:24 call  tuple(reversed((self.first, ) + self.funcs))
+    -> <builtin>.tuple
+546:33 call  reversed((self.first, ) + self.funcs)
+    -> <builtin>.reversed
+
+[toolz.functoolz.Compose.__eq__]
+549:22 call  isinstance(other, Compose)
+    -> <builtin>.isinstance
+550:32 op  other.first == self.first
+    -> toolz.functoolz.curry.__eq__
+    -> toolz.functoolz.Compose.__eq__
+    note: other and self are Compose; their firsts are composed callables (J1): a curry or a nested Compose compares with its own __eq__ (or reflected, against a function)
+550:62 op  other.funcs == self.funcs
+    -> toolz.functoolz.curry.__eq__
+    -> toolz.functoolz.Compose.__eq__
+    note: comparing the tuples compares the composed callables (as at 550:32)
+
+[toolz.functoolz.Compose.__ne__]
+554:31 call  self.__eq__(other)
+    -> toolz.functoolz.Compose.__eq__
+    reject *: self is a Compose
+
+[toolz.functoolz.Compose.__hash__]
+558:20 call  hash(self.first)
+    -> <builtin>.hash
+    -> toolz.functoolz.Compose.__hash__
+    -> toolz.functoolz.curry.__hash__
+    reject toolz.itertoolz.first: self.first is the slot of the composition (as at 504:25)
+    note: self.first is a composed callable (J1); a curry or a nested Compose hashes with its own __hash__
+558:39 call  hash(self.funcs)
+    -> <builtin>.hash
+    -> toolz.functoolz.Compose.__hash__
+    -> toolz.functoolz.curry.__hash__
+    note: hashing the tuple hashes the composed callables (as at 558:20)
+
+[toolz.functoolz.Compose.__get__]
+565:51 call  MethodType(self, obj)
+    -> types.MethodType
+
+[toolz.functoolz.Compose.__signature__]
+570:33 call  inspect.signature(self.first)
+    -> inspect.signature
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject toolz.itertoolz.first: self.first is the slot of the composition (as at 504:25)
+    note: for a curry, inspect.signature loads its __signature__; for a nested Compose, inspect.unwrap loads __wrapped__ and __signature__, and inspect.signature loads __signature__: all InstanceProperties (J6)
+571:33 call  inspect.signature(self.funcs[-1])
+    -> inspect.signature
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: as at 570:33
+572:28 call  base.replace(return_annotation=last.return_annotation)
+    -> inspect.Signature.replace
+
+[toolz.functoolz.Compose._combined_annotations]
+598:38 op  annotation_format != annotationlib.Format.VALUE
+    reject *: annotation_format is an annotationlib.Format, an enum (Python 3.14 and later)
+618:37 call  annotations_of(self.first)
+    -> toolz.functoolz.Compose._combined_annotations.annotations_of
+    reject toolz.itertoolz.first: self.first is the slot of the composition (as at 504:25)
+619:24 call  annotations.pop('return', None)
+    -> <builtin>.dict.pop
+621:42 call  annotations_of(last)
+    -> toolz.functoolz.Compose._combined_annotations.annotations_of
+
+[toolz.functoolz.Compose._combined_annotations.annotations_of]
+601:26 call  isinstance(func, Compose)
+    -> <builtin>.isinstance
+602:50 call  func._combined_annotations(annotation_format)
+    -> toolz.functoolz.Compose._combined_annotations
+604:40 call  inspect.signature(func, **kwargs)
+    -> inspect.signature
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: func is a composed callable that is not a Compose (J1); for a curry, inspect.signature loads its __signature__ (J6)
+612:58 call  sig.parameters.items()
+    -> types.MappingProxyType.items
+
+[toolz.functoolz.Compose._get_annotate.annotate]
+637:63 call  annotationlib.annotations_to_string( self._combined_annot...
+    -> annotationlib.annotations_to_string
+638:51 call  self._combined_annotations(format)
+    -> toolz.functoolz.Compose._combined_annotations
+641:54 call  self._combined_annotations(format)
+    -> toolz.functoolz.Compose._combined_annotations
+642:42 call  NotImplementedError(format)
+    -> <builtin>.NotImplementedError
+
+[toolz.functoolz.compose]
+672:11 call  len(funcs)
+    -> <builtin>.len
+675:23 call  Compose(funcs)
+    -> toolz.functoolz.Compose.__init__
+
+[toolz.functoolz.compose_left]
+696:19 call  compose(*reversed(funcs))
+    -> toolz.functoolz.compose
+696:29 call  reversed(funcs)
+    -> <builtin>.reversed
+
+[toolz.functoolz.pipe]
+720:20 call  func(data)
+    -> toolz.functoolz.curry.__call__
+    -> toolz.itertoolz.concat
+    reject toolz.functoolz.curry.func: func is a piped function, not the property of a curry
+    note: func is a client function (opaque), a curry of the curried namespace, which the documentation and the benchmarks pipe (doc/source/streaming-analytics.rst:37-39, :100-101: filter(...), map(get([1, 2])), groupby(get(3)), valmap(...); bench/test_join.py:15, 31: map(range)), or concat (bench/test_join.py:15, 31); list consuming a curried map calls the bound get curry, also curry.__call__ (J1)
+
+[toolz.functoolz.complement]
+737:19 call  compose(not_, func)
+    -> toolz.functoolz.compose
+
+[toolz.functoolz.juxt.__init__]
+759:15 call  len(funcs)
+    -> <builtin>.len
+759:44 call  callable(funcs[0])
+    -> <builtin>.callable
+761:27 call  tuple(funcs)
+    -> <builtin>.tuple
+
+[toolz.functoolz.juxt.__call__]
+764:21 call  tuple(func(*args, **kwargs) for func in self.funcs)
+    -> <builtin>.tuple
+764:26 call  func(*args, **kwargs)
+    reject toolz.functoolz.curry.func: func is a juxtaposed function, not the property of a curry
+    note: the funcs are client callables (lambdas, str, int, bool, itemgetters in the docstring and the tests); no package function is passed to juxt
+
+[toolz.functoolz.do]
+795:9 call  func(x)
+    reject toolz.functoolz.curry.func: func is do's first argument, not the property of a curry
+    note: func is a client callable (log.append and a lambda in the docstring and the tests)
+
+[toolz.functoolz.flip]
+823:16 call  func(b, a)
+    reject toolz.functoolz.curry.func: func is flip's first argument, not the property of a curry
+    note: func is a client callable (div, isinstance, f in the docstring and the tests)
+
+[toolz.functoolz.excepts.__call__]
+868:25 getattr  self.func
+    reject *: self is an excepts; func is an attribute in its __dict__
+868:29 call  self.func(*args, **kwargs)
+    reject toolz.functoolz.curry.func: self.func is the wrapped client function, not the property of a curry
+    note: func is a client callable (lambdas, idx, getzero, raise_, object() in the docstring and the tests)
+870:32 call  self.handler(e)
+    -> toolz.functoolz.return_none
+    note: handler is return_none (the default, functoolz.py:861) or a client callable
+
+[toolz.functoolz.excepts.__doc__]
+878:26 call  isinstance(exc, tuple)
+    -> <builtin>.isinstance
+879:35 op  '(%s)' % ', '.join( map(attrgetter('__name__'), exc), )
+    reject *: the operand is the str that str.join returns
+879:46 call  ', '.join( map(attrgetter('__name__'), exc), )
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal ', '
+880:24 call  map(attrgetter('__name__'), exc)
+    -> <builtin>.map
+880:35 call  attrgetter('__name__')
+    -> operator.attrgetter
+883:32 getattr  exc.__name__
+    reject *: exc is a client exception class
+885:26 call  dedent( """\ A wrapper around {inst.func.__name__!r} that...
+    -> textwrap.dedent
+897:21 call  dedent( """\ A wrapper around {inst.func.__name__!r} that...
+    -> <builtin>.str.format
+    reject *: the fields format the names and docstrings of the client function and handler or of return_none (strs or None) and exc_name, a str
+902:24 call  type(self)
+    -> <builtin>.type
+902:31 getattr  type(self).__doc__
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: type(self) is excepts; its __doc__ is an InstanceProperty, which the type's __doc__ getter calls with no instance (classval)
+
+[toolz.functoolz.excepts.__name__]
+908:26 call  isinstance(exc, tuple)
+    -> <builtin>.isinstance
+909:39 call  '_or_'.join(map(attrgetter('__name__'), exc))
+    -> <builtin>.str.join
+    reject toolz.itertoolz.join: the receiver is a str literal; this is str.join
+    note: the receiver is the str literal '_or_'
+909:43 call  map(attrgetter('__name__'), exc)
+    -> <builtin>.map
+909:54 call  attrgetter('__name__')
+    -> operator.attrgetter
+911:32 getattr  exc.__name__
+    reject *: exc is a client exception class
+912:22 format  {self.func.__name__}
+    reject *: the formatted value is a str
+912:28 getattr  self.func
+    reject *: self is an excepts; func is an attribute in its __dict__
+912:33 getattr  self.func.__name__
+    reject *: self.func is a client callable
+912:53 format  {exc_name}
+    reject *: exc_name is a str
+
+[toolz.functoolz._check_sigspec]
+920:40 call  inspect.signature(func)
+    -> inspect.signature
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: func is a client callable (opaque) or a package value of the introspection role (J6): a curry (inspect.signature loads its __signature__), the class curry or Compose (inspect.signature loads __signature__, and unwrap loads Compose.__wrapped__ before Python 3.14: InstanceProperties with classval None), a function, a lambda or another class
+923:18 call  isinstance(sigspec, ValueError)
+    -> <builtin>.isinstance
+924:34 call  builtin_func(*builtin_args)
+    -> toolz._signatures._num_required_args
+    -> toolz._signatures._has_varargs
+    -> toolz._signatures._has_keywords
+    -> toolz._signatures._is_valid_args
+    -> toolz._signatures._is_partial_args
+    -> toolz._signatures._is_arity
+    note: builtin_func is the registry function that each caller passes (functoolz.py:959, 969, 977, 986, 998, 1024)
+925:24 call  isinstance(sigspec, inspect.Signature)
+    -> <builtin>.isinstance
+927:18 op  func in _sigs.signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: this test runs when inspect.signature raised TypeError (a curry with bad bound arguments, test_inspect_args.py:337) or when the caller passed a sigspec that is not a Signature (sigspec is a public parameter of the introspection functions; client control flow counts, B5); a curry is hashed, and with a non-Signature sigspec a curry equal to toolz.flip or toolz.memoize but not identical to it (toolz.flip() returns one) is compared with the stored key by curry.__eq__ (J3)
+929:24 call  hasattr(func, '__signature__')
+    -> <builtin>.hasattr
+    -> toolz.functoolz.InstanceProperty.__get__
+    note: func is a registry key here (reached as at 927:18): for the classes curry and Compose and for the curries toolz.flip and toolz.memoize (or a curry equal to them), __signature__ is an InstanceProperty
+930:28 call  hasattr(func.__signature__, '__get__')
+    -> <builtin>.hasattr
+    reject toolz.functoolz.Compose.__signature__, toolz.functoolz.curry.__signature__: func.__signature__ is loaded at 930:34, through InstanceProperty.__get__; hasattr reads __get__ of the result (None or a Signature)
+930:34 getattr  func.__signature__
+    -> toolz.functoolz.InstanceProperty.__get__
+    reject *: the descriptor of __signature__ on curry and Compose (classes or instances) is InstanceProperty
+933:31 call  builtin_func(*builtin_args)
+    note: this branch cannot run with toolz: it needs a registry key whose __signature__ has __get__, and the __signature__ of every key is None (the classes curry and Compose: classval), a Signature (the curries toolz.flip and toolz.memoize) or absent (930:28); it serves cytoolz's objects. No callee (audit F1, ruled by the lead); the six registry functions stay callees through 924:34 and 945:31
+944:17 op  func in _sigs.signatures
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: the PyPy definition (functoolz.py:942) tests every func; a curry is hashed, and a curry equal to toolz.flip or toolz.memoize but not identical to it (toolz.flip() returns one) is compared with the stored key by curry.__eq__ (J3)
+945:31 call  builtin_func(*builtin_args)
+    -> toolz._signatures._num_required_args
+    -> toolz._signatures._has_varargs
+    -> toolz._signatures._has_keywords
+    -> toolz._signatures._is_valid_args
+    -> toolz._signatures._is_partial_args
+    -> toolz._signatures._is_arity
+    note: as at 924:34
+947:35 call  _check_sigspec_orig(sigspec, func, builtin_func, *builtin...
+    -> toolz.functoolz._check_sigspec
+    note: _check_sigspec_orig is the first definition of _check_sigspec (functoolz.py:940); both definitions are one node
+
+[toolz.functoolz.num_required_args]
+959:33 call  _check_sigspec(sigspec, func, _sigs._num_required_args, f...
+    -> toolz.functoolz._check_sigspec
+    reject toolz._signatures._num_required_args: passed as builtin_func; _check_sigspec calls it
+963:15 call  sum(1 for p in sigspec.parameters.values() if p.default i...
+    -> <builtin>.sum
+963:52 call  sigspec.parameters.values()
+    -> types.MappingProxyType.values
+
+[toolz.functoolz.has_varargs]
+969:33 call  _check_sigspec(sigspec, func, _sigs._has_varargs, func)
+    -> toolz.functoolz._check_sigspec
+    reject toolz._signatures._has_varargs: passed as builtin_func; _check_sigspec calls it
+972:15 call  any(p.kind == p.VAR_POSITIONAL for p in sigspec.parameter...
+    -> <builtin>.any
+973:50 call  sigspec.parameters.values()
+    -> types.MappingProxyType.values
+
+[toolz.functoolz.has_keywords]
+977:33 call  _check_sigspec(sigspec, func, _sigs._has_keywords, func)
+    -> toolz.functoolz._check_sigspec
+    reject toolz._signatures._has_keywords: passed as builtin_func; _check_sigspec calls it
+980:15 call  any(p.default is not p.empty or p.kind in (p.KEYWORD_ONLY...
+    -> <builtin>.any
+982:50 call  sigspec.parameters.values()
+    -> types.MappingProxyType.values
+
+[toolz.functoolz.is_valid_args]
+986:33 call  _check_sigspec(sigspec, func, _sigs._is_valid_args, func,...
+    -> toolz.functoolz._check_sigspec
+    reject toolz._signatures._is_valid_args: passed as builtin_func; _check_sigspec calls it
+991:21 call  sigspec.bind(*args, **kwargs)
+    -> inspect.Signature.bind
+    reject toolz.functoolz.curry.bind: sigspec is an inspect.Signature here
+
+[toolz.functoolz.is_partial_args]
+998:33 call  _check_sigspec(sigspec, func, _sigs._is_partial_args, fun...
+    -> toolz.functoolz._check_sigspec
+    reject toolz._signatures._is_partial_args: passed as builtin_func; _check_sigspec calls it
+1003:29 call  sigspec.bind_partial(*args, **kwargs)
+    -> inspect.Signature.bind_partial
+
+[toolz.functoolz.is_arity]
+1024:33 call  _check_sigspec(sigspec, func, _sigs._is_arity, n, func)
+    -> toolz.functoolz._check_sigspec
+    reject toolz._signatures._is_arity: passed as builtin_func; _check_sigspec calls it
+1027:28 call  num_required_args(func, sigspec)
+    -> toolz.functoolz.num_required_args
+1032:26 call  has_varargs(func, sigspec)
+    -> toolz.functoolz.has_varargs
+1035:28 call  has_keywords(func, sigspec)
+    -> toolz.functoolz.has_keywords
+
+== toolz.itertoolz
+
+[toolz.itertoolz]
+404:15 call  partial(drop, 1)
+    -> functools.partial
+    reject toolz.itertoolz.drop: stored in the partial rest; calling rest calls it (client code)
+
+[toolz.itertoolz.remove]
+27:23 call  filterfalse(predicate, seq)
+    -> itertools.filterfalse
+    note: the lazy filterfalse is returned to the client; its calls of predicate are client behaviour
+
+[toolz.itertoolz.accumulate]
+57:15 call  iter(seq)
+    -> <builtin>.iter
+60:26 call  next(seq)
+    -> <builtin>.next
+67:23 call  binop(result, elem)
+    note: binop is a client function (operator.add, operator.mul, a local binop in the docstring and the tests); no package function is passed there
+
+[toolz.itertoolz.groupby]
+100:10 getitem  d[key(item)]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: an underapplied curried get as key (toolz.curried.get(), the documented factory with other public arguments, FO) returns a new curry for each item (curry.__call__ binds on TypeError, functoolz.py:305-308, 338); equal curries are distinct objects, so the dict hashes them and compares the second with the first (Codex round 1 M04-M09)
+103:11 setitem  rv[k]
+    -> toolz.functoolz.curry.__hash__
+    note: the keys of d (100:10) can be curries; rv takes them over (distinct keys, so no comparison)
+96:20 call  callable(key)
+    -> <builtin>.callable
+97:21 call  getter(key)
+    -> toolz.itertoolz.getter
+98:32 call  collections.defaultdict(lambda: [].append)
+    -> collections.defaultdict
+    -> toolz.itertoolz.groupby.<lambda1>
+    note: the defaultdict calls its factory back at d[key(item)] (itertoolz.py:100) for a missing key, in this function
+100:14 call  key(item)
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> operator.itemgetter.__call__
+    -> toolz.itertoolz.first
+    -> toolz.itertoolz.second
+    -> toolz.functoolz.curry.__call__
+    -> toolz.functoolz.identity
+    reject toolz.functoolz.memoize.key: key here is groupby's parameter, not memoize's key function
+    note: key is a client function (opaque), getter's result for a non-callable key (itertoolz.py:97: a lambda for a list of one or no index, else an operator.itemgetter), identity (bench/test_groupby.py:8), join's leftkey (itertoolz.py:882: first, second, identity or a curried get in the tests and docs, test_itertoolz.py:412, doc/source/streaming-analytics.rst:192, :281, itertoolz.py:843, bench/test_join.py:18, 26) or a curried get (doc/source/streaming-analytics.rst:87 and :100, groupby(get(3), ...)); J1
+100:21 call  d[key(item)](item)
+    -> <builtin>.list.append
+    note: d[key(item)] is the bound append of a list that groupby.<lambda1> made
+102:24 call  d.items()
+    -> collections.defaultdict.items
+
+[toolz.itertoolz.merge_sorted]
+123:11 call  len(seqs)
+    -> <builtin>.len
+124:20 call  iter([])
+    -> <builtin>.iter
+125:13 call  len(seqs)
+    -> <builtin>.len
+126:20 call  iter(seqs[0])
+    -> <builtin>.iter
+128:21 call  kwargs.get('key', None)
+    -> <builtin>.dict.get
+    reject toolz.itertoolz.get: kwargs is the dict of keyword arguments; this is dict.get
+    note: kwargs is the **kwargs dict that the interpreter builds
+130:36 call  _merge_sorted_binary(seqs)
+    -> toolz.itertoolz._merge_sorted_binary
+132:40 call  _merge_sorted_binary_key(seqs, key)
+    -> toolz.itertoolz._merge_sorted_binary_key
+
+[toolz.itertoolz._merge_sorted_binary]
+136:14 call  len(seqs)
+    -> <builtin>.len
+138:11 call  len(L1)
+    -> <builtin>.len
+139:20 call  iter(L1[0])
+    -> <builtin>.iter
+141:36 call  _merge_sorted_binary(L1)
+    -> toolz.itertoolz._merge_sorted_binary
+143:11 call  len(L2)
+    -> <builtin>.len
+144:20 call  iter(L2[0])
+    -> <builtin>.iter
+146:36 call  _merge_sorted_binary(L2)
+    -> toolz.itertoolz._merge_sorted_binary
+149:20 call  next(seq2)
+    -> <builtin>.next
+
+[toolz.itertoolz._merge_sorted_binary_key]
+176:14 call  len(seqs)
+    -> <builtin>.len
+178:11 call  len(L1)
+    -> <builtin>.len
+179:20 call  iter(L1[0])
+    -> <builtin>.iter
+181:40 call  _merge_sorted_binary_key(L1, key)
+    -> toolz.itertoolz._merge_sorted_binary_key
+183:11 call  len(L2)
+    -> <builtin>.len
+184:20 call  iter(L2[0])
+    -> <builtin>.iter
+186:40 call  _merge_sorted_binary_key(L2, key)
+    -> toolz.itertoolz._merge_sorted_binary_key
+189:20 call  next(seq2)
+    -> <builtin>.next
+193:15 call  key(val2)
+    reject toolz.functoolz.memoize.key: key here is merge_sorted's key, not memoize's key function
+    note: key is merge_sorted's client key (lambdas, ord and a local identity in the docstring and the tests); no package function is passed there
+196:19 call  key(val1)
+    reject toolz.functoolz.memoize.key: key here is merge_sorted's key, not memoize's key function
+    note: as at 193:15
+200:27 call  key(val2)
+    reject toolz.functoolz.memoize.key: key here is merge_sorted's key, not memoize's key function
+    note: as at 193:15
+
+[toolz.itertoolz.interleave]
+231:28 call  itertools.cycle(map(iter, seqs))
+    -> itertools.cycle
+231:32 call  map(iter, seqs)
+    -> <builtin>.map
+235:27 call  next(itr)
+    -> <builtin>.next
+238:32 call  partial(operator.is_not, itr)
+    -> functools.partial
+239:36 call  itertools.cycle(itertools.takewhile(predicate, iters))
+    -> itertools.cycle
+239:56 call  itertools.takewhile(predicate, iters)
+    -> itertools.takewhile
+
+[toolz.itertoolz.unique]
+255:15 call  set()
+    -> <builtin>.set
+260:25 call  seen_add(item)
+    -> <builtin>.set.add
+    note: seen_add is the bound add of the set seen; the items are client values
+264:22 call  key(item)
+    -> toolz.functoolz.curry.__call__
+    reject toolz.functoolz.memoize.key: key here is unique's key, not memoize's key function
+    note: key is a client function (len, iseven in the docstring and the tests) or a curry of EqualityHashKey, which the tests and the docstring of EqualityHashKey pass (sandbox/tests/test_core.py:48-74, sandbox/core.py:39); J1
+265:20 op  val not in seen
+    -> toolz.sandbox.core.EqualityHashKey.__hash__
+    -> toolz.sandbox.core.EqualityHashKey.__eq__
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: a curry of EqualityHashKey with no bound key (curry(EqualityHashKey), the documented factory with other public arguments, FO) returns a new curry per item, equal but distinct: hashed and compared (Codex round 1 M10, M11)
+    note: val is an EqualityHashKey where key is one of its curries (264:22); the set hashes it, and compares it with the members of equal hash (all EqualityHashKeys of the default key share one hash, sandbox tests)
+266:25 call  seen_add(val)
+    -> <builtin>.set.add
+    -> toolz.sandbox.core.EqualityHashKey.__hash__
+    -> toolz.sandbox.core.EqualityHashKey.__eq__
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: seen_add is the bound add of the set seen; adding an EqualityHashKey hashes it and compares it with the members of equal hash (as at 265:20)
+
+[toolz.itertoolz.isiterable]
+281:13 call  iter(x)
+    -> <builtin>.iter
+
+[toolz.itertoolz.isdistinct]
+300:12 call  iter(seq)
+    -> <builtin>.iter
+301:19 call  set()
+    -> <builtin>.set
+306:21 call  seen_add(item)
+    -> <builtin>.set.add
+    note: seen_add is the bound add of the set seen
+309:19 call  len(seq)
+    -> <builtin>.len
+309:31 call  len(set(seq))
+    -> <builtin>.len
+309:35 call  set(seq)
+    -> <builtin>.set
+
+[toolz.itertoolz.take]
+322:28 call  itertools.islice(seq, n)
+    -> itertools.islice
+
+[toolz.itertoolz.tail]
+338:21 call  tuple(collections.deque(seq, n))
+    -> <builtin>.tuple
+338:39 call  collections.deque(seq, n)
+    -> collections.deque
+
+[toolz.itertoolz.drop]
+351:28 call  itertools.islice(seq, n, None)
+    -> itertools.islice
+
+[toolz.itertoolz.take_nth]
+360:28 call  itertools.islice(seq, 0, None, n)
+    -> itertools.islice
+
+[toolz.itertoolz.first]
+369:16 call  next(iter(seq))
+    -> <builtin>.next
+369:21 call  iter(seq)
+    -> <builtin>.iter
+
+[toolz.itertoolz.second]
+378:15 call  iter(seq)
+    -> <builtin>.iter
+379:9 call  next(seq)
+    -> <builtin>.next
+380:16 call  next(seq)
+    -> <builtin>.next
+
+[toolz.itertoolz.nth]
+389:18 call  isinstance(seq, (tuple, list, Sequence))
+    -> <builtin>.isinstance
+392:20 call  next(itertools.islice(seq, n, None))
+    -> <builtin>.next
+392:37 call  itertools.islice(seq, n, None)
+    -> itertools.islice
+
+[toolz.itertoolz.last]
+401:16 call  tail(1, seq)
+    -> toolz.itertoolz.tail
+
+[toolz.itertoolz.get]
+450:22 call  isinstance(ind, list)
+    -> <builtin>.isinstance
+452:23 call  len(ind)
+    -> <builtin>.len
+453:47 call  operator.itemgetter(*ind)
+    -> operator.itemgetter
+453:53 call  operator.itemgetter(*ind)(seq)
+    -> operator.itemgetter.__call__
+    note: the callee is the operator.itemgetter made at 453:47
+459:29 call  tuple(_get(i, seq, default) for i in ind)
+    -> <builtin>.tuple
+459:34 call  _get(i, seq, default)
+    -> toolz.itertoolz._get
+460:22 op  default != no_default
+    reject *: default is a client value (B3) and no_default a str
+
+[toolz.itertoolz.concat]
+486:41 call  itertools.chain.from_iterable(seqs)
+    -> itertools.chain.from_iterable
+
+[toolz.itertoolz.concatv]
+498:18 call  concat(seqs)
+    -> toolz.itertoolz.concat
+
+[toolz.itertoolz.mapcat]
+508:18 call  concat(map(func, seqs))
+    -> toolz.itertoolz.concat
+    note: the chain over the lazy map is returned to the client; its calls of func are client behaviour
+508:22 call  map(func, seqs)
+    -> <builtin>.map
+
+[toolz.itertoolz.cons]
+517:27 call  itertools.chain([el], seq)
+    -> itertools.chain
+
+[toolz.itertoolz.interpose]
+528:21 call  concat(zip(itertools.repeat(el), seq))
+    -> toolz.itertoolz.concat
+528:25 call  zip(itertools.repeat(el), seq)
+    -> <builtin>.zip
+528:42 call  itertools.repeat(el)
+    -> itertools.repeat
+530:13 call  next(inposed)
+    -> <builtin>.next
+532:20 call  iter([])
+    -> <builtin>.iter
+
+[toolz.itertoolz.frequencies]
+548:10 getitem  d[item]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: countby's map, or the documented composition compose(frequencies, map(get(...))) (README.rst:67, doc/source/streaming-analytics.rst:38), can yield curries: an underapplied curried get returns one per item, equal but distinct (Codex round 1 M13, M14)
+548:10 setitem  d[item]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: countby's map, or the documented composition compose(frequencies, map(get(...))) (README.rst:67, doc/source/streaming-analytics.rst:38), can yield curries: an underapplied curried get returns one per item, equal but distinct (Codex round 1 M13, M14)
+546:32 call  collections.defaultdict(int)
+    -> collections.defaultdict
+547:17 iter  seq
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> toolz.functoolz.curry.__call__
+    note: compose(frequencies, map(get(0))) hands frequencies a map that the curried map made with a curried get (README.rst:67, doc/source/streaming-analytics.rst:38; FO, Codex round 1 M12)
+    note: countby passes frequencies a lazy map of its key (recipes.py:23); for a non-callable key that key is getter's result, a lambda for a list of one or no index (README "Limits of the site finder": an iteration of a map with a package callback). Other seqs are client iterables or the documented chains and maps over client functions (README.rst:67, doc/source/laziness.rst:90)
+549:16 call  dict(d)
+    -> <builtin>.dict
+
+[toolz.itertoolz.reduceby]
+622:14 op  k not in d
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: key can be an underapplied curried get that returns equal curries (as at groupby 100:10; Codex round 1 M08, M09)
+624:18 setitem  d[k]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: key can be an underapplied curried get that returns equal curries (as at groupby 100:10; Codex round 1 M08, M09)
+627:18 setitem  d[k]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: key can be an underapplied curried get that returns equal curries (as at groupby 100:10; Codex round 1 M08, M09)
+628:10 setitem  d[k]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: key can be an underapplied curried get that returns equal curries (as at groupby 100:10; Codex round 1 M08, M09)
+628:23 getitem  d[k]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: key can be an underapplied curried get that returns equal curries (as at groupby 100:10; Codex round 1 M08, M09)
+614:42 call  callable(init)
+    -> <builtin>.callable
+617:20 call  callable(key)
+    -> <builtin>.callable
+618:21 call  getter(key)
+    -> toolz.itertoolz.getter
+621:16 call  key(item)
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> operator.itemgetter.__call__
+    -> toolz.functoolz.curry.__call__
+    reject toolz.functoolz.memoize.key: key here is reduceby's key, not memoize's key function
+    note: key is a client function, getter's result for a non-callable key (itertoolz.py:618) or a curried get (doc/source/streaming-analytics.rst:155, reduceby(get(3), binop, accounts, 0)); J1
+627:28 call  init()
+    -> toolz.itertoolz.reduceby.<lambda1>
+    note: init is reduceby.<lambda1> (itertoolz.py:616, for a non-callable init) or a client callable (set in the tests)
+628:21 call  binop(d[k], item)
+    note: binop is a client function (operator.add, operator.mul, lambdas, set_add in the docstring, the tests and the documentation); no package function is passed there
+
+[toolz.itertoolz.iterate]
+659:17 call  func(x)
+    reject toolz.functoolz.curry.func: func is iterate's first argument, not the property of a curry
+    note: func is a client function (inc, double in the docstring and the tests)
+
+[toolz.itertoolz.sliding_window]
+675:15 call  zip(*(collections.deque(itertools.islice(it, i), 0) or it...
+    -> <builtin>.zip
+675:35 call  collections.deque(itertools.islice(it, i), 0)
+    -> collections.deque
+675:52 call  itertools.islice(it, i)
+    -> itertools.islice
+676:38 call  enumerate(itertools.tee(seq, n))
+    -> <builtin>.enumerate
+676:52 call  itertools.tee(seq, n)
+    -> itertools.tee
+
+[toolz.itertoolz.partition]
+700:17 call  iter(seq)
+    -> <builtin>.iter
+702:19 call  zip(*args)
+    -> <builtin>.zip
+704:27 call  zip_longest(*args, fillvalue=pad)
+    -> itertools.zip_longest
+
+[toolz.itertoolz.partition_all]
+721:17 call  iter(seq)
+    -> <builtin>.iter
+722:21 call  zip_longest(*args, fillvalue=no_pad)
+    -> itertools.zip_longest
+724:20 call  next(it)
+    -> <builtin>.next
+734:22 call  len(seq)
+    -> <builtin>.len
+734:28 op  len(seq) % n
+    reject *: both operands are ints
+736:34 call  LookupError( 'The sequence passed to `parition_all` has i...
+    -> <builtin>.LookupError
+
+[toolz.itertoolz.count]
+767:15 call  hasattr(seq, '__len__')
+    -> <builtin>.hasattr
+768:19 call  len(seq)
+    -> <builtin>.len
+769:15 call  sum(1 for i in seq)
+    -> <builtin>.sum
+
+[toolz.itertoolz.pluck]
+796:21 call  getter(ind)
+    -> toolz.itertoolz.getter
+797:19 call  map(get, seqs)
+    -> <builtin>.map
+    note: the lazy map is returned; unzip, partitionby and the client consume it outside this function
+798:20 call  isinstance(ind, list)
+    -> <builtin>.isinstance
+799:22 call  tuple(_get(item, seq, default) for item in ind)
+    -> <builtin>.tuple
+799:27 call  _get(item, seq, default)
+    -> toolz.itertoolz._get
+801:17 call  _get(ind, seq, default)
+    -> toolz.itertoolz._get
+
+[toolz.itertoolz.getter]
+805:18 call  isinstance(index, list)
+    -> <builtin>.isinstance
+806:15 call  len(index)
+    -> <builtin>.len
+810:39 call  operator.itemgetter(*index)
+    -> operator.itemgetter
+814:35 call  operator.itemgetter(index)
+    -> operator.itemgetter
+
+[toolz.itertoolz.join]
+888:20 op  key in d
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+889:36 getitem  d[key]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+895:20 op  key in d
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+896:36 getitem  d[key]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+909:24 op  key in d
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+910:40 getitem  d[key]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+917:24 op  key in d
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+918:40 getitem  d[key]
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+924:20 op  key not in seen_keys
+    -> toolz.functoolz.curry.__hash__
+    -> toolz.functoolz.curry.__eq__
+    note: leftkey and rightkey (one role, F2) can be underapplied curried gets that return equal curries (as at groupby 100:10; Codex round 1 M06, M07)
+877:20 call  callable(leftkey)
+    -> <builtin>.callable
+878:25 call  getter(leftkey)
+    -> toolz.itertoolz.getter
+879:20 call  callable(rightkey)
+    -> <builtin>.callable
+880:26 call  getter(rightkey)
+    -> toolz.itertoolz.getter
+882:16 call  groupby(leftkey, leftseq)
+    -> toolz.itertoolz.groupby
+887:27 call  rightkey(item)
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> operator.itemgetter.__call__
+    -> toolz.itertoolz.first
+    -> toolz.itertoolz.second
+    -> toolz.functoolz.identity
+    -> toolz.functoolz.curry.__call__
+    note: rightkey is a client function, getter's result for a non-callable key (itertoolz.py:880), first or second, which the tests, the docstring and the documentation pass (test_itertoolz.py:412, itertoolz.py:843, doc/source/streaming-analytics.rst:192, :281), identity (bench/test_join.py:18, 26, 34), or a curried get: join's docstring treats the key arguments as one role (itertoolz.py:867-869), and bench/test_join.py:18 passes get(0) as leftkey (audit F2, ruled by the lead); J1
+891:23 op  left_default != no_default
+    reject *: left_default is a client value (B3) and no_default a str
+894:27 call  rightkey(item)
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> operator.itemgetter.__call__
+    -> toolz.itertoolz.first
+    -> toolz.itertoolz.second
+    -> toolz.functoolz.identity
+    -> toolz.functoolz.curry.__call__
+    note: as at 887:27
+900:24 op  right_default != no_default
+    reject *: right_default is a client value (B3) and no_default a str
+901:24 call  set()
+    -> <builtin>.set
+907:31 call  rightkey(item)
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> operator.itemgetter.__call__
+    -> toolz.itertoolz.first
+    -> toolz.itertoolz.second
+    -> toolz.functoolz.identity
+    -> toolz.functoolz.curry.__call__
+    note: as at 887:27
+908:21 call  seen(key)
+    -> <builtin>.set.add
+    note: seen is the bound add of the set seen_keys
+915:31 call  rightkey(item)
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> operator.itemgetter.__call__
+    -> toolz.itertoolz.first
+    -> toolz.itertoolz.second
+    -> toolz.functoolz.identity
+    -> toolz.functoolz.curry.__call__
+    note: as at 887:27
+916:21 call  seen(key)
+    -> <builtin>.set.add
+    note: seen is the bound add of the set seen_keys
+923:36 call  d.items()
+    -> <builtin>.dict.items
+    note: d is the dict that groupby returns
+
+[toolz.itertoolz.diff]
+946:12 call  len(seqs)
+    -> <builtin>.len
+947:29 call  isinstance(seqs[0], list)
+    -> <builtin>.isinstance
+949:16 call  len(seqs)
+    -> <builtin>.len
+951:24 call  TypeError('Too few sequences given (min 2 required)')
+    -> <builtin>.TypeError
+952:25 call  kwargs.get('default', no_default)
+    -> <builtin>.dict.get
+    reject toolz.itertoolz.get: kwargs is the dict of keyword arguments; this is dict.get
+    note: kwargs is the **kwargs dict that the interpreter builds
+954:20 call  zip(*seqs)
+    -> <builtin>.zip
+956:28 call  zip_longest(*seqs, fillvalue=default)
+    -> itertools.zip_longest
+957:21 call  kwargs.get('key', None)
+    -> <builtin>.dict.get
+    reject toolz.itertoolz.get: kwargs is the dict of keyword arguments; this is dict.get
+    note: kwargs is the **kwargs dict that the interpreter builds
+960:27 call  items.count(items[0])
+    -> <builtin>.tuple.count
+    reject toolz.itertoolz.count: items is a tuple that zip or zip_longest made; this is tuple.count
+960:38 op  items.count(items[0]) != N
+    reject *: both operands are ints
+964:25 call  tuple(map(key, items))
+    -> <builtin>.tuple
+    note: tuple consumes the map, which calls diff's client key (str.lower, indollars in the docstring and the tests); no package function is passed there
+964:29 call  map(key, items)
+    -> <builtin>.map
+965:26 call  vals.count(vals[0])
+    -> <builtin>.tuple.count
+    reject toolz.itertoolz.count: vals is a tuple; this is tuple.count
+965:36 op  vals.count(vals[0]) != N
+    reject *: both operands are ints
+
+[toolz.itertoolz.topk]
+985:40 call  callable(key)
+    -> <builtin>.callable
+986:21 call  getter(key)
+    -> toolz.itertoolz.getter
+987:17 call  tuple(heapq.nlargest(k, seq, key=key))
+    -> <builtin>.tuple
+987:32 call  heapq.nlargest(k, seq, key=key)
+    -> heapq.nlargest
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    note: nlargest calls key back: a client function (opaque) or getter's result for a non-callable key (itertoolz.py:986; an operator.itemgetter that library code calls is no edge)
+
+[toolz.itertoolz.peek]
+1003:20 call  iter(seq)
+    -> <builtin>.iter
+1004:16 call  next(iterator)
+    -> <builtin>.next
+1005:33 call  itertools.chain((item,), iterator)
+    -> itertools.chain
+
+[toolz.itertoolz.peekn]
+1021:20 call  iter(seq)
+    -> <builtin>.iter
+1022:19 call  tuple(take(n, iterator))
+    -> <builtin>.tuple
+1022:24 call  take(n, iterator)
+    -> toolz.itertoolz.take
+1023:35 call  itertools.chain(iter(peeked), iterator)
+    -> itertools.chain
+1023:40 call  iter(peeked)
+    -> <builtin>.iter
+
+[toolz.itertoolz.random_sample]
+1058:19 call  hasattr(random_state, 'random')
+    -> <builtin>.hasattr
+1061:30 call  Random(random_state)
+    -> random.Random
+1062:18 call  filter(lambda _: random_state.random() < prob, seq)
+    -> <builtin>.filter
+    reject toolz.itertoolz.random_sample.<lambda1>: the lazy filter is returned to the client, whose consumption calls the lambda (client behaviour)
+
+[toolz.itertoolz.random_sample.<lambda1>]
+1062:48 call  random_state.random()
+    -> random.Random.random
+    note: random_state is the random.Random that random_sample made, or the client's object with a random method; the docstring documents a random.Random (itertools.py:1053-1055; B4)
+
+== toolz.recipes
+
+[toolz.recipes.countby]
+21:20 call  callable(key)
+    -> <builtin>.callable
+22:21 call  getter(key)
+    -> toolz.itertoolz.getter
+23:23 call  frequencies(map(key, seq))
+    -> toolz.itertoolz.frequencies
+    note: frequencies iterates the map and calls key there (itertoolz.py:547)
+23:27 call  map(key, seq)
+    -> <builtin>.map
+
+[toolz.recipes.partitionby]
+46:15 call  map(tuple, pluck(1, itertools.groupby(seq, key=func)))
+    -> <builtin>.map
+46:28 call  pluck(1, itertools.groupby(seq, key=func))
+    -> toolz.itertoolz.pluck
+46:49 call  itertools.groupby(seq, key=func)
+    -> itertools.groupby
+    reject toolz.itertoolz.groupby: this is itertools.groupby
+    note: the lazy groupby is returned (inside a lazy map) to the client, whose consumption calls func (client behaviour)
+
+== toolz.sandbox.core
+
+[toolz.sandbox.core.EqualityHashKey.__init__]
+66:29 getattr  self._default_hashkey
+    reject *: _default_hashkey is a str of the class body
+67:26 call  callable(key)
+    -> <builtin>.callable
+68:30 call  getter(key)
+    -> toolz.itertoolz.getter
+
+[toolz.sandbox.core.EqualityHashKey.__hash__]
+74:29 getattr  self._default_hashkey
+    reject *: _default_hashkey is a str of the class body
+77:27 call  self.key(self.item)
+    -> toolz.itertoolz.first
+    -> toolz.itertoolz.getter.<lambda1>
+    -> toolz.itertoolz.getter.<lambda2>
+    -> operator.itemgetter.__call__
+    reject toolz.functoolz.memoize.key: self.key is EqualityHashKey's key attribute, not memoize's key function
+    note: self.key is a client callable (len, type, id in the tests), first (sandbox/tests/test_core.py:45) or getter's result for a non-callable key (core.py:68; 'firstname', ['firstname', 'age'] and 0 in the tests)
+78:20 call  hash(val)
+    -> <builtin>.hash
+
+[toolz.sandbox.core.EqualityHashKey.__eq__]
+82:26 getattr  self._default_hashkey
+    reject *: _default_hashkey is a str of the class body
+82:52 getattr  other._default_hashkey
+    reject *: other is an EqualityHashKey (a str of the class body) or a client value
+
+[toolz.sandbox.core.EqualityHashKey.__ne__]
+88:31 call  self.__eq__(other)
+    -> toolz.sandbox.core.EqualityHashKey.__eq__
+
+[toolz.sandbox.core.EqualityHashKey.__str__]
+91:23 op  '=%s=' % str(self.item)
+    reject *: the operand is the str that str() returns
+91:28 call  str(self.item)
+    -> <builtin>.str
+    reject *: item is a client value (B3)
+
+[toolz.sandbox.core.EqualityHashKey.__repr__]
+94:23 op  '=%s=' % repr(self.item)
+    reject *: the operand is the str that repr() returns
+94:29 call  repr(self.item)
+    -> <builtin>.repr
+    reject *: item is a client value (B3)
+
+[toolz.sandbox.core.unzip]
+121:15 call  iter(seq)
+    -> <builtin>.iter
+125:22 call  tuple(next(seq))
+    -> <builtin>.tuple
+125:27 call  next(seq)
+    -> <builtin>.next
+127:21 call  tuple()
+    -> <builtin>.tuple
+130:17 call  len(first)
+    -> <builtin>.len
+131:15 call  tee(cons(first, seq), niters)
+    -> itertools.tee
+131:20 call  cons(first, seq)
+    -> toolz.itertoolz.cons
+133:17 call  tuple(starmap(pluck, enumerate(seqs)))
+    -> <builtin>.tuple
+133:25 call  starmap(pluck, enumerate(seqs))
+    -> itertools.starmap
+    -> toolz.itertoolz.pluck
+    note: tuple() consumes the starmap in this function (133:17), which calls pluck back
+133:42 call  enumerate(seqs)
+    -> <builtin>.enumerate
+
+== toolz.sandbox.parallel
+
+[toolz.sandbox.parallel._reduce]
+8:32 call  functools.reduce(func, seq)
+    -> functools.reduce
+    note: functools.reduce calls func back: fold's client binop or combine (operator.add, setadd, set.union in the docstring and the tests); no package function is passed there
+10:32 call  functools.reduce(func, seq, initial)
+    -> functools.reduce
+    note: as at 8:32
+
+[toolz.sandbox.parallel.fold]
+66:27 call  partition_all(chunksize, seq)
+    -> toolz.itertoolz.partition_all
+70:22 call  map( functools.partial(_reduce, binop), chunks)
+    -> <builtin>.map
+    note: map is fold's parameter: the builtin map (the default) or a client map (pool.map in the tests; opaque, and its calls of the package partial are client behaviour)
+71:30 call  functools.partial(_reduce, binop)
+    -> functools.partial
+    -> toolz.sandbox.parallel._reduce
+    note: with the default map, list(results) (78:19) consumes the map, which calls the partial and so _reduce, in this function
+74:22 call  map( functools.partial(_reduce, binop, initial=default), ...
+    -> <builtin>.map
+    note: as at 70:22
+75:30 call  functools.partial(_reduce, binop, initial=default)
+    -> functools.partial
+    -> toolz.sandbox.parallel._reduce
+    note: as at 71:30
+78:19 call  list(results)
+    -> <builtin>.list
+80:11 call  len(results)
+    -> <builtin>.len
+83:20 call  fold(combine, results, map=map, chunksize=chunksize)
+    -> toolz.sandbox.parallel.fold
+
+== toolz.utils
+
+[toolz.utils.raises]
+3:14 call  lamda()
+    -> toolz.functoolz.apply
+    note: raises is public (toolz.utils); lamda is a client callable (the tests pass lambdas, opaque) or a package function that the tests pass there: test_functoolz.py:54 passes apply (B2), which raises TypeError without arguments
+

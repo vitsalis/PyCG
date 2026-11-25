@@ -1,0 +1,4114 @@
+default reject tablib._vendor.dbfpy.dbf.Dbf.__getitem__: the subscripted, iterated, unpacked or searched value is not a Dbf (a str, bytes, list, tuple, dict, set, Row, Dataset, DbfRecord, struct result, regex match, library object or client value); only the sites that subscript or iterate a Dbf (DBFFormat.import_set, demo_read, dbfnew's __main__ block) accept the candidate
+default reject tablib._vendor.dbfpy.header.DbfHeader.__getitem__: no package code subscripts, iterates, unpacks or searches a DbfHeader; the headers are reached only through attribute loads (fields, recordCount, headerLength, recordLength, changed) and method calls
+default reject tablib._vendor.dbfpy.record.DbfRecord.__getitem__: the subscripted, iterated, unpacked or searched value is not a DbfRecord; only the subscripts of a record (DBFFormat.import_set, DbfRecord.__repr__, dbfnew's __main__ block) accept the candidate
+default reject tablib.core.Dataset.__getitem__: the subscripted, iterated, unpacked or searched value is not a Dataset (a str, bytes, list, tuple, dict, set, Row, headers list, library object or client value); only the sites that subscript or iterate a Dataset accept the candidate (Dataset has no __iter__, so iteration falls back to __getitem__)
+default reject tablib.core.Row.__getitem__: the subscripted value is not a Row (Row defines __iter__, so iterating a Row never calls __getitem__); only the sites that subscript a Row of Dataset._data accept the candidate
+default reject tablib.core.Row.__iter__: the iterated, unpacked or searched value is not a Row; only the sites that iterate a Row of Dataset._data (or a Row that the package passes as a row) accept the candidate
+default reject tablib._vendor.dbfpy.utils.classproperty.__get__, tablib.formats.ImportExportBookDescriptor.__get__, tablib.formats.ImportExportSetDescriptor.__get__: the loaded attribute is not bound to one of these descriptors on the receiver's class: classproperty objects are only the defaultValue of DbfDateFieldDef and DbfDateTimeFieldDef (fields.py:366, 400), and the format descriptors are only the format keys that Registry.register sets on Dataset and Databook; only defaultValue loads on field definitions and the load of dset.html (_html.py:53) accept a candidate
+default reject tablib._vendor.dbfpy.fields.DbfFieldDef.__eq__, tablib._vendor.dbfpy.utils._InvalidValue.__eq__: no operand of this comparison, `in` test, list search or dict key lookup is a field definition or INVALID_VALUE; the package never compares field definitions, and INVALID_VALUE never leaves dbfpy in a package flow (every Dbf of the package has ignoreErrors False, J5); the compared values are strs, bytes, ints, floats, types, None, lists, tuples, headers and cells of client data
+default reject tablib._vendor.dbfpy.dbf.Dbf.__len__, tablib.core.Dataset.__len__, tablib.core.Row.__len__: the measured or truth-tested value is not a Dbf, Dataset or Row; only the sites whose operand is one accept the candidate
+default reject tablib._vendor.dbfpy.fields.DbfFieldDef.__hash__: no field definition is hashed: no package dict, set or dict lookup has one as a key (the registry and FLD_TYPES are keyed by type-code strs)
+default reject tablib._vendor.dbfpy.utils._InvalidValue.__bool__: INVALID_VALUE never reaches a truth test of the package (J5); only _InvalidValue.__eq__, documented as comparing INVALID_VALUE with itself, accepts it
+default reject tablib._vendor.dbfpy.dbf.Dbf.__repr__, tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__, tablib._vendor.dbfpy.header.DbfHeader.__repr__, tablib._vendor.dbfpy.record.DbfRecord.__repr__, tablib._vendor.dbfpy.utils._InvalidValue.__repr__, tablib.core.Databook.__repr__, tablib.core.Dataset.__repr__, tablib.core.Row.__repr__: the converted or formatted value is not a package object with this __repr__ (a str, int, float, date, type, stream, cell value or client value); only the repr() calls on a Dbf, DbfHeader, DbfRecord or field definition accept a candidate
+default reject tablib._vendor.dbfpy.utils._InvalidValue.__str__, tablib.core.Dataset.__str__: the converted or formatted value is not INVALID_VALUE (J5) or a Dataset: the package never converts a Dataset to str, and the converted values are cells, headers, titles, field names, numbers, dates and client values
+
+== tablib._vendor.dbfpy.dbf
+
+[tablib._vendor.dbfpy.dbf]
+142:22 call  property(lambda self: self.stream.closed)
+    -> <builtin>.property
+    reject *: property() stores the getter; it is called on attribute loads
+143:27 call  property(lambda self: self.header.recordCount)
+    -> <builtin>.property
+    reject *: property() stores the getter; it is called on attribute loads
+144:26 call  property( lambda self: [_fld.name for _fld in self.header...
+    -> <builtin>.property
+    reject *: property() stores the getter; it is called on attribute loads
+146:25 call  property(lambda self: self.header.fields)
+    -> <builtin>.property
+    reject *: property() stores the getter; it is called on attribute loads
+147:23 call  property(lambda self: self._changed or self.header.changed)
+    -> <builtin>.property
+    reject *: property() stores the getter; it is called on attribute loads
+153:28 call  property( lambda self: self._ignore_errors, ignoreErrors,...
+    -> <builtin>.property
+    reject *: property() stores the getter and the setter; they are called on attribute loads and stores
+293:16 call  len(sys.argv)
+    -> <builtin>.len
+293:27 op  len(sys.argv) > 1
+    reject *: an int comparison
+294:16 call  demo_create(_name)
+    -> tablib._vendor.dbfpy.dbf.demo_create
+295:14 call  demo_read(_name)
+    reject *: never reached: demo_create always raises TypeError in Dbf.addField (J4)
+    note: unreachable: demo_create(_name) on the line before always raises (J4)
+
+[tablib._vendor.dbfpy.dbf.Dbf.__init__]
+116:22 call  isinstance(f, str)
+    -> <builtin>.isinstance
+122:35 call  open(f, "w+b")
+    -> <builtin>.open
+125:35 call  open(f, ("r+b", "rb")[bool(readOnly)])
+    -> <builtin>.open
+125:57 call  bool(readOnly)
+    -> <builtin>.bool
+128:32 call  getattr(f, "name", "")
+    -> <builtin>.getattr
+132:43 call  self.HeaderClass()
+    -> tablib._vendor.dbfpy.header.DbfHeader.__init__
+    note: HeaderClass is the class attribute header.DbfHeader; Dbf has __slots__, no package subclass and no assignment of HeaderClass
+135:54 call  self.HeaderClass.fromStream(self.stream)
+    -> tablib._vendor.dbfpy.header.DbfHeader.fromStream
+    reject tablib._vendor.dbfpy.record.DbfRecord.fromStream: HeaderClass is header.DbfHeader
+    note: HeaderClass is the class attribute header.DbfHeader (see 132:43)
+136:14 setattr  self.ignoreErrors
+    -> tablib._vendor.dbfpy.dbf.Dbf.ignoreErrors
+    reject *: the store of the Dbf property ignoreErrors runs its setter Dbf.ignoreErrors (dbf.py:149)
+137:25 call  bool(new)
+    -> <builtin>.bool
+
+[tablib._vendor.dbfpy.dbf.Dbf.<lambda1>]
+142:48 getattr  self.stream.closed
+    reject *: closed is loaded from the stream (a file object), not from a Dbf
+
+[tablib._vendor.dbfpy.dbf.Dbf.<lambda2>]
+143:53 getattr  self.header.recordCount
+    reject *: recordCount is loaded from the DbfHeader (a slot), not from a Dbf
+
+[tablib._vendor.dbfpy.dbf.Dbf.<lambda5>]
+147:66 getattr  self.header.changed
+    reject *: changed is loaded from the DbfHeader (a slot), not from a Dbf
+
+[tablib._vendor.dbfpy.dbf.Dbf.ignoreErrors]
+151:21 setattr  self.header.ignoreErrors
+    -> tablib._vendor.dbfpy.header.DbfHeader.ignoreErrors
+    reject *: self.header is a DbfHeader; the store runs its property setter DbfHeader.ignoreErrors (header.py:143)
+151:62 call  bool(value)
+    -> <builtin>.bool
+
+[tablib._vendor.dbfpy.dbf.Dbf._fixIndex]
+179:26 call  isinstance(index, int)
+    -> <builtin>.isinstance
+180:28 call  TypeError("Index must be a numeric object")
+    -> <builtin>.TypeError
+    note: reachable through Dbf.__setitem__, which the package never calls; its index is judged as public (J4)
+181:18 op  index < 0
+    reject *: an int comparison
+184:25 call  len(self)
+    -> <builtin>.len
+    -> tablib._vendor.dbfpy.dbf.Dbf.__len__
+185:24 call  len(self)
+    -> <builtin>.len
+    -> tablib._vendor.dbfpy.dbf.Dbf.__len__
+186:29 call  IndexError("Record index out of range")
+    -> <builtin>.IndexError
+
+[tablib._vendor.dbfpy.dbf.Dbf.close]
+192:19 call  self.flush()
+    -> tablib._vendor.dbfpy.dbf.Dbf.flush
+193:26 call  self.stream.close()
+    -> io.BufferedRandom.close
+    -> io.BufferedReader.close
+    reject *: self.stream is a file object
+    note: the stream of a closed Dbf: open(path, "r+b") in DBFFormat.export_set (BufferedRandom); open(filename, "rb") in demo_read, which the package never calls (BufferedReader, J4)
+
+[tablib._vendor.dbfpy.dbf.Dbf.flush]
+197:17 getattr  self.changed
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda5>
+198:39 call  self.header.setCurrentDate()
+    -> tablib._vendor.dbfpy.header.DbfHeader.setCurrentDate
+199:30 call  self.header.write(self.stream)
+    -> tablib._vendor.dbfpy.header.DbfHeader.write
+    reject tablib._vendor.dbfpy.dbfnew.dbf_new.write: self.header is a DbfHeader
+200:30 call  self.stream.flush()
+    -> io.BufferedRandom.flush
+    reject *: self.stream is a file object
+    note: changed is true only for the Dbf of DBFFormat.export_set, opened with "r+b"
+
+[tablib._vendor.dbfpy.dbf.Dbf.indexOfFieldName]
+207:27 call  names.index(name.upper())
+    -> <builtin>.list.index
+    note: names is the list that the comprehension of line 206 makes
+207:38 call  name.upper()
+    -> <builtin>.bytes.upper
+    -> <builtin>.str.upper
+    note: name is a field name: a header of the exported Dataset (documented as strings; bytes from a YAML !!binary key, Codex round 1 T03) or a field name that the package reads
+
+[tablib._vendor.dbfpy.dbf.Dbf.newRecord]
+211:32 call  self.RecordClass(self)
+    -> tablib._vendor.dbfpy.record.DbfRecord.__init__
+    note: RecordClass is the class attribute record.DbfRecord (Dbf has __slots__ and no package subclass)
+
+[tablib._vendor.dbfpy.dbf.Dbf.append]
+215:36 getattr  self.header.recordCount
+    reject *: recordCount is loaded from the DbfHeader (a slot)
+216:22 call  record._write()
+    -> tablib._vendor.dbfpy.record.DbfRecord._write
+217:21 getattr  self.header.recordCount
+    reject *: recordCount is loaded from the DbfHeader (a slot)
+217:21 setattr  self.header.recordCount
+    reject *: recordCount is stored on the DbfHeader (a slot)
+
+[tablib._vendor.dbfpy.dbf.Dbf.addField]
+228:33 call  self.header.addField(*defs)
+    -> tablib._vendor.dbfpy.header.DbfHeader.addField
+    reject tablib._vendor.dbfpy.dbf.Dbf.addField: self.header is a DbfHeader
+230:28 call  TypeError("At least one record was added, " "structure ca...
+    note: unreachable: the only caller, demo_create, calls addField on a new Dbf, whose _new is true (J4)
+
+[tablib._vendor.dbfpy.dbf.Dbf.__repr__]
+236:54 call  repr(self.header)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.header.DbfHeader.__repr__
+
+[tablib._vendor.dbfpy.dbf.Dbf.__len__]
+240:21 getattr  self.recordCount
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda2>
+
+[tablib._vendor.dbfpy.dbf.Dbf.__getitem__]
+244:43 call  self.RecordClass.fromStream(self, self._fixIndex(index))
+    -> tablib._vendor.dbfpy.record.DbfRecord.fromStream
+    reject tablib._vendor.dbfpy.header.DbfHeader.fromStream: RecordClass is record.DbfRecord
+    note: RecordClass is the class attribute record.DbfRecord
+244:64 call  self._fixIndex(index)
+    -> tablib._vendor.dbfpy.dbf.Dbf._fixIndex
+
+[tablib._vendor.dbfpy.dbf.Dbf.__setitem__]
+248:38 call  self._fixIndex(index)
+    -> tablib._vendor.dbfpy.dbf.Dbf._fixIndex
+249:22 call  record._write()
+    -> tablib._vendor.dbfpy.record.DbfRecord._write
+
+[tablib._vendor.dbfpy.dbf.demo_read]
+259:15 call  Dbf(filename, True)
+    -> tablib._vendor.dbfpy.dbf.Dbf.__init__
+260:17 iter  _dbf
+    -> tablib._vendor.dbfpy.dbf.Dbf.__getitem__
+    reject *: _dbf is a Dbf, which has no __iter__: iteration calls __getitem__ until _fixIndex raises IndexError
+261:14 call  print()
+    -> <builtin>.print
+262:14 call  print(repr(_rec))
+    -> <builtin>.print
+262:19 call  repr(_rec)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.record.DbfRecord.__repr__
+263:15 call  _dbf.close()
+    -> tablib._vendor.dbfpy.dbf.Dbf.close
+
+[tablib._vendor.dbfpy.dbf.demo_create]
+267:15 call  Dbf(filename, new=True)
+    -> tablib._vendor.dbfpy.dbf.Dbf.__init__
+268:18 call  _dbf.addField( ("NAME", "C", 15), ("SURNAME", "C", 25), (...
+    -> tablib._vendor.dbfpy.dbf.Dbf.addField
+    reject tablib._vendor.dbfpy.header.DbfHeader.addField: _dbf is a Dbf
+280:30 call  _dbf.newRecord()
+    reject *: unreachable: _dbf.addField always raises TypeError (lookupFor calls chr("C"), J4)
+    note: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+281:13 setitem  _rec["NAME"]
+    reject *: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+282:13 setitem  _rec["SURNAME"]
+    reject *: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+283:13 setitem  _rec["INITIALS"]
+    reject *: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+284:13 setitem  _rec["BIRTHDATE"]
+    reject *: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+285:19 call  _rec.store()
+    reject *: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+    note: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+286:10 call  print(repr(_dbf))
+    note: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+286:15 call  repr(_dbf)
+    note: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+287:15 call  _dbf.close()
+    reject *: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+    note: unreachable: _dbf.addField on line 268 always raises TypeError (J4)
+
+== tablib._vendor.dbfpy.dbfnew
+
+[tablib._vendor.dbfpy.dbfnew]
+158:19 call  dbf_new()
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.__init__
+159:19 call  dbfn.add_field("name", 'C', 80)
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.add_field
+160:19 call  dbfn.add_field("price", 'N', 10, 2)
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.add_field
+161:19 call  dbfn.add_field("date", 'D', 8)
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.add_field
+162:15 call  dbfn.write("tst.dbf")
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.write
+    reject tablib._vendor.dbfpy.header.DbfHeader.write: dbfn is a dbf_new
+164:10 call  print("*** created tst.dbf: ***")
+    -> <builtin>.print
+165:15 call  Dbf('tst.dbf', readOnly=0)
+    -> tablib._vendor.dbfpy.dbf.Dbf.__init__
+166:10 call  print(repr(dbft))
+    -> <builtin>.print
+166:15 call  repr(dbft)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.dbf.Dbf.__repr__
+168:20 call  DbfRecord(dbft)
+    -> tablib._vendor.dbfpy.record.DbfRecord.__init__
+169:8 setitem  rec['name']
+    -> tablib._vendor.dbfpy.record.DbfRecord.__setitem__
+    reject *: rec is a DbfRecord
+170:8 setitem  rec['price']
+    -> tablib._vendor.dbfpy.record.DbfRecord.__setitem__
+    reject *: rec is a DbfRecord
+171:8 setitem  rec['date']
+    -> tablib._vendor.dbfpy.record.DbfRecord.__setitem__
+    reject *: rec is a DbfRecord
+172:14 call  rec.store()
+    -> tablib._vendor.dbfpy.record.DbfRecord.store
+174:20 call  DbfRecord(dbft)
+    -> tablib._vendor.dbfpy.record.DbfRecord.__init__
+175:8 setitem  rec['name']
+    -> tablib._vendor.dbfpy.record.DbfRecord.__setitem__
+    reject *: rec is a DbfRecord
+176:8 setitem  rec['price']
+    -> tablib._vendor.dbfpy.record.DbfRecord.__setitem__
+    reject *: rec is a DbfRecord
+177:8 setitem  rec['date']
+    -> tablib._vendor.dbfpy.record.DbfRecord.__setitem__
+    reject *: rec is a DbfRecord
+178:14 call  rec.store()
+    -> tablib._vendor.dbfpy.record.DbfRecord.store
+181:10 call  print("*** inserted 2 records into tst.dbf: ***")
+    -> <builtin>.print
+182:10 call  print(repr(dbft))
+    -> <builtin>.print
+182:15 call  repr(dbft)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.dbf.Dbf.__repr__
+183:20 call  range(len(dbft))
+    -> <builtin>.range
+183:24 call  len(dbft)
+    -> <builtin>.len
+    -> tablib._vendor.dbfpy.dbf.Dbf.__len__
+184:19 getitem  dbft[i1]
+    -> tablib._vendor.dbfpy.dbf.Dbf.__getitem__
+    reject *: dbft is a Dbf
+185:29 getattr  dbft.fieldNames
+    reject *: unreachable: dbft[i1] on line 184 always raises ValueError (the date field "20000112" decodes to datetime.date(50, 48, 48), J4)
+186:18 call  print(f'{fldName}:\t {rec[fldName]}')
+    note: unreachable: dbft[i1] on line 184 always raises ValueError when it decodes the date field (J4)
+187:14 call  print()
+    note: unreachable: dbft[i1] on line 184 always raises ValueError when it decodes the date field (J4)
+188:15 call  dbft.close()
+    reject *: unreachable: dbft[i1] on line 184 always raises ValueError (J4)
+    note: unreachable: dbft[i1] on line 184 always raises ValueError when it decodes the date field (J4)
+
+[tablib._vendor.dbfpy.dbfnew._FieldDefinition.__init__]
+74:33 call  ValueError("Field length must be defined")
+    note: unreachable: every package call of dbf_new.add_field passes a length (DBFFormat.export_set: 10 and 80; the __main__ block: 80, 10 and 8)
+
+[tablib._vendor.dbfpy.dbfnew._FieldDefinition.getDbfField]
+84:24 call  self.cls(self.name, self.len, self.dec)
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__init__
+    note: self.cls is the class of FLD_TYPES[type]: DbfCharacterFieldDef and DbfNumericFieldDef (DBFFormat.export_set), DbfDateFieldDef (the __main__ block); all inherit DbfFieldDef.__init__
+
+[tablib._vendor.dbfpy.dbfnew._FieldDefinition.appendToHeader]
+93:33 call  self.getDbfField()
+    -> tablib._vendor.dbfpy.dbfnew._FieldDefinition.getDbfField
+94:22 call  dbfh.addField(_dbff)
+    -> tablib._vendor.dbfpy.header.DbfHeader.addField
+    reject tablib._vendor.dbfpy.dbf.Dbf.addField: dbfh is the DbfHeader of dbf_new.write
+
+[tablib._vendor.dbfpy.dbfnew.dbf_new.add_field]
+142:27 call  self.fields.append(self.FieldDefinitionClass(name, typ, l...
+    -> <builtin>.list.append
+    reject *: self.fields is a list
+142:53 call  self.FieldDefinitionClass(name, typ, len, dec)
+    -> tablib._vendor.dbfpy.dbfnew._FieldDefinition.__init__
+    note: FieldDefinitionClass is the class attribute _FieldDefinition (dbf_new has __slots__ ("fields",) and no package subclass)
+
+[tablib._vendor.dbfpy.dbfnew.dbf_new.write]
+146:26 call  DbfHeader()
+    -> tablib._vendor.dbfpy.header.DbfHeader.__init__
+147:29 call  _dbfh.setCurrentDate()
+    -> tablib._vendor.dbfpy.header.DbfHeader.setCurrentDate
+149:35 call  _fldDef.appendToHeader(_dbfh)
+    -> tablib._vendor.dbfpy.dbfnew._FieldDefinition.appendToHeader
+151:26 call  open(filename, "wb")
+    -> <builtin>.open
+152:20 call  _dbfh.write(_dbfStream)
+    -> tablib._vendor.dbfpy.header.DbfHeader.write
+    reject tablib._vendor.dbfpy.dbfnew.dbf_new.write: _dbfh is a DbfHeader
+153:25 call  _dbfStream.close()
+    -> io.BufferedWriter.close
+    reject *: _dbfStream is the file of open(filename, "wb")
+
+== tablib._vendor.dbfpy.fields
+
+[tablib._vendor.dbfpy.fields]
+43:2 decorator  @total_ordering
+    -> functools.total_ordering
+135:29 call  classmethod(fromString)
+    -> <builtin>.classmethod
+366:39 call  utils.classproperty(lambda cls: datetime.date.today())
+    -> <builtin>.property.__init__
+    reject *: the classproperty stores the lambda; classproperty.__get__ calls it
+400:39 call  utils.classproperty(lambda cls: datetime.datetime.now())
+    -> <builtin>.property.__init__
+    reject *: the classproperty stores the lambda; classproperty.__get__ calls it
+469:26 call  list(globals().items())
+    -> <builtin>.list
+    reject *: the builtin list
+469:34 call  globals()
+    -> <builtin>.globals
+469:42 call  globals().items()
+    -> <builtin>.dict.items
+470:18 call  isinstance(_val, type)
+    -> <builtin>.isinstance
+470:45 call  issubclass(_val, DbfFieldDef)
+    -> <builtin>.issubclass
+471:19 op  _name != "DbfFieldDef"
+    reject *: a str comparison
+472:23 call  __all__.append(_name)
+    -> <builtin>.list.append
+    reject *: __all__ is a list
+473:22 call  registerField(_val)
+    -> tablib._vendor.dbfpy.fields.registerField
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.__init__]
+81:21 getattr  self.defaultValue
+    -> tablib._vendor.dbfpy.utils.classproperty.__get__
+    reject *: defaultValue is a class attribute
+    note: defaultValue is a classproperty in DbfDateFieldDef and DbfDateTimeFieldDef (fields.py:366, 400); the assert is removed under -O, the graph is the union
+83:15 call  len(name)
+    -> <builtin>.len
+83:22 op  len(name) > 10
+    reject *: an int comparison
+84:29 call  ValueError(f"Field name \"{name}\" is too long")
+    -> <builtin>.ValueError
+85:19 call  str(name)
+    -> <builtin>.str
+85:31 call  str(name).upper()
+    -> <builtin>.str.upper
+88:33 call  ValueError(f"[{name}] Length isn't specified")
+    note: unreachable: length is never None for a class without a fixed length (fromString passes an int, getDbfField the length that dbf_new.add_field received)
+89:25 call  int(length)
+    -> <builtin>.int
+    reject *: length is an int
+91:33 call  ValueError(f"[{name}] Length must be a positive integer")
+    -> <builtin>.ValueError
+100:14 setattr  self.length
+    reject *: length is a plain class attribute; the store sets an instance attribute
+102:14 setattr  self.ignoreErrors
+    reject *: ignoreErrors is a slot of DbfFieldDef
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.__eq__]
+107:20 call  repr(self)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__
+107:34 call  repr(other)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__
+    note: no package code compares field definitions; other is judged as public, and a field definition is its role (J4)
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.__ne__]
+110:20 call  repr(self)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__
+110:27 op  repr(self) != repr(other)
+    reject *: a str comparison
+110:34 call  repr(other)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__
+    note: no package code compares field definitions; other is judged as public, and a field definition is its role (J4)
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.__lt__]
+113:20 call  repr(self)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__
+113:27 op  repr(self) < repr(other)
+    reject *: a str comparison
+113:33 call  repr(other)
+    -> <builtin>.repr
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__
+    note: no package code compares field definitions; other is judged as public, and a field definition is its role (J4)
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.__hash__]
+116:20 call  hash(self.name)
+    -> <builtin>.hash
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.fromString]
+131:19 call  len(string)
+    -> <builtin>.len
+133:19 call  cls(utils.unzfill(string)[:11].decode('utf-8'), _length, ...
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.__init__
+    note: cls is the class that lookupFor returns (DbfHeader.fromStream): one of the nine registered subclasses, all inheriting DbfFieldDef.__init__
+133:33 call  utils.unzfill(string)
+    -> tablib._vendor.dbfpy.utils.unzfill
+133:53 call  utils.unzfill(string)[:11].decode('utf-8')
+    -> <builtin>.bytes.decode
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.toString]
+145:32 call  self.name.ljust(11, '\0')
+    -> <builtin>.str.ljust
+150:16 call  chr(0)
+    -> <builtin>.chr
+151:16 call  chr(self.length)
+    -> <builtin>.chr
+152:16 call  chr(self.decimalCount)
+    -> <builtin>.chr
+153:16 call  chr(0)
+    -> <builtin>.chr
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.__repr__]
+157:36 op  "%-10s %1s %3d %3d" % self.fieldInfo()
+    reject *: the tuple holds strs and ints
+157:52 call  self.fieldInfo()
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.fieldInfo
+
+[tablib._vendor.dbfpy.fields.DbfFieldDef.decodeFromRecord]
+175:36 call  self.decodeValue(self.rawFromRecord(record))
+    -> tablib._vendor.dbfpy.fields.DbfCharacterFieldDef.decodeValue
+    -> tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.decodeValue
+    -> tablib._vendor.dbfpy.fields.DbfDateFieldDef.decodeValue
+    -> tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.decodeValue
+    -> tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.decodeValue
+    -> tablib._vendor.dbfpy.fields.DbfLogicalFieldDef.decodeValue
+    -> tablib._vendor.dbfpy.fields.DbfMemoFieldDef.decodeValue
+    -> tablib._vendor.dbfpy.fields.DbfNumericFieldDef.decodeValue
+    reject tablib._vendor.dbfpy.fields.DbfFieldDef.decodeValue: DbfFieldDef has no instance (its own __init__ fails: the assert on typeCode, and under -O the store of length, which is no slot)
+    note: the fields of a header that fromStream reads from a client file can have every registered type code; DbfFloatFieldDef inherits DbfNumericFieldDef.decodeValue
+175:55 call  self.rawFromRecord(record)
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.rawFromRecord
+177:21 getattr  self.ignoreErrors
+    reject *: ignoreErrors is a slot of the field definition
+
+[tablib._vendor.dbfpy.fields.DbfCharacterFieldDef.decodeValue]
+214:28 call  value.rstrip(b' ')
+    -> <builtin>.bytes.rstrip
+    note: value is a slice of a record that the package reads from a binary stream (J4)
+214:41 call  value.rstrip(b' ').decode('utf-8')
+    -> <builtin>.bytes.decode
+
+[tablib._vendor.dbfpy.fields.DbfCharacterFieldDef.encodeValue]
+218:19 call  str(value)
+    -> <builtin>.str
+218:46 call  str(value)[:self.length].ljust(self.length)
+    -> <builtin>.str.ljust
+
+[tablib._vendor.dbfpy.fields.DbfNumericFieldDef.decodeValue]
+241:28 call  value.strip(b' \0')
+    -> <builtin>.bytes.strip
+242:17 op  b'.' in value
+    reject *: value is bytes
+244:25 call  float(value)
+    -> <builtin>.float
+    reject *: value is bytes
+247:23 call  int(value)
+    -> <builtin>.int
+    reject *: value is bytes
+
+[tablib._vendor.dbfpy.fields.DbfNumericFieldDef.encodeValue]
+253:24 op  "%*.*f" % (self.length, self.decimalCount, value)
+    reject *: value is a cell of the exported Dataset (client data), a default 0 or a number that the package decoded; INVALID_VALUE never reaches it (J5)
+254:15 call  len(_rv)
+    -> <builtin>.len
+254:21 op  len(_rv) > self.length
+    reject *: an int comparison
+255:29 call  _rv.find(".")
+    -> <builtin>.str.find
+259:33 call  ValueError( f"[{self.name}] Numeric overflow: {_rv} (fiel...
+    -> <builtin>.ValueError
+
+[tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.decodeValue]
+280:29 call  struct.unpack("<i", value)
+    -> struct.unpack
+
+[tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.encodeValue]
+284:27 call  struct.pack("<i", int(value))
+    -> struct.pack
+284:37 call  int(value)
+    -> <builtin>.int
+    reject *: value is a decoded int or the default 0 (J4)
+
+[tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.decodeValue]
+296:29 call  struct.unpack("<q", value)
+    -> struct.unpack
+
+[tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.encodeValue]
+300:27 call  struct.pack("<q", round(value * 10000))
+    -> struct.pack
+300:39 call  round(value * 10000)
+    -> <builtin>.round
+
+[tablib._vendor.dbfpy.fields.DbfLogicalFieldDef.decodeValue]
+315:18 op  value in "NnFf "
+    reject *: value is bytes: `bytes in str` raises TypeError, so the method always raises here (J4)
+317:18 op  value in "YyTt"
+    reject *: unreachable: line 315 always raises TypeError
+319:25 call  ValueError(f"[{self.name}] Invalid logical value {value!r}")
+    note: unreachable: line 315 always raises TypeError for a bytes value (J4)
+
+[tablib._vendor.dbfpy.fields.DbfDateFieldDef.<lambda1>]
+366:71 call  datetime.date.today()
+    -> datetime.date.today
+
+[tablib._vendor.dbfpy.fields.DbfDateFieldDef.decodeValue]
+372:23 call  value.strip()
+    -> <builtin>.bytes.strip
+373:33 call  utils.getDate(value)
+    -> tablib._vendor.dbfpy.utils.getDate
+
+[tablib._vendor.dbfpy.fields.DbfDateFieldDef.encodeValue]
+388:33 call  utils.getDate(value)
+    -> tablib._vendor.dbfpy.utils.getDate
+388:49 call  utils.getDate(value).strftime("%Y%m%d")
+    -> datetime.date.strftime
+    note: getDate returns its date argument or a new datetime.date; the values are tuples (the __main__ block of dbfnew), the default date.today() and decoded dates (J4), never a datetime
+
+[tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.<lambda1>]
+400:73 call  datetime.datetime.now()
+    -> datetime.datetime.now
+
+[tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.decodeValue]
+408:19 call  len(value)
+    -> <builtin>.len
+410:37 call  struct.unpack("<2I", value)
+    -> struct.unpack
+412:48 call  datetime.datetime.fromordinal(_jdn - self.JDN_GDN_DIFF)
+    -> datetime.datetime.fromordinal
+413:38 call  datetime.timedelta(0, _msecs / 1000.0)
+    -> datetime.timedelta
+
+[tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.encodeValue]
+422:38 call  utils.getDateTime(value)
+    -> tablib._vendor.dbfpy.utils.getDateTime
+424:30 call  struct.pack("<2I", value.toordinal() + self.JDN_GDN_DIFF,...
+    -> struct.pack
+424:53 call  value.toordinal()
+    -> datetime.datetime.toordinal
+    note: value is what getDateTime returns for a datetime (J4)
+428:19 call  len(_rv)
+    -> <builtin>.len
+
+[tablib._vendor.dbfpy.fields.registerField]
+447:20 setitem  _fieldsRegistry[fieldCls.typeCode]
+    reject *: _fieldsRegistry is a dict
+
+[tablib._vendor.dbfpy.fields.lookupFor]
+464:31 call  chr(typeCode)
+    -> <builtin>.chr
+
+== tablib._vendor.dbfpy.header
+
+[tablib._vendor.dbfpy.header]
+102:29 call  classmethod(fromString)
+    -> <builtin>.classmethod
+135:29 call  classmethod(fromStream)
+    -> <builtin>.classmethod
+139:20 call  property(lambda self: self.lastUpdate.year)
+    -> <builtin>.property
+    reject *: property() stores the getter
+140:21 call  property(lambda self: self.lastUpdate.month)
+    -> <builtin>.property
+    reject *: property() stores the getter
+141:19 call  property(lambda self: self.lastUpdate.day)
+    -> <builtin>.property
+    reject *: property() stores the getter
+148:28 call  property( lambda self: self._ignore_errors, ignoreErrors,...
+    -> <builtin>.property
+    reject *: property() stores the getter and the setter
+
+[tablib._vendor.dbfpy.header.DbfHeader.__init__]
+88:31 call  list(fields)
+    reject *: unreachable: every package call passes fields=None (Dbf.__init__, fromStream, dbf_new.write)
+    note: unreachable: every package call passes fields=None
+89:34 call  getDate(lastUpdate)
+    -> tablib._vendor.dbfpy.utils.getDate
+92:14 setattr  self.recordCount
+    reject *: recordCount is a slot
+93:14 setattr  self.ignoreErrors
+    -> tablib._vendor.dbfpy.header.DbfHeader.ignoreErrors
+    reject *: the store of the DbfHeader property ignoreErrors runs its setter (header.py:143)
+96:14 setattr  self.changed
+    reject *: changed is a slot
+96:28 call  bool(self.fields)
+    -> <builtin>.bool
+
+[tablib._vendor.dbfpy.header.DbfHeader.fromString]
+101:30 call  cls.fromStream(io.StringIO(str(string)))
+    -> tablib._vendor.dbfpy.header.DbfHeader.fromStream
+    reject tablib._vendor.dbfpy.record.DbfRecord.fromStream: cls is DbfHeader
+    note: cls is DbfHeader (a classmethod of DbfHeader, which has no subclass)
+101:42 call  io.StringIO(str(string))
+    -> io.StringIO
+101:46 call  str(string)
+    -> <builtin>.str
+
+[tablib._vendor.dbfpy.header.DbfHeader.fromStream]
+107:20 call  stream.seek(0)
+    -> io.BufferedRandom.seek
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+    -> io.StringIO.seek
+    -> io.TextIOWrapper.seek
+    -> pandas.DataFrame.seek
+    note: the stream of Dbf.__init__: open(path, "r+b") (DBFFormat.export_set and dbfnew), open(path, "rb") (DBFFormat.detect with a str, demo_read), and the stream of DBFFormat.import_set and detect: StringIO, BytesIO, the documented text and binary files, a pandas DataFrame (J1, J2); fromString passes a StringIO
+108:31 call  stream.read(32)
+    -> io.BufferedRandom.read
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    -> pandas.DataFrame.read
+    note: as at 107:20
+109:26 call  isinstance(first_32, bytes)
+    -> <builtin>.isinstance
+110:26 call  bytes(first_32, sys.getfilesystemencoding())
+    -> <builtin>.bytes
+110:62 call  sys.getfilesystemencoding()
+    -> sys.getfilesystemencoding
+112:49 call  struct.unpack("<I2H", _data[4:12])
+    -> struct.unpack
+115:18 op  _year < 80
+    reject *: an int comparison
+122:19 call  cls(None, _hdrLen, _recLen, _cnt, _data[0], (_year, _data...
+    -> tablib._vendor.dbfpy.header.DbfHeader.__init__
+    note: cls is DbfHeader (Dbf.HeaderClass, or DbfHeader.fromString)
+127:28 call  stream.read(1)
+    -> io.BufferedRandom.read
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    note: only a binary stream gets past struct.unpack (line 112): a str of a text stream makes it raise TypeError, and a DataFrame raises at bytes() on line 110
+128:21 op  _data != b'\r'
+    reject *: a bytes comparison
+129:33 call  stream.read(31)
+    -> io.BufferedRandom.read
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    note: as at 127:28
+130:36 call  fields.lookupFor(_data[11])
+    -> tablib._vendor.dbfpy.fields.lookupFor
+130:58 call  fields.lookupFor(_data[11]).fromString(_data, _pos)
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.fromString
+    reject *: lookupFor returns a registered subclass of DbfFieldDef, which inherits the classmethod DbfFieldDef.fromString
+    note: the receiver is the field class that lookupFor returns
+131:27 call  _obj._addField(_fld)
+    -> tablib._vendor.dbfpy.header.DbfHeader._addField
+133:32 call  stream.read(1)
+    -> io.BufferedRandom.read
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    note: as at 127:28
+
+[tablib._vendor.dbfpy.header.DbfHeader.<lambda1>]
+139:50 getattr  self.lastUpdate.year
+    reject *: year is loaded from lastUpdate, a datetime.date
+
+[tablib._vendor.dbfpy.header.DbfHeader.<lambda2>]
+140:51 getattr  self.lastUpdate.month
+    reject *: month is loaded from lastUpdate, a datetime.date
+
+[tablib._vendor.dbfpy.header.DbfHeader.<lambda3>]
+141:49 getattr  self.lastUpdate.day
+    reject *: day is loaded from lastUpdate, a datetime.date
+
+[tablib._vendor.dbfpy.header.DbfHeader.ignoreErrors]
+145:43 call  bool(value)
+    -> <builtin>.bool
+147:20 setattr  _field.ignoreErrors
+    reject *: ignoreErrors is a slot of the field definition
+
+[tablib._vendor.dbfpy.header.DbfHeader.__repr__]
+169:19 op  _rv % (self.signature, self.lastUpdate, self.headerLength...
+    reject *: the tuple holds ints and a datetime.date
+170:46 getattr  self.recordCount
+    reject *: recordCount is a slot of the DbfHeader
+171:25 call  "\n".join( ["%10s %4s %3s %3s" % _fld.fieldInfo() for _fl...
+    -> <builtin>.str.join
+172:49 call  _fld.fieldInfo()
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.fieldInfo
+
+[tablib._vendor.dbfpy.header.DbfHeader._addField]
+195:26 call  isinstance(_def, fields.DbfFieldDef)
+    -> <builtin>.isinstance
+198:52 call  tuple(_def)
+    -> <builtin>.tuple
+    reject *: the builtin tuple
+199:40 call  fields.lookupFor(_type)
+    -> tablib._vendor.dbfpy.fields.lookupFor
+200:28 call  _cls(_name, _len, _dec, ignoreErrors=self._ignore_errors)
+    note: unreachable: the only tuple definitions come from demo_create, whose type codes are strs: lookupFor calls chr("C") and raises TypeError (J4)
+202:25 call  _defs.append(_obj)
+    -> <builtin>.list.append
+    reject *: _defs is a list
+
+[tablib._vendor.dbfpy.header.DbfHeader.addField]
+225:44 call  self._addField(*defs)
+    -> tablib._vendor.dbfpy.header.DbfHeader._addField
+231:43 call  len(self.fields)
+    -> <builtin>.len
+232:14 setattr  self.changed
+    reject *: changed is a slot
+
+[tablib._vendor.dbfpy.header.DbfHeader.write]
+236:20 call  stream.seek(0)
+    -> io.BufferedRandom.seek
+    -> io.BufferedWriter.seek
+    note: the stream of Dbf.flush (open(path, "r+b")) or of dbf_new.write (open(filename, "wb"))
+237:21 call  stream.write(self.toString())
+    -> io.BufferedRandom.write
+    -> io.BufferedWriter.write
+    reject *: stream is a file object
+    note: as at 236:20
+237:35 call  self.toString()
+    -> tablib._vendor.dbfpy.header.DbfHeader.toString
+    reject *: self is a DbfHeader
+238:32 call  _fld.toString()
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.toString
+    reject *: the fields are field definitions
+239:21 call  stream.write(''.join(fields).encode(sys.getfilesystemenco...
+    -> io.BufferedRandom.write
+    -> io.BufferedWriter.write
+    reject *: stream is a file object
+    note: as at 236:20
+239:29 call  ''.join(fields)
+    -> <builtin>.str.join
+239:44 call  ''.join(fields).encode(sys.getfilesystemencoding())
+    -> <builtin>.str.encode
+239:70 call  sys.getfilesystemencoding()
+    -> sys.getfilesystemencoding
+240:21 call  stream.write(b'\x0D')
+    -> io.BufferedRandom.write
+    -> io.BufferedWriter.write
+    reject *: stream is a file object
+    note: as at 236:20
+241:14 setattr  self.changed
+    reject *: changed is a slot
+
+[tablib._vendor.dbfpy.header.DbfHeader.toString]
+245:27 call  struct.pack("<4BI2H", self.signature, self.year - 1900, s...
+    -> struct.pack
+247:33 getattr  self.year
+    -> tablib._vendor.dbfpy.header.DbfHeader.<lambda1>
+248:33 getattr  self.month
+    -> tablib._vendor.dbfpy.header.DbfHeader.<lambda2>
+249:33 getattr  self.day
+    -> tablib._vendor.dbfpy.header.DbfHeader.<lambda3>
+250:33 getattr  self.recordCount
+    reject *: recordCount is a slot of the DbfHeader
+
+[tablib._vendor.dbfpy.header.DbfHeader.setCurrentDate]
+257:46 call  datetime.date.today()
+    -> datetime.date.today
+
+[tablib._vendor.dbfpy.header.DbfHeader.__getitem__]
+261:22 call  isinstance(item, str)
+    -> <builtin>.isinstance
+262:31 call  item.upper()
+    -> <builtin>.str.upper
+267:31 call  KeyError(item)
+    -> <builtin>.KeyError
+
+== tablib._vendor.dbfpy.record
+
+[tablib._vendor.dbfpy.record]
+86:24 call  property(lambda self: self.dbf.header.headerLength + self...
+    -> <builtin>.property
+    reject *: property() stores the getter
+108:32 call  classmethod(rawFromStream)
+    -> <builtin>.classmethod
+125:29 call  classmethod(fromStream)
+    -> <builtin>.classmethod
+145:29 call  classmethod(fromString)
+    -> <builtin>.classmethod
+
+[tablib._vendor.dbfpy.record.DbfRecord.__init__]
+81:35 getattr  _fd.defaultValue
+    -> tablib._vendor.dbfpy.utils.classproperty.__get__
+    reject *: defaultValue is a class attribute
+    note: defaultValue is a classproperty for date and timestamp fields (the __main__ block of dbfnew; a client file read by newRecord's Dbf, J4)
+83:34 call  list(data)
+    -> <builtin>.list
+    reject *: the builtin list
+
+[tablib._vendor.dbfpy.record.DbfRecord.rawFromStream]
+105:24 call  dbf.stream.seek(dbf.header.headerLength + index * dbf.hea...
+    -> io.BufferedRandom.seek
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+    note: the stream of a Dbf whose records the package reads: BytesIO or the documented binary file (DBFFormat.import_set, J1), open(path, "r+b") (dbfnew's __main__ block), open(path, "rb") (demo_read); a Dbf over a text stream or a DataFrame is never made (fromStream raises)
+106:31 call  dbf.stream.read(dbf.header.recordLength)
+    -> io.BufferedRandom.read
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    note: as at 105:24
+
+[tablib._vendor.dbfpy.record.DbfRecord.fromStream]
+123:30 call  cls.fromString(dbf, cls.rawFromStream(dbf, index), index)
+    -> tablib._vendor.dbfpy.record.DbfRecord.fromString
+    reject *: cls is DbfRecord (Dbf.RecordClass)
+    note: cls is DbfRecord, Dbf.RecordClass
+123:53 call  cls.rawFromStream(dbf, index)
+    -> tablib._vendor.dbfpy.record.DbfRecord.rawFromStream
+    note: cls is DbfRecord, Dbf.RecordClass
+
+[tablib._vendor.dbfpy.record.DbfRecord.fromString]
+142:19 call  cls(dbf, index, string[0] == "*", [_fd.decodeFromRecord(s...
+    -> tablib._vendor.dbfpy.record.DbfRecord.__init__
+    note: cls is DbfRecord
+143:41 call  _fd.decodeFromRecord(string)
+    -> tablib._vendor.dbfpy.fields.DbfFieldDef.decodeFromRecord
+
+[tablib._vendor.dbfpy.record.DbfRecord.__repr__]
+150:40 op  "%%%ds: %%s (%%s)" % max(len(_fld) for _fld in self.dbf.f...
+    reject *: the right operand is an int
+150:45 call  max(len(_fld) for _fld in self.dbf.fieldNames)
+    -> <builtin>.max
+    reject *: ints are compared
+150:49 call  len(_fld)
+    -> <builtin>.len
+150:77 getattr  self.dbf.fieldNames
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda3>
+152:30 getattr  self.dbf.fieldNames
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda3>
+153:24 getitem  self[_fld]
+    -> tablib._vendor.dbfpy.record.DbfRecord.__getitem__
+    reject *: self is a DbfRecord
+155:27 call  _rv.append(_template % (_fld, "None", "value cannot be de...
+    reject *: unreachable: a record's value is never INVALID_VALUE (J5)
+    note: unreachable: every Dbf of the package has ignoreErrors False, so no value is INVALID_VALUE (J5)
+155:38 op  _template % (_fld, "None", "value cannot be decoded")
+    reject *: unreachable (J5)
+157:27 call  _rv.append(_template % (_fld, _val, type(_val)))
+    -> <builtin>.list.append
+    reject *: _rv is a list
+157:38 op  _template % (_fld, _val, type(_val))
+    reject *: the values are decoded field values (str, int, float, date, datetime, None) and types
+157:57 call  type(_val)
+    -> <builtin>.type
+158:25 call  "\n".join(_rv)
+    -> <builtin>.str.join
+
+[tablib._vendor.dbfpy.record.DbfRecord._write]
+172:28 call  self._validateIndex(False)
+    -> tablib._vendor.dbfpy.record.DbfRecord._validateIndex
+173:29 call  self.dbf.stream.seek(self.position)
+    -> io.BufferedRandom.seek
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+    note: the record's Dbf: open(path, "r+b") (DBFFormat.export_set, dbfnew); through Dbf.__setitem__, which the package never calls, any record that the package makes, also one read from BytesIO or a binary file (J4)
+173:35 getattr  self.position
+    -> tablib._vendor.dbfpy.record.DbfRecord.<lambda1>
+174:30 call  self.dbf.stream.write(bytes(self.toString(), sys.getfiles...
+    -> io.BufferedRandom.write
+    -> io.BufferedReader.write
+    -> io.BytesIO.write
+    reject *: the stream is a file object
+    note: as at 173:29; a BufferedReader refuses the write in its body (io.UnsupportedOperation)
+174:36 call  bytes(self.toString(), sys.getfilesystemencoding())
+    -> <builtin>.bytes
+174:50 call  self.toString()
+    -> tablib._vendor.dbfpy.record.DbfRecord.toString
+    reject *: self is a DbfRecord
+175:56 call  sys.getfilesystemencoding()
+    -> sys.getfilesystemencoding
+178:29 call  len(self.dbf)
+    -> <builtin>.len
+    -> tablib._vendor.dbfpy.dbf.Dbf.__len__
+181:34 call  self.dbf.stream.write(b"\x1A")
+    -> io.BufferedRandom.write
+    -> io.BytesIO.write
+    reject *: the stream is a file object
+    note: as at 173:29; a BufferedReader raised at line 174
+
+[tablib._vendor.dbfpy.record.DbfRecord._validateIndex]
+194:33 call  ValueError("Index is undefined")
+    note: unreachable: _write runs after Dbf.append or Dbf.__setitem__ set index, and store calls with allowUndefined True
+195:25 op  self.index < 0
+    reject *: an int comparison
+196:29 call  ValueError(f"Index can't be negative ({self.index})")
+    -> <builtin>.ValueError
+    note: through Dbf.__setitem__ (judged as public, J4): _fixIndex adds len(self) + 1 to a negative index and checks only the upper bound, so -10 on an empty table gives -9 (audit F2)
+197:59 getattr  self.dbf.header.recordCount
+    reject *: recordCount is a slot of the DbfHeader (and checkRange is always False)
+198:29 call  ValueError( f"There are only {self.dbf.header.recordCount...
+    note: unreachable: no package call passes checkRange
+199:51 getattr  self.dbf.header.recordCount
+    reject *: recordCount is a slot of the DbfHeader
+
+[tablib._vendor.dbfpy.record.DbfRecord.store]
+211:28 call  self._validateIndex()
+    -> tablib._vendor.dbfpy.record.DbfRecord._validateIndex
+213:29 call  len(self.dbf)
+    -> <builtin>.len
+    -> tablib._vendor.dbfpy.dbf.Dbf.__len__
+214:28 call  self.dbf.append(self)
+    -> tablib._vendor.dbfpy.dbf.Dbf.append
+    reject *: self.dbf is a Dbf
+216:21 setitem  self.dbf[self.index]
+    reject *: unreachable: every record that the package stores has index None (DBFFormat.export_set, dbfnew's __main__ block), so store appends (J4)
+
+[tablib._vendor.dbfpy.record.DbfRecord.toString]
+224:23 call  "".join([" *"[self.deleted]] + [ _def.encodeValue(_dat) f...
+    -> <builtin>.str.join
+225:28 call  _def.encodeValue(_dat)
+    -> tablib._vendor.dbfpy.fields.DbfCharacterFieldDef.encodeValue
+    -> tablib._vendor.dbfpy.fields.DbfCurrencyFieldDef.encodeValue
+    -> tablib._vendor.dbfpy.fields.DbfDateFieldDef.encodeValue
+    -> tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.encodeValue
+    -> tablib._vendor.dbfpy.fields.DbfIntegerFieldDef.encodeValue
+    -> tablib._vendor.dbfpy.fields.DbfLogicalFieldDef.encodeValue
+    -> tablib._vendor.dbfpy.fields.DbfMemoFieldDef.encodeValue
+    -> tablib._vendor.dbfpy.fields.DbfNumericFieldDef.encodeValue
+    reject tablib._vendor.dbfpy.fields.DbfFieldDef.encodeValue: DbfFieldDef has no instance
+    note: character and numeric fields (DBFFormat.export_set), a date field (dbfnew's __main__ block); every field type through Dbf.__setitem__ and newRecord, which the package never calls (J4); DbfFloatFieldDef inherits DbfNumericFieldDef.encodeValue
+225:58 call  zip(self.dbf.header.fields, self.fieldData)
+    -> <builtin>.zip
+
+[tablib._vendor.dbfpy.record.DbfRecord.asDict]
+246:20 call  dict(list(zip(self.dbf.fieldNames, self.fieldData)))
+    -> <builtin>.dict
+246:25 call  list(zip(self.dbf.fieldNames, self.fieldData))
+    -> <builtin>.list
+    reject *: the builtin list
+246:29 call  zip(self.dbf.fieldNames, self.fieldData)
+    -> <builtin>.zip
+246:39 getattr  self.dbf.fieldNames
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda3>
+
+[tablib._vendor.dbfpy.record.DbfRecord.__getitem__]
+250:22 call  isinstance(key, int)
+    -> <builtin>.isinstance
+254:56 call  self.dbf.indexOfFieldName(key)
+    -> tablib._vendor.dbfpy.dbf.Dbf.indexOfFieldName
+
+[tablib._vendor.dbfpy.record.DbfRecord.__setitem__]
+258:22 call  isinstance(key, int)
+    -> <builtin>.isinstance
+262:23 setitem  self.fieldData[self.dbf.indexOfFieldName(key)]
+    reject *: fieldData is a list
+262:49 call  self.dbf.indexOfFieldName(key)
+    -> tablib._vendor.dbfpy.dbf.Dbf.indexOfFieldName
+
+== tablib._vendor.dbfpy.utils
+
+[tablib._vendor.dbfpy.utils]
+167:30 call  _InvalidValue()
+    note: _InvalidValue has no __init__ (object.__init__): no callee
+
+[tablib._vendor.dbfpy.utils.unzfill]
+29:30 call  str.index(b'\0')
+    -> <builtin>.bytes.index
+    note: str is the parameter: the 32 bytes of a field definition (DbfFieldDef.fromString)
+
+[tablib._vendor.dbfpy.utils.getDate]
+59:35 call  datetime.date.today()
+    -> datetime.date.today
+60:18 call  isinstance(date, datetime.date)
+    -> <builtin>.isinstance
+62:18 call  isinstance(date, datetime.datetime)
+    -> <builtin>.isinstance
+63:25 call  date.date()
+    note: unreachable: a datetime is a datetime.date, returned on line 61 (and no package call passes one, J4)
+64:18 call  isinstance(date, (int, float))
+    -> <builtin>.isinstance
+66:43 call  datetime.date.fromtimestamp(date)
+    note: unreachable: the package passes None, a tuple, bytes or a date (J4)
+67:18 call  isinstance(date, str)
+    -> <builtin>.isinstance
+68:28 call  date.replace(" ", "0")
+    reject *: unreachable: the package never passes a str (J4)
+    note: unreachable: the package passes None, a tuple, bytes or a date (J4)
+69:15 call  len(date)
+    note: unreachable: the package never passes a str (J4)
+71:33 call  datetime.date(*time.strptime(date, "%y%m%d")[:3])
+    note: unreachable: the package never passes a str (J4)
+71:48 call  time.strptime(date, "%y%m%d")
+    note: unreachable: the package never passes a str (J4)
+73:29 call  datetime.date(*time.strptime(date, "%Y%m%d")[:3])
+    note: unreachable: the package never passes a str (J4)
+73:44 call  time.strptime(date, "%Y%m%d")
+    note: unreachable: the package never passes a str (J4)
+74:15 call  hasattr(date, "__getitem__")
+    -> <builtin>.hasattr
+76:29 call  datetime.date(*date[:3])
+    -> datetime.date
+77:39 call  datetime.date.fromtimestamp(date.ticks())
+    note: unreachable: tuples and bytes have __getitem__ (J4)
+77:50 call  date.ticks()
+    note: unreachable: tuples and bytes have __getitem__ (J4)
+
+[tablib._vendor.dbfpy.utils.getDateTime]
+106:39 call  datetime.datetime.today()
+    note: unreachable: the only caller, DbfDateTimeFieldDef.encodeValue, passes a true value, a datetime (J4)
+107:18 call  isinstance(value, datetime.datetime)
+    -> <builtin>.isinstance
+109:18 call  isinstance(value, datetime.date)
+    note: unreachable: the value is a datetime, returned on line 108 (J4)
+110:45 call  datetime.datetime.fromordinal(value.toordinal())
+    note: unreachable: the value is a datetime (J4)
+110:61 call  value.toordinal()
+    note: unreachable: the value is a datetime (J4)
+111:18 call  isinstance(value, (int, float))
+    note: unreachable: the value is a datetime (J4)
+113:47 call  datetime.datetime.fromtimestamp(value)
+    note: unreachable: the value is a datetime (J4)
+114:18 call  isinstance(value, str)
+    note: unreachable: the value is a datetime (J4)
+115:34 call  NotImplementedError("Strings aren't currently implemented")
+    note: unreachable: the value is a datetime (J4)
+116:15 call  hasattr(value, "__getitem__")
+    note: unreachable: the value is a datetime (J4)
+118:33 call  datetime.datetime(*tuple(value)[:6])
+    note: unreachable: the value is a datetime (J4)
+118:40 call  tuple(value)
+    reject *: unreachable: the value is a datetime (J4)
+    note: unreachable: the value is a datetime (J4)
+119:43 call  datetime.datetime.fromtimestamp(value.ticks())
+    note: unreachable: the value is a datetime (J4)
+119:55 call  value.ticks()
+    note: unreachable: the value is a datetime (J4)
+
+[tablib._vendor.dbfpy.utils.classproperty.__get__]
+126:25 call  self.fget(cls)
+    -> tablib._vendor.dbfpy.fields.DbfDateFieldDef.<lambda1>
+    -> tablib._vendor.dbfpy.fields.DbfDateTimeFieldDef.<lambda1>
+    note: self.fget is the lambda that the class body passes to classproperty (fields.py:366, 400); the only classproperty objects
+
+[tablib._vendor.dbfpy.utils._InvalidValue.__eq__]
+144:20 truth  other
+    -> tablib._vendor.dbfpy.utils._InvalidValue.__bool__
+    reject *: other is INVALID_VALUE (the class docstring: equal to itself) or a client value
+    note: no package code compares INVALID_VALUE; other is judged as public, and the docstring names INVALID_VALUE itself as an operand (J5)
+
+== tablib.core
+
+[tablib.core]
+89:6 decorator  @property
+    -> <builtin>.property
+94:6 decorator  @property
+    -> <builtin>.property
+324:23 call  property(_get_headers, _set_headers)
+    -> <builtin>.property
+    reject *: property() stores the accessors; attribute loads and stores call them
+378:20 call  property(_get_dict, _set_dict)
+    -> <builtin>.property
+    reject *: property() stores the accessors; attribute loads and stores call them
+392:6 decorator  @property
+    -> <builtin>.property
+399:6 decorator  @property
+    -> <builtin>.property
+900:6 decorator  @property
+    -> <builtin>.property
+966:27 call  registry.register_builtins()
+    -> tablib.formats.Registry.register_builtins
+
+[tablib.core.Row.__init__]
+44:25 call  list(row)
+    -> <builtin>.list
+    -> tablib.core.Row.__iter__
+    -> tablib.core.Row.__len__
+    reject tablib.core.Row.list: the builtin list
+    note: row is a Row where the package passes one (Dataset.insert with the Row of _set_dict, _transpose_with_headers or subset); list() calls __len__ for its length hint, then iterates
+45:25 call  list(tags)
+    -> <builtin>.list
+    reject *: the builtin list; tags is the client's tags or the list copy of Row.copy
+
+[tablib.core.Row.__len__]
+51:19 call  len(self._row)
+    -> <builtin>.len
+
+[tablib.core.Row.__repr__]
+54:20 call  repr(self._row)
+    -> <builtin>.repr
+
+[tablib.core.Row.__setitem__]
+60:18 setitem  self._row[i]
+    reject *: self._row is a list
+
+[tablib.core.Row.__delitem__]
+63:22 delitem  self._row[i]
+    reject *: self._row is a list
+
+[tablib.core.Row.rpush]
+72:20 call  self.insert(len(self._row), value)
+    -> tablib.core.Row.insert
+    reject tablib.core.Dataset.insert: self is a Row
+72:24 call  len(self._row)
+    -> <builtin>.len
+
+[tablib.core.Row.lpush]
+75:20 call  self.insert(0, value)
+    -> tablib.core.Row.insert
+    reject tablib.core.Dataset.insert: self is a Row
+
+[tablib.core.Row.append]
+78:19 call  self.rpush(value)
+    -> tablib.core.Row.rpush
+    reject tablib.core.Dataset.rpush: self is a Row
+
+[tablib.core.Row.insert]
+81:25 call  self._row.insert(index, value)
+    -> <builtin>.list.insert
+    reject *: self._row is a list
+
+[tablib.core.Row.copy]
+84:19 call  Row(self._row.copy(), self.tags.copy())
+    -> tablib.core.Row.__init__
+84:34 call  self._row.copy()
+    -> <builtin>.list.copy
+    reject *: self._row is a list
+84:52 call  self.tags.copy()
+    -> <builtin>.list.copy
+    reject *: self.tags is a list
+
+[tablib.core.Row.__contains__]
+87:21 op  item in self._row
+    reject *: self._row is a list
+
+[tablib.core.Row.tuple]
+92:21 call  tuple(self._row)
+    -> <builtin>.tuple
+    reject *: the builtin tuple
+
+[tablib.core.Row.list]
+97:20 call  list(self._row)
+    -> <builtin>.list
+    reject *: the builtin list
+
+[tablib.core.Row.has_tag]
+104:24 call  isinstance(tag, str)
+    -> <builtin>.isinstance
+105:24 op  tag in self.tags
+    reject *: self.tags is a list
+107:24 call  bool(len(set(tag) & set(self.tags)))
+    -> <builtin>.bool
+107:28 call  len(set(tag) & set(self.tags))
+    -> <builtin>.len
+107:32 call  set(tag)
+    -> <builtin>.set
+107:43 call  set(self.tags)
+    -> <builtin>.set
+
+[tablib.core.Dataset.__init__]
+158:26 call  Row(arg)
+    -> tablib.core.Row.__init__
+170:14 setattr  self.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset (core.py:324)
+170:34 call  kwargs.get('headers')
+    -> <builtin>.dict.get
+    reject *: kwargs is a dict
+172:14 setattr  self.title
+    reject *: title is a plain attribute
+172:32 call  kwargs.get('title')
+    -> <builtin>.dict.get
+    reject *: kwargs is a dict
+
+[tablib.core.Dataset.__len__]
+175:21 getattr  self.height
+    -> tablib.core.Dataset.height
+
+[tablib.core.Dataset.__getitem__]
+178:22 call  isinstance(key, str)
+    -> <builtin>.isinstance
+179:21 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+180:36 call  HeadersNeeded()
+    -> <builtin>.AttributeError.__init__
+181:20 op  key in self.headers
+    reject *: headers is a list
+181:28 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+182:28 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+182:41 call  self.headers.index(key)
+    -> <builtin>.list.index
+    note: self.headers is the list that _set_headers stores (list(collection))
+183:28 getitem  row[pos]
+    -> tablib.core.Row.__getitem__
+    reject *: row is a Row of self._data
+188:26 call  isinstance(_results, Row)
+    -> <builtin>.isinstance
+189:33 getattr  _results.tuple
+    -> tablib.core.Row.tuple
+191:32 getattr  result.tuple
+    -> tablib.core.Row.tuple
+
+[tablib.core.Dataset.__setitem__]
+194:23 call  self._validate(value)
+    -> tablib.core.Dataset._validate
+195:19 setitem  self._data[key]
+    -> tablib.core.Row.__iter__
+    reject *: self._data is a list
+    note: with a slice key the list's slice assignment iterates the new Row (PySequence_Fast calls iter first, Objects/abstract.c, CPython 3.10 to 3.15); the Row's items, not the Row, become elements of _data (Codex round 1 T04)
+195:30 call  Row(value)
+    -> tablib.core.Row.__init__
+
+[tablib.core.Dataset.__delitem__]
+198:22 call  isinstance(key, str)
+    -> <builtin>.isinstance
+199:21 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+200:36 call  HeadersNeeded()
+    -> <builtin>.AttributeError.__init__
+202:20 op  key in self.headers
+    reject *: headers is a list
+202:28 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+204:28 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+204:41 call  self.headers.index(key)
+    -> <builtin>.list.index
+    note: self.headers is the list that _set_headers stores
+205:26 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+205:33 delitem  self.headers[pos]
+    reject *: headers is a list
+206:24 op  pos in self._dynamic_columns
+    reject *: _dynamic_columns is a dict
+207:46 delitem  self._dynamic_columns[pos]
+    reject *: _dynamic_columns is a dict
+209:40 call  enumerate(self._data)
+    -> <builtin>.enumerate
+211:28 delitem  row[pos]
+    -> tablib.core.Row.__delitem__
+    reject *: row is a Row of self._data
+212:31 setitem  self._data[i]
+    reject *: self._data is a list
+216:27 delitem  self._data[key]
+    reject *: self._data is a list
+
+[tablib.core.Dataset.__repr__]
+220:40 call  self.title.lower()
+    -> <builtin>.bytes.lower
+    -> <builtin>.str.lower
+    note: title is documented as a string (Dataset docstring); the package sets it from a sheet name (xlrd, openpyxl, odfpy) or a JSON or YAML title, and a YAML !!binary title is bytes (PyYAML SafeConstructor.construct_yaml_binary; _yaml.py:50; Codex round 1 T01)
+
+[tablib.core.Dataset.__str__]
+229:26 call  result.append([str(h) for h in self.__headers])
+    -> <builtin>.list.append
+    reject *: result is a list
+229:31 call  str(h)
+    -> <builtin>.str
+232:22 call  result.extend(list(map(str, row)) for row in self._data)
+    -> <builtin>.list.extend
+    reject *: result is a list
+232:27 call  list(map(str, row))
+    -> <builtin>.list
+    reject *: the builtin list
+232:31 call  map(str, row)
+    -> <builtin>.map
+    -> tablib.core.Row.__iter__
+    note: map() calls iter() on row, a Row of self._data; str is called by map (a callback of a builtin, no edge)
+234:21 call  list(map(len, row))
+    -> <builtin>.list
+    reject *: the builtin list
+234:25 call  map(len, row)
+    -> <builtin>.map
+235:26 call  list(map(max, zip(*lens)))
+    -> <builtin>.list
+    reject *: the builtin list
+235:30 call  map(max, zip(*lens))
+    -> <builtin>.map
+235:39 call  zip(*lens)
+    -> <builtin>.zip
+239:26 call  result.insert(1, ['-' * length for length in field_lens])
+    -> <builtin>.list.insert
+    reject *: result is a list
+241:33 call  '|'.join('{{{}:{}}}'.format(*item) for item in enumerate(...
+    -> <builtin>.str.join
+241:52 call  '{{{}:{}}}'.format(*item)
+    -> <builtin>.str.format
+241:81 call  enumerate(field_lens)
+    -> <builtin>.enumerate
+243:25 call  '\n'.join(format_string.format(*row) for row in result)
+    -> <builtin>.str.join
+243:46 call  format_string.format(*row)
+    -> <builtin>.str.format
+
+[tablib.core.Dataset._get_in_format]
+250:35 call  registry.get_format(fmt_key)
+    -> tablib.formats.Registry.get_format
+250:55 call  registry.get_format(fmt_key).export_set(self, **kwargs)
+    -> tablib.formats._cli.CLIFormat.export_set
+    -> tablib.formats._csv.CSVFormat.export_set
+    -> tablib.formats._dbf.DBFFormat.export_set
+    -> tablib.formats._df.DataFrameFormat.export_set
+    -> tablib.formats._html.HTMLFormat.export_set
+    -> tablib.formats._jira.JIRAFormat.export_set
+    -> tablib.formats._json.JSONFormat.export_set
+    -> tablib.formats._latex.LATEXFormat.export_set
+    -> tablib.formats._ods.ODSFormat.export_set
+    -> tablib.formats._rst.ReSTFormat.export_set
+    -> tablib.formats._sql.SQLFormat.export_set
+    -> tablib.formats._xls.XLSFormat.export_set
+    -> tablib.formats._xlsx.XLSXFormat.export_set
+    -> tablib.formats._yaml.YAMLFormat.export_set
+    note: get_format returns the format object of a registered key: the 15 built-in keys (J3; tsv is a TSVFormat, which inherits CSVFormat.export_set) or a client's format (opaque); Dataset.get_<key> partialmethods pass the key
+
+[tablib.core.Dataset._set_in_format]
+253:36 call  normalize_input(in_stream)
+    -> tablib.utils.normalize_input
+254:35 call  registry.get_format(fmt_key)
+    -> tablib.formats.Registry.get_format
+254:55 call  registry.get_format(fmt_key).import_set(self, in_stream, ...
+    -> tablib.formats._csv.CSVFormat.import_set
+    -> tablib.formats._dbf.DBFFormat.import_set
+    -> tablib.formats._df.DataFrameFormat.import_set
+    -> tablib.formats._html.HTMLFormat.import_set
+    -> tablib.formats._json.JSONFormat.import_set
+    -> tablib.formats._ods.ODSFormat.import_set
+    -> tablib.formats._sql.SQLFormat.import_set
+    -> tablib.formats._xls.XLSFormat.import_set
+    -> tablib.formats._xlsx.XLSXFormat.import_set
+    -> tablib.formats._yaml.YAMLFormat.import_set
+    reject tablib.core.import_set: the receiver is a format object, not the module
+    note: as at 250:55; the formats without import_set raise AttributeError
+
+[tablib.core.Dataset._validate]
+258:12 truth  row
+    -> tablib.core.Row.__len__
+    reject *: row is a client row, a list or a Row
+    note: Dataset.insert passes the Rows of _set_dict, _transpose_with_headers and subset
+259:21 getattr  self.width
+    -> tablib.core.Dataset.width
+261:24 call  len(row)
+    -> <builtin>.len
+    -> tablib.core.Row.__len__
+    note: row can be a Row (see 258:12)
+261:38 getattr  self.width
+    -> tablib.core.Dataset.width
+262:24 call  len(row)
+    -> <builtin>.len
+    -> tablib.core.Row.__len__
+    note: row can be a Row (see 258:12)
+262:39 getattr  self.width
+    -> tablib.core.Dataset.width
+262:50 call  len(self._dynamic_columns)
+    -> <builtin>.len
+267:19 call  len(col)
+    -> <builtin>.len
+267:25 op  len(col) < 1
+    reject *: an int comparison
+270:32 call  len(col)
+    -> <builtin>.len
+270:46 getattr  self.height
+    -> tablib.core.Dataset.height
+270:62 getattr  self.height
+    -> tablib.core.Dataset.height
+272:27 call  all(len(x) == self.width for x in self._data)
+    -> <builtin>.all
+272:31 call  len(x)
+    -> <builtin>.len
+    -> tablib.core.Row.__len__
+    note: x is a Row of self._data
+272:43 getattr  self.width
+    -> tablib.core.Dataset.width
+
+[tablib.core.Dataset._package]
+285:21 call  list(self._data)
+    -> <builtin>.list
+    reject *: the builtin list of the list self._data
+299:17 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+301:29 call  dict(list(zip(self.headers, format_row(row))))
+    -> <builtin>.dict
+301:34 call  list(zip(self.headers, format_row(row)))
+    -> <builtin>.list
+    reject *: the builtin list
+301:38 call  zip(self.headers, format_row(row))
+    -> <builtin>.zip
+301:44 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+301:63 call  format_row(row)
+    -> tablib.core.Dataset._package.format_row
+303:29 call  list(self.headers)
+    -> <builtin>.list
+    reject *: the builtin list
+303:35 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+303:58 call  format_row(row)
+    -> tablib.core.Dataset._package.format_row
+305:31 call  format_row(row)
+    -> tablib.core.Dataset._package.format_row
+
+[tablib.core.Dataset._package.format_row]
+290:31 call  row.copy()
+    -> <builtin>.dict.copy
+    -> <builtin>.list.copy
+    -> <builtin>.set.copy
+    -> tablib.core.Row.copy
+    note: row is a Row, or, after a slice assignment through Dataset.__setitem__ (195:19), a cell of the assigned row: a list, dict or set that yaml.safe_load (or json.load) made (Codex round 1 T05-T07)
+294:40 call  callback(cell)
+    note: callback is a client handler of add_formatter (client callback, B5): no callee
+294:59 iter  row
+    -> tablib.core.Row.__iter__
+    reject *: row is the Row copy (or a list after a formatter of all columns)
+296:28 setitem  row[col]
+    -> tablib.core.Row.__setitem__
+    reject *: row is the Row copy, or a list after a formatter of all columns
+296:44 call  callback(row[col])
+    note: callback is a client handler of add_formatter (client callback, B5): no callee
+296:48 getitem  row[col]
+    -> tablib.core.Row.__getitem__
+    reject *: row is the Row copy, or a list after a formatter of all columns
+297:24 call  list(row)
+    -> <builtin>.list
+    -> tablib.core.Row.__iter__
+    -> tablib.core.Row.__len__
+    reject tablib.core.Row.list: the builtin list
+    note: row is a Row of _data (no formatter or only column formatters) or a list
+
+[tablib.core.Dataset._set_headers]
+318:23 call  self._validate(collection)
+    -> tablib.core.Dataset._validate
+320:34 call  list(collection)
+    -> <builtin>.list
+    reject *: the builtin list
+
+[tablib.core.Dataset._get_dict]
+337:29 call  self._package()
+    -> tablib.core.Dataset._package
+    reject tablib.core.Databook._package: self is a Dataset
+
+[tablib.core.Dataset._set_dict]
+358:26 call  isinstance(pickle, list)
+    -> <builtin>.isinstance
+    reject *: list is the builtin, passed to isinstance
+361:36 call  UnsupportedFormat(error_details)
+    -> <builtin>.NotImplementedError.__init__
+364:22 call  isinstance(pickle[0], list)
+    -> <builtin>.isinstance
+    reject *: list is the builtin, passed to isinstance
+365:22 call  self.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: self is a Dataset
+367:28 call  self.append(Row(row))
+    -> tablib.core.Dataset.append
+    reject *: self is a Dataset
+367:32 call  Row(row)
+    -> tablib.core.Row.__init__
+370:24 call  isinstance(pickle[0], dict)
+    -> <builtin>.isinstance
+371:22 call  self.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: self is a Dataset
+372:18 setattr  self.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+372:32 call  list(pickle[0].keys())
+    -> <builtin>.list
+    reject *: the builtin list
+372:47 call  pickle[0].keys()
+    -> <builtin>.dict.keys
+    note: pickle[0] passed isinstance(pickle[0], dict)
+374:28 call  self.append(Row(list(row.values())))
+    -> tablib.core.Dataset.append
+    reject *: self is a Dataset
+374:32 call  Row(list(row.values()))
+    -> tablib.core.Row.__init__
+374:37 call  list(row.values())
+    -> <builtin>.list
+    reject *: the builtin list
+374:48 call  row.values()
+    -> <builtin>.dict.values
+    note: the rows of a list of objects: dicts of json.load, yaml.safe_load or DataFrame.to_dict(orient='records')
+376:36 call  UnsupportedFormat(error_details)
+    -> <builtin>.NotImplementedError.__init__
+
+[tablib.core.Dataset._clean_col]
+385:19 call  list(col)
+    -> <builtin>.list
+    reject *: the builtin list
+387:15 call  len(col)
+    -> <builtin>.len
+387:37 call  hasattr(col[0], '__call__')
+    -> <builtin>.hasattr
+388:23 call  list(map(col[0], self._data))
+    -> <builtin>.list
+    reject *: the builtin list
+    note: list() iterates the map, which calls col[0], a client callable (B5)
+388:27 call  map(col[0], self._data)
+    -> <builtin>.map
+
+[tablib.core.Dataset.height]
+397:19 call  len(self._data)
+    -> <builtin>.len
+
+[tablib.core.Dataset.width]
+406:23 call  len(self._data[0])
+    -> <builtin>.len
+    -> tablib.core.Row.__len__
+409:27 call  len(self.headers)
+    -> <builtin>.len
+409:33 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+
+[tablib.core.Dataset.load]
+421:33 call  normalize_input(in_stream)
+    -> tablib.utils.normalize_input
+423:35 call  detect_format(stream)
+    -> tablib.core.detect_format
+425:34 call  registry.get_format(format)
+    -> tablib.formats.Registry.get_format
+426:23 call  hasattr(fmt, 'import_set')
+    -> <builtin>.hasattr
+427:36 call  UnsupportedFormat(f'Format {format} cannot be imported.')
+    -> <builtin>.NotImplementedError.__init__
+429:23 call  fmt.import_set(self, stream, **kwargs)
+    -> tablib.formats._csv.CSVFormat.import_set
+    -> tablib.formats._dbf.DBFFormat.import_set
+    -> tablib.formats._df.DataFrameFormat.import_set
+    -> tablib.formats._html.HTMLFormat.import_set
+    -> tablib.formats._json.JSONFormat.import_set
+    -> tablib.formats._ods.ODSFormat.import_set
+    -> tablib.formats._sql.SQLFormat.import_set
+    -> tablib.formats._xls.XLSFormat.import_set
+    -> tablib.formats._xlsx.XLSXFormat.import_set
+    -> tablib.formats._yaml.YAMLFormat.import_set
+    reject tablib.core.import_set: fmt is a format object
+    note: fmt is the format object of a registered key (J3)
+
+[tablib.core.Dataset.export]
+438:34 call  registry.get_format(format)
+    -> tablib.formats.Registry.get_format
+439:23 call  hasattr(fmt, 'export_set')
+    -> <builtin>.hasattr
+440:36 call  UnsupportedFormat(f'Format {format} cannot be exported.')
+    -> <builtin>.NotImplementedError.__init__
+442:30 call  fmt.export_set(self, **kwargs)
+    -> tablib.formats._cli.CLIFormat.export_set
+    -> tablib.formats._csv.CSVFormat.export_set
+    -> tablib.formats._dbf.DBFFormat.export_set
+    -> tablib.formats._df.DataFrameFormat.export_set
+    -> tablib.formats._html.HTMLFormat.export_set
+    -> tablib.formats._jira.JIRAFormat.export_set
+    -> tablib.formats._json.JSONFormat.export_set
+    -> tablib.formats._latex.LATEXFormat.export_set
+    -> tablib.formats._ods.ODSFormat.export_set
+    -> tablib.formats._rst.ReSTFormat.export_set
+    -> tablib.formats._sql.SQLFormat.export_set
+    -> tablib.formats._xls.XLSFormat.export_set
+    -> tablib.formats._xlsx.XLSXFormat.export_set
+    -> tablib.formats._yaml.YAMLFormat.export_set
+    note: fmt is the format object of a registered key (J3)
+
+[tablib.core.Dataset.insert]
+461:23 call  self._validate(row)
+    -> tablib.core.Dataset._validate
+462:15 call  len(row)
+    -> <builtin>.len
+    -> tablib.core.Row.__len__
+    note: row can be a Row (see 258:12)
+462:21 op  len(row) < self.width
+    reject *: an int comparison
+462:28 getattr  self.width
+    -> tablib.core.Dataset.width
+463:57 call  self._dynamic_columns.items()
+    -> <builtin>.dict.items
+464:27 call  list(row)
+    -> <builtin>.list
+    -> tablib.core.Row.__iter__
+    -> tablib.core.Row.__len__
+    reject tablib.core.Row.list: the builtin list
+    note: a Row reaches this list() when a dataset with a dynamic column gets a shorter row through _set_dict (wipe keeps _dynamic_columns)
+465:27 call  row.insert(pos, func(row))
+    -> <builtin>.list.insert
+    reject *: row is the list of line 464
+465:37 call  func(row)
+    note: func is a client callable of insert_col (client callback, B5): no callee
+466:26 call  self._data.insert(index, Row(row, tags=tags))
+    -> <builtin>.list.insert
+    reject *: self._data is a list
+466:37 call  Row(row, tags=tags)
+    -> tablib.core.Row.__init__
+
+[tablib.core.Dataset.rpush]
+473:20 call  self.insert(self.height, row=row, tags=tags)
+    -> tablib.core.Dataset.insert
+    reject tablib.core.Dataset.height: the property is loaded (473:26), not passed as a callable
+    reject tablib.core.Row.insert: self is a Dataset
+473:26 getattr  self.height
+    -> tablib.core.Dataset.height
+
+[tablib.core.Dataset.lpush]
+480:20 call  self.insert(0, row=row, tags=tags)
+    -> tablib.core.Dataset.insert
+    reject tablib.core.Row.insert: self is a Dataset
+
+[tablib.core.Dataset.append]
+487:19 call  self.rpush(row, tags)
+    -> tablib.core.Dataset.rpush
+    reject tablib.core.Row.rpush: self is a Dataset
+
+[tablib.core.Dataset.extend]
+495:24 call  self.append(row, tags)
+    -> tablib.core.Dataset.append
+    reject *: self is a Dataset
+
+[tablib.core.Dataset.lpop]
+500:21 getitem  self[0]
+    -> tablib.core.Dataset.__getitem__
+    reject *: self is a Dataset
+501:17 delitem  self[0]
+    -> tablib.core.Dataset.__delitem__
+    reject *: self is a Dataset
+
+[tablib.core.Dataset.rpop]
+508:21 getitem  self[-1]
+    -> tablib.core.Dataset.__getitem__
+    reject *: self is a Dataset
+509:17 delitem  self[-1]
+    -> tablib.core.Dataset.__delitem__
+    reject *: self is a Dataset
+
+[tablib.core.Dataset.pop]
+516:25 call  self.rpop()
+    -> tablib.core.Dataset.rpop
+
+[tablib.core.Dataset.get]
+521:22 call  isinstance(index, int)
+    -> <builtin>.isinstance
+522:24 getitem  self[index]
+    -> tablib.core.Dataset.__getitem__
+    reject *: self is a Dataset
+524:24 call  TypeError('Row indices must be integers.')
+    -> <builtin>.TypeError
+
+[tablib.core.Dataset.insert_col]
+552:20 call  callable(col)
+    -> <builtin>.callable
+553:34 setitem  self._dynamic_columns[self.width]
+    reject *: _dynamic_columns is a dict
+553:40 getattr  self.width
+    -> tablib.core.Dataset.width
+554:23 call  list(map(col, self._data))
+    -> <builtin>.list
+    reject *: the builtin list
+    note: list() iterates the map, which calls col, a client callable (B5)
+554:27 call  map(col, self._data)
+    -> <builtin>.map
+556:30 call  self._clean_col(col)
+    -> tablib.core.Dataset._clean_col
+557:23 call  self._validate(col=col)
+    -> tablib.core.Dataset._validate
+559:17 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+562:36 call  HeadersNeeded()
+    -> <builtin>.AttributeError.__init__
+565:34 getattr  self.height
+    -> tablib.core.Dataset.height
+565:53 call  len(col)
+    -> <builtin>.len
+568:18 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+568:32 call  self.headers.insert(index, header)
+    -> <builtin>.list.insert
+    reject *: headers is a list
+570:17 getattr  self.height
+    -> tablib.core.Dataset.height
+570:33 getattr  self.width
+    -> tablib.core.Dataset.width
+572:36 call  enumerate(self._data)
+    -> <builtin>.enumerate
+574:27 call  row.insert(index, col[i])
+    -> <builtin>.list.insert
+    -> tablib.core.Row.insert
+    reject tablib.core.Dataset.insert: row is a Row of self._data, or a list cell stored by a slice assignment (195:19)
+575:27 setitem  self._data[i]
+    reject *: self._data is a list
+577:30 call  Row([row])
+    -> tablib.core.Row.__init__
+
+[tablib.core.Dataset.rpush_col]
+584:24 call  self.insert_col(self.width, col, header=header)
+    -> tablib.core.Dataset.insert_col
+    reject tablib.core.Dataset.width: the property is loaded (584:30), not passed as a callable
+584:30 getattr  self.width
+    -> tablib.core.Dataset.width
+
+[tablib.core.Dataset.lpush_col]
+591:24 call  self.insert_col(0, col, header=header)
+    -> tablib.core.Dataset.insert_col
+
+[tablib.core.Dataset.insert_separator]
+597:32 call  self._separators.append(sep)
+    -> <builtin>.list.append
+    reject *: _separators is a list
+
+[tablib.core.Dataset.append_separator]
+603:21 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+604:26 getattr  self.height
+    -> tablib.core.Dataset.height
+604:41 getattr  self.height
+    -> tablib.core.Dataset.height
+606:27 getattr  self.height
+    -> tablib.core.Dataset.height
+606:47 getattr  self.height
+    -> tablib.core.Dataset.height
+608:30 call  self.insert_separator(index, text)
+    -> tablib.core.Dataset.insert_separator
+
+[tablib.core.Dataset.append_col]
+615:23 call  self.rpush_col(col, header)
+    -> tablib.core.Dataset.rpush_col
+
+[tablib.core.Dataset.add_formatter]
+635:22 call  isinstance(col, str)
+    -> <builtin>.isinstance
+636:20 op  col in self.headers
+    reject *: headers is a list
+636:28 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+637:28 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+637:41 call  self.headers.index(col)
+    -> <builtin>.list.index
+    note: self.headers is the list that _set_headers stores
+641:39 getattr  self.width
+    -> tablib.core.Dataset.width
+642:36 call  self._formatters.append((col, handler))
+    -> <builtin>.list.append
+    reject *: _formatters is a list
+
+[tablib.core.Dataset.filter]
+652:21 call  copy(self)
+    -> copy.copy
+    reject *: copy is copy.copy
+653:65 call  row.has_tag(tag)
+    -> tablib.core.Row.has_tag
+
+[tablib.core.Dataset.sort]
+666:22 call  isinstance(col, str)
+    -> <builtin>.isinstance
+668:25 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+671:29 call  sorted(self.dict, key=itemgetter(col), reverse=reverse)
+    -> <builtin>.sorted
+    reject *: the sort keys are cells (client data)
+671:35 getattr  self.dict
+    -> tablib.core.Dataset._get_dict
+671:55 call  itemgetter(col)
+    -> operator.itemgetter
+672:28 call  Dataset(headers=self.headers, title=self.title)
+    -> tablib.core.Dataset.__init__
+672:42 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+675:50 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+676:29 call  _dset.append(row=row)
+    -> tablib.core.Dataset.append
+    reject *: _dset is a Dataset
+679:21 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+680:28 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+682:29 call  sorted(self.dict, key=itemgetter(col), reverse=reverse)
+    -> <builtin>.sorted
+    reject *: the sort keys are cells (client data)
+682:35 getattr  self.dict
+    -> tablib.core.Dataset._get_dict
+682:55 call  itemgetter(col)
+    -> operator.itemgetter
+683:28 call  Dataset(headers=self.headers, title=self.title)
+    -> tablib.core.Dataset.__init__
+683:42 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+686:25 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+687:54 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+690:29 call  _dset.append(row=row)
+    -> tablib.core.Dataset.append
+    reject *: _dset is a Dataset
+
+[tablib.core.Dataset._transpose_with_headers]
+699:24 call  Dataset()
+    -> tablib.core.Dataset.__init__
+702:29 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+702:47 getitem  self[self.headers[0]]
+    -> tablib.core.Dataset.__getitem__
+    reject *: self is a Dataset
+702:53 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+704:15 setattr  _dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+705:39 call  enumerate(self.headers)
+    -> <builtin>.enumerate
+705:45 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+707:31 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+713:47 call  self.get_col(index)
+    -> tablib.core.Dataset.get_col
+714:27 call  Row(row_data)
+    -> tablib.core.Row.__init__
+715:25 call  _dset.append(row=row_data)
+    -> tablib.core.Dataset.append
+    reject *: _dset is a Dataset
+
+[tablib.core.Dataset._transpose_without_headers]
+723:24 call  Dataset()
+    -> tablib.core.Dataset.__init__
+726:27 call  range(len(self._data[0]))
+    -> <builtin>.range
+726:31 call  len(self._data[0])
+    -> <builtin>.len
+    -> tablib.core.Row.__len__
+727:36 call  self.get_col(index)
+    -> tablib.core.Dataset.get_col
+728:25 call  _dset.append(row=row_data)
+    -> tablib.core.Dataset.append
+    reject *: _dset is a Dataset
+
+[tablib.core.Dataset.transpose]
+739:16 truth  self
+    -> tablib.core.Dataset.__len__
+    reject *: self is a Dataset
+742:17 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+743:51 call  self._transpose_without_headers()
+    -> tablib.core.Dataset._transpose_without_headers
+745:48 call  self._transpose_with_headers()
+    -> tablib.core.Dataset._transpose_with_headers
+
+[tablib.core.Dataset.stack]
+752:26 call  isinstance(other, Dataset)
+    -> <builtin>.isinstance
+753:28 call  TypeError("'other' must be a Dataset instance")
+    -> <builtin>.TypeError
+755:17 getattr  self.width
+    -> tablib.core.Dataset.width
+755:23 op  self.width != other.width
+    reject *: an int comparison
+755:32 getattr  other.width
+    -> tablib.core.Dataset.width
+759:21 call  copy(self)
+    -> copy.copy
+    reject *: copy is copy.copy
+761:29 call  list(_dset._data)
+    -> <builtin>.list
+    reject *: the builtin list of a list
+762:26 call  list(other._data)
+    -> <builtin>.list
+    reject *: the builtin list of a list
+764:29 call  rows_to_stack.extend(other_rows)
+    -> <builtin>.list.extend
+    reject *: rows_to_stack is a list
+
+[tablib.core.Dataset.stack_cols]
+775:26 call  isinstance(other, Dataset)
+    -> <builtin>.isinstance
+776:28 call  TypeError("'other' must be a Dataset instance")
+    -> <builtin>.TypeError
+778:17 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+778:34 getattr  other.headers
+    -> tablib.core.Dataset._get_headers
+779:25 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+779:46 getattr  other.headers
+    -> tablib.core.Dataset._get_headers
+782:17 getattr  self.height
+    -> tablib.core.Dataset.height
+782:24 op  self.height != other.height
+    reject *: an int comparison
+782:33 getattr  other.height
+    -> tablib.core.Dataset.height
+786:32 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+786:48 getattr  other.headers
+    -> tablib.core.Dataset._get_headers
+790:24 call  Dataset()
+    -> tablib.core.Dataset.__init__
+792:17 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+793:32 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+794:33 call  _dset.append_col(col=self[column])
+    -> tablib.core.Dataset.append_col
+794:42 getitem  self[column]
+    -> tablib.core.Dataset.__getitem__
+    reject *: self is a Dataset
+796:33 getattr  other.headers
+    -> tablib.core.Dataset._get_headers
+797:33 call  _dset.append_col(col=other[column])
+    -> tablib.core.Dataset.append_col
+797:43 getitem  other[column]
+    -> tablib.core.Dataset.__getitem__
+    reject *: other is a Dataset (isinstance check)
+799:31 call  range(self.width)
+    -> <builtin>.range
+    reject tablib.core.Dataset.width: the property is loaded (799:37), not passed as a callable
+799:37 getattr  self.width
+    -> tablib.core.Dataset.width
+800:33 call  _dset.append_col(col=self.get_col(index))
+    -> tablib.core.Dataset.append_col
+800:50 call  self.get_col(index)
+    -> tablib.core.Dataset.get_col
+802:31 call  range(other.width)
+    -> <builtin>.range
+    reject tablib.core.Dataset.width: the property is loaded (802:38), not passed as a callable
+802:38 getattr  other.width
+    -> tablib.core.Dataset.width
+803:33 call  _dset.append_col(col=other.get_col(index))
+    -> tablib.core.Dataset.append_col
+803:51 call  other.get_col(index)
+    -> tablib.core.Dataset.get_col
+805:15 setattr  _dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+
+[tablib.core.Dataset.remove_duplicates]
+812:19 call  set()
+    -> <builtin>.set
+813:19 setitem  self._data[:]
+    reject *: self._data is a list
+814:52 call  tuple(row)
+    -> <builtin>.tuple
+    -> tablib.core.Row.__iter__
+    -> tablib.core.Row.__len__
+    reject tablib.core.Row.tuple: the builtin tuple
+    note: row is a Row of self._data; tuple() calls __len__ for its length hint on CPython 3.10 to 3.13 (Objects/abstract.c, PySequence_Tuple), not on 3.14 and later
+814:58 op  tuple(row) in seen
+    reject *: seen is a set of tuples of cells
+814:77 call  seen.add(tuple(row))
+    -> <builtin>.set.add
+814:83 call  tuple(row)
+    -> <builtin>.tuple
+    -> tablib.core.Row.__iter__
+    -> tablib.core.Row.__len__
+    reject tablib.core.Row.tuple: the builtin tuple
+    note: as at 814:52
+
+[tablib.core.Dataset.subset]
+828:16 truth  self
+    -> tablib.core.Dataset.__len__
+    reject *: self is a Dataset
+832:24 call  list(range(self.height))
+    -> <builtin>.list
+    reject *: the builtin list
+832:30 call  range(self.height)
+    -> <builtin>.range
+    reject tablib.core.Dataset.height: the property is loaded (832:36), not passed as a callable
+832:36 getattr  self.height
+    -> tablib.core.Dataset.height
+835:24 call  list(self.headers)
+    -> <builtin>.list
+    reject *: the builtin list
+835:30 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+838:44 op  row in range(self.height)
+    reject *: a range of ints and client row indexes
+838:52 call  range(self.height)
+    -> <builtin>.range
+    reject tablib.core.Dataset.height: the property is loaded (838:58), not passed as a callable
+838:58 getattr  self.height
+    -> tablib.core.Dataset.height
+839:53 op  header in self.headers
+    reject *: headers is a list
+839:61 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+841:24 call  Dataset()
+    -> tablib.core.Dataset.__init__
+844:15 setattr  _dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+844:29 call  list(cols)
+    -> <builtin>.list
+    reject *: the builtin list
+847:37 call  enumerate(self._data)
+    -> <builtin>.enumerate
+849:30 getattr  _dset.headers
+    -> tablib.core.Dataset._get_headers
+850:24 op  key in self.headers
+    reject *: headers is a list
+850:32 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+851:32 getattr  self.headers
+    -> tablib.core.Dataset._get_headers
+851:45 call  self.headers.index(key)
+    -> <builtin>.list.index
+    note: self.headers is the list that _set_headers stores
+852:36 call  data_row.append(row[pos])
+    -> <builtin>.list.append
+    reject *: data_row is a list
+852:40 getitem  row[pos]
+    -> tablib.core.Row.__getitem__
+    reject *: row is a Row of self._data
+856:23 op  row_no in rows
+    reject *: rows is a list of client row indexes
+857:29 call  _dset.append(row=Row(data_row))
+    -> tablib.core.Dataset.append
+    reject *: _dset is a Dataset
+857:37 call  Row(data_row)
+    -> tablib.core.Row.__init__
+
+[tablib.core.Databook.__repr__]
+871:40 call  self.title.lower()
+    note: unreachable: no package code, documentation or test sets a title on a Databook, so self.title raises AttributeError first
+
+[tablib.core.Databook.add_sheet]
+884:22 call  isinstance(dataset, Dataset)
+    -> <builtin>.isinstance
+885:34 call  self._datasets.append(dataset)
+    -> <builtin>.list.append
+    reject *: _datasets is the default [] (or the client's sets)
+
+[tablib.core.Databook._package]
+894:29 call  collector.append({ 'title': dset.title, 'data': dset._pac...
+    -> <builtin>.list.append
+    reject *: collector is a list
+896:38 call  dset._package()
+    -> tablib.core.Dataset._package
+    reject tablib.core.Databook._package: dset is a Dataset of the book
+
+[tablib.core.Databook.size]
+903:19 call  len(self._datasets)
+    -> <builtin>.len
+
+[tablib.core.Databook.load]
+913:33 call  normalize_input(in_stream)
+    -> tablib.utils.normalize_input
+915:35 call  detect_format(stream)
+    -> tablib.core.detect_format
+917:34 call  registry.get_format(format)
+    -> tablib.formats.Registry.get_format
+918:23 call  hasattr(fmt, 'import_book')
+    -> <builtin>.hasattr
+919:36 call  UnsupportedFormat(f'Format {format} cannot be loaded.')
+    -> <builtin>.NotImplementedError.__init__
+921:24 call  fmt.import_book(self, stream, **kwargs)
+    -> tablib.formats._json.JSONFormat.import_book
+    -> tablib.formats._ods.ODSFormat.import_book
+    -> tablib.formats._xls.XLSFormat.import_book
+    -> tablib.formats._xlsx.XLSXFormat.import_book
+    -> tablib.formats._yaml.YAMLFormat.import_book
+    reject tablib.core.import_book: fmt is a format object
+    note: fmt is the format object of a registered key (J3)
+
+[tablib.core.Databook.export]
+930:34 call  registry.get_format(format)
+    -> tablib.formats.Registry.get_format
+931:23 call  hasattr(fmt, 'export_book')
+    -> <builtin>.hasattr
+932:36 call  UnsupportedFormat(f'Format {format} cannot be exported.')
+    -> <builtin>.NotImplementedError.__init__
+934:31 call  fmt.export_book(self, **kwargs)
+    -> tablib.formats._html.HTMLFormat.export_book
+    -> tablib.formats._json.JSONFormat.export_book
+    -> tablib.formats._ods.ODSFormat.export_book
+    -> tablib.formats._rst.ReSTFormat.export_book
+    -> tablib.formats._xls.XLSFormat.export_book
+    -> tablib.formats._xlsx.XLSXFormat.export_book
+    -> tablib.formats._yaml.YAMLFormat.export_book
+    note: fmt is the format object of a registered key (J3)
+
+[tablib.core.detect_format]
+939:29 call  normalize_input(stream)
+    -> tablib.utils.normalize_input
+941:32 call  registry.formats()
+    -> tablib.formats.Registry.formats
+943:26 call  fmt.detect(stream)
+    -> tablib.formats._csv.CSVFormat.detect
+    -> tablib.formats._dbf.DBFFormat.detect
+    -> tablib.formats._df.DataFrameFormat.detect
+    -> tablib.formats._json.JSONFormat.detect
+    -> tablib.formats._ods.ODSFormat.detect
+    -> tablib.formats._sql.SQLFormat.detect
+    -> tablib.formats._xls.XLSFormat.detect
+    -> tablib.formats._xlsx.XLSXFormat.detect
+    -> tablib.formats._yaml.YAMLFormat.detect
+    note: fmt runs over every registered format object (J3); the formats without detect raise AttributeError, which the loop catches
+949:23 call  hasattr(stream, 'seek')
+    -> <builtin>.hasattr
+950:28 call  stream.seek(0)
+    -> io.BufferedReader.seek
+    -> io.BytesIO.seek
+    -> io.StringIO.seek
+    -> io.TextIOWrapper.seek
+    -> pandas.DataFrame.seek
+    note: stream after normalize_input: a StringIO (str), a BytesIO (bytes), the documented text and binary files (J1), a pandas DataFrame (J2); any other stream is a client object (B5)
+
+[tablib.core.import_set]
+957:19 call  Dataset()
+    -> tablib.core.Dataset.__init__
+957:26 call  Dataset().load(stream, format, **kwargs)
+    -> tablib.core.Dataset.load
+    reject tablib.core.Databook.load: the receiver is a new Dataset
+
+[tablib.core.import_book]
+963:20 call  Databook()
+    -> tablib.core.Databook.__init__
+963:27 call  Databook().load(stream, format, **kwargs)
+    -> tablib.core.Databook.load
+    reject tablib.core.Dataset.load: the receiver is a new Databook
+
+[tablib.core.Dataset.get_col]
+620:20 getitem  row[index]
+    -> tablib.core.Row.__getitem__
+    reject *: row is a Row of self._data
+
+== tablib.formats
+
+[tablib.formats]
+144:20 call  Registry()
+    note: Registry has no __init__ (object.__init__): no callee
+
+[tablib.formats.load_format_class]
+37:53 call  dotted_path.rsplit('.', 1)
+    -> <builtin>.str.rsplit
+38:23 call  getattr(import_module(module_path), class_name)
+    -> <builtin>.getattr
+38:37 call  import_module(module_path)
+    -> importlib.import_module
+40:26 call  ImportError(f"Unable to load format class '{dotted_path}'...
+    -> <builtin>.ImportError
+    note: a client str registered as a format path (Registry.register is documented) that has no dot or names no class
+
+[tablib.formats.FormatDescriptorBase.__init__]
+47:22 call  isinstance(format_or_path, str)
+    -> <builtin>.isinstance
+
+[tablib.formats.FormatDescriptorBase.ensure_format_loaded]
+55:45 call  load_format_class(self._format_path)
+    -> tablib.formats.load_format_class
+
+[tablib.formats.ImportExportBookDescriptor.__get__]
+60:34 call  self.ensure_format_loaded()
+    -> tablib.formats.FormatDescriptorBase.ensure_format_loaded
+61:40 call  self._format.export_book(obj, **kwargs)
+    -> tablib.formats._html.HTMLFormat.export_book
+    -> tablib.formats._json.JSONFormat.export_book
+    -> tablib.formats._ods.ODSFormat.export_book
+    -> tablib.formats._rst.ReSTFormat.export_book
+    -> tablib.formats._xls.XLSFormat.export_book
+    -> tablib.formats._xlsx.XLSXFormat.export_book
+    -> tablib.formats._yaml.YAMLFormat.export_book
+    note: self._format is the format object of the descriptor's key: one of the built-in formats (J3) or a client's format (opaque)
+
+[tablib.formats.ImportExportBookDescriptor.__set__]
+64:34 call  self.ensure_format_loaded()
+    -> tablib.formats.FormatDescriptorBase.ensure_format_loaded
+65:40 call  self._format.import_book(obj, normalize_input(val))
+    -> tablib.formats._json.JSONFormat.import_book
+    -> tablib.formats._ods.ODSFormat.import_book
+    -> tablib.formats._xls.XLSFormat.import_book
+    -> tablib.formats._xlsx.XLSXFormat.import_book
+    -> tablib.formats._yaml.YAMLFormat.import_book
+    reject tablib.core.import_book: self._format is a format object
+    note: as at 61:40
+65:61 call  normalize_input(val)
+    -> tablib.utils.normalize_input
+
+[tablib.formats.ImportExportSetDescriptor.__get__]
+70:34 call  self.ensure_format_loaded()
+    -> tablib.formats.FormatDescriptorBase.ensure_format_loaded
+71:39 call  self._format.export_set(obj, **kwargs)
+    -> tablib.formats._cli.CLIFormat.export_set
+    -> tablib.formats._csv.CSVFormat.export_set
+    -> tablib.formats._dbf.DBFFormat.export_set
+    -> tablib.formats._df.DataFrameFormat.export_set
+    -> tablib.formats._html.HTMLFormat.export_set
+    -> tablib.formats._jira.JIRAFormat.export_set
+    -> tablib.formats._json.JSONFormat.export_set
+    -> tablib.formats._latex.LATEXFormat.export_set
+    -> tablib.formats._ods.ODSFormat.export_set
+    -> tablib.formats._rst.ReSTFormat.export_set
+    -> tablib.formats._sql.SQLFormat.export_set
+    -> tablib.formats._xls.XLSFormat.export_set
+    -> tablib.formats._xlsx.XLSXFormat.export_set
+    -> tablib.formats._yaml.YAMLFormat.export_set
+    note: as at 61:40
+
+[tablib.formats.ImportExportSetDescriptor.__set__]
+74:34 call  self.ensure_format_loaded()
+    -> tablib.formats.FormatDescriptorBase.ensure_format_loaded
+75:39 call  self._format.import_set(obj, normalize_input(val))
+    -> tablib.formats._csv.CSVFormat.import_set
+    -> tablib.formats._dbf.DBFFormat.import_set
+    -> tablib.formats._df.DataFrameFormat.import_set
+    -> tablib.formats._html.HTMLFormat.import_set
+    -> tablib.formats._json.JSONFormat.import_set
+    -> tablib.formats._ods.ODSFormat.import_set
+    -> tablib.formats._sql.SQLFormat.import_set
+    -> tablib.formats._xls.XLSFormat.import_set
+    -> tablib.formats._xlsx.XLSXFormat.import_set
+    -> tablib.formats._yaml.YAMLFormat.import_set
+    reject tablib.core.import_set: self._format is a format object
+    note: as at 61:40
+75:60 call  normalize_input(val)
+    -> tablib.utils.normalize_input
+
+[tablib.formats.Registry.register]
+85:16 call  setattr(Databook, key, ImportExportBookDescriptor(key, fo...
+    -> <builtin>.setattr
+85:58 call  ImportExportBookDescriptor(key, format_or_path)
+    -> tablib.formats.FormatDescriptorBase.__init__
+89:16 call  setattr(Dataset, key, ImportExportSetDescriptor(key, form...
+    -> <builtin>.setattr
+89:56 call  ImportExportSetDescriptor(key, format_or_path)
+    -> tablib.formats.FormatDescriptorBase.__init__
+91:20 call  setattr(Dataset, f'get_{key}', partialmethod(Dataset._get...
+    -> <builtin>.setattr
+91:57 call  partialmethod(Dataset._get_in_format, key)
+    -> functools.partialmethod
+    reject *: partialmethod stores Dataset._get_in_format; Dataset.get_<key> calls it
+92:20 call  setattr(Dataset, f'set_{key}', partialmethod(Dataset._set...
+    -> <builtin>.setattr
+92:57 call  partialmethod(Dataset._set_in_format, key)
+    -> functools.partialmethod
+    reject *: partialmethod stores Dataset._set_in_format; Dataset.set_<key> calls it
+94:20 call  setattr(Dataset, f'get_{key}', partialmethod(Dataset._get...
+    -> <builtin>.setattr
+    note: the except branch runs when formatting the key raises AttributeError: a client str subclass as key can override __format__ (B5, client control flow); the pairs are those of lines 91 and 92 anyway
+94:57 call  partialmethod(Dataset._get_in_format, key)
+    -> functools.partialmethod
+    reject *: partialmethod stores Dataset._get_in_format
+96:22 setitem  self._formats[key]
+    reject *: _formats is a dict
+
+[tablib.formats.Registry.register_builtins]
+100:22 call  self.register('json', JSONFormat())
+    -> tablib.formats.Registry.register
+100:41 call  JSONFormat()
+    note: JSONFormat has no __init__ (object.__init__): no callee
+102:21 call  find_spec('openpyxl')
+    -> importlib.util.find_spec
+103:26 call  self.register('xlsx', 'tablib.formats._xlsx.XLSXFormat')
+    -> tablib.formats.Registry.register
+104:21 call  find_spec('xlrd')
+    -> importlib.util.find_spec
+104:43 call  find_spec('xlwt')
+    -> importlib.util.find_spec
+105:26 call  self.register('xls', 'tablib.formats._xls.XLSFormat')
+    -> tablib.formats.Registry.register
+106:21 call  find_spec('yaml')
+    -> importlib.util.find_spec
+107:26 call  self.register('yaml', 'tablib.formats._yaml.YAMLFormat')
+    -> tablib.formats.Registry.register
+108:22 call  self.register('csv', CSVFormat())
+    -> tablib.formats.Registry.register
+108:39 call  CSVFormat()
+    note: CSVFormat has no __init__ (object.__init__): no callee
+109:22 call  self.register('tsv', TSVFormat())
+    -> tablib.formats.Registry.register
+109:39 call  TSVFormat()
+    note: TSVFormat has no __init__ (object.__init__): no callee
+110:21 call  find_spec('odf')
+    -> importlib.util.find_spec
+111:26 call  self.register('ods', 'tablib.formats._ods.ODSFormat')
+    -> tablib.formats.Registry.register
+112:22 call  self.register('dbf', 'tablib.formats._dbf.DBFFormat')
+    -> tablib.formats.Registry.register
+113:22 call  self.register('html', 'tablib.formats._html.HTMLFormat')
+    -> tablib.formats.Registry.register
+114:22 call  self.register('jira', 'tablib.formats._jira.JIRAFormat')
+    -> tablib.formats.Registry.register
+115:22 call  self.register('latex', 'tablib.formats._latex.LATEXFormat')
+    -> tablib.formats.Registry.register
+116:21 call  find_spec('pandas')
+    -> importlib.util.find_spec
+117:26 call  self.register('df', 'tablib.formats._df.DataFrameFormat')
+    -> tablib.formats.Registry.register
+118:22 call  self.register('rst', 'tablib.formats._rst.ReSTFormat')
+    -> tablib.formats.Registry.register
+119:22 call  self.register('sql', 'tablib.formats._sql.SQLFormat')
+    -> tablib.formats.Registry.register
+120:21 call  find_spec('tabulate')
+    -> importlib.util.find_spec
+121:26 call  self.register('cli', 'tablib.formats._cli.CLIFormat')
+    -> tablib.formats.Registry.register
+
+[tablib.formats.Registry.formats]
+124:44 call  self._formats.items()
+    -> <builtin>.dict.items
+125:26 call  isinstance(frm, str)
+    -> <builtin>.isinstance
+126:30 setitem  self._formats[key]
+    reject *: _formats is a dict
+126:55 call  load_format_class(frm)
+    -> tablib.formats.load_format_class
+
+[tablib.formats.Registry.get_format]
+130:16 op  key not in self._formats
+    reject *: _formats is a dict
+131:20 op  key in uninstalled_format_messages
+    reject *: uninstalled_format_messages is a dict
+132:40 call  UnsupportedFormat( "The '{key}' format is not available. ...
+    -> <builtin>.NotImplementedError.__init__
+134:90 call  "The '{key}' format is not available. You may want to ins...
+    -> <builtin>.str.format
+138:36 call  UnsupportedFormat(f"Tablib has no format '{key}' or it is...
+    -> <builtin>.NotImplementedError.__init__
+139:22 call  isinstance(self._formats[key], str)
+    -> <builtin>.isinstance
+140:26 setitem  self._formats[key]
+    reject *: _formats is a dict
+140:51 call  load_format_class(self._formats[key])
+    -> tablib.formats.load_format_class
+
+== tablib.formats._cli
+
+[tablib.formats._cli]
+17:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._cli.CLIFormat.export_set]
+20:20 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+21:30 call  kwargs.setdefault('headers', dataset.headers)
+    -> <builtin>.dict.setdefault
+21:50 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+22:26 call  kwargs.setdefault('tablefmt', cls.DEFAULT_FMT)
+    -> <builtin>.dict.setdefault
+23:24 call  Tabulate(dataset, **kwargs)
+    -> tabulate.tabulate
+    -> tablib.core.Dataset.__getitem__
+    -> tablib.core.Dataset.__len__
+    note: tabulate's _normalize_tabular_data makes list(tabular_data) from the Dataset (tabulate 0.10.0, __init__.py:1539): __len__ for the length hint, __getitem__ for the iteration (Dataset has no __iter__)
+
+== tablib.formats._csv
+
+[tablib.formats._csv]
+16:6 decorator  @classmethod
+    -> <builtin>.classmethod
+31:6 decorator  @classmethod
+    -> <builtin>.classmethod
+37:6 decorator  @classmethod
+    -> <builtin>.classmethod
+56:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._csv.CSVFormat.export_stream_set]
+19:26 call  StringIO()
+    -> io.StringIO
+21:26 call  kwargs.setdefault('delimiter', cls.DEFAULT_DELIMITER)
+    -> <builtin>.dict.setdefault
+23:26 call  csv.writer(stream, **kwargs)
+    -> csv.writer
+25:36 call  dataset._package(dicts=False)
+    -> tablib.core.Dataset._package
+    reject tablib.core.Databook._package: dataset is a Dataset
+26:26 call  _csv.writerow(row)
+    -> _csv.Writer.writerow
+    note: _csv is the writer object that csv.writer returns (line 23); CPython 3.10 to 3.15 export its type as _csv.Writer (Modules/_csv.c: 3.10.22:1719, 3.14.10 and 3.15.2:1799), which names it (referee ruling b8-ruling-c-type-names-1.md); tablib admits no runtime without that export
+28:20 call  stream.seek(0)
+    -> io.StringIO.seek
+
+[tablib.formats._csv.CSVFormat.export_set]
+34:39 call  cls.export_stream_set(dataset, **kwargs)
+    -> tablib.formats._csv.CSVFormat.export_stream_set
+35:31 call  stream.getvalue()
+    -> io.StringIO.getvalue
+
+[tablib.formats._csv.CSVFormat.import_set]
+41:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+43:26 call  kwargs.setdefault('delimiter', cls.DEFAULT_DELIMITER)
+    -> <builtin>.dict.setdefault
+45:26 call  csv.reader(in_stream, **kwargs)
+    -> csv.reader
+46:32 call  enumerate(rows)
+    -> <builtin>.enumerate
+47:18 op  i < skip_lines
+    reject *: an int comparison
+50:22 setattr  dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+52:22 op  i > 0
+    reject *: an int comparison
+52:33 call  len(row)
+    -> <builtin>.len
+52:39 op  len(row) < dset.width
+    reject *: an int comparison
+52:46 getattr  dset.width
+    -> tablib.core.Dataset.width
+53:41 getattr  dset.width
+    -> tablib.core.Dataset.width
+53:52 call  len(row)
+    -> <builtin>.len
+54:28 call  dset.append(row)
+    -> tablib.core.Dataset.append
+    reject *: dset is a Dataset
+
+[tablib.formats._csv.CSVFormat.detect]
+60:24 call  csv.Sniffer()
+    -> csv.Sniffer
+60:32 call  csv.Sniffer().sniff(stream.read(2048), delimiters=delimit...
+    -> csv.Sniffer.sniff
+60:44 call  stream.read(2048)
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    -> pandas.DataFrame.read
+    note: the stream of detect_format (see core.py:950; J1, J2)
+
+== tablib.formats._dbf
+
+[tablib.formats._dbf]
+25:6 decorator  @classmethod
+    -> <builtin>.classmethod
+56:6 decorator  @classmethod
+    -> <builtin>.classmethod
+67:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._dbf.DBFFormat.export_set]
+28:33 call  dbfnew.dbf_new()
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.__init__
+29:47 call  tempfile.mkstemp()
+    -> tempfile.mkstemp
+32:28 getitem  dataset[0]
+    -> tablib.core.Dataset.__getitem__
+    reject *: dataset is a Dataset
+33:42 call  zip(dataset.headers, first_row)
+    -> <builtin>.zip
+33:51 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+34:20 call  type(field_value)
+    -> <builtin>.type
+34:34 op  type(field_value) in [int, float]
+    reject *: a list display of types
+35:34 call  new_dbf.add_field(fieldname, 'N', 10, 8)
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.add_field
+37:34 call  new_dbf.add_field(fieldname, 'C', 80)
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.add_field
+39:22 call  new_dbf.write(temp_uri)
+    -> tablib._vendor.dbfpy.dbfnew.dbf_new.write
+    reject tablib._vendor.dbfpy.header.DbfHeader.write: new_dbf is a dbf_new
+41:27 call  dbf.Dbf(temp_uri, readOnly=0)
+    -> tablib._vendor.dbfpy.dbf.Dbf.__init__
+42:20 iter  dataset
+    -> tablib.core.Dataset.__getitem__
+    reject *: dataset is a Dataset, which has no __iter__: iteration calls __getitem__
+43:41 call  dbfrecord.DbfRecord(dbf_file)
+    -> tablib._vendor.dbfpy.record.DbfRecord.__init__
+44:46 call  zip(dataset.headers, row)
+    -> <builtin>.zip
+44:55 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+45:23 setitem  record[fieldname]
+    -> tablib._vendor.dbfpy.record.DbfRecord.__setitem__
+    reject *: record is a DbfRecord
+46:25 call  record.store()
+    -> tablib._vendor.dbfpy.record.DbfRecord.store
+48:23 call  dbf_file.close()
+    -> tablib._vendor.dbfpy.dbf.Dbf.close
+49:26 call  open(temp_uri, 'rb')
+    -> <builtin>.open
+50:28 call  io.BytesIO(dbf_stream.read())
+    -> io.BytesIO
+50:44 call  dbf_stream.read()
+    -> io.BufferedReader.read
+51:25 call  dbf_stream.close()
+    -> io.BufferedReader.close
+    reject *: dbf_stream is the file of open(temp_uri, 'rb')
+52:17 call  os.close(temp_file)
+    -> os.close
+    reject *: os.close, not a Dbf
+53:18 call  os.remove(temp_uri)
+    -> os.remove
+54:31 call  stream.getvalue()
+    -> io.BytesIO.getvalue
+
+[tablib.formats._dbf.DBFFormat.import_set]
+60:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+61:23 call  dbf.Dbf(in_stream)
+    -> tablib._vendor.dbfpy.dbf.Dbf.__init__
+62:14 setattr  dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+62:29 getattr  _dbf.fieldNames
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda3>
+63:28 call  range(_dbf.recordCount)
+    -> <builtin>.range
+63:34 getattr  _dbf.recordCount
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda2>
+64:24 getitem  _dbf[record]
+    -> tablib._vendor.dbfpy.dbf.Dbf.__getitem__
+    reject *: _dbf is a Dbf
+64:32 getitem  _dbf[record][f]
+    -> tablib._vendor.dbfpy.record.DbfRecord.__getitem__
+    reject *: _dbf[record] is a DbfRecord
+64:50 getattr  _dbf.fieldNames
+    -> tablib._vendor.dbfpy.dbf.Dbf.<lambda3>
+65:24 call  dset.append(row)
+    -> tablib.core.Dataset.append
+    reject *: dset is a Dataset
+
+[tablib.formats._dbf.DBFFormat.detect]
+71:20 call  dbf.Dbf(stream, readOnly=True)
+    -> tablib._vendor.dbfpy.dbf.Dbf.__init__
+
+== tablib.formats._df
+
+[tablib.formats._df]
+14:6 decorator  @classmethod
+    -> <builtin>.classmethod
+27:6 decorator  @classmethod
+    -> <builtin>.classmethod
+37:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._df.DataFrameFormat.detect]
+19:24 call  isinstance(stream, DataFrame)
+    -> <builtin>.isinstance
+22:22 call  DataFrame(stream.read())
+    -> pandas.DataFrame
+    note: DataFrame is pandas.DataFrame (pandas is not installed: a missing module, J2); with the fallback None, line 18 returns first
+22:34 call  stream.read()
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    note: the stream of detect_format (J1); a DataFrame returned on line 20
+
+[tablib.formats._df.DataFrameFormat.export_set]
+31:38 call  NotImplementedError( 'DataFrame Format requires `pandas` ...
+    -> <builtin>.NotImplementedError
+    note: the side of the optional import where `from pandas import DataFrame` fails (both sides run, README "Judgements")
+34:30 call  DataFrame(dset.dict, columns=dset.headers)
+    -> pandas.DataFrame
+    note: DataFrame is pandas.DataFrame (J2)
+34:36 getattr  dset.dict
+    -> tablib.core.Dataset._get_dict
+34:55 getattr  dset.headers
+    -> tablib.core.Dataset._get_headers
+
+[tablib.formats._df.DataFrameFormat.import_set]
+40:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+41:14 setattr  dset.dict
+    -> tablib.core.Dataset._set_dict
+    reject *: dict is the property of Dataset (core.py:378)
+41:38 call  in_stream.to_dict(orient='records')
+    -> pandas.DataFrame.to_dict
+    note: in_stream is a pandas DataFrame, the documented input of the df format (J2)
+
+== tablib.formats._html
+
+[tablib.formats._html]
+16:6 decorator  @classmethod
+    -> <builtin>.classmethod
+43:6 decorator  @classmethod
+    -> <builtin>.classmethod
+58:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._html.HTMLFormat.export_set]
+20:27 call  ET.Element('table')
+    -> xml.etree.ElementTree.Element
+21:20 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+22:30 call  ET.Element('thead')
+    -> xml.etree.ElementTree.Element
+23:28 call  ET.Element('tr')
+    -> xml.etree.ElementTree.Element
+24:35 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+25:32 call  ET.Element('th')
+    -> xml.etree.ElementTree.Element
+26:30 call  str(header)
+    -> <builtin>.str
+27:26 call  tr.append(th)
+    -> xml.etree.ElementTree.Element.append
+    reject *: tr is an Element
+28:24 call  head.append(tr)
+    -> xml.etree.ElementTree.Element.append
+    reject *: head is an Element
+29:25 call  table.append(head)
+    -> xml.etree.ElementTree.Element.append
+    reject *: table is an Element
+31:26 call  ET.Element('tbody')
+    -> xml.etree.ElementTree.Element
+32:20 iter  dataset
+    -> tablib.core.Dataset.__getitem__
+    reject *: dataset is a Dataset, which has no __iter__: iteration calls __getitem__
+33:28 call  ET.Element('tr')
+    -> xml.etree.ElementTree.Element
+35:32 call  ET.Element('td')
+    -> xml.etree.ElementTree.Element
+36:30 call  str(item)
+    -> <builtin>.str
+37:26 call  tr.append(td)
+    -> xml.etree.ElementTree.Element.append
+    reject *: tr is an Element
+38:24 call  body.append(tr)
+    -> xml.etree.ElementTree.Element.append
+    reject *: body is an Element
+39:21 call  table.append(body)
+    -> xml.etree.ElementTree.Element.append
+    reject *: table is an Element
+41:27 call  ET.tostring(table, method='html', encoding='unicode')
+    -> xml.etree.ElementTree.tostring
+
+[tablib.formats._html.HTMLFormat.export_book]
+48:33 call  enumerate(databook._datasets)
+    -> <builtin>.enumerate
+50:34 call  ET.Element(cls.BOOK_ENDINGS)
+    -> xml.etree.ElementTree.Element
+52:34 call  ET.tostring(title_el, method='html', encoding='unicode')
+    -> xml.etree.ElementTree.tostring
+53:28 getattr  dset.html
+    -> tablib.formats.ImportExportSetDescriptor.__get__
+    note: Registry.register sets the descriptor of the key html on Dataset (formats/__init__.py:89); the site finder offers no candidate for an attribute that setattr binds
+
+[tablib.formats._html.HTMLFormat.import_set]
+62:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+63:34 call  TablibHTMLParser(dset, table_id=table_id)
+    -> tablib.formats._html.TablibHTMLParser.__init__
+64:20 call  parser.feed(in_stream.read())
+    -> html.parser.HTMLParser.feed
+    -> tablib.formats._html.TablibHTMLParser.handle_data
+    -> tablib.formats._html.TablibHTMLParser.handle_endtag
+    -> tablib.formats._html.TablibHTMLParser.handle_starttag
+    note: parser is a TablibHTMLParser, which inherits feed; feed calls back the parser's handlers
+64:35 call  in_stream.read()
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    -> pandas.DataFrame.read
+    note: in_stream after normalize_input: StringIO, BytesIO, the documented files (J1), a DataFrame (J2)
+67:33 call  ValueError(f'No <table> found with id="{table_id}" in inp...
+    -> <builtin>.ValueError
+69:33 call  ValueError('No <table> found in input HTML')
+    -> <builtin>.ValueError
+
+[tablib.formats._html.TablibHTMLParser.__init__]
+74:14 call  super()
+    -> <builtin>.super
+74:25 call  super().__init__(*args, **kwargs)
+    -> html.parser.HTMLParser.__init__
+    reject *: super() of TablibHTMLParser is html.parser.HTMLParser
+81:14 setattr  self.headers
+    reject *: headers is a plain attribute of the parser
+
+[tablib.formats._html.TablibHTMLParser.handle_starttag]
+88:39 call  dict(attrs)
+    -> <builtin>.dict
+88:50 call  dict(attrs).get('id')
+    -> <builtin>.dict.get
+    reject *: dict(attrs) is a dict
+95:22 op  tag in ['td', 'th']
+    reject *: a list display of strs
+
+[tablib.formats._html.TablibHTMLParser.handle_endtag]
+105:23 setattr  self.dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: self.dset is the Dataset of HTMLFormat.import_set
+105:38 getattr  self.headers
+    reject *: self.headers is the parser's list attribute
+107:29 call  self.dset.append(self.current_row)
+    -> tablib.core.Dataset.append
+    reject *: self.dset is a Dataset
+109:18 op  tag in ['td', 'th']
+    reject *: a list display of strs
+111:22 getattr  self.headers
+    reject *: self.headers is the parser's list attribute
+111:36 call  self.headers.append(self.current_data)
+    -> <builtin>.list.append
+    reject *: self.headers is a list
+113:40 call  self.current_row.append(self.current_data)
+    -> <builtin>.list.append
+    reject *: self.current_row is a list
+
+== tablib.formats._jira
+
+[tablib.formats._jira]
+10:6 decorator  @classmethod
+    -> <builtin>.classmethod
+26:6 decorator  @classmethod
+    -> <builtin>.classmethod
+30:6 decorator  @classmethod
+    -> <builtin>.classmethod
+34:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._jira.JIRAFormat.export_set]
+22:33 call  cls._get_header(dataset.headers)
+    -> tablib.formats._jira.JIRAFormat._get_header
+22:42 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+22:62 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+23:29 call  cls._get_body(dataset)
+    -> tablib.formats._jira.JIRAFormat._get_body
+
+[tablib.formats._jira.JIRAFormat._get_body]
+28:25 call  '\n'.join([cls._serialize_row(row) for row in dataset])
+    -> <builtin>.str.join
+28:45 call  cls._serialize_row(row)
+    -> tablib.formats._jira.JIRAFormat._serialize_row
+    reject tablib.formats._latex.LATEXFormat._serialize_row: cls is JIRAFormat
+28:62 iter  dataset
+    -> tablib.core.Dataset.__getitem__
+    reject *: dataset is a Dataset, which has no __iter__
+
+[tablib.formats._jira.JIRAFormat._get_header]
+32:34 call  cls._serialize_row(headers, delimiter='||')
+    -> tablib.formats._jira.JIRAFormat._serialize_row
+    reject tablib.formats._latex.LATEXFormat._serialize_row: cls is JIRAFormat
+
+[tablib.formats._jira.JIRAFormat._serialize_row]
+36:31 call  '{}{}{}'.format( delimiter, delimiter.join([str(item) if ...
+    -> <builtin>.str.format
+38:27 call  delimiter.join([str(item) if item else ' ' for item in row])
+    -> <builtin>.str.join
+38:32 call  str(item)
+    -> <builtin>.str
+
+== tablib.formats._json
+
+[tablib.formats._json]
+26:6 decorator  @classmethod
+    -> <builtin>.classmethod
+33:6 decorator  @classmethod
+    -> <builtin>.classmethod
+40:6 decorator  @classmethod
+    -> <builtin>.classmethod
+47:6 decorator  @classmethod
+    -> <builtin>.classmethod
+58:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._json.serialize_objects_handler]
+14:18 call  isinstance(obj, (decimal.Decimal, UUID))
+    -> <builtin>.isinstance
+15:19 call  str(obj)
+    -> <builtin>.str
+16:17 call  hasattr(obj, 'isoformat')
+    -> <builtin>.hasattr
+17:29 call  obj.isoformat()
+    -> datetime.date.isoformat
+    -> datetime.datetime.isoformat
+    -> datetime.time.isoformat
+    note: obj is a cell that json cannot serialize; the cells that the package's importers make are datetimes (xlrd, openpyxl, odfpy), dates and times (odfpy, openpyxl, dbf) (J6); client cells are opaque (B5)
+
+[tablib.formats._json.JSONFormat.export_set]
+29:26 call  json.dumps( dataset.dict, default=serialize_objects_handl...
+    -> json.dumps
+    -> tablib.formats._json.serialize_objects_handler
+30:21 getattr  dataset.dict
+    -> tablib.core.Dataset._get_dict
+
+[tablib.formats._json.JSONFormat.export_book]
+36:26 call  json.dumps( databook._package(), default=serialize_object...
+    -> json.dumps
+    -> tablib.formats._json.serialize_objects_handler
+37:30 call  databook._package()
+    -> tablib.core.Databook._package
+    reject tablib.core.Dataset._package: databook is a Databook
+
+[tablib.formats._json.JSONFormat.import_set]
+44:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+45:14 setattr  dset.dict
+    -> tablib.core.Dataset._set_dict
+    reject *: dict is the property of Dataset
+45:30 call  json.load(in_stream)
+    -> json.load
+    reject *: json.load, not a package load
+
+[tablib.formats._json.JSONFormat.import_book]
+51:19 call  dbook.wipe()
+    -> tablib.core.Databook.wipe
+    reject tablib.core.Dataset.wipe: dbook is a Databook
+52:31 call  json.load(in_stream)
+    -> json.load
+    reject *: json.load, not a package load
+53:34 call  tablib.Dataset()
+    -> tablib.core.Dataset.__init__
+54:18 setattr  data.title
+    reject *: title is a plain attribute
+55:18 setattr  data.dict
+    -> tablib.core.Dataset._set_dict
+    reject *: dict is the property of Dataset
+56:28 call  dbook.add_sheet(data)
+    -> tablib.core.Databook.add_sheet
+
+[tablib.formats._json.JSONFormat.detect]
+62:22 call  json.load(stream)
+    -> json.load
+    reject *: json.load, not a package load
+
+== tablib.formats._latex
+
+[tablib.formats._latex]
+44:41 call  re.compile( '({})'.format('|'.join(map(re.escape, TEX_RES...
+    -> re.compile
+45:22 call  '({})'.format('|'.join(map(re.escape, TEX_RESERVED_SYMBOL...
+    -> <builtin>.str.format
+45:31 call  '|'.join(map(re.escape, TEX_RESERVED_SYMBOLS_MAP.keys()))
+    -> <builtin>.str.join
+45:35 call  map(re.escape, TEX_RESERVED_SYMBOLS_MAP.keys())
+    -> <builtin>.map
+45:76 call  TEX_RESERVED_SYMBOLS_MAP.keys()
+    -> <builtin>.dict.keys
+47:6 decorator  @classmethod
+    -> <builtin>.classmethod
+63:6 decorator  @classmethod
+    -> <builtin>.classmethod
+84:6 decorator  @classmethod
+    -> <builtin>.classmethod
+97:6 decorator  @classmethod
+    -> <builtin>.classmethod
+116:6 decorator  @classmethod
+    -> <builtin>.classmethod
+127:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._latex.LATEXFormat.export_set]
+56:31 call  cls._colspec(dataset.width)
+    -> tablib.formats._latex.LATEXFormat._colspec
+    reject tablib.core.Dataset.width: the property is loaded (56:40), not passed as a callable
+56:40 getattr  dataset.width
+    -> tablib.core.Dataset.width
+57:36 call  cls._serialize_row(dataset.headers)
+    -> tablib.formats._latex.LATEXFormat._serialize_row
+    reject tablib.formats._jira.JIRAFormat._serialize_row: cls is LATEXFormat
+57:45 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+57:65 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+58:31 call  cls._midrule(dataset.width)
+    -> tablib.formats._latex.LATEXFormat._midrule
+    reject tablib.core.Dataset.width: the property is loaded (58:40), not passed as a callable
+58:40 getattr  dataset.width
+    -> tablib.core.Dataset.width
+59:25 call  '\n'.join([cls._serialize_row(row) for row in dataset])
+    -> <builtin>.str.join
+59:45 call  cls._serialize_row(row)
+    -> tablib.formats._latex.LATEXFormat._serialize_row
+    reject tablib.formats._jira.JIRAFormat._serialize_row: cls is LATEXFormat
+59:62 iter  dataset
+    -> tablib.core.Dataset.__getitem__
+    reject *: dataset is a Dataset, which has no __iter__
+60:35 op  cls.TABLE_TEMPLATE % {'CAPTION': caption, 'COLSPEC': cols...
+    reject *: the dict holds strs
+
+[tablib.formats._latex.LATEXFormat._colspec]
+80:23 call  range(1, dataset_width)
+    -> <builtin>.range
+
+[tablib.formats._latex.LATEXFormat._midrule]
+94:24 call  ' '.join([cls._cmidrule(colindex, dataset_width) for coli...
+    -> <builtin>.str.join
+94:39 call  cls._cmidrule(colindex, dataset_width)
+    -> tablib.formats._latex.LATEXFormat._cmidrule
+95:31 call  range(1, dataset_width + 1)
+    -> <builtin>.range
+
+[tablib.formats._latex.LATEXFormat._cmidrule]
+109:25 op  rule % ('r', colindex, colindex)
+    reject *: the tuple holds a str and ints
+112:25 op  rule % ('l', colindex, colindex)
+    reject *: the tuple holds a str and ints
+114:21 op  rule % ('lr', colindex, colindex)
+    reject *: the tuple holds a str and ints
+
+[tablib.formats._latex.LATEXFormat._serialize_row]
+123:52 call  cls._escape_tex_reserved_symbols(str(item))
+    -> tablib.formats._latex.LATEXFormat._escape_tex_reserved_symbols
+123:56 call  str(item)
+    -> <builtin>.str
+125:36 call  ' & '.join(new_row)
+    -> <builtin>.str.join
+
+[tablib.formats._latex.LATEXFormat._escape_tex_reserved_symbols]
+135:47 call  cls.TEX_RESERVED_SYMBOLS_RE.sub(replace, string)
+    -> re.Pattern.sub
+    -> tablib.formats._latex.LATEXFormat._escape_tex_reserved_symbols.replace
+    note: TEX_RESERVED_SYMBOLS_RE is the compiled pattern of line 44; sub calls back replace
+
+[tablib.formats._latex.LATEXFormat._escape_tex_reserved_symbols.replace]
+134:60 call  match.group()
+    -> re.Match.group
+
+== tablib.formats._ods
+
+[tablib.formats._ods]
+14:19 call  style.Style(name="bold", family="paragraph")
+    -> odf.style.Style
+15:16 call  bold.addElement(style.TextProperties( fontweight="bold", ...
+    -> odf.element.Element.addElement
+    note: odf.style.Style returns an odf.element.Element (StyleElement is a function, odfpy 1.4.1 style.py:24)
+15:37 call  style.TextProperties( fontweight="bold", fontweightasian=...
+    -> odf.style.TextProperties
+38:30 call  number.DateStyle(name="date-style1")
+    -> odf.number.DateStyle
+39:15 call  set_date_style(date_style)
+    -> tablib.formats._ods.set_date_style
+40:17 call  style.Style( name="ds1", datastylename="date-style1", par...
+    -> odf.style.Style
+47:30 call  number.DateStyle(name="time-style1")
+    -> odf.number.DateStyle
+48:15 call  set_time_style(time_style)
+    -> tablib.formats._ods.set_time_style
+49:17 call  style.Style( name="ts1", datastylename="time-style1", par...
+    -> odf.style.Style
+56:34 call  number.DateStyle(name="datetime-style1")
+    -> odf.number.DateStyle
+57:15 call  set_date_style(datetime_style)
+    -> tablib.formats._ods.set_date_style
+58:26 call  datetime_style.addElement(number.Text(text=" "))
+    -> odf.element.Element.addElement
+58:38 call  number.Text(text=" ")
+    -> odf.number.Text
+59:15 call  set_time_style(datetime_style)
+    -> tablib.formats._ods.set_time_style
+60:18 call  style.Style( name="dts1", datastylename="datetime-style1"...
+    -> odf.style.Style
+72:6 decorator  @classmethod
+    -> <builtin>.classmethod
+93:6 decorator  @classmethod
+    -> <builtin>.classmethod
+109:6 decorator  @classmethod
+    -> <builtin>.classmethod
+133:6 decorator  @classmethod
+    -> <builtin>.classmethod
+175:6 decorator  @classmethod
+    -> <builtin>.classmethod
+186:6 decorator  @classmethod
+    -> <builtin>.classmethod
+201:6 decorator  @classmethod
+    -> <builtin>.classmethod
+248:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._ods.set_date_style]
+23:21 call  style.addElement(number.Year(style="long"))
+    -> odf.element.Element.addElement
+    note: style is a number.DateStyle element of the module code (an odf.element.Element)
+23:33 call  number.Year(style="long")
+    -> odf.number.Year
+24:21 call  style.addElement(number.Text(text="-"))
+    -> odf.element.Element.addElement
+24:33 call  number.Text(text="-")
+    -> odf.number.Text
+25:21 call  style.addElement(number.Month(style="long"))
+    -> odf.element.Element.addElement
+25:34 call  number.Month(style="long")
+    -> odf.number.Month
+26:21 call  style.addElement(number.Text(text="-"))
+    -> odf.element.Element.addElement
+26:33 call  number.Text(text="-")
+    -> odf.number.Text
+27:21 call  style.addElement(number.Day(style="long"))
+    -> odf.element.Element.addElement
+27:32 call  number.Day(style="long")
+    -> odf.number.Day
+
+[tablib.formats._ods.set_time_style]
+31:21 call  style.addElement(number.Hours(style="long"))
+    -> odf.element.Element.addElement
+31:34 call  number.Hours(style="long")
+    -> odf.number.Hours
+32:21 call  style.addElement(number.Text(text=":"))
+    -> odf.element.Element.addElement
+32:33 call  number.Text(text=":")
+    -> odf.number.Text
+33:21 call  style.addElement(number.Minutes(style="long"))
+    -> odf.element.Element.addElement
+33:36 call  number.Minutes(style="long")
+    -> odf.number.Minutes
+34:21 call  style.addElement(number.Text(text=":"))
+    -> odf.element.Element.addElement
+34:33 call  number.Text(text=":")
+    -> odf.number.Text
+35:21 call  style.addElement(number.Seconds(style="long", decimalplac...
+    -> odf.element.Element.addElement
+35:36 call  number.Seconds(style="long", decimalplaces="0")
+    -> odf.number.Seconds
+
+[tablib.formats._ods.ODSFormat.export_set]
+76:50 call  opendocument.OpenDocumentSpreadsheet()
+    -> odf.opendocument.OpenDocumentSpreadsheet
+77:38 call  wb.automaticstyles.addElement(bold)
+    -> odf.element.Element.addElement
+78:29 call  wb.styles.addElement(date_style)
+    -> odf.element.Element.addElement
+79:38 call  wb.automaticstyles.addElement(ds)
+    -> odf.element.Element.addElement
+80:29 call  wb.styles.addElement(time_style)
+    -> odf.element.Element.addElement
+81:38 call  wb.automaticstyles.addElement(ts)
+    -> odf.element.Element.addElement
+82:29 call  wb.styles.addElement(datetime_style)
+    -> odf.element.Element.addElement
+83:38 call  wb.automaticstyles.addElement(dts)
+    -> odf.element.Element.addElement
+85:25 call  table.Table(name=dataset.title if dataset.title else 'Tab...
+    -> odf.table.Table
+86:34 call  wb.spreadsheet.addElement(ws)
+    -> odf.element.Element.addElement
+87:23 call  cls.dset_sheet(dataset, ws)
+    -> tablib.formats._ods.ODSFormat.dset_sheet
+    reject *: cls is ODSFormat
+89:25 call  BytesIO()
+    -> io.BytesIO
+90:16 call  wb.save(stream)
+    -> odf.opendocument.OpenDocument.save
+91:31 call  stream.getvalue()
+    -> io.BytesIO.getvalue
+
+[tablib.formats._ods.ODSFormat.export_book]
+97:50 call  opendocument.OpenDocumentSpreadsheet()
+    -> odf.opendocument.OpenDocumentSpreadsheet
+98:38 call  wb.automaticstyles.addElement(bold)
+    -> odf.element.Element.addElement
+100:33 call  enumerate(databook._datasets)
+    -> <builtin>.enumerate
+101:29 call  table.Table(name=dset.title if dset.title else f"Sheet{i}")
+    -> odf.table.Table
+102:38 call  wb.spreadsheet.addElement(ws)
+    -> odf.element.Element.addElement
+103:27 call  cls.dset_sheet(dset, ws)
+    -> tablib.formats._ods.ODSFormat.dset_sheet
+    reject *: cls is ODSFormat
+105:25 call  BytesIO()
+    -> io.BytesIO
+106:16 call  wb.save(stream)
+    -> odf.opendocument.OpenDocument.save
+107:31 call  stream.getvalue()
+    -> io.BytesIO.getvalue
+
+[tablib.formats._ods.ODSFormat.import_sheet]
+113:14 setattr  dset.title
+    reject *: title is a plain attribute
+113:40 call  sheet.getAttribute('name')
+    -> odf.element.Element.getAttribute
+120:32 call  enumerate(rows)
+    -> <builtin>.enumerate
+121:18 op  i < skip_lines
+    reject *: an int comparison
+123:38 call  cls.read_cell(cell)
+    -> tablib.formats._ods.ODSFormat.read_cell
+    reject tablib.formats._xls.XLSFormat.read_cell: cls is ODSFormat
+123:87 call  is_real_cell(cell)
+    -> tablib.formats._ods.ODSFormat.import_sheet.is_real_cell
+127:22 setattr  dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+129:22 op  i > skip_lines
+    reject *: an int comparison
+129:42 call  len(row_vals)
+    -> <builtin>.len
+129:53 op  len(row_vals) < dset.width
+    reject *: an int comparison
+129:60 getattr  dset.width
+    -> tablib.core.Dataset.width
+130:46 getattr  dset.width
+    -> tablib.core.Dataset.width
+130:57 call  len(row_vals)
+    -> <builtin>.len
+131:28 call  dset.append(row_vals)
+    -> tablib.core.Dataset.append
+    reject *: dset is a Dataset
+
+[tablib.formats._ods.ODSFormat.import_sheet.is_real_cell]
+116:38 call  cell.hasChildNodes()
+    -> odf.element.Element.hasChildNodes
+    -> odf.element.Text.hasChildNodes
+    note: the children of a table row: cell elements, and text nodes where the file has text between cells (odf.load adds it, load.py:69-72); Element inherits Node.hasChildNodes, Text gets Childless.hasChildNodes
+116:65 call  cell.getAttribute('numbercolumnsrepeated')
+    -> odf.element.Element.getAttribute
+    note: a text node has no getAttribute (AttributeError before the call)
+
+[tablib.formats._ods.ODSFormat.read_cell]
+142:43 call  cell.getAttribute('valuetype')
+    -> odf.element.Element.getAttribute
+    note: cell is a cell element or one of its child elements; a text child has no getAttribute
+144:43 call  cell.getAttribute('datevalue')
+    -> odf.element.Element.getAttribute
+146:36 call  convert_date(date_value)
+    -> tablib.formats._ods.ODSFormat.read_cell.convert_date
+148:43 call  cell.getAttribute('timevalue')
+    -> odf.element.Element.getAttribute
+150:44 call  dt.datetime.strptime(time_value, "PT%HH%MM%SS")
+    -> datetime.datetime.strptime
+150:76 call  dt.datetime.strptime(time_value, "PT%HH%MM%SS").time()
+    -> datetime.datetime.time
+153:44 call  dt.datetime.strptime(time_value, "%H:%M:%S")
+    -> datetime.datetime.strptime
+153:73 call  dt.datetime.strptime(time_value, "%H:%M:%S").time()
+    -> datetime.datetime.time
+155:43 call  cell.getAttribute('booleanvalue')
+    -> odf.element.Element.getAttribute
+158:28 call  getattr(cell, 'data', None)
+    -> <builtin>.getattr
+161:46 call  cell.getAttribute('value')
+    -> odf.element.Element.getAttribute
+167:29 call  float(value)
+    -> <builtin>.float
+    reject *: value is an attribute str or the data of a text node
+169:36 call  convert_date(value)
+    -> tablib.formats._ods.ODSFormat.read_cell.convert_date
+173:33 call  cls.read_cell(subnode, value_type)
+    -> tablib.formats._ods.ODSFormat.read_cell
+    reject tablib.formats._xls.XLSFormat.read_cell: cls is ODSFormat
+
+[tablib.formats._ods.ODSFormat.read_cell.convert_date]
+136:20 op  'T' in val
+    reject *: val is a str
+137:44 call  dt.datetime.strptime(val, "%Y-%m-%dT%H:%M:%S")
+    -> datetime.datetime.strptime
+139:44 call  dt.datetime.strptime(val, "%Y-%m-%d")
+    -> datetime.datetime.strptime
+139:66 call  dt.datetime.strptime(val, "%Y-%m-%d").date()
+    -> datetime.datetime.date
+
+[tablib.formats._ods.ODSFormat.import_set]
+179:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+181:37 call  opendocument.load(in_stream)
+    -> odf.opendocument.load
+    reject *: odf.opendocument.load, not a package load
+184:33 call  cls.import_sheet(dset, sheet, headers, skip_lines)
+    -> tablib.formats._ods.ODSFormat.import_sheet
+    reject *: cls is ODSFormat
+
+[tablib.formats._ods.ODSFormat.import_book]
+190:19 call  dbook.wipe()
+    -> tablib.core.Databook.wipe
+    reject tablib.core.Dataset.wipe: dbook is a Databook
+192:37 call  opendocument.load(in_stream)
+    -> odf.opendocument.load
+    reject *: odf.opendocument.load, not a package load
+195:31 op  sheet.qname[1] != 'table'
+    reject *: a str comparison
+197:34 call  tablib.Dataset()
+    -> tablib.core.Dataset.__init__
+198:29 call  cls.import_sheet(dset, sheet, headers)
+    -> tablib.formats._ods.ODSFormat.import_sheet
+    reject *: cls is ODSFormat
+199:28 call  dbook.add_sheet(dset)
+    -> tablib.core.Databook.add_sheet
+
+[tablib.formats._ods.ODSFormat.dset_sheet]
+204:36 call  dataset._package(dicts=False)
+    -> tablib.core.Dataset._package
+    reject tablib.core.Databook._package: dataset is a Dataset
+206:32 call  enumerate(dataset._separators)
+    -> <builtin>.enumerate
+208:28 call  _package.insert((sep[0] + _offset), (sep[1],))
+    -> <builtin>.list.insert
+    reject *: _package is a list
+210:41 call  enumerate(_package, start=1)
+    -> <builtin>.enumerate
+211:53 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+213:37 call  table.TableRow(stylename=style)
+    -> odf.table.TableRow
+214:26 call  ws.addElement(odf_row)
+    -> odf.element.Element.addElement
+    note: ws is the odf.table.Table element of export_set or export_book
+215:36 call  enumerate(row)
+    -> <builtin>.enumerate
+216:30 call  isinstance(col, bool)
+    -> <builtin>.isinstance
+217:43 call  table.TableCell( valuetype="boolean", booleanvalue="true"...
+    -> odf.table.TableCell
+221:32 call  isinstance(col, numbers.Number)
+    -> <builtin>.isinstance
+222:43 call  table.TableCell(valuetype="float", value=col)
+    -> odf.table.TableCell
+223:32 call  isinstance(col, dt.datetime)
+    -> <builtin>.isinstance
+224:43 call  table.TableCell( valuetype="date", datevalue=col.strftime...
+    -> odf.table.TableCell
+226:47 call  col.strftime('%Y-%m-%dT%H:%M:%S')
+    -> datetime.datetime.strftime
+229:36 call  cell.addElement(text.P(text=col.strftime('%Y-%m-%d %H:%M:...
+    -> odf.element.Element.addElement
+229:43 call  text.P(text=col.strftime('%Y-%m-%d %H:%M:%S'))
+    -> odf.text.P
+229:61 call  col.strftime('%Y-%m-%d %H:%M:%S')
+    -> datetime.datetime.strftime
+230:32 call  isinstance(col, dt.date)
+    -> <builtin>.isinstance
+231:46 call  col.strftime('%Y-%m-%d')
+    -> datetime.date.strftime
+232:43 call  table.TableCell(valuetype="date", datevalue=date_value, s...
+    -> odf.table.TableCell
+233:36 call  cell.addElement(text.P(text=date_value))
+    -> odf.element.Element.addElement
+233:43 call  text.P(text=date_value)
+    -> odf.text.P
+234:32 call  isinstance(col, dt.time)
+    -> <builtin>.isinstance
+235:43 call  table.TableCell( valuetype="time", timevalue=col.strftime...
+    -> odf.table.TableCell
+237:47 call  col.strftime('PT%HH%MM%SS')
+    -> datetime.time.strftime
+240:36 call  cell.addElement(text.P(text=col.strftime('%H:%M:%S')))
+    -> odf.element.Element.addElement
+240:43 call  text.P(text=col.strftime('%H:%M:%S'))
+    -> odf.text.P
+240:61 call  col.strftime('%H:%M:%S')
+    -> datetime.time.strftime
+242:43 call  table.TableCell(valuetype="void")
+    -> odf.table.TableCell
+244:43 call  table.TableCell(valuetype="string")
+    -> odf.table.TableCell
+245:36 call  cell.addElement(text.P(text=str(col), stylename=style))
+    -> odf.element.Element.addElement
+245:43 call  text.P(text=str(col), stylename=style)
+    -> odf.text.P
+245:52 call  str(col)
+    -> <builtin>.str
+246:35 call  odf_row.addElement(cell)
+    -> odf.element.Element.addElement
+
+[tablib.formats._ods.ODSFormat.detect]
+250:22 call  isinstance(stream, bytes)
+    -> <builtin>.isinstance
+252:29 call  BytesIO(stream)
+    -> io.BytesIO
+254:30 call  opendocument.load(stream)
+    -> odf.opendocument.load
+    reject *: odf.opendocument.load, not a package load
+
+== tablib.formats._rst
+
+[tablib.formats._rst]
+38:6 decorator  @classmethod
+    -> <builtin>.classmethod
+58:6 decorator  @classmethod
+    -> <builtin>.classmethod
+92:6 decorator  @classmethod
+    -> <builtin>.classmethod
+111:6 decorator  @classmethod
+    -> <builtin>.classmethod
+138:6 decorator  @classmethod
+    -> <builtin>.classmethod
+190:6 decorator  @classmethod
+    -> <builtin>.classmethod
+214:6 decorator  @classmethod
+    -> <builtin>.classmethod
+260:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._rst.to_str]
+17:18 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+18:28 call  value.decode('utf-8')
+    -> <builtin>.bytes.decode
+19:15 call  str(value)
+    -> <builtin>.str
+
+[tablib.formats._rst._max_word_len]
+29:15 call  max((len(word) for word in text.split()), default=0)
+    -> <builtin>.max
+    reject *: ints are compared
+29:20 call  len(word)
+    -> <builtin>.len
+29:49 call  text.split()
+    -> <builtin>.bytes.split
+    -> <builtin>.str.split
+    note: text is what to_str returns, or a header: documented as a string, but a YAML mapping keyed by !!binary gives bytes headers (_set_dict, core.py:372; Codex round 1 T02)
+
+[tablib.formats._rst.ReSTFormat._get_column_string_lengths]
+44:20 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+45:35 call  len(h)
+    -> <builtin>.len
+45:57 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+46:39 call  _max_word_len(h)
+    -> tablib.formats._rst._max_word_len
+46:60 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+48:48 call  range(dataset.width)
+    -> <builtin>.range
+    reject tablib.core.Dataset.width: the property is loaded (48:57), not passed as a callable
+48:57 getattr  dataset.width
+    -> tablib.core.Dataset.width
+49:42 call  range(dataset.width)
+    -> <builtin>.range
+    reject tablib.core.Dataset.width: the property is loaded (49:51), not passed as a callable
+49:51 getattr  dataset.width
+    -> tablib.core.Dataset.width
+50:28 getattr  dataset.dict
+    -> tablib.core.Dataset._get_dict
+51:26 call  iter(row.values() if hasattr(row, 'values') else row)
+    -> <builtin>.iter
+51:37 call  row.values()
+    -> <builtin>.dict.values
+    note: row is a dict of Dataset.dict when the dataset has headers
+51:50 call  hasattr(row, 'values')
+    -> <builtin>.hasattr
+52:36 call  enumerate(values)
+    -> <builtin>.enumerate
+53:30 call  to_str(val)
+    -> tablib.formats._rst.to_str
+54:41 call  column_lengths[i].append(len(text))
+    -> <builtin>.list.append
+    reject *: column_lengths[i] is a list
+54:45 call  len(text)
+    -> <builtin>.len
+55:26 setitem  word_lens[i]
+    reject *: word_lens is a list
+55:35 call  max(word_lens[i], _max_word_len(text))
+    -> <builtin>.max
+    reject *: ints are compared
+55:63 call  _max_word_len(text)
+    -> tablib.formats._rst._max_word_len
+
+[tablib.formats._rst.ReSTFormat._row_to_lines]
+63:20 op  justify not in JUSTIFY_VALUES
+    reject *: JUSTIFY_VALUES is a tuple of strs
+64:29 call  ValueError('Value of "justify" must be one of "{}"'.forma...
+    note: unreachable: _row_to_lines is private and the package passes justify JUSTIFY_LEFT (default) or JUSTIFY_CENTER only
+64:77 call  'Value of "justify" must be one of "{}"'.format( '", "'.j...
+    note: unreachable (see 64:29)
+65:28 call  '", "'.join(JUSTIFY_VALUES)
+    note: unreachable (see 64:29)
+79:32 call  zip(values, widths)
+    -> <builtin>.zip
+81:26 call  to_str(value)
+    -> tablib.formats._rst.to_str
+82:32 call  wrapper.wrap(text)
+    -> textwrap.TextWrapper.wrap
+    note: wrapper is the textwrap.TextWrapper that export_set_as_simple_table or export_set_as_grid_table makes
+83:25 call  cells.append(cell)
+    -> <builtin>.list.append
+    reject *: cells is a list
+84:28 call  zip_longest(*cells, fillvalue='')
+    -> itertools.zip_longest
+86:18 call  just(cell_line, widths[i])
+    -> tablib.formats._rst.ReSTFormat._row_to_lines.just
+86:70 call  enumerate(line)
+    -> <builtin>.enumerate
+89:25 call  ''.join((lpad, pad.join(line), rpad))
+    -> <builtin>.str.join
+89:41 call  pad.join(line)
+    -> <builtin>.str.join
+
+[tablib.formats._rst.ReSTFormat._row_to_lines.just]
+70:35 call  text_.ljust(width_)
+    -> <builtin>.str.ljust
+72:36 call  text_.center(width_)
+    -> <builtin>.str.center
+74:35 call  text_.rjust(width_)
+    note: unreachable: the package passes justify JUSTIFY_LEFT or JUSTIFY_CENTER only (J9; audit F1)
+
+[tablib.formats._rst.ReSTFormat._get_column_widths]
+98:61 call  cls._get_column_string_lengths(dataset)
+    -> tablib.formats._rst.ReSTFormat._get_column_string_lengths
+99:27 call  int(median(lens))
+    -> <builtin>.int
+    reject *: median returns an int or a float
+99:34 call  median(lens)
+    -> statistics.median
+100:20 call  sum(median_lens)
+    -> <builtin>.sum
+101:18 op  total > max_table_width - (pad_len * len(median_lens))
+    reject *: an int comparison (max_table_width is an int of the client or the default)
+101:52 call  len(median_lens)
+    -> <builtin>.len
+106:43 op  w > pad_len
+    reject *: an int comparison
+108:29 call  max(w, l)
+    -> <builtin>.max
+    reject *: ints are compared
+108:51 call  zip(column_widths, word_lens)
+    -> <builtin>.zip
+
+[tablib.formats._rst.ReSTFormat.export_set_as_simple_table]
+117:30 call  TextWrapper()
+    -> textwrap.TextWrapper
+119:51 call  cls._get_column_widths(dataset, pad_len=2)
+    -> tablib.formats._rst.ReSTFormat._get_column_widths
+120:27 call  ' '.join(['=' * w for w in column_widths])
+    -> <builtin>.str.join
+122:21 call  lines.append(border)
+    -> <builtin>.list.append
+    reject *: lines is a list
+123:20 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+124:25 call  lines.extend(cls._row_to_lines( dataset.headers, column_w...
+    -> <builtin>.list.extend
+    reject *: lines is a list
+124:43 call  cls._row_to_lines( dataset.headers, column_widths, wrappe...
+    -> tablib.formats._rst.ReSTFormat._row_to_lines
+125:25 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+131:25 call  lines.append(border)
+    -> <builtin>.list.append
+    reject *: lines is a list
+132:28 getattr  dataset.dict
+    -> tablib.core.Dataset._get_dict
+133:26 call  iter(row.values() if hasattr(row, 'values') else row)
+    -> <builtin>.iter
+133:37 call  row.values()
+    -> <builtin>.dict.values
+    note: row is a dict of Dataset.dict when the dataset has headers
+133:50 call  hasattr(row, 'values')
+    -> <builtin>.hasattr
+134:25 call  lines.extend(cls._row_to_lines(values, column_widths, wra...
+    -> <builtin>.list.extend
+    reject *: lines is a list
+134:43 call  cls._row_to_lines(values, column_widths, wrapper, '')
+    -> tablib.formats._rst.ReSTFormat._row_to_lines
+135:21 call  lines.append(border)
+    -> <builtin>.list.append
+    reject *: lines is a list
+136:25 call  '\n'.join(lines)
+    -> <builtin>.str.join
+
+[tablib.formats._rst.ReSTFormat.export_set_as_grid_table]
+168:30 call  TextWrapper()
+    -> textwrap.TextWrapper
+170:51 call  cls._get_column_widths(dataset)
+    -> tablib.formats._rst.ReSTFormat._get_column_widths
+171:39 call  '=+='.join(['=' * w for w in column_widths])
+    -> <builtin>.str.join
+172:36 call  '-+-'.join(['-' * w for w in column_widths])
+    -> <builtin>.str.join
+174:21 call  lines.append(row_sep)
+    -> <builtin>.list.append
+    reject *: lines is a list
+176:20 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+177:25 call  lines.extend(cls._row_to_lines( dataset.headers, column_w...
+    -> <builtin>.list.extend
+    reject *: lines is a list
+177:43 call  cls._row_to_lines( dataset.headers, column_widths, wrappe...
+    -> tablib.formats._rst.ReSTFormat._row_to_lines
+178:25 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+183:25 call  lines.append(header_sep)
+    -> <builtin>.list.append
+    reject *: lines is a list
+184:28 getattr  dataset.dict
+    -> tablib.core.Dataset._get_dict
+185:26 call  iter(row.values() if hasattr(row, 'values') else row)
+    -> <builtin>.iter
+185:37 call  row.values()
+    -> <builtin>.dict.values
+    note: row is a dict of Dataset.dict when the dataset has headers
+185:50 call  hasattr(row, 'values')
+    -> <builtin>.hasattr
+186:25 call  lines.extend(cls._row_to_lines(values, column_widths, wra...
+    -> <builtin>.list.extend
+    reject *: lines is a list
+186:43 call  cls._row_to_lines(values, column_widths, wrapper)
+    -> tablib.formats._rst.ReSTFormat._row_to_lines
+187:25 call  lines.append(row_sep)
+    -> <builtin>.list.append
+    reject *: lines is a list
+188:25 call  '\n'.join(lines)
+    -> <builtin>.str.join
+
+[tablib.formats._rst.ReSTFormat._use_simple_table]
+205:27 call  to_str(head0)
+    -> tablib.formats._rst.to_str
+206:19 call  len(head0)
+    -> <builtin>.len
+206:27 op  len(head0) > width0
+    reject *: an int comparison
+209:26 call  to_str(cell)
+    -> tablib.formats._rst.to_str
+210:19 call  len(cell)
+    -> <builtin>.len
+210:26 op  len(cell) > width0
+    reject *: an int comparison
+
+[tablib.formats._rst.ReSTFormat.export_set]
+244:24 getattr  dataset.dict
+    -> tablib.core.Dataset._get_dict
+246:32 call  kwargs.get('force_grid', False)
+    -> <builtin>.dict.get
+    reject *: kwargs is a dict
+247:37 call  kwargs.get('max_table_width', cls.MAX_TABLE_WIDTH)
+    -> <builtin>.dict.get
+    reject *: kwargs is a dict
+248:47 call  cls._get_column_widths(dataset, max_table_width)
+    -> tablib.formats._rst.ReSTFormat._get_column_widths
+250:49 call  cls._use_simple_table( dataset.headers[0] if dataset.head...
+    -> tablib.formats._rst.ReSTFormat._use_simple_table
+251:21 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+251:43 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+252:28 call  dataset.get_col(0)
+    -> tablib.core.Dataset.get_col
+256:50 call  cls.export_set_as_simple_table(dataset, column_widths)
+    -> tablib.formats._rst.ReSTFormat.export_set_as_simple_table
+258:48 call  cls.export_set_as_grid_table(dataset, column_widths)
+    -> tablib.formats._rst.ReSTFormat.export_set_as_grid_table
+
+[tablib.formats._rst.ReSTFormat.export_book]
+268:27 call  '\n\n'.join(cls.export_set(dataset, force_grid=True) for ...
+    -> <builtin>.str.join
+268:42 call  cls.export_set(dataset, force_grid=True)
+    -> tablib.formats._rst.ReSTFormat.export_set
+    reject *: cls is ReSTFormat
+
+== tablib.formats._sql
+
+[tablib.formats._sql]
+20:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+47:6 decorator  @classmethod
+    -> <builtin>.classmethod
+69:6 decorator  @classmethod
+    -> <builtin>.classmethod
+74:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._sql.SQLFormat._render_literal]
+25:22 call  isinstance(value, bool)
+    -> <builtin>.isinstance
+27:22 call  isinstance(value, (int, decimal.Decimal))
+    -> <builtin>.isinstance
+28:23 call  str(value)
+    -> <builtin>.str
+29:22 call  isinstance(value, float)
+    -> <builtin>.isinstance
+32:45 op  value not in (float('inf'), -float('inf'))
+    reject *: a tuple of floats
+32:58 call  float('inf')
+    -> <builtin>.float
+    reject *: the argument is a str
+32:73 call  float('inf')
+    -> <builtin>.float
+    reject *: the argument is a str
+33:32 call  repr(value)
+    -> <builtin>.repr
+37:22 call  isinstance(value, datetime.datetime)
+    -> <builtin>.isinstance
+39:49 call  value.isoformat(sep=' ')
+    -> datetime.datetime.isoformat
+40:22 call  isinstance(value, datetime.date)
+    -> <builtin>.isinstance
+42:44 call  value.isoformat()
+    -> datetime.date.isoformat
+    note: value is a datetime.date that is not a datetime.datetime (line 37)
+44:19 call  str(value)
+    -> <builtin>.str
+44:34 call  str(value).replace("'", "''")
+    -> <builtin>.str.replace
+    reject *: str(value) is a str
+
+[tablib.formats._sql.SQLFormat.export_set]
+53:31 call  getattr(dataset, 'title', None)
+    -> <builtin>.getattr
+54:24 call  str(tbl)
+    -> <builtin>.str
+55:36 call  ','.join( columns if columns is not None else dataset.hea...
+    -> <builtin>.str.join
+57:25 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+57:44 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+63:31 call  ', '.join(cls._render_literal(v) for v in row)
+    -> <builtin>.str.join
+63:51 call  cls._render_literal(v)
+    -> tablib.formats._sql.SQLFormat._render_literal
+63:64 iter  row
+    -> tablib.core.Row.__iter__
+    reject *: row is a Row of dataset._data
+64:30 call  statements.append( f'INSERT INTO {tbl_ident}{columns_head...
+    -> <builtin>.list.append
+    reject *: statements is a list
+67:25 call  '\n'.join(statements)
+    -> <builtin>.str.join
+
+[tablib.formats._sql.SQLFormat.import_set]
+72:32 call  UnsupportedFormat('SQL import is not supported.')
+    -> <builtin>.NotImplementedError.__init__
+
+== tablib.formats._xls
+
+[tablib.formats._xls]
+17:19 call  xlwt.easyxf("alignment: wrap on")
+    -> xlwt.Style.easyxf
+    note: xlwt re-exports easyxf from xlwt.Style without __all__ (xlwt 1.3.0 __init__.py): named where it is defined
+18:19 call  xlwt.easyxf("font: bold on")
+    -> xlwt.Style.easyxf
+19:29 call  xlwt.easyxf(num_format_str='M/D/YY h:mm')
+    -> xlwt.Style.easyxf
+20:25 call  xlwt.easyxf(num_format_str='M/D/YY')
+    -> xlwt.Style.easyxf
+21:25 call  xlwt.easyxf(num_format_str='h:mm:ss')
+    -> xlwt.Style.easyxf
+23:33 call  re.compile(r'[\\*?:/\[\]]')
+    -> re.compile
+34:6 decorator  @classmethod
+    -> <builtin>.classmethod
+53:6 decorator  @classmethod
+    -> <builtin>.classmethod
+77:6 decorator  @classmethod
+    -> <builtin>.classmethod
+95:6 decorator  @classmethod
+    -> <builtin>.classmethod
+104:6 decorator  @classmethod
+    -> <builtin>.classmethod
+121:6 decorator  @classmethod
+    -> <builtin>.classmethod
+132:6 decorator  @classmethod
+    -> <builtin>.classmethod
+145:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._xls.safe_xls_sheet_title]
+27:18 call  re.sub(INVALID_TITLE_REGEX, replace, s)
+    -> re.sub
+
+[tablib.formats._xls.XLSFormat.detect]
+38:31 call  xlrd.open_workbook(file_contents=stream)
+    -> xlrd.open_workbook
+43:31 call  xlrd.open_workbook(file_contents=stream.read())
+    -> xlrd.open_workbook
+43:57 call  stream.read()
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    -> pandas.DataFrame.read
+    note: the stream of detect_format (see core.py:950; J1, J2)
+48:31 call  xlrd.open_workbook(filename=stream)
+    -> xlrd.open_workbook
+
+[tablib.formats._xls.XLSFormat.export_set]
+64:27 call  xlwt.Workbook(encoding='utf8')
+    -> xlwt.Workbook.Workbook
+65:26 call  wb.add_sheet( safe_xls_sheet_title(dataset.title, invalid...
+    -> xlwt.Workbook.Workbook.add_sheet
+    reject *: wb is an xlwt Workbook
+66:33 call  safe_xls_sheet_title(dataset.title, invalid_char_subst)
+    -> tablib.formats._xls.safe_xls_sheet_title
+71:23 call  cls.dset_sheet(dataset, ws)
+    -> tablib.formats._xls.XLSFormat.dset_sheet
+    reject *: cls is XLSFormat
+73:25 call  BytesIO()
+    -> io.BytesIO
+74:16 call  wb.save(stream)
+    -> xlwt.Workbook.Workbook.save
+75:31 call  stream.getvalue()
+    -> io.BytesIO.getvalue
+
+[tablib.formats._xls.XLSFormat.export_book]
+81:27 call  xlwt.Workbook(encoding='utf8')
+    -> xlwt.Workbook.Workbook
+83:33 call  enumerate(databook._datasets)
+    -> <builtin>.enumerate
+84:30 call  wb.add_sheet(safe_xls_sheet_title( dset.title, invalid_ch...
+    -> xlwt.Workbook.Workbook.add_sheet
+    reject *: wb is an xlwt Workbook
+84:51 call  safe_xls_sheet_title( dset.title, invalid_char_subst)
+    -> tablib.formats._xls.safe_xls_sheet_title
+89:27 call  cls.dset_sheet(dset, ws)
+    -> tablib.formats._xls.XLSFormat.dset_sheet
+    reject *: cls is XLSFormat
+91:25 call  BytesIO()
+    -> io.BytesIO
+92:16 call  wb.save(stream)
+    -> xlwt.Workbook.Workbook.save
+93:31 call  stream.getvalue()
+    -> io.BytesIO.getvalue
+
+[tablib.formats._xls.XLSFormat.read_cell]
+101:38 call  xldate_as_datetime(value, datemode)
+    -> xlrd.xldate.xldate_as_datetime
+
+[tablib.formats._xls.XLSFormat.import_sheet]
+108:14 setattr  dset.title
+    reject *: title is a plain attribute
+110:23 call  range(sheet.nrows)
+    -> <builtin>.range
+111:18 op  i < skip_lines
+    reject *: an int comparison
+114:22 setattr  dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+114:48 call  sheet.row_values(i)
+    -> xlrd.sheet.Sheet.row_values
+116:28 call  dset.append([ cls.read_cell(val, typ, datemode) for val, ...
+    -> tablib.core.Dataset.append
+    reject *: dset is a Dataset
+117:34 call  cls.read_cell(val, typ, datemode)
+    -> tablib.formats._xls.XLSFormat.read_cell
+    reject tablib.formats._ods.ODSFormat.read_cell: cls is XLSFormat
+118:40 call  zip(sheet.row_values(i), sheet.row_types(i))
+    -> <builtin>.zip
+118:57 call  sheet.row_values(i)
+    -> xlrd.sheet.Sheet.row_values
+118:77 call  sheet.row_types(i)
+    -> xlrd.sheet.Sheet.row_types
+
+[tablib.formats._xls.XLSFormat.import_set]
+125:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+127:38 call  xlrd.open_workbook(file_contents=in_stream.read())
+    -> xlrd.open_workbook
+127:67 call  in_stream.read()
+    -> io.BufferedReader.read
+    -> io.BytesIO.read
+    -> io.StringIO.read
+    -> io.TextIOWrapper.read
+    -> pandas.DataFrame.read
+    note: in_stream after normalize_input (J1, J2)
+128:40 call  xls_book.sheet_by_index(0)
+    -> xlrd.book.Book.sheet_by_index
+130:25 call  cls.import_sheet(dset, sheet, xls_book.datemode, headers,...
+    -> tablib.formats._xls.XLSFormat.import_sheet
+    reject *: cls is XLSFormat
+
+[tablib.formats._xls.XLSFormat.import_book]
+136:19 call  dbook.wipe()
+    -> tablib.core.Databook.wipe
+    reject tablib.core.Dataset.wipe: dbook is a Databook
+138:38 call  xlrd.open_workbook(file_contents=in_stream.read())
+    -> xlrd.open_workbook
+138:67 call  in_stream.read()
+    -> io.BytesIO.read
+    -> io.StringIO.read
+    note: in_stream after normalize_input; Databook.load documents only an abstract "file-like object" (no example), so no file class (J1; audit F3, the lead's ruling); no DataFrame reaches a book (J2)
+140:37 call  xls_book.sheets()
+    -> xlrd.book.Book.sheets
+    reject *: xls_book is an xlrd Book
+141:34 call  tablib.Dataset()
+    -> tablib.core.Dataset.__init__
+142:29 call  cls.import_sheet(dset, sheet, xls_book.datemode, headers)
+    -> tablib.formats._xls.XLSFormat.import_sheet
+    reject *: cls is XLSFormat
+143:28 call  dbook.add_sheet(dset)
+    -> tablib.core.Databook.add_sheet
+
+[tablib.formats._xls.XLSFormat.dset_sheet]
+148:36 call  dataset._package(dicts=False)
+    -> tablib.core.Dataset._package
+    reject tablib.core.Databook._package: dataset is a Dataset
+150:32 call  enumerate(dataset._separators)
+    -> <builtin>.enumerate
+152:28 call  _package.insert((sep[0] + _offset), (sep[1],))
+    -> <builtin>.list.insert
+    reject *: _package is a list
+154:32 call  enumerate(_package)
+    -> <builtin>.enumerate
+155:36 call  enumerate(row)
+    -> <builtin>.enumerate
+158:41 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+159:29 call  ws.write(i, j, col, bold)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+166:25 call  len(row)
+    -> <builtin>.len
+166:31 op  len(row) < dataset.width
+    reject *: an int comparison
+166:41 getattr  dataset.width
+    -> tablib.core.Dataset.width
+167:29 call  ws.write(i, j, col, bold)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+170:32 call  isinstance(col, datetime.datetime)
+    -> <builtin>.isinstance
+171:29 call  ws.write(i, j, col, datetime_style)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+172:32 call  isinstance(col, datetime.date)
+    -> <builtin>.isinstance
+173:29 call  ws.write(i, j, col, date_style)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+174:32 call  isinstance(col, datetime.time)
+    -> <builtin>.isinstance
+175:29 call  ws.write(i, j, col, time_style)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+179:33 op  '\n' in col
+    reject *: col is a cell (client data or an imported value)
+180:37 call  ws.write(i, j, col, wrap)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+182:37 call  ws.write(i, j, col)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+184:33 call  ws.write(i, j, col)
+    -> xlwt.Worksheet.Worksheet.write
+    reject *: ws is the xlwt Worksheet of add_sheet
+
+== tablib.formats._xlsx
+
+[tablib.formats._xlsx]
+24:33 call  re.compile(r'[\\*?:/\[\]]')
+    -> re.compile
+35:6 decorator  @classmethod
+    -> <builtin>.classmethod
+47:6 decorator  @classmethod
+    -> <builtin>.classmethod
+85:6 decorator  @classmethod
+    -> <builtin>.classmethod
+110:6 decorator  @classmethod
+    -> <builtin>.classmethod
+127:6 decorator  @classmethod
+    -> <builtin>.classmethod
+137:6 decorator  @classmethod
+    -> <builtin>.classmethod
+150:6 decorator  @classmethod
+    -> <builtin>.classmethod
+192:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._xlsx.safe_xlsx_sheet_title]
+28:18 call  re.sub(INVALID_TITLE_REGEX, replace, s)
+    -> re.sub
+
+[tablib.formats._xlsx.XLSXFormat.detect]
+41:33 call  ExcelReader(stream, read_only=False)
+    -> openpyxl.reader.excel.ExcelReader
+42:33 call  reader.read_manifest()
+    -> openpyxl.reader.excel.ExcelReader.read_manifest
+
+[tablib.formats._xlsx.XLSXFormat.export_set]
+69:22 call  Workbook()
+    -> openpyxl.workbook.workbook.Workbook
+    note: openpyxl.workbook re-exports Workbook without __all__: named where it is defined
+72:12 setattr  ws.title
+    reject *: ws is an openpyxl worksheet
+73:34 call  safe_xlsx_sheet_title(dataset.title, invalid_char_subst)
+    -> tablib.formats._xlsx.safe_xlsx_sheet_title
+77:23 call  cls.dset_sheet(dataset, ws, freeze_panes=freeze_panes, es...
+    -> tablib.formats._xlsx.XLSXFormat.dset_sheet
+    reject *: cls is XLSXFormat
+79:32 call  cls._adapt_column_width(ws, column_width)
+    -> tablib.formats._xlsx.XLSXFormat._adapt_column_width
+81:25 call  BytesIO()
+    -> io.BytesIO
+82:16 call  wb.save(stream)
+    -> openpyxl.workbook.workbook.Workbook.save
+83:31 call  stream.getvalue()
+    -> io.BytesIO.getvalue
+
+[tablib.formats._xlsx.XLSXFormat.export_book]
+92:22 call  Workbook()
+    -> openpyxl.workbook.workbook.Workbook
+94:22 call  wb.remove(sheet)
+    -> openpyxl.workbook.workbook.Workbook.remove
+95:33 call  enumerate(databook._datasets)
+    -> <builtin>.enumerate
+96:33 call  wb.create_sheet()
+    -> openpyxl.workbook.workbook.Workbook.create_sheet
+97:16 setattr  ws.title
+    reject *: ws is an openpyxl worksheet
+98:38 call  safe_xlsx_sheet_title(dset.title, invalid_char_subst)
+    -> tablib.formats._xlsx.safe_xlsx_sheet_title
+102:27 call  cls.dset_sheet(dset, ws, freeze_panes=freeze_panes, escap...
+    -> tablib.formats._xlsx.XLSXFormat.dset_sheet
+    reject *: cls is XLSXFormat
+104:36 call  cls._adapt_column_width(ws, column_width)
+    -> tablib.formats._xlsx.XLSXFormat._adapt_column_width
+106:25 call  BytesIO()
+    -> io.BytesIO
+107:16 call  wb.save(stream)
+    -> openpyxl.workbook.workbook.Workbook.save
+108:31 call  stream.getvalue()
+    -> io.BytesIO.getvalue
+
+[tablib.formats._xlsx.XLSXFormat.import_sheet]
+114:14 setattr  dset.title
+    reject *: title is a plain attribute
+116:32 call  enumerate(sheet.rows)
+    -> <builtin>.enumerate
+117:18 op  i < skip_lines
+    reject *: an int comparison
+121:22 setattr  dset.headers
+    -> tablib.core.Dataset._set_headers
+    reject *: headers is the property of Dataset
+123:22 op  i > skip_lines
+    reject *: an int comparison
+123:42 call  len(row_vals)
+    -> <builtin>.len
+123:53 op  len(row_vals) < dset.width
+    reject *: an int comparison
+123:60 getattr  dset.width
+    -> tablib.core.Dataset.width
+124:46 getattr  dset.width
+    -> tablib.core.Dataset.width
+124:57 call  len(row_vals)
+    -> <builtin>.len
+125:28 call  dset.append(row_vals)
+    -> tablib.core.Dataset.append
+    reject *: dset is a Dataset
+
+[tablib.formats._xlsx.XLSXFormat.import_set]
+131:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+133:33 call  load_workbook(in_stream, read_only=read_only, data_only=T...
+    -> openpyxl.reader.excel.load_workbook
+135:25 call  cls.import_sheet(dset, sheet, headers, skip_lines)
+    -> tablib.formats._xlsx.XLSXFormat.import_sheet
+    reject *: cls is XLSXFormat
+
+[tablib.formats._xlsx.XLSXFormat.import_book]
+141:19 call  dbook.wipe()
+    -> tablib.core.Databook.wipe
+    reject tablib.core.Dataset.wipe: dbook is a Databook
+143:33 call  load_workbook(in_stream, read_only=read_only, data_only=T...
+    -> openpyxl.reader.excel.load_workbook
+146:34 call  tablib.Dataset()
+    -> tablib.core.Dataset.__init__
+147:29 call  cls.import_sheet(dset, sheet, headers)
+    -> tablib.formats._xlsx.XLSXFormat.import_sheet
+    reject *: cls is XLSXFormat
+148:28 call  dbook.add_sheet(dset)
+    -> tablib.core.Databook.add_sheet
+
+[tablib.formats._xlsx.XLSXFormat.dset_sheet]
+153:36 call  dataset._package(dicts=False)
+    -> tablib.core.Dataset._package
+    reject tablib.core.Databook._package: dataset is a Dataset
+155:32 call  enumerate(dataset._separators)
+    -> <builtin>.enumerate
+157:28 call  _package.insert((sep[0] + _offset), (sep[1],))
+    -> <builtin>.list.insert
+    reject *: _package is a list
+159:20 call  Font(bold=True)
+    -> openpyxl.styles.fonts.Font
+160:30 call  Alignment(wrap_text=True)
+    -> openpyxl.styles.alignment.Alignment
+162:32 call  enumerate(_package)
+    -> <builtin>.enumerate
+164:36 call  enumerate(row)
+    -> <builtin>.enumerate
+165:44 call  get_column_letter(j + 1)
+    -> functools._lru_cache_wrapper.__call__
+    -> openpyxl.utils.cell.get_column_letter
+    note: get_column_letter is a functools.lru_cache wrapper in openpyxl 3.1.5 (utils/cell.py:78) and a plain function of openpyxl.utils.cell in 2.6.0, 2.6.4 and 3.0.10 (utils/cell.py:107, 107, 105), re-exported by openpyxl.utils without __all__ (audit F4, the lead's ruling on admitted releases)
+169:50 getattr  dataset.headers
+    -> tablib.core.Dataset._get_headers
+176:25 call  len(row)
+    -> <builtin>.len
+176:31 op  len(row) < dataset.width
+    reject *: an int comparison
+176:41 getattr  dataset.width
+    -> tablib.core.Dataset.width
+181:29 op  '\n' in str(col)
+    reject *: str(col) is a str
+181:35 call  str(col)
+    -> <builtin>.str
+187:37 call  str(col)
+    -> <builtin>.str
+189:78 call  cell.value.startswith('=')
+    -> <builtin>.str.startswith
+    note: a cell of data type 'f' holds a formula str
+
+[tablib.formats._xlsx.XLSXFormat._adapt_column_width]
+194:22 call  isinstance(width, str)
+    -> <builtin>.isinstance
+194:45 op  width != "adaptive"
+    reject *: a str comparison
+199:29 call  ValueError(msg)
+    -> <builtin>.ValueError
+207:41 call  enumerate(row)
+    -> <builtin>.enumerate
+208:37 call  len(str(cell))
+    -> <builtin>.len
+208:41 call  str(cell)
+    -> <builtin>.str
+209:27 call  len(column_widths)
+    -> <builtin>.len
+209:43 op  len(column_widths) > i
+    reject *: an int comparison
+210:39 op  cell_width > column_widths[i]
+    reject *: an int comparison
+211:42 setitem  column_widths[i]
+    reject *: column_widths is a list
+213:45 call  column_widths.append(cell_width)
+    -> <builtin>.list.append
+    reject *: column_widths is a list
+217:41 call  enumerate(column_widths, 1)
+    -> <builtin>.enumerate
+218:58 call  get_column_letter(i)
+    -> functools._lru_cache_wrapper.__call__
+    -> openpyxl.utils.cell.get_column_letter
+    note: as at 165:44
+
+== tablib.formats._yaml
+
+[tablib.formats._yaml]
+15:6 decorator  @classmethod
+    -> <builtin>.classmethod
+25:6 decorator  @classmethod
+    -> <builtin>.classmethod
+35:6 decorator  @classmethod
+    -> <builtin>.classmethod
+42:6 decorator  @classmethod
+    -> <builtin>.classmethod
+54:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[tablib.formats._yaml.YAMLFormat.export_set]
+18:30 call  yaml.safe_dump( dataset._package(), default_flow_style=No...
+    -> yaml.safe_dump
+19:29 call  dataset._package()
+    -> tablib.core.Dataset._package
+    reject tablib.core.Databook._package: dataset is a Dataset
+
+[tablib.formats._yaml.YAMLFormat.export_book]
+28:30 call  yaml.safe_dump( databook._package(), default_flow_style=N...
+    -> yaml.safe_dump
+29:30 call  databook._package()
+    -> tablib.core.Databook._package
+    reject tablib.core.Dataset._package: databook is a Databook
+
+[tablib.formats._yaml.YAMLFormat.import_set]
+39:18 call  dset.wipe()
+    -> tablib.core.Dataset.wipe
+    reject tablib.core.Databook.wipe: dset is a Dataset
+40:14 setattr  dset.dict
+    -> tablib.core.Dataset._set_dict
+    reject *: dict is the property of Dataset
+40:35 call  yaml.safe_load(in_stream)
+    -> yaml.safe_load
+
+[tablib.formats._yaml.YAMLFormat.import_book]
+46:19 call  dbook.wipe()
+    -> tablib.core.Databook.wipe
+    reject tablib.core.Dataset.wipe: dbook is a Databook
+48:36 call  yaml.safe_load(in_stream)
+    -> yaml.safe_load
+49:34 call  tablib.Dataset()
+    -> tablib.core.Dataset.__init__
+50:18 setattr  data.title
+    reject *: title is a plain attribute
+51:18 setattr  data.dict
+    -> tablib.core.Dataset._set_dict
+    reject *: dict is the property of Dataset
+52:28 call  dbook.add_sheet(data)
+    -> tablib.core.Databook.add_sheet
+
+[tablib.formats._yaml.YAMLFormat.detect]
+58:35 call  yaml.safe_load(stream)
+    -> yaml.safe_load
+59:26 call  isinstance(_yaml, (list, tuple, dict))
+    -> <builtin>.isinstance
+
+== tablib.utils
+
+[tablib.utils.normalize_input]
+11:18 call  isinstance(stream, str)
+    -> <builtin>.isinstance
+12:24 call  StringIO(stream, newline='')
+    -> io.StringIO
+13:20 call  isinstance(stream, bytes)
+    -> <builtin>.isinstance
+14:23 call  BytesIO(stream)
+    -> io.BytesIO
+

@@ -1,4 +1,4 @@
-# The projects of the macro-benchmark: 40 projects, each pinned at `commit`
+# The projects of the macro-benchmark: 50 projects, each pinned at `commit`
 # (the commit of the release `tag` of its `repository`) or at the SHA-256 of
 # its sdist: the only lock. The build of the inputs image
 # (evaluation/container/Dockerfile.inputs, fetch.py macro) writes the files
@@ -6,8 +6,9 @@
 # below: the project's directory).
 #
 # Read by trace.py, check.py and the evaluation:
-#   batch         the batch that the project came with: 1 to 5 and 7, in the
-#                 order in which the batches were built (7: ten projects), or
+#   batch         the batch that the project came with: 1 to 5, 7 and 8, in
+#                 the order in which the batches were built (7 and 8: ten
+#                 projects each), or
 #                 "icse-2021" for the five projects of PyCG's ICSE 2021
 #                 evaluation (README.md, "How the benchmark grew")
 #   root          directory that is put on sys.path; module names are
@@ -58,8 +59,8 @@
 # test run, for the trace service: the full closure, each file by version
 # and SHA-256; test_requirements repeats the versions.
 #
-# A security scan of the sources came before any run of batches 3 to 5 and
-# 7 and of the ICSE 2021 set; the entries hold its restrictions. The scan of
+# A security scan of the sources came before any run of batches 3 to 5, 7
+# and 8 and of the ICSE 2021 set; the entries hold its restrictions. The scan of
 # batches 1 and 2 came after their traces (README.md, "Projects").
 #
 # Documentation only (read from the project's tox.ini, pyproject.toml and
@@ -1830,6 +1831,628 @@ files in src/xcbproto (not analysed). Every native call goes through ctypes
 (libX11, libXrandr, libXfixes and the xcb libraries, found with
 find_library, which runs ldconfig); the implementation is chosen inside
 MSS() by platform.system().
+"""
+
+# --------------------------------------------------------------------------
+# Batch 8: ten packages from rounds 8 and 9 (four each: stratum 2 has no
+# project left) and the partial round 10 (strata 1 and 3), by the rule fixed
+# before the draw (README.md, "Choosing a new batch"; selection/round-8.json,
+# round-9.json, round-10.json; rounds 9 and 10 skipped the projects of the
+# earlier rounds, which their logs list under `used`). It was measured once,
+# by the frozen engine 2372b60 that measured batch 7, before its false
+# positives and false negatives were read (README.md, "How the benchmark
+# grew").
+#
+# Dropped (`--drop`, recorded in the round log under `dropped`); the draw
+# took the next project of the order in the same stratum:
+#   cerberus      round 8, stratum 3: in the scalability corpus of DyPyBench
+#   sh            round 8, stratum 3: the maintainer's veto (round 4)
+#   platformdirs  round 8, stratum 4: in the scalability corpus of the PyPI top 100
+#                 and in itables' trace environment
+#
+# The maintainer's answer to the veto list (2026-11-24): no veto; pubchempy
+# without a test run (every test needs the internet) and pyusb with about 15
+# tests, each with a doubled blind audit; avro as its sdist, run by pytest;
+# tablib with odfpy built from its pinned sdist after a scan of it; the
+# exception MarkupSafe 3.0.3 for honcho. The entries come from a reading of
+# the sources in containers (the record of the selection stage); the
+# security scans' points are folded in when they are back.
+# --------------------------------------------------------------------------
+[honcho]
+batch = 8
+repository = "https://github.com/nickstenning/honcho"
+tag = "v2.0.0"
+commit = "8af63177405a574612abf90ef55aaa68d76f7686"
+licence = "MIT"
+root = "."
+packages = ["honcho"]
+exclude = []
+dependencies = ["jinja2", "markupsafe"]
+pytest_args = [
+    "tests",
+    "--ignore=tests/integration",
+]
+upstream_test_command = "coverage run -m pytest"  # tox.ini (extras export; deps coverage, mock, pytest), run by .github/workflows/main.yml on the built wheel
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "Jinja2==3.1.4",
+    "MarkupSafe==3.0.3",
+    "mock==5.1.0",
+]  # see test-environments/honcho.txt
+deselect = [
+    { test = "tests/test_invocation.py::test_runpy_invoke", reason = "runs `python -m honcho version` in a child interpreter: the tracer does not record a child process" },
+    { test = "tests/test_manager.py::TestManager::test_loop_calls_process_run", reason = "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)" },
+    { test = "tests/test_manager.py::TestManager::test_printer_receives_messages_in_correct_order", reason = "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)" },
+    { test = "tests/test_manager.py::TestManager::test_printer_receives_lines_multi_process", reason = "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)" },
+    { test = "tests/test_manager.py::TestManager::test_returncode_set_by_first_exiting_process", reason = "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)" },
+    { test = "tests/test_manager.py::TestManager::test_printer_receives_lines_after_stop", reason = "starts multiprocessing.Process with a local function (Harness.run's _loop): Python 3.14's default start method on Linux, forkserver, cannot pickle it (inferred, not run)" },
+]
+notes = """
+Drawn in round 8, stratum 1 (809 to 1236 code lines). Release 2.0.0,
+uploaded 2024-10-06; wheel honcho-2.0.0-py3-none-any.whl, SHA-256
+56dcd04fc72d362a4befb9303b1a1a812cba5da283526fbc6509be122918ddf3; 835 code
+lines; import names honcho; the checkout root is ".". The tag v2.0.0 is the
+annotated tag object c8ac2ca252ed19959e6b8decff9f40637c9b1bdf. Licence:
+PyPI's classifier "MIT License"; GitHub detects MIT. Test files (frame): 17,
+1303 code lines: tests/integration/test_check.py,
+tests/integration/test_export.py, tests/integration/test_main.py,
+tests/integration/test_run.py, tests/integration/test_start.py,
+tests/test_colour.py and 11 more; CI: .github/workflows/main.yml,
+.github/workflows/pypi-package.yml. Of the compared Python files (the
+wheel's .py files outside *.dist-info and *.data), one differs from the tag
+(missing from it or not equal): honcho/_version.py, 12 code lines (written
+at build time; whether the checkout imports without it is NOT VERIFIED). NOT
+YET KNOWN: see the header. Proposed (reading in containers, 2026-11-23): the
+checkout imports without honcho/_version.py (honcho/__init__.py falls back
+to 0.0.0+unknown). Tests: tests without tests/integration (13 tests that run
+the console script `honcho` and Procfiles of child processes through
+subprocess: the console script is not installed, and the tracer does not
+record child processes). 105 test functions by reading, 92 in tests/*.py; 86
+run, 6 deselected. honcho/export imports jinja2 at import and exits without
+it: Jinja2 3.1.4 and MarkupSafe 3.0.3 (see test-environments/honcho.txt).
+Manager.loop runs each process in a multiprocessing.Process: in the tests
+that remain, FakeProcess objects only, but see the resource tracker below.
+Exporters are found through the entry-point group honcho_exporters, which
+the uninstalled checkout does not register. The maintainer's answer
+(2026-11-24): MarkupSafe 3.0.3 accepted as an exception to the release-date
+rule. Scan A (2026-11-24): safe to run as planned. The ten TestManager tests
+that stay make multiprocessing.Queue objects (the autouse fixture printer):
+with Python 3.14's forkserver this starts the standard library's resource
+tracker in a child interpreter (standard-library code only) and needs a
+writable /dev/shm; a container started as trace.sh starts it gives user
+10001 a writable /dev/shm (a 64 MB tmpfs; checked with the base image on
+2026-11-24: a Queue works there).
+test_loop_with_empty_manager_returns_immediately replaces the handlers of
+SIGTERM and SIGINT in the pytest process. No test reaches an exporter's
+entry point (honcho is not installed).
+"""
+
+
+[nodeenv]
+batch = 8
+repository = "https://github.com/ekalinin/nodeenv"
+tag = "1.12.0"
+commit = "cb7fc97ebff9792d1fa603fe66baa6fcd5912659"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["nodeenv.py"]
+exclude = []
+dependencies = ["shtab"]
+pytest_args = [
+    "tests",
+    "-m",
+    "not integration",
+]
+upstream_test_command = "coverage run -p -m pytest -m 'not integration' tests"  # tox.ini (deps -r requirements-dev.txt: -e .[completion]), run by .github/workflows/tests.yml; the jobs activate-shells (zsh, fish, NODEENV_REQUIRE_SHELLS=1) and integration (real Node.js downloads) besides
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "shtab==1.13.0",
+]  # see test-environments/nodeenv.txt
+deselect = [
+    { test = "tests/test_completion.py::test_module_run_completes_nodeenv", reason = "runs nodeenv.py in a child interpreter (sys.executable): the tracer does not record a child process, and the child writes bytecode into the source copy" },
+]
+notes = """
+Drawn in round 8, stratum 3 (1596 to 2256 code lines). Release 1.12.0,
+uploaded 2026-10-31; wheel nodeenv-1.12.0-py3-none-any.whl, SHA-256
+80644d65c10cc2be12e3e4b54b3367ff288c7ad24ae75c2dcc65454fc7449d4d; 1793 code
+lines; import names nodeenv; the checkout root is ".". Licence: PyPI's
+classifier "BSD License"; GitHub NOASSERTION: which BSD licence is NOT
+VERIFIED. Test files (frame): 5, 3876 code lines: tests/nodeenv_test.py,
+tests/test_activate_shells.py, tests/test_activate_win.py,
+tests/test_completion.py, tests/test_install_activate.py; CI:
+.github/workflows/main.yml, .github/workflows/pages.yml,
+.github/workflows/tests.yml. Proposed (reading in containers, 2026-11-23):
+one module, nodeenv.py. LICENSE is the BSD 3-clause text. Tests: tests -m
+"not integration" (the 9 integration tests download Node.js), with shtab
+1.13.0 (test_completion.py skips without it). 245 test functions by reading;
+about 225 run: test_activate_win.py (10) skips off Windows; the shell tests
+skip for each shell that is not installed (the image has sh and bash; zsh,
+fish, tcsh, powershell are missing). Shell tests run sh and bash on
+activation scripts that the package writes; a fixture creates virtual
+environments with `python -m venv --without-pip` in temporary directories
+(child interpreters that run no package code). The mirror tests start an
+HTTP server on 127.0.0.1 (a thread) and connect to it, and one connects to a
+closed loopback port; every other URL is mocked (urlopen patched).
+UNVERIFIED: that no test reaches the network (the container has none). The
+maintainer's answer (2026-11-24): no veto. Scan A (2026-11-24): safe to run
+as planned; the lead keeps -m "not integration" and accepts the child
+processes that the tracer does not record, with no further deselection: sh,
+dash and bash on the activation scripts, each running a child Python on
+dump.py (os and sys only); python -m venv --without-pip five times (the
+fixture python_venv, for every shell parameter before the skip); and three
+child interpreters that run nodeenv.py --print-completion (the fixture
+scripts of test_completion.py; they stop in argument parsing and write no
+bytecode, as __main__). A loopback HTTP server runs in a thread; every other
+URL is mocked.
+"""
+
+
+[flit-core]
+batch = 8
+repository = "https://github.com/pypa/flit"
+tag = "4.2.0"
+commit = "eeaf9e783c87c331f1d73bb2f5553fc79016aae1"
+licence = "BSD-3-Clause"
+root = "flit_core"
+packages = ["flit_core"]
+exclude = []
+dependencies = []
+pytest_args = [
+    "flit_core/tests_core",
+]
+upstream_test_command = "python -m pytest --cov=flit --cov=flit_core/flit_core"  # tox.ini (PYTHONPATH=flit_core; deps requests, testpath, responses, docutils, tomli-w, pytest), run by .github/workflows/test.yml; it collects tests/ of flit too
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "testpath==0.6.0",
+]  # see test-environments/flit-core.txt
+notes = """
+Drawn in round 8, stratum 4 (2267 to 3074 code lines). Release 4.2.0,
+uploaded 2026-10-27; wheel flit_core-4.2.0-py3-none-any.whl, SHA-256
+2bee22dc8ba89c2e35b4e1ad575e596aac945c85672dd8f3cad21b629036e044; 2855 code
+lines; import names flit_core; the checkout root is "flit_core". Licence:
+PyPI's license_expression BSD-3-Clause; GitHub detects BSD-3-Clause. Test
+files (frame): 19, 2559 code lines:
+flit_core/tests_core/test_build_thyself.py,
+flit_core/tests_core/test_buildapi.py, flit_core/tests_core/test_common.py,
+flit_core/tests_core/test_config.py, flit_core/tests_core/test_sdist.py,
+flit_core/tests_core/test_versionno.py and 13 more; CI:
+.github/workflows/test.yml. The checkout root is the repository's flit_core
+directory: the repository also holds flit, the command-line tool, which is
+not analysed. The frame's tests include tests/ of flit; flit_core's own are
+flit_core/tests_core, beside the package. Proposed (reading in containers,
+2026-11-23): root flit_core, package flit_core with flit_core/vendor/tomli
+(tomli 1.2.3, vendored; on Python 3.11 and later config.py imports tomllib
+first, so the vendored copy is analysed but not reached). Tests:
+flit_core/tests_core with testpath 0.6.0: 80 test functions by reading, all
+in process; they build sdists and wheels of the samples into temporary
+directories, and test_build_thyself builds flit_core itself from its source
+directory (into tmp_path). tests/ belongs to flit, the command-line tool,
+and is not run. The maintainer's answer (2026-11-24): no veto. Scan A
+(2026-11-24): safe to run as planned. The package executes the sample
+modules of tests_core/samples in process (exec_module), all 25 read:
+trivial. Its documentation (README.rst, doc/development.rst) holds a policy
+addressed to AI tools: data, not followed; the benchmark changes nothing in
+Flit and sends it nothing.
+"""
+
+
+[pyusb]
+batch = 8
+repository = "https://github.com/pyusb/pyusb"
+tag = "v1.3.1"
+commit = "89ea84d6c9e4cb81bc6e40d7df849d0cbd7dfd47"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["usb"]
+exclude = []
+dependencies = []
+pytest_args = [
+    "tests/test_find.py",
+    "tests/test_interop.py",
+    "tests/test_util.py",
+]
+upstream_test_command = "python testall.py"  # tox.ini (changedir tests), run by .github/workflows/run_tox.yml with libusb on macOS and Windows
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+]  # see test-environments/pyusb.txt
+notes = """
+Drawn in round 8, stratum 5 (3117 to 3880 code lines). Release 1.3.1,
+uploaded 2025-01-08; wheel pyusb-1.3.1-py3-none-any.whl, SHA-256
+bf9b754557af4717fe80c2b07cc2b923a9151f5c08d17bdb5345dac09d6a0430; 3245 code
+lines; import names usb; the checkout root is ".". The tag v1.3.1 is the
+annotated tag object b9b8a2b1ecb822af0c0f1d2cf0c0ec69f19765e3. Licence:
+PyPI's classifier "BSD License"; GitHub detects BSD-3-Clause. Test files
+(frame): 7, 1076 code lines: tests/test_backend.py, tests/test_control.py,
+tests/test_find.py, tests/test_integration.py, tests/test_interop.py,
+tests/test_legacy.py and 1 more; CI: .github/workflows/run_tox.yml. Of the
+compared Python files, one differs from the tag: usb/_version.py, 12 code
+lines (written at build time; NOT VERIFIED). The import name is usb. NOT YET
+KNOWN: see the header. Proposed (reading in containers, 2026-11-23): the
+checkout imports without usb/_version.py (usb/__init__.py falls back to
+0.0.0). LICENSE is the BSD 3-clause text. The upstream runner is
+tests/testall.py (unittest, get_suite of each module): the backend, control,
+integration and legacy suites are added only when a backend loads libusb and
+finds the PIC test device (devinfo.py), so without hardware only test_find
+(1), test_interop (7) and test_util (8) run, 16 of 70 test functions (scan
+A), through a fake backend (usb.backend.IBackend) but one. The test modules import
+utils and devinfo from tests/ (no __init__.py). libusb is not installed:
+usb.backend.libusb1, libusb0 and openusb (ctypes) come from reading only.
+The maintainer's answer (2026-11-24): the about 15 tests accepted; the
+ground truth gets a doubled blind audit. Scan A (2026-11-24): safe to run as
+planned. tests/test_util.py has 8 tests, not 7: 16 items in all.
+tests/test_util.py::FindDescriptorTest::runTest calls usb.core.find with no
+backend; it runs /sbin/ldconfig -p in child processes
+(ctypes.util.find_library), finds no libusb, and fails with NoBackendError.
+The lead keeps it, the only test of the backend search and of usb.libloader,
+and declares its failure accepted before the run
+(repeatability/declared.json, accepted_failures).
+"""
+
+
+[vulture]
+batch = 8
+repository = "https://github.com/jendrikseipp/vulture"
+tag = "v2.16"
+commit = "b0f67ba0044693aa9ec0d38fe460590facc98004"
+licence = "MIT"
+root = "."
+packages = ["vulture"]
+exclude = []
+dependencies = []
+pytest_args = [
+    "tests",
+    "--ignore=tests/test_script.py",
+]
+upstream_test_command = "pytest"  # tox.ini (deps coverage, pint, pytest, pytest-cov, ty), with the addopts --cov of pyproject.toml
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+]  # see test-environments/vulture.txt
+deselect = [
+    { test = "tests/test_errors.py::test_invalid_cmdline_args", reason = "runs `python -m vulture` in a child interpreter: the tracer does not record a child process" },
+]
+notes = """
+Drawn in round 9, stratum 1 (809 to 1236 code lines). Release 2.16, uploaded
+2026-03-25; wheel vulture-2.16-py3-none-any.whl, SHA-256
+6e0f1c312cef1c87856957e5c2ca9608834a7c794c2180477f30bf0e4cc58eee; 1161 code
+lines; import names dev, vulture; the checkout root is ".". The tag v2.16 is
+the annotated tag object 258fe6a1974e89a2add9a45519a9e9dd9f46154e. Licence:
+PyPI's classifier "MIT License"; GitHub detects MIT. Test files (frame): 18,
+3323 code lines: tests/test_conditions.py, tests/test_confidence.py,
+tests/test_config.py, tests/test_encoding.py, tests/test_errors.py,
+tests/test_format_strings.py and 12 more; CI: .github/workflows/main.yml,
+.github/workflows/pre-commit.yml, .github/workflows/release.yml. The wheel
+has two top-level names, vulture and dev (the draw counted both: 1161 code
+lines); what dev is, is NOT YET KNOWN. Proposed (reading in containers,
+2026-11-23): dev/ is the release tooling (make-release-notes.py, whose name
+is not importable, and release.sh); the draw counted it as a top-level name
+of the wheel. Tests: tests without tests/test_script.py (12 tests, each runs
+`python -m vulture` or a whitelist in a child interpreter). 274 test
+functions by reading; about 260 run, 1 skips on Python 3.14 (test_size, PEP
+765). No pytest_config: the addopts of pyproject.toml need pytest-cov.
+vulture/whitelists/*.py are whitelists, read as data by the tests that ran
+in the child. The maintainer's answer (2026-11-24): no veto. The draw
+counted dev/ as a top-level name of the wheel (the wheel ships
+dev/make-release-notes.py). It is not analysed: the analysed source is the
+importable package (README.md, "Scope"), and dev/ has no importable module
+(make-release-notes.py has a hyphen in its name, release.sh is a shell
+script, no __init__.py); with it in packages, trace.py --locate would stop
+(a namespace package has no origin; scan B). So packages = ["vulture"],
+whose __init__.py --locate finds in the root by reading, and the analysed
+code lines are those of the draw less dev/make-release-notes.py. Scan B
+(2026-11-24): safe to run as planned.
+"""
+
+
+[toolz]
+batch = 8
+repository = "https://github.com/pytoolz/toolz"
+tag = "1.2.0"
+commit = "451af60dec590a6010e2babdbf391ea8f815122f"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["tlz", "toolz"]
+exclude = ["toolz/sandbox/tests", "toolz/tests"]
+dependencies = []
+pytest_args = [
+    "toolz",
+    "--doctest-modules",
+]
+pytest_config = "pyproject.toml"
+upstream_test_command = "coverage run -m pytest --doctest-modules toolz/"  # .github/workflows/test.yml, then pytest bench/
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+]  # see test-environments/toolz.txt
+deselect = [
+    { test = "toolz/tests/test_package.py::test_has_version", reason = "asserts toolz.__version__, which toolz/__init__.py takes from importlib.metadata: toolz is not installed in the trace image, so it raises PackageNotFoundError (scan B)" },
+]
+notes = """
+Drawn in round 9, stratum 3 (1596 to 2256 code lines). Release 1.2.0,
+uploaded 2026-10-07; wheel toolz-1.2.0-py3-none-any.whl, SHA-256
+890f820b1cb8152785aaf9386d8707770110809035800985ca65cb24ce1120ef; 2144 code
+lines; import names tlz, toolz; the checkout root is ".". Licence: PyPI's
+license_expression BSD-3-Clause; GitHub NOASSERTION. Test files (frame): 29,
+2216 code lines: bench/test_curry.py, bench/test_curry_baseline.py,
+bench/test_first.py, bench/test_first_iter.py, bench/test_frequencies.py,
+bench/test_get.py and 23 more; CI: .github/workflows/pre-commit.yml,
+.github/workflows/publish_pypi.yml, .github/workflows/test.yml. The draw
+counted 2144 of the 4248 compared code lines: the rest is toolz/tests and
+toolz/sandbox/tests, inside the package (excluded). The second import name,
+tlz, is a re-export of toolz and toolz.curried. NOT YET KNOWN: see the
+header. Proposed (reading in containers, 2026-11-23): tlz is a second
+top-level package whose _build_tlz.py installs a meta-path finder that
+builds tlz from cytoolz or toolz at import. Tests: toolz with
+--doctest-modules, as upstream, and pyproject.toml as the configuration
+(filterwarnings error, xfail_strict, strict markers; no plugin needed): 163
+test functions and the doctests of 8 modules (about 288 examples). cytoolz
+is not installed (test_tlz checks both).
+toolz/sandbox/tests/test_parallel.py::test_fold maps with a
+multiprocessing.Pool: its workers run toolz code that the tracer does not
+record (the serial parts of the test do run in process). bench/ is not run.
+The maintainer's answer (2026-11-24): no veto. Scan B (2026-11-24): safe to
+run as planned. test_package.py::test_has_version is deselected
+(toolz.__version__ comes from importlib.metadata, and toolz is not
+installed); filterwarnings = error stays, as upstream has it; cytoolz is
+never installed (tlz would take its functions).
+"""
+
+
+[tablib]
+batch = 8
+repository = "https://github.com/jazzband/tablib"
+tag = "v3.10.0"
+commit = "b0ff39fb9b2f457e5332249b4cc2ec11eabf46ee"
+licence = "MIT"
+root = "src"
+packages = ["tablib"]
+exclude = []
+dependencies = ["openpyxl", "et_xmlfile", "yaml", "tabulate", "xlrd", "xlwt", "odf", "defusedxml"]
+pytest_args = [
+    "tests",
+]
+upstream_test_command = "pytest tests"  # tox.ini (deps -r tests/requirements.txt, pandas best effort), with the addopts of pytest.ini (--cov)
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+    "et-xmlfile==2.0.0",
+    "openpyxl==3.1.5",
+    "PyYAML==6.0.3",
+    "defusedxml==0.7.1",
+    "odfpy==1.4.1",
+    "tabulate==0.10.0",
+    "xlrd==2.0.2",
+    "xlwt==1.3.0",
+]  # see test-environments/tablib.txt
+notes = """
+Drawn in round 9, stratum 4 (2267 to 3074 code lines). Release 3.10.0,
+uploaded 2026-07-31; wheel tablib-3.10.0-py3-none-any.whl, SHA-256
+5721bf3a52d491f8f843628a3a3200db164f6ad9e92fb6eaa64dc3f945f30ad9; 2416 code
+lines; import names tablib; the checkout root is "src". Licence: PyPI's
+classifier "MIT License"; GitHub detects MIT. Test files (frame): 3, 1593
+code lines: tests/test_tablib.py,
+tests/test_tablib_dbfpy_packages_fields.py,
+tests/test_tablib_dbfpy_packages_utils.py; CI:
+.github/workflows/docs-lint.yml, .github/workflows/release-drafter.yml,
+.github/workflows/release.yml, .github/workflows/require-pr-label.yml and
+more. Of the compared Python files, one differs from the tag:
+tablib/_version.py, 18 code lines (written at build time; NOT VERIFIED). NOT
+YET KNOWN: see the header. Proposed (reading in containers, 2026-11-23): the
+checkout imports without src/tablib/_version.py (a fallback to None). Tests:
+tests, 183 test functions by reading (163 in test_tablib.py, 20 for the
+vendored dbfpy). pandas is not installed (the df tests skip their part).
+tabulate is a project of batch 6; it is installed for the cli format. No
+pytest_config: pytest.ini's addopts need pytest-cov. The maintainer's answer
+(2026-11-24): odfpy's wheel is built from its pinned sdist
+(odfpy-1.4.1.tar.gz, SHA-256
+db766a6e59c5103212f3cc92ec8dd50a0f3a02790233ed0b52148b70d3c438ec) in a
+container, after a security scan of that sdist, so that all of tablib's
+tests run; odfpy needs defusedxml (its setup.py), and defusedxml 0.7.1 is in
+the environment. Built on 2026-11-24 as the scans prescribe
+(evaluation/macro-benchmark/wheels/README.md: setuptools 83.0.0 alone, no network,
+SOURCE_DATE_EPOCH 1579366500; twice, the same bytes):
+odfpy-1.4.1-py2.py3-none-any.whl, SHA-256
+19548df9de7970e8cb6b120eb0de3232561de6c876b2642a91e1b9c88c2af2f8, its 34
+odf/*.py byte for byte the sdist's, no .pth file and no entry point; pinned
+by that hash. Scan B: odfpy appends its own directory to sys.path at import
+(seven modules), so its modules also answer to top-level names such as table
+or text (nothing imports such a name); with defusedxml installed, openpyxl
+parses through defusedxml.ElementTree; the eleven odfpy scripts land on
+PATH, and no test calls them.
+"""
+
+
+[avro]
+batch = 8
+sdist = "avro-1.12.2.tar.gz"
+sdist_url = "https://files.pythonhosted.org/packages/5f/68/973b9c682aa2c3cf2b05fc4c961af11b9be1d9b46604f65aed23cd4fd1e6/avro-1.12.2.tar.gz"
+sdist_sha256 = "e900e7b59a4781f63d9e935e88f6ec50c4d60be3f4adf9c63b51ed39d578fe08"
+licence = "Apache-2.0"
+root = "."
+packages = ["avro"]
+exclude = ["avro/test"]
+dependencies = []
+pytest_args = [
+    "avro/test",
+    "--ignore=avro/test/test_script.py",
+    "--ignore=avro/test/test_tether_task.py",
+    "--ignore=avro/test/test_tether_task_runner.py",
+    "--ignore=avro/test/test_tether_word_count.py",
+]
+plugins = ["plugins/avro_load_tests.py"]
+upstream_test_command = "python -m unittest discover --buffer --failfast"  # build.sh coverage (with avro/test/interop/data generated first), run by .github/workflows/test-lang-py.yml
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+]  # see test-environments/avro.txt
+deselect = [
+    { test = "avro/test/test_bench.py::TestBench::test_minimum_speed", reason = "asserts on timing (10,000 random records written and read within a limit sized for an untraced run)" },
+    { test = "avro/test/test_ipc.py::TestIPC::test_server_with_path", reason = "opens a TCP connection to apache.org:80 (HTTPTransceiver connects in its constructor; scan B)" },
+]
+notes = """
+Drawn in round 9, stratum 5 (3117 to 3880 code lines). Release 1.12.2,
+uploaded 2026-08-17; wheel avro-1.12.2-py3-none-any.whl, SHA-256
+bcbed5da65d298cb4ceb1e61f1a61b5b9fb180049c904f4045022338a95bf686; 3697 code
+lines; import names avro; the checkout root is "lang/py". The tag
+release-1.12.2 is the annotated tag object
+4b5e271603dcc1ab177fcb6a5021d30913119adf. Licence: PyPI's classifier "Apache
+Software License"; GitHub detects Apache-2.0. Test files (frame): 15, 4665
+code lines: lang/py/avro/test/test_bench.py,
+lang/py/avro/test/test_codecs.py, lang/py/avro/test/test_compatibility.py,
+lang/py/avro/test/test_datafile.py,
+lang/py/avro/test/test_datafile_interop.py, lang/py/avro/test/test_init.py
+and 9 more; CI: .github/workflows/codeql-csharp-analysis.yml,
+.github/workflows/codeql-java-analysis.yml,
+.github/workflows/codeql-js-analysis.yml,
+.github/workflows/codeql-py-analysis.yml and more. The repository is Apache
+Avro for every language; the Python package is lang/py (the checkout root).
+The draw counted 3697 of the 8613 compared code lines: the rest is
+lang/py/avro/test, inside the package (excluded). NOT YET KNOWN: see the
+header. Proposed (reading in containers, 2026-11-23): held as its sdist
+avro-1.12.2.tar.gz (SHA-256 e900e7b5...; 66 members, regular files and
+directories only, checked against PyPI's JSON in a container); its 47 files
+that lang/py at the tag also has are equal to them, and it adds the six
+generated data files (VERSION.txt, the two handshake schemas, interop.avsc,
+the two tether protocols), setup.cfg and the metadata. The checkout does not
+import: avro/__init__.py reads avro/VERSION.txt and avro/ipc.py reads
+HandshakeRequest.avsc and HandshakeResponse.avsc at import, and setup.py
+copies them from share/ at build time; the sdist has them, the tether
+protocols and interop.avsc. Tests: avro/test under pytest: its 144 test
+methods by reading, about 120 run. The cases that load_tests builds from
+data (most of test_io, test_schema, test_protocol and test_name: TestCase
+classes whose methods do not start with test) run only under unittest
+discover, as upstream runs them; pytest does not collect them. Left out:
+test_script.py (17, `python -m avro` in a child interpreter),
+test_tether_task.py and test_tether_task_runner.py (a child server process
+on a loopback port, then sleep), test_tether_word_count.py (Java). Skip: the
+snappy and zstandard codec tests (4; neither installed) and the interop test
+(no generated data). The analysed package is avro without avro/test. The
+maintainer's answer (2026-11-24): the sdist and the pytest-only run
+accepted. Scan B (2026-11-24): safe with one more deselection,
+avro/test/test_ipc.py::TestIPC::test_server_with_path, which connects to
+apache.org:80; about 119 test methods run. The sdist's avro.egg-info lies in
+the root; trace.py leaves metadata inside the project's directory out of its
+list of distributions. The first trace run (2026-11-24, attempt 1, voided)
+had 8 collection errors: the classes IoValidateTestCase, RoundTripTestCase,
+BinaryEncodingTestCase, SchemaPromotionTestCase and DefaultValueTestCase of
+test_io.py, SchemaParseTestCase and FingerprintTestCase of test_schema.py
+and ProtocolParseTestCase of test_protocol.py take constructor arguments
+that only the modules' load_tests() supplies; pytest ignores load_tests and
+instantiates each class while it collects it, and --deselect filters only
+after collection. The plugin plugins/avro_load_tests.py (outside the
+checkout, loaded by trace.py) returns no collector for exactly these eight
+classes in these three modules (the lead's decision of 2026-11-24): they
+are not tests that pytest can run.
+"""
+
+
+[pubchempy]
+batch = 8
+repository = "https://github.com/mcs07/PubChemPy"
+tag = "v1.0.5"
+commit = "9935a14e7fdb4a88d27a99fedce69ca99f004698"
+licence = "MIT"
+root = "."
+packages = ["pubchempy.py"]
+exclude = []
+dependencies = []
+upstream_test_command = "uv run pytest tests -v"  # .github/workflows/test.yml (uv sync --all-extras --group test: pytest, pytest-rerunfailures, pandas, certifi), against the PubChem web service
+notes = """
+Drawn in round 10, stratum 1 (809 to 1236 code lines). Release 1.0.5,
+uploaded 2025-09-08; wheel pubchempy-1.0.5-py3-none-any.whl, SHA-256
+e936cfed31fa194042ad463be3c803dde5b12ef2f795caf336e3114127c34fa0; 1159 code
+lines; import names pubchempy; the checkout root is ".". The tag v1.0.5 is
+the annotated tag object 1fcc2e5cb56f6c07faaf9009bc7bf26fc9f36df2. Licence:
+PyPI's license_expression MIT; GitHub detects MIT. Test files (frame): 12,
+443 code lines: tests/test_assay.py, tests/test_compound.py,
+tests/test_compound3d.py, tests/test_download.py, tests/test_errors.py,
+tests/test_identifiers.py and 6 more; CI: .github/workflows/code-check.yml,
+.github/workflows/release.yml, .github/workflows/test.yml. NOT YET KNOWN:
+see the header. Proposed (reading in containers, 2026-11-23): one module,
+pubchempy.py. No test run: every one of the 64 test functions calls the
+PubChem PUG REST service (pubchem.ncbi.nlm.nih.gov) through urllib, in the
+test or in a module fixture; none runs without the internet. A ground truth
+from reading only, or a drop. No test run (the maintainer's decision,
+2026-11-24): the ground truth comes from reading only and gets a doubled
+blind audit.
+"""
+
+
+[m3u8]
+batch = 8
+repository = "https://github.com/globocom/m3u8"
+tag = "6.0.0"
+commit = "49417d05602fc472b518ec61aa9b327cd00e079d"
+licence = "MIT"
+root = "."
+packages = ["m3u8"]
+exclude = []
+dependencies = []
+pytest_args = [
+    "tests",
+]
+upstream_test_command = "PYTHONPATH=. py.test -vv --cov-report term-missing --cov m3u8 tests/"  # runtests, with tests/m3u8server.py (bottle) on localhost:8112, run by .github/workflows/main.yml
+test_requirements = [
+    "pytest==9.2.0",
+    "iniconfig==2.3.1",
+    "packaging==26.3",
+    "pluggy==1.7.0",
+    "Pygments==2.21.0",
+]  # see test-environments/m3u8.txt
+deselect = [
+    { test = "tests/test_loader.py::test_load_should_create_object_from_uri", reason = "loads a playlist from the bottle test server on localhost:8112 (tests/m3u8server.py), which the tests do not start" },
+    { test = "tests/test_loader.py::test_load_should_remember_redirect", reason = "loads a playlist from the bottle test server on localhost:8112 (tests/m3u8server.py), which the tests do not start" },
+    { test = "tests/test_loader.py::test_load_should_create_object_from_uri_with_relative_segments", reason = "loads a playlist from the bottle test server on localhost:8112 (tests/m3u8server.py), which the tests do not start" },
+    { test = "tests/test_loader.py::test_raise_timeout_exception_if_timeout_happens_when_loading_from_uri", reason = "loads a playlist from the bottle test server on localhost:8112 (tests/m3u8server.py), which the tests do not start" },
+]
+notes = """
+Drawn in round 10, stratum 3 (1596 to 2256 code lines). Release 6.0.0,
+uploaded 2024-08-07; wheel m3u8-6.0.0-py3-none-any.whl, SHA-256
+566d0748739c552dad10f8c87150078de6a0ec25071fa48e6968e96fc6dcba5d; 1934 code
+lines; import names m3u8; the checkout root is ".". Licence: PyPI's license
+field MIT; GitHub NOASSERTION. Test files (frame): 8, 2596 code lines:
+tests/test_http_client.py, tests/test_invalid_versioned_playlists.py,
+tests/test_loader.py, tests/test_model.py, tests/test_parser.py,
+tests/test_strict_validations.py and 2 more; CI: .github/workflows/main.yml,
+.github/workflows/ruff.yml. Proposed (reading in containers, 2026-11-23):
+LICENSE is the MIT text. Tests: tests, 267 test functions by reading; 263
+run (8 of them xfail by mark in test_strict_validations.py), the 4 that need
+the local test server are deselected. The tests import playlists and
+invalid_versioned_playlists from tests/ (no __init__.py). The HTTP client
+tests patch urlopen. No runtime dependency on Python 3.14
+(backports-datetime-fromisoformat only before 3.11). The maintainer's answer
+(2026-11-24): no veto. Scan B (2026-11-24): safe to run as planned; bottle
+and backports-datetime-fromisoformat stay out (tests/m3u8server.py starts a
+server at import and is never collected; parser.py patches datetime with the
+backport when it is there).
 """
 
 # --------------------------------------------------------------------------

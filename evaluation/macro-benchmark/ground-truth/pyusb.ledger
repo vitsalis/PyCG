@@ -1,0 +1,3456 @@
+# Call-site ledger of pyusb at 89ea84d6c9e4cb81bc6e40d7df849d0cbd7dfd47.
+#
+# The trace (dynamic/pyusb.json) ran 16 tests through fake backends of the
+# tests, without libusb: most edges come from reading (pyusb.md). Analysed
+# source: usb/ (root "."), 14 modules. Python >= 3.9, CPython and PyPy, on
+# macOS, Windows, FreeBSD, NetBSD, OpenBSD, Linux and Solaris (setup.py
+# classifiers); every platform branch of these runs (pyusb.md, J4).
+# Native calls go through ctypes: a call of a foreign function of the loaded
+# CDLL or WinDLL is ctypes.CDLL.__init__._FuncPtr.__call__ (Sublist3r and mss
+# precedents).
+# Three judgements decide most edges (pyusb.md): J1, PYUSB_DEBUG (documented,
+# docs/tutorial.rst:127) makes methodtrace wrap every backend method in
+# do_trace; J2, synchronized wraps every _ResourceManager method in wrapper;
+# J3, IBackend is a receiver of its own methods.
+default reject usb.backend.libusb1._ConfigDescriptor.__getattr__: the receiver of this attribute load is not a libusb1 _ConfigDescriptor, or the attribute is one that its instance has (desc, _finalizer, _finalize_called, extra_descriptors) or its class defines; the loads of other attributes on a _ConfigDescriptor accept it explicitly
+default reject usb.backend.libusb1._WrapDescriptor.__getattr__: the receiver of this attribute load is not a libusb1 _WrapDescriptor, or the attribute is one that its instance has (obj, desc); the loads of other attributes on a _WrapDescriptor accept it explicitly
+default reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: the subscripted object is not a core Device, Configuration or Interface (it is a ctypes pointer or array, a dict, a tuple, an array.array, a list, a str or a regex match); the subscripts of a Device or a Configuration accept the candidate explicitly
+default reject usb.core.Device.__eq__, usb.core.Device.__hash__: no operand of this comparison or `in` test, and no key of this dict or set operation, is a core Device; the comparisons that can meet a Device accept the candidates explicitly
+default reject usb.core.Configuration.__repr__, usb.core.Configuration.__str__, usb.core.Device.__repr__, usb.core.Device.__str__, usb.core.Endpoint.__repr__, usb.core.Endpoint.__str__, usb.core.Interface.__repr__, usb.core.Interface.__str__, usb.core._DescriptorInfo.__repr__: no value formatted or converted to str at this site is a core Device, Configuration, Interface, Endpoint or _DescriptorInfo; the str() and %s of descriptor objects accept the candidates explicitly
+default reject usb.backend.libusb1._DevIterator.__iter__, usb.backend.openusb._BusIterator.__iter__, usb.backend.openusb._DevIterator.__iter__, usb.core.Configuration.__iter__, usb.core.Device.__iter__, usb.core.Interface.__iter__: the iterated object is not a backend device or bus iterator or a core Device, Configuration or Interface; the iterations of such objects accept the candidates explicitly
+
+== usb
+
+[usb]
+62:51 call  _get_extended_version_info(__version__)
+    -> usb._get_extended_version_info
+106:11 call  _setup_log()
+    -> usb._setup_log
+
+[usb._get_extended_version_info]
+58:17 call  re.match(r'(\d+)\.(\d+)(\.(\d+))?[.-]?(.*)', version)
+    -> re.match
+59:46 call  m.groups()
+    -> re.Match.groups
+    note: the pattern matches every version string (its groups after the first two are optional)
+60:15 call  int(major)
+    -> <builtin>.int
+60:27 call  int(minor)
+    -> <builtin>.int
+60:39 call  int(patch or "0")
+    -> <builtin>.int
+
+[usb._setup_log]
+69:31 call  logging.getLogger('usb')
+    -> logging.getLogger
+70:28 call  os.getenv('PYUSB_DEBUG')
+    -> os.getenv
+73:30 call  _debug.enable_tracing(True)
+    -> usb._debug.enable_tracing
+    note: PYUSB_DEBUG is documented (docs/tutorial.rst:127, docs/faq.rst:17): both branches run (judgement J1)
+74:29 call  os.getenv('PYUSB_LOG_FILENAME')
+    -> os.getenv
+82:27 call  LEVELS.get(debug_level, logging.CRITICAL + 10)
+    -> <builtin>.dict.get
+83:24 call  logger.setLevel(level = level)
+    -> logging.Logger.setLevel
+86:42 call  logging.FileHandler(filename)
+    -> logging.FileHandler
+    note: PYUSB_LOG_FILENAME is documented (tutorial.rst:134); FileHandler(None) raises TypeError in its __init__, which the bare except catches
+88:44 call  logging.StreamHandler()
+    -> logging.StreamHandler
+90:32 call  logging.Formatter('%(asctime)s %(levelname)s:%(name)s:%(m...
+    -> logging.Formatter
+91:29 call  handler.setFormatter(fmt)
+    -> logging.FileHandler.setFormatter
+    -> logging.StreamHandler.setFormatter
+    note: handler is the FileHandler of 86 or the StreamHandler of 88
+92:26 call  logger.addHandler(handler)
+    -> logging.Logger.addHandler
+101:24 call  logger.setLevel(logging.CRITICAL + 10)
+    -> logging.Logger.setLevel
+103:26 call  logger.addHandler(NullHandler())
+    -> logging.Logger.addHandler
+103:38 call  NullHandler()
+    -> logging.Handler.__init__
+    note: NullHandler defines no __init__; the first __init__ of its MRO is logging.Handler.__init__
+
+== usb._debug
+
+[usb._debug._trace_function_call]
+45:17 call  logger.debug( # TODO: check if 'f' is a method or a free ...
+    -> logging.Logger.debug
+    note: logger is the module logger of a backend module that methodtrace(_logger) receives (a logging.Logger); functiontrace has no package caller, and its client logger is opaque (B5)
+48:26 call  ', '.join((str(val) for val in args))
+    -> <builtin>.str.join
+48:31 call  str(val)
+    -> <builtin>.str
+    note: val is an argument of a backend method (methodtrace) after self: ints, array.array buffers, ctypes values and structures, the libusb1 _Device and _DeviceHandle, the loaded CDLL; none defines __str__ or __repr__ in the package
+49:26 call  ', '.join((name + '=' + str(val) for name, val in named_a...
+    -> <builtin>.str.join
+49:44 call  str(val)
+    -> <builtin>.str
+    note: the keyword arguments of a backend method: the package passes none (every package call of a backend method is positional)
+49:83 call  named_args.items()
+    -> <builtin>.dict.items
+
+[usb._debug.methodtrace.decorator_logging]
+63:33 call  functools.update_wrapper(do_trace, f)
+    -> functools.update_wrapper
+    reject *: update_wrapper copies the attributes of f onto do_trace and calls neither
+
+[usb._debug.methodtrace.decorator_logging.do_trace]
+59:57 call  logger.getEffectiveLevel()
+    -> logging.Logger.getEffectiveLevel
+    note: logger is the backend module logger that methodtrace receives
+60:26 call  type(args[0])
+    -> <builtin>.type
+61:37 call  _trace_function_call(logger, fn, *args[1:], **named_args)
+    -> usb._debug._trace_function_call
+62:21 call  f(*args, **named_args)
+    -> usb.backend.libusb0._LibUSB.bulk_read
+    -> usb.backend.libusb0._LibUSB.bulk_write
+    -> usb.backend.libusb0._LibUSB.claim_interface
+    -> usb.backend.libusb0._LibUSB.clear_halt
+    -> usb.backend.libusb0._LibUSB.close_device
+    -> usb.backend.libusb0._LibUSB.ctrl_transfer
+    -> usb.backend.libusb0._LibUSB.detach_kernel_driver
+    -> usb.backend.libusb0._LibUSB.enumerate_devices
+    -> usb.backend.libusb0._LibUSB.get_configuration
+    -> usb.backend.libusb0._LibUSB.get_configuration_descriptor
+    -> usb.backend.libusb0._LibUSB.get_device_descriptor
+    -> usb.backend.libusb0._LibUSB.get_endpoint_descriptor
+    -> usb.backend.libusb0._LibUSB.get_interface_descriptor
+    -> usb.backend.libusb0._LibUSB.intr_read
+    -> usb.backend.libusb0._LibUSB.intr_write
+    -> usb.backend.libusb0._LibUSB.is_kernel_driver_active
+    -> usb.backend.libusb0._LibUSB.iso_read
+    -> usb.backend.libusb0._LibUSB.iso_write
+    -> usb.backend.libusb0._LibUSB.open_device
+    -> usb.backend.libusb0._LibUSB.release_interface
+    -> usb.backend.libusb0._LibUSB.reset_device
+    -> usb.backend.libusb0._LibUSB.set_configuration
+    -> usb.backend.libusb0._LibUSB.set_interface_altsetting
+    -> usb.backend.libusb1._Device._finalize_object
+    -> usb.backend.libusb1._LibUSB.__init__
+    -> usb.backend.libusb1._LibUSB._finalize_object
+    -> usb.backend.libusb1._LibUSB.attach_kernel_driver
+    -> usb.backend.libusb1._LibUSB.bulk_read
+    -> usb.backend.libusb1._LibUSB.bulk_write
+    -> usb.backend.libusb1._LibUSB.claim_interface
+    -> usb.backend.libusb1._LibUSB.clear_halt
+    -> usb.backend.libusb1._LibUSB.close_device
+    -> usb.backend.libusb1._LibUSB.ctrl_transfer
+    -> usb.backend.libusb1._LibUSB.detach_kernel_driver
+    -> usb.backend.libusb1._LibUSB.enumerate_devices
+    -> usb.backend.libusb1._LibUSB.get_configuration
+    -> usb.backend.libusb1._LibUSB.get_configuration_descriptor
+    -> usb.backend.libusb1._LibUSB.get_device_descriptor
+    -> usb.backend.libusb1._LibUSB.get_endpoint_descriptor
+    -> usb.backend.libusb1._LibUSB.get_interface_descriptor
+    -> usb.backend.libusb1._LibUSB.get_parent
+    -> usb.backend.libusb1._LibUSB.intr_read
+    -> usb.backend.libusb1._LibUSB.intr_write
+    -> usb.backend.libusb1._LibUSB.is_kernel_driver_active
+    -> usb.backend.libusb1._LibUSB.iso_read
+    -> usb.backend.libusb1._LibUSB.iso_write
+    -> usb.backend.libusb1._LibUSB.open_device
+    -> usb.backend.libusb1._LibUSB.release_interface
+    -> usb.backend.libusb1._LibUSB.reset_device
+    -> usb.backend.libusb1._LibUSB.set_configuration
+    -> usb.backend.libusb1._LibUSB.set_interface_altsetting
+    -> usb.backend.openusb._OpenUSB.bulk_read
+    -> usb.backend.openusb._OpenUSB.bulk_write
+    -> usb.backend.openusb._OpenUSB.claim_interface
+    -> usb.backend.openusb._OpenUSB.clear_halt
+    -> usb.backend.openusb._OpenUSB.close_device
+    -> usb.backend.openusb._OpenUSB.ctrl_transfer
+    -> usb.backend.openusb._OpenUSB.enumerate_devices
+    -> usb.backend.openusb._OpenUSB.get_configuration
+    -> usb.backend.openusb._OpenUSB.get_configuration_descriptor
+    -> usb.backend.openusb._OpenUSB.get_device_descriptor
+    -> usb.backend.openusb._OpenUSB.get_endpoint_descriptor
+    -> usb.backend.openusb._OpenUSB.get_interface_descriptor
+    -> usb.backend.openusb._OpenUSB.intr_read
+    -> usb.backend.openusb._OpenUSB.intr_write
+    -> usb.backend.openusb._OpenUSB.open_device
+    -> usb.backend.openusb._OpenUSB.release_interface
+    -> usb.backend.openusb._OpenUSB.reset_device
+    -> usb.backend.openusb._OpenUSB.set_configuration
+    -> usb.backend.openusb._OpenUSB.set_interface_altsetting
+    note: f is the method that decorator_logging receives: the package decorates exactly these 70 backend methods with methodtrace(_logger) (judgement J1)
+
+[usb._debug.functiontrace.decorator_logging]
+77:33 call  functools.update_wrapper(do_trace, f)
+    -> functools.update_wrapper
+    reject *: update_wrapper copies the attributes of f onto do_trace and calls neither
+
+[usb._debug.functiontrace.decorator_logging.do_trace]
+74:57 call  logger.getEffectiveLevel()
+    note: functiontrace has no caller in the package (private module, uncalled: its parameters are judged as public ones, B); logger is a client object without a documented type, opaque (B5)
+75:37 call  _trace_function_call(logger, f.__name__, *args, **named_a...
+    -> usb._debug._trace_function_call
+76:21 call  f(*args, **named_args)
+    note: f is the function that a client decorates with functiontrace (no package caller): a client callable (B5)
+
+== usb._interop
+
+[usb._interop.as_array]
+57:18 call  isinstance(data_or_length, array.array)
+    -> <builtin>.isinstance
+60:18 call  isinstance(data_or_length, str)
+    -> <builtin>.isinstance
+61:27 call  array.array('B', data_or_length.encode('utf-8'))
+    -> array.array
+61:54 call  data_or_length.encode('utf-8')
+    -> <builtin>.str.encode
+64:27 call  array.array('B')
+    -> array.array
+67:34 call  util.create_buffer(data_or_length)
+    -> usb.util.create_buffer
+69:27 call  array.array('B', data_or_length)
+    -> array.array
+
+== usb._objfinalizer
+
+[usb._objfinalizer._AutoFinalizedObjectBase.__new__]
+60:25 call  super(_AutoFinalizedObjectBase, cls)
+    -> <builtin>.super
+60:64 call  super(_AutoFinalizedObjectBase, cls).__new__(cls)
+    -> <builtin>.object.__new__
+    reject *: super(_AutoFinalizedObjectBase, cls) starts after _AutoFinalizedObjectBase, and every package class has object after it in its MRO
+
+[usb._objfinalizer._AutoFinalizedObjectBase._do_finalize_object]
+71:34 call  self._finalize_object()
+    -> usb._objfinalizer._AutoFinalizedObjectBase._finalize_object
+    -> usb.backend.libusb1._ConfigDescriptor._finalize_object
+    -> usb.backend.libusb1._DevIterator._finalize_object
+    -> usb.backend.libusb1._Device._finalize_object
+    -> usb.backend.libusb1._IsoTransferHandler._finalize_object
+    -> usb.backend.libusb1._LibUSB._finalize_object
+    -> usb.backend.openusb._BusIterator._finalize_object
+    -> usb.backend.openusb._Context._finalize_object
+    -> usb.backend.openusb._DevIterator._finalize_object
+    -> usb.core.Device._finalize_object
+    -> usb.legacy.DeviceHandle._finalize_object
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    note: self is any AutoFinalizedObject that the package or a client makes: IBackend and the libusb0 and openusb backends inherit _AutoFinalizedObjectBase._finalize_object; the two libusb1 methods with methodtrace go through do_trace (J1)
+
+[usb._objfinalizer._AutoFinalizedObjectBase.finalize]
+79:34 call  NotImplementedError( "finalize() must be implemented by A...
+    -> <builtin>.NotImplementedError
+
+[usb._objfinalizer._AutoFinalizedObjectBase.__del__]
+84:22 call  self.finalize()
+    -> usb._objfinalizer.AutoFinalizedObject.finalize
+    reject usb._objfinalizer._AutoFinalizedObjectBase.finalize: every package class with this __del__ derives from AutoFinalizedObject, which overrides finalize; _AutoFinalizedObjectBase is private and never instantiated
+
+[usb._objfinalizer._do_finalize_object_ref]
+99:18 call  obj_ref()
+    -> weakref.ref.__call__
+    note: obj_ref is the weakref.ref of the instance that AutoFinalizedObject.__new__ passes to weakref.finalize (_objfinalizer.py:135)
+102:32 call  obj._do_finalize_object()
+    -> usb._objfinalizer._AutoFinalizedObjectBase._do_finalize_object
+
+[usb._objfinalizer.AutoFinalizedObject.__new__]
+130:25 call  super(AutoFinalizedObject, cls)
+    -> <builtin>.super
+130:59 call  super(AutoFinalizedObject, cls).__new__( cls, *args, **kw...
+    -> usb._objfinalizer._AutoFinalizedObjectBase.__new__
+    reject usb._objfinalizer.AutoFinalizedObject.__new__: super(AutoFinalizedObject, cls) starts after AutoFinalizedObject
+134:47 call  weakref.finalize( instance, _do_finalize_object_ref, weak...
+    -> weakref.finalize
+    reject *: weakref.finalize only registers _do_finalize_object_ref; it runs when the object is collected or at interpreter exit (no package site, as for __del__; judgement J5), or when AutoFinalizedObject.finalize calls the finalizer (142)
+135:59 call  weakref.ref(instance)
+    -> weakref.ref
+
+[usb._objfinalizer.AutoFinalizedObject.finalize]
+142:24 call  self._finalizer()
+    -> weakref.finalize.__call__
+    -> usb._objfinalizer._do_finalize_object_ref
+    note: _finalizer is the weakref.finalize that __new__ stores (134); its first call calls _do_finalize_object_ref with the weak reference (callback rule)
+
+== usb.backend
+
+[usb.backend._not_implemented]
+83:30 call  NotImplementedError(func.__name__)
+    -> <builtin>.NotImplementedError
+
+[usb.backend.IBackend.enumerate_devices]
+107:25 call  _not_implemented(self.enumerate_devices)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.get_parent]
+111:25 call  _not_implemented(self.get_parent)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.get_device_descriptor]
+123:25 call  _not_implemented(self.get_device_descriptor)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.get_configuration_descriptor]
+137:25 call  _not_implemented(self.get_configuration_descriptor)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.get_interface_descriptor]
+153:25 call  _not_implemented(self.get_interface_descriptor)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.get_endpoint_descriptor]
+166:25 call  _not_implemented(self.get_endpoint_descriptor)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.open_device]
+178:25 call  _not_implemented(self.open_device)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.close_device]
+186:25 call  _not_implemented(self.close_device)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.set_configuration]
+196:25 call  _not_implemented(self.set_configuration)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.get_configuration]
+207:25 call  _not_implemented(self.get_configuration)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.set_interface_altsetting]
+217:25 call  _not_implemented(self.set_interface_altsetting)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.claim_interface]
+230:25 call  _not_implemented(self.claim_interface)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.release_interface]
+238:25 call  _not_implemented(self.release_interface)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.bulk_write]
+253:25 call  _not_implemented(self.bulk_write)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.bulk_read]
+268:25 call  _not_implemented(self.bulk_read)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.intr_write]
+283:25 call  _not_implemented(self.intr_write)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.intr_read]
+298:25 call  _not_implemented(self.intr_read)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.iso_write]
+313:25 call  _not_implemented(self.iso_write)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.iso_read]
+328:25 call  _not_implemented(self.iso_read)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.ctrl_transfer]
+355:25 call  _not_implemented(self.ctrl_transfer)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.clear_halt]
+359:25 call  _not_implemented(self.clear_halt)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.reset_device]
+363:25 call  _not_implemented(self.reset_device)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.is_kernel_driver_active]
+371:25 call  _not_implemented(self.is_kernel_driver_active)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.detach_kernel_driver]
+379:25 call  _not_implemented(self.detach_kernel_driver)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+[usb.backend.IBackend.attach_kernel_driver]
+384:25 call  _not_implemented(self.attach_kernel_driver)
+    -> usb.backend._not_implemented
+    reject *: the bound method is an argument; _not_implemented only reads its __name__
+
+== usb.backend.libusb0
+
+[usb.backend.libusb0]
+47:28 call  logging.getLogger('usb.backend.libusb0')
+    -> logging.getLogger
+53:21 call  sys.platform.find('bsd')
+    -> <builtin>.str.find
+    reject *: sys.platform is a str
+53:55 call  sys.platform.find('mac')
+    -> <builtin>.str.find
+    reject *: sys.platform is a str
+54:26 call  sys.platform.find('darwin')
+    -> <builtin>.str.find
+    reject *: sys.platform is a str
+54:63 call  sys.platform.find('sunos5')
+    -> <builtin>.str.find
+    reject *: sys.platform is a str
+59:28 call  os.pathconf('.', 'PC_PATH_MAX')
+    -> os.pathconf
+    note: the else branch runs on Linux (sys.platform 'linux'), a supported platform
+93:34 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+106:37 call  POINTER(_usb_endpoint_descriptor)
+    -> ctypes.POINTER
+107:34 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+111:39 call  POINTER(_usb_interface_descriptor)
+    -> ctypes.POINTER
+123:38 call  POINTER(_usb_interface)
+    -> ctypes.POINTER
+124:34 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+150:41 call  POINTER(_usb_device)
+    -> ctypes.POINTER
+151:41 call  POINTER(_usb_device)
+    -> ctypes.POINTER
+153:40 call  POINTER(_usb_bus)
+    -> ctypes.POINTER
+155:43 call  POINTER(_usb_config_descriptor)
+    -> ctypes.POINTER
+159:45 call  POINTER(POINTER(_usb_device))
+    -> ctypes.POINTER
+159:53 call  POINTER(_usb_device)
+    -> ctypes.POINTER
+161:38 call  POINTER(_usb_bus)
+    -> ctypes.POINTER
+162:38 call  POINTER(_usb_bus)
+    -> ctypes.POINTER
+164:41 call  POINTER(_usb_device)
+    -> ctypes.POINTER
+166:42 call  POINTER(_usb_device)
+    -> ctypes.POINTER
+453:19 getattr  usb.backend
+    reject usb.core.Device.backend: usb.backend is the module
+454:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+454:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+466:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+466:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+470:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+470:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+478:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+478:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+490:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+490:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+499:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+499:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+503:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+503:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+507:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+507:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+511:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+511:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+531:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+531:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+535:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+535:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+539:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+539:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+543:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+543:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+551:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+551:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+560:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+560:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+569:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+569:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+578:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+578:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+584:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+584:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+590:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+590:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+612:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+612:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+616:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+616:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+620:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+620:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+659:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+659:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+
+[usb.backend.libusb0._load_library]
+197:45 call  usb.libloader.load_locate_library( ('usb-0.1', 'usb', 'li...
+    -> usb.libloader.load_locate_library
+
+[usb.backend.libusb0._setup_prototypes]
+205:37 call  POINTER(_usb_device)
+    -> ctypes.POINTER
+364:37 call  POINTER(_usb_device)
+    -> ctypes.POINTER
+367:41 call  POINTER(_usb_bus)
+    -> ctypes.POINTER
+375:15 call  hasattr(lib, 'usb_get_driver_np')
+    -> <builtin>.hasattr
+380:15 call  hasattr(lib, 'usb_detach_kernel_driver_np')
+    -> <builtin>.hasattr
+389:15 call  hasattr(lib, 'usb_isochronous_setup_async')
+    -> <builtin>.hasattr
+391:38 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+396:15 call  hasattr(lib, 'usb_bulk_setup_async')
+    -> <builtin>.hasattr
+398:38 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+403:15 call  hasattr(lib, 'usb_interrupt_setup_async')
+    -> <builtin>.hasattr
+405:38 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+408:15 call  hasattr(lib, 'usb_submit_async')
+    -> <builtin>.hasattr
+412:15 call  hasattr(lib, 'usb_reap_async')
+    -> <builtin>.hasattr
+416:15 call  hasattr(lib, 'usb_reap_async_nocancel')
+    -> <builtin>.hasattr
+420:15 call  hasattr(lib, 'usb_cancel_async')
+    -> <builtin>.hasattr
+424:15 call  hasattr(lib, 'usb_free_async')
+    -> <builtin>.hasattr
+425:47 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+
+[usb.backend.libusb0._check]
+429:35 call  _lib.usb_strerror()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+431:19 call  hasattr(ret, 'value')
+    -> <builtin>.hasattr
+435:39 call  _lib.usb_strerror()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+440:28 call  errmsg.lower()
+    -> <builtin>.bytes.lower
+    note: usb_strerror returns a c_char_p (restype, libusb0.py:357): bytes
+441:37 call  os.strerror(-ret)
+    note: no callee: errmsg is bytes and never equals the str 'no error' (440), so this line never runs (judgement J6)
+446:30 call  USBTimeoutError(errmsg, ret, -ret)
+    -> usb.core.USBError.__init__
+447:19 call  USBError(errmsg, ret)
+    -> usb.core.USBError.__init__
+
+[usb.backend.libusb0._has_iso_transfer]
+450:19 call  hasattr(_lib, 'usb_isochronous_setup_async')
+    -> <builtin>.hasattr
+
+[usb.backend.libusb0._LibUSB.enumerate_devices]
+456:15 call  _check(_lib.usb_find_busses())
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+456:36 call  _lib.usb_find_busses()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+457:15 call  _check(_lib.usb_find_devices())
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+457:37 call  _lib.usb_find_devices()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+458:34 call  _lib.usb_get_busses()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+459:19 call  bool(bus)
+    -> <builtin>.bool
+461:23 call  bool(dev)
+    -> <builtin>.bool
+
+[usb.backend.libusb0._LibUSB.get_device_descriptor]
+468:33 call  _DeviceDescriptor(dev)
+    -> usb.backend.libusb0._DeviceDescriptor.__init__
+
+[usb.backend.libusb0._LibUSB.get_configuration_descriptor]
+473:29 call  IndexError('Invalid configuration index ' + str(config))
+    -> <builtin>.IndexError
+473:66 call  str(config)
+    -> <builtin>.str
+
+[usb.backend.libusb0._LibUSB.get_interface_descriptor]
+480:52 call  self.get_configuration_descriptor(dev, config)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.get_configuration_descriptor
+    reject *: self is a libusb0 backend object (a private class without subclasses)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+482:29 call  IndexError('Invalid interface index ' + str(intf))
+    -> <builtin>.IndexError
+482:62 call  str(intf)
+    -> <builtin>.str
+485:29 call  IndexError('Invalid alternate setting index ' + str(alt))
+    -> <builtin>.IndexError
+485:70 call  str(alt)
+    -> <builtin>.str
+
+[usb.backend.libusb0._LibUSB.get_endpoint_descriptor]
+492:50 call  self.get_interface_descriptor(dev, intf, alt, config)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.get_interface_descriptor
+    reject *: self is a libusb0 backend object (a private class without subclasses)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+494:29 call  IndexError('Invalid endpoint index ' + str(ep))
+    -> <builtin>.IndexError
+494:61 call  str(ep)
+    -> <builtin>.str
+
+[usb.backend.libusb0._LibUSB.open_device]
+501:22 call  _check(_lib.usb_open(dev))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+501:36 call  _lib.usb_open(dev)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.close_device]
+505:15 call  _check(_lib.usb_close(dev_handle))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+505:30 call  _lib.usb_close(dev_handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.set_configuration]
+509:15 call  _check(_lib.usb_set_configuration(dev_handle, config_value))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+509:42 call  _lib.usb_set_configuration(dev_handle, config_value)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.get_configuration]
+513:52 call  usb.util.build_request_type( usb.util.CTRL_IN, usb.util.C...
+    -> usb.util.build_request_type
+518:38 call  usb.util.create_buffer(1)
+    -> usb.util.create_buffer
+519:33 call  self.ctrl_transfer( dev_handle, bmRequestType, 0x08, 0, 0...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.ctrl_transfer
+    reject *: self is a libusb0 backend object (a private class without subclasses)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+
+[usb.backend.libusb0._LibUSB.set_interface_altsetting]
+533:15 call  _check(_lib.usb_set_altinterface(dev_handle, altsetting))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+533:41 call  _lib.usb_set_altinterface(dev_handle, altsetting)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.claim_interface]
+537:15 call  _check(_lib.usb_claim_interface(dev_handle, intf))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+537:40 call  _lib.usb_claim_interface(dev_handle, intf)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.release_interface]
+541:15 call  _check(_lib.usb_release_interface(dev_handle, intf))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+541:42 call  _lib.usb_release_interface(dev_handle, intf)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.bulk_write]
+545:28 call  self.__write(_lib.usb_bulk_write, dev_handle, ep, intf, d...
+    -> usb.backend.libusb0._LibUSB.__write
+    reject *: self is a libusb0 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb0._LibUSB.bulk_read]
+553:27 call  self.__read(_lib.usb_bulk_read, dev_handle, ep, intf, buf...
+    -> usb.backend.libusb0._LibUSB.__read
+    reject *: self is a libusb0 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb0._LibUSB.intr_write]
+562:28 call  self.__write(_lib.usb_interrupt_write, dev_handle, ep, in...
+    -> usb.backend.libusb0._LibUSB.__write
+    reject *: self is a libusb0 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb0._LibUSB.intr_read]
+571:27 call  self.__read(_lib.usb_interrupt_read, dev_handle, ep, intf...
+    -> usb.backend.libusb0._LibUSB.__read
+    reject *: self is a libusb0 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb0._LibUSB.iso_write]
+580:33 call  _has_iso_transfer()
+    -> usb.backend.libusb0._has_iso_transfer
+581:24 getattr  usb.backend
+    reject usb.core.Device.backend: usb.backend is the module
+581:50 call  usb.backend.IBackend.iso_write(self, dev_handle, ep, intf...
+    -> usb.backend.IBackend.iso_write
+    reject *: the call names IBackend.iso_write explicitly
+582:35 call  self.__iso_transfer(dev_handle, ep, intf, data, timeout)
+    -> usb.backend.libusb0._LibUSB.__iso_transfer
+
+[usb.backend.libusb0._LibUSB.iso_read]
+586:33 call  _has_iso_transfer()
+    -> usb.backend.libusb0._has_iso_transfer
+587:24 getattr  usb.backend
+    reject usb.core.Device.backend: usb.backend is the module
+587:49 call  usb.backend.IBackend.iso_read(self, dev_handle, ep, intf,...
+    -> usb.backend.IBackend.iso_read
+    reject *: the call names IBackend.iso_read explicitly
+588:35 call  self.__iso_transfer(dev_handle, ep, intf, buff, timeout)
+    -> usb.backend.libusb0._LibUSB.__iso_transfer
+
+[usb.backend.libusb0._LibUSB.ctrl_transfer]
+599:43 call  data.buffer_info()
+    -> array.array.buffer_info
+601:22 call  _check(_lib.usb_control_msg( dev_handle, bmRequestType, b...
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+601:43 call  _lib.usb_control_msg( dev_handle, bmRequestType, bRequest...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+607:33 call  cast(address, c_char_p)
+    -> ctypes.cast
+
+[usb.backend.libusb0._LibUSB.clear_halt]
+614:15 call  _check(_lib.usb_clear_halt(dev_handle, ep))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+614:35 call  _lib.usb_clear_halt(dev_handle, ep)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.reset_device]
+618:15 call  _check(_lib.usb_reset(dev_handle))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+618:30 call  _lib.usb_reset(dev_handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.is_kernel_driver_active]
+628:53 call  self.__get_driver_name(dev_handle, intf)
+    -> usb.backend.libusb0._LibUSB.__get_driver_name
+641:53 call  self.__get_driver_name(dev_handle, intf)
+    -> usb.backend.libusb0._LibUSB.__get_driver_name
+648:37 call  sys.platform.startswith('freebsd')
+    -> <builtin>.str.startswith
+648:75 call  sys.platform.startswith('dragonfly')
+    -> <builtin>.str.startswith
+652:49 call  self.__get_driver_name(dev_handle, intf)
+    -> usb.backend.libusb0._LibUSB.__get_driver_name
+657:38 call  NotImplementedError(self.is_kernel_driver_active.__name__)
+    -> <builtin>.NotImplementedError
+
+[usb.backend.libusb0._LibUSB.detach_kernel_driver]
+661:23 call  hasattr(_lib, 'usb_detach_kernel_driver_np')
+    -> <builtin>.hasattr
+662:38 call  NotImplementedError(self.detach_kernel_driver.__name__)
+    -> <builtin>.NotImplementedError
+663:15 call  _check(_lib.usb_detach_kernel_driver_np(dev_handle, intf))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+663:48 call  _lib.usb_detach_kernel_driver_np(dev_handle, intf)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb0._LibUSB.__get_driver_name]
+666:23 call  hasattr(_lib, 'usb_get_driver_np')
+    -> <builtin>.hasattr
+667:38 call  NotImplementedError('usb_get_driver_np')
+    -> <builtin>.NotImplementedError
+668:37 call  usb.util.create_buffer(_USBFS_MAXDRIVERNAME + 1)
+    -> usb.util.create_buffer
+669:39 call  buf.buffer_info()
+    -> array.array.buffer_info
+671:15 call  _check(_lib.usb_get_driver_np( dev_handle, intf, cast(nam...
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+671:38 call  _lib.usb_get_driver_np( dev_handle, intf, cast(name, c_ch...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+674:25 call  cast(name, c_char_p)
+    -> ctypes.cast
+676:20 call  cast(name, c_char_p)
+    -> ctypes.cast
+
+[usb.backend.libusb0._LibUSB.__write]
+679:43 call  data.buffer_info()
+    -> array.array.buffer_info
+681:19 call  int(_check(fn( dev_handle, ep, cast(address, c_char_p), l...
+    -> <builtin>.int
+681:26 call  _check(fn( dev_handle, ep, cast(address, c_char_p), lengt...
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+681:29 call  fn( dev_handle, ep, cast(address, c_char_p), length, time...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: fn is the foreign function usb_bulk_write or usb_interrupt_write of _lib (545, 562)
+684:29 call  cast(address, c_char_p)
+    -> ctypes.cast
+
+[usb.backend.libusb0._LibUSB.__read]
+690:43 call  buff.buffer_info()
+    -> array.array.buffer_info
+692:18 call  int(_check(fn( dev_handle, ep, cast(address, c_char_p), l...
+    -> <builtin>.int
+692:25 call  _check(fn( dev_handle, ep, cast(address, c_char_p), lengt...
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+692:28 call  fn( dev_handle, ep, cast(address, c_char_p), length, time...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: fn is the foreign function usb_bulk_read or usb_interrupt_read of _lib (553, 571)
+695:25 call  cast(address, c_char_p)
+    -> ctypes.cast
+
+[usb.backend.libusb0._LibUSB.__iso_transfer]
+702:27 call  c_void_p()
+    -> ctypes.c_void_p
+703:40 call  data.buffer_info()
+    -> array.array.buffer_info
+706:15 call  _check(_lib.usb_isochronous_setup_async( dev_handle, byre...
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+706:48 call  _lib.usb_isochronous_setup_async( dev_handle, byref(conte...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+708:18 call  byref(context)
+    -> ctypes.byref
+716:23 call  _check(_lib.usb_submit_async( context, cast(buff + transm...
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+716:45 call  _lib.usb_submit_async( context, cast(buff + transmitted, ...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+718:25 call  cast(buff + transmitted, c_char_p)
+    -> ctypes.cast
+721:29 call  _check(_lib.usb_reap_async(context, timeout))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+721:49 call  _lib.usb_reap_async(context, timeout)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+730:19 call  _check(_lib.usb_free_async(byref(context)))
+    -> usb.backend.libusb0._check
+    reject *: _check here is the module's own function usb.backend.libusb0._check
+730:39 call  _lib.usb_free_async(byref(context))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+730:45 call  byref(context)
+    -> ctypes.byref
+
+[usb.backend.libusb0.get_backend]
+738:33 call  _load_library(find_library)
+    -> usb.backend.libusb0._load_library
+    reject *: _load_library here is libusb0's own
+739:30 call  _setup_prototypes(_lib)
+    -> usb.backend.libusb0._setup_prototypes
+    reject *: _setup_prototypes here is libusb0's own
+740:26 call  _lib.usb_init()
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+741:23 call  _LibUSB()
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    reject *: _LibUSB here is libusb0's; neither it nor IBackend defines __init__ (object.__init__: no edge); AutoFinalizedObject.__new__ comes first in the MRO
+744:22 call  _logger.error('Error loading libusb 0.1 backend', exc_inf...
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+747:22 call  _logger.error('Error loading libusb 0.1 backend', exc_inf...
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+
+== usb.backend.libusb1
+
+[usb.backend.libusb1]
+70:28 call  logging.getLogger('usb.backend.libusb1')
+    -> logging.getLogger
+122:39 call  errno.__dict__.get('EIO', None)
+    -> <builtin>.dict.get
+123:50 call  errno.__dict__.get('EINVAL', None)
+    -> <builtin>.dict.get
+124:43 call  errno.__dict__.get('EACCES', None)
+    -> <builtin>.dict.get
+125:46 call  errno.__dict__.get('ENODEV', None)
+    -> <builtin>.dict.get
+126:46 call  errno.__dict__.get('ENOENT', None)
+    -> <builtin>.dict.get
+127:41 call  errno.__dict__.get('EBUSY', None)
+    -> <builtin>.dict.get
+128:44 call  errno.__dict__.get('ETIMEDOUT', None)
+    -> <builtin>.dict.get
+129:45 call  errno.__dict__.get('EOVERFLOW', None)
+    -> <builtin>.dict.get
+130:41 call  errno.__dict__.get('EPIPE', None)
+    -> <builtin>.dict.get
+131:48 call  errno.__dict__.get('EINTR', None)
+    -> <builtin>.dict.get
+132:43 call  errno.__dict__.get('ENOMEM', None)
+    -> <builtin>.dict.get
+133:50 call  errno.__dict__.get('ENOSYS', None)
+    -> <builtin>.dict.get
+164:45 call  errno.__dict__.get('EIO', None)
+    -> <builtin>.dict.get
+165:49 call  errno.__dict__.get('ETIMEDOUT', None)
+    -> <builtin>.dict.get
+166:49 call  errno.__dict__.get('EAGAIN', None)
+    -> <builtin>.dict.get
+167:45 call  errno.__dict__.get('EIO', None)
+    -> <builtin>.dict.get
+168:49 call  errno.__dict__.get('ENODEV', None)
+    -> <builtin>.dict.get
+169:48 call  errno.__dict__.get('EOVERFLOW', None)
+    -> <builtin>.dict.get
+189:34 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+202:37 call  POINTER(_libusb_endpoint_descriptor)
+    -> ctypes.POINTER
+203:34 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+207:39 call  POINTER(_libusb_interface_descriptor)
+    -> ctypes.POINTER
+219:38 call  POINTER(_libusb_interface)
+    -> ctypes.POINTER
+220:34 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+250:29 call  POINTER(_libusb_transfer)
+    -> ctypes.POINTER
+252:37 call  CFUNCTYPE(None, _libusb_transfer_p)
+    -> ctypes.CFUNCTYPE
+613:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+613:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+716:19 getattr  usb.backend
+    reject usb.core.Device.backend: usb.backend is the module
+717:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+717:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+724:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+724:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+729:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+729:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+733:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+733:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+741:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+741:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+774:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+774:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+785:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+785:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+797:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+797:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+806:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+806:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+810:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+810:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+814:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+814:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+818:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+818:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+824:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+824:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+831:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+831:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+835:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+835:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+839:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+839:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+848:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+848:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+857:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+857:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+866:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+866:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+875:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+875:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+880:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+880:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+885:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+885:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+909:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+909:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+913:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+913:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+917:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+917:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+922:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+922:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+926:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+926:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+
+[usb.backend.libusb1._strerror]
+174:36 call  _lib.libusb_strerror(errcode)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+174:52 call  _lib.libusb_strerror(errcode).decode('utf8')
+    -> <builtin>.bytes.decode
+    note: libusb_strerror returns a c_char_p when the library has it (restype, 487): bytes; without it the attribute load raises AttributeError first
+
+[usb.backend.libusb1._get_iso_packet_list]
+271:34 call  list_type.from_address(addressof(transfer.iso_packet_desc))
+    -> _ctypes.PyCArrayType.from_address
+    -> _ctypes.array.ArrayMeta.from_address
+    note: list_type is an array type (_libusb_iso_packet_descriptor * n); from_address is a method of its metaclass, named by that class per implementation: _ctypes.PyCArrayType on CPython, _ctypes.array.ArrayMeta on PyPy (lib_pypy/_ctypes/array.py:76; the mss ruling on ctypes class methods)
+271:44 call  addressof(transfer.iso_packet_desc)
+    -> ctypes.addressof
+
+[usb.backend.libusb1._load_library]
+287:45 call  usb.libloader.load_locate_library( ('usb-1.0', 'libusb-1....
+    -> usb.libloader.load_locate_library
+
+[usb.backend.libusb1._setup_prototypes]
+298:40 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+307:20 call  POINTER(POINTER(c_void_p))
+    -> ctypes.POINTER
+307:28 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+317:20 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+329:50 call  POINTER(_libusb_device_handle)
+    -> ctypes.POINTER
+340:76 call  POINTER(c_int)
+    -> ctypes.POINTER
+389:20 call  POINTER(_libusb_device_descriptor)
+    -> ctypes.POINTER
+400:20 call  POINTER(POINTER(_libusb_config_descriptor))
+    -> ctypes.POINTER
+400:28 call  POINTER(_libusb_config_descriptor)
+    -> ctypes.POINTER
+407:20 call  POINTER(_libusb_config_descriptor)
+    -> ctypes.POINTER
+417:20 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+435:20 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+451:24 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+453:24 call  POINTER(c_int)
+    -> ctypes.POINTER
+468:28 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+470:28 call  POINTER(c_int)
+    -> ctypes.POINTER
+476:48 call  POINTER(_libusb_transfer)
+    -> ctypes.POINTER
+479:49 call  POINTER(_libusb_transfer)
+    -> ctypes.POINTER
+482:51 call  POINTER(_libusb_transfer)
+    -> ctypes.POINTER
+484:15 call  hasattr(lib, 'libusb_strerror')
+    -> <builtin>.hasattr
+583:24 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+
+[usb.backend.libusb1._setup_prototypes.libusb_set_iso_packet_lengths]
+506:52 call  _get_iso_packet_list(transfer)
+    -> usb.backend.libusb1._get_iso_packet_list
+
+[usb.backend.libusb1._setup_prototypes.libusb_fill_iso_transfer]
+548:31 call  cast(buffer, c_void_p)
+    -> ctypes.cast
+
+[usb.backend.libusb1._check]
+595:15 call  hasattr(ret, 'value')
+    -> <builtin>.hasattr
+600:38 call  NotImplementedError(_strerror(ret))
+    -> <builtin>.NotImplementedError
+600:48 call  _strerror(ret)
+    -> usb.backend.libusb1._strerror
+602:34 call  USBTimeoutError(_strerror(ret), ret, _libusb_errno[ret])
+    -> usb.core.USBError.__init__
+602:44 call  _strerror(ret)
+    -> usb.backend.libusb1._strerror
+604:27 call  USBError(_strerror(ret), ret, _libusb_errno[ret])
+    -> usb.core.USBError.__init__
+604:37 call  _strerror(ret)
+    -> usb.backend.libusb1._strerror
+
+[usb.backend.libusb1._Device.__init__]
+611:44 call  _lib.libusb_ref_device(devid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._Device._finalize_object]
+615:19 call  hasattr(self, 'devid')
+    -> <builtin>.hasattr
+616:37 call  _lib.libusb_unref_device(self.devid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._WrapDescriptor.__getattr__]
+625:23 call  getattr(self.desc, name)
+    -> <builtin>.getattr
+    note: self.desc is a ctypes structure (an interface or endpoint descriptor)
+
+[usb.backend.libusb1._ConfigDescriptor._finalize_object]
+632:19 call  hasattr(self, 'desc')
+    -> <builtin>.hasattr
+633:47 call  _lib.libusb_free_config_descriptor(self.desc)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._ConfigDescriptor.__getattr__]
+635:23 call  getattr(self.desc.contents, name)
+    -> <builtin>.getattr
+    note: self.desc.contents is a ctypes structure (_libusb_config_descriptor)
+
+[usb.backend.libusb1._DevIterator.__init__]
+640:32 call  POINTER(c_void_p)
+    -> ctypes.POINTER
+640:42 call  POINTER(c_void_p)()
+    -> ctypes.c_void_p.__pointer_type__
+    note: POINTER(c_void_p) is the pointer class that CPython 3.14 documents as c_void_p.__pointer_type__, a public path outside the package (the mss ruling on generated ctypes classes)
+641:31 call  _check(_lib.libusb_get_device_list( ctx, byref(self.dev_l...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+641:59 call  _lib.libusb_get_device_list( ctx, byref(self.dev_list))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+643:42 call  byref(self.dev_list)
+    -> ctypes.byref
+
+[usb.backend.libusb1._DevIterator.__iter__]
+646:23 call  range(self.num_devs)
+    -> <builtin>.range
+647:26 call  _Device(self.dev_list[i])
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.libusb1._Device.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+
+[usb.backend.libusb1._DevIterator._finalize_object]
+649:19 call  hasattr(self, 'dev_list')
+    -> <builtin>.hasattr
+650:41 call  _lib.libusb_free_device_list(self.dev_list, 1)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._DeviceHandle.__init__]
+654:44 call  _libusb_device_handle()
+    -> ctypes.c_void_p
+    note: _libusb_device_handle is c_void_p (246)
+656:15 call  _check(_lib.libusb_open(self.devid, byref(self.handle)))
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+656:32 call  _lib.libusb_open(self.devid, byref(self.handle))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+656:50 call  byref(self.handle)
+    -> ctypes.byref
+
+[usb.backend.libusb1._IsoTransferHandler.__init__]
+660:43 call  buff.buffer_info()
+    -> array.array.buffer_info
+662:60 call  _lib.libusb_get_max_iso_packet_size(dev_handle.devid, ep)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+663:27 call  int(math.ceil(float(length) / packet_length))
+    -> <builtin>.int
+663:37 call  math.ceil(float(length) / packet_length)
+    -> math.ceil
+663:43 call  float(length)
+    -> <builtin>.float
+665:51 call  _lib.libusb_alloc_transfer(packet_count)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+667:38 call  _lib.libusb_fill_iso_transfer(self.transfer, dev_handle.h...
+    -> usb.backend.libusb1._setup_prototypes.libusb_fill_iso_transfer
+    note: the package assigns this Python function to the CDLL attribute (553)
+670:43 call  cast(address, POINTER(c_ubyte))
+    -> ctypes.cast
+670:60 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+673:63 call  _libusb_transfer_cb_fn_p(self.__callback)
+    -> ctypes.CFUNCTYPE.CFunctionType
+    reject usb.backend.libusb1._IsoTransferHandler.__callback: the C function object only wraps the bound method; libusb calls it from libusb_handle_events (688:45)
+    note: _libusb_transfer_cb_fn_p is the class that CFUNCTYPE returns (252), defined in ctypes.CFUNCTYPE (the mss ruling)
+677:34 call  self.__set_packets_length(length, packet_length)
+    -> usb.backend.libusb1._IsoTransferHandler.__set_packets_length
+
+[usb.backend.libusb1._IsoTransferHandler._finalize_object]
+680:19 call  hasattr(self, 'transfer')
+    -> <builtin>.hasattr
+681:38 call  _lib.libusb_free_transfer(self.transfer)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._IsoTransferHandler.submit]
+685:15 call  _check(_lib.libusb_submit_transfer(self.transfer))
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+685:43 call  _lib.libusb_submit_transfer(self.transfer)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+688:19 call  _check(_lib.libusb_handle_events(ctx))
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+688:45 call  _lib.libusb_handle_events(ctx)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> usb.backend.libusb1._IsoTransferHandler.__callback
+    note: libusb calls the callback of a completed transfer from libusb_handle_events (libusb's documentation of asynchronous I/O); __init__ registered it (673); a package function entered through a C callback thunk is a callee of the foreign call that runs it (the mss ruling)
+690:21 call  int(self.transfer.contents.status)
+    -> <builtin>.int
+692:31 call  usb.USBError(_str_transfer_error[status], status, _transf...
+    -> usb.core.USBError.__init__
+    note: usb.USBError is core.USBError, which usb/__init__.py takes from usb.legacy (legacy.py:40)
+696:47 call  self.__compute_size_transf_data()
+    -> usb.backend.libusb1._IsoTransferHandler.__compute_size_transf_data
+
+[usb.backend.libusb1._IsoTransferHandler.__compute_size_transf_data]
+699:19 call  sum([t.actual_length for t in _get_iso_packet_list(self.t...
+    -> <builtin>.sum
+700:41 call  _get_iso_packet_list(self.transfer.contents)
+    -> usb.backend.libusb1._get_iso_packet_list
+
+[usb.backend.libusb1._IsoTransferHandler.__set_packets_length]
+703:43 call  _lib.libusb_set_iso_packet_lengths(self.transfer, packet_...
+    -> usb.backend.libusb1._setup_prototypes.libusb_set_iso_packet_lengths
+    note: the package assigns this Python function to the CDLL attribute (508)
+706:47 call  _get_iso_packet_list(self.transfer.contents)
+    -> usb.backend.libusb1._get_iso_packet_list
+709:19 call  len(iso_packets)
+    -> <builtin>.len
+
+[usb.backend.libusb1._LibUSB.__init__]
+719:13 getattr  usb.backend
+    reject usb.core.Device.backend: usb.backend is the module
+719:38 call  usb.backend.IBackend.__init__(self)
+    -> <builtin>.object.__init__
+    reject *: IBackend, AutoFinalizedObject and _AutoFinalizedObjectBase define no __init__: the explicit call reaches object.__init__
+721:28 call  c_void_p()
+    -> ctypes.c_void_p
+722:15 call  _check(self.lib.libusb_init(byref(self.ctx)))
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+722:36 call  self.lib.libusb_init(byref(self.ctx))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+722:42 call  byref(self.ctx)
+    -> ctypes.byref
+
+[usb.backend.libusb1._LibUSB._finalize_object]
+726:19 call  hasattr(self, 'ctx')
+    -> <builtin>.hasattr
+727:33 call  self.lib.libusb_exit(self.ctx)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.enumerate_devices]
+731:28 call  _DevIterator(self.ctx)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.libusb1._DevIterator.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+
+[usb.backend.libusb1._LibUSB.get_parent]
+735:45 call  self.lib.libusb_get_parent(dev.devid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+739:27 call  _Device(_parent)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.libusb1._Device.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+
+[usb.backend.libusb1._LibUSB.get_device_descriptor]
+743:45 call  _libusb_device_descriptor()
+    -> ctypes.Structure.__init__
+    note: _libusb_device_descriptor is a Structure without __init__
+744:15 call  _check(self.lib.libusb_get_device_descriptor(dev.devid, b...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+744:53 call  self.lib.libusb_get_device_descriptor(dev.devid, byref(de...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+744:70 call  byref(dev_desc)
+    -> ctypes.byref
+745:54 call  self.lib.libusb_get_bus_number(dev.devid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+746:62 call  self.lib.libusb_get_device_address(dev.devid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+750:62 call  self.lib.libusb_get_device_speed(dev.devid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+756:67 call  self.lib.libusb_get_port_number(dev.devid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+762:33 call  (c_uint8 * 7)()
+    note: no callee: c_uint8 * 7 is an array class that ctypes generates; no public class path outside the package names it (the mss ruling on generated ctypes classes)
+763:79 call  self.lib.libusb_get_port_numbers( dev.devid, buff, len(bu...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+764:41 call  len(buff)
+    -> <builtin>.len
+766:46 call  tuple(buff[:written])
+    -> <builtin>.tuple
+
+[usb.backend.libusb1._LibUSB.get_configuration_descriptor]
+776:22 call  POINTER(_libusb_config_descriptor)
+    -> ctypes.POINTER
+776:49 call  POINTER(_libusb_config_descriptor)()
+    note: no callee: POINTER(_libusb_config_descriptor) is a pointer class that ctypes generates; only a package class names it (_libusb_config_descriptor.__pointer_type__), so no outside name (the mss ruling)
+777:15 call  _check(self.lib.libusb_get_config_descriptor( dev.devid, ...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+777:53 call  self.lib.libusb_get_config_descriptor( dev.devid, config,...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+779:30 call  byref(cfg)
+    -> ctypes.byref
+780:40 call  _ConfigDescriptor(cfg)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.libusb1._ConfigDescriptor.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+782:29 getattr  config_desc.extra
+    -> usb.backend.libusb1._ConfigDescriptor.__getattr__
+    note: the receiver is a _ConfigDescriptor, which has no such attribute: __getattr__ reads the field of the structure
+782:48 getattr  config_desc.extra_length
+    -> usb.backend.libusb1._ConfigDescriptor.__getattr__
+    note: the receiver is a _ConfigDescriptor, which has no such attribute: __getattr__ reads the field of the structure
+
+[usb.backend.libusb1._LibUSB.get_interface_descriptor]
+787:48 call  self.get_configuration_descriptor(dev, config)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb1._LibUSB.get_configuration_descriptor
+    reject *: self is a libusb1 backend object (a private class without subclasses)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+788:24 getattr  cfg.bNumInterfaces
+    -> usb.backend.libusb1._ConfigDescriptor.__getattr__
+    note: the receiver is a _ConfigDescriptor, which has no such attribute: __getattr__ reads the field of the structure
+789:29 call  IndexError('Invalid interface index ' + str(intf))
+    -> <builtin>.IndexError
+789:62 call  str(intf)
+    -> <builtin>.str
+790:17 getattr  cfg.interface
+    -> usb.backend.libusb1._ConfigDescriptor.__getattr__
+    note: the receiver is a _ConfigDescriptor, which has no such attribute: __getattr__ reads the field of the structure
+792:29 call  IndexError('Invalid alternate setting index ' + str(alt))
+    -> <builtin>.IndexError
+792:70 call  str(alt)
+    -> <builtin>.str
+795:31 call  _WrapDescriptor(intf_desc, cfg)
+    -> usb.backend.libusb1._WrapDescriptor.__init__
+
+[usb.backend.libusb1._LibUSB.get_endpoint_descriptor]
+799:42 call  self.get_interface_descriptor(dev, intf, alt, config)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb1._LibUSB.get_interface_descriptor
+    reject *: self is a libusb1 backend object (a private class without subclasses)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+800:19 getattr  i.bNumEndpoints
+    -> usb.backend.libusb1._WrapDescriptor.__getattr__
+    note: the receiver is a _WrapDescriptor, which has no such attribute: __getattr__ reads the field of the structure
+801:29 call  IndexError('Invalid endpoint index ' + str(ep))
+    -> <builtin>.IndexError
+801:61 call  str(ep)
+    -> <builtin>.str
+802:21 getattr  i.endpoint
+    -> usb.backend.libusb1._WrapDescriptor.__getattr__
+    note: the receiver is a _WrapDescriptor, which has no such attribute: __getattr__ reads the field of the structure
+804:31 call  _WrapDescriptor(ep_desc, i)
+    -> usb.backend.libusb1._WrapDescriptor.__init__
+
+[usb.backend.libusb1._LibUSB.open_device]
+808:29 call  _DeviceHandle(dev)
+    -> usb.backend.libusb1._DeviceHandle.__init__
+
+[usb.backend.libusb1._LibUSB.close_device]
+812:30 call  self.lib.libusb_close(dev_handle.handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.set_configuration]
+816:15 call  _check(self.lib.libusb_set_configuration(dev_handle.handl...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+816:49 call  self.lib.libusb_set_configuration(dev_handle.handle, conf...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> usb.backend.libusb1._IsoTransferHandler.__callback
+    note: on Windows, WinUSB's set_configuration sends a synchronous control transfer (libusb 1.0.30 os/windows_winusb.c:2464-2469), which waits by handling the context's events (sync.c:139, 49-55); WinUSB supports isochronous transfers (windows_winusb.c:2605; ChangeLog, v1.0.23), so a second thread's isochronous transfer can complete there and libusb runs __callback in this thread (io.c:549-552, 1723-1725; the mss ruling on C callbacks; Codex round 1, the writer's extension; pyusb.md J9)
+
+[usb.backend.libusb1._LibUSB.get_configuration]
+820:23 call  c_int()
+    -> ctypes.c_int
+821:15 call  _check(self.lib.libusb_get_configuration(dev_handle.handl...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+821:49 call  self.lib.libusb_get_configuration(dev_handle.handle, byre...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> usb.backend.libusb1._IsoTransferHandler.__callback
+    note: with libusb 1.0.12 (the floor of the releases that pyusb can load) on Linux without sysfs's USB attributes, op_get_configuration returns LIBUSB_ERROR_NOT_SUPPORTED (os/linux_usbfs.c:1319-1324; sysfs_can_relate_devices, 358-416), and libusb_get_configuration falls back to a synchronous control transfer (core.c:1240-1247), which waits by handling the context's events (sync.c:104-105; io.c:2025, 1855, 1949) and runs a completed isochronous transfer's callback of another thread (io.c:1488); libusb 1.0.30 has no such fallback on an admitted backend (pyusb.md J9; audit remark CR1)
+821:74 call  byref(config)
+    -> ctypes.byref
+
+[usb.backend.libusb1._LibUSB.set_interface_altsetting]
+826:15 call  _check(self.lib.libusb_set_interface_alt_setting( dev_han...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+826:57 call  self.lib.libusb_set_interface_alt_setting( dev_handle.han...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.claim_interface]
+833:15 call  _check(self.lib.libusb_claim_interface(dev_handle.handle,...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+833:47 call  self.lib.libusb_claim_interface(dev_handle.handle, intf)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.release_interface]
+837:15 call  _check(self.lib.libusb_release_interface(dev_handle.handl...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+837:49 call  self.lib.libusb_release_interface(dev_handle.handle, intf)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.bulk_write]
+841:28 call  self.__write(self.lib.libusb_bulk_transfer, dev_handle, e...
+    -> usb.backend.libusb1._LibUSB.__write
+    reject *: self is a libusb1 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb1._LibUSB.bulk_read]
+850:27 call  self.__read(self.lib.libusb_bulk_transfer, dev_handle, ep...
+    -> usb.backend.libusb1._LibUSB.__read
+    reject *: self is a libusb1 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb1._LibUSB.intr_write]
+859:28 call  self.__write(self.lib.libusb_interrupt_transfer, dev_hand...
+    -> usb.backend.libusb1._LibUSB.__write
+    reject *: self is a libusb1 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb1._LibUSB.intr_read]
+868:27 call  self.__read(self.lib.libusb_interrupt_transfer, dev_handl...
+    -> usb.backend.libusb1._LibUSB.__read
+    reject *: self is a libusb1 _LibUSB; the mangled name belongs to this class
+
+[usb.backend.libusb1._LibUSB.iso_write]
+877:38 call  _IsoTransferHandler(dev_handle, ep, data, timeout)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.libusb1._IsoTransferHandler.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+878:30 call  handler.submit(self.ctx)
+    -> usb.backend.libusb1._IsoTransferHandler.submit
+
+[usb.backend.libusb1._LibUSB.iso_read]
+882:38 call  _IsoTransferHandler(dev_handle, ep, buff, timeout)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.libusb1._IsoTransferHandler.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+883:30 call  handler.submit(self.ctx)
+    -> usb.backend.libusb1._IsoTransferHandler.submit
+
+[usb.backend.libusb1._LibUSB.ctrl_transfer]
+894:40 call  data.buffer_info()
+    -> array.array.buffer_info
+897:21 call  _check(self.lib.libusb_control_transfer( dev_handle.handl...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+897:54 call  self.lib.libusb_control_transfer( dev_handle.handle, bmRe...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> usb.backend.libusb1._IsoTransferHandler.__callback
+    note: libusb runs the callback of any completed transfer of the context in the thread that handles its events (libusb 1.0.30 io.c:549-552; usbi_handle_transfer_completion, io.c:1723-1725); libusb_control_transfer (sync.c:139) waits by handling the context's events (sync.c:49-55, libusb_handle_events_completed, io.c:2370-2374, handle_events, io.c:2287), and the backend's handles all belong to its one context (libusb1.py:641, 656, 722); a second thread with an isochronous transfer of _IsoTransferHandler in flight (submit, 685) is admitted (libusb is thread-safe, io.c:808; no restriction to one thread, the path ruling), so this call can run __callback (the mss ruling on C callbacks; Codex round 1, U3; pyusb.md J9)
+903:45 call  cast(addr, POINTER(c_ubyte))
+    -> ctypes.cast
+903:59 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+
+[usb.backend.libusb1._LibUSB.clear_halt]
+911:15 call  _check(self.lib.libusb_clear_halt(dev_handle.handle, ep))
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+911:42 call  self.lib.libusb_clear_halt(dev_handle.handle, ep)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.reset_device]
+915:15 call  _check(self.lib.libusb_reset_device(dev_handle.handle))
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+915:44 call  self.lib.libusb_reset_device(dev_handle.handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.is_kernel_driver_active]
+919:20 call  bool(_check(self.lib.libusb_kernel_driver_active(dev_hand...
+    -> <builtin>.bool
+919:27 call  _check(self.lib.libusb_kernel_driver_active(dev_handle.ha...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+919:64 call  self.lib.libusb_kernel_driver_active(dev_handle.handle, i...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.detach_kernel_driver]
+924:15 call  _check(self.lib.libusb_detach_kernel_driver(dev_handle.ha...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+924:52 call  self.lib.libusb_detach_kernel_driver(dev_handle.handle, i...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.attach_kernel_driver]
+928:15 call  _check(self.lib.libusb_attach_kernel_driver(dev_handle.ha...
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+928:52 call  self.lib.libusb_attach_kernel_driver(dev_handle.handle, i...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.libusb1._LibUSB.__write]
+931:43 call  data.buffer_info()
+    -> array.array.buffer_info
+933:28 call  c_int()
+    -> ctypes.c_int
+934:20 call  fn(dev_handle.handle, ep, cast(address, POINTER(c_ubyte))...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> usb.backend.libusb1._IsoTransferHandler.__callback
+    note: fn is the foreign function libusb_bulk_transfer or libusb_interrupt_transfer of self.lib (841, 859)
+    note: libusb runs the callback of any completed transfer of the context in the thread that handles its events (libusb 1.0.30 io.c:549-552; usbi_handle_transfer_completion, io.c:1723-1725); a synchronous bulk or interrupt transfer (sync.c:200) waits by handling the context's events (sync.c:49-55, libusb_handle_events_completed, io.c:2370-2374, handle_events, io.c:2287), and the backend's handles all belong to its one context (libusb1.py:641, 656, 722); a second thread with an isochronous transfer of _IsoTransferHandler in flight (submit, 685) is admitted (libusb is thread-safe, io.c:808; no restriction to one thread, the path ruling), so this call can run __callback (the mss ruling on C callbacks; Codex round 1, U1; pyusb.md J9)
+936:23 call  cast(address, POINTER(c_ubyte))
+    -> ctypes.cast
+936:40 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+938:24 call  byref(transferred)
+    -> ctypes.byref
+942:19 call  _check(retval)
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+
+[usb.backend.libusb1._LibUSB.__read]
+947:43 call  buff.buffer_info()
+    -> array.array.buffer_info
+949:28 call  c_int()
+    -> ctypes.c_int
+950:20 call  fn(dev_handle.handle, ep, cast(address, POINTER(c_ubyte))...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    -> usb.backend.libusb1._IsoTransferHandler.__callback
+    note: fn is the foreign function libusb_bulk_transfer or libusb_interrupt_transfer of self.lib (850, 868)
+    note: libusb runs the callback of any completed transfer of the context in the thread that handles its events (libusb 1.0.30 io.c:549-552; usbi_handle_transfer_completion, io.c:1723-1725); a synchronous bulk or interrupt transfer (sync.c:200) waits by handling the context's events (sync.c:49-55, libusb_handle_events_completed, io.c:2370-2374, handle_events, io.c:2287), and the backend's handles all belong to its one context (libusb1.py:641, 656, 722); a second thread with an isochronous transfer of _IsoTransferHandler in flight (submit, 685) is admitted (libusb is thread-safe, io.c:808; no restriction to one thread, the path ruling), so this call can run __callback (the mss ruling on C callbacks; Codex round 1, U2; pyusb.md J9)
+952:23 call  cast(address, POINTER(c_ubyte))
+    -> ctypes.cast
+952:40 call  POINTER(c_ubyte)
+    -> ctypes.POINTER
+954:24 call  byref(transferred)
+    -> ctypes.byref
+958:19 call  _check(retval)
+    -> usb.backend.libusb1._check
+    reject *: _check here is the module's own function usb.backend.libusb1._check
+
+[usb.backend.libusb1.get_backend]
+965:33 call  _load_library(find_library=find_library)
+    -> usb.backend.libusb1._load_library
+    reject *: _load_library here is libusb1's own
+966:30 call  _setup_prototypes(_lib)
+    -> usb.backend.libusb1._setup_prototypes
+    reject *: _setup_prototypes here is libusb1's own
+967:34 call  _LibUSB(_lib)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.libusb1._LibUSB.__init__
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO; _LibUSB here is libusb1's
+    note: with PYUSB_DEBUG set, _LibUSB.__init__ is do_trace, which calls it (J1)
+971:22 call  _logger.error('Error loading libusb 1.0 backend', exc_inf...
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+974:22 call  _logger.error('Error loading libusb 1.0 backend', exc_inf...
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+
+== usb.backend.openusb
+
+[usb.backend.openusb]
+81:28 call  logging.getLogger('usb.backend.openusb')
+    -> logging.getLogger
+118:44 call  errno.__dict__.get('ENOMEM', None)
+    -> <builtin>.dict.get
+120:45 call  errno.__dict__.get('ENOSYS', None)
+    -> <builtin>.dict.get
+121:49 call  errno.__dict__.get('EIO', None)
+    -> <builtin>.dict.get
+122:44 call  errno.__dict__.get('EBADF', None)
+    -> <builtin>.dict.get
+123:36 call  errno.__dict__.get('EBUSY', None)
+    -> <builtin>.dict.get
+124:38 call  errno.__dict__.get('EINVAL', None)
+    -> <builtin>.dict.get
+125:40 call  errno.__dict__.get('EACCES', None)
+    -> <builtin>.dict.get
+127:46 call  errno.__dict__.get('ENODEV', None)
+    -> <builtin>.dict.get
+128:46 call  errno.__dict__.get('EINVAL', None)
+    -> <builtin>.dict.get
+133:40 call  errno.__dict__.get('EIO', None)
+    -> <builtin>.dict.get
+134:44 call  errno.__dict__.get('EIO', None)
+    -> <builtin>.dict.get
+135:46 call  errno.__dict__.get('EIO', None)
+    -> <builtin>.dict.get
+136:46 call  errno.__dict__.get('E2BIG', None)
+    -> <builtin>.dict.get
+138:49 call  errno.__dict__.get('ESRCH', None)
+    -> <builtin>.dict.get
+139:47 call  errno.__dict__.get('EOVERFLOW', None)
+    -> <builtin>.dict.get
+141:49 call  errno.__dict__.get('EOVERFLOW', None)
+    -> <builtin>.dict.get
+145:42 call  errno.__dict__.get('ETIMEDOUT', None)
+    -> <builtin>.dict.get
+146:43 call  errno.__dict__.get('EINTR', None)
+    -> <builtin>.dict.get
+221:36 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+230:36 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+238:36 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+247:40 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+250:36 call  POINTER(_openusb_isoc_packet)
+    -> ctypes.POINTER
+256:41 call  POINTER(_openusb_request_result)
+    -> ctypes.POINTER
+555:20 getattr  usb.backend
+    reject usb.core.Device.backend: usb.backend is the module
+556:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+556:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+562:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+562:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+577:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+577:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+589:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+589:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+603:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+603:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+618:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+618:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+624:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+624:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+628:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+628:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+632:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+632:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+638:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+638:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+642:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+642:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+646:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+646:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+650:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+650:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+660:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+660:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+670:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+670:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+680:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+680:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+699:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+699:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+725:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+725:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+729:6 decorator  @methodtrace(_logger)
+    -> usb._debug.methodtrace.decorator_logging
+729:17 call  methodtrace(_logger)
+    -> usb._debug.methodtrace
+
+[usb.backend.openusb._openusb_ctrl_request.__init__]
+202:14 call  super(_openusb_ctrl_request, self)
+    -> <builtin>.super
+202:52 call  super(_openusb_ctrl_request, self).__init__()
+    -> ctypes.Structure.__init__
+    reject *: super() after _openusb_ctrl_request reaches ctypes.Structure.__init__
+
+[usb.backend.openusb._load_library]
+272:45 call  usb.libloader.load_locate_library( ('openusb',), 'openusb...
+    -> usb.libloader.load_locate_library
+
+[usb.backend.openusb._setup_prototypes]
+278:51 call  POINTER(_openusb_handle)
+    -> ctypes.POINTER
+289:20 call  POINTER(POINTER(_openusb_busid))
+    -> ctypes.POINTER
+289:28 call  POINTER(_openusb_busid)
+    -> ctypes.POINTER
+290:20 call  POINTER(c_uint32)
+    -> ctypes.POINTER
+294:52 call  POINTER(_openusb_busid)
+    -> ctypes.POINTER
+303:24 call  POINTER(POINTER(_openusb_devid))
+    -> ctypes.POINTER
+303:32 call  POINTER(_openusb_devid)
+    -> ctypes.POINTER
+304:24 call  POINTER(c_uint32)
+    -> ctypes.POINTER
+310:52 call  POINTER(_openusb_devid)
+    -> ctypes.POINTER
+320:24 call  POINTER(_openusb_dev_handle)
+    -> ctypes.POINTER
+336:75 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+381:20 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+383:20 call  POINTER(_usb_device_desc)
+    -> ctypes.POINTER
+397:24 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+400:24 call  POINTER(_usb_config_desc)
+    -> ctypes.POINTER
+415:28 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+420:28 call  POINTER(_usb_interface_desc)
+    -> ctypes.POINTER
+437:28 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+443:28 call  POINTER(_usb_endpoint_desc)
+    -> ctypes.POINTER
+460:20 call  POINTER(_openusb_ctrl_request)
+    -> ctypes.POINTER
+473:24 call  POINTER(_openusb_intr_request)
+    -> ctypes.POINTER
+486:20 call  POINTER(_openusb_bulk_request)
+    -> ctypes.POINTER
+499:20 call  POINTER(_openusb_isoc_request)
+    -> ctypes.POINTER
+
+[usb.backend.openusb._check]
+505:15 call  hasattr(ret, 'value')
+    -> <builtin>.hasattr
+510:34 call  USBTimeoutError(_lib.openusb_strerror(ret), ret, _openusb...
+    -> usb.core.USBError.__init__
+510:56 call  _lib.openusb_strerror(ret)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+512:27 call  USBError(_lib.openusb_strerror(ret), ret, _openusb_errno[...
+    -> usb.core.USBError.__init__
+512:49 call  _lib.openusb_strerror(ret)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._Context.__init__]
+518:38 call  _openusb_handle()
+    -> ctypes.c_uint64
+    note: _openusb_handle is c_uint64 (262)
+519:15 call  _check(_lib.openusb_init(0, byref(self.handle)))
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+519:33 call  _lib.openusb_init(0, byref(self.handle))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+519:42 call  byref(self.handle)
+    -> ctypes.byref
+
+[usb.backend.openusb._Context._finalize_object]
+521:19 call  hasattr(self, 'handle')
+    -> <builtin>.hasattr
+522:30 call  _lib.openusb_fini(self.handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._BusIterator.__init__]
+526:31 call  POINTER(_openusb_busid)
+    -> ctypes.POINTER
+526:47 call  POINTER(_openusb_busid)()
+    -> ctypes.c_uint64.__pointer_type__
+    note: _openusb_busid is c_uint64 (261); POINTER(c_uint64) is c_uint64.__pointer_type__ on CPython 3.14 (the mss ruling on generated ctypes classes)
+527:30 call  c_uint32()
+    -> ctypes.c_uint32
+528:15 call  _check(_lib.openusb_get_busid_list(_ctx.handle, byref(sel...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+528:43 call  _lib.openusb_get_busid_list(_ctx.handle, byref(self.busli...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+529:49 call  byref(self.buslist)
+    -> ctypes.byref
+530:49 call  byref(num_busids)
+    -> ctypes.byref
+
+[usb.backend.openusb._BusIterator.__iter__]
+533:23 call  range(self.num_busids)
+    -> <builtin>.range
+
+[usb.backend.openusb._BusIterator._finalize_object]
+536:19 call  hasattr(self, 'buslist')
+    -> <builtin>.hasattr
+537:41 call  _lib.openusb_free_busid_list(self.buslist)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._DevIterator.__init__]
+541:31 call  POINTER(_openusb_devid)
+    -> ctypes.POINTER
+541:47 call  POINTER(_openusb_devid)()
+    -> ctypes.c_uint64.__pointer_type__
+    note: _openusb_devid is c_uint64 (260); POINTER(c_uint64) is c_uint64.__pointer_type__ on CPython 3.14 (the mss ruling on generated ctypes classes)
+542:30 call  c_uint32()
+    -> ctypes.c_uint32
+543:15 call  _check(_lib.openusb_get_devids_by_bus(_ctx.handle, busid,...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+543:46 call  _lib.openusb_get_devids_by_bus(_ctx.handle, busid, byref(...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+545:52 call  byref(self.devlist)
+    -> ctypes.byref
+546:52 call  byref(num_devids)
+    -> ctypes.byref
+
+[usb.backend.openusb._DevIterator.__iter__]
+549:23 call  range(self.num_devids)
+    -> <builtin>.range
+
+[usb.backend.openusb._DevIterator._finalize_object]
+552:19 call  hasattr(self, 'devlist')
+    -> <builtin>.hasattr
+553:41 call  _lib.openusb_free_devid_list(self.devlist)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._OpenUSB.enumerate_devices]
+558:20 iter  _BusIterator()
+    -> usb.backend.openusb._BusIterator.__iter__
+    note: the iterated object is the _BusIterator made here
+558:32 call  _BusIterator()
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.openusb._BusIterator.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+559:26 iter  _DevIterator(bus)
+    -> usb.backend.openusb._DevIterator.__iter__
+    note: the iterated object is the openusb _DevIterator made here
+559:38 call  _DevIterator(bus)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.openusb._DevIterator.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+
+[usb.backend.openusb._OpenUSB.get_device_descriptor]
+564:32 call  _usb_device_desc()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+565:15 call  _check(_lib.openusb_parse_device_desc(_ctx.handle, dev, N...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+565:46 call  _lib.openusb_parse_device_desc(_ctx.handle, dev, None, 0,...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+569:52 call  byref(desc)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.get_configuration_descriptor]
+579:32 call  _usb_config_desc()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+580:15 call  _check(_lib.openusb_parse_config_desc(_ctx.handle, dev, N...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+580:46 call  _lib.openusb_parse_config_desc(_ctx.handle, dev, None, 0,...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+585:52 call  byref(desc)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.get_interface_descriptor]
+591:35 call  _usb_interface_desc()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+592:15 call  _check(_lib.openusb_parse_interface_desc(_ctx.handle, dev...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+592:49 call  _lib.openusb_parse_interface_desc(_ctx.handle, dev, None,...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+599:55 call  byref(desc)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.get_endpoint_descriptor]
+605:34 call  _usb_endpoint_desc()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+606:15 call  _check(_lib.openusb_parse_endpoint_desc(_ctx.handle, dev,...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+606:48 call  _lib.openusb_parse_endpoint_desc(_ctx.handle, dev, None, ...
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+614:54 call  byref(desc)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.open_device]
+620:37 call  _openusb_dev_handle()
+    -> ctypes.c_uint64
+    note: _openusb_dev_handle is c_uint64 (263)
+621:15 call  _check(_lib.openusb_open_device(_ctx.handle, dev, 0, byre...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+621:40 call  _lib.openusb_open_device(_ctx.handle, dev, 0, byref(handle))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+621:67 call  byref(handle)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.close_device]
+626:34 call  _lib.openusb_close_device(dev_handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._OpenUSB.set_configuration]
+630:15 call  _check(_lib.openusb_set_configuration(dev_handle, config_...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+630:46 call  _lib.openusb_set_configuration(dev_handle, config_value)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._OpenUSB.get_configuration]
+634:25 call  c_uint8()
+    -> ctypes.c_uint8
+635:15 call  _check(_lib.openusb_get_configuration(dev_handle, byref(c...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+635:46 call  _lib.openusb_get_configuration(dev_handle, byref(config))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+635:64 call  byref(config)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.set_interface_altsetting]
+640:15 call  _check(_lib.openusb_set_altsetting(dev_handle, intf, alts...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+640:43 call  _lib.openusb_set_altsetting(dev_handle, intf, altsetting)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._OpenUSB.claim_interface]
+644:15 call  _check(_lib.openusb_claim_interface(dev_handle, intf, 0))
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+644:44 call  _lib.openusb_claim_interface(dev_handle, intf, 0)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._OpenUSB.release_interface]
+648:39 call  _lib.openusb_release_interface(dev_handle, intf)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._OpenUSB.bulk_write]
+652:40 call  _openusb_bulk_request()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+653:15 call  memset(byref(request), 0, sizeof(request))
+    -> ctypes.CFUNCTYPE.CFunctionType.__call__
+    note: ctypes.memset is an instance of the class that CFUNCTYPE returns (memset = CFUNCTYPE(c_void_p, c_void_p, c_int, c_size_t)(_memset_addr), ctypes/__init__.py of CPython 3.9 to 3.15 and PyPy 3.9 to 3.11): a call of an instance is the __call__ of its class (judgement J8)
+653:21 call  byref(request)
+    -> ctypes.byref
+653:41 call  sizeof(request)
+    -> ctypes.sizeof
+654:51 call  data.buffer_info()
+    -> array.array.buffer_info
+655:31 call  cast(payload, POINTER(c_uint8))
+    -> ctypes.cast
+655:48 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+657:15 call  _check(_lib.openusb_bulk_xfer(dev_handle, intf, ep, byref...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+657:38 call  _lib.openusb_bulk_xfer(dev_handle, intf, ep, byref(request))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+657:66 call  byref(request)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.bulk_read]
+662:40 call  _openusb_bulk_request()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+663:15 call  memset(byref(request), 0, sizeof(request))
+    -> ctypes.CFUNCTYPE.CFunctionType.__call__
+    note: ctypes.memset is an instance of the class that CFUNCTYPE returns (memset = CFUNCTYPE(c_void_p, c_void_p, c_int, c_size_t)(_memset_addr), ctypes/__init__.py of CPython 3.9 to 3.15 and PyPy 3.9 to 3.11): a call of an instance is the __call__ of its class (judgement J8)
+663:21 call  byref(request)
+    -> ctypes.byref
+663:41 call  sizeof(request)
+    -> ctypes.sizeof
+664:51 call  buff.buffer_info()
+    -> array.array.buffer_info
+665:31 call  cast(payload, POINTER(c_uint8))
+    -> ctypes.cast
+665:48 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+667:15 call  _check(_lib.openusb_bulk_xfer(dev_handle, intf, ep, byref...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+667:38 call  _lib.openusb_bulk_xfer(dev_handle, intf, ep, byref(request))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+667:66 call  byref(request)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.intr_write]
+672:40 call  _openusb_intr_request()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+673:15 call  memset(byref(request), 0, sizeof(request))
+    -> ctypes.CFUNCTYPE.CFunctionType.__call__
+    note: ctypes.memset is an instance of the class that CFUNCTYPE returns (memset = CFUNCTYPE(c_void_p, c_void_p, c_int, c_size_t)(_memset_addr), ctypes/__init__.py of CPython 3.9 to 3.15 and PyPy 3.9 to 3.11): a call of an instance is the __call__ of its class (judgement J8)
+673:21 call  byref(request)
+    -> ctypes.byref
+673:41 call  sizeof(request)
+    -> ctypes.sizeof
+674:51 call  data.buffer_info()
+    -> array.array.buffer_info
+675:31 call  cast(payload, POINTER(c_uint8))
+    -> ctypes.cast
+675:48 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+677:15 call  _check(_lib.openusb_intr_xfer(dev_handle, intf, ep, byref...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+677:38 call  _lib.openusb_intr_xfer(dev_handle, intf, ep, byref(request))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+677:66 call  byref(request)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.intr_read]
+682:40 call  _openusb_intr_request()
+    -> ctypes.Structure.__init__
+    note: a package Structure without __init__
+683:15 call  memset(byref(request), 0, sizeof(request))
+    -> ctypes.CFUNCTYPE.CFunctionType.__call__
+    note: ctypes.memset is an instance of the class that CFUNCTYPE returns (memset = CFUNCTYPE(c_void_p, c_void_p, c_int, c_size_t)(_memset_addr), ctypes/__init__.py of CPython 3.9 to 3.15 and PyPy 3.9 to 3.11): a call of an instance is the __call__ of its class (judgement J8)
+683:21 call  byref(request)
+    -> ctypes.byref
+683:41 call  sizeof(request)
+    -> ctypes.sizeof
+684:51 call  buff.buffer_info()
+    -> array.array.buffer_info
+685:31 call  cast(payload, POINTER(c_uint8))
+    -> ctypes.cast
+685:48 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+687:15 call  _check(_lib.openusb_intr_xfer(dev_handle, intf, ep, byref...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+687:38 call  _lib.openusb_intr_xfer(dev_handle, intf, ep, byref(request))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+687:66 call  byref(request)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.ctrl_transfer]
+708:40 call  _openusb_ctrl_request()
+    -> usb.backend.openusb._openusb_ctrl_request.__init__
+715:44 call  usb.util.ctrl_direction(bmRequestType)
+    -> usb.util.ctrl_direction
+717:51 call  data.buffer_info()
+    -> array.array.buffer_info
+719:31 call  cast(payload, POINTER(c_uint8))
+    -> ctypes.cast
+719:48 call  POINTER(c_uint8)
+    -> ctypes.POINTER
+721:15 call  _check(_lib.openusb_ctrl_xfer(dev_handle, 0, 0, byref(req...
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+721:38 call  _lib.openusb_ctrl_xfer(dev_handle, 0, 0, byref(request))
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+721:62 call  byref(request)
+    -> ctypes.byref
+
+[usb.backend.openusb._OpenUSB.reset_device]
+727:15 call  _check(_lib.openusb_reset(dev_handle))
+    -> usb.backend.openusb._check
+    reject *: _check here is the module's own function usb.backend.openusb._check
+727:34 call  _lib.openusb_reset(dev_handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+
+[usb.backend.openusb._OpenUSB.clear_halt]
+731:48 call  util.build_request_type( util.CTRL_OUT, util.CTRL_TYPE_ST...
+    -> usb.util.build_request_type
+735:27 call  self.ctrl_transfer( dev_handle, bmRequestType, 0x03, 0, e...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.openusb._OpenUSB.ctrl_transfer
+    reject *: self is a openusb backend object (a private class without subclasses)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+741:30 call  _interop.as_array()
+    -> usb._interop.as_array
+
+[usb.backend.openusb.get_backend]
+748:33 call  _load_library(find_library)
+    -> usb.backend.openusb._load_library
+    reject *: _load_library here is openusb's own
+749:30 call  _setup_prototypes(_lib)
+    -> usb.backend.openusb._setup_prototypes
+    reject *: _setup_prototypes here is openusb's own
+750:28 call  _Context()
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.backend.openusb._Context.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+751:24 call  _logger.warning('OpenUSB backend deprecated (https://gith...
+    -> logging.Logger.warning
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+752:24 call  _OpenUSB()
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    reject *: _OpenUSB and IBackend define no __init__ (object.__init__: no edge); AutoFinalizedObject.__new__ comes first in the MRO
+755:22 call  _logger.error('Error loading OpenUSB backend', exc_info=F...
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+758:22 call  _logger.error('Error loading OpenUSB backend', exc_info=T...
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+
+== usb.control
+
+[usb.control._parse_recipient]
+73:20 call  isinstance(recipient, core.Interface)
+    -> <builtin>.isinstance
+76:20 call  isinstance(recipient, core.Endpoint)
+    -> <builtin>.isinstance
+80:25 call  ValueError('Invalid recipient.')
+    -> <builtin>.ValueError
+81:44 call  util.build_request_type( direction, util.CTRL_TYPE_STANDA...
+    -> usb.util.build_request_type
+
+[usb.control.get_status]
+108:45 call  _parse_recipient(recipient, util.CTRL_IN)
+    -> usb.control._parse_recipient
+109:28 call  dev.ctrl_transfer(bmRequestType = bmRequestType, bRequest...
+    -> usb.core.Device.ctrl_transfer
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+[usb.control.clear_feature]
+127:23 call  dev.clear_halt(recipient)
+    -> usb.core.Device.clear_halt
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+129:49 call  _parse_recipient(recipient, util.CTRL_OUT)
+    -> usb.control._parse_recipient
+130:26 call  dev.ctrl_transfer(bmRequestType = bmRequestType, bRequest...
+    -> usb.core.Device.ctrl_transfer
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+[usb.control.set_feature]
+146:45 call  _parse_recipient(recipient, util.CTRL_OUT)
+    -> usb.control._parse_recipient
+147:22 call  dev.ctrl_transfer(bmRequestType = bmRequestType, bRequest...
+    -> usb.core.Device.ctrl_transfer
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+[usb.control.get_descriptor]
+167:44 call  util.build_request_type( util.CTRL_IN, util.CTRL_TYPE_STA...
+    -> usb.util.build_request_type
+172:29 call  dev.ctrl_transfer( bmRequestType = bmRequestType, bReques...
+    -> usb.core.Device.ctrl_transfer
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+179:11 call  len(desc)
+    -> <builtin>.len
+180:23 call  USBError('Invalid descriptor')
+    -> usb.core.USBError.__init__
+    note: USBError is core.USBError (control.py:67)
+
+[usb.control.set_descriptor]
+198:44 call  util.build_request_type( util.CTRL_OUT, util.CTRL_TYPE_ST...
+    -> usb.util.build_request_type
+203:22 call  dev.ctrl_transfer( bmRequestType = bmRequestType, bReques...
+    -> usb.core.Device.ctrl_transfer
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+[usb.control.get_configuration]
+220:44 call  util.build_request_type( util.CTRL_IN, util.CTRL_TYPE_STA...
+    -> usb.util.build_request_type
+225:29 call  dev.ctrl_transfer( bmRequestType, bRequest = 0x08, data_o...
+    -> usb.core.Device.ctrl_transfer
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+[usb.control.set_configuration]
+236:26 call  dev.set_configuration(bConfigurationNumber)
+    -> usb.core.Device.set_configuration
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+[usb.control.get_interface]
+244:44 call  util.build_request_type( util.CTRL_IN, util.CTRL_TYPE_STA...
+    -> usb.util.build_request_type
+249:29 call  dev.ctrl_transfer( bmRequestType = bmRequestType, bReques...
+    -> usb.core.Device.ctrl_transfer
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+[usb.control.set_interface]
+261:33 call  dev.set_interface_altsetting(bInterfaceNumber, bAlternate...
+    -> usb.core.Device.set_interface_altsetting
+    reject *: dev is the Device object of the documentation (control.py:99 and the other docstrings)
+
+== usb.core
+
+[usb.core]
+59:28 call  logging.getLogger('usb.core')
+    -> logging.getLogger
+63:19 call  object()
+    -> <builtin>.object
+129:6 decorator  @synchronized
+    -> usb.core.synchronized
+135:6 decorator  @synchronized
+    -> usb.core.synchronized
+141:6 decorator  @synchronized
+    -> usb.core.synchronized
+170:6 decorator  @synchronized
+    -> usb.core.synchronized
+183:6 decorator  @synchronized
+    -> usb.core.synchronized
+199:6 decorator  @synchronized
+    -> usb.core.synchronized
+224:6 decorator  @synchronized
+    -> usb.core.synchronized
+238:6 decorator  @synchronized
+    -> usb.core.synchronized
+253:6 decorator  @synchronized
+    -> usb.core.synchronized
+267:6 decorator  @synchronized
+    -> usb.core.synchronized
+278:6 decorator  @synchronized
+    -> usb.core.synchronized
+851:6 decorator  @property
+    -> <builtin>.property
+870:6 decorator  @property
+    -> <builtin>.property
+881:6 decorator  @property
+    -> <builtin>.property
+892:6 decorator  @property
+    -> <builtin>.property
+904:6 decorator  @property
+    -> <builtin>.property
+915:6 decorator  @property
+    -> <builtin>.property
+1228:31 call  property( __get_def_tmo, __set_def_tmo, doc = 'Default ti...
+    -> <builtin>.property
+    reject *: property() stores the accessors; they run when default_timeout is loaded or stored, which the package never does
+
+[usb.core._set_attr]
+67:16 call  setattr(output, f, getattr(input, f))
+    -> <builtin>.setattr
+    note: output is a core Device, Configuration, Interface or Endpoint; none defines __setattr__, and no field of the lists is a property
+67:35 call  getattr(input, f)
+    -> <builtin>.getattr
+    -> usb.backend.libusb1._ConfigDescriptor.__getattr__
+    -> usb.backend.libusb1._WrapDescriptor.__getattr__
+    note: input is the descriptor of a backend; libusb1 returns a _ConfigDescriptor for a configuration (libusb1.py:780) and a _WrapDescriptor for an interface or an endpoint (795, 804), whose fields are no instance attributes
+
+[usb.core._try_getattr]
+71:23 call  getattr(object, name)
+    -> <builtin>.getattr
+    note: object is a core Device (core.py:1306), without __getattr__; name comes from the keyword arguments of find, descriptor fields in the documentation and tests (B3)
+
+[usb.core._try_get_string]
+85:41 call  util.get_string(dev, index)
+    -> usb.util.get_string
+87:41 call  util.get_string(dev, index, langid)
+    -> usb.util.get_string
+
+[usb.core.synchronized]
+109:6 decorator  @functools.wraps(f)
+    -> functools.partial.__call__
+    note: functools.wraps returns a functools.partial of update_wrapper; calling it copies the attributes of f onto wrapper
+109:21 call  functools.wraps(f)
+    -> functools.wraps
+
+[usb.core.synchronized.wrapper]
+112:30 call  self.lock.acquire()
+    -> _thread.RLock.acquire
+    note: self is a _ResourceManager, whose lock is threading.RLock() (127), an instance of _thread.RLock: on CPython the C RLock, on PyPy 3.9 to 3.11 the TypeDef "_thread.RLock" of pypy/module/thread/os_lock.py (W_RLock, exported as _thread.RLock by moduledef.py:24), which lib-python's threading.py:46 takes
+113:21 call  f(self, *args, **kwargs)
+    -> usb.core._ResourceManager.dispose
+    -> usb.core._ResourceManager.get_active_configuration
+    -> usb.core._ResourceManager.get_interface_and_endpoint
+    -> usb.core._ResourceManager.managed_claim_interface
+    -> usb.core._ResourceManager.managed_close
+    -> usb.core._ResourceManager.managed_open
+    -> usb.core._ResourceManager.managed_release_interface
+    -> usb.core._ResourceManager.managed_set_configuration
+    -> usb.core._ResourceManager.managed_set_interface
+    -> usb.core._ResourceManager.release_all_interfaces
+    -> usb.core._ResourceManager.setup_request
+    note: f is the method that synchronized receives: the eleven methods of _ResourceManager with @synchronized (judgement J2)
+115:30 call  self.lock.release()
+    -> _thread.RLock.release
+
+[usb.core._ResourceManager.__init__]
+124:33 call  set()
+    -> <builtin>.set
+    reject *: set is the builtin
+127:36 call  threading.RLock()
+    -> threading.RLock
+
+[usb.core._ResourceManager.managed_open]
+132:32 getattr  self.backend
+    reject usb.core.Device.backend: self is a _ResourceManager, whose backend is a plain attribute (core.py:120)
+132:51 call  self.backend.open_device(self.dev)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.open_device
+    -> usb.backend.libusb1._LibUSB.open_device
+    -> usb.backend.openusb._OpenUSB.open_device
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+
+[usb.core._ResourceManager.managed_close]
+138:18 getattr  self.backend
+    reject usb.core.Device.backend: self is a _ResourceManager, whose backend is a plain attribute (core.py:120)
+138:38 call  self.backend.close_device(self.handle)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.close_device
+    -> usb.backend.libusb1._LibUSB.close_device
+    -> usb.backend.openusb._OpenUSB.close_device
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+
+[usb.core._ResourceManager.managed_set_configuration]
+144:25 getitem  device[0]
+    -> usb.core.Device.__getitem__
+    reject usb.core.Configuration.__getitem__, usb.core.Interface.__getitem__: device is the Device of Device.set_configuration (929)
+145:24 call  isinstance(config, Configuration)
+    -> <builtin>.isinstance
+152:36 call  MockConfiguration()
+    -> usb.core._ResourceManager.managed_set_configuration.MockConfiguration.__init__
+154:39 call  util.find_descriptor(device, bConfigurationValue=config)
+    -> usb.util.find_descriptor
+157:29 call  ValueError("Invalid configuration " + str(config))
+    -> <builtin>.ValueError
+157:60 call  str(config)
+    -> <builtin>.str
+159:26 call  self.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+160:14 getattr  self.backend
+    reject usb.core.Device.backend: self is a _ResourceManager, whose backend is a plain attribute (core.py:120)
+160:39 call  self.backend.set_configuration(self.handle, cfg.bConfigur...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.set_configuration
+    -> usb.backend.libusb1._LibUSB.set_configuration
+    -> usb.backend.openusb._OpenUSB.set_configuration
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+167:33 call  self._intf_setting.clear()
+    -> <builtin>.dict.clear
+168:28 call  self._ep_info.clear()
+    -> <builtin>.dict.clear
+
+[usb.core._ResourceManager.managed_claim_interface]
+172:26 call  self.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+174:22 call  isinstance(intf, Interface)
+    -> <builtin>.isinstance
+180:18 getattr  self.backend
+    reject usb.core.Device.backend: self is a _ResourceManager, whose backend is a plain attribute (core.py:120)
+180:41 call  self.backend.claim_interface(self.handle, i)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.claim_interface
+    -> usb.backend.libusb1._LibUSB.claim_interface
+    -> usb.backend.openusb._OpenUSB.claim_interface
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+181:35 call  self._claimed_intf.add(i)
+    -> <builtin>.set.add
+
+[usb.core._ResourceManager.managed_release_interface]
+186:48 call  self.get_active_configuration(device)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.get_active_configuration by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+187:20 getitem  cfg[(0,0)]
+    -> usb.core.Configuration.__getitem__
+    reject usb.core.Device.__getitem__, usb.core.Interface.__getitem__: cfg is the Configuration of get_active_configuration (find_descriptor on a Device, or device[index])
+188:24 call  isinstance(intf, Interface)
+    -> <builtin>.isinstance
+195:22 getattr  self.backend
+    reject usb.core.Device.backend: self is a _ResourceManager, whose backend is a plain attribute (core.py:120)
+195:47 call  self.backend.release_interface(self.handle, i)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.release_interface
+    -> usb.backend.libusb1._LibUSB.release_interface
+    -> usb.backend.openusb._OpenUSB.release_interface
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+197:42 call  self._claimed_intf.remove(i)
+    -> <builtin>.set.remove
+
+[usb.core._ResourceManager.managed_set_interface]
+201:22 call  isinstance(intf, Interface)
+    -> <builtin>.isinstance
+204:48 call  self.get_active_configuration(device)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.get_active_configuration by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+206:27 getitem  cfg[(0,0)]
+    -> usb.core.Configuration.__getitem__
+    reject usb.core.Device.__getitem__, usb.core.Interface.__getitem__: cfg is the Configuration of get_active_configuration
+208:41 call  util.find_descriptor(cfg, bInterfaceNumber=intf, bAlterna...
+    -> usb.util.find_descriptor
+210:41 call  util.find_descriptor(cfg, bInterfaceNumber=intf)
+    -> usb.util.find_descriptor
+212:33 call  ValueError('No matching interface (' + str(intf) + ',' + ...
+    -> <builtin>.ValueError
+212:65 call  str(intf)
+    -> <builtin>.str
+212:83 call  str(alt)
+    -> <builtin>.str
+214:37 call  self.managed_claim_interface(device, i)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_claim_interface by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+219:14 getattr  self.backend
+    reject usb.core.Device.backend: self is a _ResourceManager, whose backend is a plain attribute (core.py:120)
+219:46 call  self.backend.set_interface_altsetting(self.handle, i.bInt...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.set_interface_altsetting
+    -> usb.backend.libusb1._LibUSB.set_interface_altsetting
+    -> usb.backend.openusb._OpenUSB.set_interface_altsetting
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+222:28 call  self._ep_info.clear()
+    -> <builtin>.dict.clear
+
+[usb.core._ResourceManager.setup_request]
+228:22 call  isinstance(endpoint, Endpoint)
+    -> <builtin>.isinstance
+233:51 call  self.get_interface_and_endpoint(device, endpoint_address)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.get_interface_and_endpoint by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+234:37 call  self.managed_claim_interface(device, intf)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_claim_interface by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.core._ResourceManager.get_interface_and_endpoint]
+243:25 iter  self.get_active_configuration(device)
+    -> usb.core.Configuration.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: the result of get_active_configuration is a Configuration
+243:54 call  self.get_active_configuration(device)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.get_active_configuration by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+244:68 call  self._intf_setting.get(intf.bInterfaceNumber, 0)
+    -> <builtin>.dict.get
+246:42 call  util.find_descriptor(intf, bEndpointAddress=endpoint_addr...
+    -> usb.util.find_descriptor
+251:29 call  ValueError('Invalid endpoint address ' + hex(endpoint_add...
+    -> <builtin>.ValueError
+251:63 call  hex(endpoint_address)
+    -> <builtin>.hex
+
+[usb.core._ResourceManager.get_active_configuration]
+256:30 call  self.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+257:39 call  util.find_descriptor( device, bConfigurationValue=self.ba...
+    -> usb.util.find_descriptor
+259:46 getattr  self.backend
+    reject usb.core.Device.backend: self is a _ResourceManager, whose backend is a plain attribute (core.py:120)
+259:71 call  self.backend.get_configuration(self.handle)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.get_configuration
+    -> usb.backend.libusb1._LibUSB.get_configuration
+    -> usb.backend.openusb._OpenUSB.get_configuration
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+262:31 call  USBError('Configuration not set')
+    -> usb.core.USBError.__init__
+265:22 getitem  device[self._active_cfg_index]
+    -> usb.core.Device.__getitem__
+    reject usb.core.Configuration.__getitem__, usb.core.Interface.__getitem__: device is the Device whose methods call this (Device passes self)
+
+[usb.core._ResourceManager.release_all_interfaces]
+269:28 call  copy.copy(self._claimed_intf)
+    -> copy.copy
+272:47 call  self.managed_release_interface(device, i)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_release_interface by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.core._ResourceManager.dispose]
+280:36 call  self.release_all_interfaces(device)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.release_all_interfaces by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+282:31 call  self.managed_close()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_close by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+283:33 call  self._intf_setting.clear()
+    -> <builtin>.dict.clear
+284:28 call  self._ep_info.clear()
+    -> <builtin>.dict.clear
+
+[usb.core.USBError.__init__]
+304:25 call  IOError.__init__(self, errno, strerror)
+    -> <builtin>.IOError.__init__
+    reject *: IOError is the builtin (OSError)
+
+[usb.core.Endpoint.__init__]
+353:31 getattr  device._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+355:47 call  backend.get_endpoint_descriptor( device._ctx.dev, endpoin...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.get_endpoint_descriptor
+    -> usb.backend.libusb1._LibUSB.get_endpoint_descriptor
+    -> usb.backend.openusb._OpenUSB.get_endpoint_descriptor
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+363:18 call  _set_attr( desc, self, ( 'bLength', 'bDescriptorType', 'b...
+    -> usb.core._set_attr
+
+[usb.core.Endpoint.__repr__]
+380:31 call  self._str()
+    -> usb.core.Endpoint._str
+    reject *: self is an Endpoint (the package has no subclass of it)
+
+[usb.core.Endpoint.__str__]
+383:39 call  self._str()
+    -> usb.core.Endpoint._str
+    reject *: self is an Endpoint (the package has no subclass of it)
+385:35 call  util.endpoint_direction(self.bEndpointAddress)
+    -> usb.util.endpoint_direction
+390:52 call  len(headstr)
+    -> <builtin>.len
+395:28 call  _try_lookup(_lu.descriptors, self.bDescriptorType)
+    -> usb.core._try_lookup
+
+[usb.core.Endpoint.write]
+416:33 call  self.device.write(self, data, timeout)
+    -> usb.core.Device.write
+    reject *: self.device is the core Device of the descriptor (Device, Configuration and Interface pass theirs, core.py:533, 542, 657, 670, 1151, 1155)
+
+[usb.core.Endpoint.read]
+431:32 call  self.device.read(self, size_or_buffer, timeout)
+    -> usb.core.Device.read
+    reject *: self.device is the core Device of the descriptor (Device, Configuration and Interface pass theirs, core.py:533, 542, 657, 670, 1151, 1155)
+
+[usb.core.Endpoint.clear_halt]
+435:31 call  self.device.clear_halt(self.bEndpointAddress)
+    -> usb.core.Device.clear_halt
+    reject *: self.device is the core Device of the descriptor (Device, Configuration and Interface pass theirs, core.py:533, 542, 657, 670, 1151, 1155)
+
+[usb.core.Endpoint._str]
+438:35 call  util.endpoint_direction(self.bEndpointAddress)
+    -> usb.util.endpoint_direction
+
+[usb.core.Interface.__init__]
+483:31 getattr  device._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+485:48 call  backend.get_interface_descriptor( self.device._ctx.dev, i...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.get_interface_descriptor
+    -> usb.backend.libusb1._LibUSB.get_interface_descriptor
+    -> usb.backend.openusb._OpenUSB.get_interface_descriptor
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+492:18 call  _set_attr( desc, self, ( 'bLength', 'bDescriptorType', 'b...
+    -> usb.core._set_attr
+
+[usb.core.Interface.__repr__]
+510:31 call  self._str()
+    -> usb.core.Interface._str
+    reject *: self is an Interface (the package has no subclass of it)
+
+[usb.core.Interface.__str__]
+515:47 call  self._get_full_descriptor_str()
+    -> usb.core.Interface._get_full_descriptor_str
+    reject *: self is an Interface (the package has no subclass of it)
+516:25 iter  self
+    -> usb.core.Interface.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: self is an Interface
+517:33 call  str(endpoint)
+    -> <builtin>.str
+    -> usb.core.Endpoint.__str__
+    reject *: endpoint is a core Endpoint (Interface.__iter__)
+
+[usb.core.Interface.endpoints]
+522:21 call  tuple(self)
+    -> <builtin>.tuple
+    -> usb.core.Interface.__iter__
+    reject *: tuple iterates self, an Interface, through its __iter__
+
+[usb.core.Interface.set_altsetting]
+526:45 call  self.device.set_interface_altsetting( self.bInterfaceNumb...
+    -> usb.core.Device.set_interface_altsetting
+    reject *: self.device is the core Device of the descriptor (Device, Configuration and Interface pass theirs, core.py:533, 542, 657, 670, 1151, 1155)
+
+[usb.core.Interface.__iter__]
+532:23 call  range(self.bNumEndpoints)
+    -> <builtin>.range
+533:27 call  Endpoint( self.device, i, self.index, self.alternate_inde...
+    -> usb.core.Endpoint.__init__
+    reject *: Endpoint here is usb.core.Endpoint
+
+[usb.core.Interface.__getitem__]
+542:24 call  Endpoint( self.device, index, self.index, self.alternate_...
+    -> usb.core.Endpoint.__init__
+    reject *: Endpoint here is usb.core.Endpoint
+
+[usb.core.Interface._str]
+556:24 call  _try_lookup(_lu.interface_classes, self.bInterfaceClass, ...
+    -> usb.core._try_lookup
+
+[usb.core.Interface._get_full_descriptor_str]
+560:37 call  self._str()
+    -> usb.core.Interface._str
+    reject *: self is an Interface (the package has no subclass of it)
+561:52 call  len(headstr)
+    -> <builtin>.len
+566:24 call  _try_lookup(_lu.descriptors, self.bDescriptorType)
+    -> usb.core._try_lookup
+575:24 call  _try_lookup(_lu.interface_classes, self.bInterfaceClass)
+    -> usb.core._try_lookup
+582:28 call  _try_get_string(self.device, self.iInterface)
+    -> usb.core._try_get_string
+
+[usb.core.Configuration.__init__]
+611:31 getattr  device._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+613:52 call  backend.get_configuration_descriptor( self.device._ctx.de...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.get_configuration_descriptor
+    -> usb.backend.libusb1._LibUSB.get_configuration_descriptor
+    -> usb.backend.openusb._OpenUSB.get_configuration_descriptor
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+618:18 call  _set_attr( desc, self, ( 'bLength', 'bDescriptorType', 'w...
+    -> usb.core._set_attr
+
+[usb.core.Configuration.__repr__]
+635:31 call  self._str()
+    -> usb.core.Configuration._str
+    reject *: self is a Configuration (the package has no subclass of it)
+
+[usb.core.Configuration.__str__]
+638:47 call  self._get_full_descriptor_str()
+    -> usb.core.Configuration._get_full_descriptor_str
+    reject *: self is a Configuration (the package has no subclass of it)
+639:26 iter  self
+    -> usb.core.Configuration.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: self is a Configuration
+640:35 call  str(interface)
+    -> <builtin>.str
+    -> usb.core.Interface.__str__
+    reject *: interface is a core Interface (Configuration.__iter__)
+
+[usb.core.Configuration.interfaces]
+645:21 call  tuple(self)
+    -> <builtin>.tuple
+    -> usb.core.Configuration.__iter__
+    reject *: tuple iterates self, a Configuration, through its __iter__
+
+[usb.core.Configuration.set]
+649:38 call  self.device.set_configuration(self.bConfigurationValue)
+    -> usb.core.Device.set_configuration
+    reject *: self.device is the core Device of the descriptor (Device, Configuration and Interface pass theirs, core.py:533, 542, 657, 670, 1151, 1155)
+
+[usb.core.Configuration.__iter__]
+653:23 call  range(self.bNumInterfaces)
+    -> <builtin>.range
+657:36 call  Interface(self.device, i, alt, self.index)
+    -> usb.core.Interface.__init__
+    reject *: Interface here is usb.core.Interface
+
+[usb.core.Configuration.__getitem__]
+670:25 call  Interface(self.device, index[0], index[1], self.index)
+    -> usb.core.Interface.__init__
+    reject *: Interface here is usb.core.Interface
+
+[usb.core.Configuration._str]
+683:39 call  self._get_power_multiplier()
+    -> usb.core.Configuration._get_power_multiplier
+
+[usb.core.Configuration._get_full_descriptor_str]
+686:35 call  self._str()
+    -> usb.core.Configuration._str
+    reject *: self is a Configuration (the package has no subclass of it)
+697:52 call  len(headstr)
+    -> <builtin>.len
+702:24 call  _try_lookup(_lu.descriptors, self.bDescriptorType)
+    -> usb.core._try_lookup
+711:28 call  _try_get_string(self.device, self.iConfiguration)
+    -> usb.core._try_get_string
+718:39 call  self._get_power_multiplier()
+    -> usb.core.Configuration._get_power_multiplier
+
+[usb.core.Device.__eq__]
+757:22 call  isinstance(other, self.__class__)
+    -> <builtin>.isinstance
+758:26 getattr  self.backend
+    -> usb.core.Device.backend
+    note: self is a Device
+759:27 getattr  other.backend
+    -> usb.core.Device.backend
+    note: other is an instance of self.__class__ (757), a Device
+
+[usb.core.Device.__hash__]
+764:20 call  hash((self.backend, self.bus, self.address))
+    -> <builtin>.hash
+    note: the tuple holds the backend object and two ints or None; no backend class of the package defines __hash__ or __eq__
+764:27 getattr  self.backend
+    -> usb.core.Device.backend
+    note: self is a Device
+
+[usb.core.Device.__repr__]
+767:31 call  self._str()
+    -> usb.core.Device._str
+    reject *: self is a Device (the package has no subclass of it)
+
+[usb.core.Device.__str__]
+770:47 call  self._get_full_descriptor_str()
+    -> usb.core.Device._get_full_descriptor_str
+    reject *: self is a Device (the package has no subclass of it)
+772:34 iter  self
+    -> usb.core.Device.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: self is a Device
+773:39 call  str(configuration)
+    -> <builtin>.str
+    -> usb.core.Configuration.__str__
+    reject *: configuration is a core Configuration (Device.__iter__)
+776:62 call  self.get_active_configuration()
+    -> usb.core.Device.get_active_configuration
+    reject *: self is a Device
+
+[usb.core.Device.configurations]
+784:21 call  tuple(self)
+    -> <builtin>.tuple
+    -> usb.core.Device.__iter__
+    reject *: tuple iterates self, a Device, through its __iter__
+
+[usb.core.Device.__init__]
+795:37 call  _ResourceManager(dev, backend)
+    -> usb.core._ResourceManager.__init__
+800:45 call  backend.get_device_descriptor(dev)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.get_device_descriptor
+    -> usb.backend.libusb0._LibUSB.get_device_descriptor
+    -> usb.backend.libusb1._LibUSB.get_device_descriptor
+    -> usb.backend.openusb._OpenUSB.get_device_descriptor
+    reject *: the receiver is a backend object that libusb0, libusb1 or openusb get_backend returns, or an IBackend itself (a plain public class documented for subclassing, a receiver of its own methods, B1; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+802:18 call  _set_attr( desc, self, ( 'bLength', 'bDescriptorType', 'b...
+    -> usb.core._set_attr
+829:27 call  int(desc.bus)
+    -> <builtin>.int
+834:31 call  int(desc.address)
+    -> <builtin>.int
+839:35 call  int(desc.port_number)
+    -> <builtin>.int
+844:29 call  int(desc.speed)
+    -> <builtin>.int
+
+[usb.core.Device.langids]
+865:49 call  util.get_langids(self)
+    -> usb.util.get_langids
+
+[usb.core.Device.serial_number]
+878:50 call  util.get_string(self, self.iSerialNumber)
+    -> usb.util.get_string
+
+[usb.core.Device.product]
+889:44 call  util.get_string(self, self.iProduct)
+    -> usb.util.get_string
+
+[usb.core.Device.parent]
+896:33 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+896:51 call  self._ctx.backend.get_parent(self._ctx.dev)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.get_parent
+    -> usb.backend.libusb1._LibUSB.get_parent
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+899:38 call  Device(_parent, self._ctx.backend)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.core.Device.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+899:58 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+
+[usb.core.Device.manufacturer]
+912:49 call  util.get_string(self, self.iManufacturer)
+    -> usb.util.get_string
+
+[usb.core.Device.backend]
+918:26 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+
+[usb.core.Device.set_configuration]
+929:44 call  self._ctx.managed_set_configuration(self, configuration)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_set_configuration by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.core.Device.get_active_configuration]
+935:50 call  self._ctx.get_active_configuration(self)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.get_active_configuration by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.core.Device.set_interface_altsetting]
+962:40 call  self._ctx.managed_set_interface(self, interface, alternat...
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_set_interface by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.core.Device.clear_halt]
+966:22 call  isinstance(ep, Endpoint)
+    -> <builtin>.isinstance
+968:31 call  self._ctx.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+969:19 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+969:37 call  self._ctx.backend.clear_halt(self._ctx.handle, ep)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.clear_halt
+    -> usb.backend.libusb1._LibUSB.clear_halt
+    -> usb.backend.openusb._OpenUSB.clear_halt
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+
+[usb.core.Device.reset]
+973:31 call  self._ctx.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+974:26 call  self._ctx.dispose(self, False)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.dispose by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+975:19 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+975:39 call  self._ctx.backend.reset_device(self._ctx.handle)
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.reset_device
+    -> usb.backend.libusb1._LibUSB.reset_device
+    -> usb.backend.openusb._OpenUSB.reset_device
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+976:26 call  self._ctx.dispose(self, True)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.dispose by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.core.Device.write]
+992:29 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+1000:43 call  self._ctx.setup_request(self, endpoint)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.setup_request by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+1001:39 call  util.endpoint_type(ep.bmAttributes)
+    -> usb.util.endpoint_type
+1003:18 call  fn( self._ctx.handle, ep.bEndpointAddress, intf.bInterfac...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.iso_write
+    -> usb.backend.libusb0._LibUSB.bulk_write
+    -> usb.backend.libusb0._LibUSB.intr_write
+    -> usb.backend.libusb0._LibUSB.iso_write
+    -> usb.backend.libusb1._LibUSB.bulk_write
+    -> usb.backend.libusb1._LibUSB.intr_write
+    -> usb.backend.libusb1._LibUSB.iso_write
+    -> usb.backend.openusb._OpenUSB.bulk_write
+    -> usb.backend.openusb._OpenUSB.intr_write
+    note: fn is backend.bulk_write, intr_write or iso_write (fn_map, 994-998), bound methods of the backend of a constructed Device: a backend of get_backend (openusb inherits IBackend.iso_write); an IBackend itself is never the backend of a Device (J3); a client backend is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+1007:34 call  _interop.as_array(data)
+    -> usb._interop.as_array
+1008:35 call  self.__get_timeout(timeout)
+    -> usb.core.Device.__get_timeout
+
+[usb.core.Device.read]
+1027:29 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+1035:43 call  self._ctx.setup_request(self, endpoint)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.setup_request by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+1036:39 call  util.endpoint_type(ep.bmAttributes)
+    -> usb.util.endpoint_type
+1038:22 call  isinstance(size_or_buffer, array.array)
+    -> <builtin>.isinstance
+1041:38 call  util.create_buffer(size_or_buffer)
+    -> usb.util.create_buffer
+1043:17 call  fn( self._ctx.handle, ep.bEndpointAddress, intf.bInterfac...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.iso_read
+    -> usb.backend.libusb0._LibUSB.bulk_read
+    -> usb.backend.libusb0._LibUSB.intr_read
+    -> usb.backend.libusb0._LibUSB.iso_read
+    -> usb.backend.libusb1._LibUSB.bulk_read
+    -> usb.backend.libusb1._LibUSB.intr_read
+    -> usb.backend.libusb1._LibUSB.iso_read
+    -> usb.backend.openusb._OpenUSB.bulk_read
+    -> usb.backend.openusb._OpenUSB.intr_read
+    note: fn is backend.bulk_read, intr_read or iso_read (fn_map, 1029-1033), bound methods of the backend of a constructed Device: a backend of get_backend (openusb inherits IBackend.iso_read); an IBackend itself is never the backend of a Device (J3); a client backend is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+1048:35 call  self.__get_timeout(timeout)
+    -> usb.core.Device.__get_timeout
+1050:22 call  isinstance(size_or_buffer, array.array)
+    -> <builtin>.isinstance
+1052:24 call  len(buff)
+    -> <builtin>.len
+
+[usb.core.Device.ctrl_transfer]
+1080:33 call  _interop.as_array(data_or_wLength)
+    -> usb._interop.as_array
+1082:31 call  self._ctx.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+1091:46 call  self._ctx.managed_claim_interface(self, interface_number)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_claim_interface by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+1093:25 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+1093:46 call  self._ctx.backend.ctrl_transfer( self._ctx.handle, bmRequ...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.libusb0._LibUSB.ctrl_transfer
+    -> usb.backend.libusb1._LibUSB.ctrl_transfer
+    -> usb.backend.openusb._OpenUSB.ctrl_transfer
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+1100:55 call  self.__get_timeout(timeout)
+    -> usb.core.Device.__get_timeout
+1102:22 call  isinstance(data_or_wLength, array.array)
+    -> <builtin>.isinstance
+1103:39 call  util.ctrl_direction(bmRequestType)
+    -> usb.util.ctrl_direction
+1105:24 call  len(buff)
+    -> <builtin>.len
+
+[usb.core.Device.is_kernel_driver_active]
+1118:31 call  self._ctx.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+1119:26 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+1119:57 call  self._ctx.backend.is_kernel_driver_active( self._ctx.hand...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.is_kernel_driver_active
+    -> usb.backend.libusb0._LibUSB.is_kernel_driver_active
+    -> usb.backend.libusb1._LibUSB.is_kernel_driver_active
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+
+[usb.core.Device.detach_kernel_driver]
+1131:31 call  self._ctx.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+1132:19 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+1132:47 call  self._ctx.backend.detach_kernel_driver( self._ctx.handle,...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.detach_kernel_driver
+    -> usb.backend.libusb0._LibUSB.detach_kernel_driver
+    -> usb.backend.libusb1._LibUSB.detach_kernel_driver
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+
+[usb.core.Device.attach_kernel_driver]
+1143:31 call  self._ctx.managed_open()
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_open by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+1144:19 getattr  self._ctx.backend
+    reject usb.core.Device.backend: the receiver is the _ResourceManager of a Device, whose backend is a plain attribute (core.py:120)
+1144:47 call  self._ctx.backend.attach_kernel_driver( self._ctx.handle,...
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.attach_kernel_driver
+    -> usb.backend.libusb1._LibUSB.attach_kernel_driver
+    reject *: the receiver is the backend of a constructed Device: the backend object that libusb0, libusb1 or openusb get_backend returns (an inherited method is IBackend's); an IBackend itself is never the backend of a Device, because Device.__init__ calls its get_device_descriptor, which raises (B3; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+
+[usb.core.Device.__iter__]
+1150:23 call  range(self.bNumConfigurations)
+    -> <builtin>.range
+1151:32 call  Configuration(self, i)
+    -> usb.core.Configuration.__init__
+    reject *: Configuration here is usb.core.Configuration
+
+[usb.core.Device.__getitem__]
+1155:29 call  Configuration(self, index)
+    -> usb.core.Configuration.__init__
+    reject *: Configuration here is usb.core.Configuration
+
+[usb.core.Device._finalize_object]
+1158:19 call  hasattr(self, '_ctx')
+    -> <builtin>.hasattr
+1159:30 call  self._ctx.dispose(self)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.dispose by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.core.Device.__set_def_tmo]
+1168:29 call  ValueError('Timeout cannot be a negative value')
+    -> <builtin>.ValueError
+
+[usb.core.Device._get_full_descriptor_str]
+1179:28 call  self._str()
+    -> usb.core.Device._str
+    reject *: self is a Device (the package has no subclass of it)
+1182:30 call  str(self.bcdUSB & 0xf)
+    -> <builtin>.str
+1187:33 call  str(self.bcdDevice & 0xf)
+    -> <builtin>.str
+1191:53 call  len(headstr)
+    -> <builtin>.len
+1196:24 call  _try_lookup(_lu.descriptors, self.bDescriptorType)
+    -> usb.core._try_lookup
+1202:24 call  _try_lookup(_lu.device_classes, self.bDeviceClass)
+    -> usb.core._try_lookup
+1218:28 call  _try_get_string(self, self.iManufacturer)
+    -> usb.core._try_get_string
+1221:28 call  _try_get_string(self, self.iProduct)
+    -> usb.core._try_get_string
+1224:28 call  _try_get_string(self, self.iSerialNumber)
+    -> usb.core._try_get_string
+
+[usb.core.find]
+1316:36 call  m.get_backend()
+    -> usb.backend.libusb0.get_backend
+    -> usb.backend.libusb1.get_backend
+    -> usb.backend.openusb.get_backend
+    note: m is each of the modules libusb1, openusb and libusb0 (1315)
+1318:29 call  _logger.info('find(): using backend "%s"', m.__name__)
+    -> logging.Logger.info
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+1321:33 call  NoBackendError('No backend available')
+    -> <builtin>.ValueError.__init__
+    note: NoBackendError defines no __init__; named through ValueError
+1324:27 call  device_iter(**args)
+    -> usb.core.find.device_iter
+1327:24 call  next(device_iter(**args))
+    -> <builtin>.next
+1327:36 call  device_iter(**args)
+    -> usb.core.find.device_iter
+
+[usb.core.find.device_iter]
+1304:20 iter  backend.enumerate_devices()
+    -> usb.backend.libusb1._DevIterator.__iter__
+    note: the libusb1 backend returns a _DevIterator (libusb1.py:731); libusb0 and openusb return generators, IBackend raises, a client iterable is opaque (B5)
+1304:45 call  backend.enumerate_devices()
+    -> usb._debug.methodtrace.decorator_logging.do_trace
+    -> usb.backend.IBackend.enumerate_devices
+    -> usb.backend.libusb0._LibUSB.enumerate_devices
+    -> usb.backend.libusb1._LibUSB.enumerate_devices
+    -> usb.backend.openusb._OpenUSB.enumerate_devices
+    reject *: the receiver is a backend object that libusb0, libusb1 or openusb get_backend returns, or an IBackend itself (a plain public class documented for subclassing, a receiver of its own methods, B1; judgement J3); a client backend, a client subclass of IBackend too, is opaque (B5)
+    note: do_trace is the class attribute of each backend method when PYUSB_DEBUG is set (methodtrace, _debug.py:53; judgement J1)
+1305:23 call  Device(dev, backend)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.core.Device.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+1306:41 call  _try_getattr(d, key)
+    -> usb.core._try_getattr
+1306:78 call  kwargs.items()
+    -> <builtin>.dict.items
+1307:19 call  all(tests)
+    -> <builtin>.all
+1307:68 call  custom_match(d)
+    note: custom_match is a client callable (documented, core.py:1260-1262; B5): no callee
+
+[usb.core.show_devices]
+1338:19 call  find(**kwargs)
+    -> usb.core.find
+1342:50 call  device._str()
+    -> usb.core.Device._str
+    reject *: device is a core Device that find yields
+1342:65 call  _try_lookup( _lu.device_classes, device.bDeviceClass)
+    -> usb.core._try_lookup
+1345:38 call  str(device)
+    -> <builtin>.str
+    -> usb.core.Device.__str__
+    reject *: device is a core Device that find yields
+1347:27 call  _DescriptorInfo(strings)
+    note: _DescriptorInfo subclasses str without __init__ or __new__: the first __init__ of its MRO is object.__init__ (no edge; the tabulate ruling on an inherited __init__), and str.__new__ is builtin code
+
+== usb.legacy
+
+[usb.legacy.Endpoint.__init__]
+109:39 call  util.endpoint_type(ep.bmAttributes)
+    -> usb.util.endpoint_type
+
+[usb.legacy.Interface.__init__]
+120:35 call  Endpoint(e)
+    -> usb.legacy.Endpoint.__init__
+    reject usb.core.Endpoint.__init__: Endpoint here is usb.legacy.Endpoint
+120:48 iter  intf
+    -> usb.core.Interface.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: intf is the core Interface that iterating a core Configuration yields (134:64)
+
+[usb.legacy.Configuration.__init__]
+132:33 call  list(g)
+    -> <builtin>.list
+132:56 call  groupby( sorted( [Interface(i) for i in cfg], key=lambda ...
+    -> itertools.groupby
+    -> usb.legacy.Configuration.__init__.<lambda2>
+    note: the list comprehension of this function iterates the groupby, which calls the key function (callback rule)
+133:43 call  sorted( [Interface(i) for i in cfg], key=lambda i: i.inte...
+    -> <builtin>.sorted
+    -> usb.legacy.Configuration.__init__.<lambda1>
+134:51 call  Interface(i)
+    -> usb.legacy.Interface.__init__
+    reject usb.core.Interface.__init__: Interface here is usb.legacy.Interface
+134:64 iter  cfg
+    -> usb.core.Configuration.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: cfg is the core Configuration that iterating a core Device yields (339:58)
+
+[usb.legacy.DeviceHandle._finalize_object]
+146:19 call  hasattr(self, 'dev')
+    -> <builtin>.hasattr
+147:35 call  util.dispose_resources(self.dev)
+    -> usb.util.dispose_resources
+
+[usb.legacy.DeviceHandle.bulkWrite]
+160:30 call  self.dev.write(endpoint, buffer, timeout)
+    -> usb.core.Device.write
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.bulkRead]
+171:29 call  self.dev.read(endpoint, size, timeout)
+    -> usb.core.Device.read
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.interruptWrite]
+183:30 call  self.dev.write(endpoint, buffer, timeout)
+    -> usb.core.Device.write
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.interruptRead]
+194:29 call  self.dev.read(endpoint, size, timeout)
+    -> usb.core.Device.read
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.controlMsg]
+211:38 call  self.dev.ctrl_transfer( requestType, request, wValue = va...
+    -> usb.core.Device.ctrl_transfer
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.clearHalt]
+225:28 call  self.dev.clear_halt(endpoint)
+    -> usb.core.Device.clear_halt
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.claimInterface]
+233:22 call  isinstance(interface, Interface)
+    -> <builtin>.isinstance
+236:29 call  util.claim_interface(self.dev, interface)
+    -> usb.util.claim_interface
+    reject *: util.claim_interface is the module function of usb.util
+
+[usb.legacy.DeviceHandle.releaseInterface]
+241:31 call  util.release_interface(self.dev, self.__claimed_interface)
+    -> usb.util.release_interface
+    reject *: util.release_interface is the module function of usb.util
+
+[usb.legacy.DeviceHandle.reset]
+247:23 call  self.dev.reset()
+    -> usb.core.Device.reset
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.resetEndpoint]
+255:23 call  self.clearHalt(endpoint)
+    -> usb.legacy.DeviceHandle.clearHalt
+
+[usb.legacy.DeviceHandle.setConfiguration]
+263:22 call  isinstance(configuration, Configuration)
+    -> <builtin>.isinstance
+266:35 call  self.dev.set_configuration(configuration)
+    -> usb.core.Device.set_configuration
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.setAltInterface]
+274:22 call  isinstance(alternate, Interface)
+    -> <builtin>.isinstance
+277:42 call  self.dev.set_interface_altsetting(self.__claimed_interfac...
+    -> usb.core.Device.set_interface_altsetting
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.DeviceHandle.getString]
+289:31 call  util.get_string(self.dev, index, langid)
+    -> usb.util.get_string
+289:63 call  util.get_string(self.dev, index, langid).encode('ascii')
+    -> <builtin>.str.encode
+
+[usb.legacy.DeviceHandle.getDescriptor]
+301:38 call  control.get_descriptor(self.dev, length, desc_type, desc_...
+    -> usb.control.get_descriptor
+
+[usb.legacy.DeviceHandle.detachKernelDriver]
+310:22 call  isinstance(interface, Interface)
+    -> <builtin>.isinstance
+313:38 call  self.dev.detach_kernel_driver(interface)
+    -> usb.core.Device.detach_kernel_driver
+    reject *: self.dev is the core Device of legacy.Device.open (347) or the core Device that a client passes to DeviceHandle
+
+[usb.legacy.Device.__init__]
+321:33 call  str((dev.bcdDevice >> 12) & 0xf)
+    -> <builtin>.str
+322:32 call  str((dev.bcdDevice >> 8) & 0xf)
+    -> <builtin>.str
+324:32 call  str((dev.bcdDevice >> 4) & 0xf)
+    -> <builtin>.str
+325:32 call  str(dev.bcdDevice & 0xf)
+    -> <builtin>.str
+334:30 call  str((dev.bcdUSB >> 12) & 0xf)
+    -> <builtin>.str
+335:29 call  str((dev.bcdUSB >> 8) & 0xf)
+    -> <builtin>.str
+337:29 call  str((dev.bcdUSB >> 4) & 0xf)
+    -> <builtin>.str
+338:29 call  str(dev.bcdUSB & 0xf)
+    -> <builtin>.str
+339:45 call  Configuration(c)
+    -> usb.legacy.Configuration.__init__
+    reject usb.core.Configuration.__init__: Configuration here is usb.legacy.Configuration
+339:58 iter  dev
+    -> usb.core.Device.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: dev is a core Device (Bus passes the devices of core.find, 353)
+
+[usb.legacy.Device.open]
+347:28 call  DeviceHandle(self.dev)
+    -> usb._objfinalizer.AutoFinalizedObject.__new__
+    -> usb.legacy.DeviceHandle.__init__
+    reject *: AutoFinalizedObject.__new__ comes first in the MRO and reaches _AutoFinalizedObjectBase.__new__ through super (_objfinalizer.py:130); the class name is that of this module
+
+[usb.legacy.Bus.__init__]
+353:31 call  Device(d)
+    -> usb.legacy.Device.__init__
+    reject *: Device here is usb.legacy.Device, a plain class
+353:44 iter  devices
+    -> usb.legacy.busses.<lambda2>
+    note: devices is a group of the groupby of busses (358); iterating it advances the groupby, which calls its key function busses.<lambda2> (the uncertainties ruling: the site that triggers consumption of a lazy library iterator is the caller)
+
+[usb.legacy.busses]
+358:16 call  Bus(g)
+    -> usb.legacy.Bus.__init__
+358:39 call  groupby( sorted(core.find(find_all=True), key=lambda d: d...
+    -> itertools.groupby
+    -> usb.legacy.busses.<lambda2>
+    note: the generator expression of busses (code of busses) iterates the groupby, which calls the key function (callback rule)
+359:19 call  sorted(core.find(find_all=True), key=lambda d: d.bus)
+    -> <builtin>.sorted
+    -> usb.legacy.busses.<lambda1>
+    reject *: sorted consumes the generator that core.find returns; generator bodies are edges of the function that calls the generator function (find)
+359:29 call  core.find(find_all=True)
+    -> usb.core.find
+
+== usb.libloader
+
+[usb.libloader]
+52:28 call  logging.getLogger('usb.libloader')
+    -> logging.getLogger
+
+[usb.libloader.locate_library]
+95:54 call  platform.machine()
+    -> platform.machine
+    note: macOS is supported (classifier), on arm64 too
+104:31 call  find_library(candidate)
+    -> ctypes.util.find_library
+    note: find_library is ctypes.util.find_library (the default, or set at 88 for None); the backends pass None or the find_library that the client gives get_backend, a client callback (documented, docs/tutorial.rst:556; B5)
+113:30 call  os.path.isfile(libname)
+    -> os.path.isfile
+
+[usb.libloader.load_library]
+131:27 call  lib_cls(lib)
+    -> ctypes.WinDLL
+    note: lib_cls is the win_cls of load_locate_library: WinDLL from libusb1 on win32 (libusb1.py:283), or a client class (B5); the other package callers pass None
+133:31 call  ctypes.CDLL(lib)
+    -> ctypes.CDLL
+144:22 call  _LOGGER.error(lib_msg, exc_info=True)
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+
+[usb.libloader.load_locate_library]
+178:38 call  load_library(cygwin_lib, name, cygwin_cls)
+    -> usb.libloader.load_library
+180:47 call  NoLibraryCandidatesException(name)
+    -> <builtin>.OSError.__init__
+    note: the libloader exceptions define no __init__; named through OSError, the nearest base outside the package
+182:29 call  locate_library(candidates, find_library)
+    -> usb.libloader.locate_library
+184:26 call  _LOGGER.debug("%r found as %s", (name or candidates), lib)
+    -> logging.Logger.debug
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+186:42 call  load_library(lib, name, win_cls)
+    -> usb.libloader.load_library
+188:42 call  load_library(lib, name, others_cls)
+    -> usb.libloader.load_library
+190:26 call  _LOGGER.error('%r could not be found', (name or candidates))
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+191:43 call  LibraryNotFoundException(name)
+    -> <builtin>.OSError.__init__
+    note: the libloader exceptions define no __init__; named through OSError, the nearest base outside the package
+193:43 call  NoLibraryCandidatesException(name)
+    -> <builtin>.OSError.__init__
+    note: the libloader exceptions define no __init__; named through OSError, the nearest base outside the package
+196:40 call  LibraryNotLoadedException(name)
+    -> <builtin>.OSError.__init__
+    note: the libloader exceptions define no __init__; named through OSError, the nearest base outside the package
+199:60 call  hasattr(loaded_lib, s)
+    -> <builtin>.hasattr
+203:26 call  _LOGGER.error(msg)
+    -> logging.Logger.error
+    -> usb._setup_log.NullHandler.emit
+    note: without PYUSB_DEBUG the usb logger has the package's NullHandler (usb/__init__.py:103); a client may lower its level through logging's public interface (README, Rulings for batch 8, the nodeenv ruling), and the record of this module logger then propagates to it: Logger.callHandlers walks the parents and Handler.handle calls emit (CPython 3.9 logging/__init__.py:1645-1665 and 939-952; 3.15 :1733-1753 and 1014-1030; PyPy 3.11 lib-python :1690-1710 and 965-978; Codex round 1, M1-M6)
+204:49 call  LibraryMissingSymbolsException(lib)
+    -> <builtin>.OSError.__init__
+    note: the libloader exceptions define no __init__; named through OSError, the nearest base outside the package
+
+== usb.util
+
+[usb.util.create_buffer]
+160:23 call  array.array('B', length * b"\x00")
+    -> array.array
+
+[usb.util.find_descriptor]
+185:25 call  desc_iter(**args)
+    -> usb.util.find_descriptor.desc_iter
+188:24 call  next(desc_iter(**args))
+    -> <builtin>.next
+188:34 call  desc_iter(**args)
+    -> usb.util.find_descriptor.desc_iter
+
+[usb.util.find_descriptor.desc_iter]
+179:18 iter  desc
+    -> usb.core.Configuration.__iter__
+    -> usb.core.Device.__iter__
+    -> usb.core.Interface.__iter__
+    reject usb.core.Configuration.__getitem__, usb.core.Device.__getitem__, usb.core.Interface.__getitem__: iteration uses __iter__, which Device, Configuration and Interface define
+    note: desc is the parent descriptor of the documentation (a Device, Configuration or Interface, util.py:165-171, tutorial.rst:275-283); the package passes all three (core.py:154, 208, 246); a client iterable is opaque (B5)
+180:36 call  getattr(d, key)
+    -> <builtin>.getattr
+    note: d is a Configuration, Interface or Endpoint (what iterating desc yields), none with __getattr__ or properties; the keys of the documentation and tests are descriptor fields (B3)
+180:73 call  kwargs.items()
+    -> <builtin>.dict.items
+181:19 call  all(tests)
+    -> <builtin>.all
+181:68 call  custom_match(d)
+    note: custom_match is a client callable (documented, tutorial.rst:216; B5): no callee
+
+[usb.util.claim_interface]
+203:40 call  device._ctx.managed_claim_interface(device, interface)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_claim_interface by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.util.release_interface]
+215:42 call  device._ctx.managed_release_interface(device, interface)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.managed_release_interface by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.util.dispose_resources]
+231:24 call  device._ctx.dispose(device)
+    -> usb.core.synchronized.wrapper
+    reject *: synchronized (core.py:108) replaces _ResourceManager.dispose by its wrapper, which calls the method (judgement J2); the receiver is the _ResourceManager of a Device
+
+[usb.util.get_langids]
+262:25 call  get_descriptor( dev, 254, DESC_TYPE_STRING, 0 )
+    -> usb.control.get_descriptor
+278:11 call  len(buf)
+    -> <builtin>.len
+281:17 call  tuple(map(lambda x,y: x+(y<<8), buf[2:buf[0]:2], buf[3:bu...
+    -> <builtin>.tuple
+    note: tuple iterates the map of 281:21 (its lambda is a callee there, in this same function); a map has no package __iter__
+281:21 call  map(lambda x,y: x+(y<<8), buf[2:buf[0]:2], buf[3:buf[0]:2])
+    -> <builtin>.map
+    -> usb.util.get_langids.<lambda1>
+    note: map is lazy; tuple() at 281:17, in this function, iterates it and calls the lambda (callback rule)
+
+[usb.util.get_string]
+307:23 getattr  dev.langids
+    -> usb.core.Device.langids
+    note: dev is the Device object of the documentation (util.py:286); legacy and core pass Devices
+308:20 call  len(langids)
+    -> <builtin>.len
+309:29 call  ValueError("The device has no langid" " (permission issue...
+    -> <builtin>.ValueError
+313:25 call  get_descriptor( dev, 254, # maximum even length DESC_TYPE...
+    -> usb.control.get_descriptor
+321:31 call  buf[2:blen].tobytes()
+    -> array.array.tobytes
+    note: buf is the array.array that Device.ctrl_transfer returns for an IN request (core.py:1105-1108), sliced
+321:40 call  buf[2:blen].tobytes().decode('utf-16-le')
+    -> <builtin>.bytes.decode

@@ -1,0 +1,8 @@
+# The build environment of the wheels of macro-benchmark/wheels/ (README.md
+# there): setuptools alone, no plugin, the release on or before the date of
+# the project that needs the wheel (tablib 3.10.0, 2026-07-31), from PyPI's
+# JSON; its hash is PyPI's for the wheel. Installed into the build image
+# only, never into a trace image.
+#   pip install --require-hashes --only-binary :all: --no-deps -r build-requirements.txt
+setuptools==83.0.0 \
+    --hash=sha256:29b23c360f22f414dc7336bb39178cc7bcbf6021ed2733cde173f09dba19abb3

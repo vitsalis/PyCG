@@ -1,0 +1,46 @@
+# The test environment (batch 8) of
+# honcho 2.0.0: the full closure on CPython 3.14 for Linux aarch64,
+# each file by version and SHA-256. The package itself is not installed.
+#   pip install --require-hashes --only-binary :all: --no-deps -r honcho.txt
+#
+# Computed on 2026-11-23 from PyPI's JSON (no wheel downloaded or read):
+# the requires_dist of each pinned release, the markers evaluated for
+# CPython 3.14.10 on Linux aarch64 and no extra; each hash is PyPI's for
+# that file. Each version but pytest's stack is the newest release that is
+# not yanked, not a pre-release and was uploaded on or before 2024-10-06
+# (the release of honcho), with a usable wheel. Pure-Python wheel only
+# where there is one; else the cp314 (or abi3) aarch64 wheels for
+# manylinux and musllinux. A wheel's own METADATA could ask for more:
+# UNVERIFIED until pip installs the list with --no-deps.
+#
+# mock (tests import the backport) and Jinja2 (the extra export, as tox
+# installs it). MarkupSafe 3.0.3: the oldest release with a cp314 aarch64
+# wheel (uploaded 2025-09-27, after the cutoff; 2.1.5, current at the
+# cutoff, has no wheel for CPython 3.14). A proposal: an exception for the
+# lead, as numpy 2.3.2 was in batch 7.
+
+# pytest; uploaded 2026-10-06.
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# (top); uploaded 2024-05-05.
+Jinja2==3.1.4 \
+    --hash=sha256:bc5dd2abb727a5319567b7a813e6a2e7318c39f4f487cfe6c89c6f9c7d25197d
+# Jinja2==3.1.4; uploaded 2025-09-27.
+MarkupSafe==3.0.3 \
+    --hash=sha256:f34c41761022dd093b4b6896d4810782ffbabe30f2d443ff5f083e0cbbb8c737 \
+    --hash=sha256:ec15a59cf5af7be74194f7ab02d0f59a62bdcf1a537677ce67a2537c9b87fcda
+# (top); uploaded 2023-07-11.
+mock==5.1.0 \
+    --hash=sha256:18c694e5ae8a208cdb3d2c20a993ca1a7b0efa258c247a1e565150f477f83744
+# pytest; uploaded 2026-08-04.
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# pytest; uploaded 2026-10-15.
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# pytest; uploaded 2026-08-17.
+Pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+# 9.2.0, as for batches 3 to 7 (one pytest stack); uploaded 2026-10-27.
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588

@@ -32,7 +32,7 @@ TRACE_OPTIONAL_TYPE_BY_KEY = {"plugins": list, "environment": dict, "failures": 
 USAGE = """usage:
     trace_helper.py check-pin BENCHMARK_DIR NAME
     trace_helper.py plugins BENCHMARK_DIR NAME
-    trace_helper.py image-tag NAME DOCKERFILE REQUIREMENTS PYTHON_IMAGE
+    trace_helper.py image-tag NAME DOCKERFILE REQUIREMENTS PYTHON_IMAGE WHEELS
     trace_helper.py check-trace TRACE BENCHMARK_DIR NAME PYTHON_IMAGE
     trace_helper.py compare COMMITTED_TRACE NEW_TRACE
 
@@ -121,13 +121,21 @@ def plugins(benchmark_dir, name):
     ]
 
 
-def image_tag(name, dockerfile, requirements, python_image):
+def image_tag(name, dockerfile, requirements, python_image, wheels):
     if not PYTHON_IMAGE_PATTERN.fullmatch(python_image):
         raise HelperError(f"PYTHON_IMAGE {python_image!r} is not NAME@sha256:<digest>")
+    wheels = Path(wheels)
+    if not wheels.is_dir():
+        raise HelperError(f"WHEELS {wheels} is not a directory")
     digest = hashlib.sha256()
     digest.update(Path(dockerfile).read_bytes())
     digest.update(Path(requirements).read_bytes())
     digest.update(python_image.encode())
+    for path in sorted(p for p in wheels.rglob("*") if p.is_file()):
+        relative = path.relative_to(wheels).as_posix().encode()
+        content = path.read_bytes()
+        digest.update(b"%d:%s%d:" % (len(relative), relative, len(content)))
+        digest.update(content)
     return f"pycg-trace-{name.lower()}:{digest.hexdigest()[:12]}"
 
 
@@ -354,7 +362,7 @@ def main(argv):
         elif command == "plugins" and len(args) == 2:
             for path in plugins(*args):
                 print(path)
-        elif command == "image-tag" and len(args) == 4:
+        elif command == "image-tag" and len(args) == 5:
             print(image_tag(*args))
         elif command == "check-trace" and len(args) == 4:
             print(check_trace(*args))

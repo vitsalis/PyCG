@@ -1,0 +1,8 @@
+{
+  "usb.core.find": {
+    "usb._objfinalizer._AutoFinalizedObjectBase.__del__": "an implicit call: the garbage collector runs __del__ when find drops the last reference to a Device (the generator of next(device_iter(...)) or a Device that the client's criteria reject); a __del__ that runs because a function drops the last reference is not an edge (README, Implicit calls; asyncstdlib precedent)"
+  },
+  "usb.core.find.device_iter": {
+    "usb._objfinalizer._AutoFinalizedObjectBase.__del__": "an implicit call: __del__ runs when device_iter rebinds d and drops the last reference to a Device that did not match; a __del__ that runs because a function drops the last reference is not an edge (README, Implicit calls; asyncstdlib precedent)"
+  }
+}

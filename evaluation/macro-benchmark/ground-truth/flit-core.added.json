@@ -1,0 +1,928 @@
+{
+  "edges": {
+    "flit_core.common.Module.__init__": {
+      "pathlib.WindowsPath.is_dir": [
+        "flit_core.common 33:26 call  pkg_dir.is_dir()",
+        "flit_core.common 43:30 call  src_pkg_dir.is_dir()"
+      ],
+      "pathlib.WindowsPath.is_file": [
+        "flit_core.common 38:27 call  py_file.is_file()",
+        "flit_core.common 48:31 call  src_py_file.is_file()"
+      ]
+    },
+    "flit_core.common.Module.version_files": {
+      "pathlib.WindowsPath.is_file": [
+        "flit_core.common 84:50 call  (self.path / filename).is_file()"
+      ]
+    },
+    "flit_core.common.get_docstring_and_version_via_ast": {
+      "pathlib.WindowsPath.open": [
+        "flit_core.common 147:30 call  target_path.open('rb')"
+      ]
+    },
+    "flit_core.common.get_docstring_and_version_via_import": {
+      "flit_core.common._module_load_ctx": [
+        "flit_core.common 188:26 call  _module_load_ctx()"
+      ]
+    },
+    "flit_core.common.get_info_from_module": {
+      "<builtin>.ValueError.__init__": [
+        "flit_core.common 229:35 call  NoDocstringError( 'Flit cannot package module without doc..."
+      ]
+    },
+    "flit_core.common.hash_file": {
+      "<builtin>.open": [
+        "flit_core.common 306:14 call  open(path, 'rb')"
+      ],
+      "_hashlib.HASH.hexdigest": [
+        "flit_core.common 308:23 call  h.hexdigest()"
+      ],
+      "_sha2.SHA256Type.hexdigest": [
+        "flit_core.common 308:23 call  h.hexdigest()"
+      ],
+      "_sha256.SHA256Type.hexdigest": [
+        "flit_core.common 308:23 call  h.hexdigest()"
+      ],
+      "hashlib.new": [
+        "flit_core.common 307:24 call  hashlib.new(algorithm, f.read())"
+      ],
+      "io.BufferedReader.read": [
+        "flit_core.common 307:42 call  f.read()"
+      ]
+    },
+    "flit_core.common.parse_entry_point": {
+      "<builtin>.ValueError": [
+        "flit_core.common 280:25 call  ValueError(f\"Invalid entry point (no ':'): {ep!r}\")",
+        "flit_core.common 285:29 call  ValueError(f\"Invalid entry point: {piece!r} is not an ide...",
+        "flit_core.common 288:29 call  ValueError(f\"Invalid entry point: {piece!r} is not a modu..."
+      ],
+      "<builtin>.str.isidentifier": [
+        "flit_core.common 284:34 call  piece.isidentifier()",
+        "flit_core.common 287:34 call  piece.isidentifier()"
+      ],
+      "<builtin>.str.split": [
+        "flit_core.common 281:25 call  ep.split(':')",
+        "flit_core.common 283:28 call  func.split('.')",
+        "flit_core.common 286:27 call  mod.split('.')"
+      ]
+    },
+    "flit_core.config._license_files_from_globs": {
+      "pathlib.WindowsPath.as_posix": [
+        "flit_core.config 321:79 call  file.relative_to(project_dir).as_posix()",
+        "flit_core.config 325:68 call  file.relative_to(project_dir).as_posix()"
+      ],
+      "pathlib.WindowsPath.glob": [
+        "flit_core.config 312:41 call  project_dir.glob(pattern)"
+      ],
+      "pathlib.WindowsPath.is_file": [
+        "flit_core.config 313:36 call  file.is_file()"
+      ],
+      "pathlib.WindowsPath.relative_to": [
+        "flit_core.config 321:57 call  file.relative_to(project_dir)",
+        "flit_core.config 325:46 call  file.relative_to(project_dir)"
+      ]
+    },
+    "flit_core.config.description_from_file": {
+      "pathlib.WindowsPath.open": [
+        "flit_core.config 257:28 call  desc_path.open('r', encoding='utf-8')"
+      ]
+    },
+    "flit_core.config.normalise_compound_license_expr": {
+      "logging.Logger.warning": [
+        "flit_core.config 795:24 call  log.warning(\"Invalid license ID %r allowed by FLIT_ALLOW_..."
+      ]
+    },
+    "flit_core.config.prep_toml_config": {
+      "<builtin>.str.lower": [
+        "flit_core.config 141:67 call  s.lower()"
+      ],
+      "pathlib.WindowsPath.is_dir": [
+        "flit_core.config 183:48 call  loaded_cfg.data_directory.is_dir()"
+      ]
+    },
+    "flit_core.config.read_flit_config": {
+      "flit_core.vendor.tomli._parser.loads": [
+        "flit_core.config 74:22 call  tomllib.loads(path.read_text('utf-8'))"
+      ],
+      "pathlib.WindowsPath.read_text": [
+        "flit_core.config 74:37 call  path.read_text('utf-8')"
+      ]
+    },
+    "flit_core.config.read_pep621_metadata": {
+      "pathlib.WindowsPath.as_posix": [
+        "flit_core.config 498:72 call  license_p.relative_to(path.parent).as_posix()"
+      ],
+      "pathlib.WindowsPath.is_file": [
+        "flit_core.config 491:41 call  license_p.is_file()"
+      ],
+      "pathlib.WindowsPath.relative_to": [
+        "flit_core.config 498:50 call  license_p.relative_to(path.parent)"
+      ]
+    },
+    "flit_core.sdist.FilePatterns.match_dir": {
+      "<builtin>.str.startswith": [
+        "flit_core.sdist 122:39 call  rel_path.startswith(d + os.sep)"
+      ]
+    },
+    "flit_core.sdist.SdistBuilder.apply_includes_excludes": {
+      "<builtin>.Exception": [
+        "flit_core.sdist 214:28 call  Exception(\"Crucial files were excluded from the sdist: {}..."
+      ],
+      "<builtin>.str.format": [
+        "flit_core.sdist 215:36 call  \"Crucial files were excluded from the sdist: {}\" .format(..."
+      ],
+      "<builtin>.str.join": [
+        "flit_core.sdist 215:46 call  \", \".join(missing_crucial)"
+      ],
+      "pathlib.WindowsPath.relative_to": [
+        "flit_core.sdist 204:63 call  self.module.file.relative_to(self.cfgdir)"
+      ]
+    },
+    "flit_core.sdist.SdistBuilder.build": {
+      "<builtin>.int": [
+        "flit_core.sdist 227:20 call  int(source_date_epoch)"
+      ]
+    },
+    "flit_core.sdist.SdistBuilder.prep_entry_points": {
+      "<builtin>.dict": [
+        "flit_core.sdist 166:20 call  dict(res)"
+      ],
+      "<builtin>.dict.items": [
+        "flit_core.sdist 162:55 call  self.entrypoints.items()",
+        "flit_core.sdist 163:47 call  group.items()"
+      ],
+      "<builtin>.list.append": [
+        "flit_core.sdist 164:38 call  res[groupname].append(f'{name} = {ep}')"
+      ],
+      "<builtin>.sorted": [
+        "flit_core.sdist 163:35 call  sorted(group.items())"
+      ],
+      "collections.defaultdict": [
+        "flit_core.sdist 161:26 call  defaultdict(list)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser": {
+      "<builtin>.chr": [
+        "flit_core.vendor.tomli._parser 16:27 call  chr(i)",
+        "flit_core.vendor.tomli._parser 16:66 call  chr(127)"
+      ],
+      "<builtin>.frozenset": [
+        "flit_core.vendor.tomli._parser 16:23 call  frozenset(chr(i) for i in range(32))",
+        "flit_core.vendor.tomli._parser 16:62 call  frozenset(chr(127))",
+        "flit_core.vendor.tomli._parser 20:49 call  frozenset(\"\\t\")",
+        "flit_core.vendor.tomli._parser 21:59 call  frozenset(\"\\t\\n\")",
+        "flit_core.vendor.tomli._parser 28:20 call  frozenset(\" \\t\")",
+        "flit_core.vendor.tomli._parser 29:42 call  frozenset(\"\\n\")",
+        "flit_core.vendor.tomli._parser 30:27 call  frozenset(string.ascii_letters + string.digits + \"-_\")",
+        "flit_core.vendor.tomli._parser 31:47 call  frozenset(\"\\\"'\")",
+        "flit_core.vendor.tomli._parser 32:27 call  frozenset(string.hexdigits)"
+      ],
+      "<builtin>.range": [
+        "flit_core.vendor.tomli._parser 16:45 call  range(32)"
+      ],
+      "types.MappingProxyType": [
+        "flit_core.vendor.tomli._parser 34:49 call  MappingProxyType( { \"\\\\b\": \"\\u0008\", # backspace \"\\\\t\": \"..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.Flags.set": {
+      "<builtin>.set": [
+        "flit_core.vendor.tomli._parser 169:40 call  set()",
+        "flit_core.vendor.tomli._parser 169:66 call  set()",
+        "flit_core.vendor.tomli._parser 172:43 call  set()",
+        "flit_core.vendor.tomli._parser 172:69 call  set()"
+      ],
+      "<builtin>.set.add": [
+        "flit_core.vendor.tomli._parser 173:72 call  cont[key_stem][\"recursive_flags\" if recursive else \"flags..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.Flags.set_for_relative_key": {
+      "<builtin>.set": [
+        "flit_core.vendor.tomli._parser 155:40 call  set()",
+        "flit_core.vendor.tomli._parser 155:66 call  set()",
+        "flit_core.vendor.tomli._parser 161:67 call  set()"
+      ],
+      "<builtin>.set.add": [
+        "flit_core.vendor.tomli._parser 159:37 call  cont[k][\"flags\"].add(flag)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.Flags.unset_all": {
+      "<builtin>.dict.pop": [
+        "flit_core.vendor.tomli._parser 149:17 call  cont.pop(key[-1], None)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.NestedDict.append_nest_to_list": {
+      "<builtin>.KeyError": [
+        "flit_core.vendor.tomli._parser 223:31 call  KeyError(\"An object other than list found behind this key\")"
+      ],
+      "<builtin>.list.append": [
+        "flit_core.vendor.tomli._parser 221:29 call  list_.append({})"
+      ],
+      "flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest": [
+        "flit_core.vendor.tomli._parser 216:39 call  self.get_or_create_nest(key[:-1])"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest": {
+      "<builtin>.KeyError": [
+        "flit_core.vendor.tomli._parser 212:31 call  KeyError(\"There is no nest behind this key\")"
+      ],
+      "<builtin>.isinstance": [
+        "flit_core.vendor.tomli._parser 209:43 call  isinstance(cont, list)",
+        "flit_core.vendor.tomli._parser 211:30 call  isinstance(cont, dict)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.create_dict_rule": {
+      "<builtin>.str.startswith": [
+        "flit_core.vendor.tomli._parser 298:26 call  src.startswith(\"]\", pos)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.is_": [
+        "flit_core.vendor.tomli._parser 290:21 call  out.flags.is_(key, Flags.EXPLICIT_NEST)",
+        "flit_core.vendor.tomli._parser 290:64 call  out.flags.is_(key, Flags.FROZEN)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.set": [
+        "flit_core.vendor.tomli._parser 292:18 call  out.flags.set(key, Flags.EXPLICIT_NEST, recursive=False)"
+      ],
+      "flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest": [
+        "flit_core.vendor.tomli._parser 294:36 call  out.data.get_or_create_nest(key)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_key": [
+        "flit_core.vendor.tomli._parser 288:25 call  parse_key(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 287:21 call  skip_chars(src, pos, TOML_WS)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 291:27 call  suffixed_err(src, pos, f\"Can not declare {key} twice\")",
+        "flit_core.vendor.tomli._parser 296:27 call  suffixed_err(src, pos, \"Can not overwrite a value\")",
+        "flit_core.vendor.tomli._parser 299:27 call  suffixed_err(src, pos, 'Expected \"]\" at the end of a tabl..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.create_list_rule": {
+      "<builtin>.str.startswith": [
+        "flit_core.vendor.tomli._parser 319:26 call  src.startswith(\"]]\", pos)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.is_": [
+        "flit_core.vendor.tomli._parser 308:21 call  out.flags.is_(key, Flags.FROZEN)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.set": [
+        "flit_core.vendor.tomli._parser 313:18 call  out.flags.set(key, Flags.EXPLICIT_NEST, recursive=False)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.unset_all": [
+        "flit_core.vendor.tomli._parser 311:24 call  out.flags.unset_all(key)"
+      ],
+      "flit_core.vendor.tomli._parser.NestedDict.append_nest_to_list": [
+        "flit_core.vendor.tomli._parser 315:37 call  out.data.append_nest_to_list(key)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_key": [
+        "flit_core.vendor.tomli._parser 306:25 call  parse_key(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 305:21 call  skip_chars(src, pos, TOML_WS)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 309:27 call  suffixed_err(src, pos, f\"Can not mutate immutable namespa...",
+        "flit_core.vendor.tomli._parser 317:27 call  suffixed_err(src, pos, \"Can not overwrite a value\")",
+        "flit_core.vendor.tomli._parser 320:27 call  suffixed_err(src, pos, 'Expected \"]]\" at the end of an ar..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.key_value_rule": {
+      "<builtin>.isinstance": [
+        "flit_core.vendor.tomli._parser 344:18 call  isinstance(value, (dict, list))"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.is_": [
+        "flit_core.vendor.tomli._parser 331:21 call  out.flags.is_(abs_key_parent, Flags.FROZEN)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.set": [
+        "flit_core.vendor.tomli._parser 345:22 call  out.flags.set(header + key, Flags.FROZEN, recursive=True)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.set_for_relative_key": [
+        "flit_core.vendor.tomli._parser 336:35 call  out.flags.set_for_relative_key(header, key, Flags.EXPLICI..."
+      ],
+      "flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest": [
+        "flit_core.vendor.tomli._parser 338:43 call  out.data.get_or_create_nest(abs_key_parent)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_key_value_pair": [
+        "flit_core.vendor.tomli._parser 327:43 call  parse_key_value_pair(src, pos, parse_float)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 332:27 call  suffixed_err( src, pos, f\"Can not mutate immutable namesp...",
+        "flit_core.vendor.tomli._parser 340:27 call  suffixed_err(src, pos, \"Can not overwrite a value\")",
+        "flit_core.vendor.tomli._parser 342:27 call  suffixed_err(src, pos, \"Can not overwrite a value\")"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.load": {
+      "flit_core.vendor.tomli._parser.loads": [
+        "flit_core.vendor.tomli._parser 64:17 call  loads(s, parse_float=parse_float)"
+      ],
+      "warnings.warn": [
+        "flit_core.vendor.tomli._parser 57:22 call  warnings.warn( \"Text file object support is deprecated in..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.loads": {
+      "<builtin>.str.replace": [
+        "flit_core.vendor.tomli._parser 72:20 call  s.replace(\"\\r\\n\", \"\\n\")"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.__init__": [
+        "flit_core.vendor.tomli._parser 74:37 call  Flags()"
+      ],
+      "flit_core.vendor.tomli._parser.NestedDict.__init__": [
+        "flit_core.vendor.tomli._parser 74:28 call  NestedDict()"
+      ],
+      "flit_core.vendor.tomli._parser.create_dict_rule": [
+        "flit_core.vendor.tomli._parser 109:47 call  create_dict_rule(src, pos, out)"
+      ],
+      "flit_core.vendor.tomli._parser.create_list_rule": [
+        "flit_core.vendor.tomli._parser 107:47 call  create_list_rule(src, pos, out)"
+      ],
+      "flit_core.vendor.tomli._parser.key_value_rule": [
+        "flit_core.vendor.tomli._parser 99:33 call  key_value_rule(src, pos, out, header, parse_float)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 81:25 call  skip_chars(src, pos, TOML_WS)",
+        "flit_core.vendor.tomli._parser 100:29 call  skip_chars(src, pos, TOML_WS)",
+        "flit_core.vendor.tomli._parser 110:29 call  skip_chars(src, pos, TOML_WS)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_comment": [
+        "flit_core.vendor.tomli._parser 115:27 call  skip_comment(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 112:31 call  suffixed_err(src, pos, \"Invalid statement\")",
+        "flit_core.vendor.tomli._parser 123:31 call  suffixed_err( src, pos, \"Expected newline or end of docum..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_array": {
+      "<builtin>.list.append": [
+        "flit_core.vendor.tomli._parser 414:21 call  array.append(val)"
+      ],
+      "<builtin>.str.startswith": [
+        "flit_core.vendor.tomli._parser 410:22 call  src.startswith(\"]\", pos)",
+        "flit_core.vendor.tomli._parser 425:26 call  src.startswith(\"]\", pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_value": [
+        "flit_core.vendor.tomli._parser 413:31 call  parse_value(src, pos, parse_float)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_comments_and_array_ws": [
+        "flit_core.vendor.tomli._parser 409:37 call  skip_comments_and_array_ws(src, pos)",
+        "flit_core.vendor.tomli._parser 415:41 call  skip_comments_and_array_ws(src, pos)",
+        "flit_core.vendor.tomli._parser 424:41 call  skip_comments_and_array_ws(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 421:31 call  suffixed_err(src, pos, \"Unclosed array\")"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_basic_str": {
+      "<builtin>.str.startswith": [
+        "flit_core.vendor.tomli._parser 564:30 call  src.startswith('\"\"\"', pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_basic_str_escape": [
+        "flit_core.vendor.tomli._parser 570:47 call  parse_escapes(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_basic_str_escape_multiline": [
+        "flit_core.vendor.tomli._parser 570:47 call  parse_escapes(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 560:31 call  suffixed_err(src, pos, \"Unterminated string\")",
+        "flit_core.vendor.tomli._parser 575:31 call  suffixed_err(src, pos, f\"Illegal character {char!r}\")"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_basic_str_escape": {
+      "<builtin>.len": [
+        "flit_core.vendor.tomli._parser 487:15 call  len(escape_id)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_hex_char": [
+        "flit_core.vendor.tomli._parser 481:30 call  parse_hex_char(src, pos, 4)",
+        "flit_core.vendor.tomli._parser 483:30 call  parse_hex_char(src, pos, 8)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 470:29 call  skip_chars(src, pos, TOML_WS)",
+        "flit_core.vendor.tomli._parser 478:25 call  skip_chars(src, pos, TOML_WS_AND_NEWLINE)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 476:35 call  suffixed_err(src, pos, 'Unescaped \"\\\\\" in a string')",
+        "flit_core.vendor.tomli._parser 488:31 call  suffixed_err(src, pos, \"Unterminated string\")",
+        "flit_core.vendor.tomli._parser 489:27 call  suffixed_err(src, pos, 'Unescaped \"\\\\\" in a string')"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_basic_str_escape_multiline": {
+      "flit_core.vendor.tomli._parser.parse_basic_str_escape": [
+        "flit_core.vendor.tomli._parser 493:34 call  parse_basic_str_escape(src, pos, multiline=True)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_hex_char": {
+      "<builtin>.chr": [
+        "flit_core.vendor.tomli._parser 504:20 call  chr(hex_int)"
+      ],
+      "<builtin>.frozenset.issuperset": [
+        "flit_core.vendor.tomli._parser 498:64 call  HEXDIGIT_CHARS.issuperset(hex_str)"
+      ],
+      "<builtin>.int": [
+        "flit_core.vendor.tomli._parser 501:18 call  int(hex_str, 16)"
+      ],
+      "<builtin>.len": [
+        "flit_core.vendor.tomli._parser 498:11 call  len(hex_str)"
+      ],
+      "flit_core.vendor.tomli._parser.is_unicode_scalar_value": [
+        "flit_core.vendor.tomli._parser 502:35 call  is_unicode_scalar_value(hex_int)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 499:27 call  suffixed_err(src, pos, \"Invalid hex value\")",
+        "flit_core.vendor.tomli._parser 503:27 call  suffixed_err(src, pos, \"Escaped character is not a Unicod..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_inline_table": {
+      "<builtin>.isinstance": [
+        "flit_core.vendor.tomli._parser 455:22 call  isinstance(value, (dict, list))"
+      ],
+      "<builtin>.str.startswith": [
+        "flit_core.vendor.tomli._parser 435:22 call  src.startswith(\"}\", pos)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.__init__": [
+        "flit_core.vendor.tomli._parser 432:18 call  Flags()"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.is_": [
+        "flit_core.vendor.tomli._parser 440:21 call  flags.is_(key, Flags.FROZEN)"
+      ],
+      "flit_core.vendor.tomli._parser.Flags.set": [
+        "flit_core.vendor.tomli._parser 456:22 call  flags.set(key, Flags.FROZEN, recursive=True)"
+      ],
+      "flit_core.vendor.tomli._parser.NestedDict.__init__": [
+        "flit_core.vendor.tomli._parser 431:29 call  NestedDict()"
+      ],
+      "flit_core.vendor.tomli._parser.NestedDict.get_or_create_nest": [
+        "flit_core.vendor.tomli._parser 443:50 call  nested_dict.get_or_create_nest(key_parent, access_lists=F..."
+      ],
+      "flit_core.vendor.tomli._parser.parse_key_value_pair": [
+        "flit_core.vendor.tomli._parser 438:47 call  parse_key_value_pair(src, pos, parse_float)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 434:21 call  skip_chars(src, pos, TOML_WS)",
+        "flit_core.vendor.tomli._parser 449:25 call  skip_chars(src, pos, TOML_WS)",
+        "flit_core.vendor.tomli._parser 458:25 call  skip_chars(src, pos, TOML_WS)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 441:31 call  suffixed_err(src, pos, f\"Can not mutate immutable namespa...",
+        "flit_core.vendor.tomli._parser 445:31 call  suffixed_err(src, pos, \"Can not overwrite a value\")",
+        "flit_core.vendor.tomli._parser 447:31 call  suffixed_err(src, pos, f\"Duplicate inline table key {key_...",
+        "flit_core.vendor.tomli._parser 454:31 call  suffixed_err(src, pos, \"Unclosed inline table\")"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_key": {
+      "flit_core.vendor.tomli._parser.parse_key_part": [
+        "flit_core.vendor.tomli._parser 367:35 call  parse_key_part(src, pos)",
+        "flit_core.vendor.tomli._parser 379:39 call  parse_key_part(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 369:21 call  skip_chars(src, pos, TOML_WS)",
+        "flit_core.vendor.tomli._parser 378:25 call  skip_chars(src, pos, TOML_WS)",
+        "flit_core.vendor.tomli._parser 381:25 call  skip_chars(src, pos, TOML_WS)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_key_part": {
+      "flit_core.vendor.tomli._parser.parse_literal_str": [
+        "flit_core.vendor.tomli._parser 394:33 call  parse_literal_str(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_one_line_basic_str": [
+        "flit_core.vendor.tomli._parser 396:40 call  parse_one_line_basic_str(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 391:25 call  skip_chars(src, pos, BARE_KEY_CHARS)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 397:23 call  suffixed_err(src, pos, \"Invalid initial character for a k..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_key_value_pair": {
+      "flit_core.vendor.tomli._parser.parse_key": [
+        "flit_core.vendor.tomli._parser 353:25 call  parse_key(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_value": [
+        "flit_core.vendor.tomli._parser 362:29 call  parse_value(src, pos, parse_float)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 361:21 call  skip_chars(src, pos, TOML_WS)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 359:27 call  suffixed_err(src, pos, 'Expected \"=\" after a key in a key..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_literal_str": {
+      "flit_core.vendor.tomli._parser.skip_until": [
+        "flit_core.vendor.tomli._parser 510:21 call  skip_until( src, pos, \"'\", error_on=ILLEGAL_LITERAL_STR_C..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_multiline_str": {
+      "<builtin>.str.startswith": [
+        "flit_core.vendor.tomli._parser 518:22 call  src.startswith(\"\\n\", pos)",
+        "flit_core.vendor.tomli._parser 538:26 call  src.startswith(delim, pos)",
+        "flit_core.vendor.tomli._parser 541:26 call  src.startswith(delim, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_basic_str": [
+        "flit_core.vendor.tomli._parser 534:38 call  parse_basic_str(src, pos, multiline=True)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_until": [
+        "flit_core.vendor.tomli._parser 523:29 call  skip_until( src, pos, \"'''\", error_on=ILLEGAL_MULTILINE_L..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_one_line_basic_str": {
+      "flit_core.vendor.tomli._parser.parse_basic_str": [
+        "flit_core.vendor.tomli._parser 402:27 call  parse_basic_str(src, pos, multiline=False)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.parse_value": {
+      "<builtin>.float": [
+        "flit_core.vendor.tomli._parser 637:36 call  parse_float(first_three)",
+        "flit_core.vendor.tomli._parser 640:36 call  parse_float(first_four)"
+      ],
+      "<builtin>.str.startswith": [
+        "flit_core.vendor.tomli._parser 589:26 call  src.startswith('\"\"\"', pos)",
+        "flit_core.vendor.tomli._parser 595:26 call  src.startswith(\"'''\", pos)",
+        "flit_core.vendor.tomli._parser 601:26 call  src.startswith(\"true\", pos)",
+        "flit_core.vendor.tomli._parser 604:26 call  src.startswith(\"false\", pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_array": [
+        "flit_core.vendor.tomli._parser 628:27 call  parse_array(src, pos, parse_float)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_inline_table": [
+        "flit_core.vendor.tomli._parser 632:34 call  parse_inline_table(src, pos, parse_float)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_literal_str": [
+        "flit_core.vendor.tomli._parser 597:33 call  parse_literal_str(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_multiline_str": [
+        "flit_core.vendor.tomli._parser 590:39 call  parse_multiline_str(src, pos, literal=False)",
+        "flit_core.vendor.tomli._parser 596:39 call  parse_multiline_str(src, pos, literal=True)"
+      ],
+      "flit_core.vendor.tomli._parser.parse_one_line_basic_str": [
+        "flit_core.vendor.tomli._parser 591:40 call  parse_one_line_basic_str(src, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 613:31 call  suffixed_err(src, pos, \"Invalid date or datetime\")",
+        "flit_core.vendor.tomli._parser 642:23 call  suffixed_err(src, pos, \"Invalid value\")"
+      ],
+      "flit_core.vendor.tomli._re.match_to_datetime": [
+        "flit_core.vendor.tomli._parser 611:45 call  match_to_datetime(datetime_match)"
+      ],
+      "flit_core.vendor.tomli._re.match_to_localtime": [
+        "flit_core.vendor.tomli._parser 617:57 call  match_to_localtime(localtime_match)"
+      ],
+      "flit_core.vendor.tomli._re.match_to_number": [
+        "flit_core.vendor.tomli._parser 624:51 call  match_to_number(number_match, parse_float)"
+      ],
+      "re.Match.end": [
+        "flit_core.vendor.tomli._parser 614:34 call  datetime_match.end()",
+        "flit_core.vendor.tomli._parser 617:35 call  localtime_match.end()",
+        "flit_core.vendor.tomli._parser 624:32 call  number_match.end()"
+      ],
+      "re.Pattern.match": [
+        "flit_core.vendor.tomli._parser 608:39 call  RE_DATETIME.match(src, pos)",
+        "flit_core.vendor.tomli._parser 615:41 call  RE_LOCALTIME.match(src, pos)",
+        "flit_core.vendor.tomli._parser 622:35 call  RE_NUMBER.match(src, pos)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.skip_comment": {
+      "flit_core.vendor.tomli._parser.skip_until": [
+        "flit_core.vendor.tomli._parser 270:26 call  skip_until( src, pos + 1, \"\\n\", error_on=ILLEGAL_COMMENT_..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.skip_comments_and_array_ws": {
+      "flit_core.vendor.tomli._parser.skip_chars": [
+        "flit_core.vendor.tomli._parser 279:25 call  skip_chars(src, pos, TOML_WS_AND_NEWLINE)"
+      ],
+      "flit_core.vendor.tomli._parser.skip_comment": [
+        "flit_core.vendor.tomli._parser 280:27 call  skip_comment(src, pos)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.skip_until": {
+      "<builtin>.frozenset.isdisjoint": [
+        "flit_core.vendor.tomli._parser 257:31 call  error_on.isdisjoint(src[pos:new_pos])"
+      ],
+      "<builtin>.len": [
+        "flit_core.vendor.tomli._parser 253:22 call  len(src)"
+      ],
+      "<builtin>.str.index": [
+        "flit_core.vendor.tomli._parser 251:28 call  src.index(expect, pos)"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err": [
+        "flit_core.vendor.tomli._parser 255:31 call  suffixed_err(src, new_pos, f\"Expected {expect!r}\")",
+        "flit_core.vendor.tomli._parser 260:27 call  suffixed_err(src, pos, f\"Found invalid character {src[pos..."
+      ]
+    },
+    "flit_core.vendor.tomli._parser.suffixed_err": {
+      "<builtin>.ValueError.__init__": [
+        "flit_core.vendor.tomli._parser 659:27 call  TOMLDecodeError(f\"{msg} (at {coord_repr(src, pos)})\")"
+      ],
+      "flit_core.vendor.tomli._parser.suffixed_err.coord_repr": [
+        "flit_core.vendor.tomli._parser 659:51 call  coord_repr(src, pos)"
+      ]
+    },
+    "flit_core.vendor.tomli._parser.suffixed_err.coord_repr": {
+      "<builtin>.len": [
+        "flit_core.vendor.tomli._parser 650:22 call  len(src)"
+      ],
+      "<builtin>.str.count": [
+        "flit_core.vendor.tomli._parser 652:25 call  src.count(\"\\n\", 0, pos)"
+      ],
+      "<builtin>.str.rindex": [
+        "flit_core.vendor.tomli._parser 656:38 call  src.rindex(\"\\n\", 0, pos)"
+      ]
+    },
+    "flit_core.vendor.tomli._re": {
+      "functools.lru_cache": [
+        "flit_core.vendor.tomli._re 81:11 call  lru_cache(maxsize=None)"
+      ],
+      "functools.lru_cache.decorating_function": [
+        "flit_core.vendor.tomli._re 81:2 decorator  @lru_cache(maxsize=None)"
+      ],
+      "re.compile": [
+        "flit_core.vendor.tomli._re 13:23 call  re.compile( r\"\"\" 0 (?: x[0-9A-Fa-f](?:_?[0-9A-Fa-f])* # h...",
+        "flit_core.vendor.tomli._re 32:26 call  re.compile(_TIME_RE_STR)",
+        "flit_core.vendor.tomli._re 33:25 call  re.compile( fr\"\"\" ([0-9]{{4}})-(0[1-9]|1[0-2])-(0[1-9]|[1..."
+      ]
+    },
+    "flit_core.vendor.tomli._re.cached_tz": {
+      "<builtin>.int": [
+        "flit_core.vendor.tomli._re 86:29 call  int(hour_str)",
+        "flit_core.vendor.tomli._re 87:31 call  int(minute_str)"
+      ],
+      "datetime.timedelta": [
+        "flit_core.vendor.tomli._re 85:18 call  timedelta( hours=sign * int(hour_str), minutes=sign * int..."
+      ],
+      "datetime.timezone": [
+        "flit_core.vendor.tomli._re 84:20 call  timezone( timedelta( hours=sign * int(hour_str), minutes=..."
+      ]
+    },
+    "flit_core.vendor.tomli._re.match_to_datetime": {
+      "<builtin>.int": [
+        "flit_core.vendor.tomli._re 65:27 call  int(year_str)",
+        "flit_core.vendor.tomli._re 65:42 call  int(month_str)",
+        "flit_core.vendor.tomli._re 65:58 call  int(day_str)",
+        "flit_core.vendor.tomli._re 68:28 call  int(hour_str)",
+        "flit_core.vendor.tomli._re 68:43 call  int(minute_str)",
+        "flit_core.vendor.tomli._re 68:60 call  int(sec_str)",
+        "flit_core.vendor.tomli._re 69:17 call  int(micros_str.ljust(6, \"0\"))"
+      ],
+      "<builtin>.str.ljust": [
+        "flit_core.vendor.tomli._re 69:34 call  micros_str.ljust(6, \"0\")"
+      ],
+      "datetime.date": [
+        "flit_core.vendor.tomli._re 67:20 call  date(year, month, day)"
+      ],
+      "datetime.datetime": [
+        "flit_core.vendor.tomli._re 78:20 call  datetime(year, month, day, hour, minute, sec, micros, tzi..."
+      ],
+      "flit_core.vendor.tomli._re.cached_tz": [
+        "flit_core.vendor.tomli._re 71:41 call  cached_tz( offset_hour_str, offset_minute_str, offset_sig..."
+      ],
+      "functools._lru_cache_wrapper.__call__": [
+        "flit_core.vendor.tomli._re 71:41 call  cached_tz( offset_hour_str, offset_minute_str, offset_sig..."
+      ],
+      "re.Match.groups": [
+        "flit_core.vendor.tomli._re 64:21 call  match.groups()"
+      ]
+    },
+    "flit_core.vendor.tomli._re.match_to_localtime": {
+      "<builtin>.int": [
+        "flit_core.vendor.tomli._re 94:17 call  int(micros_str.ljust(6, \"0\"))",
+        "flit_core.vendor.tomli._re 95:20 call  int(hour_str)",
+        "flit_core.vendor.tomli._re 95:35 call  int(minute_str)",
+        "flit_core.vendor.tomli._re 95:52 call  int(sec_str)"
+      ],
+      "<builtin>.str.ljust": [
+        "flit_core.vendor.tomli._re 94:34 call  micros_str.ljust(6, \"0\")"
+      ],
+      "datetime.time": [
+        "flit_core.vendor.tomli._re 95:16 call  time(int(hour_str), int(minute_str), int(sec_str), micros)"
+      ],
+      "re.Match.groups": [
+        "flit_core.vendor.tomli._re 93:61 call  match.groups()"
+      ]
+    },
+    "flit_core.vendor.tomli._re.match_to_number": {
+      "<builtin>.float": [
+        "flit_core.vendor.tomli._re 100:27 call  parse_float(match.group())"
+      ],
+      "<builtin>.int": [
+        "flit_core.vendor.tomli._re 101:15 call  int(match.group(), 0)"
+      ],
+      "re.Match.group": [
+        "flit_core.vendor.tomli._re 99:19 call  match.group(\"floatpart\")",
+        "flit_core.vendor.tomli._re 100:39 call  match.group()",
+        "flit_core.vendor.tomli._re 101:27 call  match.group()"
+      ]
+    },
+    "flit_core.wheel": {
+      "flit_core.wheel.main": [
+        "flit_core.wheel 274:9 call  main()"
+      ]
+    },
+    "flit_core.wheel.WheelBuilder._add_file": {
+      "<builtin>.str.replace": [
+        "flit_core.wheel 119:40 call  rel_path.replace(os.sep, '/')"
+      ],
+      "_sha2.SHA256Type.digest": [
+        "flit_core.wheel 147:55 call  hashsum.digest()"
+      ],
+      "_sha2.SHA256Type.update": [
+        "flit_core.wheel 143:31 call  hashsum.update(buf)"
+      ],
+      "_sha256.SHA256Type.digest": [
+        "flit_core.wheel 147:55 call  hashsum.digest()"
+      ],
+      "_sha256.SHA256Type.update": [
+        "flit_core.wheel 143:31 call  hashsum.update(buf)"
+      ]
+    },
+    "flit_core.wheel.WheelBuilder._write_to_zip": {
+      "_sha2.SHA256Type.digest": [
+        "flit_core.wheel 165:55 call  hashsum.digest()"
+      ],
+      "_sha256.SHA256Type.digest": [
+        "flit_core.wheel 165:55 call  hashsum.digest()"
+      ]
+    },
+    "flit_core.wheel.WheelBuilder.add_pth": {
+      "flit_core.wheel.WheelBuilder._write_to_zip": [
+        "flit_core.wheel 178:32 call  self._write_to_zip(self.module.name + \".pth\")"
+      ],
+      "pathlib.WindowsPath.resolve": [
+        "flit_core.wheel 179:55 call  self.module.source_dir.resolve()"
+      ]
+    },
+    "flit_core.wheel.WheelBuilder.write_metadata": {
+      "flit_core.wheel.WheelBuilder._write_to_zip": [
+        "flit_core.wheel 191:36 call  self._write_to_zip(f'{self.dist_info}/entry_points.txt')",
+        "flit_core.wheel 197:32 call  self._write_to_zip(f'{self.dist_info}/WHEEL')",
+        "flit_core.wheel 200:32 call  self._write_to_zip(f'{self.dist_info}/METADATA')"
+      ]
+    },
+    "flit_core.wheel.WheelBuilder.write_record": {
+      "_csv.Writer.writerow": [
+        "flit_core.wheel 209:32 call  writer.writerow((path, f'sha256={hash}', size))",
+        "flit_core.wheel 211:28 call  writer.writerow((f'{self.dist_info}/RECORD', '', ''))"
+      ],
+      "flit_core.wheel.WheelBuilder._write_to_zip": [
+        "flit_core.wheel 206:32 call  self._write_to_zip(f'{self.dist_info}/RECORD')"
+      ]
+    },
+    "flit_core.wheel.main": {
+      "pathlib.WindowsPath.mkdir": [
+        "flit_core.wheel 269:17 call  outdir.mkdir(parents=True, exist_ok=True)"
+      ]
+    }
+  },
+  "notes": {
+    "flit_core.common 147:30 call  target_path.open('rb')": [
+      "target is a Module (private function; its callers pass the Module of buildapi, make_metadata or get_info_from_module); version_files holds Paths built from Module.path (33:26)"
+    ],
+    "flit_core.common 188:26 call  _module_load_ctx()": [
+      "_module_load_ctx is decorated with @contextmanager (127:2): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "flit_core.common 229:35 call  NoDocstringError( 'Flit cannot package module without doc...": [
+      "NoDocstringError and ProblemInModule define no __init__; the first in the MRO is ValueError's"
+    ],
+    "flit_core.common 280:25 call  ValueError(f\"Invalid entry point (no ':'): {ep!r}\")": [
+      "parse_entry_point is private and never called by the package: its parameter is judged as a public one; the docstring makes ep a 'package.module:func' str"
+    ],
+    "flit_core.common 306:14 call  open(path, 'rb')": [
+      "hash_file is private and never called by the package: its parameters are judged as public ones; nothing documents or tests another algorithm, so the hash is the default sha256 (flit-core.md J6)"
+    ],
+    "flit_core.common 308:23 call  h.hexdigest()": [
+      "hashlib.new('sha256') returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback the builtin object of the class that the module exports as _sha256.SHA256Type on CPython 3.8 to 3.11 (PyModule_AddObject; its type name is _sha256.sha256) and _sha2.SHA256Type from 3.12 (Modules/sha256module.c, sha2module.c of the deps; the precedent of django-constance and markdown2)"
+    ],
+    "flit_core.common 33:26 call  pkg_dir.is_dir()": [
+      "directory / name_as_path keeps the flavour of directory, a PosixPath on Linux or a WindowsPath on Windows (flit-core.md J4)"
+    ],
+    "flit_core.common 38:27 call  py_file.is_file()": [
+      "a PosixPath or a WindowsPath, as at 33:26"
+    ],
+    "flit_core.common 43:30 call  src_pkg_dir.is_dir()": [
+      "a PosixPath or a WindowsPath, as at 33:26"
+    ],
+    "flit_core.common 48:31 call  src_py_file.is_file()": [
+      "a PosixPath or a WindowsPath, as at 33:26"
+    ],
+    "flit_core.common 84:50 call  (self.path / filename).is_file()": [
+      "self.path is one of the Paths of __init__ (33:26)"
+    ],
+    "flit_core.config 141:67 call  s.lower()": [
+      "s is a key of the TOML table dtool, a str"
+    ],
+    "flit_core.config 183:48 call  loaded_cfg.data_directory.is_dir()": [
+      "path.parent / data_dir keeps the flavour of path (74:37)"
+    ],
+    "flit_core.config 257:28 call  desc_path.open('r', encoding='utf-8')": [
+      "proj_dir is path.parent of read_pep621_metadata (lines 413, 439), a PosixPath or a WindowsPath; proj_dir / rel_path keeps it"
+    ],
+    "flit_core.config 312:41 call  project_dir.glob(pattern)": [
+      "project_dir is path.parent of read_pep621_metadata, a PosixPath or a WindowsPath"
+    ],
+    "flit_core.config 313:36 call  file.is_file()": [
+      "glob yields Paths of project_dir's class"
+    ],
+    "flit_core.config 491:41 call  license_p.is_file()": [
+      "path.parent / license_f keeps the class of path, a PosixPath or a WindowsPath (read_flit_config, 74:37)"
+    ],
+    "flit_core.config 74:22 call  tomllib.loads(path.read_text('utf-8'))": [
+      "optional import (lines 10-18): tomllib on CPython 3.11 and later; on 3.8 to 3.10 the vendored copy (flit_core.vendor.tomli re-exports _parser.loads). The third side (import tomli, line 18) runs only on 3.8 to 3.10 with the vendored package deleted, a state that the release does not document: no edge (flit-core.md J2, ruling of the lead, 2026-11-24)"
+    ],
+    "flit_core.config 74:37 call  path.read_text('utf-8')": [
+      "path is the pyproject.toml Path of buildapi (Path('pyproject.toml')), of wheel.main (srcdir / 'pyproject.toml') or of the from_ini_path callers, which pass these; a PosixPath on Linux, a WindowsPath on Windows"
+    ],
+    "flit_core.sdist 161:26 call  defaultdict(list)": [
+      "the package never calls prep_entry_points; self is an SdistBuilder that from_ini_path makes, so entrypoints is LoadedConfig.entrypoints, a dict of dicts of strs"
+    ],
+    "flit_core.sdist 204:63 call  self.module.file.relative_to(self.cfgdir)": [
+      "Module.file is built from the Path directory that from_ini_path passes (ini_path.parent), a PosixPath or a WindowsPath"
+    ],
+    "flit_core.vendor.tomli._parser 149:17 call  cont.pop(key[-1], None)": [
+      "cont is self._flags or a nested \"nested\" dict that Flags itself made"
+    ],
+    "flit_core.vendor.tomli._parser 159:37 call  cont[k][\"flags\"].add(flag)": [
+      "the \"flags\" entry is a set that Flags made (lines 155, 161, 169, 172)"
+    ],
+    "flit_core.vendor.tomli._parser 173:72 call  cont[key_stem][\"recursive_flags\" if recursive else \"flags...": [
+      "the \"flags\" and \"recursive_flags\" entries are sets that Flags made"
+    ],
+    "flit_core.vendor.tomli._parser 221:29 call  list_.append({})": [
+      "list_ is a value that tomli stored behind the key: a list (an array of tables or an inline array) has append; any other value (a dict, str, int, float, bool or datetime value) raises AttributeError at the attribute load, before a call"
+    ],
+    "flit_core.vendor.tomli._parser 257:31 call  error_on.isdisjoint(src[pos:new_pos])": [
+      "error_on is one of the module frozensets ILLEGAL_* (annotated FrozenSet[str]; every package caller passes one)"
+    ],
+    "flit_core.vendor.tomli._parser 570:47 call  parse_escapes(src, pos)": [
+      "value site: parse_escapes is the local of lines 550 and 553: parse_basic_str_escape_multiline when multiline, else parse_basic_str_escape"
+    ],
+    "flit_core.vendor.tomli._parser 637:36 call  parse_float(first_three)": [
+      "value site: parse_float is the parameter of loads (through parse_value, parse_array, parse_inline_table and parse_key_value_pair, which forward it unchanged); its only package value is the default float of loads and load (read_flit_config calls loads(text) with the default); a client callable passed to load or loads is opaque (B2: ParseFloat is a bare Callable)"
+    ],
+    "flit_core.vendor.tomli._parser 640:36 call  parse_float(first_four)": [
+      "value site: parse_float is the parameter of loads (through parse_value, parse_array, parse_inline_table and parse_key_value_pair, which forward it unchanged); its only package value is the default float of loads and load (read_flit_config calls loads(text) with the default); a client callable passed to load or loads is opaque (B2: ParseFloat is a bare Callable)"
+    ],
+    "flit_core.vendor.tomli._parser 659:27 call  TOMLDecodeError(f\"{msg} (at {coord_repr(src, pos)})\")": [
+      "TOMLDecodeError subclasses ValueError and defines no __init__"
+    ],
+    "flit_core.vendor.tomli._parser 72:20 call  s.replace(\"\\r\\n\", \"\\n\")": [
+      "s is annotated str; the package caller (config.read_flit_config) passes the str of Path.read_text"
+    ],
+    "flit_core.vendor.tomli._re 100:27 call  parse_float(match.group())": [
+      "value site: parse_float is the parameter of loads (through parse_value, parse_array, parse_inline_table and parse_key_value_pair, which forward it unchanged); its only package value is the default float of loads and load (read_flit_config calls loads(text) with the default); a client callable passed to load or loads is opaque (B2: ParseFloat is a bare Callable)"
+    ],
+    "flit_core.vendor.tomli._re 64:21 call  match.groups()": [
+      "match is the RE_DATETIME match of parse_value (608:39), annotated re.Match"
+    ],
+    "flit_core.vendor.tomli._re 71:41 call  cached_tz( offset_hour_str, offset_minute_str, offset_sig...": [
+      "cached_tz is the lru_cache wrapper of the function (81:2); on a cache miss the wrapper calls the function (no PyPy is admitted, so no functools._lru_cache_wrapper.wrapper)"
+    ],
+    "flit_core.vendor.tomli._re 81:2 decorator  @lru_cache(maxsize=None)": [
+      "value site: the decorator is the value that lru_cache(maxsize=None) returns, its local function decorating_function (functools.py), which wraps cached_tz in a functools._lru_cache_wrapper without calling it"
+    ],
+    "flit_core.vendor.tomli._re 93:61 call  match.groups()": [
+      "match is the RE_LOCALTIME match of parse_value (615:41)"
+    ],
+    "flit_core.vendor.tomli._re 99:19 call  match.group(\"floatpart\")": [
+      "match is the RE_NUMBER match of parse_value (622:35)"
+    ],
+    "flit_core.wheel 119:40 call  rel_path.replace(os.sep, '/')": [
+      "the branch runs where os.sep is not '/': Windows, a supported platform (CI windows-latest)"
+    ],
+    "flit_core.wheel 143:31 call  hashsum.update(buf)": [
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback when OpenSSL does not provide SHA-256 the builtin object of the class that the module exports as _sha256.SHA256Type on CPython 3.8 to 3.11 (PyModule_AddObject; its type name is _sha256.sha256) and _sha2.SHA256Type from 3.12 (Modules/sha256module.c and sha2module.c of the deps; the precedent of django-constance)"
+    ],
+    "flit_core.wheel 147:55 call  hashsum.digest()": [
+      "the hash object of 137:33, as at 143:31"
+    ],
+    "flit_core.wheel 165:55 call  hashsum.digest()": [
+      "the hash object of 164:33, as at 143:31"
+    ],
+    "flit_core.wheel 178:32 call  self._write_to_zip(self.module.name + \".pth\")": [
+      "_write_to_zip is decorated with @contextlib.contextmanager (150:6): the call runs contextlib's helper, which calls the generator function back"
+    ],
+    "flit_core.wheel 179:55 call  self.module.source_dir.resolve()": [
+      "source_dir is directory / prefix of Module.__init__ (common.py:62), a PosixPath or a WindowsPath"
+    ],
+    "flit_core.wheel 191:36 call  self._write_to_zip(f'{self.dist_info}/entry_points.txt')": [
+      "as at 178:32"
+    ],
+    "flit_core.wheel 197:32 call  self._write_to_zip(f'{self.dist_info}/WHEEL')": [
+      "as at 178:32"
+    ],
+    "flit_core.wheel 200:32 call  self._write_to_zip(f'{self.dist_info}/METADATA')": [
+      "as at 178:32"
+    ],
+    "flit_core.wheel 206:32 call  self._write_to_zip(f'{self.dist_info}/RECORD')": [
+      "as at 178:32"
+    ],
+    "flit_core.wheel 209:32 call  writer.writerow((path, f'sha256={hash}', size))": [
+      "writer is the object that csv.writer returns; CPython 3.10 and later export its class as _csv.Writer (Modules/_csv.c, PyModule_AddObjectRef); 3.8 and 3.9 have no public path for it, so their name is the type name _csv.writer, as the tracer names it (the netaddr precedent; Codex round 1, M1)"
+    ],
+    "flit_core.wheel 211:28 call  writer.writerow((f'{self.dist_info}/RECORD', '', ''))": [
+      "as at 209:32"
+    ],
+    "flit_core.wheel 269:17 call  outdir.mkdir(parents=True, exist_ok=True)": [
+      "outdir is srcdir / 'dist' (srcdir a Path from argparse's type=Path or the default Path.cwd()) or Path(args.outdir): a PosixPath on Linux, a WindowsPath on Windows"
+    ],
+    "flit_core.wheel 274:9 call  main()": [
+      "the module's __main__ block, which python -m flit_core.wheel runs (doc/bootstrap.rst:18)"
+    ]
+  },
+  "trace": "dynamic/flit-core.json"
+}

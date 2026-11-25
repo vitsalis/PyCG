@@ -1,0 +1,768 @@
+{
+  "aliases": {
+    "<builtin>.BaseException.__init__": [
+      "<builtin>.Exception.__init__"
+    ],
+    "<builtin>.open": [
+      "io.open"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.endswith": [
+      "typing.Text.endswith"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.lower": [
+      "typing.Text.lower"
+    ],
+    "<builtin>.str.partition": [
+      "typing.Text.partition"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "<builtin>.str.splitlines": [
+      "typing.Text.splitlines"
+    ],
+    "<builtin>.str.startswith": [
+      "typing.Text.startswith"
+    ],
+    "<builtin>.str.strip": [
+      "typing.Text.strip"
+    ],
+    "_io.TextIOWrapper.read": [
+      "io.TextIOWrapper.read"
+    ],
+    "argparse._ActionsContainer.add_argument": [
+      "argparse.ArgumentParser.add_argument"
+    ],
+    "fnmatch.fnmatch": [
+      "unittest.loader.fnmatch"
+    ],
+    "fnmatch.fnmatchcase": [
+      "unittest.loader.fnmatchcase"
+    ],
+    "pathlib.Path.cwd": [
+      "pathlib.PosixPath.cwd"
+    ],
+    "pathlib.Path.is_file": [
+      "pathlib.PosixPath.is_file"
+    ],
+    "pathlib.Path.resolve": [
+      "pathlib.PosixPath.resolve"
+    ],
+    "pathlib.PurePath.relative_to": [
+      "pathlib.Path.relative_to",
+      "pathlib.PosixPath.relative_to",
+      "pathlib.PurePosixPath.relative_to"
+    ],
+    "tomllib._parser.load": [
+      "tomllib.load"
+    ]
+  },
+  "commit": "b0f67ba0044693aa9ec0d38fe460590facc98004",
+  "deselect": [
+    {
+      "reason": "runs `python -m vulture` in a child interpreter: the tracer does not record a child process",
+      "test": "tests/test_errors.py::test_invalid_cmdline_args"
+    }
+  ],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 0,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "vulture.config._check_input_config": [
+      "<builtin>.dict.items",
+      "<builtin>.type",
+      "vulture.config.InputError.__init__"
+    ],
+    "vulture.config._check_output_config": [
+      "vulture.config.InputError.__init__"
+    ],
+    "vulture.config._parse_args": [
+      "<builtin>.dict.items",
+      "<builtin>.object",
+      "<builtin>.vars",
+      "argparse.ArgumentParser",
+      "argparse.ArgumentParser.parse_args",
+      "argparse._ActionsContainer.add_argument",
+      "vulture.config._check_input_config",
+      "vulture.config._parse_args.csv"
+    ],
+    "vulture.config._parse_args.csv": [
+      "<builtin>.str.split"
+    ],
+    "vulture.config._parse_toml": [
+      "<builtin>.dict.get",
+      "tomllib._parser.load",
+      "vulture.config._check_input_config"
+    ],
+    "vulture.config.make_config": [
+      "<builtin>.dict.items",
+      "<builtin>.dict.setdefault",
+      "<builtin>.dict.update",
+      "<builtin>.open",
+      "<builtin>.print",
+      "<builtin>.str",
+      "pathlib.Path",
+      "pathlib.Path.is_file",
+      "pathlib.Path.resolve",
+      "vulture.config._check_output_config",
+      "vulture.config._parse_args",
+      "vulture.config._parse_toml"
+    ],
+    "vulture.core": [
+      "<builtin>.property",
+      "<builtin>.staticmethod"
+    ],
+    "vulture.core.Item.__hash__": [
+      "<builtin>.hash",
+      "vulture.core.Item._tuple"
+    ],
+    "vulture.core.Item.__repr__": [
+      "<builtin>.repr"
+    ],
+    "vulture.core.Item.get_report": [
+      "vulture.utils.format_path"
+    ],
+    "vulture.core.Item.get_whitelist_string": [
+      "vulture.utils.format_path"
+    ],
+    "vulture.core.Vulture.__init__": [
+      "functools.partial",
+      "pathlib.Path",
+      "vulture.core.Vulture.__init__.get_list",
+      "vulture.reachability.Reachability.__init__",
+      "vulture.utils.LoggingSet.__init__"
+    ],
+    "vulture.core.Vulture.__init__.get_list": [
+      "vulture.utils.LoggingList.__init__"
+    ],
+    "vulture.core.Vulture._add_aliases": [
+      "<builtin>.isinstance",
+      "<builtin>.str.partition",
+      "vulture.core.Vulture._define",
+      "vulture.utils.LoggingSet.add"
+    ],
+    "vulture.core.Vulture._define": [
+      "vulture.core.Item.__init__",
+      "vulture.core.Vulture._define.ignored",
+      "vulture.core.Vulture._log",
+      "vulture.lines.get_first_line_number",
+      "vulture.lines.get_last_line_number",
+      "vulture.utils.LoggingList.append"
+    ],
+    "vulture.core.Vulture._define.ignored": [
+      "vulture.core._ignore_class",
+      "vulture.core._ignore_function",
+      "vulture.core._ignore_import",
+      "vulture.core._ignore_method",
+      "vulture.core._ignore_variable",
+      "vulture.core._match",
+      "vulture.noqa.ignore_line"
+    ],
+    "vulture.core.Vulture._define_variable": [
+      "vulture.core.Vulture._define"
+    ],
+    "vulture.core.Vulture._handle_new_format_string": [
+      "<builtin>.str.split",
+      "re.sub",
+      "string.Formatter",
+      "string.Formatter.parse",
+      "vulture.core.Vulture._handle_new_format_string.is_identifier",
+      "vulture.utils.LoggingSet.add"
+    ],
+    "vulture.core.Vulture._handle_new_format_string.is_identifier": [
+      "<builtin>.bool",
+      "re.match"
+    ],
+    "vulture.core.Vulture._is_locals_call": [
+      "<builtin>.isinstance"
+    ],
+    "vulture.core.Vulture._log": [
+      "<builtin>.print"
+    ],
+    "vulture.core.Vulture.generic_visit": [
+      "<builtin>.isinstance",
+      "ast.iter_fields",
+      "vulture.core.Vulture.visit"
+    ],
+    "vulture.core.Vulture.get_unused_code": [
+      "<builtin>.ValueError",
+      "<builtin>.sorted",
+      "vulture.core.Vulture.get_unused_code.by_name",
+      "vulture.core.Vulture.get_unused_code.by_size",
+      "vulture.core.Vulture.unused_attrs",
+      "vulture.core.Vulture.unused_classes",
+      "vulture.core.Vulture.unused_funcs",
+      "vulture.core.Vulture.unused_imports",
+      "vulture.core.Vulture.unused_methods",
+      "vulture.core.Vulture.unused_props",
+      "vulture.core.Vulture.unused_vars"
+    ],
+    "vulture.core.Vulture.get_unused_code.by_name": [
+      "<builtin>.str",
+      "<builtin>.str.lower"
+    ],
+    "vulture.core.Vulture.get_unused_code.by_size": [
+      "vulture.core.Item.size",
+      "vulture.core.Vulture.get_unused_code.by_name"
+    ],
+    "vulture.core.Vulture.report": [
+      "vulture.core.Item.get_report",
+      "vulture.core.Item.get_whitelist_string",
+      "vulture.core.Vulture._log",
+      "vulture.core.Vulture.get_unused_code"
+    ],
+    "vulture.core.Vulture.scan": [
+      "<builtin>.str",
+      "<builtin>.str.splitlines",
+      "ast.parse",
+      "pathlib.Path",
+      "vulture.core.Vulture.scan.handle_syntax_error",
+      "vulture.core.Vulture.visit",
+      "vulture.noqa.parse_noqa",
+      "vulture.reachability.Reachability.reset"
+    ],
+    "vulture.core.Vulture.scan.handle_syntax_error": [
+      "<builtin>.str.strip",
+      "vulture.core.Vulture._log",
+      "vulture.utils.format_path"
+    ],
+    "vulture.core.Vulture.scavenge": [
+      "pathlib.Path",
+      "vulture.core.Vulture._log",
+      "vulture.core.Vulture.scan",
+      "vulture.core.Vulture.scavenge.exclude_path",
+      "vulture.utils.get_modules",
+      "vulture.utils.read_file"
+    ],
+    "vulture.core.Vulture.scavenge.exclude_path": [
+      "vulture.core._match"
+    ],
+    "vulture.core.Vulture.unused_attrs": [
+      "vulture.core._get_unused_items"
+    ],
+    "vulture.core.Vulture.unused_classes": [
+      "vulture.core._get_unused_items"
+    ],
+    "vulture.core.Vulture.unused_funcs": [
+      "vulture.core._get_unused_items"
+    ],
+    "vulture.core.Vulture.unused_imports": [
+      "vulture.core._get_unused_items"
+    ],
+    "vulture.core.Vulture.unused_methods": [
+      "vulture.core._get_unused_items"
+    ],
+    "vulture.core.Vulture.unused_props": [
+      "vulture.core._get_unused_items"
+    ],
+    "vulture.core.Vulture.unused_vars": [
+      "vulture.core._get_unused_items"
+    ],
+    "vulture.core.Vulture.visit": [
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "ast.dump",
+      "ast.parse",
+      "vulture.core.Vulture._log",
+      "vulture.core.Vulture.generic_visit",
+      "vulture.core.Vulture.visit",
+      "vulture.core.Vulture.visit_Assign",
+      "vulture.core.Vulture.visit_AsyncFunctionDef",
+      "vulture.core.Vulture.visit_Attribute",
+      "vulture.core.Vulture.visit_BinOp",
+      "vulture.core.Vulture.visit_Call",
+      "vulture.core.Vulture.visit_ClassDef",
+      "vulture.core.Vulture.visit_FunctionDef",
+      "vulture.core.Vulture.visit_Import",
+      "vulture.core.Vulture.visit_ImportFrom",
+      "vulture.core.Vulture.visit_MatchClass",
+      "vulture.core.Vulture.visit_Name",
+      "vulture.core.Vulture.visit_arg",
+      "vulture.reachability.Reachability.visit"
+    ],
+    "vulture.core.Vulture.visit_Assign": [
+      "<builtin>.isinstance",
+      "vulture.core._assigns_special_variable__all__",
+      "vulture.utils.LoggingSet.add",
+      "vulture.utils.is_ast_string"
+    ],
+    "vulture.core.Vulture.visit_AsyncFunctionDef": [
+      "vulture.core.Vulture.visit_FunctionDef"
+    ],
+    "vulture.core.Vulture.visit_Attribute": [
+      "<builtin>.isinstance",
+      "vulture.core.Vulture._define",
+      "vulture.utils.LoggingSet.add"
+    ],
+    "vulture.core.Vulture.visit_BinOp": [
+      "<builtin>.isinstance",
+      "<builtin>.set",
+      "re.findall",
+      "vulture.core.Vulture._is_locals_call",
+      "vulture.utils.is_ast_string"
+    ],
+    "vulture.core.Vulture.visit_Call": [
+      "<builtin>.any",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "vulture.core.Vulture._handle_new_format_string",
+      "vulture.core.Vulture._is_locals_call",
+      "vulture.utils.LoggingSet.add",
+      "vulture.utils.is_ast_string"
+    ],
+    "vulture.core.Vulture.visit_ClassDef": [
+      "vulture.core.Vulture._define",
+      "vulture.core.Vulture._log",
+      "vulture.core._match",
+      "vulture.utils.get_decorator_name"
+    ],
+    "vulture.core.Vulture.visit_FunctionDef": [
+      "<builtin>.any",
+      "vulture.core.Vulture._define",
+      "vulture.core.Vulture._log",
+      "vulture.core._match",
+      "vulture.utils.get_decorator_name"
+    ],
+    "vulture.core.Vulture.visit_Import": [
+      "vulture.core.Vulture._add_aliases"
+    ],
+    "vulture.core.Vulture.visit_ImportFrom": [
+      "vulture.core.Vulture._add_aliases"
+    ],
+    "vulture.core.Vulture.visit_MatchClass": [
+      "vulture.utils.LoggingSet.add"
+    ],
+    "vulture.core.Vulture.visit_Name": [
+      "<builtin>.isinstance",
+      "vulture.core.Vulture._define_variable",
+      "vulture.utils.LoggingSet.add"
+    ],
+    "vulture.core.Vulture.visit_arg": [
+      "vulture.core.Vulture._define_variable"
+    ],
+    "vulture.core._assigns_special_variable__all__": [
+      "<builtin>.any",
+      "<builtin>.isinstance"
+    ],
+    "vulture.core._get_unused_items": [
+      "<builtin>.list.sort",
+      "<builtin>.set",
+      "vulture.core.Item.__hash__",
+      "vulture.core._get_unused_items.<lambda1>"
+    ],
+    "vulture.core._get_unused_items.<lambda1>": [
+      "<builtin>.str.lower"
+    ],
+    "vulture.core._ignore_class": [
+      "vulture.core._is_test_file"
+    ],
+    "vulture.core._ignore_function": [
+      "<builtin>.str.startswith",
+      "vulture.core._is_test_file"
+    ],
+    "vulture.core._ignore_method": [
+      "<builtin>.str.startswith",
+      "vulture.core._is_special_name",
+      "vulture.core._is_test_file"
+    ],
+    "vulture.core._ignore_variable": [
+      "<builtin>.str.startswith",
+      "vulture.core._is_special_name"
+    ],
+    "vulture.core._is_special_name": [
+      "<builtin>.str.endswith",
+      "<builtin>.str.startswith"
+    ],
+    "vulture.core._is_test_file": [
+      "pathlib.Path.resolve",
+      "vulture.core._match"
+    ],
+    "vulture.core._match": [
+      "<builtin>.any",
+      "fnmatch.fnmatch",
+      "fnmatch.fnmatchcase"
+    ],
+    "vulture.lines.get_first_line_number": [
+      "<builtin>.getattr"
+    ],
+    "vulture.noqa": [
+      "re.compile"
+    ],
+    "vulture.noqa._parse_error_codes": [
+      "<builtin>.str.split",
+      "<builtin>.str.strip",
+      "re.Match.groupdict"
+    ],
+    "vulture.noqa.parse_noqa": [
+      "<builtin>.dict.get",
+      "<builtin>.enumerate",
+      "<builtin>.set.add",
+      "collections.defaultdict",
+      "re.Pattern.search",
+      "vulture.noqa._parse_error_codes"
+    ],
+    "vulture.reachability": [
+      "<builtin>.staticmethod"
+    ],
+    "vulture.reachability.Reachability.__init__": [
+      "<builtin>.set"
+    ],
+    "vulture.reachability.Reachability._body_has_break": [
+      "<builtin>.isinstance",
+      "ast.iter_fields",
+      "vulture.reachability.Reachability._body_has_break"
+    ],
+    "vulture.reachability.Reachability._can_else_fall_through": [
+      "vulture.reachability.Reachability._can_fall_through_statements_analysis"
+    ],
+    "vulture.reachability.Reachability._can_fall_through_statements_analysis": [
+      "<builtin>.enumerate",
+      "<builtin>.str.lower",
+      "functools.partial.__call__",
+      "vulture.core.Vulture._define",
+      "vulture.reachability.Reachability._can_fall_through"
+    ],
+    "vulture.reachability.Reachability._handle_reachability_if": [
+      "<builtin>.bool",
+      "<builtin>.isinstance",
+      "functools.partial.__call__",
+      "vulture.core.Vulture._define",
+      "vulture.reachability.Reachability._can_else_fall_through",
+      "vulture.reachability.Reachability._can_fall_through_statements_analysis",
+      "vulture.reachability.Reachability._mark_as_no_fall_through",
+      "vulture.utils.condition_is_always_false",
+      "vulture.utils.condition_is_always_true"
+    ],
+    "vulture.reachability.Reachability._handle_reachability_if_expr": [
+      "<builtin>.isinstance",
+      "functools.partial.__call__",
+      "vulture.core.Vulture._define",
+      "vulture.utils.condition_is_always_false",
+      "vulture.utils.condition_is_always_true"
+    ],
+    "vulture.reachability.Reachability._handle_reachability_try": [
+      "<builtin>.any",
+      "<builtin>.bool",
+      "functools.partial.__call__",
+      "vulture.core.Vulture._define",
+      "vulture.reachability.Reachability._can_fall_through_statements_analysis",
+      "vulture.reachability.Reachability._mark_as_no_fall_through"
+    ],
+    "vulture.reachability.Reachability._handle_reachability_while": [
+      "<builtin>.isinstance",
+      "functools.partial.__call__",
+      "vulture.core.Vulture._define",
+      "vulture.reachability.Reachability._body_has_break",
+      "vulture.reachability.Reachability._can_fall_through_statements_analysis",
+      "vulture.reachability.Reachability._mark_as_no_fall_through",
+      "vulture.utils.condition_is_always_false",
+      "vulture.utils.condition_is_always_true"
+    ],
+    "vulture.reachability.Reachability._mark_as_no_fall_through": [
+      "<builtin>.set.add"
+    ],
+    "vulture.reachability.Reachability.reset": [
+      "<builtin>.set"
+    ],
+    "vulture.reachability.Reachability.visit": [
+      "<builtin>.isinstance",
+      "vulture.reachability.Reachability._can_fall_through_statements_analysis",
+      "vulture.reachability.Reachability._handle_reachability_if",
+      "vulture.reachability.Reachability._handle_reachability_if_expr",
+      "vulture.reachability.Reachability._handle_reachability_try",
+      "vulture.reachability.Reachability._handle_reachability_while",
+      "vulture.reachability.Reachability._mark_as_no_fall_through"
+    ],
+    "vulture.utils.LoggingList.__init__": [
+      "<builtin>.list.__init__",
+      "<builtin>.super"
+    ],
+    "vulture.utils.LoggingList.append": [
+      "<builtin>.list.append",
+      "<builtin>.print",
+      "<builtin>.super"
+    ],
+    "vulture.utils.LoggingSet.__init__": [
+      "<builtin>.set.__init__",
+      "<builtin>.super"
+    ],
+    "vulture.utils.LoggingSet.add": [
+      "<builtin>.print",
+      "<builtin>.set.add",
+      "<builtin>.super"
+    ],
+    "vulture.utils._safe_eval": [
+      "<builtin>.all",
+      "<builtin>.any",
+      "<builtin>.isinstance",
+      "ast.literal_eval",
+      "vulture.utils._safe_eval"
+    ],
+    "vulture.utils.condition_is_always_false": [
+      "vulture.utils._safe_eval"
+    ],
+    "vulture.utils.condition_is_always_true": [
+      "vulture.utils._safe_eval"
+    ],
+    "vulture.utils.format_path": [
+      "pathlib.Path.cwd",
+      "pathlib.PurePath.relative_to"
+    ],
+    "vulture.utils.get_decorator_name": [
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "<builtin>.reversed",
+      "<builtin>.str.join"
+    ],
+    "vulture.utils.get_modules": [
+      "<builtin>.list.append",
+      "pathlib.Path.is_file",
+      "pathlib.Path.resolve"
+    ],
+    "vulture.utils.is_ast_string": [
+      "<builtin>.isinstance"
+    ],
+    "vulture.utils.read_file": [
+      "<builtin>.BaseException.__init__",
+      "_io.TextIOWrapper.read",
+      "tokenize.open"
+    ]
+  },
+  "executed": [
+    "vulture.config.InputError.__init__",
+    "vulture.config._check_input_config",
+    "vulture.config._check_output_config",
+    "vulture.config._parse_args",
+    "vulture.config._parse_args.csv",
+    "vulture.config._parse_toml",
+    "vulture.config.make_config",
+    "vulture.core.Item.__hash__",
+    "vulture.core.Item.__init__",
+    "vulture.core.Item.__repr__",
+    "vulture.core.Item._tuple",
+    "vulture.core.Item.get_report",
+    "vulture.core.Item.get_whitelist_string",
+    "vulture.core.Item.size",
+    "vulture.core.Vulture.__init__",
+    "vulture.core.Vulture.__init__.get_list",
+    "vulture.core.Vulture._add_aliases",
+    "vulture.core.Vulture._define",
+    "vulture.core.Vulture._define.ignored",
+    "vulture.core.Vulture._define_variable",
+    "vulture.core.Vulture._handle_new_format_string",
+    "vulture.core.Vulture._handle_new_format_string.is_identifier",
+    "vulture.core.Vulture._is_locals_call",
+    "vulture.core.Vulture._log",
+    "vulture.core.Vulture.generic_visit",
+    "vulture.core.Vulture.get_unused_code",
+    "vulture.core.Vulture.get_unused_code.by_name",
+    "vulture.core.Vulture.get_unused_code.by_size",
+    "vulture.core.Vulture.report",
+    "vulture.core.Vulture.scan",
+    "vulture.core.Vulture.scan.handle_syntax_error",
+    "vulture.core.Vulture.scavenge",
+    "vulture.core.Vulture.scavenge.exclude_path",
+    "vulture.core.Vulture.unused_attrs",
+    "vulture.core.Vulture.unused_classes",
+    "vulture.core.Vulture.unused_funcs",
+    "vulture.core.Vulture.unused_imports",
+    "vulture.core.Vulture.unused_methods",
+    "vulture.core.Vulture.unused_props",
+    "vulture.core.Vulture.unused_vars",
+    "vulture.core.Vulture.visit",
+    "vulture.core.Vulture.visit_Assign",
+    "vulture.core.Vulture.visit_AsyncFunctionDef",
+    "vulture.core.Vulture.visit_Attribute",
+    "vulture.core.Vulture.visit_BinOp",
+    "vulture.core.Vulture.visit_Call",
+    "vulture.core.Vulture.visit_ClassDef",
+    "vulture.core.Vulture.visit_FunctionDef",
+    "vulture.core.Vulture.visit_Import",
+    "vulture.core.Vulture.visit_ImportFrom",
+    "vulture.core.Vulture.visit_MatchClass",
+    "vulture.core.Vulture.visit_Name",
+    "vulture.core.Vulture.visit_arg",
+    "vulture.core._assigns_special_variable__all__",
+    "vulture.core._get_unused_items",
+    "vulture.core._get_unused_items.<lambda1>",
+    "vulture.core._ignore_class",
+    "vulture.core._ignore_function",
+    "vulture.core._ignore_import",
+    "vulture.core._ignore_method",
+    "vulture.core._ignore_variable",
+    "vulture.core._is_special_name",
+    "vulture.core._is_test_file",
+    "vulture.core._match",
+    "vulture.lines.get_first_line_number",
+    "vulture.lines.get_last_line_number",
+    "vulture.noqa._parse_error_codes",
+    "vulture.noqa.ignore_line",
+    "vulture.noqa.parse_noqa",
+    "vulture.reachability.Reachability.__init__",
+    "vulture.reachability.Reachability._body_has_break",
+    "vulture.reachability.Reachability._can_else_fall_through",
+    "vulture.reachability.Reachability._can_fall_through",
+    "vulture.reachability.Reachability._can_fall_through_statements_analysis",
+    "vulture.reachability.Reachability._handle_reachability_if",
+    "vulture.reachability.Reachability._handle_reachability_if_expr",
+    "vulture.reachability.Reachability._handle_reachability_try",
+    "vulture.reachability.Reachability._handle_reachability_while",
+    "vulture.reachability.Reachability._mark_as_no_fall_through",
+    "vulture.reachability.Reachability.reset",
+    "vulture.reachability.Reachability.visit",
+    "vulture.utils.LoggingList.__init__",
+    "vulture.utils.LoggingList.append",
+    "vulture.utils.LoggingSet.__init__",
+    "vulture.utils.LoggingSet.add",
+    "vulture.utils._safe_eval",
+    "vulture.utils.condition_is_always_false",
+    "vulture.utils.condition_is_always_true",
+    "vulture.utils.format_path",
+    "vulture.utils.get_decorator_name",
+    "vulture.utils.get_modules",
+    "vulture.utils.is_ast_string",
+    "vulture.utils.read_file"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "vulture.config.InputError.__init__",
+    "vulture.config._check_input_config",
+    "vulture.config._check_output_config",
+    "vulture.config._parse_args",
+    "vulture.config._parse_args.csv",
+    "vulture.config._parse_toml",
+    "vulture.config.make_config",
+    "vulture.core.Item.__eq__",
+    "vulture.core.Item.__hash__",
+    "vulture.core.Item.__init__",
+    "vulture.core.Item.__repr__",
+    "vulture.core.Item._tuple",
+    "vulture.core.Item.get_report",
+    "vulture.core.Item.get_whitelist_string",
+    "vulture.core.Item.size",
+    "vulture.core.Vulture.__init__",
+    "vulture.core.Vulture.__init__.get_list",
+    "vulture.core.Vulture._add_aliases",
+    "vulture.core.Vulture._define",
+    "vulture.core.Vulture._define.ignored",
+    "vulture.core.Vulture._define_variable",
+    "vulture.core.Vulture._handle_new_format_string",
+    "vulture.core.Vulture._handle_new_format_string.is_identifier",
+    "vulture.core.Vulture._is_locals_call",
+    "vulture.core.Vulture._log",
+    "vulture.core.Vulture.generic_visit",
+    "vulture.core.Vulture.get_unused_code",
+    "vulture.core.Vulture.get_unused_code.by_name",
+    "vulture.core.Vulture.get_unused_code.by_size",
+    "vulture.core.Vulture.report",
+    "vulture.core.Vulture.scan",
+    "vulture.core.Vulture.scan.handle_syntax_error",
+    "vulture.core.Vulture.scavenge",
+    "vulture.core.Vulture.scavenge.exclude_path",
+    "vulture.core.Vulture.scavenge.prepare_pattern",
+    "vulture.core.Vulture.unused_attrs",
+    "vulture.core.Vulture.unused_classes",
+    "vulture.core.Vulture.unused_funcs",
+    "vulture.core.Vulture.unused_imports",
+    "vulture.core.Vulture.unused_methods",
+    "vulture.core.Vulture.unused_props",
+    "vulture.core.Vulture.unused_vars",
+    "vulture.core.Vulture.visit",
+    "vulture.core.Vulture.visit_Assign",
+    "vulture.core.Vulture.visit_AsyncFunctionDef",
+    "vulture.core.Vulture.visit_Attribute",
+    "vulture.core.Vulture.visit_BinOp",
+    "vulture.core.Vulture.visit_Call",
+    "vulture.core.Vulture.visit_ClassDef",
+    "vulture.core.Vulture.visit_FunctionDef",
+    "vulture.core.Vulture.visit_Import",
+    "vulture.core.Vulture.visit_ImportFrom",
+    "vulture.core.Vulture.visit_MatchClass",
+    "vulture.core.Vulture.visit_Name",
+    "vulture.core.Vulture.visit_arg",
+    "vulture.core._assigns_special_variable__all__",
+    "vulture.core._get_unused_items",
+    "vulture.core._get_unused_items.<lambda1>",
+    "vulture.core._ignore_class",
+    "vulture.core._ignore_function",
+    "vulture.core._ignore_import",
+    "vulture.core._ignore_method",
+    "vulture.core._ignore_variable",
+    "vulture.core._is_special_name",
+    "vulture.core._is_test_file",
+    "vulture.core._match",
+    "vulture.core.main",
+    "vulture.lines.get_first_line_number",
+    "vulture.lines.get_last_line_number",
+    "vulture.noqa._parse_error_codes",
+    "vulture.noqa.ignore_line",
+    "vulture.noqa.parse_noqa",
+    "vulture.reachability.Reachability.__init__",
+    "vulture.reachability.Reachability._body_has_break",
+    "vulture.reachability.Reachability._can_else_fall_through",
+    "vulture.reachability.Reachability._can_fall_through",
+    "vulture.reachability.Reachability._can_fall_through_statements_analysis",
+    "vulture.reachability.Reachability._handle_reachability_if",
+    "vulture.reachability.Reachability._handle_reachability_if_expr",
+    "vulture.reachability.Reachability._handle_reachability_try",
+    "vulture.reachability.Reachability._handle_reachability_while",
+    "vulture.reachability.Reachability._mark_as_no_fall_through",
+    "vulture.reachability.Reachability.reset",
+    "vulture.reachability.Reachability.visit",
+    "vulture.utils.LoggingList.__init__",
+    "vulture.utils.LoggingList.append",
+    "vulture.utils.LoggingSet.__init__",
+    "vulture.utils.LoggingSet.add",
+    "vulture.utils._safe_eval",
+    "vulture.utils.condition_is_always_false",
+    "vulture.utils.condition_is_always_true",
+    "vulture.utils.format_path",
+    "vulture.utils.get_decorator_name",
+    "vulture.utils.get_modules",
+    "vulture.utils.is_ast_string",
+    "vulture.utils.read_file"
+  ],
+  "modules": [
+    "vulture",
+    "vulture.config",
+    "vulture.core",
+    "vulture.lines",
+    "vulture.noqa",
+    "vulture.reachability",
+    "vulture.utils",
+    "vulture.version"
+  ],
+  "project": "vulture",
+  "pytest": {
+    "config": "/dev/null",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 1,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 283,
+    "skipped": 1,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

@@ -1,0 +1,1568 @@
+# Call-site ledger of pubchempy at 9935a14e7fdb4a88d27a99fedce69ca99f004698 (v1.0.5).
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# pubchempy has no trace: every edge comes from reading (pubchempy.md).
+# Analysed source: pubchempy.py (root "."), one module. Python >= 3.10,
+# CPython only (no other implementation is declared), every platform
+# ("Operating System :: OS Independent"; CI on Linux, macOS and Windows).
+# Optional imports (certifi, pandas) run on both sides. A response of urlopen
+# is an http.client.HTTPResponse, or the urllib.response.addinfourl of a
+# redirect to an ftp URL (judgement J3).
+default reject pubchempy.Atom.__getitem__, pubchempy.Bond.__getitem__: no value subscripted at this site is an Atom or a Bond: the package subscripts the dicts and lists of the parsed JSON records, its own dicts (_atoms, _bonds, ELEMENTS, PROPERTY_MAP, error_map, kwargs), strs and a frozenset key lookup; dict-style access to Atom and Bond is deprecated client API that no package code uses
+default reject pubchempy.Atom.__eq__, pubchempy.Bond.__eq__, pubchempy.Compound.__eq__, pubchempy.Substance.__eq__, pubchempy.Assay.__eq__: no operand of this comparison or `in` test, and no key of this dict or set operation, is an Atom, Bond, Compound, Substance or Assay: the operands are str, int, float, None, IntEnum members, dicts and lists of JSON records, frozensets of ints and client keys
+default reject pubchempy.Atom.__contains__, pubchempy.Bond.__contains__: no container of this `in` test is an Atom or a Bond: the containers are dicts and lists of the JSON records, dict_items views, str/list/set displays and package dicts; no package code tests membership in an Atom or Bond
+
+== pubchempy
+
+[pubchempy]
+24:21 call  os.getenv("PUBCHEMPY_CA_BUNDLE")
+    -> os.getenv
+24:57 call  os.getenv("REQUESTS_CA_BUNDLE")
+    -> os.getenv
+29:33 call  certifi.where()
+    -> certifi.where
+    note: optional import of the `ssl` extra (certifi>=2025.7.14), under `if not _CA_FILE:` (lines 25-31); both sides of the optional import run (README, "Judgements"); certifi is no dependency source here and no package definition goes through it, so the call keeps its access path; certifi lists where in __all__
+90:24 call  logging.getLogger("pubchempy")
+    -> logging.getLogger
+91:15 call  log.addHandler(logging.NullHandler())
+    -> logging.Logger.addHandler
+    note: log is the Logger that logging.getLogger("pubchempy") returns (line 90)
+91:35 call  logging.NullHandler()
+    -> logging.NullHandler
+879:6 decorator  @deprecated("Dictionary style access to Atom attributes i...
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+879:16 call  deprecated("Dictionary style access to Atom attributes is...
+    -> pubchempy.deprecated
+886:6 decorator  @deprecated("Dictionary style access to Atom attributes i...
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+886:16 call  deprecated("Dictionary style access to Atom attributes is...
+    -> pubchempy.deprecated
+891:6 decorator  @deprecated("Dictionary style access to Atom attributes i...
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+891:16 call  deprecated("Dictionary style access to Atom attributes is...
+    -> pubchempy.deprecated
+898:6 decorator  @property
+    -> <builtin>.property
+919:6 decorator  @property
+    -> <builtin>.property
+964:6 decorator  @deprecated("Dictionary style access to Bond attributes i...
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+964:16 call  deprecated("Dictionary style access to Bond attributes is...
+    -> pubchempy.deprecated
+971:6 decorator  @deprecated("Dictionary style access to Bond attributes i...
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+971:16 call  deprecated("Dictionary style access to Bond attributes is...
+    -> pubchempy.deprecated
+976:6 decorator  @deprecated("Dictionary style access to Bond attributes i...
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+976:16 call  deprecated("Dictionary style access to Bond attributes is...
+    -> pubchempy.deprecated
+983:6 decorator  @deprecated("Dictionary style access to Bond attributes i...
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+983:16 call  deprecated("Dictionary style access to Bond attributes is...
+    -> pubchempy.deprecated
+1087:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1101:6 decorator  @property
+    -> <builtin>.property
+1106:6 decorator  @record.setter
+    -> <builtin>.property.setter
+1183:6 decorator  @property
+    -> <builtin>.property
+1199:6 decorator  @property
+    -> <builtin>.property
+1204:6 decorator  @property
+    -> <builtin>.property
+1209:6 decorator  @property
+    -> <builtin>.property
+1214:6 decorator  @memoized_property
+    -> pubchempy.memoized_property
+1228:6 decorator  @memoized_property
+    -> pubchempy.memoized_property
+1240:6 decorator  @memoized_property
+    -> pubchempy.memoized_property
+1252:6 decorator  @property
+    -> <builtin>.property
+1260:6 decorator  @property
+    -> <builtin>.property
+1265:6 decorator  @property
+    -> <builtin>.property
+1274:6 decorator  @property
+    -> <builtin>.property
+1286:6 decorator  @property
+    -> <builtin>.property
+    note: property wraps the function wrapped that the inner decorator deprecated(...) returned (line 1287); property stores it and calls nothing
+1287:6 decorator  @deprecated("Use connectivity_smiles instead")
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+1287:16 call  deprecated("Use connectivity_smiles instead")
+    -> pubchempy.deprecated
+1297:6 decorator  @property
+    -> <builtin>.property
+    note: property wraps the function wrapped that the inner decorator deprecated(...) returned (line 1298); property stores it and calls nothing
+1298:6 decorator  @deprecated("Use smiles instead")
+    -> pubchempy.deprecated.deco
+    note: the decorator is the function deco that deprecated(...) returns (line 815)
+1298:16 call  deprecated("Use smiles instead")
+    -> pubchempy.deprecated
+1307:6 decorator  @property
+    -> <builtin>.property
+1320:6 decorator  @property
+    -> <builtin>.property
+1334:6 decorator  @property
+    -> <builtin>.property
+1346:6 decorator  @property
+    -> <builtin>.property
+1359:6 decorator  @property
+    -> <builtin>.property
+1373:6 decorator  @property
+    -> <builtin>.property
+1384:6 decorator  @property
+    -> <builtin>.property
+1396:6 decorator  @property
+    -> <builtin>.property
+1409:6 decorator  @property
+    -> <builtin>.property
+1420:6 decorator  @property
+    -> <builtin>.property
+1431:6 decorator  @property
+    -> <builtin>.property
+1441:6 decorator  @property
+    -> <builtin>.property
+1451:6 decorator  @property
+    -> <builtin>.property
+1460:6 decorator  @property
+    -> <builtin>.property
+1482:6 decorator  @property
+    -> <builtin>.property
+1507:6 decorator  @property
+    -> <builtin>.property
+1518:6 decorator  @property
+    -> <builtin>.property
+1529:6 decorator  @property
+    -> <builtin>.property
+1539:6 decorator  @property
+    -> <builtin>.property
+1550:6 decorator  @property
+    -> <builtin>.property
+1561:6 decorator  @property
+    -> <builtin>.property
+1567:6 decorator  @property
+    -> <builtin>.property
+1573:6 decorator  @property
+    -> <builtin>.property
+1579:6 decorator  @property
+    -> <builtin>.property
+1585:6 decorator  @property
+    -> <builtin>.property
+1597:6 decorator  @property
+    -> <builtin>.property
+1603:6 decorator  @property
+    -> <builtin>.property
+1615:6 decorator  @property
+    -> <builtin>.property
+1628:6 decorator  @property
+    -> <builtin>.property
+1640:6 decorator  @property
+    -> <builtin>.property
+1646:6 decorator  @property
+    -> <builtin>.property
+1654:6 decorator  @property
+    -> <builtin>.property
+1660:6 decorator  @property
+    -> <builtin>.property
+1666:6 decorator  @property
+    -> <builtin>.property
+1674:6 decorator  @property
+    -> <builtin>.property
+1729:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1744:6 decorator  @property
+    -> <builtin>.property
+1803:6 decorator  @property
+    -> <builtin>.property
+1808:6 decorator  @property
+    -> <builtin>.property
+1814:6 decorator  @property
+    -> <builtin>.property
+1819:6 decorator  @property
+    -> <builtin>.property
+1824:6 decorator  @property
+    -> <builtin>.property
+1834:6 decorator  @memoized_property
+    -> pubchempy.memoized_property
+1845:6 decorator  @property
+    -> <builtin>.property
+1857:6 decorator  @memoized_property
+    -> pubchempy.memoized_property
+1866:6 decorator  @memoized_property
+    -> pubchempy.memoized_property
+1910:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1925:6 decorator  @property
+    -> <builtin>.property
+1957:6 decorator  @property
+    -> <builtin>.property
+1962:6 decorator  @property
+    -> <builtin>.property
+1967:6 decorator  @property
+    -> <builtin>.property
+1972:6 decorator  @property
+    -> <builtin>.property
+1982:6 decorator  @property
+    -> <builtin>.property
+1989:6 decorator  @property
+    -> <builtin>.property
+1994:6 decorator  @property
+    -> <builtin>.property
+2000:6 decorator  @property
+    -> <builtin>.property
+2005:6 decorator  @property
+    -> <builtin>.property
+2147:10 call  print(__version__)
+    -> <builtin>.print
+    reject *: __version__ is the str "1.0.5" (line 36); print calls str.__str__
+
+[pubchempy.request]
+348:25 call  ValueError("identifier/cid cannot be None")
+    -> <builtin>.ValueError
+350:18 call  isinstance(identifier, int)
+    -> <builtin>.isinstance
+351:25 call  str(identifier)
+    -> <builtin>.str
+    reject *: identifier is an int here (the isinstance test of line 350); int has its own __repr__
+352:22 call  isinstance(identifier, str)
+    -> <builtin>.isinstance
+353:30 call  ",".join(str(x) for x in identifier)
+    -> <builtin>.str.join
+353:34 call  str(x)
+    -> <builtin>.str
+    reject *: x is an item of the identifier list, a str or an int (annotation list[str | int], line 335)
+355:44 call  kwargs.items()
+    -> <builtin>.dict.items
+    note: kwargs is the dict that the interpreter builds for **kwargs
+359:40 call  identifier.replace("/", ".")
+    -> <builtin>.str.replace
+    note: identifier is a str here (lines 350-353 convert an int or a list)
+366:22 call  quote(identifier.encode("utf8"))
+    -> urllib.parse.quote
+366:40 call  identifier.encode("utf8")
+    -> <builtin>.str.encode
+368:29 call  urlencode([(namespace, identifier)])
+    -> urllib.parse.urlencode
+368:63 call  urlencode([(namespace, identifier)]).encode("utf8")
+    -> <builtin>.str.encode
+369:19 call  filter( None, [API_BASE, domain, searchtype, namespace, u...
+    -> <builtin>.filter
+    note: filter(None, ...) tests the truth of each str or None item; no callback
+372:22 call  "/".join(comps)
+    -> <builtin>.str.join
+374:22 format  {urlencode(kwargs)}
+    reject *: the formatted value is the str that urlencode returns
+374:32 call  urlencode(kwargs)
+    -> urllib.parse.urlencode
+    note: the values of kwargs are QueryParam values (str, int, float, bool, list[str]; line 94) that urlencode converts with str; no package object
+377:18 call  log.debug(f"Request URL: {apiurl}")
+    -> logging.Logger.debug
+    note: log is the Logger of line 90; the message is an already formatted str
+377:34 format  {apiurl}
+    reject *: apiurl is a str
+378:18 call  log.debug(f"Request data: {postdata}")
+    -> logging.Logger.debug
+    note: log is the Logger of line 90; the message is an already formatted str
+378:35 format  {postdata}
+    reject *: postdata is None or the bytes of line 368
+379:45 call  ssl.create_default_context(cafile=_CA_FILE)
+    -> ssl.create_default_context
+380:27 call  urlopen(apiurl, postdata, context=context)
+    -> urllib.request.urlopen
+383:32 call  create_http_error(e)
+    -> pubchempy.create_http_error
+
+[pubchempy.get]
+397:27 call  request( identifier, namespace, domain, None, "JSON", sea...
+    -> pubchempy.request
+399:15 call  request( identifier, namespace, domain, None, "JSON", sea...
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: request returns what urlopen returns: an http.client.HTTPResponse for the https URL of API_BASE, or a urllib.response.addinfourl when the server redirects to an ftp URL (HTTPRedirectHandler.http_error_302 allows http, https and ftp; FTPHandler.ftp_open returns addinfourl; CPython 3.10 to 3.15). addinfourl defines no read: its base tempfile._TemporaryFileWrapper delegates through __getattr__ to its local func_wrapper (judgement J3; asciinema judgement 11, fastjsonschema __init__.py:73:50)
+400:28 call  json.loads(response.decode())
+    -> json.loads
+400:44 call  response.decode()
+    -> <builtin>.bytes.decode
+    note: response is the bytes that read returned
+405:27 call  time.sleep(2)
+    -> time.sleep
+406:35 call  request( identifier, namespace, domain, operation, "JSON"...
+    -> pubchempy.request
+408:23 call  request( identifier, namespace, domain, operation, "JSON"...
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: as at 399:15 (judgement J3)
+409:36 call  json.loads(response.decode())
+    -> json.loads
+409:52 call  response.decode()
+    -> <builtin>.bytes.decode
+    note: response is the bytes that read returned
+411:35 call  request( identifier, namespace, domain, operation, output...
+    -> pubchempy.request
+419:23 call  request( identifier, namespace, domain, operation, output...
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: as at 399:15 (judgement J3)
+421:27 call  request( identifier, namespace, domain, operation, output...
+    -> pubchempy.request
+423:15 call  request( identifier, namespace, domain, operation, output...
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: as at 399:15 (judgement J3)
+
+[pubchempy.get_json]
+440:26 call  json.loads( get( identifier, namespace, domain, operation...
+    -> json.loads
+441:16 call  get( identifier, namespace, domain, operation, "JSON", se...
+    -> pubchempy.get
+443:21 call  get( identifier, namespace, domain, operation, "JSON", se...
+    -> <builtin>.bytes.decode
+    note: get returns the bytes of a read (lines 399-423)
+446:17 call  log.info(e)
+    -> logging.Logger.info
+    -> pubchempy.PubChemHTTPError.__str__
+    note: e is the NotFoundError that request raises through create_http_error; under the logging setup that the documentation gives (docs/guide/advanced.md, "Logging": logging.basicConfig(level=logging.DEBUG), or a StreamHandler on the "pubchempy" logger at DEBUG), the handler formats the record and LogRecord.getMessage calls str(e), which runs PubChemHTTPError.__str__ (inherited by NotFoundError); the callback belongs to this site (B5; pyrate-limiter limiter.py:182, structlog _base.py:224; judgement J4)
+
+[pubchempy.get_sdf]
+463:19 call  get( identifier, namespace, domain, operation, "SDF", sea...
+    -> pubchempy.get
+465:17 call  get( identifier, namespace, domain, operation, "SDF", sea...
+    -> <builtin>.bytes.decode
+    note: get returns the bytes of a read (lines 399-423)
+467:17 call  log.info(e)
+    -> logging.Logger.info
+    -> pubchempy.PubChemHTTPError.__str__
+    note: as at 446:17: the documented logging setup formats the NotFoundError with str(e) (judgement J4)
+
+[pubchempy.get_compounds]
+494:23 call  get_json(identifier, namespace, searchtype=searchtype, **...
+    -> pubchempy.get_json
+495:26 call  Compound(r)
+    -> pubchempy.Compound.__init__
+497:34 call  compounds_to_frame(compounds)
+    -> pubchempy.compounds_to_frame
+
+[pubchempy.get_substances]
+520:23 call  get_json(identifier, namespace, "substance", **kwargs)
+    -> pubchempy.get_json
+521:28 call  Substance(r)
+    -> pubchempy.Substance.__init__
+523:35 call  substances_to_frame(substances)
+    -> pubchempy.substances_to_frame
+
+[pubchempy.get_assays]
+542:23 call  get_json(identifier, namespace, "assay", "description", *...
+    -> pubchempy.get_json
+543:18 call  Assay(r)
+    -> pubchempy.Assay.__init__
+
+[pubchempy.get_properties]
+615:18 call  isinstance(properties, str)
+    -> <builtin>.isinstance
+616:38 call  properties.split(",")
+    -> <builtin>.str.split
+617:26 call  ",".join([PROPERTY_MAP.get(p, p) for p in properties])
+    -> <builtin>.str.join
+617:44 call  PROPERTY_MAP.get(p, p)
+    -> <builtin>.dict.get
+    reject pubchempy.get: the receiver is the dict PROPERTY_MAP (line 550)
+618:29 format  {properties}
+    reject *: properties is the str that str.join returned (line 617)
+619:23 call  get_json( identifier, namespace, "compound", properties, ...
+    -> pubchempy.get_json
+626:41 call  pd.DataFrame.from_records(results, index="CID")
+    -> pandas.DataFrame.from_records
+    note: the optional dependency pandas (extra `pandas`, pandas>=0.16.2), imported in the function (line 624); results is a list of dicts of JSON values; no package object reaches pandas
+
+[pubchempy.get_synonyms]
+654:23 call  get_json( identifier, namespace, domain, "synonyms", sear...
+    -> pubchempy.get_json
+
+[pubchempy.get_cids]
+685:23 call  get_json( identifier, namespace, domain, "cids", searchty...
+    -> pubchempy.get_json
+
+[pubchempy.get_sids]
+721:23 call  get_json( identifier, namespace, domain, "sids", searchty...
+    -> pubchempy.get_json
+
+[pubchempy.get_aids]
+757:23 call  get_json( identifier, namespace, domain, "aids", searchty...
+    -> pubchempy.get_json
+
+[pubchempy.get_all_sources]
+770:25 call  json.loads(get(domain, None, "sources").decode())
+    -> json.loads
+770:29 call  get(domain, None, "sources")
+    -> pubchempy.get
+770:61 call  get(domain, None, "sources").decode()
+    -> <builtin>.bytes.decode
+    note: get returns the bytes of a read (lines 399-423)
+
+[pubchempy.download]
+786:19 call  get( identifier, namespace, domain, operation, outformat,...
+    -> pubchempy.get
+789:40 call  os.path.isfile(path)
+    -> os.path.isfile
+790:22 call  OSError(f"{path} already exists. Use 'overwrite=True' to ...
+    -> <builtin>.OSError
+790:25 format  {path}
+    reject *: path is a str or a client os.PathLike (annotation str | os.PathLike, line 776); a client path object is opaque (B5)
+791:14 call  open(path, "wb")
+    -> <builtin>.open
+792:16 call  f.write(response)
+    -> io.BufferedWriter.write
+    note: open(path, "wb") with the default buffering returns an io.BufferedWriter
+
+[pubchempy.memoized_property]
+801:20 format  {fget.__name__}
+    reject *: fget.__name__ is a str
+803:6 decorator  @functools.wraps(fget)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code (aiocache precedent)
+803:21 call  functools.wraps(fget)
+    -> functools.wraps
+809:20 call  property(fget_memoized)
+    -> <builtin>.property
+    reject pubchempy.memoized_property.fget_memoized: property stores the getter and does not call it here; it runs at each attribute load of the property
+
+[pubchempy.memoized_property.fget_memoized]
+805:23 call  hasattr(self, attr_name)
+    -> <builtin>.hasattr
+    note: self is a Compound or a Substance (the classes whose properties memoized_property decorates, lines 1214-1240, 1834-1866); attr_name is "_synonyms", "_sids", "_aids", "_standardized_compound", "_cids" or "_aids", plain instance attributes; neither class defines __getattr__
+806:20 call  setattr(self, attr_name, fget(self))
+    -> <builtin>.setattr
+    note: attr_name names a plain instance attribute (see 805:23); no property or __setattr__ of the package runs
+806:42 call  fget(self)
+    -> pubchempy.Compound.synonyms
+    -> pubchempy.Compound.sids
+    -> pubchempy.Compound.aids
+    -> pubchempy.Substance.standardized_compound
+    -> pubchempy.Substance.cids
+    -> pubchempy.Substance.aids
+    note: fget is the function that memoized_property decorates: the package passes the six functions of lines 1215, 1229, 1241, 1835, 1858 and 1867 (the one node fget_memoized holds the edges of all six closures); memoized_property is public, but its annotation Callable[[Any], Any] names no package value and a client function is client code (B2, B5)
+807:23 call  getattr(self, attr_name)
+    -> <builtin>.getattr
+    note: attr_name names a plain instance attribute (see 805:23)
+
+[pubchempy.deprecated.deco]
+816:10 decorator  @functools.wraps(func)
+    -> functools.partial.__call__
+    note: the decorator is the functools.partial object that functools.wraps returns; it calls functools.update_wrapper, which copies attributes and calls no package code (aiocache precedent)
+816:25 call  functools.wraps(func)
+    -> functools.wraps
+
+[pubchempy.deprecated.deco.wrapped]
+818:26 call  warnings.warn( f"{func.__name__} is deprecated: {message}...
+    -> warnings.warn
+    note: the category PubChemPyDeprecationWarning defines no __init__ or __str__; warnings instantiates and formats it through Warning (implicit calls of code outside the package)
+819:19 format  {func.__name__}
+    reject *: func.__name__ is a str
+819:50 format  {message}
+    reject *: message is a str (annotation str, line 812; the nine package uses pass str literals)
+823:24 call  func(*args, **kwargs)
+    -> pubchempy.Atom.__getitem__
+    -> pubchempy.Atom.__setitem__
+    -> pubchempy.Atom.__contains__
+    -> pubchempy.Bond.__getitem__
+    -> pubchempy.Bond.__setitem__
+    -> pubchempy.Bond.__contains__
+    -> pubchempy.Bond.__delitem__
+    -> pubchempy.Compound.canonical_smiles
+    -> pubchempy.Compound.isomeric_smiles
+    note: func is the function that deco wraps: the package decorates these nine functions with deprecated(...) (lines 879-983, 1287, 1298); deprecated is public, but a client function passed to it is client code (B5)
+
+[pubchempy.Atom.__repr__]
+866:23 format  {self.aid!r}
+    reject *: self.aid is the atom ID, an int (annotation int, line 835; _setup_atoms passes the JSON ints of record["atoms"]["aid"])
+866:29 getattr  self.aid
+    reject pubchempy.Assay.aid: the receiver is an Atom, whose aid is a plain attribute
+866:37 format  {self.element!r}
+    reject *: self.element is the str that Atom.element returns
+866:43 getattr  self.element
+    -> pubchempy.Atom.element
+
+[pubchempy.Atom.__eq__]
+870:23 call  isinstance(other, type(self))
+    -> <builtin>.isinstance
+870:35 call  type(self)
+    -> <builtin>.type
+871:22 getattr  self.aid
+    reject pubchempy.Assay.aid: the receiver is an Atom, whose aid is a plain attribute
+871:35 getattr  other.aid
+    reject pubchempy.Assay.aid: other is an instance of type(self), an Atom (the isinstance test of line 870 comes first), whose aid is a plain attribute
+872:22 getattr  self.element
+    -> pubchempy.Atom.element
+872:39 getattr  other.element
+    -> pubchempy.Atom.element
+    note: other is an instance of type(self) (line 870): an Atom; a client subclass that overrides element is client code
+876:22 getattr  self.charge
+    reject pubchempy.Compound.charge: the receiver is an Atom, whose charge is a plain attribute
+876:38 getattr  other.charge
+    reject pubchempy.Compound.charge: other is an Atom (line 870), whose charge is a plain attribute
+
+[pubchempy.Atom.__getitem__]
+883:27 call  getattr(self, prop)
+    -> <builtin>.getattr
+    -> pubchempy.Atom.element
+    note: prop is one of "element", "x", "y", "z", "charge" (line 882); "element" names the property Atom.element (the tests use a["element"], tests/test_compound.py:43); the others are plain attributes
+884:23 call  KeyError(prop)
+    -> <builtin>.KeyError
+
+[pubchempy.Atom.__setitem__]
+889:16 call  setattr(self, prop, val)
+    -> <builtin>.setattr
+    note: Atom's properties element and coordinate_type have no setter (property.__set__ raises AttributeError); every other name is a plain attribute; no package code runs
+
+[pubchempy.Atom.__contains__]
+895:27 call  getattr(self, prop)
+    -> <builtin>.getattr
+    -> pubchempy.Atom.element
+    note: prop is one of "element", "x", "y", "z", "charge", the names that the package's own membership test admits (line 894); "element" names the property Atom.element (judgement J5)
+
+[pubchempy.Atom.element]
+901:28 call  ELEMENTS.get(self.number, str(self.number))
+    -> <builtin>.dict.get
+    reject pubchempy.get: the receiver is the dict ELEMENTS (line 206)
+901:45 call  str(self.number)
+    -> <builtin>.str
+    reject *: self.number is the atomic number, an int (annotation int, line 836; the JSON ints of record["atoms"]["element"])
+
+[pubchempy.Atom.to_dict]
+905:29 getattr  self.aid
+    reject pubchempy.Assay.aid: the receiver is an Atom, whose aid is a plain attribute
+905:73 getattr  self.element
+    -> pubchempy.Atom.element
+907:23 call  getattr(self, coord)
+    -> <builtin>.getattr
+    note: coord is "x", "y" or "z", plain attributes of Atom
+908:21 setitem  data[coord]
+    reject *: data is the dict display of line 905
+908:38 call  getattr(self, coord)
+    -> <builtin>.getattr
+    note: coord is "x", "y" or "z", plain attributes of Atom
+909:17 getattr  self.charge
+    reject pubchempy.Compound.charge: the receiver is an Atom, whose charge is a plain attribute
+910:17 setitem  data["charge"]
+    reject *: data is the dict display of line 905
+910:35 getattr  self.charge
+    reject pubchempy.Compound.charge: the receiver is an Atom, whose charge is a plain attribute
+
+[pubchempy.Bond.__repr__]
+953:23 format  {self.aid1!r}
+    reject *: self.aid1 is an atom ID, an int (annotation int, line 930)
+953:38 format  {self.aid2!r}
+    reject *: self.aid2 is an atom ID, an int (annotation int, line 931)
+953:53 format  {self.order!r}
+    reject *: self.order is a BondType member or the int of the record (annotation BondType, line 932; _setup_bonds passes the JSON ints of record["bonds"]["order"]); enum and int have their own __repr__
+
+[pubchempy.Bond.__eq__]
+957:23 call  isinstance(other, type(self))
+    -> <builtin>.isinstance
+957:35 call  type(self)
+    -> <builtin>.type
+
+[pubchempy.Bond.__getitem__]
+968:27 call  getattr(self, prop)
+    -> <builtin>.getattr
+    note: prop is "order" or "style" (line 967), plain attributes of Bond
+969:23 call  KeyError(prop)
+    -> <builtin>.KeyError
+
+[pubchempy.Bond.__setitem__]
+974:16 call  setattr(self, prop, val)
+    -> <builtin>.setattr
+    note: Bond has no property and no __setattr__; no package code runs
+
+[pubchempy.Bond.__contains__]
+980:27 call  getattr(self, prop)
+    -> <builtin>.getattr
+    note: prop is "order" or "style" (line 979), plain attributes of Bond
+
+[pubchempy.Bond.__delitem__]
+986:23 call  hasattr(self.__wrapped, prop)
+    -> <builtin>.hasattr
+    note: self.__wrapped is the mangled self._Bond__wrapped, which no Bond has (Bond.__init__ sets aid1, aid2, order and style; no __getattr__); a client that stores it through bond["_Bond__wrapped"] = x changes package internals (no witness). The witness is B1's last sentence: a client calls the public Bond.__delitem__(obj, key) (the deprecated wrapper, which calls this function) with its own object as self; that object is opaque (B5), so the load of _Bond__wrapped can succeed and hasattr runs (judgement J6, ruling of the lead, 2026-11-24)
+987:27 call  KeyError(prop)
+    -> <builtin>.KeyError
+    note: reached when hasattr at 986:23 is false for the client object (judgement J6)
+988:16 call  delattr(self.__wrapped, prop)
+    -> <builtin>.delattr
+    note: reached when hasattr at 986:23 is true for the client object (judgement J6)
+
+[pubchempy.Bond.to_dict]
+994:17 setitem  data["style"]
+    reject *: data is the dict display of line 992
+
+[pubchempy.Compound.__init__]
+1031:14 setattr  self.record
+    -> pubchempy.Compound.record
+    note: the setter of the property record (line 1106); getter and setter are one node
+
+[pubchempy.Compound._setup_atoms]
+1038:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1039:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1040:19 call  len(aids)
+    -> <builtin>.len
+1040:32 call  len(elements)
+    -> <builtin>.len
+1041:37 call  ResponseParseError("Error parsing atom elements")
+    -> <builtin>.Exception.__init__
+    note: ResponseParseError and PubChemPyError define no __init__; the first __init__ in the MRO is that of Exception
+1042:32 call  zip(aids, elements)
+    -> <builtin>.zip
+1043:24 setitem  self._atoms[aid]
+    reject *: self._atoms is a dict (line 1036)
+1043:36 call  Atom(aid=aid, number=element)
+    -> pubchempy.Atom.__init__
+1045:29 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1046:30 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1047:23 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1048:23 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1049:23 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1049:63 call  self.record["coords"][0]["conformers"][0].get("z", [])
+    -> <builtin>.dict.get
+    reject pubchempy.get: the receiver is a conformer dict of the parsed JSON record
+1050:23 call  len(coord_ids)
+    -> <builtin>.len
+1050:41 call  len(xs)
+    -> <builtin>.len
+1050:52 call  len(ys)
+    -> <builtin>.len
+1050:63 call  len(self._atoms)
+    -> <builtin>.len
+1051:31 call  len(zs)
+    -> <builtin>.len
+1051:42 call  len(coord_ids)
+    -> <builtin>.len
+1053:41 call  ResponseParseError("Error parsing atom coordinates")
+    -> <builtin>.Exception.__init__
+    note: ResponseParseError and PubChemPyError define no __init__; the first __init__ in the MRO is that of Exception
+1054:44 call  zip_longest(coord_ids, xs, ys, zs)
+    -> itertools.zip_longest
+1055:49 call  self._atoms[aid].set_coordinates(x, y, z)
+    -> pubchempy.Atom.set_coordinates
+    note: self._atoms holds the Atom objects of line 1043
+1057:29 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1058:32 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound._setup_bonds]
+1064:32 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1067:22 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1068:22 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1069:23 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1070:19 call  len(aid1s)
+    -> <builtin>.len
+1070:33 call  len(aid2s)
+    -> <builtin>.len
+1070:47 call  len(orders)
+    -> <builtin>.len
+1071:37 call  ResponseParseError("Error parsing bonds")
+    -> <builtin>.Exception.__init__
+    note: ResponseParseError and PubChemPyError define no __init__; the first __init__ in the MRO is that of Exception
+1072:37 call  zip(aid1s, aid2s, orders)
+    -> <builtin>.zip
+1073:24 setitem  self._bonds[frozenset((aid1, aid2))]
+    reject *: self._bonds is a dict (line 1063)
+1073:34 call  frozenset((aid1, aid2))
+    -> <builtin>.frozenset
+1073:56 call  Bond( aid1=aid1, aid2=aid2, order=order )
+    -> pubchempy.Bond.__init__
+1078:30 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1079:33 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1081:26 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1082:26 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1083:27 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1084:41 call  zip(aid1s, aid2s, styles)
+    -> <builtin>.zip
+1085:38 call  frozenset((aid1, aid2))
+    -> <builtin>.frozenset
+
+[pubchempy.Compound.from_cid]
+1098:28 call  json.loads(request(cid, **kwargs).read().decode())
+    -> json.loads
+1098:36 call  request(cid, **kwargs)
+    -> pubchempy.request
+1098:56 call  request(cid, **kwargs).read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: as at 399:15: an http.client.HTTPResponse, or the urllib.response.addinfourl of a redirect to an ftp URL (judgement J3)
+1098:65 call  request(cid, **kwargs).read().decode()
+    -> <builtin>.bytes.decode
+1099:19 call  cls(record)
+    -> pubchempy.Compound.__init__
+    note: cls is Compound (classmethod; a client subclass is client code); Compound's first __init__ is its own
+
+[pubchempy.Compound.record]
+1109:18 call  log.debug(f"Created {self}")
+    -> logging.Logger.debug
+    note: log is the Logger of line 90; the message is an already formatted str
+1109:29 format  {self}
+    -> pubchempy.Compound.__repr__
+    reject *: the formatted value is self, a Compound; format(self, "") reaches object.__str__, which calls Compound.__repr__
+1110:26 call  self._setup_atoms()
+    -> pubchempy.Compound._setup_atoms
+1111:26 call  self._setup_bonds()
+    -> pubchempy.Compound._setup_bonds
+
+[pubchempy.Compound.__repr__]
+1114:27 format  {self.cid if self.cid else ''}
+    reject *: the formatted value is the cid (an int of the JSON record) or ""
+1114:33 getattr  self.cid
+    -> pubchempy.Compound.cid
+1114:45 getattr  self.cid
+    -> pubchempy.Compound.cid
+
+[pubchempy.Compound.__eq__]
+1117:26 call  isinstance(other, type(self))
+    -> <builtin>.isinstance
+1117:38 call  type(self)
+    -> <builtin>.type
+1117:55 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1117:71 getattr  other.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is other, an instance of type(self) after the isinstance test, a Compound
+
+[pubchempy.Compound.to_dict]
+1151:52 call  Compound.__dict__.items()
+    -> types.MappingProxyType.items
+    note: Compound.__dict__ is the mappingproxy of the class
+1152:30 call  isinstance(v, property)
+    -> <builtin>.isinstance
+1155:26 call  i.to_dict()
+    -> pubchempy.Atom.to_dict
+    -> pubchempy.Bond.to_dict
+    reject *: i is an item of the list that Compound.atoms or Compound.bonds returns (p is "atoms" or "bonds"): an Atom or a Bond
+1155:45 call  getattr(self, p)
+    -> <builtin>.getattr
+    -> pubchempy.Compound.atoms
+    -> pubchempy.Compound.bonds
+    note: p is "atoms" or "bonds" (the test of line 1156)
+1157:25 call  getattr(self, p)
+    -> <builtin>.getattr
+    -> pubchempy.Compound.cid
+    -> pubchempy.Compound.elements
+    -> pubchempy.Compound.coordinate_type
+    -> pubchempy.Compound.charge
+    -> pubchempy.Compound.molecular_formula
+    -> pubchempy.Compound.molecular_weight
+    -> pubchempy.Compound.connectivity_smiles
+    -> pubchempy.Compound.smiles
+    -> pubchempy.Compound.inchi
+    -> pubchempy.Compound.inchikey
+    -> pubchempy.Compound.iupac_name
+    -> pubchempy.Compound.xlogp
+    -> pubchempy.Compound.exact_mass
+    -> pubchempy.Compound.monoisotopic_mass
+    -> pubchempy.Compound.tpsa
+    -> pubchempy.Compound.complexity
+    -> pubchempy.Compound.h_bond_donor_count
+    -> pubchempy.Compound.h_bond_acceptor_count
+    -> pubchempy.Compound.rotatable_bond_count
+    -> pubchempy.Compound.fingerprint
+    -> pubchempy.Compound.cactvs_fingerprint
+    -> pubchempy.Compound.heavy_atom_count
+    -> pubchempy.Compound.isotope_atom_count
+    -> pubchempy.Compound.atom_stereo_count
+    -> pubchempy.Compound.defined_atom_stereo_count
+    -> pubchempy.Compound.undefined_atom_stereo_count
+    -> pubchempy.Compound.bond_stereo_count
+    -> pubchempy.Compound.defined_bond_stereo_count
+    -> pubchempy.Compound.undefined_bond_stereo_count
+    -> pubchempy.Compound.covalent_unit_count
+    -> pubchempy.Compound.volume_3d
+    -> pubchempy.Compound.multipoles_3d
+    -> pubchempy.Compound.conformer_rmsd_3d
+    -> pubchempy.Compound.effective_rotor_count_3d
+    -> pubchempy.Compound.pharmacophore_features_3d
+    -> pubchempy.Compound.mmff94_partial_charges_3d
+    -> pubchempy.Compound.mmff94_energy_3d
+    -> pubchempy.Compound.conformer_id_3d
+    -> pubchempy.Compound.shape_selfoverlap_3d
+    -> pubchempy.Compound.feature_selfoverlap_3d
+    -> pubchempy.Compound.shape_fingerprint_3d
+    -> pubchempy.memoized_property.fget_memoized
+    -> pubchempy.deprecated.deco.wrapped
+    exclude pubchempy.Compound.record: not admitted at this getattr: the default list skips it and no test, documented example or documentation names it for to_dict's properties (judgement J2)
+    exclude pubchempy.Compound.synonyms: a memoized property; the getattr runs pubchempy.memoized_property.fget_memoized, which calls it (806:42)
+    exclude pubchempy.Compound.sids: a memoized property; the getattr runs pubchempy.memoized_property.fget_memoized, which calls it (806:42)
+    exclude pubchempy.Compound.aids: a memoized property; the getattr runs pubchempy.memoized_property.fget_memoized, which calls it (806:42)
+    exclude pubchempy.Compound.canonical_smiles: a deprecated property; the getattr runs pubchempy.deprecated.deco.wrapped, which calls it (823:24)
+    exclude pubchempy.Compound.isomeric_smiles: a deprecated property; the getattr runs pubchempy.deprecated.deco.wrapped, which calls it (823:24)
+    note: p is a name of the default list (every property of Compound.__dict__ but the skip set of lines 1141-1148, atoms and bonds going to 1155:45) or a name that the client passes and the documentation names for the role: the skipped synonyms, sids, aids, canonical_smiles and isomeric_smiles, which the docstring says are included when explicitly specified (lines 1126-1132), and the examples' atoms, bonds, inchi, smiles, xlogp, rotatable_bond_count (docs/guide/compound.md, docs/guide/pandas.md); compounds_to_frame adds cid; the getattr runs the property's getter (judgement J2)
+
+[pubchempy.Compound.to_series]
+1181:25 call  pd.Series(self.to_dict(properties))
+    -> pandas.Series
+    note: the optional dependency pandas, imported in the method (line 1179); the dict holds JSON values, lists of dicts and strs; no package object reaches pandas
+1181:38 call  self.to_dict(properties)
+    -> pubchempy.Compound.to_dict
+    reject *: the receiver is self, a Compound
+
+[pubchempy.Compound.cid]
+1195:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.elements]
+1202:19 getattr  a.element
+    -> pubchempy.Atom.element
+1202:41 getattr  self.atoms
+    -> pubchempy.Compound.atoms
+
+[pubchempy.Compound.atoms]
+1207:22 call  sorted(self._atoms.values(), key=lambda x: x.aid)
+    -> <builtin>.sorted
+    -> pubchempy.Compound.atoms.<lambda1>
+    note: sorted calls the key function on each Atom
+1207:41 call  self._atoms.values()
+    -> <builtin>.dict.values
+
+[pubchempy.Compound.atoms.<lambda1>]
+1207:61 getattr  x.aid
+    reject pubchempy.Assay.aid: x is an Atom, whose aid is a plain attribute
+
+[pubchempy.Compound.bonds]
+1212:22 call  sorted(self._bonds.values(), key=lambda x: (x.aid1, x.aid2))
+    -> <builtin>.sorted
+    -> pubchempy.Compound.bonds.<lambda1>
+    note: sorted calls the key function on each Bond
+1212:41 call  self._bonds.values()
+    -> <builtin>.dict.values
+
+[pubchempy.Compound.synonyms]
+1220:17 getattr  self.cid
+    -> pubchempy.Compound.cid
+1221:31 call  get_json(self.cid, operation="synonyms")
+    -> pubchempy.get_json
+    reject pubchempy.Compound.cid: self.cid is loaded at 1221:37 and passed as an int; get_json does not call it
+1221:37 getattr  self.cid
+    -> pubchempy.Compound.cid
+
+[pubchempy.Compound.sids]
+1234:17 getattr  self.cid
+    -> pubchempy.Compound.cid
+1235:31 call  get_json(self.cid, operation="sids")
+    -> pubchempy.get_json
+    reject pubchempy.Compound.cid: self.cid is loaded at 1235:37 and passed as an int; get_json does not call it
+1235:37 getattr  self.cid
+    -> pubchempy.Compound.cid
+
+[pubchempy.Compound.aids]
+1246:17 getattr  self.cid
+    -> pubchempy.Compound.cid
+1247:31 call  get_json(self.cid, operation="aids")
+    -> pubchempy.get_json
+    reject pubchempy.Compound.cid: self.cid is loaded at 1247:37 and passed as an int; get_json does not call it
+1247:37 getattr  self.cid
+    -> pubchempy.Compound.cid
+
+[pubchempy.Compound.coordinate_type]
+1255:41 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1257:45 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.charge]
+1263:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1263:58 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.molecular_formula]
+1272:27 call  _parse_prop({"label": "Molecular Formula"}, self.record["...
+    -> pubchempy._parse_prop
+1272:65 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.molecular_weight]
+1283:27 call  _parse_prop({"label": "Molecular Weight"}, self.record["p...
+    -> pubchempy._parse_prop
+1283:64 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1284:21 call  float(sval)
+    -> <builtin>.float
+
+[pubchempy.Compound.canonical_smiles]
+1295:21 getattr  self.connectivity_smiles
+    -> pubchempy.Compound.connectivity_smiles
+
+[pubchempy.Compound.isomeric_smiles]
+1305:21 getattr  self.smiles
+    -> pubchempy.Compound.smiles
+
+[pubchempy.Compound.connectivity_smiles]
+1316:27 call  _parse_prop( {"label": "SMILES", "name": "Connectivity"},...
+    -> pubchempy._parse_prop
+1317:63 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.smiles]
+1330:27 call  _parse_prop( {"label": "SMILES", "name": "Absolute"}, sel...
+    -> pubchempy._parse_prop
+1331:59 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.inchi]
+1344:27 call  _parse_prop({"label": "InChI", "name": "Standard"}, self....
+    -> pubchempy._parse_prop
+1344:73 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.inchikey]
+1355:27 call  _parse_prop( {"label": "InChIKey", "name": "Standard"}, s...
+    -> pubchempy._parse_prop
+1356:61 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.iupac_name]
+1369:27 call  _parse_prop( {"label": "IUPAC Name", "name": "Preferred"}...
+    -> pubchempy._parse_prop
+1370:64 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.xlogp]
+1382:27 call  _parse_prop({"label": "Log P"}, self.record["props"])
+    -> pubchempy._parse_prop
+1382:53 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.exact_mass]
+1393:27 call  _parse_prop({"label": "Mass", "name": "Exact"}, self.reco...
+    -> pubchempy._parse_prop
+1393:69 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1394:21 call  float(sval)
+    -> <builtin>.float
+
+[pubchempy.Compound.monoisotopic_mass]
+1404:27 call  _parse_prop( {"label": "Weight", "name": "MonoIsotopic"},...
+    -> pubchempy._parse_prop
+1405:63 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1407:21 call  float(sval)
+    -> <builtin>.float
+
+[pubchempy.Compound.tpsa]
+1418:27 call  _parse_prop({"implementation": "E_TPSA"}, self.record["pr...
+    -> pubchempy._parse_prop
+1418:63 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.complexity]
+1429:27 call  _parse_prop({"implementation": "E_COMPLEXITY"}, self.reco...
+    -> pubchempy._parse_prop
+1429:69 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.h_bond_donor_count]
+1439:27 call  _parse_prop({"implementation": "E_NHDONORS"}, self.record...
+    -> pubchempy._parse_prop
+1439:67 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.h_bond_acceptor_count]
+1449:27 call  _parse_prop({"implementation": "E_NHACCEPTORS"}, self.rec...
+    -> pubchempy._parse_prop
+1449:70 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.rotatable_bond_count]
+1458:27 call  _parse_prop({"implementation": "E_NROTBONDS"}, self.recor...
+    -> pubchempy._parse_prop
+1458:68 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.fingerprint]
+1480:27 call  _parse_prop({"implementation": "E_SCREEN"}, self.record["...
+    -> pubchempy._parse_prop
+1480:65 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.cactvs_fingerprint]
+1505:18 format  {int(self.fingerprint[8:], 16):020b}
+    reject *: the formatted value is the int of line 1505:22
+1505:22 call  int(self.fingerprint[8:], 16)
+    -> <builtin>.int
+1505:28 getattr  self.fingerprint
+    -> pubchempy.Compound.fingerprint
+1505:66 call  f"{int(self.fingerprint[8:], 16):020b}"[:-7].zfill(881)
+    -> <builtin>.str.zfill
+
+[pubchempy.Compound.heavy_atom_count]
+1515:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1515:60 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1516:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.isotope_atom_count]
+1526:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1526:62 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1527:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.atom_stereo_count]
+1536:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1536:61 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1537:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.defined_atom_stereo_count]
+1547:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1547:65 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1548:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.undefined_atom_stereo_count]
+1558:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1558:67 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1559:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.bond_stereo_count]
+1564:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1564:61 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1565:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.defined_bond_stereo_count]
+1570:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1570:65 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1571:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.undefined_bond_stereo_count]
+1576:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1576:67 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1577:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.covalent_unit_count]
+1582:28 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1582:63 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1583:25 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.volume_3d]
+1593:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1595:31 call  _parse_prop({"label": "Shape", "name": "Volume"}, conf["d...
+    -> pubchempy._parse_prop
+
+[pubchempy.Compound.multipoles_3d]
+1599:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1601:31 call  _parse_prop({"label": "Shape", "name": "Multipoles"}, con...
+    -> pubchempy._parse_prop
+
+[pubchempy.Compound.conformer_rmsd_3d]
+1611:23 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1613:31 call  _parse_prop({"label": "Conformer", "name": "RMSD"}, coord...
+    -> pubchempy._parse_prop
+
+[pubchempy.Compound.effective_rotor_count_3d]
+1624:27 call  _parse_prop( {"label": "Count", "name": "Effective Rotor"...
+    -> pubchempy._parse_prop
+1625:65 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.pharmacophore_features_3d]
+1636:27 call  _parse_prop( {"label": "Features", "name": "Pharmacophore...
+    -> pubchempy._parse_prop
+1637:66 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.mmff94_partial_charges_3d]
+1642:27 call  _parse_prop( {"label": "Charge", "name": "MMFF94 Partial"...
+    -> pubchempy._parse_prop
+1643:65 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+
+[pubchempy.Compound.mmff94_energy_3d]
+1648:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1650:31 call  _parse_prop( {"label": "Energy", "name": "MMFF94 NoEstat"...
+    -> pubchempy._parse_prop
+
+[pubchempy.Compound.conformer_id_3d]
+1656:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1658:31 call  _parse_prop({"label": "Conformer", "name": "ID"}, conf["d...
+    -> pubchempy._parse_prop
+
+[pubchempy.Compound.shape_selfoverlap_3d]
+1662:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1664:31 call  _parse_prop({"label": "Shape", "name": "Self Overlap"}, c...
+    -> pubchempy._parse_prop
+
+[pubchempy.Compound.feature_selfoverlap_3d]
+1668:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1670:31 call  _parse_prop( {"label": "Feature", "name": "Self Overlap"}...
+    -> pubchempy._parse_prop
+
+[pubchempy.Compound.shape_fingerprint_3d]
+1676:21 getattr  self.record
+    -> pubchempy.Compound.record
+    reject *: the receiver is self a Compound
+1678:31 call  _parse_prop({"label": "Fingerprint", "name": "Shape"}, co...
+    -> pubchempy._parse_prop
+
+[pubchempy._parse_prop]
+1684:35 call  all(item in i["urn"].items() for item in search.items())
+    -> <builtin>.all
+1684:58 call  i["urn"].items()
+    -> <builtin>.dict.items
+    note: i["urn"] is a dict of the parsed JSON record's props
+1684:85 call  search.items()
+    -> <builtin>.dict.items
+    note: search is one of the package's dict displays (the callers of _parse_prop, a private function, pass only dict literals)
+1686:11 call  len(props)
+    -> <builtin>.len
+1687:38 call  list(props[0]["value"].keys())
+    -> <builtin>.list
+1687:61 call  props[0]["value"].keys()
+    -> <builtin>.dict.keys
+
+[pubchempy.Substance.from_sid]
+1740:27 call  request(sid, "sid", "substance", **kwargs)
+    -> pubchempy.request
+1740:67 call  request(sid, "sid", "substance", **kwargs).read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: as at 399:15: an http.client.HTTPResponse, or the urllib.response.addinfourl of a redirect to an ftp URL (judgement J3)
+1740:76 call  request(sid, "sid", "substance", **kwargs).read().decode()
+    -> <builtin>.bytes.decode
+1741:28 call  json.loads(response)
+    -> json.loads
+1742:19 call  cls(record)
+    -> pubchempy.Substance.__init__
+    note: cls is Substance (classmethod; a client subclass is client code)
+
+[pubchempy.Substance.__repr__]
+1750:28 format  {self.sid if self.sid else ''}
+    reject *: the formatted value is the sid (an int of the JSON record) or ""
+1750:34 getattr  self.sid
+    -> pubchempy.Substance.sid
+1750:46 getattr  self.sid
+    -> pubchempy.Substance.sid
+
+[pubchempy.Substance.__eq__]
+1753:26 call  isinstance(other, type(self))
+    -> <builtin>.isinstance
+1753:38 call  type(self)
+    -> <builtin>.type
+1753:55 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+1753:71 getattr  other.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is other, an instance of type(self) after the isinstance test, a Substance
+
+[pubchempy.Substance.to_dict]
+1781:53 call  Substance.__dict__.items()
+    -> types.MappingProxyType.items
+    note: Substance.__dict__ is the mappingproxy of the class
+1782:30 call  isinstance(v, property)
+    -> <builtin>.isinstance
+1784:27 call  getattr(self, p)
+    -> <builtin>.getattr
+    -> pubchempy.Substance.sid
+    -> pubchempy.Substance.synonyms
+    -> pubchempy.Substance.source_name
+    -> pubchempy.Substance.source_id
+    -> pubchempy.Substance.standardized_cid
+    -> pubchempy.memoized_property.fget_memoized
+    exclude pubchempy.Substance.record: not admitted at this getattr: the default list skips it and no test, documented example or documentation names it for to_dict's properties (judgement J2)
+    exclude pubchempy.Substance.standardized_compound: not admitted at this getattr (the default list skips it and no test, documented example or documentation names it for to_dict's properties, judgement J2); it is a memoized property, and fget_memoized is a callee through cids and aids
+    exclude pubchempy.Substance.deposited_compound: not admitted at this getattr: the default list skips it and no test, documented example or documentation names it for to_dict's properties (judgement J2)
+    exclude pubchempy.Substance.cids: a memoized property; the getattr runs pubchempy.memoized_property.fget_memoized, which calls it (806:42)
+    exclude pubchempy.Substance.aids: a memoized property; the getattr runs pubchempy.memoized_property.fget_memoized, which calls it (806:42)
+    note: p is a name of the default list (sid, synonyms, source_name, source_id, standardized_cid: lines 1771-1783) or one of cids and aids, which the docstring says are included when explicitly specified (lines 1762-1763); substances_to_frame adds sid; cids and aids are memoized properties (judgement J2)
+
+[pubchempy.Substance.to_series]
+1801:25 call  pd.Series(self.to_dict(properties))
+    -> pandas.Series
+    note: the optional dependency pandas, imported in the method (line 1799); the dict holds JSON values; no package object reaches pandas (deposited_compound is not admitted at to_dict, judgement J2)
+1801:38 call  self.to_dict(properties)
+    -> pubchempy.Substance.to_dict
+    reject *: the receiver is self, a Substance
+
+[pubchempy.Substance.sid]
+1806:21 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+
+[pubchempy.Substance.synonyms]
+1811:31 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+1812:25 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+
+[pubchempy.Substance.source_name]
+1817:21 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+
+[pubchempy.Substance.source_id]
+1822:21 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+
+[pubchempy.Substance.standardized_cid]
+1830:23 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+1830:33 call  self.record.get("compound", [])
+    -> <builtin>.dict.get
+    reject pubchempy.get: the receiver is the record, a dict (annotation dict[str, Any], line 1714; the parsed JSON of from_sid and get_substances)
+
+[pubchempy.Substance.standardized_compound]
+1841:20 getattr  self.standardized_cid
+    -> pubchempy.Substance.standardized_cid
+1843:37 call  Compound.from_cid(cid)
+    -> pubchempy.Compound.from_cid
+
+[pubchempy.Substance.deposited_compound]
+1853:23 getattr  self.record
+    -> pubchempy.Substance.record
+    reject *: the receiver is self a Substance
+1853:33 call  self.record.get("compound", [])
+    -> <builtin>.dict.get
+    reject pubchempy.get: the receiver is the record, a dict (annotation dict[str, Any], line 1714; the parsed JSON of from_sid and get_substances)
+1855:32 call  Compound(c)
+    -> pubchempy.Compound.__init__
+
+[pubchempy.Substance.cids]
+1863:27 call  get_json(self.sid, "sid", "substance", "cids")
+    -> pubchempy.get_json
+    reject pubchempy.Substance.sid: self.sid is loaded at 1863:33 and passed as an int; get_json does not call it
+1863:33 getattr  self.sid
+    -> pubchempy.Substance.sid
+
+[pubchempy.Substance.aids]
+1872:27 call  get_json(self.sid, "sid", "substance", "aids")
+    -> pubchempy.get_json
+    reject pubchempy.Substance.sid: self.sid is loaded at 1872:33 and passed as an int; get_json does not call it
+1872:33 getattr  self.sid
+    -> pubchempy.Substance.sid
+
+[pubchempy.Assay.from_aid]
+1921:27 call  request(aid, "aid", "assay", "description", **kwargs)
+    -> pubchempy.request
+1921:78 call  request(aid, "aid", "assay", "description", **kwargs).read()
+    -> http.client.HTTPResponse.read
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: as at 399:15: an http.client.HTTPResponse, or the urllib.response.addinfourl of a redirect to an ftp URL (judgement J3)
+1921:87 call  request(aid, "aid", "assay", "description", **kwargs).rea...
+    -> <builtin>.bytes.decode
+1922:28 call  json.loads(response)
+    -> json.loads
+1923:19 call  cls(record)
+    -> pubchempy.Assay.__init__
+    note: cls is Assay (classmethod; a client subclass is client code)
+
+[pubchempy.Assay.__repr__]
+1931:24 format  {self.aid if self.aid else ''}
+    reject *: the formatted value is the aid (an int of the JSON record) or ""
+1931:30 getattr  self.aid
+    -> pubchempy.Assay.aid
+1931:42 getattr  self.aid
+    -> pubchempy.Assay.aid
+
+[pubchempy.Assay.__eq__]
+1934:26 call  isinstance(other, type(self))
+    -> <builtin>.isinstance
+1934:38 call  type(self)
+    -> <builtin>.type
+1934:55 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+1934:71 getattr  other.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is other, an instance of type(self) after the isinstance test, a Assay
+
+[pubchempy.Assay.to_dict]
+1952:49 call  Assay.__dict__.items()
+    -> types.MappingProxyType.items
+    note: Assay.__dict__ is the mappingproxy of the class
+1953:30 call  isinstance(v, property)
+    -> <builtin>.isinstance
+1955:27 call  getattr(self, p)
+    -> <builtin>.getattr
+    -> pubchempy.Assay.aid
+    -> pubchempy.Assay.name
+    -> pubchempy.Assay.description
+    -> pubchempy.Assay.project_category
+    -> pubchempy.Assay.comments
+    -> pubchempy.Assay.results
+    -> pubchempy.Assay.target
+    -> pubchempy.Assay.revision
+    -> pubchempy.Assay.aid_version
+    exclude pubchempy.Assay.record: not admitted at this getattr: the default list skips it and no test, documented example or documentation names it for to_dict's properties (judgement J2)
+    note: p is a name of the default list: every property of Assay.__dict__ but record (lines 1948-1954); the docstring names no other (judgement J2)
+
+[pubchempy.Assay.aid]
+1960:21 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.name]
+1965:21 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.description]
+1970:21 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.project_category]
+1979:39 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+1980:35 call  ProjectCategory(self.record["assay"]["descr"]["project_ca...
+    -> enum.EnumMeta.__call__
+    -> enum.EnumType.__call__
+    note: ProjectCategory is an IntEnum, whose metaclass overrides type.__call__: the call looks up the member by value and runs no __init__ (README, einops metaclass ruling; micro-benchmark "Instantiation of a snippet class"). The metaclass is enum.EnumMeta on CPython 3.10 and enum.EnumType from 3.11, where EnumMeta is an alias of it (Lib/enum.py); one name per runtime (judgement J7)
+1980:41 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.comments]
+1986:41 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.results]
+1992:21 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.target]
+1997:29 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+1998:25 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.revision]
+2003:21 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.Assay.aid_version]
+2008:21 getattr  self.record
+    -> pubchempy.Assay.record
+    reject *: the receiver is self a Assay
+
+[pubchempy.compounds_to_frame]
+2021:18 call  isinstance(compounds, Compound)
+    -> <builtin>.isinstance
+2023:21 call  set(properties)
+    -> <builtin>.set
+2024:37 call  pd.DataFrame.from_records( [c.to_dict(properties) for c i...
+    -> pandas.DataFrame.from_records
+    note: the optional dependency pandas, imported in the function (line 2019); the records are the dicts of Compound.to_dict, which hold JSON values, strs and lists of the dicts of Atom.to_dict and Bond.to_dict; no package object reaches pandas
+2025:19 call  c.to_dict(properties)
+    -> pubchempy.Compound.to_dict
+    reject *: c is a Compound (annotation list[Compound] | Compound, line 2012)
+
+[pubchempy.substances_to_frame]
+2039:18 call  isinstance(substances, Substance)
+    -> <builtin>.isinstance
+2041:21 call  set(properties)
+    -> <builtin>.set
+2042:37 call  pd.DataFrame.from_records( [s.to_dict(properties) for s i...
+    -> pandas.DataFrame.from_records
+    note: the optional dependency pandas, imported in the function (line 2037); the records are the dicts of Substance.to_dict, which hold JSON values
+2043:19 call  s.to_dict(properties)
+    -> pubchempy.Substance.to_dict
+    reject *: s is a Substance (annotation list[Substance] | Substance, line 2030)
+
+[pubchempy.PubChemHTTPError.__init__]
+2070:14 call  super()
+    -> <builtin>.super
+2070:25 call  super().__init__(msg)
+    -> <builtin>.Exception.__init__
+    reject *: the next class in the MRO is PubChemPyError, which defines no __init__; Exception.__init__ runs
+
+[pubchempy.PubChemHTTPError.__str__]
+2076:39 format  {self.code}
+    reject *: self.code is an int (annotation int, line 2062; create_http_error passes HTTPError.code)
+2076:51 format  {self.msg}
+    reject *: self.msg is the str message or a JSON value of the Fault (create_http_error, lines 2091-2097); no package object
+2078:32 call  ", ".join(self.details)
+    -> <builtin>.str.join
+    note: self.details is the list of str details (annotation list[str], line 2062; the JSON "Details" list or [])
+2079:24 format  {output}
+    reject *: output is a str
+2079:34 format  {details}
+    reject *: details is the str of line 2078
+
+[pubchempy.PubChemHTTPError.__repr__]
+2084:15 format  {self.__class__.__name__}
+    reject *: the formatted value is the str name of the class
+2084:41 format  {self.code!r}
+    reject *: self.code is an int (annotation int, line 2062)
+2084:56 format  {self.msg!r}
+    reject *: self.msg is the str message or a JSON value of the Fault; no package object
+2084:70 format  {self.details!r}
+    reject *: self.details is a list of str (annotation list[str], line 2062)
+
+[pubchempy.create_http_error]
+2094:27 call  json.loads(e.read().decode())
+    -> json.loads
+2094:34 call  e.read()
+    -> tempfile._TemporaryFileWrapper.__getattr__.func_wrapper
+    note: e is a urllib.error.HTTPError (annotation; urlopen raises it at line 380), an urllib.response.addinfourl whose base tempfile._TemporaryFileWrapper delegates read through __getattr__ to its local func_wrapper (also with fp None: HTTPError.__init__ wraps an io.BytesIO; CPython 3.10 to 3.15, Lib/urllib/error.py:39-47); judgement J3
+2094:43 call  e.read().decode()
+    -> <builtin>.bytes.decode
+2095:24 call  fault.get("Code", msg)
+    -> <builtin>.dict.get
+    reject pubchempy.get: fault is the "Fault" dict of the parsed JSON error body (a str or list there has no get and raises AttributeError)
+2097:21 format  {msg}
+    reject *: msg is the str of HTTPError.msg or a JSON value of the Fault
+2097:28 format  {fault['Message']}
+    reject *: fault['Message'] is a JSON value
+2098:28 call  fault.get("Details", [])
+    -> <builtin>.dict.get
+    reject pubchempy.get: fault is the "Fault" dict of the parsed JSON error body
+2111:32 call  error_map.get(code, PubChemHTTPError)
+    -> <builtin>.dict.get
+    reject pubchempy.get: the receiver is the dict display error_map (line 2102)
+2112:23 call  error_class(code, msg, details)
+    -> pubchempy.PubChemHTTPError.__init__
+    note: error_class is one of the seven subclasses of error_map (line 2102) or PubChemHTTPError (line 2111); none of the subclasses defines __init__, so each call runs PubChemHTTPError.__init__

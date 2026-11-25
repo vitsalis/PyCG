@@ -1,0 +1,1685 @@
+{
+  "aliases": {
+    "<builtin>.dict.get": [
+      "collections.defaultdict.get"
+    ],
+    "<builtin>.dict.items": [
+      "collections.defaultdict.items"
+    ],
+    "<builtin>.dict.keys": [
+      "collections.defaultdict.keys"
+    ],
+    "<builtin>.dict.pop": [
+      "collections.defaultdict.pop"
+    ],
+    "<builtin>.dict.popitem": [
+      "collections.defaultdict.popitem"
+    ],
+    "<builtin>.dict.update": [
+      "collections.defaultdict.update"
+    ],
+    "<builtin>.dict.values": [
+      "collections.defaultdict.values"
+    ],
+    "<builtin>.int": [
+      "uuid.int_"
+    ],
+    "<builtin>.str": [
+      "typing.Text"
+    ],
+    "<builtin>.str.format": [
+      "typing.Text.format"
+    ],
+    "<builtin>.str.join": [
+      "typing.Text.join"
+    ],
+    "<builtin>.str.partition": [
+      "typing.Text.partition"
+    ],
+    "<builtin>.str.rsplit": [
+      "typing.Text.rsplit"
+    ],
+    "<builtin>.str.split": [
+      "typing.Text.split"
+    ],
+    "_frozen_importlib.ModuleSpec": [
+      "importlib.machinery.ModuleSpec"
+    ],
+    "_functools.reduce": [
+      "functools.reduce"
+    ],
+    "_operator.add": [
+      "operator.add"
+    ],
+    "_operator.mul": [
+      "operator.mul"
+    ],
+    "_operator.not_": [
+      "operator.not_"
+    ],
+    "_random.Random.random": [
+      "random.Random.random",
+      "random.random"
+    ],
+    "_warnings.warn": [
+      "warnings.warn"
+    ],
+    "builtins.mappingproxy.items": [
+      "types.MappingProxyType.items"
+    ],
+    "builtins.mappingproxy.values": [
+      "types.MappingProxyType.values"
+    ],
+    "builtins.method": [
+      "types.MethodType"
+    ],
+    "builtins.module": [
+      "types.ModuleType"
+    ],
+    "collections.abc.Mapping.items": [
+      "collections.abc.MutableMapping.items",
+      "selectors.Mapping.items"
+    ],
+    "collections.abc.Mapping.keys": [
+      "collections.abc.MutableMapping.keys",
+      "selectors.Mapping.keys"
+    ],
+    "collections.abc.Mapping.values": [
+      "collections.abc.MutableMapping.values",
+      "selectors.Mapping.values"
+    ]
+  },
+  "commit": "451af60dec590a6010e2babdbf391ea8f815122f",
+  "deselect": [
+    {
+      "reason": "asserts toolz.__version__, which toolz/__init__.py takes from importlib.metadata: toolz is not installed in the trace image, so it raises PackageNotFoundError (scan B)",
+      "test": "toolz/tests/test_package.py::test_has_version"
+    }
+  ],
+  "distributions": {
+    "Pygments": "2.21.0",
+    "iniconfig": "2.3.1",
+    "packaging": "26.3",
+    "pluggy": "1.7.0",
+    "pytest": "9.2.0"
+  },
+  "dropped": {
+    "client_callbacks": 113,
+    "unknown_caller": 0
+  },
+  "edges": {
+    "tlz._build_tlz": [
+      "<builtin>.list.append",
+      "tlz._build_tlz.TlzLoader.__init__",
+      "tlz._build_tlz.TlzLoader.exec_module"
+    ],
+    "tlz._build_tlz.TlzLoader._load_toolz": [
+      "<builtin>.ImportError",
+      "<builtin>.str.join",
+      "<builtin>.str.partition",
+      "importlib.import_module",
+      "tlz._build_tlz.TlzLoader.find_spec"
+    ],
+    "tlz._build_tlz.TlzLoader.create_module": [
+      "builtins.module"
+    ],
+    "tlz._build_tlz.TlzLoader.exec_module": [
+      "<builtin>.dict.get",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.hash",
+      "<builtin>.isinstance",
+      "<builtin>.str.join",
+      "<builtin>.str.partition",
+      "importlib.import_module",
+      "tlz._build_tlz.TlzLoader._load_toolz",
+      "tlz._build_tlz.TlzLoader.create_module",
+      "tlz._build_tlz.TlzLoader.exec_module",
+      "tlz._build_tlz.TlzLoader.find_spec",
+      "toolz.dicttoolz.merge",
+      "toolz.functoolz.curry.__hash__"
+    ],
+    "tlz._build_tlz.TlzLoader.find_spec": [
+      "<builtin>.str.partition",
+      "_frozen_importlib.ModuleSpec"
+    ],
+    "toolz": [
+      "toolz._signatures.create_signature_registry"
+    ],
+    "toolz.__getattr__": [
+      "<builtin>.AttributeError"
+    ],
+    "toolz._signatures": [
+      "<builtin>.dict",
+      "<builtin>.dict.update"
+    ],
+    "toolz._signatures._has_keywords": [
+      "<builtin>.all",
+      "<builtin>.any",
+      "toolz._signatures.check_keywords"
+    ],
+    "toolz._signatures._has_varargs": [
+      "<builtin>.all",
+      "<builtin>.any",
+      "toolz._signatures.check_varargs"
+    ],
+    "toolz._signatures._is_arity": [
+      "<builtin>.all",
+      "<builtin>.any",
+      "toolz._signatures.check_arity"
+    ],
+    "toolz._signatures._is_partial_args": [
+      "<builtin>.any",
+      "toolz._signatures.check_partial"
+    ],
+    "toolz._signatures._is_valid_args": [
+      "<builtin>.any",
+      "toolz._signatures.check_valid"
+    ],
+    "toolz._signatures._num_required_args": [
+      "<builtin>.all",
+      "toolz._signatures.check_required_args"
+    ],
+    "toolz._signatures.check_arity": [
+      "toolz.functoolz.is_arity"
+    ],
+    "toolz._signatures.check_keywords": [
+      "toolz.functoolz.has_keywords"
+    ],
+    "toolz._signatures.check_partial": [
+      "<builtin>.dict",
+      "<builtin>.dict.pop",
+      "<builtin>.len",
+      "toolz.functoolz.is_partial_args"
+    ],
+    "toolz._signatures.check_required_args": [
+      "toolz.functoolz.num_required_args"
+    ],
+    "toolz._signatures.check_valid": [
+      "<builtin>.dict",
+      "<builtin>.dict.pop",
+      "<builtin>.len",
+      "toolz._signatures.<lambda125>",
+      "toolz._signatures.<lambda126>",
+      "toolz._signatures.<lambda132>",
+      "toolz._signatures.<lambda215>",
+      "toolz._signatures.<lambda23>",
+      "toolz._signatures.<lambda55>",
+      "toolz._signatures.<lambda56>",
+      "toolz._signatures.<lambda68>",
+      "toolz._signatures.<lambda78>",
+      "toolz._signatures.<lambda79>",
+      "toolz._signatures.<lambda80>"
+    ],
+    "toolz._signatures.check_varargs": [
+      "toolz.functoolz.has_varargs"
+    ],
+    "toolz._signatures.create_signature_registry": [
+      "<builtin>.dict.items",
+      "<builtin>.getattr",
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "<builtin>.tuple",
+      "importlib.import_module",
+      "toolz._signatures.expand_sig",
+      "toolz.functoolz.curry.__hash__"
+    ],
+    "toolz._signatures.expand_sig": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "toolz._signatures.get_exclude_keywords",
+      "toolz._signatures.num_pos_args",
+      "toolz._signatures.signature_or_spec"
+    ],
+    "toolz._signatures.get_exclude_keywords": [
+      "<builtin>.any",
+      "<builtin>.list",
+      "<builtin>.tuple",
+      "builtins.mappingproxy.values"
+    ],
+    "toolz._signatures.num_pos_args": [
+      "<builtin>.sum",
+      "builtins.mappingproxy.values"
+    ],
+    "toolz._signatures.signature_or_spec": [
+      "inspect.signature"
+    ],
+    "toolz.compatibility": [
+      "<builtin>.hasattr",
+      "_warnings.warn",
+      "operator.methodcaller"
+    ],
+    "toolz.curried": [
+      "toolz.functoolz.curry.__init__"
+    ],
+    "toolz.curried.exceptions": [
+      "toolz.functoolz.curry.__init__"
+    ],
+    "toolz.curried.exceptions.merge": [
+      "toolz.dicttoolz.merge"
+    ],
+    "toolz.curried.exceptions.merge_with": [
+      "toolz.dicttoolz.merge_with"
+    ],
+    "toolz.curried.operator": [
+      "<builtin>.callable",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.locals",
+      "<builtin>.vars",
+      "toolz.functoolz.curry.__init__"
+    ],
+    "toolz.dicttoolz._get_factory": [
+      "<builtin>.TypeError",
+      "<builtin>.dict.pop",
+      "<builtin>.dict.popitem",
+      "<builtin>.str.format"
+    ],
+    "toolz.dicttoolz.assoc": [
+      "<builtin>.dict",
+      "<builtin>.dict.update"
+    ],
+    "toolz.dicttoolz.assoc_in": [
+      "toolz.dicttoolz.update_in"
+    ],
+    "toolz.dicttoolz.dissoc": [
+      "<builtin>.dict",
+      "<builtin>.dict.update",
+      "<builtin>.len",
+      "<builtin>.set",
+      "<builtin>.set.difference_update",
+      "toolz.dicttoolz._get_factory"
+    ],
+    "toolz.dicttoolz.get_in": [
+      "_functools.reduce"
+    ],
+    "toolz.dicttoolz.itemfilter": [
+      "<builtin>.dict",
+      "<builtin>.dict.items",
+      "toolz.dicttoolz.isvalid"
+    ],
+    "toolz.dicttoolz.itemmap": [
+      "<builtin>.dict",
+      "<builtin>.dict.items",
+      "<builtin>.dict.update",
+      "<builtin>.map",
+      "collections.abc.Mapping.items",
+      "toolz.functoolz.identity"
+    ],
+    "toolz.dicttoolz.keyfilter": [
+      "<builtin>.dict",
+      "<builtin>.dict.items",
+      "toolz.dicttoolz.<lambda>"
+    ],
+    "toolz.dicttoolz.keymap": [
+      "<builtin>.dict",
+      "<builtin>.dict.keys",
+      "<builtin>.dict.update",
+      "<builtin>.dict.values",
+      "<builtin>.map",
+      "<builtin>.zip",
+      "collections.abc.Mapping.keys",
+      "collections.abc.Mapping.values",
+      "toolz.functoolz.identity"
+    ],
+    "toolz.dicttoolz.merge": [
+      "<builtin>.dict",
+      "<builtin>.dict.update",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "toolz.dicttoolz._get_factory"
+    ],
+    "toolz.dicttoolz.merge_with": [
+      "<builtin>.dict",
+      "<builtin>.dict.items",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.list.append",
+      "<builtin>.sum",
+      "<builtin>.tuple",
+      "collections.abc.Mapping.items",
+      "collections.defaultdict",
+      "toolz.dicttoolz._get_factory",
+      "toolz.dicttoolz.merge_with.<lambda1>"
+    ],
+    "toolz.dicttoolz.update_in": [
+      "<builtin>.dict",
+      "<builtin>.dict.update",
+      "<builtin>.iter",
+      "<builtin>.next",
+      "<builtin>.str",
+      "toolz.dicttoolz.<lambda>",
+      "toolz.dicttoolz.assoc_in.<lambda1>"
+    ],
+    "toolz.dicttoolz.valfilter": [
+      "<builtin>.callable",
+      "<builtin>.dict",
+      "<builtin>.dict.items",
+      "toolz.dicttoolz.<lambda>"
+    ],
+    "toolz.dicttoolz.valmap": [
+      "<builtin>.dict",
+      "<builtin>.dict.keys",
+      "<builtin>.dict.update",
+      "<builtin>.dict.values",
+      "<builtin>.map",
+      "<builtin>.zip",
+      "collections.abc.Mapping.keys",
+      "collections.abc.Mapping.values",
+      "toolz.functoolz.identity"
+    ],
+    "toolz.functoolz": [
+      "<builtin>.hasattr",
+      "<builtin>.property",
+      "functools.partial.__call__",
+      "operator.attrgetter",
+      "toolz.functoolz._InstanceAnnotations.__init__",
+      "toolz.functoolz.curry.__init__",
+      "toolz.functoolz.instanceproperty"
+    ],
+    "toolz.functoolz.Compose.__call__": [
+      "<builtin>.bool",
+      "<builtin>.str",
+      "<builtin>.sum",
+      "_operator.add",
+      "_operator.not_",
+      "toolz.functoolz.<lambda>",
+      "toolz.functoolz.Compose.__call__",
+      "toolz.functoolz.curry.__call__",
+      "toolz.functoolz.iseven"
+    ],
+    "toolz.functoolz.Compose.__doc__": [
+      "<builtin>.reversed",
+      "toolz.functoolz.Compose.__doc__.composed_doc"
+    ],
+    "toolz.functoolz.Compose.__doc__.composed_doc": [
+      "toolz.functoolz.Compose.__doc__.composed_doc"
+    ],
+    "toolz.functoolz.Compose.__eq__": [
+      "<builtin>.isinstance"
+    ],
+    "toolz.functoolz.Compose.__get__": [
+      "builtins.method"
+    ],
+    "toolz.functoolz.Compose.__hash__": [
+      "<builtin>.hash"
+    ],
+    "toolz.functoolz.Compose.__init__": [
+      "<builtin>.reversed",
+      "<builtin>.tuple"
+    ],
+    "toolz.functoolz.Compose.__name__": [
+      "<builtin>.reversed",
+      "<builtin>.str.join",
+      "<builtin>.type"
+    ],
+    "toolz.functoolz.Compose.__ne__": [
+      "toolz.functoolz.Compose.__eq__"
+    ],
+    "toolz.functoolz.Compose.__repr__": [
+      "<builtin>.reversed",
+      "<builtin>.str.format",
+      "<builtin>.tuple"
+    ],
+    "toolz.functoolz.Compose.__signature__": [
+      "inspect.Signature.replace",
+      "inspect.signature",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.Compose._combined_annotations": [
+      "<builtin>.dict.pop",
+      "toolz.functoolz.Compose._combined_annotations.annotations_of"
+    ],
+    "toolz.functoolz.Compose._combined_annotations.annotations_of": [
+      "<builtin>.isinstance",
+      "builtins.mappingproxy.items",
+      "inspect.signature",
+      "toolz.functoolz.Compose._combined_annotations",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.Compose._get_annotate.annotate": [
+      "<builtin>.NotImplementedError",
+      "annotationlib.annotations_to_string",
+      "toolz.functoolz.Compose._combined_annotations"
+    ],
+    "toolz.functoolz.InstanceProperty.__get__": [
+      "<builtin>.property.__get__",
+      "toolz.functoolz.Compose.__doc__",
+      "toolz.functoolz.Compose.__signature__",
+      "toolz.functoolz.Compose._get_annotate",
+      "toolz.functoolz.curry.__signature__",
+      "toolz.functoolz.curry.args",
+      "toolz.functoolz.curry.func",
+      "toolz.functoolz.curry.func_name",
+      "toolz.functoolz.curry.keywords",
+      "toolz.functoolz.excepts.__doc__"
+    ],
+    "toolz.functoolz.InstanceProperty.__init__": [
+      "<builtin>.property.__init__"
+    ],
+    "toolz.functoolz._InstanceAnnotations.__get__": [
+      "toolz.functoolz.Compose._combined_annotations"
+    ],
+    "toolz.functoolz._check_sigspec": [
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "inspect.signature",
+      "toolz._signatures._has_keywords",
+      "toolz._signatures._has_varargs",
+      "toolz._signatures._is_arity",
+      "toolz._signatures._is_partial_args",
+      "toolz._signatures._is_valid_args",
+      "toolz._signatures._num_required_args",
+      "toolz.functoolz.InstanceProperty.__get__",
+      "toolz.functoolz.curry.__hash__"
+    ],
+    "toolz.functoolz._restore_curry": [
+      "<builtin>.dict.update",
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "<builtin>.str.rsplit",
+      "<builtin>.str.split",
+      "importlib.import_module",
+      "toolz.functoolz.InstanceProperty.__get__",
+      "toolz.functoolz.curry.__get__",
+      "toolz.functoolz.curry.__init__"
+    ],
+    "toolz.functoolz.apply": [
+      "<builtin>.TypeError",
+      "toolz.functoolz.double",
+      "toolz.functoolz.inc"
+    ],
+    "toolz.functoolz.complement": [
+      "toolz.functoolz.compose"
+    ],
+    "toolz.functoolz.compose": [
+      "<builtin>.len",
+      "toolz.functoolz.Compose.__init__"
+    ],
+    "toolz.functoolz.compose_left": [
+      "<builtin>.reversed",
+      "toolz.functoolz.compose"
+    ],
+    "toolz.functoolz.curry.__call__": [
+      "functools.partial.__call__",
+      "toolz.curried.exceptions.merge",
+      "toolz.curried.exceptions.merge_with",
+      "toolz.functoolz.curry._should_curry",
+      "toolz.functoolz.curry.bind",
+      "toolz.functoolz.do",
+      "toolz.functoolz.flip",
+      "toolz.functoolz.memoize",
+      "toolz.itertoolz.get",
+      "toolz.itertoolz.second",
+      "toolz.itertoolz.take",
+      "toolz.sandbox.core.EqualityHashKey.__init__"
+    ],
+    "toolz.functoolz.curry.__eq__": [
+      "<builtin>.isinstance",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.curry.__get__": [
+      "toolz.functoolz.curry.__init__"
+    ],
+    "toolz.functoolz.curry.__hash__": [
+      "<builtin>.dict.items",
+      "<builtin>.frozenset",
+      "<builtin>.hash",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.curry.__init__": [
+      "<builtin>.TypeError",
+      "<builtin>.callable",
+      "<builtin>.dict.update",
+      "<builtin>.getattr",
+      "<builtin>.hasattr",
+      "<builtin>.isinstance",
+      "functools.partial",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.curry.__ne__": [
+      "toolz.functoolz.curry.__eq__"
+    ],
+    "toolz.functoolz.curry.__reduce__": [
+      "<builtin>.dict.items",
+      "<builtin>.getattr",
+      "<builtin>.isinstance",
+      "<builtin>.list.append",
+      "<builtin>.str.join",
+      "<builtin>.str.split",
+      "<builtin>.tuple",
+      "<builtin>.type",
+      "importlib.import_module",
+      "toolz.functoolz.InstanceProperty.__get__",
+      "toolz.functoolz.curry.__get__"
+    ],
+    "toolz.functoolz.curry.__repr__": [
+      "<builtin>.repr",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.curry.__signature__": [
+      "<builtin>.TypeError",
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.list.append",
+      "builtins.mappingproxy.values",
+      "inspect.Parameter.replace",
+      "inspect.Signature.replace",
+      "inspect.signature",
+      "toolz.functoolz.InstanceProperty.__get__",
+      "toolz.functoolz.is_partial_args"
+    ],
+    "toolz.functoolz.curry.__str__": [
+      "<builtin>.str",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.curry._should_curry": [
+      "<builtin>.dict",
+      "toolz._signatures.signature_or_spec",
+      "toolz.functoolz.InstanceProperty.__get__",
+      "toolz.functoolz.has_varargs",
+      "toolz.functoolz.is_partial_args",
+      "toolz.functoolz.is_valid_args"
+    ],
+    "toolz.functoolz.curry.bind": [
+      "<builtin>.type",
+      "toolz.functoolz.curry.__init__"
+    ],
+    "toolz.functoolz.curry.call": [
+      "functools.partial.__call__"
+    ],
+    "toolz.functoolz.do": [
+      "<builtin>.list.append"
+    ],
+    "toolz.functoolz.excepts.__call__": [
+      "toolz.functoolz.<lambda>",
+      "toolz.functoolz.return_none"
+    ],
+    "toolz.functoolz.excepts.__doc__": [
+      "<builtin>.isinstance",
+      "<builtin>.map",
+      "<builtin>.str.format",
+      "<builtin>.str.join",
+      "<builtin>.type",
+      "operator.attrgetter",
+      "textwrap.dedent",
+      "toolz.functoolz.InstanceProperty.__get__"
+    ],
+    "toolz.functoolz.excepts.__name__": [
+      "<builtin>.isinstance",
+      "<builtin>.map",
+      "<builtin>.str.join",
+      "operator.attrgetter"
+    ],
+    "toolz.functoolz.flip": [
+      "<builtin>.isinstance",
+      "toolz.div",
+      "toolz.functoolz.div"
+    ],
+    "toolz.functoolz.has_keywords": [
+      "<builtin>.any",
+      "builtins.mappingproxy.values",
+      "toolz.functoolz._check_sigspec"
+    ],
+    "toolz.functoolz.has_varargs": [
+      "<builtin>.any",
+      "builtins.mappingproxy.values",
+      "toolz.functoolz._check_sigspec"
+    ],
+    "toolz.functoolz.instanceproperty": [
+      "functools.partial",
+      "toolz.functoolz.InstanceProperty.__init__"
+    ],
+    "toolz.functoolz.is_arity": [
+      "toolz.functoolz._check_sigspec",
+      "toolz.functoolz.has_keywords",
+      "toolz.functoolz.has_varargs",
+      "toolz.functoolz.num_required_args"
+    ],
+    "toolz.functoolz.is_partial_args": [
+      "inspect.Signature.bind_partial",
+      "toolz.functoolz._check_sigspec"
+    ],
+    "toolz.functoolz.is_valid_args": [
+      "inspect.Signature.bind",
+      "toolz.functoolz._check_sigspec"
+    ],
+    "toolz.functoolz.juxt.__call__": [
+      "<builtin>.bool",
+      "<builtin>.int",
+      "<builtin>.str",
+      "<builtin>.tuple",
+      "operator.itemgetter.__call__",
+      "toolz.functoolz.<lambda>"
+    ],
+    "toolz.functoolz.juxt.__init__": [
+      "<builtin>.callable",
+      "<builtin>.len",
+      "<builtin>.tuple"
+    ],
+    "toolz.functoolz.memoize": [
+      "toolz.functoolz.has_keywords",
+      "toolz.functoolz.is_arity"
+    ],
+    "toolz.functoolz.memoize.key": [
+      "<builtin>.dict.items",
+      "<builtin>.frozenset"
+    ],
+    "toolz.functoolz.memoize.memof": [
+      "<builtin>.TypeError",
+      "functools.partial.__call__",
+      "toolz.functoolz.curry.__call__",
+      "toolz.functoolz.memoize.key"
+    ],
+    "toolz.functoolz.num_required_args": [
+      "<builtin>.sum",
+      "builtins.mappingproxy.values",
+      "toolz.functoolz._check_sigspec"
+    ],
+    "toolz.functoolz.pipe": [
+      "<builtin>.str",
+      "toolz.functoolz.<lambda>"
+    ],
+    "toolz.functoolz.thread_first": [
+      "_functools.reduce",
+      "toolz.functoolz.thread_first.evalform_front"
+    ],
+    "toolz.functoolz.thread_first.evalform_front": [
+      "<builtin>.callable",
+      "<builtin>.isinstance",
+      "_operator.add",
+      "toolz.functoolz.add",
+      "toolz.functoolz.double",
+      "toolz.functoolz.inc",
+      "toolz.functoolz.pow"
+    ],
+    "toolz.functoolz.thread_last": [
+      "_functools.reduce",
+      "toolz.functoolz.thread_last.evalform_back"
+    ],
+    "toolz.functoolz.thread_last.evalform_back": [
+      "<builtin>.callable",
+      "<builtin>.filter",
+      "<builtin>.isinstance",
+      "<builtin>.map",
+      "_operator.add",
+      "toolz.functoolz.add",
+      "toolz.functoolz.double",
+      "toolz.functoolz.inc",
+      "toolz.functoolz.pow"
+    ],
+    "toolz.itertoolz": [
+      "functools.partial"
+    ],
+    "toolz.itertoolz._merge_sorted_binary": [
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.next",
+      "toolz.itertoolz._merge_sorted_binary"
+    ],
+    "toolz.itertoolz._merge_sorted_binary_key": [
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.next",
+      "<builtin>.ord",
+      "toolz.itertoolz.<lambda>",
+      "toolz.itertoolz._merge_sorted_binary_key"
+    ],
+    "toolz.itertoolz.accumulate": [
+      "<builtin>.iter",
+      "<builtin>.next",
+      "_operator.add",
+      "_operator.mul"
+    ],
+    "toolz.itertoolz.concat": [
+      "itertools.chain.from_iterable"
+    ],
+    "toolz.itertoolz.concatv": [
+      "toolz.itertoolz.concat"
+    ],
+    "toolz.itertoolz.cons": [
+      "itertools.chain"
+    ],
+    "toolz.itertoolz.count": [
+      "<builtin>.hasattr",
+      "<builtin>.len",
+      "<builtin>.sum"
+    ],
+    "toolz.itertoolz.diff": [
+      "<builtin>.TypeError",
+      "<builtin>.dict.get",
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.map",
+      "<builtin>.tuple",
+      "<builtin>.tuple.count",
+      "<builtin>.zip",
+      "itertools.zip_longest"
+    ],
+    "toolz.itertoolz.drop": [
+      "itertools.islice"
+    ],
+    "toolz.itertoolz.first": [
+      "<builtin>.iter",
+      "<builtin>.next"
+    ],
+    "toolz.itertoolz.frequencies": [
+      "<builtin>.dict",
+      "collections.defaultdict"
+    ],
+    "toolz.itertoolz.get": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "<builtin>.tuple",
+      "operator.itemgetter",
+      "operator.itemgetter.__call__",
+      "toolz.itertoolz._get"
+    ],
+    "toolz.itertoolz.getter": [
+      "<builtin>.isinstance",
+      "<builtin>.len",
+      "operator.itemgetter"
+    ],
+    "toolz.itertoolz.groupby": [
+      "<builtin>.callable",
+      "<builtin>.dict.items",
+      "<builtin>.list.append",
+      "collections.defaultdict",
+      "operator.itemgetter.__call__",
+      "toolz.itertoolz.<lambda>",
+      "toolz.itertoolz.first",
+      "toolz.itertoolz.getter",
+      "toolz.itertoolz.getter.<lambda1>",
+      "toolz.itertoolz.groupby.<lambda1>",
+      "toolz.itertoolz.second"
+    ],
+    "toolz.itertoolz.interleave": [
+      "<builtin>.map",
+      "<builtin>.next",
+      "functools.partial",
+      "itertools.cycle",
+      "itertools.takewhile"
+    ],
+    "toolz.itertoolz.interpose": [
+      "<builtin>.iter",
+      "<builtin>.next",
+      "<builtin>.zip",
+      "itertools.repeat",
+      "toolz.itertoolz.concat"
+    ],
+    "toolz.itertoolz.isdistinct": [
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.set",
+      "<builtin>.set.add"
+    ],
+    "toolz.itertoolz.isiterable": [
+      "<builtin>.iter"
+    ],
+    "toolz.itertoolz.iterate": [
+      "toolz.itertoolz.<lambda>",
+      "toolz.itertoolz.inc"
+    ],
+    "toolz.itertoolz.join": [
+      "<builtin>.callable",
+      "<builtin>.dict.items",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "operator.itemgetter.__call__",
+      "toolz.itertoolz.<lambda>",
+      "toolz.itertoolz.first",
+      "toolz.itertoolz.getter",
+      "toolz.itertoolz.getter.<lambda1>",
+      "toolz.itertoolz.groupby",
+      "toolz.itertoolz.second"
+    ],
+    "toolz.itertoolz.last": [
+      "toolz.itertoolz.tail"
+    ],
+    "toolz.itertoolz.mapcat": [
+      "<builtin>.map",
+      "toolz.itertoolz.concat"
+    ],
+    "toolz.itertoolz.merge_sorted": [
+      "<builtin>.dict.get",
+      "<builtin>.iter",
+      "<builtin>.len",
+      "toolz.itertoolz._merge_sorted_binary",
+      "toolz.itertoolz._merge_sorted_binary_key"
+    ],
+    "toolz.itertoolz.nth": [
+      "<builtin>.isinstance",
+      "<builtin>.next",
+      "itertools.islice"
+    ],
+    "toolz.itertoolz.partition": [
+      "<builtin>.iter",
+      "<builtin>.zip",
+      "itertools.zip_longest"
+    ],
+    "toolz.itertoolz.partition_all": [
+      "<builtin>.LookupError",
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.next",
+      "itertools.zip_longest"
+    ],
+    "toolz.itertoolz.peek": [
+      "<builtin>.iter",
+      "<builtin>.next",
+      "itertools.chain"
+    ],
+    "toolz.itertoolz.peekn": [
+      "<builtin>.iter",
+      "<builtin>.tuple",
+      "itertools.chain",
+      "toolz.itertoolz.take"
+    ],
+    "toolz.itertoolz.pluck": [
+      "<builtin>.isinstance",
+      "<builtin>.map",
+      "<builtin>.tuple",
+      "toolz.itertoolz._get",
+      "toolz.itertoolz.getter"
+    ],
+    "toolz.itertoolz.random_sample": [
+      "<builtin>.filter",
+      "<builtin>.hasattr",
+      "random.Random"
+    ],
+    "toolz.itertoolz.random_sample.<lambda1>": [
+      "_random.Random.random"
+    ],
+    "toolz.itertoolz.reduceby": [
+      "<builtin>.callable",
+      "<builtin>.set",
+      "_operator.add",
+      "_operator.mul",
+      "operator.itemgetter.__call__",
+      "toolz.itertoolz.getter",
+      "toolz.itertoolz.reduceby.<lambda1>"
+    ],
+    "toolz.itertoolz.remove": [
+      "itertools.filterfalse"
+    ],
+    "toolz.itertoolz.second": [
+      "<builtin>.iter",
+      "<builtin>.next"
+    ],
+    "toolz.itertoolz.sliding_window": [
+      "<builtin>.enumerate",
+      "<builtin>.zip",
+      "collections.deque",
+      "itertools.islice",
+      "itertools.tee"
+    ],
+    "toolz.itertoolz.tail": [
+      "<builtin>.tuple",
+      "collections.deque"
+    ],
+    "toolz.itertoolz.take": [
+      "itertools.islice"
+    ],
+    "toolz.itertoolz.take_nth": [
+      "itertools.islice"
+    ],
+    "toolz.itertoolz.topk": [
+      "<builtin>.callable",
+      "<builtin>.tuple",
+      "heapq.nlargest",
+      "toolz.itertoolz.getter"
+    ],
+    "toolz.itertoolz.unique": [
+      "<builtin>.len",
+      "<builtin>.set",
+      "<builtin>.set.add",
+      "toolz.functoolz.curry.__call__",
+      "toolz.sandbox.core.EqualityHashKey.__eq__",
+      "toolz.sandbox.core.EqualityHashKey.__hash__"
+    ],
+    "toolz.recipes.countby": [
+      "<builtin>.callable",
+      "<builtin>.map",
+      "toolz.itertoolz.frequencies",
+      "toolz.itertoolz.getter"
+    ],
+    "toolz.recipes.partitionby": [
+      "<builtin>.map",
+      "itertools.groupby",
+      "toolz.itertoolz.pluck"
+    ],
+    "toolz.sandbox.core.EqualityHashKey.__hash__": [
+      "<builtin>.hash",
+      "<builtin>.id",
+      "<builtin>.len",
+      "<builtin>.type",
+      "operator.itemgetter.__call__",
+      "toolz.itertoolz.first"
+    ],
+    "toolz.sandbox.core.EqualityHashKey.__init__": [
+      "<builtin>.callable",
+      "toolz.itertoolz.getter"
+    ],
+    "toolz.sandbox.core.EqualityHashKey.__ne__": [
+      "toolz.sandbox.core.EqualityHashKey.__eq__"
+    ],
+    "toolz.sandbox.core.EqualityHashKey.__repr__": [
+      "<builtin>.repr"
+    ],
+    "toolz.sandbox.core.EqualityHashKey.__str__": [
+      "<builtin>.str"
+    ],
+    "toolz.sandbox.core.unzip": [
+      "<builtin>.enumerate",
+      "<builtin>.iter",
+      "<builtin>.len",
+      "<builtin>.next",
+      "<builtin>.tuple",
+      "itertools.starmap",
+      "itertools.tee",
+      "toolz.itertoolz.cons",
+      "toolz.itertoolz.pluck"
+    ],
+    "toolz.sandbox.parallel._reduce": [
+      "_functools.reduce"
+    ],
+    "toolz.sandbox.parallel.fold": [
+      "<builtin>.len",
+      "<builtin>.list",
+      "<builtin>.map",
+      "functools.partial",
+      "multiprocessing.pool.Pool.map",
+      "toolz.itertoolz.partition_all",
+      "toolz.sandbox.parallel._reduce",
+      "toolz.sandbox.parallel.fold"
+    ],
+    "toolz.utils.raises": [
+      "toolz.functoolz.apply"
+    ]
+  },
+  "executed": [
+    "tlz._build_tlz.TlzLoader.__init__",
+    "tlz._build_tlz.TlzLoader._load_toolz",
+    "tlz._build_tlz.TlzLoader.create_module",
+    "tlz._build_tlz.TlzLoader.exec_module",
+    "tlz._build_tlz.TlzLoader.find_spec",
+    "toolz.__getattr__",
+    "toolz._signatures.<lambda125>",
+    "toolz._signatures.<lambda126>",
+    "toolz._signatures.<lambda132>",
+    "toolz._signatures.<lambda215>",
+    "toolz._signatures.<lambda23>",
+    "toolz._signatures.<lambda55>",
+    "toolz._signatures.<lambda56>",
+    "toolz._signatures.<lambda68>",
+    "toolz._signatures.<lambda78>",
+    "toolz._signatures.<lambda79>",
+    "toolz._signatures.<lambda80>",
+    "toolz._signatures._has_keywords",
+    "toolz._signatures._has_varargs",
+    "toolz._signatures._is_arity",
+    "toolz._signatures._is_partial_args",
+    "toolz._signatures._is_valid_args",
+    "toolz._signatures._num_required_args",
+    "toolz._signatures.check_arity",
+    "toolz._signatures.check_keywords",
+    "toolz._signatures.check_partial",
+    "toolz._signatures.check_required_args",
+    "toolz._signatures.check_valid",
+    "toolz._signatures.check_varargs",
+    "toolz._signatures.create_signature_registry",
+    "toolz._signatures.expand_sig",
+    "toolz._signatures.get_exclude_keywords",
+    "toolz._signatures.num_pos_args",
+    "toolz._signatures.signature_or_spec",
+    "toolz.curried.exceptions.merge",
+    "toolz.curried.exceptions.merge_with",
+    "toolz.dicttoolz._get_factory",
+    "toolz.dicttoolz.assoc",
+    "toolz.dicttoolz.assoc_in",
+    "toolz.dicttoolz.assoc_in.<lambda1>",
+    "toolz.dicttoolz.dissoc",
+    "toolz.dicttoolz.get_in",
+    "toolz.dicttoolz.itemfilter",
+    "toolz.dicttoolz.itemmap",
+    "toolz.dicttoolz.keyfilter",
+    "toolz.dicttoolz.keymap",
+    "toolz.dicttoolz.merge",
+    "toolz.dicttoolz.merge_with",
+    "toolz.dicttoolz.merge_with.<lambda1>",
+    "toolz.dicttoolz.update_in",
+    "toolz.dicttoolz.valfilter",
+    "toolz.dicttoolz.valmap",
+    "toolz.functoolz.Compose.__call__",
+    "toolz.functoolz.Compose.__doc__",
+    "toolz.functoolz.Compose.__doc__.composed_doc",
+    "toolz.functoolz.Compose.__eq__",
+    "toolz.functoolz.Compose.__get__",
+    "toolz.functoolz.Compose.__getstate__",
+    "toolz.functoolz.Compose.__hash__",
+    "toolz.functoolz.Compose.__init__",
+    "toolz.functoolz.Compose.__name__",
+    "toolz.functoolz.Compose.__ne__",
+    "toolz.functoolz.Compose.__repr__",
+    "toolz.functoolz.Compose.__setstate__",
+    "toolz.functoolz.Compose.__signature__",
+    "toolz.functoolz.Compose._combined_annotations",
+    "toolz.functoolz.Compose._combined_annotations.annotations_of",
+    "toolz.functoolz.Compose._get_annotate",
+    "toolz.functoolz.Compose._get_annotate.annotate",
+    "toolz.functoolz.InstanceProperty.__get__",
+    "toolz.functoolz.InstanceProperty.__init__",
+    "toolz.functoolz.InstanceProperty.__reduce__",
+    "toolz.functoolz._InstanceAnnotations.__get__",
+    "toolz.functoolz._InstanceAnnotations.__init__",
+    "toolz.functoolz._check_sigspec",
+    "toolz.functoolz._restore_curry",
+    "toolz.functoolz.apply",
+    "toolz.functoolz.complement",
+    "toolz.functoolz.compose",
+    "toolz.functoolz.compose_left",
+    "toolz.functoolz.curry.__call__",
+    "toolz.functoolz.curry.__eq__",
+    "toolz.functoolz.curry.__get__",
+    "toolz.functoolz.curry.__hash__",
+    "toolz.functoolz.curry.__init__",
+    "toolz.functoolz.curry.__ne__",
+    "toolz.functoolz.curry.__reduce__",
+    "toolz.functoolz.curry.__repr__",
+    "toolz.functoolz.curry.__signature__",
+    "toolz.functoolz.curry.__str__",
+    "toolz.functoolz.curry._should_curry",
+    "toolz.functoolz.curry.args",
+    "toolz.functoolz.curry.bind",
+    "toolz.functoolz.curry.call",
+    "toolz.functoolz.curry.func",
+    "toolz.functoolz.curry.func_name",
+    "toolz.functoolz.curry.keywords",
+    "toolz.functoolz.do",
+    "toolz.functoolz.excepts.__call__",
+    "toolz.functoolz.excepts.__doc__",
+    "toolz.functoolz.excepts.__init__",
+    "toolz.functoolz.excepts.__name__",
+    "toolz.functoolz.flip",
+    "toolz.functoolz.has_keywords",
+    "toolz.functoolz.has_varargs",
+    "toolz.functoolz.identity",
+    "toolz.functoolz.instanceproperty",
+    "toolz.functoolz.is_arity",
+    "toolz.functoolz.is_partial_args",
+    "toolz.functoolz.is_valid_args",
+    "toolz.functoolz.juxt.__call__",
+    "toolz.functoolz.juxt.__getstate__",
+    "toolz.functoolz.juxt.__init__",
+    "toolz.functoolz.juxt.__setstate__",
+    "toolz.functoolz.memoize",
+    "toolz.functoolz.memoize.key",
+    "toolz.functoolz.memoize.memof",
+    "toolz.functoolz.num_required_args",
+    "toolz.functoolz.pipe",
+    "toolz.functoolz.return_none",
+    "toolz.functoolz.thread_first",
+    "toolz.functoolz.thread_first.evalform_front",
+    "toolz.functoolz.thread_last",
+    "toolz.functoolz.thread_last.evalform_back",
+    "toolz.itertoolz._get",
+    "toolz.itertoolz._merge_sorted_binary",
+    "toolz.itertoolz._merge_sorted_binary_key",
+    "toolz.itertoolz.accumulate",
+    "toolz.itertoolz.concat",
+    "toolz.itertoolz.concatv",
+    "toolz.itertoolz.cons",
+    "toolz.itertoolz.count",
+    "toolz.itertoolz.diff",
+    "toolz.itertoolz.drop",
+    "toolz.itertoolz.first",
+    "toolz.itertoolz.frequencies",
+    "toolz.itertoolz.get",
+    "toolz.itertoolz.getter",
+    "toolz.itertoolz.getter.<lambda1>",
+    "toolz.itertoolz.getter.<lambda2>",
+    "toolz.itertoolz.groupby",
+    "toolz.itertoolz.groupby.<lambda1>",
+    "toolz.itertoolz.interleave",
+    "toolz.itertoolz.interpose",
+    "toolz.itertoolz.isdistinct",
+    "toolz.itertoolz.isiterable",
+    "toolz.itertoolz.iterate",
+    "toolz.itertoolz.join",
+    "toolz.itertoolz.last",
+    "toolz.itertoolz.mapcat",
+    "toolz.itertoolz.merge_sorted",
+    "toolz.itertoolz.nth",
+    "toolz.itertoolz.partition",
+    "toolz.itertoolz.partition_all",
+    "toolz.itertoolz.peek",
+    "toolz.itertoolz.peekn",
+    "toolz.itertoolz.pluck",
+    "toolz.itertoolz.random_sample",
+    "toolz.itertoolz.random_sample.<lambda1>",
+    "toolz.itertoolz.reduceby",
+    "toolz.itertoolz.reduceby.<lambda1>",
+    "toolz.itertoolz.remove",
+    "toolz.itertoolz.second",
+    "toolz.itertoolz.sliding_window",
+    "toolz.itertoolz.tail",
+    "toolz.itertoolz.take",
+    "toolz.itertoolz.take_nth",
+    "toolz.itertoolz.topk",
+    "toolz.itertoolz.unique",
+    "toolz.recipes.countby",
+    "toolz.recipes.partitionby",
+    "toolz.sandbox.core.EqualityHashKey.__eq__",
+    "toolz.sandbox.core.EqualityHashKey.__hash__",
+    "toolz.sandbox.core.EqualityHashKey.__init__",
+    "toolz.sandbox.core.EqualityHashKey.__ne__",
+    "toolz.sandbox.core.EqualityHashKey.__repr__",
+    "toolz.sandbox.core.EqualityHashKey.__str__",
+    "toolz.sandbox.core.unzip",
+    "toolz.sandbox.parallel._reduce",
+    "toolz.sandbox.parallel.fold",
+    "toolz.utils.raises"
+  ],
+  "failures": {
+    "errors": [],
+    "failed": []
+  },
+  "functions": [
+    "tlz._build_tlz.TlzLoader.__init__",
+    "tlz._build_tlz.TlzLoader._load_toolz",
+    "tlz._build_tlz.TlzLoader.create_module",
+    "tlz._build_tlz.TlzLoader.exec_module",
+    "tlz._build_tlz.TlzLoader.find_module",
+    "tlz._build_tlz.TlzLoader.find_spec",
+    "tlz._build_tlz.TlzLoader.load_module",
+    "toolz.__getattr__",
+    "toolz._signatures.<lambda100>",
+    "toolz._signatures.<lambda101>",
+    "toolz._signatures.<lambda102>",
+    "toolz._signatures.<lambda103>",
+    "toolz._signatures.<lambda104>",
+    "toolz._signatures.<lambda105>",
+    "toolz._signatures.<lambda106>",
+    "toolz._signatures.<lambda107>",
+    "toolz._signatures.<lambda108>",
+    "toolz._signatures.<lambda109>",
+    "toolz._signatures.<lambda10>",
+    "toolz._signatures.<lambda110>",
+    "toolz._signatures.<lambda111>",
+    "toolz._signatures.<lambda112>",
+    "toolz._signatures.<lambda113>",
+    "toolz._signatures.<lambda114>",
+    "toolz._signatures.<lambda115>",
+    "toolz._signatures.<lambda116>",
+    "toolz._signatures.<lambda117>",
+    "toolz._signatures.<lambda118>",
+    "toolz._signatures.<lambda119>",
+    "toolz._signatures.<lambda11>",
+    "toolz._signatures.<lambda120>",
+    "toolz._signatures.<lambda121>",
+    "toolz._signatures.<lambda122>",
+    "toolz._signatures.<lambda123>",
+    "toolz._signatures.<lambda124>",
+    "toolz._signatures.<lambda125>",
+    "toolz._signatures.<lambda126>",
+    "toolz._signatures.<lambda127>",
+    "toolz._signatures.<lambda128>",
+    "toolz._signatures.<lambda129>",
+    "toolz._signatures.<lambda12>",
+    "toolz._signatures.<lambda130>",
+    "toolz._signatures.<lambda131>",
+    "toolz._signatures.<lambda132>",
+    "toolz._signatures.<lambda133>",
+    "toolz._signatures.<lambda134>",
+    "toolz._signatures.<lambda135>",
+    "toolz._signatures.<lambda136>",
+    "toolz._signatures.<lambda137>",
+    "toolz._signatures.<lambda138>",
+    "toolz._signatures.<lambda139>",
+    "toolz._signatures.<lambda13>",
+    "toolz._signatures.<lambda140>",
+    "toolz._signatures.<lambda141>",
+    "toolz._signatures.<lambda142>",
+    "toolz._signatures.<lambda143>",
+    "toolz._signatures.<lambda144>",
+    "toolz._signatures.<lambda145>",
+    "toolz._signatures.<lambda146>",
+    "toolz._signatures.<lambda147>",
+    "toolz._signatures.<lambda148>",
+    "toolz._signatures.<lambda149>",
+    "toolz._signatures.<lambda14>",
+    "toolz._signatures.<lambda150>",
+    "toolz._signatures.<lambda151>",
+    "toolz._signatures.<lambda152>",
+    "toolz._signatures.<lambda153>",
+    "toolz._signatures.<lambda154>",
+    "toolz._signatures.<lambda155>",
+    "toolz._signatures.<lambda156>",
+    "toolz._signatures.<lambda157>",
+    "toolz._signatures.<lambda158>",
+    "toolz._signatures.<lambda159>",
+    "toolz._signatures.<lambda15>",
+    "toolz._signatures.<lambda160>",
+    "toolz._signatures.<lambda161>",
+    "toolz._signatures.<lambda162>",
+    "toolz._signatures.<lambda163>",
+    "toolz._signatures.<lambda164>",
+    "toolz._signatures.<lambda165>",
+    "toolz._signatures.<lambda166>",
+    "toolz._signatures.<lambda167>",
+    "toolz._signatures.<lambda168>",
+    "toolz._signatures.<lambda169>",
+    "toolz._signatures.<lambda16>",
+    "toolz._signatures.<lambda170>",
+    "toolz._signatures.<lambda171>",
+    "toolz._signatures.<lambda172>",
+    "toolz._signatures.<lambda173>",
+    "toolz._signatures.<lambda174>",
+    "toolz._signatures.<lambda175>",
+    "toolz._signatures.<lambda176>",
+    "toolz._signatures.<lambda177>",
+    "toolz._signatures.<lambda178>",
+    "toolz._signatures.<lambda179>",
+    "toolz._signatures.<lambda17>",
+    "toolz._signatures.<lambda180>",
+    "toolz._signatures.<lambda181>",
+    "toolz._signatures.<lambda182>",
+    "toolz._signatures.<lambda183>",
+    "toolz._signatures.<lambda184>",
+    "toolz._signatures.<lambda185>",
+    "toolz._signatures.<lambda186>",
+    "toolz._signatures.<lambda187>",
+    "toolz._signatures.<lambda188>",
+    "toolz._signatures.<lambda189>",
+    "toolz._signatures.<lambda18>",
+    "toolz._signatures.<lambda190>",
+    "toolz._signatures.<lambda191>",
+    "toolz._signatures.<lambda192>",
+    "toolz._signatures.<lambda193>",
+    "toolz._signatures.<lambda194>",
+    "toolz._signatures.<lambda195>",
+    "toolz._signatures.<lambda196>",
+    "toolz._signatures.<lambda197>",
+    "toolz._signatures.<lambda198>",
+    "toolz._signatures.<lambda199>",
+    "toolz._signatures.<lambda19>",
+    "toolz._signatures.<lambda1>",
+    "toolz._signatures.<lambda200>",
+    "toolz._signatures.<lambda201>",
+    "toolz._signatures.<lambda202>",
+    "toolz._signatures.<lambda203>",
+    "toolz._signatures.<lambda204>",
+    "toolz._signatures.<lambda205>",
+    "toolz._signatures.<lambda206>",
+    "toolz._signatures.<lambda207>",
+    "toolz._signatures.<lambda208>",
+    "toolz._signatures.<lambda209>",
+    "toolz._signatures.<lambda20>",
+    "toolz._signatures.<lambda210>",
+    "toolz._signatures.<lambda211>",
+    "toolz._signatures.<lambda212>",
+    "toolz._signatures.<lambda213>",
+    "toolz._signatures.<lambda214>",
+    "toolz._signatures.<lambda215>",
+    "toolz._signatures.<lambda216>",
+    "toolz._signatures.<lambda217>",
+    "toolz._signatures.<lambda218>",
+    "toolz._signatures.<lambda219>",
+    "toolz._signatures.<lambda21>",
+    "toolz._signatures.<lambda220>",
+    "toolz._signatures.<lambda221>",
+    "toolz._signatures.<lambda222>",
+    "toolz._signatures.<lambda223>",
+    "toolz._signatures.<lambda224>",
+    "toolz._signatures.<lambda225>",
+    "toolz._signatures.<lambda226>",
+    "toolz._signatures.<lambda227>",
+    "toolz._signatures.<lambda228>",
+    "toolz._signatures.<lambda229>",
+    "toolz._signatures.<lambda22>",
+    "toolz._signatures.<lambda230>",
+    "toolz._signatures.<lambda231>",
+    "toolz._signatures.<lambda232>",
+    "toolz._signatures.<lambda233>",
+    "toolz._signatures.<lambda234>",
+    "toolz._signatures.<lambda235>",
+    "toolz._signatures.<lambda236>",
+    "toolz._signatures.<lambda237>",
+    "toolz._signatures.<lambda238>",
+    "toolz._signatures.<lambda239>",
+    "toolz._signatures.<lambda23>",
+    "toolz._signatures.<lambda240>",
+    "toolz._signatures.<lambda241>",
+    "toolz._signatures.<lambda242>",
+    "toolz._signatures.<lambda243>",
+    "toolz._signatures.<lambda244>",
+    "toolz._signatures.<lambda245>",
+    "toolz._signatures.<lambda246>",
+    "toolz._signatures.<lambda247>",
+    "toolz._signatures.<lambda248>",
+    "toolz._signatures.<lambda249>",
+    "toolz._signatures.<lambda24>",
+    "toolz._signatures.<lambda250>",
+    "toolz._signatures.<lambda251>",
+    "toolz._signatures.<lambda252>",
+    "toolz._signatures.<lambda253>",
+    "toolz._signatures.<lambda254>",
+    "toolz._signatures.<lambda255>",
+    "toolz._signatures.<lambda256>",
+    "toolz._signatures.<lambda257>",
+    "toolz._signatures.<lambda258>",
+    "toolz._signatures.<lambda259>",
+    "toolz._signatures.<lambda25>",
+    "toolz._signatures.<lambda260>",
+    "toolz._signatures.<lambda261>",
+    "toolz._signatures.<lambda262>",
+    "toolz._signatures.<lambda263>",
+    "toolz._signatures.<lambda264>",
+    "toolz._signatures.<lambda265>",
+    "toolz._signatures.<lambda266>",
+    "toolz._signatures.<lambda267>",
+    "toolz._signatures.<lambda268>",
+    "toolz._signatures.<lambda269>",
+    "toolz._signatures.<lambda26>",
+    "toolz._signatures.<lambda270>",
+    "toolz._signatures.<lambda271>",
+    "toolz._signatures.<lambda272>",
+    "toolz._signatures.<lambda273>",
+    "toolz._signatures.<lambda274>",
+    "toolz._signatures.<lambda275>",
+    "toolz._signatures.<lambda276>",
+    "toolz._signatures.<lambda277>",
+    "toolz._signatures.<lambda278>",
+    "toolz._signatures.<lambda279>",
+    "toolz._signatures.<lambda27>",
+    "toolz._signatures.<lambda280>",
+    "toolz._signatures.<lambda281>",
+    "toolz._signatures.<lambda282>",
+    "toolz._signatures.<lambda283>",
+    "toolz._signatures.<lambda284>",
+    "toolz._signatures.<lambda285>",
+    "toolz._signatures.<lambda286>",
+    "toolz._signatures.<lambda287>",
+    "toolz._signatures.<lambda288>",
+    "toolz._signatures.<lambda289>",
+    "toolz._signatures.<lambda28>",
+    "toolz._signatures.<lambda290>",
+    "toolz._signatures.<lambda29>",
+    "toolz._signatures.<lambda2>",
+    "toolz._signatures.<lambda30>",
+    "toolz._signatures.<lambda31>",
+    "toolz._signatures.<lambda32>",
+    "toolz._signatures.<lambda33>",
+    "toolz._signatures.<lambda34>",
+    "toolz._signatures.<lambda35>",
+    "toolz._signatures.<lambda36>",
+    "toolz._signatures.<lambda37>",
+    "toolz._signatures.<lambda38>",
+    "toolz._signatures.<lambda39>",
+    "toolz._signatures.<lambda3>",
+    "toolz._signatures.<lambda40>",
+    "toolz._signatures.<lambda41>",
+    "toolz._signatures.<lambda42>",
+    "toolz._signatures.<lambda43>",
+    "toolz._signatures.<lambda44>",
+    "toolz._signatures.<lambda45>",
+    "toolz._signatures.<lambda46>",
+    "toolz._signatures.<lambda47>",
+    "toolz._signatures.<lambda48>",
+    "toolz._signatures.<lambda49>",
+    "toolz._signatures.<lambda4>",
+    "toolz._signatures.<lambda50>",
+    "toolz._signatures.<lambda51>",
+    "toolz._signatures.<lambda52>",
+    "toolz._signatures.<lambda53>",
+    "toolz._signatures.<lambda54>",
+    "toolz._signatures.<lambda55>",
+    "toolz._signatures.<lambda56>",
+    "toolz._signatures.<lambda57>",
+    "toolz._signatures.<lambda58>",
+    "toolz._signatures.<lambda59>",
+    "toolz._signatures.<lambda5>",
+    "toolz._signatures.<lambda60>",
+    "toolz._signatures.<lambda61>",
+    "toolz._signatures.<lambda62>",
+    "toolz._signatures.<lambda63>",
+    "toolz._signatures.<lambda64>",
+    "toolz._signatures.<lambda65>",
+    "toolz._signatures.<lambda66>",
+    "toolz._signatures.<lambda67>",
+    "toolz._signatures.<lambda68>",
+    "toolz._signatures.<lambda69>",
+    "toolz._signatures.<lambda6>",
+    "toolz._signatures.<lambda70>",
+    "toolz._signatures.<lambda71>",
+    "toolz._signatures.<lambda72>",
+    "toolz._signatures.<lambda73>",
+    "toolz._signatures.<lambda74>",
+    "toolz._signatures.<lambda75>",
+    "toolz._signatures.<lambda76>",
+    "toolz._signatures.<lambda77>",
+    "toolz._signatures.<lambda78>",
+    "toolz._signatures.<lambda79>",
+    "toolz._signatures.<lambda7>",
+    "toolz._signatures.<lambda80>",
+    "toolz._signatures.<lambda81>",
+    "toolz._signatures.<lambda82>",
+    "toolz._signatures.<lambda83>",
+    "toolz._signatures.<lambda84>",
+    "toolz._signatures.<lambda85>",
+    "toolz._signatures.<lambda86>",
+    "toolz._signatures.<lambda87>",
+    "toolz._signatures.<lambda88>",
+    "toolz._signatures.<lambda89>",
+    "toolz._signatures.<lambda8>",
+    "toolz._signatures.<lambda90>",
+    "toolz._signatures.<lambda91>",
+    "toolz._signatures.<lambda92>",
+    "toolz._signatures.<lambda93>",
+    "toolz._signatures.<lambda94>",
+    "toolz._signatures.<lambda95>",
+    "toolz._signatures.<lambda96>",
+    "toolz._signatures.<lambda97>",
+    "toolz._signatures.<lambda98>",
+    "toolz._signatures.<lambda99>",
+    "toolz._signatures.<lambda9>",
+    "toolz._signatures._has_keywords",
+    "toolz._signatures._has_varargs",
+    "toolz._signatures._is_arity",
+    "toolz._signatures._is_partial_args",
+    "toolz._signatures._is_valid_args",
+    "toolz._signatures._num_required_args",
+    "toolz._signatures.check_arity",
+    "toolz._signatures.check_keywords",
+    "toolz._signatures.check_partial",
+    "toolz._signatures.check_required_args",
+    "toolz._signatures.check_valid",
+    "toolz._signatures.check_varargs",
+    "toolz._signatures.create_signature_registry",
+    "toolz._signatures.expand_sig",
+    "toolz._signatures.get_exclude_keywords",
+    "toolz._signatures.num_pos_args",
+    "toolz._signatures.signature_or_spec",
+    "toolz.curried.exceptions.merge",
+    "toolz.curried.exceptions.merge_with",
+    "toolz.dicttoolz._get_factory",
+    "toolz.dicttoolz.assoc",
+    "toolz.dicttoolz.assoc_in",
+    "toolz.dicttoolz.assoc_in.<lambda1>",
+    "toolz.dicttoolz.dissoc",
+    "toolz.dicttoolz.get_in",
+    "toolz.dicttoolz.itemfilter",
+    "toolz.dicttoolz.itemmap",
+    "toolz.dicttoolz.keyfilter",
+    "toolz.dicttoolz.keymap",
+    "toolz.dicttoolz.merge",
+    "toolz.dicttoolz.merge_with",
+    "toolz.dicttoolz.merge_with.<lambda1>",
+    "toolz.dicttoolz.update_in",
+    "toolz.dicttoolz.valfilter",
+    "toolz.dicttoolz.valmap",
+    "toolz.functoolz.Compose.__call__",
+    "toolz.functoolz.Compose.__doc__",
+    "toolz.functoolz.Compose.__doc__.composed_doc",
+    "toolz.functoolz.Compose.__eq__",
+    "toolz.functoolz.Compose.__get__",
+    "toolz.functoolz.Compose.__getstate__",
+    "toolz.functoolz.Compose.__hash__",
+    "toolz.functoolz.Compose.__init__",
+    "toolz.functoolz.Compose.__name__",
+    "toolz.functoolz.Compose.__ne__",
+    "toolz.functoolz.Compose.__repr__",
+    "toolz.functoolz.Compose.__setstate__",
+    "toolz.functoolz.Compose.__signature__",
+    "toolz.functoolz.Compose._combined_annotations",
+    "toolz.functoolz.Compose._combined_annotations.annotations_of",
+    "toolz.functoolz.Compose._get_annotate",
+    "toolz.functoolz.Compose._get_annotate.annotate",
+    "toolz.functoolz.InstanceProperty.__get__",
+    "toolz.functoolz.InstanceProperty.__init__",
+    "toolz.functoolz.InstanceProperty.__reduce__",
+    "toolz.functoolz._InstanceAnnotations.__get__",
+    "toolz.functoolz._InstanceAnnotations.__init__",
+    "toolz.functoolz._check_sigspec",
+    "toolz.functoolz._restore_curry",
+    "toolz.functoolz.apply",
+    "toolz.functoolz.complement",
+    "toolz.functoolz.compose",
+    "toolz.functoolz.compose_left",
+    "toolz.functoolz.curry.__call__",
+    "toolz.functoolz.curry.__eq__",
+    "toolz.functoolz.curry.__get__",
+    "toolz.functoolz.curry.__hash__",
+    "toolz.functoolz.curry.__init__",
+    "toolz.functoolz.curry.__ne__",
+    "toolz.functoolz.curry.__reduce__",
+    "toolz.functoolz.curry.__repr__",
+    "toolz.functoolz.curry.__signature__",
+    "toolz.functoolz.curry.__str__",
+    "toolz.functoolz.curry._should_curry",
+    "toolz.functoolz.curry.args",
+    "toolz.functoolz.curry.bind",
+    "toolz.functoolz.curry.call",
+    "toolz.functoolz.curry.func",
+    "toolz.functoolz.curry.func_name",
+    "toolz.functoolz.curry.keywords",
+    "toolz.functoolz.do",
+    "toolz.functoolz.excepts.__call__",
+    "toolz.functoolz.excepts.__doc__",
+    "toolz.functoolz.excepts.__init__",
+    "toolz.functoolz.excepts.__name__",
+    "toolz.functoolz.flip",
+    "toolz.functoolz.has_keywords",
+    "toolz.functoolz.has_varargs",
+    "toolz.functoolz.identity",
+    "toolz.functoolz.instanceproperty",
+    "toolz.functoolz.is_arity",
+    "toolz.functoolz.is_partial_args",
+    "toolz.functoolz.is_valid_args",
+    "toolz.functoolz.juxt.__call__",
+    "toolz.functoolz.juxt.__getstate__",
+    "toolz.functoolz.juxt.__init__",
+    "toolz.functoolz.juxt.__setstate__",
+    "toolz.functoolz.memoize",
+    "toolz.functoolz.memoize.key",
+    "toolz.functoolz.memoize.memof",
+    "toolz.functoolz.num_required_args",
+    "toolz.functoolz.pipe",
+    "toolz.functoolz.return_none",
+    "toolz.functoolz.thread_first",
+    "toolz.functoolz.thread_first.evalform_front",
+    "toolz.functoolz.thread_last",
+    "toolz.functoolz.thread_last.evalform_back",
+    "toolz.itertoolz._get",
+    "toolz.itertoolz._merge_sorted_binary",
+    "toolz.itertoolz._merge_sorted_binary_key",
+    "toolz.itertoolz.accumulate",
+    "toolz.itertoolz.concat",
+    "toolz.itertoolz.concatv",
+    "toolz.itertoolz.cons",
+    "toolz.itertoolz.count",
+    "toolz.itertoolz.diff",
+    "toolz.itertoolz.drop",
+    "toolz.itertoolz.first",
+    "toolz.itertoolz.frequencies",
+    "toolz.itertoolz.get",
+    "toolz.itertoolz.getter",
+    "toolz.itertoolz.getter.<lambda1>",
+    "toolz.itertoolz.getter.<lambda2>",
+    "toolz.itertoolz.groupby",
+    "toolz.itertoolz.groupby.<lambda1>",
+    "toolz.itertoolz.interleave",
+    "toolz.itertoolz.interpose",
+    "toolz.itertoolz.isdistinct",
+    "toolz.itertoolz.isiterable",
+    "toolz.itertoolz.iterate",
+    "toolz.itertoolz.join",
+    "toolz.itertoolz.last",
+    "toolz.itertoolz.mapcat",
+    "toolz.itertoolz.merge_sorted",
+    "toolz.itertoolz.nth",
+    "toolz.itertoolz.partition",
+    "toolz.itertoolz.partition_all",
+    "toolz.itertoolz.peek",
+    "toolz.itertoolz.peekn",
+    "toolz.itertoolz.pluck",
+    "toolz.itertoolz.random_sample",
+    "toolz.itertoolz.random_sample.<lambda1>",
+    "toolz.itertoolz.reduceby",
+    "toolz.itertoolz.reduceby.<lambda1>",
+    "toolz.itertoolz.remove",
+    "toolz.itertoolz.second",
+    "toolz.itertoolz.sliding_window",
+    "toolz.itertoolz.tail",
+    "toolz.itertoolz.take",
+    "toolz.itertoolz.take_nth",
+    "toolz.itertoolz.topk",
+    "toolz.itertoolz.unique",
+    "toolz.recipes.countby",
+    "toolz.recipes.partitionby",
+    "toolz.sandbox.core.EqualityHashKey.__eq__",
+    "toolz.sandbox.core.EqualityHashKey.__hash__",
+    "toolz.sandbox.core.EqualityHashKey.__init__",
+    "toolz.sandbox.core.EqualityHashKey.__ne__",
+    "toolz.sandbox.core.EqualityHashKey.__repr__",
+    "toolz.sandbox.core.EqualityHashKey.__str__",
+    "toolz.sandbox.core.unzip",
+    "toolz.sandbox.parallel._reduce",
+    "toolz.sandbox.parallel.fold",
+    "toolz.utils.raises"
+  ],
+  "modules": [
+    "tlz",
+    "tlz._build_tlz",
+    "toolz",
+    "toolz._signatures",
+    "toolz.compatibility",
+    "toolz.curried",
+    "toolz.curried.exceptions",
+    "toolz.curried.operator",
+    "toolz.dicttoolz",
+    "toolz.functoolz",
+    "toolz.itertoolz",
+    "toolz.recipes",
+    "toolz.sandbox",
+    "toolz.sandbox.core",
+    "toolz.sandbox.parallel",
+    "toolz.utils"
+  ],
+  "project": "toolz",
+  "pytest": {
+    "config": "pyproject.toml",
+    "rootdir": "."
+  },
+  "python": "3.14.10",
+  "tests": {
+    "deselected": 1,
+    "errors": 0,
+    "exit_status": 0,
+    "failed": 0,
+    "passed": 268,
+    "skipped": 1,
+    "xfailed": 0,
+    "xpassed": 0
+  }
+}

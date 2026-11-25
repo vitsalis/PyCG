@@ -1,0 +1,136 @@
+{
+  "edges": {
+    "m3u8.httpclient.DefaultHTTPClient.download": {
+      "email.message.Message.get": [
+        "m3u8.httpclient 19:31 call  resource.info().get(\"Content-Encoding\")"
+      ],
+      "email.message.Message.get_content_charset": [
+        "m3u8.httpclient 21:53 call  resource.headers.get_content_charset(failobj=\"utf-8\")",
+        "m3u8.httpclient 25:53 call  resource.headers.get_content_charset(failobj=\"utf-8\")"
+      ],
+      "http.client.HTTPMessage.get": [
+        "m3u8.httpclient 19:31 call  resource.info().get(\"Content-Encoding\")"
+      ],
+      "http.client.HTTPMessage.get_content_charset": [
+        "m3u8.httpclient 21:53 call  resource.headers.get_content_charset(failobj=\"utf-8\")",
+        "m3u8.httpclient 25:53 call  resource.headers.get_content_charset(failobj=\"utf-8\")"
+      ],
+      "http.client.HTTPResponse.geturl": [
+        "m3u8.httpclient 17:43 call  resource.geturl()"
+      ],
+      "http.client.HTTPResponse.info": [
+        "m3u8.httpclient 19:25 call  resource.info()"
+      ],
+      "http.client.HTTPResponse.read": [
+        "m3u8.httpclient 20:52 call  resource.read()",
+        "m3u8.httpclient 24:36 call  resource.read()"
+      ],
+      "tempfile._TemporaryFileWrapper.__getattr__.func_wrapper": [
+        "m3u8.httpclient 20:52 call  resource.read()",
+        "m3u8.httpclient 24:36 call  resource.read()"
+      ],
+      "urllib.request.OpenerDirector.open": [
+        "m3u8.httpclient 16:31 call  opener.open(uri, timeout=timeout)"
+      ],
+      "urllib.response.addinfourl.geturl": [
+        "m3u8.httpclient 17:43 call  resource.geturl()"
+      ],
+      "urllib.response.addinfourl.info": [
+        "m3u8.httpclient 19:25 call  resource.info()"
+      ]
+    },
+    "m3u8.load": {
+      "m3u8.httpclient.DefaultHTTPClient.download": [
+        "m3u8 94:49 call  http_client.download(uri, timeout, headers, verify_ssl)"
+      ],
+      "m3u8.model.M3U8.__init__": [
+        "m3u8 95:20 call  M3U8(content, base_uri=base_uri, custom_tags_parser=custo..."
+      ],
+      "urllib.parse.urlsplit": [
+        "m3u8 93:16 call  urlsplit(uri)"
+      ]
+    },
+    "m3u8.mixins.BasePathMixin.absolute_uri": {
+      "urllib.parse.urlsplit": [
+        "m3u8.mixins 12:43 call  urlsplit(self.base_uri)",
+        "m3u8.mixins 15:24 call  urlsplit(ret)"
+      ]
+    },
+    "m3u8.model.M3U8.__unicode__": {
+      "m3u8.model.M3U8.dumps": [
+        "m3u8.model 287:26 call  self.dumps()"
+      ]
+    },
+    "m3u8.model.SegmentList.__str__": {
+      "m3u8.model.SegmentList.dumps": [
+        "m3u8.model 719:26 call  self.dumps()"
+      ]
+    },
+    "m3u8.model.Tiles.__str__": {
+      "m3u8.model.Tiles.dumps": [
+        "m3u8.model 1627:26 call  self.dumps()"
+      ]
+    },
+    "m3u8.model.Tiles.dumps": {
+      "<builtin>.list.append": [
+        "m3u8.model 1620:21 call  tiles.append(\"RESOLUTION=\" + self.resolution)",
+        "m3u8.model 1621:21 call  tiles.append(\"LAYOUT=\" + self.layout)",
+        "m3u8.model 1622:21 call  tiles.append(\"DURATION=\" + self.duration)"
+      ],
+      "<builtin>.str.join": [
+        "m3u8.model 1624:42 call  \",\".join(tiles)"
+      ]
+    },
+    "m3u8.parser": {
+      "backports.datetime_fromisoformat.MonkeyPatch.patch_fromisoformat": [
+        "m3u8.parser 12:36 call  MonkeyPatch.patch_fromisoformat()"
+      ]
+    },
+    "m3u8.parser._parse_attribute_list": {
+      "m3u8.parser._parse_server_control.<lambda1>": [
+        "m3u8.parser 335:43 call  attribute_parser[name](value)"
+      ]
+    },
+    "m3u8.parser._parse_server_control.<lambda1>": {
+      "<builtin>.float": [
+        "m3u8.parser 613:37 call  float(x)"
+      ]
+    }
+  },
+  "notes": {
+    "m3u8 94:49 call  http_client.download(uri, timeout, headers, verify_ssl)": [
+      "http_client is the default DefaultHTTPClient() made at import (line 86), a DefaultHTTPClient that the client makes, or a client object (opaque, B5); no other package class has download"
+    ],
+    "m3u8.httpclient 16:31 call  opener.open(uri, timeout=timeout)": [
+      "opener is the OpenerDirector of urllib.request.build_opener"
+    ],
+    "m3u8.httpclient 17:43 call  resource.geturl()": [
+      "resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4)"
+    ],
+    "m3u8.httpclient 19:25 call  resource.info()": [
+      "resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4)"
+    ],
+    "m3u8.httpclient 19:31 call  resource.info().get(\"Content-Encoding\")": [
+      "info() returns the headers: an http.client.HTTPMessage for an HTTPResponse, an email.message.Message (email.message_from_string) for an addinfourl; Message.get is named by the receiver's class"
+    ],
+    "m3u8.httpclient 20:52 call  resource.read()": [
+      "resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4); addinfourl is a tempfile._TemporaryFileWrapper (urllib.response.addbase), whose __getattr__ returns its local func_wrapper around the read of the wrapped file"
+    ],
+    "m3u8.httpclient 21:53 call  resource.headers.get_content_charset(failobj=\"utf-8\")": [
+      "resource.headers is the http.client.HTTPMessage of an HTTPResponse or the email.message.Message of an addinfourl"
+    ],
+    "m3u8.httpclient 24:36 call  resource.read()": [
+      "resource is what OpenerDirector.open returns for the client's URI: an http.client.HTTPResponse for http and https, a urllib.response.addinfourl for file, data and ftp URLs (FileHandler, DataHandler, FTPHandler of the default opener; also after a redirect to ftp) (m3u8.md, J4); addinfourl is a tempfile._TemporaryFileWrapper (urllib.response.addbase), whose __getattr__ returns its local func_wrapper around the read of the wrapped file"
+    ],
+    "m3u8.httpclient 25:53 call  resource.headers.get_content_charset(failobj=\"utf-8\")": [
+      "resource.headers is the http.client.HTTPMessage of an HTTPResponse or the email.message.Message of an addinfourl"
+    ],
+    "m3u8.parser 12:36 call  MonkeyPatch.patch_fromisoformat()": [
+      "the import of the declared dependency backports-datetime-fromisoformat (python_version < '3.11') succeeds on CPython 3.7 to 3.10 where it is installed; both sides of the optional import run (m3u8.md, J2)"
+    ],
+    "m3u8.parser 335:43 call  attribute_parser[name](value)": [
+      "value site: attribute_parser is the dict that each _parse_* caller builds (the function is private): values remove_quotes (remove_quotes_parser), int, float, str and the seven lambdas of _parse_stream_inf, _parse_start, _parse_server_control (3), _parse_part_inf and _parse_part; _parse_asset passes an empty dict"
+    ]
+  },
+  "trace": "dynamic/m3u8.json"
+}

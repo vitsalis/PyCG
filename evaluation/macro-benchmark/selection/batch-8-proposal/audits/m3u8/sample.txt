@@ -1,0 +1,79 @@
+   2 drawn m3u8 [m3u8.loads] 77:27 call  urljoin(uri, ".")
+   4 drawn m3u8 [m3u8] 86:34 call  DefaultHTTPClient()
+  30 drawn m3u8.httpclient [m3u8.httpclient.DefaultHTTPClient.download] 24:45 call  resource.read().decode( resource.headers.get_content_char...
+  67 drawn m3u8.model [m3u8.model.M3U8.__init__] 171:43 call  self._base_uri.endswith("/")
+  97 drawn m3u8.model [m3u8.model.M3U8._initialize_attributes] 207:34 call  self.files.append(key.uri)
+ 125 drawn m3u8.model [m3u8.model.M3U8._initialize_attributes] 237:30 call  ImagePlaylist( base_uri=self.base_uri, uri=img_pl["uri"],...
+ 132 drawn m3u8.model [m3u8.model.M3U8._initialize_attributes] 247:39 call  self.data.get("server_control", None)
+ 239 drawn m3u8.model [m3u8.model.M3U8.dumps] 412:30 call  str(self.session_data)
+ 244 drawn m3u8.model [m3u8.model.M3U8.dumps] 417:42 call  self.segments.dumps(timespec, infspec)
+ 270 drawn m3u8.model [m3u8.model.Segment.__init__] 583:40 call  DateRangeList( [DateRange(**daterange) for daterange in d...
+ 271 drawn m3u8.model [m3u8.model.Segment.__init__] 584:23 call  DateRange(**daterange)
+ 285 drawn m3u8.model [m3u8.model.Segment.dumps] 607:30 call  output.append("\n")
+ 425 drawn m3u8.model [m3u8.model.InitializationSection.__str__] 927:43 call  "{tag}:{attributes}".format(tag=self.tag, attributes=","....
+ 437 drawn m3u8.model [m3u8.model.Playlist.__init__] 967:42 call  resolution.strip('"')
+ 443 drawn m3u8.model [m3u8.model.Playlist.__init__] 973:38 call  StreamInfo( bandwidth=stream_info["bandwidth"], video=str...
+ 492 drawn m3u8.model [m3u8.model.IFramePlaylist.__str__] 1073:22 call  str(self.iframe_stream_info.resolution[1])
+ 530 drawn m3u8.model [m3u8.model.StreamInfo.__str__] 1145:22 call  str(self.resolution[0])
+ 567 drawn m3u8.model [m3u8.model.Media.dumps] 1245:29 call  media_out.append("AUTOSELECT=" + self.autoselect)
+ 667 drawn m3u8.model [m3u8.model.DateRange.__init__] 1462:75 call  attr.startswith("x_")
+ 681 drawn m3u8.model [m3u8.model.DateRange.dumps] 1488:29 call  daterange.append("SCTE35-OUT=" + self.scte35_out)
+ 698 drawn m3u8.model [m3u8.model.ContentSteering.dumps] 1517:53 call  ",".join(steering)
+ 702 drawn m3u8.model [m3u8.model.ImagePlaylist.__init__] 1542:38 call  resolution.split("x")
+ 717 drawn m3u8.model [m3u8.model.ImagePlaylist.__str__] 1573:36 call  image_stream_inf.append( "AVERAGE-BANDWIDTH=%d" % self.im...
+ 752 drawn m3u8.model [m3u8.model.number_to_string] 1656:28 call  decimal.Decimal(str(number))
+ 807 drawn m3u8.parser [m3u8.parser.parse] 134:29 call  line.startswith(f"{protocol.ext_x_asset}:")
+ 829 drawn m3u8.parser [m3u8.parser.parse] 155:29 call  line.startswith(protocol.ext_x_stream_inf)
+ 838 drawn m3u8.parser [m3u8.parser.parse] 164:29 call  line.startswith(protocol.ext_x_playlist_type)
+ 859 drawn m3u8.parser [m3u8.parser.parse] 185:29 call  line.startswith(protocol.ext_x_part_inf)
+ 869 drawn m3u8.parser [m3u8.parser.parse] 195:24 call  _parse_skip(**parse_kwargs)
+ 892 drawn m3u8.parser [m3u8.parser.parse] 218:29 call  line.startswith(protocol.ext_x_images_only)
+ 901 drawn m3u8.parser [m3u8.parser.parse] 232:34 call  line.startswith("#")
+ 935 drawn m3u8.parser [m3u8.parser._parse_extinf] 270:29 call  ParseError(lineno, line)
+1018 drawn m3u8.parser [m3u8.parser._parse_stream_inf.<lambda1>] 358:56 call  float(x)
+1033 drawn m3u8.parser [m3u8.parser._parse_image_stream_inf] 387:44 call  remove_quotes_parser( "codecs", "uri", "pathway_id", "sta...
+1103 drawn m3u8.parser [m3u8.parser._parse_simple_parameter_raw_value] 520:46 call  param.replace("#EXT-X-", "")
+1106 drawn m3u8.parser [m3u8.parser._parse_simple_parameter_raw_value] 523:26 call  cast_to(value)
+1146 drawn m3u8.parser [m3u8.parser._parse_cueout] 600:29 call  remove_quotes_parser("cue")
+1166 drawn m3u8.parser [m3u8.parser._parse_rendition_report] 641:37 call  data["rendition_reports"].append(rendition_report)
+1216 drawn m3u8.parser [m3u8.parser._parse_preload_hint] 700:49 call  _parse_attribute_list( protocol.ext_x_preload_hint, line,...
+1248 drawn m3u8.parser [m3u8.parser.normalize_attribute] 769:53 call  attribute.replace("-", "_").lower().strip()
+1292 drawn m3u8.version_matching_rules [m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate] 72:35 call  self.line.replace(protocol.extinf + ":", "")
+1298 drawn m3u8.version_matching_rules [m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate] 85:30 call  is_floating_number(duration)
+  78 drawn m3u8.model [m3u8.model.M3U8._initialize_attributes] 184:27 iter  self.data.get("segment_map", [])
+  88 drawn m3u8.model [m3u8.model.M3U8._initialize_attributes] 197:13 iter  attr, param
+ 114 drawn m3u8.model [m3u8.model.M3U8._initialize_attributes] 225:23 iter  self.data.get("iframe_playlists", [])
+ 329 drawn m3u8.model [m3u8.model.Segment.dumps] 659:28 op  infspec == "milliseconds"
+ 372 drawn m3u8.model [m3u8.model.PartialSegment.__init__] 790:26 mapping  **daterange
+ 399 drawn m3u8.model [m3u8.model.Key.__str__] 873:45 getattr  self.uri
+ 462 drawn m3u8.model [m3u8.model.Playlist.__str__] 1001:22 iter  self.media
+ 501 drawn m3u8.model [m3u8.model.IFramePlaylist.__str__] 1086:17 getattr  self.uri
+ 504 drawn m3u8.model [m3u8.model.IFramePlaylist.__str__] 1087:59 getattr  self.uri
+ 553 drawn m3u8.model [m3u8.model.Media.dumps] 1230:17 getattr  self.uri
+ 607 drawn m3u8.model [m3u8.model.ServerControl.dumps] 1346:20 getitem  self[attr]
+ 687 drawn m3u8.model [m3u8.model.DateRange.dumps] 1496:32 format  {denormalize_attribute(attr)}
+ 808 drawn m3u8.parser [m3u8.parser.parse] 134:32 format  {protocol.ext_x_asset}
+ 822 drawn m3u8.parser [m3u8.parser.parse] 147:34 mapping  **parse_kwargs
+ 837 drawn m3u8.parser [m3u8.parser.parse] 162:28 mapping  **parse_kwargs
+ 882 drawn m3u8.parser [m3u8.parser.parse] 207:32 mapping  **parse_kwargs
+ 924 drawn m3u8.parser [m3u8.parser._parse_key] 260:12 op  key not in data["keys"]
+ 951 drawn m3u8.parser [m3u8.parser._parse_ts_chunk] 286:53 getitem  state["current_program_date_time"]
+ 982 drawn m3u8.parser [m3u8.parser._parse_ts_chunk] 308:28 getitem  data["keys"]
+1031 drawn m3u8.parser [m3u8.parser._parse_i_frame_stream_inf] 383:9 getitem  data["iframe_playlists"]
+1085 drawn m3u8.parser [m3u8.parser._parse_cue_span] 486:10 setitem  state["cue_out"]
+1098 drawn m3u8.parser [m3u8.parser._parse_start] 511:9 setitem  data["start"]
+1099 drawn m3u8.parser [m3u8.parser._parse_gap] 515:10 setitem  state["gap"]
+1151 drawn m3u8.parser [m3u8.parser._parse_cueout] 606:10 setitem  state["current_cue_out_scte35"]
+1223 drawn m3u8.parser [m3u8.parser._parse_daterange] 712:21 setitem  attribute_parser["scte35_in"]
+1251 drawn m3u8.parser [m3u8.parser.get_segment_custom_value] 779:43 getitem  state["segment"]
+1265 drawn m3u8.version_matching [m3u8.version_matching.get_version] 8:17 iter  file_lines
+1291 drawn m3u8.version_matching_rules [m3u8.version_matching_rules.ValidFloatingPointEXTINF.validate] 69:28 op  protocol.extinf not in self.line
+ 775 value m3u8.parser [m3u8.parser.parse] 96:49 call  custom_tags_parser(line, lineno, data, state)
+ 967 value m3u8.parser [m3u8.parser._parse_ts_chunk] 297:32 call  scte_op("current_cue_out_scte35", None)
+ 969 value m3u8.parser [m3u8.parser._parse_ts_chunk] 298:39 call  scte_op("current_cue_out_oatcls_scte35", None)
+ 971 value m3u8.parser [m3u8.parser._parse_ts_chunk] 299:41 call  scte_op("current_cue_out_duration", None)
+ 973 value m3u8.parser [m3u8.parser._parse_ts_chunk] 300:44 call  scte_op("current_cue_out_elapsedtime", None)
+ 975 value m3u8.parser [m3u8.parser._parse_ts_chunk] 301:40 call  scte_op("asset_metadata", None)
+1008 value m3u8.parser [m3u8.parser._parse_attribute_list] 335:43 call  attribute_parser[name](value)
+1009 value m3u8.parser [m3u8.parser._parse_attribute_list] 337:35 call  default_parser(value)
+1272 value m3u8.version_matching [m3u8.version_matching.valid_in_all_rules] 21:25 call  rule(version, line_number, line)

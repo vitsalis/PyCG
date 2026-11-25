@@ -19,6 +19,11 @@ RUN test -n "${NAME}"
 # service of compose.yaml.
 ARG REQUIREMENTS=requirements.txt
 COPY ${REQUIREMENTS} /opt/pycg-trace/requirements.txt
+# The wheels built from pinned sdists (macro-benchmark/wheels/, the build
+# context `wheels`): pip finds there the wheels that PyPI lacks, and installs
+# them by their hashes as every other; then the copy is removed from the
+# final file system (the COPY layer of the image keeps one).
+COPY --from=wheels . /opt/pycg-trace/wheels/
 
 # pip runs with no configuration and no variable of the image's environment.
 # It installs the full closure by hash, wheels only, and is then removed, so
@@ -26,7 +31,9 @@ COPY ${REQUIREMENTS} /opt/pycg-trace/requirements.txt
 RUN env -i PATH=/usr/local/bin:/usr/bin:/bin PIP_CONFIG_FILE=/dev/null \
         python3 -m pip install --require-hashes --only-binary :all: --no-deps \
         --no-cache-dir --disable-pip-version-check --no-input \
+        --find-links /opt/pycg-trace/wheels \
         -r /opt/pycg-trace/requirements.txt \
+    && rm -r /opt/pycg-trace/wheels \
     && env -i PATH=/usr/local/bin:/usr/bin:/bin PIP_CONFIG_FILE=/dev/null \
         python3 -m pip uninstall --yes --disable-pip-version-check pip \
     && groupadd --gid 10001 runner \

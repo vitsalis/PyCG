@@ -14,7 +14,7 @@ It never imports or executes the code it analyses. Keep it that way.
 | `evaluation/micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json` |
 | `docs/design.md` | The design of the analysis: what it models, its rules, termination, open problems |
 | `evaluation/` | Measures PyCG: the runner, the scorer and their tests (`evaluation/README.md`, `evaluation/AGENTS.md`) |
-| `evaluation/macro-benchmark/` | 40 real packages with hand-written ground truths and traces |
+| `evaluation/macro-benchmark/` | 50 real packages with hand-written ground truths and traces |
 
 ## Commands
 

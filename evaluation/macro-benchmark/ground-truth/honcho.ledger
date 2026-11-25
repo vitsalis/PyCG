@@ -1,0 +1,1027 @@
+# Call-site ledger of honcho at 8af63177405a574612abf90ef55aaa68d76f7686 (v2.0.0).
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# Analysed source: honcho/ (root "."), 15 modules. Supported: CPython 3.8
+# and later, PyPy 3.9 and later (CHANGELOG 2.0.0 drops CPython 3.6, 3.7 and
+# PyPy 3.7, 3.8; no requires-python, so no upper bound), on every platform
+# ("Operating System :: OS Independent"): the Windows branches of compat.py,
+# printer.py, process.py and command.py run, and so does the 3.8/3.9 branch of
+# command.py (honcho.md).
+# Missing modules (not installed in the trace environment): colorama (a
+# dependency on win32) and backports.entry_points_selectable (a dependency
+# before 3.10), named by their access paths. Jinja2 (the extra "export") is
+# installed and named by its public paths.
+
+== honcho.__main__
+
+[honcho.__main__]
+4:9 call  main()
+    -> honcho.command.main
+    note: main is the function that line 1 imports from honcho.command; the block runs under python -m honcho
+
+== honcho.colour
+
+[honcho.colour]
+12:25 call  enumerate(ANSI_COLOURS)
+    -> <builtin>.enumerate
+13:12 call  globals()
+    -> <builtin>.globals
+13:26 call  str(30 + i)
+    -> <builtin>.str
+14:12 call  globals()
+    -> <builtin>.globals
+14:39 call  str(30 + i)
+    -> <builtin>.str
+
+[honcho.colour.get_colours]
+21:18 call  globals()
+    -> <builtin>.globals
+25:25 call  len(cs)
+    -> <builtin>.len
+
+== honcho.command
+
+[honcho.command]
+21:20 call  logging.basicConfig(format='%(asctime)s [%(process)d] [%(...
+    -> logging.basicConfig
+25:24 call  logging.getLogger(__name__)
+    -> logging.getLogger
+27:28 call  os.path.basename(os.getcwd())
+    -> os.path.basename
+27:38 call  os.getcwd()
+    -> os.getcwd
+37:22 call  dict( (_export.name, _export) for _export in entry_points...
+    -> <builtin>.dict
+38:56 call  entry_points(group="honcho_exporters")
+    -> importlib.metadata.entry_points
+    -> backports.entry_points_selectable.entry_points
+    note: version branch, lines 16-19: on 3.10 and later entry_points is importlib.metadata.entry_points; on CPython 3.8, 3.9 and PyPy 3.9 it comes from backports.entry_points_selectable, a declared dependency for python_version<"3.10" that the trace environment lacks (missing module, named by its access path; its result iterates no items)
+72:33 call  argparse.ArgumentParser( 'honcho', description='Manage Pr...
+    -> argparse.ArgumentParser
+75:17 call  _add_common_args(parser, with_defaults=True)
+    -> honcho.command._add_common_args
+77:35 call  parser.add_subparsers(title='tasks', dest='command')
+    -> argparse.ArgumentParser.add_subparsers
+89:37 call  subparsers.add_parser( 'check', help="validate a Procfile")
+    -> argparse._SubParsersAction.add_parser
+    note: subparsers is the argparse._SubParsersAction that add_subparsers returns (a private class, named as the argcomplete precedent names argparse._StoreTrueAction)
+92:17 call  _add_common_args(parser_check)
+    -> honcho.command._add_common_args
+133:38 call  subparsers.add_parser( 'export', help="export a Procfile ...
+    -> argparse._SubParsersAction.add_parser
+136:17 call  _add_common_args(parser_export)
+    -> honcho.command._add_common_args
+137:27 call  parser_export.add_argument( '-a', '--app', help="alternat...
+    -> argparse.ArgumentParser.add_argument
+    note: add_parser makes an argparse.ArgumentParser (its parser_class is the class of the main parser); add_argument is inherited from argparse._ActionsContainer and named by the receiver's class
+140:27 call  parser_export.add_argument( '-l', '--log', help="director...
+    -> argparse.ArgumentParser.add_argument
+144:27 call  parser_export.add_argument( '-p', '--port', help=f"starti...
+    -> argparse.ArgumentParser.add_argument
+148:27 call  parser_export.add_argument( '-c', '--concurrency', help='...
+    -> argparse.ArgumentParser.add_argument
+152:27 call  parser_export.add_argument( '-u', '--user', help="user th...
+    -> argparse.ArgumentParser.add_argument
+156:27 call  parser_export.add_argument( '-s', '--shell', help="the sh...
+    -> argparse.ArgumentParser.add_argument
+160:27 call  parser_export.add_argument( '-t', '--template-dir', help=...
+    -> argparse.ArgumentParser.add_argument
+164:27 call  parser_export.add_argument( 'format', help="format to exp...
+    -> argparse.ArgumentParser.add_argument
+167:19 call  sorted(export_choices.keys())
+    -> <builtin>.sorted
+167:39 call  export_choices.keys()
+    -> <builtin>.dict.keys
+169:27 call  parser_export.add_argument( 'location', help="folder to e...
+    -> argparse.ArgumentParser.add_argument
+182:36 call  subparsers.add_parser( 'help', help="describe available t...
+    -> argparse._SubParsersAction.add_parser
+185:25 call  parser_help.add_argument('task', help='task to show help ...
+    -> argparse.ArgumentParser.add_argument
+211:35 call  subparsers.add_parser( 'run', help="run a command using y...
+    -> argparse._SubParsersAction.add_parser
+214:17 call  _add_common_args(parser_run)
+    -> honcho.command._add_common_args
+215:24 call  parser_run.add_argument( 'argv', nargs=argparse.REMAINDER...
+    -> argparse.ArgumentParser.add_argument
+258:37 call  subparsers.add_parser( 'start', help="start the applicati...
+    -> argparse._SubParsersAction.add_parser
+261:17 call  _add_common_args(parser_start)
+    -> honcho.command._add_common_args
+262:26 call  parser_start.add_argument( '-p', '--port', help=f"startin...
+    -> argparse.ArgumentParser.add_argument
+266:26 call  parser_start.add_argument( '-c', '--concurrency', help='t...
+    -> argparse.ArgumentParser.add_argument
+270:26 call  parser_start.add_argument( '-q', '--quiet', help='process...
+    -> argparse.ArgumentParser.add_argument
+274:26 call  parser_start.add_argument( 'processes', nargs='*', help='...
+    -> argparse.ArgumentParser.add_argument
+285:39 call  subparsers.add_parser( 'version', help="display honcho ve...
+    -> argparse._SubParsersAction.add_parser
+410:9 call  main()
+    -> honcho.command.main
+
+[honcho.command._add_common_args]
+48:24 call  parser.add_argument('-e', '--env', default=(suppress or '...
+    -> argparse.ArgumentParser.add_argument
+    note: parser is the main argparse.ArgumentParser or one that add_parser made (the five callers in this module)
+51:24 call  parser.add_argument('-d', '--app-root', metavar='DIR', de...
+    -> argparse.ArgumentParser.add_argument
+55:24 call  parser.add_argument('--no-colour', action='store_true', d...
+    -> argparse.ArgumentParser.add_argument
+59:24 call  parser.add_argument('--no-prefix', action='store_true', d...
+    -> argparse.ArgumentParser.add_argument
+63:24 call  parser.add_argument('-f', '--procfile', metavar='FILE', d...
+    -> argparse.ArgumentParser.add_argument
+67:24 call  parser.add_argument('-v', '--version', action='version', ...
+    -> argparse.ArgumentParser.add_argument
+
+[honcho.command.command_check]
+82:22 call  map_from(args)
+    -> honcho.command.map_from
+83:14 call  Env(config)
+    -> honcho.environ.Env.__init__
+85:25 call  _procfile(env)
+    -> honcho.command._procfile
+86:13 call  log.info('Valid procfile detected ({0})'.format(', '.join...
+    -> logging.Logger.info
+    note: log is logging.getLogger(__name__) (line 25), a logging.Logger
+86:52 call  'Valid procfile detected ({0})'.format(', '.join(procfile...
+    -> <builtin>.str.format
+86:62 call  ', '.join(procfile.processes)
+    -> <builtin>.str.join
+
+[honcho.command.command_export]
+97:36 call  args.log.replace('APP', args.app)
+    -> <builtin>.str.replace
+    note: args.log is the str of --log (type=str; the test compares it with a str)
+99:22 call  map_from(args)
+    -> honcho.command.map_from
+100:14 call  Env(config)
+    -> honcho.environ.Env.__init__
+102:25 call  _procfile(env)
+    -> honcho.command._procfile
+103:24 call  _read_env(args.app_root, args.env)
+    -> honcho.command._read_env
+104:37 call  _parse_concurrency(args.concurrency)
+    -> honcho.command._parse_concurrency
+105:17 call  _port(env)
+    -> honcho.command._port
+107:41 call  environ.expand_processes(procfile.processes, concurrency=...
+    -> honcho.environ.expand_processes
+112:51 call  export_choices[args.format].load()
+    -> importlib.metadata.EntryPoint.load
+    note: export_choices maps the names of the group honcho_exporters to importlib.metadata.EntryPoint objects (3.10 and later); on 3.8 and 3.9 the backports stub iterates no items, so the dict is empty and the lookup fails before the call
+113:25 call  export_ctor(template_dir=args.template_dir)
+    -> honcho.export.base.BaseExport.__init__
+    note: value site: export_ctor is the class that EntryPoint.load imports: one of the four exporters that honcho's own distribution registers (pyproject.toml, [project.entry-points.honcho_exporters]: runit, supervisord, systemd, upstart), each an Export that inherits BaseExport.__init__, or a plugin's class (doc/export.rst; client code)
+117:36 call  os.path.abspath(args.app_root)
+    -> os.path.abspath
+123:11 call  _mkdir(args.location)
+    -> honcho.command._mkdir
+125:27 call  export.render(processes, context)
+    -> honcho.export.runit.Export.render
+    -> honcho.export.supervisord.Export.render
+    -> honcho.export.systemd.Export.render
+    -> honcho.export.upstart.Export.render
+    reject honcho.export.base.BaseExport.render: export is an instance of one of the four registered exporters, each of which overrides render; a plugin exporter is client code
+    note: the runit, systemd and upstart render methods are generator functions, whose bodies run as this for loop iterates; supervisord's returns a list
+126:28 call  os.path.join(args.location, f.name)
+    -> os.path.join
+127:17 call  log.info("Writing '%s'", path)
+    -> logging.Logger.info
+128:20 call  _write_file(path, f.content)
+    -> honcho.command._write_file
+130:21 call  os.chmod(path, 0o755)
+    -> os.chmod
+
+[honcho.command.command_help]
+178:20 call  argv.append(args.task)
+    -> <builtin>.list.append
+179:29 call  parser.parse_args(argv[::-1])
+    -> argparse.ArgumentParser.parse_args
+    note: parser is the module's ArgumentParser; with --help it prints the help and exits
+
+[honcho.command.command_run]
+189:22 call  os.environ.update(_read_env(args.app_root, args.env))
+    -> collections.abc.MutableMapping.update
+    note: os.environ is an os._Environ, which inherits update from MutableMapping (bottle precedent)
+189:32 call  _read_env(args.app_root, args.env)
+    -> honcho.command._read_env
+202:23 call  ' '.join(shlex.quote(arg) for arg in argv)
+    -> <builtin>.str.join
+202:35 call  shlex.quote(arg)
+    -> shlex.quote
+204:14 call  Popen(cmd, stdout=sys.stdout, stderr=sys.stderr, start_ne...
+    -> honcho.process.Popen.__init__
+206:18 call  signal.signal(signal.SIGINT, signal.SIG_IGN)
+    -> signal.signal
+207:11 call  p.wait()
+    -> subprocess.Popen.wait
+    note: p is a honcho.process.Popen, which inherits wait from subprocess.Popen
+208:13 call  sys.exit(p.returncode)
+    -> sys.exit
+
+[honcho.command.command_start]
+222:22 call  map_from(args)
+    -> honcho.command.map_from
+223:14 call  Env(config)
+    -> honcho.environ.Env.__init__
+225:25 call  _procfile(env)
+    -> honcho.command._procfile
+226:37 call  _parse_concurrency(args.concurrency)
+    -> honcho.command._parse_concurrency
+227:24 call  _read_env(args.app_root, args.env)
+    -> honcho.command._read_env
+228:25 call  _parse_quiet(args.quiet)
+    -> honcho.command._parse_quiet
+229:17 call  _port(env)
+    -> honcho.command._port
+232:32 call  OrderedDict()
+    -> collections.OrderedDict
+237:35 call  CommandError("Process type '{0}' does not exist in Procfi...
+    -> <builtin>.Exception.__init__
+    note: CommandError (line 42) defines no __init__; the first __init__ of its MRO is that of Exception
+237:90 call  "Process type '{0}' does not exist in Procfile".format(name)
+    -> <builtin>.str.format
+241:22 call  Manager(Printer(sys.stdout, colour=(not args.no_colour), ...
+    -> honcho.manager.Manager.__init__
+241:30 call  Printer(sys.stdout, colour=(not args.no_colour), prefix=(...
+    -> honcho.printer.Printer.__init__
+245:38 call  environ.expand_processes(processes, concurrency=concurren...
+    -> honcho.environ.expand_processes
+250:28 call  os.environ.copy()
+    -> os._Environ.copy
+251:17 call  e.update(p.env)
+    -> <builtin>.dict.update
+    note: e is the dict that os._Environ.copy returns
+252:28 call  manager.add_process(p.name, p.cmd, quiet=p.quiet, env=e)
+    -> honcho.manager.Manager.add_process
+    reject honcho.environ.Procfile.add_process: manager is the Manager of line 241
+254:17 call  manager.loop()
+    -> honcho.manager.Manager.loop
+255:13 call  sys.exit(manager.returncode)
+    -> sys.exit
+
+[honcho.command.command_version]
+280:10 call  print('{prog} {version}'.format( prog=parser.prog, versio...
+    -> <builtin>.print
+280:36 call  '{prog} {version}'.format( prog=parser.prog, version=__ve...
+    -> <builtin>.str.format
+
+[honcho.command.map_from]
+301:20 call  _read_env(args.app_root, args.env)
+    -> honcho.command._read_env
+303:27 call  _compact({k: os.environ.get(v) for k, v in ENV_ARGS.items...
+    -> honcho.command._compact
+303:46 call  os.environ.get(v)
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ, which inherits get from Mapping (anytree precedent)
+303:76 call  ENV_ARGS.items()
+    -> <builtin>.dict.items
+304:24 call  _compact({k: env.get(v) for k, v in ENV_ARGS.items()})
+    -> honcho.command._compact
+304:36 call  env.get(v)
+    -> <builtin>.dict.get
+    note: env is the dict that environ.parse returns through _read_env
+304:66 call  ENV_ARGS.items()
+    -> <builtin>.dict.items
+305:24 call  _compact(vars(args))
+    -> honcho.command._compact
+305:29 call  vars(args)
+    -> <builtin>.vars
+307:20 call  ChainMap(from_cli, from_env, from_os_env, DEFAULTS)
+    -> collections.ChainMap
+
+[honcho.command.main]
+312:33 call  parser.parse_args(argv)
+    -> argparse.ArgumentParser.parse_args
+314:33 call  parser.parse_args()
+    -> argparse.ArgumentParser.parse_args
+317:31 call  _check_output_encoding()
+    -> honcho.command._check_output_encoding
+318:31 call  COMMANDS[args.command](args)
+    -> honcho.command.command_check
+    -> honcho.command.command_export
+    -> honcho.command.command_help
+    -> honcho.command.command_run
+    -> honcho.command.command_start
+    -> honcho.command.command_version
+    note: value site: COMMANDS (lines 290-297) maps the six subcommand names to the six command functions; args.command is the name of the subparser that parse_args selected (dest='command', required)
+320:18 call  log.error(str(e))
+    -> logging.Logger.error
+320:22 call  str(e)
+    -> <builtin>.str
+321:17 call  sys.exit(1)
+    -> sys.exit
+
+[honcho.command._compact]
+325:43 call  mapping.items()
+    -> <builtin>.dict.items
+    note: map_from passes dicts: two dict comprehensions and vars(args)
+
+[honcho.command._procfile]
+330:37 call  env.load_procfile()
+    -> honcho.environ.Env.load_procfile
+332:27 call  CommandError('Procfile does not exist or is not a file')
+    -> <builtin>.Exception.__init__
+334:27 call  CommandError(str(e))
+    -> <builtin>.Exception.__init__
+334:31 call  str(e)
+    -> <builtin>.str
+
+[honcho.command._port]
+340:20 getattr  env.port
+    -> honcho.environ.Env.port
+    note: env is the Env that the command functions make
+342:27 call  CommandError(str(e))
+    -> <builtin>.Exception.__init__
+342:31 call  str(e)
+    -> <builtin>.str
+
+[honcho.command._read_env]
+346:21 call  e.strip()
+    -> <builtin>.str.strip
+346:42 call  env.split(',')
+    -> <builtin>.str.split
+    note: env is the str of --env (default '.env')
+350:22 call  open(os.path.join(app_root, envfile))
+    -> <builtin>.open
+350:35 call  os.path.join(app_root, envfile)
+    -> os.path.join
+351:31 call  content.append(f.read())
+    -> <builtin>.list.append
+351:38 call  f.read()
+    -> io.TextIOWrapper.read
+    note: f is the text-mode file that open() returns
+355:25 call  environ.parse('\n'.join(content))
+    -> honcho.environ.parse
+355:35 call  '\n'.join(content)
+    -> <builtin>.str.join
+
+[honcho.command._parse_concurrency]
+359:25 call  defaultdict(lambda: 1)
+    -> collections.defaultdict
+    reject honcho.command._parse_concurrency.<lambda1>: defaultdict stores the factory; nothing looks up a missing key of this dict: the function only stores keys, and its one consumer copies it with update (environ.py:103), which reads the stored pairs
+362:27 call  desc.split(',')
+    -> <builtin>.str.split
+363:38 call  item.split('=', 1)
+    -> <builtin>.str.split
+364:26 call  int(concurrency)
+    -> <builtin>.int
+
+[honcho.command._parse_quiet]
+372:24 call  desc.split(',')
+    -> <builtin>.str.split
+
+[honcho.command._mkdir]
+377:22 call  os.path.exists(path)
+    -> os.path.exists
+380:20 call  os.makedirs(path)
+    -> os.makedirs
+382:18 call  log.error("Could not create export directory")
+    -> logging.Logger.error
+383:27 call  CommandError(e)
+    -> <builtin>.Exception.__init__
+
+[honcho.command._write_file]
+387:11 call  _mkdir(os.path.dirname(path))
+    -> honcho.command._mkdir
+387:27 call  os.path.dirname(path)
+    -> os.path.dirname
+389:18 call  open(path, 'w')
+    -> <builtin>.open
+390:21 call  fp.write(content)
+    -> io.TextIOWrapper.write
+    reject honcho.printer.Printer.write: fp is the text-mode file of open(path, 'w')
+392:18 call  log.error("Could not write to export file")
+    -> logging.Logger.error
+393:27 call  CommandError(e)
+    -> <builtin>.Exception.__init__
+
+[honcho.command._check_output_encoding]
+398:25 call  codecs.lookup('utf8')
+    -> codecs.lookup
+400:29 call  sys.stdout.isatty()
+    -> io.TextIOWrapper.isatty
+    -> colorama.ansitowin32.StreamWrapper.isatty
+    note: sys.stdout is the interpreter's text stream, or on Windows the colorama StreamWrapper that colorama.init() (printer.py:82, run at import) puts in its place when should_wrap() holds (honcho.md J6, ruling of the lead)
+403:36 call  codecs.lookup(sys.stdout.encoding)
+    -> codecs.lookup
+404:17 call  log.warn('Your terminal is not configured to receive UTF-...
+    -> logging.Logger.warn
+    note: Logger.warn is deprecated but present in every admitted CPython (3.8 to 3.15)
+
+== honcho.compat
+
+[honcho.compat]
+11:28 call  str(sys.platform)
+    -> <builtin>.str
+11:48 call  str(sys.platform).lower()
+    -> <builtin>.str.lower
+
+[honcho.compat.ProcessManager.terminate]
+22:56 call  ctypes.windll.kernel32.OpenProcess(1, False, pid)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only. ctypes.windll.kernel32 is a ctypes.WinDLL; its functions are instances of the class _FuncPtr that CDLL.__init__ defines, and the call is its __call__ (Sublist3r, segno precedent)
+23:52 call  ctypes.windll.kernel32.TerminateProcess(handle, -1)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only; as at line 22
+24:47 call  ctypes.windll.kernel32.CloseHandle(handle)
+    -> ctypes.CDLL.__init__._FuncPtr.__call__
+    note: Windows only; as at line 22
+28:26 call  os.killpg(pid, signal.SIGTERM)
+    -> os.killpg
+
+[honcho.compat.ProcessManager.kill]
+36:27 call  self.terminate(pid)
+    -> honcho.compat.ProcessManager.terminate
+    reject honcho.manager.Manager.terminate: self is a ProcessManager
+    note: Windows only
+40:26 call  os.killpg(pid, signal.SIGKILL)
+    -> os.killpg
+
+== honcho.environ
+
+[honcho.environ]
+6:27 call  re.compile(r'^([A-Za-z0-9_-]+):\s*(.+)$')
+    -> re.compile
+14:6 decorator  @property
+    -> <builtin>.property
+21:6 decorator  @property
+    -> <builtin>.property
+82:27 call  namedtuple("ProcessParams", "name cmd quiet env")
+    -> collections.namedtuple
+
+[honcho.environ.Env.port]
+17:23 call  int(self._c['port'])
+    -> <builtin>.int
+    note: the port value is a str of the config (the default '5000', the --port option, PORT of the .env file or of os.environ)
+19:29 call  ValueError(f"invalid value for port: '{self._c['port']}'")
+    -> <builtin>.ValueError
+
+[honcho.environ.Env.procfile]
+23:28 call  os.path.join(self._c['app_root'], self._c['procfile'])
+    -> os.path.join
+
+[honcho.environ.Env.load_procfile]
+26:18 call  open(self.procfile)
+    -> <builtin>.open
+    reject honcho.environ.Env.procfile: the property runs at its load (26:24); its str is the argument
+26:24 getattr  self.procfile
+    -> honcho.environ.Env.procfile
+    note: self is an Env
+27:29 call  f.read()
+    -> io.TextIOWrapper.read
+    note: f is the text-mode file that open() returns
+29:30 call  parse_procfile(content)
+    -> honcho.environ.parse_procfile
+
+[honcho.environ.Procfile.__init__]
+36:37 call  OrderedDict()
+    -> collections.OrderedDict
+
+[honcho.environ.parse_procfile]
+45:17 call  Procfile()
+    -> honcho.environ.Procfile.__init__
+46:36 call  contents.splitlines()
+    -> <builtin>.str.splitlines
+47:32 call  PROCFILE_LINE.match(line)
+    -> re.Pattern.match
+49:26 call  p.add_process(m.group(1), m.group(2))
+    -> honcho.environ.Procfile.add_process
+    reject honcho.manager.Manager.add_process: p is the Procfile of line 45
+49:34 call  m.group(1)
+    -> re.Match.group
+49:46 call  m.group(2)
+    -> re.Match.group
+
+[honcho.environ.parse]
+59:35 call  content.splitlines()
+    -> <builtin>.str.splitlines
+60:28 call  shlex.shlex(line, posix=True)
+    -> shlex.shlex
+61:22 call  list(lexer)
+    -> <builtin>.list
+64:15 call  len(tokens)
+    -> <builtin>.len
+68:24 call  ''.join(tokens[2:])
+    -> <builtin>.str.join
+72:24 call  re.match(r'[A-Za-z_][A-Za-z_0-9]*', name)
+    -> re.match
+75:30 call  value.replace(r'\n', '\n')
+    -> <builtin>.str.replace
+76:30 call  value.replace(r'\t', '\t')
+    -> <builtin>.str.replace
+
+[honcho.environ.expand_processes]
+95:35 call  env.get("PORT")
+    -> <builtin>.dict.get
+    note: env is the dict of environ.parse that the command functions pass (app_env); a client mapping is opaque
+96:19 call  int(env.get("PORT"))
+    -> <builtin>.int
+96:27 call  env.get("PORT")
+    -> <builtin>.dict.get
+101:22 call  defaultdict(lambda: 1)
+    -> collections.defaultdict
+    -> honcho.environ.expand_processes.<lambda1>
+    note: defaultdict calls the lambda back at con[name] (108:32), the lookup of a process type that concurrency does not name (every type when concurrency is None); one function builds and reads the dict, so the edge is the same at this site
+103:19 call  con.update(concurrency)
+    -> collections.defaultdict.update
+107:37 call  processes.items()
+    -> collections.OrderedDict.items
+    note: processes is Procfile.processes or the OrderedDict of command_start, line 232
+108:23 call  range(con[name])
+    -> <builtin>.range
+109:33 call  "{0}.{1}".format(name, i + 1)
+    -> <builtin>.str.format
+114:25 call  e.update(env)
+    -> <builtin>.dict.update
+116:32 call  str(port + i)
+    -> <builtin>.str
+118:35 call  ProcessParams(n, c, q, e)
+    note: value site: ProcessParams is the namedtuple class of line 82; a call of a namedtuple class adds no edge (README, "Callees outside the package")
+119:23 call  out.append(params)
+    -> <builtin>.list.append
+
+== honcho.export.base
+
+[honcho.export.base]
+8:10 call  print("honcho's 'export' command requires the jinja2 pack...
+    -> <builtin>.print
+    note: optional import, lines 5-15: jinja2 is the extra "export"; both sides run
+15:13 call  sys.exit(1)
+    -> sys.exit
+
+[honcho.export.base.BaseExport.__init__]
+25:45 call  jinja2.FileSystemLoader([template_dir])
+    -> jinja2.FileSystemLoader
+27:46 call  self.get_template_loader()
+    -> honcho.export.base.BaseExport.get_template_loader
+    -> honcho.export.runit.Export.get_template_loader
+    -> honcho.export.supervisord.Export.get_template_loader
+    -> honcho.export.systemd.Export.get_template_loader
+    -> honcho.export.upstart.Export.get_template_loader
+    note: self is a BaseExport (a plain public class documented for subclassing, doc/export.rst: a receiver of its own methods, B1; its method raises NotImplementedError) or one of the four package exporters
+29:51 call  _default_template_env(loader)
+    -> honcho.export.base._default_template_env
+
+[honcho.export.base.BaseExport.get_template]
+37:47 call  self._template_env.get_template(path)
+    -> jinja2.Environment.get_template
+    reject honcho.export.base.BaseExport.get_template: _template_env is the jinja2.Environment of _default_template_env, or the client's template_env (opaque)
+
+[honcho.export.base.BaseExport.get_template_loader]
+40:34 call  NotImplementedError("You must implement a get_template_lo...
+    -> <builtin>.NotImplementedError
+
+[honcho.export.base.BaseExport.render]
+44:34 call  NotImplementedError("You must implement a render method.")
+    -> <builtin>.NotImplementedError
+
+[honcho.export.base.dashrepl]
+58:22 call  re.compile(r'\W', re.UNICODE)
+    -> re.compile
+59:18 call  re.sub(patt, '-', value)
+    -> re.sub
+
+[honcho.export.base.percentescape]
+66:25 call  value.replace('%', '%%')
+    -> <builtin>.str.replace
+
+[honcho.export.base._default_template_env]
+70:29 call  jinja2.Environment(loader=loader)
+    -> jinja2.Environment
+
+== honcho.export.runit
+
+[honcho.export.runit.Export.get_template_loader]
+15:36 call  jinja2.PackageLoader(__name__, 'templates/runit')
+    -> jinja2.PackageLoader
+
+[honcho.export.runit.Export.render]
+18:36 call  self.get_template('run')
+    -> honcho.export.base.BaseExport.get_template
+19:36 call  self.get_template('log/run')
+    -> honcho.export.base.BaseExport.get_template
+22:31 call  context.copy()
+    -> <builtin>.dict.copy
+    note: context is the dict of command_export
+23:23 call  ctx.update({'process': p})
+    -> <builtin>.dict.update
+25:36 call  '{0}-{1}'.format(ctx['app'], dashrepl(p.name))
+    -> <builtin>.str.format
+25:57 call  dashrepl(p.name)
+    -> honcho.export.base.dashrepl
+28:36 call  p.env.items()
+    -> <builtin>.dict.items
+    note: p is a ProcessParams of expand_processes; its env is a dict
+29:27 call  File(os.path.join(name, 'env', k), v)
+    -> honcho.export.base.File.__init__
+29:40 call  os.path.join(name, 'env', k)
+    -> os.path.join
+32:23 call  File(os.path.join(name, 'run'), run_tpl.render(ctx), exec...
+    -> honcho.export.base.File.__init__
+32:36 call  os.path.join(name, 'run')
+    -> os.path.join
+33:38 call  run_tpl.render(ctx)
+    -> jinja2.Template.render
+    reject *: run_tpl is the jinja2.Template that Environment.get_template returns
+    note: templates/runit/run applies no package filter
+37:23 call  File(os.path.join(name, 'log', 'run'), log_tpl.render(ctx...
+    -> honcho.export.base.File.__init__
+37:36 call  os.path.join(name, 'log', 'run')
+    -> os.path.join
+38:38 call  log_tpl.render(ctx)
+    -> jinja2.Template.render
+    -> honcho.export.base.dashrepl
+    reject *: log_tpl is the jinja2.Template that Environment.get_template returns
+    note: templates/runit/log/run applies the filter dashrepl, which _default_template_env registers; the code that jinja2 generates from the template calls it during render (callback; honcho.md J4)
+
+== honcho.export.supervisord
+
+[honcho.export.supervisord.Export.get_template_loader]
+8:36 call  jinja2.PackageLoader(__name__, 'templates/supervisord')
+    -> jinja2.PackageLoader
+
+[honcho.export.supervisord.Export.render]
+12:37 call  "{0}.conf".format(context['app'])
+    -> <builtin>.str.format
+13:37 call  self.get_template('supervisord.conf')
+    -> honcho.export.base.BaseExport.get_template
+14:21 call  File(filename, template.render(context))
+    -> honcho.export.base.File.__init__
+14:47 call  template.render(context)
+    -> jinja2.Template.render
+    -> honcho.export.base.dashrepl
+    -> honcho.export.base.percentescape
+    reject *: template is the jinja2.Template that Environment.get_template returns
+    note: templates/supervisord/supervisord.conf applies the filters dashrepl and percentescape to each process (callback; honcho.md J4)
+
+== honcho.export.systemd
+
+[honcho.export.systemd.Export.get_template_loader]
+15:36 call  jinja2.PackageLoader(__name__, 'templates/systemd')
+    -> jinja2.PackageLoader
+
+[honcho.export.systemd.Export.render]
+18:39 call  self.get_template('master.target')
+    -> honcho.export.base.BaseExport.get_template
+19:47 call  self.get_template('process_master.target')
+    -> honcho.export.base.BaseExport.get_template
+20:40 call  self.get_template('process.service')
+    -> honcho.export.base.BaseExport.get_template
+23:33 call  groupby(processes, lambda proc: proc.name.split(".")[0])
+    -> itertools.groupby
+    -> honcho.export.systemd.Export.render.<lambda1>
+    note: groupby calls the key lambda back as the comprehension of lines 24-27 iterates it, in this function
+25:22 call  "-".join([app_name, group_name])
+    -> <builtin>.str.join
+26:24 call  "-".join([app_name, dashrepl(proc.name)])
+    -> <builtin>.str.join
+26:44 call  dashrepl(proc.name)
+    -> honcho.export.base.dashrepl
+29:33 call  ".".join([group[0], "target"])
+    -> <builtin>.str.join
+30:43 call  " ".join(master_wants)
+    -> <builtin>.str.join
+32:19 call  File("{0}.target".format(app_name), master_tpl.render(con...
+    -> honcho.export.base.File.__init__
+32:39 call  "{0}.target".format(app_name)
+    -> <builtin>.str.format
+32:68 call  master_tpl.render(context)
+    -> jinja2.Template.render
+    reject *: master_tpl is the jinja2.Template that Environment.get_template returns
+    note: the systemd templates apply no package filter (only shellquote, which is shlex.quote)
+35:45 call  ".".join([p[0], "service"])
+    -> <builtin>.str.join
+36:55 call  " ".join(process_master_wants)
+    -> <builtin>.str.join
+38:23 call  File("{0}.target".format(process_master_name), process_ma...
+    -> honcho.export.base.File.__init__
+38:43 call  "{0}.target".format(process_master_name)
+    -> <builtin>.str.format
+38:91 call  process_master_tpl.render(context)
+    -> jinja2.Template.render
+    reject *: process_master_tpl is the jinja2.Template that Environment.get_template returns
+42:27 call  File("{0}.service".format(process_name), process_tpl.rend...
+    -> honcho.export.base.File.__init__
+42:48 call  "{0}.service".format(process_name)
+    -> <builtin>.str.format
+42:82 call  process_tpl.render(context)
+    -> jinja2.Template.render
+    reject *: process_tpl is the jinja2.Template that Environment.get_template returns
+
+[honcho.export.systemd.Export.render.<lambda1>]
+23:73 call  proc.name.split(".")
+    -> <builtin>.str.split
+    note: proc is a ProcessParams; its name is a str
+
+== honcho.export.upstart
+
+[honcho.export.upstart.Export.get_template_loader]
+10:36 call  jinja2.PackageLoader(__name__, 'templates/upstart')
+    -> jinja2.PackageLoader
+
+[honcho.export.upstart.Export.render]
+13:39 call  self.get_template('master.conf')
+    -> honcho.export.base.BaseExport.get_template
+14:47 call  self.get_template('process_master.conf')
+    -> honcho.export.base.BaseExport.get_template
+15:40 call  self.get_template('process.conf')
+    -> honcho.export.base.BaseExport.get_template
+17:25 call  groupby(processes, lambda p: p.name.split('.')[0])
+    -> itertools.groupby
+    -> honcho.export.upstart.Export.render.<lambda1>
+    note: groupby calls the key lambda back as the for loops of lines 22 and 31 iterate it, in this function
+19:35 call  "{0}.conf".format(context['app'])
+    -> <builtin>.str.format
+20:19 call  File(master, master_tpl.render(context))
+    -> honcho.export.base.File.__init__
+20:45 call  master_tpl.render(context)
+    -> jinja2.Template.render
+    reject *: master_tpl is the jinja2.Template that Environment.get_template returns
+    note: the upstart templates apply no package filter (only shellquote, which is shlex.quote)
+23:42 call  "{0}-{1}".format(context['app'], name)
+    -> <builtin>.str.format
+25:31 call  context.copy()
+    -> <builtin>.dict.copy
+26:23 call  ctx.update({'group_name': group_name})
+    -> <builtin>.dict.update
+28:47 call  "{0}.conf".format(group_name)
+    -> <builtin>.str.format
+29:23 call  File(process_master, process_master_tpl.render(ctx))
+    -> honcho.export.base.File.__init__
+29:65 call  process_master_tpl.render(ctx)
+    -> jinja2.Template.render
+    reject *: process_master_tpl is the jinja2.Template that Environment.get_template returns
+32:35 call  context.copy()
+    -> <builtin>.dict.copy
+33:27 call  ctx.update({'group_name': group_name, 'process': p})
+    -> <builtin>.dict.update
+35:48 call  "{0}-{1}.conf".format(context['app'], dashrepl(p.name))
+    -> <builtin>.str.format
+36:57 call  dashrepl(p.name)
+    -> honcho.export.base.dashrepl
+37:27 call  File(process, process_tpl.render(ctx))
+    -> honcho.export.base.File.__init__
+37:55 call  process_tpl.render(ctx)
+    -> jinja2.Template.render
+    reject *: process_tpl is the jinja2.Template that Environment.get_template returns
+
+[honcho.export.upstart.Export.render.<lambda1>]
+17:59 call  p.name.split('.')
+    -> <builtin>.str.split
+    note: p is a ProcessParams; its name is a str
+
+== honcho.manager
+
+[honcho.manager.Manager.__init__]
+50:44 call  multiprocessing.Queue()
+    -> multiprocessing.Queue
+53:36 call  get_colours()
+    -> honcho.colour.get_colours
+55:39 call  ProcessManager()
+    note: ProcessManager defines no __init__: its first __init__ is object.__init__, no edge
+57:68 call  Printer(sys.stdout)
+    -> honcho.printer.Printer.__init__
+58:34 call  len(SYSTEM_PRINTER_NAME)
+    -> <builtin>.len
+
+[honcho.manager.Manager.add_process]
+71:34 call  self._process_ctor(cmd, name=name, quiet=quiet, colour=ne...
+    -> honcho.process.Process.__init__
+    note: value site: _process_ctor is honcho.process.Process (line 60), a private attribute that nothing in the package reassigns
+74:46 call  next(self._colours)
+    -> <builtin>.next
+    note: _colours is the generator of get_colours (line 53); next resumes it, which is no edge to the generator function
+81:34 call  max(self._printer.width, len(name))
+    -> <builtin>.max
+81:59 call  len(name)
+    -> <builtin>.len
+
+[honcho.manager.Manager.loop]
+100:22 call  signal.signal(signal.SIGTERM, _terminate)
+    -> signal.signal
+    reject honcho.manager.Manager.loop._terminate: signal.signal only stores the handler; it runs in the blocking wait of 110:38
+101:22 call  signal.signal(signal.SIGINT, _terminate)
+    -> signal.signal
+    reject honcho.manager.Manager.loop._terminate: signal.signal only stores the handler; it runs in the blocking wait of 110:38
+103:20 call  self._start()
+    -> honcho.manager.Manager._start
+110:38 call  self.events.get(timeout=0.1)
+    -> multiprocessing.queues.Queue.get
+    -> honcho.manager.Manager.loop._terminate
+    note: events is the multiprocessing.Queue of __init__. The handler that lines 100-101 install runs when SIGTERM or SIGINT interrupts this blocking get (PyErr_CheckSignals on EINTR in the wait); a signal at another point runs it in an unrelated frame (asciinema precedent; honcho.md J2)
+116:40 call  self._printer.write(msg)
+    -> honcho.printer.Printer.write
+    note: _printer is the Printer of command_start or of __init__'s default; a client printer is opaque
+119:39 call  self._system_print("%s started (pid=%s)\n" % (msg.name, m...
+    -> honcho.manager.Manager._system_print
+123:39 call  self._system_print("%s stopped (rc=%s)\n" % (msg.name, ms...
+    -> honcho.manager.Manager._system_print
+128:33 call  self._all_started()
+    -> honcho.manager.Manager._all_started
+128:57 call  self._all_stopped()
+    -> honcho.manager.Manager._all_stopped
+131:56 call  self._all_started()
+    -> honcho.manager.Manager._all_started
+131:80 call  self._any_stopped()
+    -> honcho.manager.Manager._any_stopped
+132:45 call  self._clock.now()
+    -> datetime.datetime.now
+    note: _clock is datetime.datetime (line 54), a private attribute that nothing in the package reassigns
+133:31 call  self.terminate()
+    -> honcho.manager.Manager.terminate
+    reject honcho.compat.ProcessManager.terminate: self is a Manager
+138:42 call  self._clock.now()
+    -> datetime.datetime.now
+139:48 call  datetime.timedelta(seconds=KILL_WAIT)
+    -> datetime.timedelta
+140:30 call  self.kill()
+    -> honcho.manager.Manager.kill
+    reject honcho.compat.ProcessManager.kill: self is a Manager
+
+[honcho.manager.Manager.loop._terminate]
+96:31 call  self._system_print("%s received\n" % SIGNALS[signum]['nam...
+    -> honcho.manager.Manager._system_print
+    note: self is the Manager whose loop defines the handler
+98:27 call  self.terminate()
+    -> honcho.manager.Manager.terminate
+    reject honcho.compat.ProcessManager.terminate: self is the Manager of the enclosing loop
+
+[honcho.manager.Manager.terminate]
+149:22 call  self._killall()
+    -> honcho.manager.Manager._killall
+
+[honcho.manager.Manager.kill]
+155:22 call  self._killall(force=True)
+    -> honcho.manager.Manager._killall
+
+[honcho.manager.Manager._killall]
+161:42 call  self._processes.items()
+    -> <builtin>.dict.items
+163:39 call  for_termination.append(n)
+    -> <builtin>.list.append
+168:31 call  self._system_print("sending %s to %s (pid %s)\n" % (signa...
+    -> honcho.manager.Manager._system_print
+171:35 call  self._procmgr.kill(p['pid'])
+    -> honcho.compat.ProcessManager.kill
+    reject honcho.manager.Manager.kill: _procmgr is the ProcessManager of line 55
+173:40 call  self._procmgr.terminate(p['pid'])
+    -> honcho.compat.ProcessManager.terminate
+    reject honcho.manager.Manager.terminate: _procmgr is the ProcessManager of line 55
+
+[honcho.manager.Manager._start]
+176:45 call  self._processes.items()
+    -> <builtin>.dict.items
+177:51 call  multiprocessing.Process(name=name, target=p['obj'].run, a...
+    -> multiprocessing.Process
+    reject honcho.process.Process.__init__: the class called is multiprocessing.Process
+    reject honcho.process.Process.run: the constructor stores the target; start() runs it (180:31)
+180:31 call  p['process'].start()
+    -> multiprocessing.Process.start
+    -> honcho.process.Process.run
+    note: start() runs the target p['obj'].run, the run method of the honcho.process.Process of add_process, in the child process that it forks (the default start method on Linux up to 3.13); callback rule (asciinema, Sublist3r precedent; honcho.md J1)
+
+[honcho.manager.Manager._all_started]
+183:19 call  all(p.get('pid') is not None for _, p in self._processes....
+    -> <builtin>.all
+183:25 call  p.get('pid')
+    -> <builtin>.dict.get
+    note: each value of _processes is a dict (add_process, line 77)
+183:78 call  self._processes.items()
+    -> <builtin>.dict.items
+
+[honcho.manager.Manager._all_stopped]
+186:19 call  all(p.get('returncode') is not None for _, p in self._pro...
+    -> <builtin>.all
+186:25 call  p.get('returncode')
+    -> <builtin>.dict.get
+186:85 call  self._processes.items()
+    -> <builtin>.dict.items
+
+[honcho.manager.Manager._any_stopped]
+189:19 call  any(p.get('returncode') is not None for _, p in self._pro...
+    -> <builtin>.any
+189:25 call  p.get('returncode')
+    -> <builtin>.dict.get
+189:85 call  self._processes.items()
+    -> <builtin>.dict.items
+
+[honcho.manager.Manager._system_print]
+192:28 call  self._printer.write(Message(type='line', data=data, time=...
+    -> honcho.printer.Printer.write
+    note: _printer is the Printer of command_start or of __init__'s default; a client printer is opaque
+192:36 call  Message(type='line', data=data, time=self._clock.now(), n...
+    note: Message is the namedtuple class of printer.py:6; a call of a namedtuple class adds no edge
+194:57 call  self._clock.now()
+    -> datetime.datetime.now
+
+== honcho.printer
+
+[honcho.printer]
+6:21 call  namedtuple("Message", "type data time name colour")
+    -> collections.namedtuple
+82:22 call  colorama.init()
+    -> colorama.init
+    note: Windows only (lines 72-82); colorama, a dependency on win32, is missing from the trace environment: named by its access path; both sides of the optional import run (the except side defines a _colour_string without calls)
+
+[honcho.printer.Printer.__init__]
+31:57 call  self.output.isatty()
+    -> io.TextIOWrapper.isatty
+    -> colorama.ansitowin32.StreamWrapper.isatty
+    note: the package passes sys.stdout (the default of line 17, Manager.__init__ and command_start): a text stream, or on Windows, at the two calls made after import, the colorama StreamWrapper that colorama.init() (line 82) puts in its place when should_wrap() holds; a client output is opaque (honcho.md J6, ruling of the lead)
+
+[honcho.printer.Printer.write]
+39:31 call  RuntimeError('Printer can only process messages of type "...
+    -> <builtin>.RuntimeError
+42:26 call  name.ljust(self.width)
+    -> <builtin>.str.ljust
+    note: name is the str name of a Process (command_start's process names) or SYSTEM_PRINTER_NAME, or ""
+49:22 call  isinstance(message.data, bytes)
+    -> <builtin>.isinstance
+50:41 call  message.data.decode("utf-8", "replace")
+    -> <builtin>.bytes.decode
+    note: the package's line messages carry the bytes that Process.run reads from the pipe
+54:38 call  string.splitlines()
+    -> <builtin>.str.splitlines
+57:55 call  message.time.strftime(self.time_format)
+    -> datetime.datetime.strftime
+    note: the package's messages carry datetime.datetime.now() (process.py:58, manager.py:194)
+58:50 call  '{time} {name}| '.format(time=time_formatted, name=name)
+    -> <builtin>.str.format
+60:44 call  _colour_string(message.colour, prefix)
+    -> honcho.printer._colour_string
+61:18 call  print(prefix + line, file=self.output, flush=True)
+    -> <builtin>.print
+
+[honcho.printer._ansi]
+65:30 call  '\033[{0}m'.format(code)
+    -> <builtin>.str.format
+
+[honcho.printer._colour_string]
+69:33 call  '{0}{1}{2}{3}'.format(_ansi(0), _ansi(colour), s, _ansi(0))
+    -> <builtin>.str.format
+69:39 call  _ansi(0)
+    -> honcho.printer._ansi
+69:49 call  _ansi(colour)
+    -> honcho.printer._ansi
+69:67 call  _ansi(0)
+    -> honcho.printer._ansi
+
+== honcho.process
+
+[honcho.process.Process.__init__]
+27:35 call  os.environ.copy()
+    -> os._Environ.copy
+
+[honcho.process.Process.run]
+36:39 call  self._child_ctor(self.cmd, env=self.env, cwd=self.cwd)
+    -> honcho.process.Popen.__init__
+    note: value site: _child_ctor is honcho.process.Popen (line 32), a private attribute that nothing in the package reassigns (the tests' FakePopen is a change of package internals)
+37:27 call  self._send_message({'pid': self._child.pid}, type='start')
+    -> honcho.process.Process._send_message
+43:26 call  signal.signal(signal.SIGINT, signal.SIG_IGN)
+    -> signal.signal
+44:26 call  signal.signal(signal.SIGTERM, signal.SIG_IGN)
+    -> signal.signal
+46:25 call  iter(self._child.stdout.readline, b'')
+    -> <builtin>.iter
+    note: iter calls the bound readline of the pipe: a library callable, no edge
+48:35 call  self._send_message(line)
+    -> honcho.process.Process._send_message
+49:33 call  self._child.stdout.close()
+    -> io.BufferedReader.close
+    note: _child is the Popen of line 36 with stdout=PIPE in binary mode (only env and cwd are passed), so stdout is an io.BufferedReader
+50:25 call  self._child.wait()
+    -> subprocess.Popen.wait
+    note: _child is a honcho.process.Popen, which inherits wait from subprocess.Popen
+52:27 call  self._send_message({'returncode': self._child.returncode}...
+    -> honcho.process.Process._send_message
+
+[honcho.process.Process._send_message]
+56:29 call  self._events.put(Message(type=type, data=data, time=self....
+    -> multiprocessing.queues.Queue.put
+    note: _events is the events argument of run: the package passes the multiprocessing.Queue of Manager (manager.py:179); a client queue is opaque
+56:37 call  Message(type=type, data=data, time=self._clock.now(), nam...
+    note: Message is the namedtuple class of printer.py:6; a call of a namedtuple class adds no edge
+58:58 call  self._clock.now()
+    -> datetime.datetime.now
+    note: _clock is datetime.datetime (line 30), a private attribute that nothing in the package reassigns
+
+[honcho.process.Popen.__init__]
+66:39 call  kwargs.pop('start_new_session', True)
+    -> <builtin>.dict.pop
+73:23 call  options.update(**kwargs)
+    -> <builtin>.dict.update
+79:27 call  options.update(creationflags=create_no_window)
+    -> <builtin>.dict.update
+    note: Windows only
+81:27 call  options.update(start_new_session=True)
+    -> <builtin>.dict.update
+83:14 call  super(Popen, self)
+    -> <builtin>.super
+83:36 call  super(Popen, self).__init__(cmd, **options)
+    -> subprocess.Popen.__init__
+    reject *: super(Popen, self) finds __init__ after Popen in the MRO: subprocess.Popen.__init__

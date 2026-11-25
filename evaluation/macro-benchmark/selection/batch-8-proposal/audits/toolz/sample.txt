@@ -1,0 +1,161 @@
+# 1256 sites: 599 explicit, 440 getattr, 217 other implicit, 96 value sites
+# random.Random(20261124); rng.sample: 45 explicit, then 15 other implicit, then 10 getattr; 89 value sites added; 159 sites
+   3 value       tlz._build_tlz [tlz._build_tlz.TlzLoader._load_toolz] 18:54 call  fullname.partition('.')
+   5 drawn,value tlz._build_tlz [tlz._build_tlz.TlzLoader._load_toolz] 20:34 call  ''.join(['cytoolz', dot, submodules])
+   9 drawn,value tlz._build_tlz [tlz._build_tlz.TlzLoader._load_toolz] 25:34 call  ''.join(['toolz', dot, submodules])
+  14 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.find_module] 34:54 call  fullname.partition('.')
+  28 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.find_spec] 48:54 call  fullname.partition('.')
+  38 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 57:34 call  toolz_mods.get('cytoolz')
+  41 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 58:34 call  toolz_mods.get('toolz')
+  52 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 62:57 call  package.partition('.')
+  54 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 63:41 call  ''.join(['tlz', dot, submodules])
+  63 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 74:39 call  slow_mod.__dict__.get(k)
+  76 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 85:64 call  v.__name__.partition('.')
+  77 drawn       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 86:34 getattr  ''.join
+  78 value       tlz._build_tlz [tlz._build_tlz.TlzLoader.exec_module] 86:38 call  ''.join(['tlz', dot, submodules])
+  82 drawn       tlz._build_tlz [tlz._build_tlz] 91:23 call  TlzLoader()
+  94 drawn       toolz [toolz.__getattr__] 29:21 call  version("toolz")
+ 131 drawn       toolz._signatures [toolz._signatures.get_exclude_keywords] 612:29 op  x.kind == x.VAR_KEYWORD
+ 136 drawn       toolz._signatures [toolz._signatures.get_exclude_keywords] 616:20 call  list(sigspec.parameters.values())
+ 159 drawn       toolz._signatures [toolz._signatures.create_signature_registry] 668:37 call  info.items()
+ 169 value       toolz._signatures [toolz._signatures.check_valid] 684:13 call  func(*args, **kwargs)
+ 179 drawn       toolz._signatures [toolz._signatures.check_partial] 708:27 call  is_partial_args(func, args, kwargs, sigspec)
+ 184 drawn       toolz._signatures [toolz._signatures.check_arity] 723:20 call  is_arity(n, func, sigspec)
+ 203 drawn       toolz._signatures [toolz._signatures._num_required_args] 780:13 op  func not in signatures
+ 208 drawn       toolz._signatures [toolz._signatures._num_required_args] 785:14 op  x == val
+ 217 drawn       toolz.compatibility [toolz.compatibility] 12:53 getitem  sys.version_info[1]
+ 264 drawn       toolz.curried [toolz.curried] 70:29 getattr  toolz.groupby
+ 270 drawn       toolz.curried [toolz.curried] 72:32 getattr  toolz.itemfilter
+ 358 drawn       toolz.curried.exceptions [toolz.curried.exceptions.merge_with] 9:28 call  toolz.merge_with(func, d, *dicts, **kwargs)
+ 362 drawn       toolz.curried.exceptions [toolz.curried.exceptions.merge] 14:23 call  toolz.merge(d, *dicts, **kwargs)
+ 369 drawn       toolz.curried.operator [toolz.curried.operator] 12:16 call  locals().update( {name: f if name in IGNORE else curry(f)...
+ 387 drawn       toolz.dicttoolz [toolz.dicttoolz.merge] 33:42 call  isinstance(dicts[0], Mapping)
+ 391 value       toolz.dicttoolz [toolz.dicttoolz.merge] 37:17 call  factory()
+ 406 value       toolz.dicttoolz [toolz.dicttoolz.merge_with] 65:22 call  values[k](v)
+ 407 value       toolz.dicttoolz [toolz.dicttoolz.merge_with] 67:21 call  factory()
+ 409 drawn       toolz.dicttoolz [toolz.dicttoolz.merge_with] 68:29 call  values.items()
+ 411 drawn,value toolz.dicttoolz [toolz.dicttoolz.merge_with] 69:25 call  func(v.__self__)
+ 413 value       toolz.dicttoolz [toolz.dicttoolz.valmap] 84:17 call  factory()
+ 422 value       toolz.dicttoolz [toolz.dicttoolz.keymap] 100:17 call  factory()
+ 426 drawn       toolz.dicttoolz [toolz.dicttoolz.keymap] 101:22 call  map(func, d.keys())
+ 431 value       toolz.dicttoolz [toolz.dicttoolz.itemmap] 116:17 call  factory()
+ 437 value       toolz.dicttoolz [toolz.dicttoolz.valfilter] 134:17 call  factory()
+ 440 value       toolz.dicttoolz [toolz.dicttoolz.valfilter] 136:21 call  predicate(v)
+ 442 value       toolz.dicttoolz [toolz.dicttoolz.keyfilter] 154:17 call  factory()
+ 445 value       toolz.dicttoolz [toolz.dicttoolz.keyfilter] 156:21 call  predicate(k)
+ 447 value       toolz.dicttoolz [toolz.dicttoolz.itemfilter] 177:17 call  factory()
+ 450 value       toolz.dicttoolz [toolz.dicttoolz.itemfilter] 179:21 call  predicate(item)
+ 452 value       toolz.dicttoolz [toolz.dicttoolz.assoc] 195:17 call  factory()
+ 457 value       toolz.dicttoolz [toolz.dicttoolz.dissoc] 215:17 call  factory()
+ 472 value       toolz.dicttoolz [toolz.dicttoolz.update_in] 282:25 call  factory()
+ 477 value       toolz.dicttoolz [toolz.dicttoolz.update_in] 288:28 call  factory()
+ 480 value       toolz.dicttoolz [toolz.dicttoolz.update_in] 291:32 call  factory()
+ 484 value       toolz.dicttoolz [toolz.dicttoolz.update_in] 297:24 call  func(d[k])
+ 487 value       toolz.dicttoolz [toolz.dicttoolz.update_in] 299:24 call  func(default)
+ 494 drawn       toolz.functoolz [toolz.functoolz.apply] 43:49 getitem  func_and_args[1:]
+ 495 value       toolz.functoolz [toolz.functoolz.apply] 44:16 call  func(*args, **kwargs)
+ 497 value       toolz.functoolz [toolz.functoolz.thread_first.evalform_front] 73:24 call  form(val)
+ 501 value       toolz.functoolz [toolz.functoolz.thread_first.evalform_front] 77:24 call  func(*args)
+ 504 value       toolz.functoolz [toolz.functoolz.thread_last.evalform_back] 112:24 call  form(val)
+ 508 value       toolz.functoolz [toolz.functoolz.thread_last.evalform_back] 116:24 call  func(*args)
+ 520 drawn       toolz.functoolz [toolz.functoolz.InstanceProperty.__reduce__] 165:56 getattr  self.__doc__
+ 527 drawn       toolz.functoolz [toolz.functoolz.curry.__init__] 206:20 call  hasattr(func, 'func')
+ 548 drawn       toolz.functoolz [toolz.functoolz.curry.func] 233:30 getattr  self._partial.func
+ 563 drawn       toolz.functoolz [toolz.functoolz.curry.__signature__] 245:33 call  len(args)
+ 587 drawn       toolz.functoolz [toolz.functoolz] 273:6 decorator  @instanceproperty
+ 597 drawn       toolz.functoolz [toolz.functoolz.curry.__repr__] 289:20 call  repr(self.func)
+ 614 drawn       toolz.functoolz [toolz.functoolz.curry.__eq__] 298:50 getattr  self.keywords
+ 618 drawn       toolz.functoolz [toolz.functoolz.curry.__ne__] 301:31 call  self.__eq__(other)
+ 620 value       toolz.functoolz [toolz.functoolz.curry.__call__] 305:33 call  self._partial(*args, **kwargs)
+ 632 drawn       toolz.functoolz [toolz.functoolz.curry._should_curry] 317:62 call  _sigs.signature_or_spec(func)
+ 639 drawn,value toolz.functoolz [toolz.functoolz.curry.bind] 338:26 call  type(self)(self, *args, **kwargs)
+ 641 value       toolz.functoolz [toolz.functoolz.curry.call] 341:29 call  self._partial(*args, **kwargs)
+ 660 value       toolz.functoolz [toolz.functoolz.curry.__reduce__] 368:36 call  '.'.join(attrs)
+ 666 drawn       toolz.functoolz [toolz.functoolz.curry.__reduce__] 372:64 call  self.__dict__.items()
+ 679 value       toolz.functoolz [toolz.functoolz._restore_curry] 388:14 call  cls(func, *args, **(kwargs or {}))
+ 682 drawn       toolz.functoolz [toolz.functoolz._restore_curry] 389:24 call  obj.__dict__.update(userdict)
+ 690 value       toolz.functoolz [toolz.functoolz.memoize.memof] 456:16 call  key(args, kwargs)
+ 691 drawn       toolz.functoolz [toolz.functoolz.memoize.memof] 458:25 getitem  cache[k]
+ 693 drawn       toolz.functoolz [toolz.functoolz.memoize.memof] 462:18 setitem  cache[k]
+ 694 value       toolz.functoolz [toolz.functoolz.memoize.memof] 462:37 call  func(*args, **kwargs)
+ 698 value       toolz.functoolz [toolz.functoolz._InstanceAnnotations.__get__] 487:50 call  self.fget(obj)
+ 699 drawn       toolz.functoolz [toolz.functoolz.Compose.__init__] 499:22 call  tuple(reversed(funcs))
+ 704 value       toolz.functoolz [toolz.functoolz.Compose.__call__] 504:25 call  self.first(*args, **kwargs)
+ 706 value       toolz.functoolz [toolz.functoolz.Compose.__call__] 506:20 call  f(ret)
+ 709 value       toolz.functoolz [toolz.functoolz] 515:6 decorator  @instanceproperty(classval=__doc__)
+ 716 drawn       toolz.functoolz [toolz.functoolz.Compose.__doc__.composed_doc] 524:56 getitem  fs[1:]
+ 723 value       toolz.functoolz [toolz.functoolz.Compose.__name__] 538:31 call  '_of_'.join( f.__name__ for f in reversed((self.first,) +...
+ 752 drawn       toolz.functoolz [toolz.functoolz.Compose.__signature__] 570:33 call  inspect.signature(self.first)
+ 785 drawn       toolz.functoolz [toolz.functoolz.Compose._combined_annotations] 620:21 getattr  self.funcs
+ 799 drawn       toolz.functoolz [toolz.functoolz.Compose._get_annotate.annotate] 637:63 call  annotationlib.annotations_to_string( self._combined_annot...
+ 811 drawn       toolz.functoolz [toolz.functoolz.compose] 673:21 getitem  funcs[0]
+ 815 value       toolz.functoolz [toolz.functoolz.pipe] 720:20 call  func(data)
+ 824 value       toolz.functoolz [toolz.functoolz.juxt.__call__] 764:26 call  func(*args, **kwargs)
+ 827 value       toolz.functoolz [toolz.functoolz.do] 795:9 call  func(x)
+ 828 drawn       toolz.functoolz [toolz.functoolz] 799:2 decorator  @curry
+ 829 value       toolz.functoolz [toolz.functoolz.flip] 823:16 call  func(b, a)
+ 831 value       toolz.functoolz [toolz.functoolz.excepts.__call__] 868:29 call  self.func(*args, **kwargs)
+ 834 value       toolz.functoolz [toolz.functoolz.excepts.__call__] 870:32 call  self.handler(e)
+ 835 value       toolz.functoolz [toolz.functoolz] 872:6 decorator  @instanceproperty(classval=__doc__)
+ 841 value       toolz.functoolz [toolz.functoolz.excepts.__doc__] 879:46 call  ', '.join( map(attrgetter('__name__'), exc), )
+ 848 drawn       toolz.functoolz [toolz.functoolz.excepts.__doc__] 902:24 call  type(self)
+ 854 value       toolz.functoolz [toolz.functoolz.excepts.__name__] 909:39 call  '_or_'.join(map(attrgetter('__name__'), exc))
+ 865 value       toolz.functoolz [toolz.functoolz._check_sigspec] 924:34 call  builtin_func(*builtin_args)
+ 873 value       toolz.functoolz [toolz.functoolz._check_sigspec] 933:31 call  builtin_func(*builtin_args)
+ 876 value       toolz.functoolz [toolz.functoolz._check_sigspec] 945:31 call  builtin_func(*builtin_args)
+ 877 value       toolz.functoolz [toolz.functoolz._check_sigspec] 947:35 call  _check_sigspec_orig(sigspec, func, builtin_func, *builtin...
+ 887 drawn       toolz.functoolz [toolz.functoolz.num_required_args] 965:27 op  p.kind in (p.POSITIONAL_OR_KEYWORD, p.POSITIONAL_ONLY)
+ 909 drawn       toolz.functoolz [toolz.functoolz.has_keywords] 982:44 getattr  sigspec.parameters.values
+ 929 value       toolz.itertoolz [toolz.itertoolz.accumulate] 67:23 call  binop(result, elem)
+ 936 value       toolz.itertoolz [toolz.itertoolz.groupby] 100:14 call  key(item)
+ 937 value       toolz.itertoolz [toolz.itertoolz.groupby] 100:21 call  d[key(item)](item)
+ 950 value       toolz.itertoolz [toolz.itertoolz.merge_sorted] 128:21 call  kwargs.get('key', None)
+ 977 drawn       toolz.itertoolz [toolz.itertoolz._merge_sorted_binary_key] 184:20 call  iter(L2[0])
+ 981 value       toolz.itertoolz [toolz.itertoolz._merge_sorted_binary_key] 193:15 call  key(val2)
+ 982 value       toolz.itertoolz [toolz.itertoolz._merge_sorted_binary_key] 196:19 call  key(val1)
+ 983 value       toolz.itertoolz [toolz.itertoolz._merge_sorted_binary_key] 200:27 call  key(val2)
+ 997 value       toolz.itertoolz [toolz.itertoolz.unique] 260:25 call  seen_add(item)
+ 998 drawn,value toolz.itertoolz [toolz.itertoolz.unique] 264:22 call  key(item)
+1000 value       toolz.itertoolz [toolz.itertoolz.unique] 266:25 call  seen_add(val)
+1005 drawn       toolz.itertoolz [toolz.itertoolz.isdistinct] 304:21 op  item in seen
+1006 value       toolz.itertoolz [toolz.itertoolz.isdistinct] 306:21 call  seen_add(item)
+1018 drawn       toolz.itertoolz [toolz.itertoolz.drop] 351:28 call  itertools.islice(seq, n, None)
+1022 drawn       toolz.itertoolz [toolz.itertoolz.first] 369:21 call  iter(seq)
+1041 value       toolz.itertoolz [toolz.itertoolz.get] 453:53 call  operator.itemgetter(*ind)(seq)
+1044 drawn       toolz.itertoolz [toolz.itertoolz.get] 459:29 call  tuple(_get(i, seq, default) for i in ind)
+1050 drawn       toolz.itertoolz [toolz.itertoolz.concat] 486:41 call  itertools.chain.from_iterable(seqs)
+1064 drawn       toolz.itertoolz [toolz.itertoolz.frequencies] 548:10 getitem  d[item]
+1071 value       toolz.itertoolz [toolz.itertoolz.reduceby] 621:16 call  key(item)
+1075 value       toolz.itertoolz [toolz.itertoolz.reduceby] 627:28 call  init()
+1077 value       toolz.itertoolz [toolz.itertoolz.reduceby] 628:21 call  binop(d[k], item)
+1079 value       toolz.itertoolz [toolz.itertoolz.iterate] 659:17 call  func(x)
+1087 drawn       toolz.itertoolz [toolz.itertoolz.sliding_window] 676:52 call  itertools.tee(seq, n)
+1110 drawn       toolz.itertoolz [toolz.itertoolz.pluck] 799:22 call  tuple(_get(item, seq, default) for item in ind)
+1129 value       toolz.itertoolz [toolz.itertoolz.join] 887:27 call  rightkey(item)
+1130 drawn       toolz.itertoolz [toolz.itertoolz.join] 888:20 op  key in d
+1134 drawn,value toolz.itertoolz [toolz.itertoolz.join] 894:27 call  rightkey(item)
+1141 value       toolz.itertoolz [toolz.itertoolz.join] 907:31 call  rightkey(item)
+1142 value       toolz.itertoolz [toolz.itertoolz.join] 908:21 call  seen(key)
+1145 value       toolz.itertoolz [toolz.itertoolz.join] 915:31 call  rightkey(item)
+1146 value       toolz.itertoolz [toolz.itertoolz.join] 916:21 call  seen(key)
+1151 drawn       toolz.itertoolz [toolz.itertoolz.join] 924:20 op  key not in seen_keys
+1156 drawn       toolz.itertoolz [toolz.itertoolz.diff] 948:20 getitem  seqs[0]
+1160 value       toolz.itertoolz [toolz.itertoolz.diff] 952:25 call  kwargs.get('default', no_default)
+1162 drawn       toolz.itertoolz [toolz.itertoolz.diff] 954:20 call  zip(*seqs)
+1165 value       toolz.itertoolz [toolz.itertoolz.diff] 957:21 call  kwargs.get('key', None)
+1185 drawn       toolz.itertoolz [toolz.itertoolz.peekn] 1021:20 call  iter(seq)
+1192 drawn       toolz.itertoolz [toolz.itertoolz.random_sample] 1061:30 call  Random(random_state)
+1203 value       toolz.recipes [toolz.recipes.partitionby] 46:49 call  itertools.groupby(seq, key=func)
+1209 drawn       toolz.sandbox.core [toolz.sandbox.core.EqualityHashKey.__hash__] 74:29 getattr  self._default_hashkey
+1212 value       toolz.sandbox.core [toolz.sandbox.core.EqualityHashKey.__hash__] 77:27 call  self.key(self.item)
+1220 drawn       toolz.sandbox.core [toolz.sandbox.core.EqualityHashKey.__eq__] 83:40 getattr  other.item
+1222 drawn       toolz.sandbox.core [toolz.sandbox.core.EqualityHashKey.__ne__] 88:31 call  self.__eq__(other)
+1233 drawn       toolz.sandbox.core [toolz.sandbox.core.unzip] 130:17 call  len(first)
+1240 value       toolz.sandbox.parallel [toolz.sandbox.parallel._reduce] 8:32 call  functools.reduce(func, seq)
+1242 drawn,value toolz.sandbox.parallel [toolz.sandbox.parallel._reduce] 10:32 call  functools.reduce(func, seq, initial)
+1245 value       toolz.sandbox.parallel [toolz.sandbox.parallel.fold] 70:22 call  map( functools.partial(_reduce, binop), chunks)
+1247 value       toolz.sandbox.parallel [toolz.sandbox.parallel.fold] 71:30 call  functools.partial(_reduce, binop)
+1248 value       toolz.sandbox.parallel [toolz.sandbox.parallel.fold] 74:22 call  map( functools.partial(_reduce, binop, initial=default), ...
+1250 value       toolz.sandbox.parallel [toolz.sandbox.parallel.fold] 75:30 call  functools.partial(_reduce, binop, initial=default)
+1255 drawn       toolz.sandbox.parallel [toolz.sandbox.parallel.fold] 83:20 call  fold(combine, results, map=map, chunksize=chunksize)
+1256 value       toolz.utils [toolz.utils.raises] 3:14 call  lamda()
