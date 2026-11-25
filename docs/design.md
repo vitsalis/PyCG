@@ -494,7 +494,7 @@ defines inside them, where their stubs give only a callable type
 `contextlib.asynccontextmanager` return `helper`, which makes a
 `_GeneratorContextManager` or `_AsyncGeneratorContextManager`, and
 `functools.lru_cache` given an int or None returns `decorating_function`,
-which makes a `functools._lru_cache_wrapper` (`Lib/contextlib.py`,
+which makes a `_functools._lru_cache_wrapper` (`Lib/contextlib.py`,
 `Lib/functools.py`). The callable result of their stubs is that closure,
 named where it is defined (`contextlib.contextmanager.helper`, as the
 benchmark names it), and calling it gives the edge to that name and an
@@ -502,7 +502,7 @@ instance of the callable's result type. The decorated name holds the closure
 and the undecorated function, as for every outside decorator, so `with
 managed():` calls `contextlib.contextmanager.helper` and `managed`, which
 the closure calls back. A call of a function that `lru_cache` or `cache`
-decorates calls `functools._lru_cache_wrapper.__call__` and the function in
+decorates calls `_functools._lru_cache_wrapper.__call__` and the function in
 the same way; given a function, `lru_cache` and `cache` return the wrapper
 at once, as their stubs say. `decorating_function` wraps the function that
 an explicit call gives it as it wraps a decorated one, where the call is
@@ -1540,6 +1540,48 @@ its value. Lookups on a class walk a C3 order of
 its bases in every version, ending with `object`; a base that the stubs do
 not have is left out.
 
+CPython's sources correct the name of a class that CPython defines in an
+extension module and that typeshed declares in the module that re-exports
+it, under a name that is not public there: private, or not in the
+module's `__all__` (`functools._lru_cache_wrapper`, which CPython defines
+in `_functools`). Such a class is named by the extension module's
+attribute (`_functools._lru_cache_wrapper`), as the benchmark names an
+extension type without a public class path. The generator reads the
+`Lib/` sources of one CPython release of each supported version (3.12 to
+3.15, pinned by commit in the data's README) with `ast`, importing and
+executing nothing, and finds the binding of the name that the module's
+top-level statements make last: statements in order, the body, `else`
+and `finally` of a `try` (where the extension is present), and any other
+statement that binds the name, which makes it no import. Where that
+binding is `from M import X` with an absolute `M` that has no source
+under `Lib/` (an extension module), the class is named `M.X`, if every
+version whose module binds the name binds it so to the same attribute;
+where the versions disagree, the class keeps typeshed's name and the
+generator reports it. A public class path wins, as it does for the
+benchmark: `functools.partial`, which `__all__` lists, keeps its name,
+though CPython also takes it from `_functools`. At the pinned commits
+this renames `functools._lru_cache_wrapper` and
+`functools._PlaceholderType` (3.14 and later); `multiprocessing.synchronize`
+imports `_multiprocessing.SemLock` and then defines its own `SemLock`,
+which keeps its name. The generator parses the sources of the newest
+version, so it runs on that version of Python (3.15).
+
+- Limit: only a re-export in a module's Python source is seen. A class
+  that an extension module defines and typeshed declares elsewhere
+  without a re-export in `Lib/`, or an attribute that C code overwrites
+  (`_sha512` of 3.10 and 3.11 exports its SHA-384 type under the name of
+  the SHA-512 one), keeps typeshed's name.
+- Limit: a name bound in a conditional statement (`if`, a loop, `with`)
+  or by a star import is not taken from an extension module, though it
+  may be.
+- Limit: CPython only. Where another implementation defines the class in
+  Python (PyPy's `functools._lru_cache_wrapper` is a function with a
+  closure `wrapper`), the benchmark names what that implementation runs;
+  the analysis does not model it.
+- Limit: code that imports the extension module itself (`import
+  _functools`) reaches a module without stubs, whose names are access
+  paths (see *External names*).
+
 One fact of Python corrects the data: the two mixin methods of
 `collections.abc` that return `self`, `Iterator.__iter__` and
 `AsyncIterator.__aiter__`, return the receiver, where typeshed declares a
@@ -1578,7 +1620,7 @@ Python version and platform. Every entry has a kind `k`:
 | `k` | Entry | Keys |
 |---|---|---|
 | `"f"` | function or method | `s`, its signatures (the overloads, of every version); `d`, `"classmethod"` or `"staticmethod"`; `x`, abstract |
-| `"c"` | class | `b`, its base classes (types, without `Generic` and `Protocol`); `m`, its members (entries); `tp`, its type parameters (type variable names); `proto`, a protocol; `final`; `tco`, a class that exists only in stubs (`@type_check_only`); `meta`, its metaclass; `pub`, its public name where it is not its definition path |
+| `"c"` | class | `b`, its base classes (types, without `Generic` and `Protocol`); `m`, its members (entries); `tp`, its type parameters (type variable names); `proto`, a protocol; `final`; `tco`, a class that exists only in stubs (`@type_check_only`); `meta`, its metaclass; `pub`, the name that the analysis gives it where that is not its definition path: its public name, or the attribute of the extension module that defines it (see *Stub data*) |
 | `"p"` | property | `t`, its type; `set`, it has a setter; `x`, abstract |
 | `"v"` | variable or attribute | `t`, its type |
 | `"r"` | reference | `to`, the definitions it may be, each `[module, qualified name]` (an empty name for a module); `also`, for a definition that another version or platform re-exports from elsewhere, those places |

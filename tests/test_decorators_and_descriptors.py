@@ -647,10 +647,10 @@ def test_a_library_decorator_that_returns_a_closure_puts_it_on_the_call_path(
     graph = main_graph(tmp_path, CLOSURES_PROGRAM)
 
     assert callees(graph, "main.use") == [
+        "_functools._lru_cache_wrapper.__call__",
+        "_functools._lru_cache_wrapper.cache_clear",
         "contextlib._GeneratorContextManager.__enter__",
         "contextlib.contextmanager.helper",
-        "functools._lru_cache_wrapper.__call__",
-        "functools._lru_cache_wrapper.cache_clear",
         "main.managed",
         "main.square",
     ]
@@ -659,8 +659,8 @@ def test_a_library_decorator_that_returns_a_closure_puts_it_on_the_call_path(
         "main.amanaged",
     ]
     assert callees(graph, "main.C.run") == [
+        "_functools._lru_cache_wrapper.__call__",
         "contextlib.contextmanager.helper",
-        "functools._lru_cache_wrapper.__call__",
         "main.C.cm",
         "main.C.m",
     ]
@@ -682,7 +682,7 @@ def test_lru_cache_applied_by_a_call_wraps_the_function_it_gets(tmp_path):
 
     assert callees(graph, "main.use") == [
         "<builtin>.dict.items",
-        "functools._lru_cache_wrapper.__call__",
+        "_functools._lru_cache_wrapper.__call__",
         "main.work",
     ]
 
@@ -701,7 +701,7 @@ def test_limit_a_stored_lru_cache_decorator_does_not_wrap_what_it_gets(tmp_path)
         """,
     )
 
-    assert callees(graph, "main.use") == ["functools._lru_cache_wrapper.__call__"]
+    assert callees(graph, "main.use") == ["_functools._lru_cache_wrapper.__call__"]
 
 
 def test_limit_lru_cache_is_not_selected_by_the_class_of_its_argument(tmp_path):
@@ -719,11 +719,11 @@ def test_limit_lru_cache_is_not_selected_by_the_class_of_its_argument(tmp_path):
     )
 
     assert callees(graph, "main.use") == [
-        "functools._lru_cache_wrapper.__call__",
+        "_functools._lru_cache_wrapper.__call__",
         "functools.lru_cache.decorating_function",
         "main.bare",
     ]
-    assert "functools._lru_cache_wrapper.__call__" in callees(graph, "main")
+    assert "_functools._lru_cache_wrapper.__call__" in callees(graph, "main")
 
 
 def test_limit_a_context_manager_is_made_where_it_is_called_and_yields_nothing(
