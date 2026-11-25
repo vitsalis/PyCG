@@ -8,7 +8,8 @@
 # missing-result provenance. Judgements: fabric.md J1-J14.
 # Invoke bases of package Config/Connection/Remote/Fab/tunnel classes and
 # decorator4/5 package wrappers are source-checked at the pinned versions.
-# Constructor parameter boundaries prevent recursive clone-path unrolling.
+# A forwarded clone stub keeps its path through Connection's config parameter;
+# the recursive gateway family is an open path set (ruling-fabric-1, fabric.md).
 default reject fabric.connection.Connection.__eq__: no operand of this comparison or `in` test, and no key of this subscript, is a Connection: they are str (dict keys of kwargs, config and ssh_config data, CLI argument names, host and user strings), int (list indexes, lengths, ports), tuples of str and int (_identity), or sockets and opaque outside values of select's result; only source-admitted GroupResult key sites (group.py) accept the candidate
 default reject fabric.connection.Connection.__hash__: no Connection is hashed here: the keys of these subscripts, dict stores and `in` tests are str (kwargs, config and ssh_config data, CLI argument names, globals) or int list indexes, and the `in r` tests search a list of sockets and opaque outside values, which hashes nothing; only source-admitted GroupResult key sites (group.py) accept the candidate
 
@@ -215,8 +216,11 @@ default reject fabric.connection.Connection.__hash__: no Connection is hashed he
     -> <builtin>.isinstance
 261:34 call  config.clone(into=Config)
     -> invoke.config.Config.clone
+    -> invoke.config.Config.clone.clone.clone
+    -> invoke.config.Config.clone.clone.clone.clone
     reject *: The isinstance branch excludes Fabric Config. This is an ordinary method on documented external invoke.config.Config; passing into=Config does not make the receiver a package definition. Retain imported clone name but exclude callbacks from missing code. Its result is an opaque stub.
     note: The isinstance branch excludes Fabric Config. This is an ordinary method on documented external invoke.config.Config; passing into=Config does not make the receiver a package definition. Retain imported clone name but exclude callbacks from missing code. Its result is an opaque stub.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): besides the client's vanilla Invoke config (callee invoke.config.Config.clone), the config that get_gateway forwards (388, 391) arrives here as invoke.config.Config + .clone repeated m times, m >= 2, when isinstance fails, so the callee is that path + .clone: the family is m >= 3 (no m = 2 here); the members m = 3 and 4 are recorded, a lower bound
 262:18 call  self._set(_config=config)
     -> invoke.Context._set
 266:42 call  self.derive_shorthand(host)
@@ -234,26 +238,38 @@ default reject fabric.connection.Connection.__hash__: no Connection is hashed he
 281:61 call  self.config.base_ssh_config.lookup(host)
     -> invoke.config.Config.clone.base_ssh_config.lookup
     -> paramiko.config.SSHConfig.lookup
+    -> invoke.config.Config.clone.clone.base_ssh_config.lookup
+    -> invoke.config.Config.clone.clone.clone.base_ssh_config.lookup
     note: Vanilla config.clone result is stored unchanged by inherited _set; direct attribute/call chain on this result retains the original imported clone path, alongside real Fabric Config SSHConfig path.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 291:48 call  self.ssh_config.get("user", self.config.user)
     -> invoke.config.Config.clone.base_ssh_config.lookup.get
     -> paramiko.config.SSHConfig.lookup.get
+    -> invoke.config.Config.clone.clone.base_ssh_config.lookup.get
+    -> invoke.config.Config.clone.clone.clone.base_ssh_config.lookup.get
     reject *: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
     note: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 296:32 call  int(self.ssh_config.get("port", self.config.port))
     -> <builtin>.int
 296:52 call  self.ssh_config.get("port", self.config.port)
     -> invoke.config.Config.clone.base_ssh_config.lookup.get
     -> paramiko.config.SSHConfig.lookup.get
+    -> invoke.config.Config.clone.clone.base_ssh_config.lookup.get
+    -> invoke.config.Config.clone.clone.clone.base_ssh_config.lookup.get
     reject *: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
     note: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 303:76 call  self.get_gateway()
     -> fabric.connection.Connection.get_gateway
 320:50 call  self.ssh_config.get( "connecttimeout", self.config.timeou...
     -> invoke.config.Config.clone.base_ssh_config.lookup.get
     -> paramiko.config.SSHConfig.lookup.get
+    -> invoke.config.Config.clone.clone.base_ssh_config.lookup.get
+    -> invoke.config.Config.clone.clone.clone.base_ssh_config.lookup.get
     reject *: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
     note: SSHConfig.lookup is an ordinary missing-library return, not a dict/SSHConfigDict. A clone-derived configuration supplies the second direct path. Neither subscript result nor library source can fix a returned concrete type.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 324:34 call  int(connect_timeout)
     -> <builtin>.int
 330:58 call  self.resolve_connect_kwargs(connect_kwargs)
@@ -273,7 +289,10 @@ default reject fabric.connection.Connection.__hash__: no Connection is hashed he
     -> <builtin>.dict.setdefault
     -> invoke.config.Config.clone.connect_kwargs.setdefault
     -> invoke.config.DataProxy.setdefault
+    -> invoke.config.Config.clone.clone.connect_kwargs.setdefault
+    -> invoke.config.Config.clone.clone.clone.connect_kwargs.setdefault
     note: Plain DataProxy.setdefault does not invoke a package subclass definition; do not trace merge callbacks. Actual Fabric Config inherited lookup still supplies DataProxy. Vanilla cloned configuration supplies an additional direct stub chain.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 364:50 call  connect_kwargs["key_filename"].extend( self.ssh_config["i...
     -> <builtin>.list.extend
     note: the key_filename value is a list: the [] of setdefault, the list of the -i flag (main.py:121-123), or the merged list of 358
@@ -290,7 +309,10 @@ default reject fabric.connection.Connection.__hash__: no Connection is hashed he
 388:55 call  self.config.clone()
     -> fabric.config.Config.clone
     -> invoke.config.Config.clone.clone
+    -> invoke.config.Config.clone.clone.clone
+    -> invoke.config.Config.clone.clone.clone.clone
     note: A Connection made from a vanilla InvokeConfig stores the ordinary clone result; the later .clone call extends that stub path. Actual FabricConfig receiver retains its package clone target.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): self.config is invoke.config.Config + .clone repeated m times for every m >= 1 (stored from 261 or forwarded from an earlier level), so the callee is that path + .clone, m >= 2; the members m = 3 and 4 beyond the existing invoke.config.Config.clone.clone are recorded, a lower bound
 391:33 call  Connection(hop, **kwargs)
     -> fabric.connection.Connection.__init__
 
@@ -399,11 +421,17 @@ default reject fabric.connection.Connection.__hash__: no Connection is hashed he
 549:26 call  self.gateway.open()
     -> fabric.connection.Connection.open
     -> invoke.config.Config.clone.gateway.open
+    -> invoke.config.Config.clone.clone.gateway.open
+    -> invoke.config.Config.clone.clone.clone.gateway.open
     note: get_gateway may return the gateway attribute of an ordinary vanilla-config clone stub. Its explicit open method retains that direct attribute path; documented actual Connection gateway values retain the package open method.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 558:51 call  self.gateway.transport.open_channel( kind="direct-tcpip",...
     -> invoke.config.Config.clone.gateway.transport.open_channel
     -> paramiko.client.SSHClient.get_transport.open_channel
+    -> invoke.config.Config.clone.clone.gateway.transport.open_channel
+    -> invoke.config.Config.clone.clone.clone.gateway.transport.open_channel
     note: Connection.transport stores an ordinary SSHClient.get_transport return. Package output description does not replace that provenance with concrete Transport; preserve direct imported path through explicit member call. In open_gateway the stored gateway may also come from the vanilla-config clone stub gateway attribute, supplying that direct chain.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 560:38 call  int(self.port)
     -> <builtin>.int
 
@@ -432,7 +460,10 @@ default reject fabric.connection.Connection.__hash__: no Connection is hashed he
 608:44 call  self.config.runners.remote(self)
     -> invoke.Runner.__init__
     -> invoke.config.Config.clone.runners.remote
+    -> invoke.config.Config.clone.clone.runners.remote
+    -> invoke.config.Config.clone.clone.clone.runners.remote
     note: Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 609:25 call  self._run(runner, command, **kwargs)
     -> invoke.Context._run
     -> fabric.runners.Remote.start
@@ -451,7 +482,10 @@ default reject fabric.connection.Connection.__hash__: no Connection is hashed he
 623:44 call  self.config.runners.remote(self)
     -> invoke.Runner.__init__
     -> invoke.config.Config.clone.runners.remote
+    -> invoke.config.Config.clone.clone.runners.remote
+    -> invoke.config.Config.clone.clone.clone.runners.remote
     note: Vanilla InvokeConfig clone return may reach self.config. The direct chained runner factory call retains that missing clone path; actual FabricConfig default Remote still invokes inherited Runner.__init__.
+    note: open path set (fabric.md, Open path sets; ruling-fabric-1): get_gateway forwards self.config.clone() to a new Connection (388, 391), which stores it (isinstance true, 260) or clones it again (261); the first hop of each gateway level repeats this without a bound, so the stored config is invoke.config.Config + .clone repeated m times for every m >= 1; the members with one and two repetitions beyond the originating path are recorded, a lower bound
 624:26 call  self._sudo(runner, command, **kwargs)
     -> invoke.Context._sudo
     -> fabric.runners.Remote.start
