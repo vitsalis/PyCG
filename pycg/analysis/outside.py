@@ -3,6 +3,7 @@ import json
 from .builtin_models import (
     CALLS_BACK,
     CLOSURES,
+    CONCRETE_CLASSES,
     CONTAINER_CLASSES,
     DECORATING_CLOSURES,
     HASHED_ARGUMENTS,
@@ -12,6 +13,7 @@ from .builtin_models import (
     LIBRARY_ITERATION,
     OPENERS,
     REFLECTION_CALLS,
+    STUB_RESULTS,
     VARIABLE_FUNCTIONS,
     VARIABLE_TYPES,
     builtin_kind,
@@ -139,6 +141,9 @@ class Outside:
             result = None
             if not isinstance(external, UnknownExternal):
                 path = stub_path(name)
+                for concrete, cls in CONCRETE_CLASSES.items():
+                    if path == concrete or path.startswith(f"{concrete}."):
+                        path = cls + path[len(concrete) :]
                 if self.stubs.module(path.partition(".")[0]) is not None:
                     result = self.stubs.find(path)
             self._stub_definitions[name] = result
@@ -230,7 +235,19 @@ class Outside:
                 self.add_object(dst, self.unknown_external)
 
     def typed_attribute(self, typed, attr, dst):
-        self.stub_member(typed, typed.cls, typed.name, attr, dst)
+        if self.stubs.member(typed.cls, attr):
+            self.stub_member(typed, typed.cls, typed.name, attr, dst)
+            return
+        for definition in self.stubs.member(typed.cls, "__getattr__"):
+            if definition.path in STUB_RESULTS:
+                self.add_object(dst, self.concrete_typed(STUB_RESULTS[definition.path]))
+
+    def concrete_typed(self, name):
+        cls = CONCRETE_CLASSES[name]
+        key = (cls, name)
+        if key not in self._typed:
+            self._typed[key] = Typed(cls, name, False)
+        return self._typed[key]
 
     def builtin_member(self, obj, kind, attr, dst):
         cls, prefix = self.kind_class(kind)
@@ -761,6 +778,9 @@ class Outside:
             return
         for definition in self.stubs.member(self._stub_class(typed), method):
             if definition.kind != "function":
+                continue
+            if definition.path in STUB_RESULTS:
+                self.add_object(dst, self.concrete_typed(STUB_RESULTS[definition.path]))
                 continue
             for signature in definition.entry["s"]:
                 context = _Context(origin=origin, receivers=(typed,))
