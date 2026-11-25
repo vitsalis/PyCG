@@ -142,10 +142,13 @@ Each case is decided by the nearest rule; the lead may rule on them.
    environment (pytest 9.2.0, pluggy 1.7.0: `pluggy._decorators`).
    **Dependencies without a bound** (the lead's ruling, Codex audit round
    1). pytest, pluggy and asgiref have no version constraint and no
-   versioned support declaration in the release, and redis has only the
-   extra `redis` with no bound. Each is read at the audit pin only: pytest
-   9.2.0, pluggy 1.7.0, asgiref 3.13.0, redis 8.1.0. No other release of
-   them is considered. asgiref 3.13.0 needs Python 3.11 or later, so its
+   versioned support declaration in the release. Each is read at the audit
+   pin only: pytest 9.2.0, pluggy 1.7.0, asgiref 3.13.0. No other release
+   of them is considered. redis differs: the extra `redis` is a declared
+   requirement without a bound, so every release that runs on CPython 3.10
+   or later is admitted (README, batch 7, "Which releases of a dependency
+   are admitted"), read by batch 8's sampling rule (see "Corrections of
+   2026-11-25"). asgiref 3.13.0 needs Python 3.11 or later, so its
    Python 3.11 branch counts (`asyncio.coroutines.iscoroutinefunction`,
    `test/unittest.py:32:31`). The Python 3.10 case would need an older
    asgiref and is not considered.
@@ -434,10 +437,11 @@ Each case is decided by the nearest rule; the lead may rule on them.
 
      No name changed between the releases except the lazy wrapper, which
      the ledger already named for both.
-   - **Not verified, and not considered.** asgiref and redis were read
-     only at the pinned 3.13.0 and 8.1.0, and pytest and pluggy at 9.2.0
-     and 1.7.0. The package does not bound any of them, so their other
-     releases are not considered (judgement 1, the lead's ruling). The
+   - **Not verified, and not considered.** asgiref was read only at the
+     pinned 3.13.0, and pytest and pluggy at 9.2.0 and 1.7.0. The package
+     does not declare them, so their other releases are not considered
+     (judgement 1, the lead's ruling). The redis releases that the extra
+     admits are read in "Corrections of 2026-11-25". The
      Python 3.11 branch of asgiref's `iscoroutinefunction` is named
      `asyncio.coroutines.iscoroutinefunction`. That is read in CPython
      3.12's `asyncio/coroutines.py:1`, `20` (no 3.11 source is on disk).
@@ -468,8 +472,8 @@ Other decisions:
 - `codecs.py` and `checks.py` have `from __future__ import annotations`:
   no annotation is a site. The other annotations hold no calls.
 - `threading.Lock` is named as imported (the precedent of Sublist3r);
-  `hashlib.sha256` objects have the three receivers of the precedents of
-  markdown2 and validators.
+  `hashlib.sha256` objects have three receivers, `_hashlib.HASH`, and the
+  builtin fallback per runtime (see "Corrections of 2026-11-25").
 
 ## Default rejections
 
@@ -651,3 +655,54 @@ longer lists `LazyConfig._setup`, because the `getattr` just before it
 (`139:30`, `43:49`) has already set up the same wrapper. The pairs stay
 through those earlier sites, so the graph keeps its 680 edges.
 
+## Corrections of 2026-11-25
+
+**(a) The releases of redis.** The extra `redis = ["redis"]`
+(`pyproject.toml:42-43`) is a declared requirement without a bound. By
+batch 7's ruling "Which releases of a dependency are admitted" it admits
+every redis release that runs on an admitted runtime (CPython 3.10 and
+later); the lead's batch-6 reading (the audit pin only, judgement 1) is
+replaced. Batch 8's rule "Which releases of a dependency are read" gives
+the sample: the floor, and the last release of each minor series up to
+the pin of the test environment (redis 8.1.0, uploaded 2026-07-30, before
+the release of 4.5.0 on 2026-10-28). Each sdist was fetched in a container
+by its PyPI SHA-256 and read as text, never run.
+
+- **Floor: 2.6.1** (`c9e0e74e...`). Every older release on PyPI has
+  Python 2 syntax that CPython 3.10 does not parse (`except
+  (socket.error, socket.timeout), e:`, `redis/connection.py:76` of 2.6.0;
+  `client.py:28` of 1.34; 0.6.x is a single Python 2 module). 2.6.1
+  imports through `redis/_compat.py`, whose Python 3 branch (`:29-50`)
+  covers every Python 2 name that its modules use.
+- **Read:** 2.6.1, 2.6.2, 2.7.6, 2.8.0, 2.9.1, 2.10.6, 3.0.1, 3.1.0,
+  3.2.1, 3.3.11, 3.4.1, 3.5.3, 4.0.2, 4.1.4, 4.2.2, 4.3.6, 4.4.4, 4.5.5,
+  4.6.0, 5.0.8, 5.1.1, 5.2.1, 5.3.1, 6.0.0, 6.1.1, 6.2.0, 6.3.0, 6.4.0,
+  7.0.1, 7.1.1, 7.2.2, 7.3.1, 7.4.1, 8.0.1, 8.1.0 (and every 2.x release,
+  for the floor).
+
+| Name in the ledger | What every read release has |
+|---|---|
+| `redis.from_url` (`redisd.py:32:46`, `0003_drop_pickle.py:51:37`) | exported by `redis/__init__.py` (`:7` of 2.6.1 to `:57` of 8.1.0); it returns a `redis.Redis`: `Redis(...)` in 2.6.1 (`utils.py:27-31`), `Redis.from_url(...)` from 2.6.2 on (`utils.py`, `from redis.client import Redis`) |
+| `redis.Redis` (`redisd.py:34:43`, `0003_drop_pickle.py:53:34`) | a class in `client.py` (`:1152` of 2.6.1, the backwards-compatible subclass of `StrictRedis` in 2.x; `:416` of 3.0.1; `:156` of 8.1.0) |
+| `redis.Redis.get`, `.mget`, `.set` (`redisd.py:62:29`, `78:76`, `90:21`; `0003_drop_pickle.py:57:28`, `61:20`) | defined in `StrictRedis` (2.x: `client.py:454`, `492`, `538` of 2.6.1), in `Redis` (3.x: `client.py:1602`, `1663`, `1763` of 3.5.3) or in `CoreCommands` (4.0 on: `commands/core.py:3194`, `3760` (overloads from `3751`), `4292` of 8.1.0), named through the receiver class `redis.Redis`; the arguments of every package call bind |
+| `redis.asyncio.from_url`, `redis.asyncio.Redis` and its `get`, `mget`, `set` (`redisd.py:47:48`, `49:45`, `69:36`, `85:38`, `99:28`) | from 4.2.0 on (`redis/asyncio/__init__.py:15` of 4.2.2, `:21` of 8.1.0; `asyncio/client.py:83` of 4.2.2, `:136` of 8.1.0); before 4.2.0 `import redis.asyncio` fails and `_ard` is `None` (`redisd.py:39-44`), the branch that already runs (optional imports, both sides) |
+
+No name or edge changes: the releases before the pin add no callee and
+remove none, because the graph is the union over the admitted releases.
+
+**(b) The builtin SHA-256 object** (`forms.py:124:32`, `125:57`).
+`_sha256.sha256.update` and `.hexdigest` are renamed
+`_sha256.SHA256Type.update` and `.hexdigest` (2 edges renamed). Batch 8's
+ruling "A C type exported under a module attribute other than its type
+name" names a C type by the attribute under which its module exports it,
+never by the type name where an attribute exists, and never by two aliases
+on one runtime. The package admits CPython 3.10 and later only:
+
+| Runtime | Builtin fallback of `hashlib.sha256` | Type name | Exported as | Name |
+|---|---|---|---|---|
+| CPython 3.10, 3.11 | `_sha256.sha256` (`Lib/hashlib.py:95-97` of 3.11.18) | `_sha256.sha256` (`Modules/sha256module.c:567` of 3.10.22, `:570` of 3.11.18) | `SHA256Type` (`PyModule_AddObject`, `:725`, `:728`) | `_sha256.SHA256Type` |
+| CPython 3.12 to 3.15 | `_sha2.sha256` | `_sha2.SHA256Type` (`Modules/sha2module.c:547` of 3.12.16, `:540` of 3.15.2) | `SHA256Type` (`PyModule_AddType`, `:855`, `:867`) | `_sha2.SHA256Type` |
+| OpenSSL, every version | `_hashlib.openssl_sha256` | `_hashlib.HASH` (`Modules/_hashopenssl.c:697` of 3.10.22, `:1097` of 3.15.2) | `HASH` (`PyModule_AddType`, `:2143`, `:2787`) | `_hashlib.HASH` |
+
+Graph: 680 edges (256 inside, 424 outside), unchanged in number; 497
+confirmed by the trace, unchanged.

@@ -390,10 +390,10 @@
       "_sha2.SHA256Type.update": [
         "constance.forms 124:32 call  version_hash.update(smart_bytes(initial.get(name, \"\")))"
       ],
-      "_sha256.sha256.hexdigest": [
+      "_sha256.SHA256Type.hexdigest": [
         "constance.forms 125:57 call  version_hash.hexdigest()"
       ],
-      "_sha256.sha256.update": [
+      "_sha256.SHA256Type.update": [
         "constance.forms 124:32 call  version_hash.update(smart_bytes(initial.get(name, \"\")))"
       ],
       "collections.OrderedDict.items": [
@@ -875,7 +875,7 @@
       "field_class comes from FIELDS: the nine field classes of forms.py:39-49, and the classes that CONSTANCE_ADDITIONAL_FIELDS names: the documented ChoiceField, ImageField and JSONField (docs/index.rst:132, 147, 177) and those of the package's own test settings (ruling R1): EmailField (tests/settings.py:61), CharField (tests/settings.py:62-63, already among the FIELDS classes) and TypedMultipleChoiceField (tests/test_admin.py:282); a client's own field class is client code (judgement 3)"
     ],
     "constance.forms 124:32 call  version_hash.update(smart_bytes(initial.get(name, \"\")))": [
-      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.10 and 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2 and validators)"
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object. Each is named by the attribute under which its extension module exports the type (README, batch-8 ruling \"A C type exported under a module attribute other than its type name\"): _hashlib exports HASH (Modules/_hashopenssl.c PyModule_AddType, tp_name \"_hashlib.HASH\": 3.10.22:697, 2143; 3.15.2:1097, 2787); on CPython 3.10 and 3.11 the fallback _sha256.sha256 (Lib/hashlib.py:95-97 of 3.11.18) makes a \"_sha256.sha256\" object whose type _sha256 exports as SHA256Type (Modules/sha256module.c:725 of 3.10.22, 728 of 3.11.18); from 3.12 the fallback is _sha2.sha256, whose type _sha2 exports as SHA256Type, its type name too (Modules/sha2module.c PyModule_AddType, .name \"_sha2.SHA256Type\": 3.12.16:547, 855; 3.15.2:540, 867) (django-constance.md, \"Corrections of 2026-11-25\")"
     ],
     "constance.forms 124:44 call  smart_bytes(initial.get(name, \"\"))": [
       "smart_bytes calls force_bytes, which returns str(s).encode() for a value that is neither bytes nor memoryview; initial is the dict of get_values (admin.py:110, constance.py:20), whose values the Memory backend can return as a stored AsyncValueProxy, whose __str__ str() runs (judgement 2, stored proxy)"
