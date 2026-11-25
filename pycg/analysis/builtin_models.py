@@ -303,6 +303,11 @@ CLOSURES = {
 
 DECORATING_CLOSURES = frozenset({"functools.lru_cache.decorating_function"})
 
+VARIABLE_FUNCTIONS = {
+    "timeit.default_timer": "time.perf_counter",
+    "shutil.rmtree": "shutil.rmtree",
+}
+
 REFLECTION_CALLS = {
     "builtins.vars": ("(object=None, /)", "namespace"),
     "inspect.getmembers": ("(object, predicate=None)", "members"),
