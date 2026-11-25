@@ -148,6 +148,42 @@ def test_a_module_variable_typed_only_in_the_stub(tmp_path):
     assert callees(graph, "main.run") == ALL_AREAS
 
 
+def test_a_class_statement_reads_its_bases_without_the_stubs_declared_values(
+    tmp_path,
+):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": """
+            from typing import TYPE_CHECKING
+            class Table:
+                def insert(self):
+                    self.storage()
+                def storage(self): pass
+            def with_typehint(baseclass):
+                if TYPE_CHECKING:
+                    return baseclass
+                return object
+            TableBase = with_typehint(Table)
+            class Database(TableBase):
+                def __getattr__(self, name):
+                    return getattr(Table(), name)
+            def later():
+                TableBase().insert()
+            """,
+            "main.pyi": """
+            class Table:
+                def insert(self) -> None: ...
+                def storage(self) -> None: ...
+            TableBase: type[Table]
+            """,
+        },
+    )
+
+    assert callees(graph, "main.Table.insert") == ["main.Table.storage"]
+    assert callees(graph, "main.later") == ["<builtin>.object", "main.Table.insert"]
+
+
 def test_an_annotation_in_the_source_wins_over_the_stub(tmp_path):
     graph = graph_of(
         tmp_path,
