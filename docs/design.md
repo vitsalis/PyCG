@@ -957,7 +957,12 @@ generator expression nested in the scope, another module, `getattr` on the
 module) runs at times that the statements do not decide, and reads the
 variable, which every definition also flows into. So a module's own
 top-level code reads its names in order, while its functions and other
-modules see every value.
+modules see every value. A module name that is also a builtin and that a
+path of the module may leave unbound (by the module's definitions at its
+end; for a name that the module does not follow, where no top-level
+statement binds it) also reads the builtin there, as Python's lookup of a
+global falls back to the builtins (bottle binds `callable` only under `if
+py3k:`).
 
 - Limit: a call through a qualified name (`builtins.locals()`) is not seen
   as a read of the namespace.
