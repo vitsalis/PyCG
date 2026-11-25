@@ -697,6 +697,11 @@ CASES = {
         "a function passed to library code is not a call: the key that "
         "functools.cmp_to_key makes calls the function",
     ),
+    "stdlib/ctypes_callback_function": (
+        "outside/library-callables",
+        "the stub types the result of `CFUNCTYPE` as `ctypes._CFunctionType`, not "
+        "the `CFunctionType` it defines: no `__call__`, no call of the callback",
+    ),
     "stdlib/exit_stack_callback": (
         "outside/library-calls-back",
         "a function passed to library code is not a call: ExitStack.callback "

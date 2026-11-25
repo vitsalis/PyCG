@@ -226,7 +226,7 @@ class Tracer:
             return _method_of_first_definer(obj.__objclass__.__mro__, obj.__name__, obj)
         if self._is_snippet_class(type(obj)):
             return self._inherited_outside_method(type(obj), "__call__")
-        return _method_of_first_definer(type(obj).__mro__, "__call__", obj)
+        return f"{_class_name(type(obj))}.__call__", _call_of_instance(type(obj))
 
     def _inherited_outside_method(self, cls, name):
         owner = next((k for k in cls.__mro__ if name in vars(k)), None)
@@ -420,9 +420,7 @@ class Tracer:
         edges = set(self.edges)
         for (caller, _), (target, name) in self.outside.items():
             for candidate in sorted(set(graph.get(caller, ())) - own):
-                if candidate not in resolved:
-                    resolved[candidate] = _resolve_ground_truth_name(candidate)
-                if resolved[candidate] is target:
+                if _names_target(candidate, target, resolved):
                     name = candidate
                     break
             edges.add((caller, name))
@@ -618,6 +616,35 @@ def _canonical(obj):
     ):
         return _builtin_method(obj)[1]
     return obj
+
+
+class _CallOfInstance:
+    __slots__ = ("cls",)
+
+    def __init__(self, cls):
+        self.cls = cls
+
+
+_CALLS_OF_INSTANCES = {}
+
+
+def _call_of_instance(cls):
+    if cls not in _CALLS_OF_INSTANCES:
+        _CALLS_OF_INSTANCES[cls] = _CallOfInstance(cls)
+    return _CALLS_OF_INSTANCES[cls]
+
+
+def _names_target(candidate, target, resolved):
+    if _is_a(target, _CallOfInstance):
+        owner, _, method = candidate.rpartition(".")
+        return method == "__call__" and _resolved(owner, resolved) is target.cls
+    return _resolved(candidate, resolved) is target
+
+
+def _resolved(name, resolved):
+    if name not in resolved:
+        resolved[name] = _resolve_ground_truth_name(name)
+    return resolved[name]
 
 
 def _resolve_ground_truth_name(name):

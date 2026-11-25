@@ -141,6 +141,7 @@ sets/difference: outside/builtin-models: the `-` of two sets gives no set
 sets/discard: flow/container-update: discard does not remove the element
 stdlib/argparse_action: outside/library-calls-back: argparse does not call the action's __call__
 stdlib/cmp_to_key: outside/library-calls-back: a function passed to library code is not a call: the key that functools.cmp_to_key makes calls the function
+stdlib/ctypes_callback_function: outside/library-callables: the stub types the result of `CFUNCTYPE` as `ctypes._CFunctionType`, not the `CFunctionType` it defines: no `__call__`, no call of the callback
 stdlib/exit_stack_callback: outside/library-calls-back: a function passed to library code is not a call: ExitStack.callback registers a function that the stack calls
 stdlib/heapq_bisect_key: outside/library-calls-back: a function passed to library code is not a call: heapq and bisect call their key functions
 stdlib/html_parser_subclass: outside/library-calls-back: HTMLParser.feed does not call handle_starttag
