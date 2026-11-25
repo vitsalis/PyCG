@@ -177,3 +177,72 @@ retain their separately justified inherited callbacks. No graph decision
 changes. Normal/-O/-OO is the round-4 working scope assumption. Python 2.7
 and Python 3.4+ paths remain, with release-local interpreter evidence and
 retained Invoke/decorator source checked statically. No analyzed code ran.
+
+## Audit of the corrections of 2026-11-25
+
+Branch `vitsalis/gt-fabric-config` (51881da, PR #109) against `main`
+(2130a69): `fabric.json`, `fabric.added.json`, `fabric.ledger` and
+`fabric.md` change; `evaluation/metrics.json` is not recorded yet. I read
+`fabric/connection.py`, `fabric/config.py` and
+`sites/docs/concepts/networking.rst` from the inputs image and the
+referee's `ruling-fabric-1.md` on `main`. Nothing ran; no PyCG output was
+read.
+
+**The ledger against the ruling's table.** Exact match: every site and
+every callee of the ruling, and nothing else, with `Sk` written out
+(`S2` = `invoke.config.Config.clone.clone`, and so on).
+
+| Caller (`fabric.connection.Connection.`) | Site | Ruling | Ledger |
+|---|---|---|---|
+| `__init__` | `261:34` | `S3`, `S4` | `S3`, `S4` added beside `S1` |
+| `__init__` | `281:61` | `S2`, `S3` `.base_ssh_config.lookup` | the same |
+| `__init__` | `291:48`, `296:52`, `320:50` | `S2`, `S3` `.base_ssh_config.lookup.get` | the same at each |
+| `resolve_connect_kwargs` | `363:38` | `S2`, `S3` `.connect_kwargs.setdefault` | the same |
+| `get_gateway` | `388:55` | `S3`, `S4` | `S3`, `S4` added beside `S2` |
+| `open_gateway` | `549:26`, `558:51` | `S2`, `S3` `.gateway.open`, `.gateway.transport.open_channel` | the same |
+| `run`, `sudo` | `608:44`, `623:44` | `S2`, `S3` `.runners.remote` | the same |
+
+22 site-callee additions and 18 graph edges, none removed, no inside edge:
+before, 351 edges (99 inside), 426 callee lines, 113 notes and 161
+outside callees; after, 369 edges (99 inside, 270 outside), 448 callee
+lines, 124 notes (one new note at each of the 11 sites) and 175 outside
+callees (14 new names). `check.py fabric`, `--origin` and `--report`
+pass with the source in place.
+
+**The source behind the ruling.** `connection.py:260-262` clones a
+vanilla config (`elif not isinstance(config, Config)`) and stores it;
+`281` assigns `self.ssh_config` from `self.config.base_ssh_config.lookup`;
+`349` takes `self.config.connect_kwargs`; `363` calls `setdefault` on it;
+`388` builds `kwargs = dict(config=self.config.clone())` and `391` calls
+`Connection(hop, **kwargs)`; the first hop of the reversed ProxyJump list
+gets no `gateway` (`379-391`), so its `__init__` reaches `get_gateway`
+again (`303`); `384-385` returns only for the current host; `398` returns
+`self.config.gateway`; `549`, `558`, `608` and `623` call on
+`self.gateway` and `self.config`; `networking.rst:53-54` says gateways
+"can be chained indefinitely". The other `config` method calls of the
+package (`main.py:99-138`) are on the program's own Fabric config, and
+`config.py:139:40` is `super().clone` inside the package's own
+`Config.clone` (the base-class exception), not this chain.
+
+**`fabric.md`.** The section "Open path sets" gives the three families of
+the ruling (`Sm.<suffix>`, `m >= 1`, members `m` = 1, 2, 3; `388:55`
+`Sm`, `m >= 2`, members `S2`, `S3`, `S4`; `261:34` `S1` and `Sm`,
+`m >= 3`, members `S1`, `S3`, `S4`), why they are open, the absence of
+`S2` at 261, and the graph there as a lower bound, as batch 7's rule on
+open path sets asks. J1 now states that the stub keeps its path through
+`Connection`'s `config` parameter and that the earlier reset yields to the
+global rules, and B1 adds the forwarded config; the ledger header says the
+same. "Corrections of 2026-11-25" reproduces the ruling's table.
+
+| Id | Finding | Where | Fix |
+|---|---|---|---|
+| R1 | Remark: the Statistics row before this change said 353 edges, 254 outside, 163 outside callees and 428 callee lines, but the graph at 2130a69 has 351, 252, 161 and 426; the new row is right (369, 270, 175, 448), and the commit message counts from 351, so the old row was 2 too high. Worth one sentence in the correction | `fabric.md`, Statistics | optional |
+| R2 | Remark for the lead: batch 7's rule on open path sets asks that the outside edges of the package's batch be read with and without each package that has such sites; fabric now has three families | the batch reports | when the metrics are recorded |
+
+**Verdict.** Closed: the 18 edges stand and match the ruling exactly, and
+the families, J1, B1 and the ledger header are right. Two remarks, no
+finding.
+
+R1 was applied before the merge (`fabric.md` notes the stale Statistics
+row). R2 goes to the reporting of outside edges with and without fabric.
+The audit is closed.
