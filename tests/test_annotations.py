@@ -1578,3 +1578,25 @@ def f(v: "mod.Other", w: "mod.Thing"):
 
     assert callees(graph, "main") == []
     assert callees(graph, "main.f") == ["mod.Thing.run"]
+
+
+def test_the_fields_of_a_ctypes_structure_hold_their_types(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import ctypes
+        class Point(ctypes.Structure):
+            _fields_ = (("x", ctypes.c_int),)
+            def show(self): pass
+        class Rect(ctypes.Structure):
+            _fields_ = [("origin", Point), ("count", ctypes.c_uint32)]
+            def use(self):
+                self.origin.show()
+                self.count.bit_length()
+        """,
+    )
+
+    assert callees(graph, "main.Rect.use") == [
+        "<builtin>.int.bit_length",
+        "main.Point.show",
+    ]

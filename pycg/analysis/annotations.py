@@ -648,6 +648,31 @@ class Annotations:
         for node in bases:
             self.solver.attach(node, Each(self._dataclass_base, cls))
 
+    def add_structure_class(self, cls, fields, bases):
+        for node in bases:
+            self.solver.attach(node, Each(self._structure_base, cls, fields))
+
+    def _structure_base(self, obj, cls, fields):
+        if not (isinstance(obj, External) and obj.name in STRUCTURE_BASES):
+            return
+        if cls in self._structure_classes:
+            return
+        self._structure_classes.add(cls)
+        for name, annotation in fields.items():
+            if annotation is None:
+                continue
+            native = self.node()
+            values = self.node()
+            each = Each(self._native_field, native, results=(native,))
+            self.solver.attach(annotation, each)
+            self.annotated(native, values, INSTANCE, (cls, name))
+            self.solver.attach(cls.instances, Each(self._field_values, name, values))
+
+    def _native_field(self, obj, native):
+        if isinstance(obj, External) and obj.name in SIMPLE_NATIVE:
+            obj = self.external(f"{BUILTIN_MODULE}.{SIMPLE_NATIVE[obj.name]}")
+        self.add_object(native, obj)
+
     def _dataclass_decorator(self, obj, cls):
         if isinstance(obj, (External, ReturnsArgument)) and (
             obj.name in DATACLASS_DECORATORS
@@ -670,6 +695,45 @@ class Annotations:
     def _field_values(self, instance, name, values):
         self.add_edge(values, self.field(instance, name))
         self.stored_name(instance, name)
+
+
+STRUCTURE_BASES = frozenset({"ctypes.Structure", "ctypes.Union"})
+SIMPLE_NATIVE = {
+    **{
+        f"ctypes.c_{name}": "int"
+        for name in (
+            "byte",
+            "ubyte",
+            "short",
+            "ushort",
+            "int",
+            "uint",
+            "long",
+            "ulong",
+            "longlong",
+            "ulonglong",
+            "size_t",
+            "ssize_t",
+            "int8",
+            "uint8",
+            "int16",
+            "uint16",
+            "int32",
+            "uint32",
+            "int64",
+            "uint64",
+        )
+    },
+    "ctypes.c_float": "float",
+    "ctypes.c_double": "float",
+    "ctypes.c_longdouble": "float",
+    "ctypes.c_bool": "bool",
+    "ctypes.c_char": "bytes",
+    "ctypes.c_char_p": "bytes",
+    "ctypes.c_wchar": "str",
+    "ctypes.c_wchar_p": "str",
+    "ctypes.c_void_p": "int",
+}
 
 
 _NESTED_SCOPES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)

@@ -929,6 +929,7 @@ EACH_RULES_WITHOUT_RESULTS = {
     "_keyword_candidate",
     "_dataclass_decorator",
     "_dataclass_base",
+    "_structure_base",
     "_stub_base",
     "_pattern_class_instance",
     "load_by_pattern",

@@ -2194,6 +2194,18 @@ it is an annotated assignment, below); a `TypedDict` value is a
 dict, read by subscript, so its annotations are no fields
 (`test_a_typed_dict_gives_no_attributes`).
 
+A class whose base is `ctypes.Structure` or `ctypes.Union` and whose body
+binds `_fields_` to a literal sequence of `(name, type)` pairs declares a
+field for each pair: the metaclass makes a descriptor that reads it as an
+instance of the type, so each field of every instance holds what the type
+names as an annotation would, and a fundamental simple type (`c_int`,
+`c_char_p`, ...) its native value (`int`, `bytes`; `SIMPLE_NATIVE`).
+
+- Limit: only a direct base counts, so a class that derives from an
+  analysed structure declares no fields of its own `_fields_`; and a
+  pointer field (`POINTER(T)`) or an array type names nothing, so
+  `.contents` of it gives no value.
+
 **Annotated assignments.** An assignment with an annotation (`x: T = v`,
 `self.parsers: list[Parser] = []`, at any level and to any target) stores
 what `T` names as well as `v`, read as the annotation of a parameter is

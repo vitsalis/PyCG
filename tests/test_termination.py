@@ -807,6 +807,7 @@ NOT_COUNTED = {
     "_tested_classes",
     "_stub_ancestors",
     "_dataclass_like_classes",
+    "_structure_classes",
     "_classes_below",
     "_pattern_states",
     "_store_names",

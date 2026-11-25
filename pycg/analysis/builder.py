@@ -507,9 +507,15 @@ class ModuleBuilder(
                 self.analysis.add_set_name(value, cls, name, self._caller, site)
             slots = _slots(finals) if "__slots__" in members else ()
             cls.defines = frozenset(members).union(map(self._scope.mangle, slots))
+            fields = {
+                name: self.annotation(kind) for name, kind in _structure_fields(finals)
+            }
         self.analysis.add_init_subclass(cls, keywords, double_star, self._caller, site)
         statement = (node.name, bases, namespace, keywords, double_star)
         self.analysis.add_metaclass_call(cls, statement, self._caller, site)
+        if fields:
+            bases_seen = [base for base in bases if base is not None]
+            self.analysis.add_structure_class(cls, fields, bases_seen)
         if cls.annotations:
             self.analysis.add_annotated_class(
                 cls,
@@ -1137,6 +1143,23 @@ def _top_level_bindings(statements):
                 for alias in aliases:
                     names.add(alias.asname or alias.name.partition(".")[0])
     return names
+
+
+def _structure_fields(finals):
+    statement = finals.get("_fields_")
+    if not isinstance(statement, ast.Assign) or len(statement.targets) != 1:
+        return []
+    if not isinstance(statement.value, (ast.Tuple, ast.List)):
+        return []
+    fields = []
+    for element in statement.value.elts:
+        if not isinstance(element, (ast.Tuple, ast.List)) or len(element.elts) < 2:
+            return []
+        name, kind = element.elts[0], element.elts[1]
+        if not (isinstance(name, ast.Constant) and isinstance(name.value, str)):
+            return []
+        fields.append((name.value, kind))
+    return fields
 
 
 def _abstract_methods(finals):

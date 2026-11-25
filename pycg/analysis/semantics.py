@@ -144,6 +144,7 @@ class Analysis(
         self._stub_ancestors = {}
         self._families = {}
         self._dataclass_like_classes = set()
+        self._structure_classes = set()
         self._classes_below = {}
         self._below_nodes = {}
         self._patterns = {}
