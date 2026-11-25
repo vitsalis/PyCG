@@ -1,0 +1,1928 @@
+# Call-site ledger of tabulate at 3b4cd509820e4c45cd2aaba833aa585ea6308b94.
+#
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md; tabulate.md
+# shows how this ledger applies them and records every judgement. The package
+# is one module. Its public names are tabulate(), simple_separated_format(),
+# the names Line, DataRow, TableFormat, the class JupyterHTMLStr (which
+# tabulate() returns for html, with its public property str) and the module
+# flags; everything else has an underscore. A table cell, a header and
+# every other argument of tabulate() is a client object: opaque (B5) unless
+# the package checks its class with isinstance or type() before the call, or
+# the documentation fixes its type (B4: a dict of iterables, a list of dicts
+# or OrderedDicts, a dict of headers, str format specifications). The cells
+# that tabulate() hands to the private helpers after _format are str.
+default reject tabulate.JupyterHTMLStr.str: the name str at this site is the builtin str (called, or passed to isinstance or map); the property JupyterHTMLStr.str runs only on an attribute load .str of a JupyterHTMLStr, and the package never loads that attribute
+
+== tabulate
+
+[tabulate]
+9:27 call  _version("tabulate")
+    -> importlib.metadata.version
+    note: _version is importlib.metadata.version (line 3); it raises PackageNotFoundError for a source tree without metadata, which the except of line 10 catches
+70:18 call  namedtuple("Line", ["begin", "hline", "sep", "end"])
+    -> collections.namedtuple
+73:21 call  namedtuple("DataRow", ["begin", "sep", "end"])
+    -> collections.namedtuple
+107:25 call  namedtuple( "TableFormat", [ "lineabove", "linebelowheade...
+    -> collections.namedtuple
+363:26 call  TableFormat( lineabove=Line("", "-", " ", ""), linebelowh...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+364:23 call  Line("", "-", " ", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+365:29 call  Line("", "-", " ", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+367:23 call  Line("", "-", " ", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+368:26 call  DataRow("", " ", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+369:24 call  DataRow("", " ", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+373:25 call  TableFormat( lineabove=None, linebelowheader=None, linebe...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+378:26 call  DataRow("", " ", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+379:24 call  DataRow("", " ", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+383:24 call  TableFormat( lineabove=Line("+", "-", "+", "+"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+384:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+385:29 call  Line("+", "=", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+386:29 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+387:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+388:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+389:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+393:31 call  TableFormat( lineabove=Line("┌", "─", "┬", "┐"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+394:23 call  Line("┌", "─", "┬", "┐")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+395:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+396:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+397:23 call  Line("└", "─", "┴", "┘")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+398:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+399:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+403:32 call  TableFormat( lineabove=Line("╭", "─", "┬", "╮"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+404:23 call  Line("╭", "─", "┬", "╮")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+405:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+406:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+407:23 call  Line("╰", "─", "┴", "╯")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+408:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+409:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+413:30 call  TableFormat( lineabove=Line("┏", "━", "┳", "┓"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+414:23 call  Line("┏", "━", "┳", "┓")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+415:29 call  Line("┣", "━", "╋", "┫")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+416:29 call  Line("┣", "━", "╋", "┫")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+417:23 call  Line("┗", "━", "┻", "┛")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+418:26 call  DataRow("┃", "┃", "┃")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+419:24 call  DataRow("┃", "┃", "┃")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+423:30 call  TableFormat( lineabove=Line("┍", "━", "┯", "┑"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+424:23 call  Line("┍", "━", "┯", "┑")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+425:29 call  Line("┝", "━", "┿", "┥")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+426:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+427:23 call  Line("┕", "━", "┷", "┙")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+428:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+429:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+433:31 call  TableFormat( lineabove=Line("╔", "═", "╦", "╗"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+434:23 call  Line("╔", "═", "╦", "╗")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+435:29 call  Line("╠", "═", "╬", "╣")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+436:29 call  Line("╠", "═", "╬", "╣")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+437:23 call  Line("╚", "═", "╩", "╝")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+438:26 call  DataRow("║", "║", "║")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+439:24 call  DataRow("║", "║", "║")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+443:30 call  TableFormat( lineabove=Line("╒", "═", "╤", "╕"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+444:23 call  Line("╒", "═", "╤", "╕")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+445:29 call  Line("╞", "═", "╪", "╡")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+446:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+447:23 call  Line("╘", "═", "╧", "╛")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+448:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+449:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+453:30 call  TableFormat( lineabove=Line("+", "-", "+", "+"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+454:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+456:29 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+457:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+458:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+459:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+463:27 call  TableFormat( lineabove=Line("+", "-", "+", "+"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+464:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+465:29 call  Line("+", "=", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+467:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+468:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+469:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+473:34 call  TableFormat( lineabove=Line("┌", "─", "┬", "┐"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+474:23 call  Line("┌", "─", "┬", "┐")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+475:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+477:23 call  Line("└", "─", "┴", "┘")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+478:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+479:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+483:35 call  TableFormat( lineabove=Line("╭", "─", "┬", "╮"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+484:23 call  Line("╭", "─", "┬", "╮")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+485:29 call  Line("├", "─", "┼", "┤")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+487:23 call  Line("╰", "─", "┴", "╯")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+488:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+489:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+493:33 call  TableFormat( lineabove=Line("┏", "━", "┳", "┓"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+494:23 call  Line("┏", "━", "┳", "┓")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+495:29 call  Line("┣", "━", "╋", "┫")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+497:23 call  Line("┗", "━", "┻", "┛")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+498:26 call  DataRow("┃", "┃", "┃")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+499:24 call  DataRow("┃", "┃", "┃")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+503:33 call  TableFormat( lineabove=Line("┍", "━", "┯", "┑"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+504:23 call  Line("┍", "━", "┯", "┑")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+505:29 call  Line("┝", "━", "┿", "┥")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+507:23 call  Line("┕", "━", "┷", "┙")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+508:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+509:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+513:34 call  TableFormat( lineabove=Line("╔", "═", "╦", "╗"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+514:23 call  Line("╔", "═", "╦", "╗")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+515:29 call  Line("╠", "═", "╬", "╣")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+517:23 call  Line("╚", "═", "╩", "╝")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+518:26 call  DataRow("║", "║", "║")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+519:24 call  DataRow("║", "║", "║")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+523:33 call  TableFormat( lineabove=Line("╒", "═", "╤", "╕"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+524:23 call  Line("╒", "═", "╤", "╕")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+525:29 call  Line("╞", "═", "╪", "╡")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+527:23 call  Line("╘", "═", "╧", "╛")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+528:26 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+529:24 call  DataRow("│", "│", "│")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+533:26 call  TableFormat( lineabove=Line("|", "-", "|", "|"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+534:23 call  Line("|", "-", "|", "|")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+535:29 call  Line("|", "-", "|", "|")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+538:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+539:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+543:24 call  TableFormat( lineabove=_pipe_line_with_colons, linebelowh...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+548:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+549:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+553:26 call  TableFormat( lineabove=None, linebelowheader=Line("|", "-...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+555:29 call  Line("|", "-", "+", "|")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+558:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+559:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+563:24 call  TableFormat( lineabove=None, linebelowheader=None, linebe...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+568:26 call  DataRow("||", "||", "||")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+569:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+573:26 call  TableFormat( lineabove=None, linebelowheader=Line("", "-"...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+575:29 call  Line("", "-", "+", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+578:26 call  DataRow("", "|", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+579:24 call  DataRow("", "|", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+583:26 call  TableFormat( lineabove=Line("+", "-", "+", "+"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+584:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+585:29 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+587:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+588:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+589:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+593:24 call  TableFormat( lineabove=Line("+", "-", "+", "+"), linebelo...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+594:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+595:29 call  Line("|", "-", "+", "|")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+597:23 call  Line("+", "-", "+", "+")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+598:26 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+599:24 call  DataRow("|", "|", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+603:23 call  TableFormat( lineabove=Line("", "=", " ", ""), linebelowh...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+604:23 call  Line("", "=", " ", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+605:29 call  Line("", "=", " ", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+607:23 call  Line("", "=", " ", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+608:26 call  DataRow("", " ", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+609:24 call  DataRow("", " ", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+613:29 call  TableFormat( lineabove=Line( '{| class="wikitable" style=...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+614:23 call  Line( '{| class="wikitable" style="text-align: left;"', "...
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+620:29 call  Line("|-", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+621:29 call  Line("|-", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+622:23 call  Line("|}", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+623:26 call  partial(_mediawiki_row_with_attrs, "!")
+    -> functools.partial
+    reject tabulate._mediawiki_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+624:24 call  partial(_mediawiki_row_with_attrs, "|")
+    -> functools.partial
+    reject tabulate._mediawiki_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+628:28 call  TableFormat( lineabove=None, linebelowheader=None, linebe...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+633:26 call  partial(_moin_row_with_attrs, "||", header="'''")
+    -> functools.partial
+    reject tabulate._moin_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+634:24 call  partial(_moin_row_with_attrs, "||")
+    -> functools.partial
+    reject tabulate._moin_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+638:28 call  TableFormat( lineabove=None, linebelowheader=None, linebe...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+643:26 call  DataRow("|| ", " || ", " || ")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+644:24 call  DataRow("| ", " | ", " |")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+648:24 call  TableFormat( lineabove=_html_begin_table_without_header, ...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+652:23 call  Line("</tbody>\n</table>", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+653:26 call  partial(_html_row_with_attrs, "th", False)
+    -> functools.partial
+    reject tabulate._html_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+654:24 call  partial(_html_row_with_attrs, "td", False)
+    -> functools.partial
+    reject tabulate._html_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+658:30 call  TableFormat( lineabove=_html_begin_table_without_header, ...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+662:23 call  Line("</tbody>\n</table>", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+663:26 call  partial(_html_row_with_attrs, "th", True)
+    -> functools.partial
+    reject tabulate._html_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+664:24 call  partial(_html_row_with_attrs, "td", True)
+    -> functools.partial
+    reject tabulate._html_row_with_attrs: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+668:25 call  TableFormat( lineabove=_latex_line_begin_tabular, linebel...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+670:29 call  Line("\\hline", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+672:23 call  Line("\\hline\n\\end{tabular}", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+678:29 call  TableFormat( lineabove=_latex_line_begin_tabular, linebel...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+680:29 call  Line("\\hline", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+682:23 call  Line("\\hline\n\\end{tabular}", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+683:26 call  partial(_latex_row, escrules={})
+    -> functools.partial
+    reject tabulate._latex_row: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+684:24 call  partial(_latex_row, escrules={})
+    -> functools.partial
+    reject tabulate._latex_row: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+688:34 call  TableFormat( lineabove=partial(_latex_line_begin_tabular,...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+689:26 call  partial(_latex_line_begin_tabular, booktabs=True)
+    -> functools.partial
+    reject tabulate._latex_line_begin_tabular: partial() only stores the function; _build_line calls the partial object (functools.partial.__call__) later
+690:29 call  Line("\\midrule", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+692:23 call  Line("\\bottomrule\n\\end{tabular}", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+698:35 call  TableFormat( lineabove=partial(_latex_line_begin_tabular,...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+699:26 call  partial(_latex_line_begin_tabular, longtable=True)
+    -> functools.partial
+    reject tabulate._latex_line_begin_tabular: partial() only stores the function; _build_line calls the partial object (functools.partial.__call__) later
+700:29 call  Line("\\hline\n\\endhead", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+702:23 call  Line("\\hline\n\\end{longtable}", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+708:23 call  TableFormat( lineabove=None, linebelowheader=None, linebe...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+713:26 call  DataRow("", "\t", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+714:24 call  DataRow("", "\t", "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+718:27 call  TableFormat( lineabove=None, linebelowheader=None, linebe...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+    reject *: the generated __new__ of the namedtuple only stores the function as a field; _build_line and _build_row call it later
+723:26 call  DataRow("|_. ", "|_.", "|")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+728:28 call  TableFormat( lineabove=partial(_asciidoc_row, False), lin...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+729:26 call  partial(_asciidoc_row, False)
+    -> functools.partial
+    reject tabulate._asciidoc_row: partial() only stores the function; _build_line calls the partial object (functools.partial.__call__) later
+732:23 call  Line("|====", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+733:26 call  partial(_asciidoc_row, True)
+    -> functools.partial
+    reject tabulate._asciidoc_row: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+734:24 call  partial(_asciidoc_row, False)
+    -> functools.partial
+    reject tabulate._asciidoc_row: partial() only stores the function; _build_row calls the partial object (functools.partial.__call__) later
+741:26 call  sorted(_table_formats.keys())
+    -> <builtin>.sorted
+    note: the keys are str; sorting them runs no package code
+741:46 call  _table_formats.keys()
+    -> <builtin>.dict.keys
+784:30 call  re.compile(r"\r|\n|\r\n")
+    -> re.compile
+785:36 call  re.compile(b"\r|\n|\r\n")
+    -> re.compile
+833:25 call  re.compile(_ansi_escape_pat, re.VERBOSE)
+    -> re.compile
+834:31 call  re.compile(_ansi_escape_pat.encode("utf8"), re.VERBOSE)
+    -> re.compile
+834:55 call  _ansi_escape_pat.encode("utf8")
+    -> <builtin>.str.encode
+837:46 call  re.compile( r"^(([+-]?[0-9]{1,3})(?:,([0-9]{3}))*)?(?(1)\...
+    -> re.compile
+2647:6 decorator  @property
+    -> <builtin>.property
+2748:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+3074:10 call  _main()
+    -> tabulate._main
+    note: the if __name__ == "__main__" block is module code (README, "Edges"); it runs when tabulate/__init__.py runs as a script
+
+[tabulate._is_file]
+33:22 call  isinstance(f, io.IOBase)
+    -> <builtin>.isinstance
+
+[tabulate._is_separating_line_value]
+123:16 call  type(value)
+    -> <builtin>.type
+123:46 call  value.strip()
+    -> <builtin>.str.strip
+    note: type(value) is str has been checked; a str subclass fails the test
+
+[tabulate._is_separating_line]
+127:20 call  type(row)
+    -> <builtin>.type
+129:13 call  len(row)
+    -> <builtin>.len
+129:53 call  _is_separating_line_value(row[0])
+    -> tabulate._is_separating_line_value
+130:16 call  len(row)
+    -> <builtin>.len
+130:56 call  _is_separating_line_value(row[1])
+    -> tabulate._is_separating_line_value
+
+[tabulate._pipe_line_with_colons]
+154:31 call  len(colwidths)
+    -> <builtin>.len
+155:24 call  "|".join( _pipe_segment_with_colons(a, w) for a, w in zip...
+    -> <builtin>.str.join
+156:34 call  _pipe_segment_with_colons(a, w)
+    -> tabulate._pipe_segment_with_colons
+156:56 call  zip(colaligns, colwidths)
+    -> <builtin>.zip
+
+[tabulate._grid_line_with_colons]
+179:31 call  len(colwidths)
+    -> <builtin>.len
+180:24 call  "+".join( _grid_segment_with_colons(w, a) for a, w in zip...
+    -> <builtin>.str.join
+181:34 call  _grid_segment_with_colons(w, a)
+    -> tabulate._grid_segment_with_colons
+181:56 call  zip(colaligns, colwidths)
+    -> <builtin>.zip
+
+[tabulate._mediawiki_row_with_attrs]
+196:28 call  alignment.get(a, "")
+    -> <builtin>.dict.get
+    note: alignment is the dict literal of line 187
+196:61 call  zip(cell_values, colaligns)
+    -> <builtin>.zip
+199:36 call  colsep.join(values_with_attrs)
+    -> <builtin>.str.join
+    note: colsep is the str separator ("!" or "|", the partial arguments of lines 623-624) doubled
+199:63 call  (separator + colsep.join(values_with_attrs)).rstrip()
+    -> <builtin>.str.rstrip
+
+[tabulate._textile_row_with_attrs]
+205:22 call  "|".join(alignment.get(a, "") + v for a, v in zip(colalig...
+    -> <builtin>.str.join
+205:36 call  alignment.get(a, "")
+    -> <builtin>.dict.get
+    note: alignment is the dict literal of line 204
+205:63 call  zip(colaligns, cell_values)
+    -> <builtin>.zip
+
+[tabulate._html_row_with_attrs]
+223:39 call  "<{0}{1}>{2}</{0}>".format(celltag, alignment.get(a, ""), c)
+    -> <builtin>.str.format
+    note: the fields are the str celltag, a str of the alignment dict and the str cell c; formatting them runs no package code
+223:62 call  alignment.get(a, "")
+    -> <builtin>.dict.get
+    note: alignment is the dict literal of line 215
+224:28 call  zip(cell_values, colaligns)
+    -> <builtin>.zip
+228:39 call  "<{0}{1}>{2}</{0}>".format(celltag, alignment.get(a, ""),...
+    -> <builtin>.str.format
+    note: the fields are the str celltag, a str of the alignment dict and the str that html.escape returns
+228:62 call  alignment.get(a, "")
+    -> <builtin>.dict.get
+    note: alignment is the dict literal of line 215
+228:81 call  htmlescape(c)
+    -> html.escape
+    note: htmlescape is html.escape (line 16)
+229:28 call  zip(cell_values, colaligns)
+    -> <builtin>.zip
+231:35 call  "<tr>{}</tr>".format("".join(values_with_attrs).rstrip())
+    -> <builtin>.str.format
+231:43 call  "".join(values_with_attrs)
+    -> <builtin>.str.join
+231:69 call  "".join(values_with_attrs).rstrip()
+    -> <builtin>.str.rstrip
+
+[tabulate._moin_row_with_attrs]
+245:26 call  "{}{} {} ".format(celltag, alignment.get(a, ""), header +...
+    -> <builtin>.str.format
+    note: the fields are the str celltag, a str of the alignment dict and the concatenated str cell
+245:49 call  alignment.get(a, "")
+    -> <builtin>.dict.get
+    note: alignment is the dict literal of line 238
+246:24 call  zip(cell_values, colaligns)
+    -> <builtin>.zip
+248:19 call  "".join(values_with_attrs)
+    -> <builtin>.str.join
+
+[tabulate._latex_line_begin_tabular]
+253:34 call  "".join([alignment.get(a, "l") for a in colaligns])
+    -> <builtin>.str.join
+253:49 call  alignment.get(a, "l")
+    -> <builtin>.dict.get
+    note: alignment is the dict literal of line 252
+254:21 call  "\n".join( [ ("\\begin{tabular}{" if not longtable else "...
+    -> <builtin>.str.join
+
+[tabulate._asciidoc_row]
+294:11 call  len(args)
+    -> <builtin>.len
+297:32 call  make_header_line(False, *args)
+    -> tabulate._asciidoc_row.make_header_line
+299:13 call  len(args)
+    -> <builtin>.len
+304:35 call  "|".join(cell_values)
+    -> <builtin>.str.join
+307:36 call  make_header_line(True, colwidths, colaligns)
+    -> tabulate._asciidoc_row.make_header_line
+312:25 call  ValueError( "_asciidoc_row() requires two (colwidths, col...
+    note: no edge: _asciidoc_row is private, and the package calls it only through the partial objects of the asciidoc format (lines 729, 733, 734), with two arguments from _build_line (line 2628) or three from _build_row (line 2577), so len(args) is 2 or 3 and this branch never runs (a check that cannot fail under the package's own values has no callee, README B1)
+
+[tabulate._asciidoc_row.make_header_line]
+272:34 call  zip( colwidths, [alignment[colalign] for colalign in cola...
+    -> <builtin>.zip
+278:44 call  ",".join(asciidoc_column_specifiers)
+    -> <builtin>.str.join
+284:32 call  options_list.append("header")
+    -> <builtin>.list.append
+287:36 call  ",".join(options_list)
+    -> <builtin>.str.join
+288:31 call  header_list.append(f'options="{options_list}"')
+    -> <builtin>.list.append
+292:36 call  "[{}]\n|====".format(",".join(header_list))
+    -> <builtin>.str.format
+292:45 call  ",".join(header_list)
+    -> <builtin>.str.join
+
+[tabulate._latex_row]
+338:30 call  "".join(map(escape_char, cell))
+    -> <builtin>.str.join
+    note: join iterates the map of line 338:34, which calls escape_char; the edge is given at the map call (same function)
+338:34 call  map(escape_char, cell)
+    -> <builtin>.map
+    -> tabulate._latex_row.escape_char
+    note: the map object is iterated by "".join in this function
+339:21 call  DataRow("", "&", "\\\\")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+340:29 call  _build_simple_row(escaped_values, rowfmt)
+    -> tabulate._build_simple_row
+
+[tabulate._latex_row.escape_char]
+336:28 call  escrules.get(c, c)
+    -> <builtin>.dict.get
+    note: escrules is LATEX_ESCAPE_RULES (the default) or the dict {} of the partial objects of latex_raw (lines 683-684)
+
+[tabulate._rst_escape_first_column]
+350:23 call  list(headers)
+    -> <builtin>.list
+353:38 call  escape_empty(headers[0])
+    -> tabulate._rst_escape_first_column.escape_empty
+355:23 call  list(row)
+    -> <builtin>.list
+357:38 call  escape_empty(row[0])
+    -> tabulate._rst_escape_first_column.escape_empty
+358:24 call  new_rows.append(new_row)
+    -> <builtin>.list.append
+
+[tabulate._rst_escape_first_column.escape_empty]
+345:22 call  isinstance(val, (str, bytes))
+    -> <builtin>.isinstance
+345:59 call  val.strip()
+    -> <builtin>.str.strip
+    -> <builtin>.bytes.strip
+    note: val passed the isinstance check for str or bytes; the headers are str, and a first-column cell can be a client bytes value (bytes cells are documented, README.md "Type Deduction and Missing Values", line 802)
+
+[tabulate.simple_separated_format]
+850:23 call  TableFormat( None, None, None, None, headerrow=DataRow(""...
+    note: TableFormat is the collections.namedtuple class of line 107; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+855:26 call  DataRow("", separator, "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+856:24 call  DataRow("", separator, "")
+    note: DataRow is the collections.namedtuple class of line 73; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+
+[tabulate._isnumber_with_thousands_separator]
+888:31 call  string.decode()
+    -> <builtin>.bytes.decode
+    note: _isnumber_with_thousands_separator is private. Its package callers pass a str (_type, lines 1022 and 1029, after isinstance(string, str)) or a formatted cell (_afterpoint, line 1053): a str, whose missing decode raises the AttributeError that line 889 catches; or bytes: the replace override of a client str subclass can return bytes in _format (line 1376), and in a decimal column of a table with ANSI codes _align_column_choose_padfn passes it through _strip_ansi (line 1180), whose re.Pattern.sub returns exact bytes (line 1121). The receiver is that library result, whose type is known, not the client object (judgement 6 of tabulate.md)
+892:16 call  bool(re.match(_float_with_thousands_separators, string))
+    -> <builtin>.bool
+892:25 call  re.match(_float_with_thousands_separators, string)
+    -> re.match
+
+[tabulate._isconvertible]
+897:13 call  conv(string)
+    -> <builtin>.float
+    -> <builtin>.int
+    note: _isconvertible is private; the package passes conv=float (_isnumber, line 940) and conv=inttype (_isint, line 969), and every package call of _isint uses the default inttype=int. float() and int() of a client object call its __float__ or __int__: client code
+
+[tabulate._isnumber]
+936:13 call  type(string)
+    -> <builtin>.type
+940:27 call  _isconvertible(float, string)
+    -> tabulate._isconvertible
+943:31 call  isinstance(string, (str, bytes))
+    -> <builtin>.isinstance
+947:36 call  math.isinf(float(string))
+    -> math.isinf
+947:42 call  float(string)
+    -> <builtin>.float
+947:65 call  math.isnan(float(string))
+    -> math.isnan
+947:71 call  float(string)
+    -> <builtin>.float
+948:36 call  string.lower()
+    -> <builtin>.str.lower
+    -> <builtin>.bytes.lower
+    note: string passed isinstance(string, (str, bytes)) (line 943) and float(string) succeeded: a str or bytes that names inf or nan (bytes cells are documented, README.md "Type Deduction and Missing Values", line 802)
+
+[tabulate._isint]
+963:13 call  type(string)
+    -> <builtin>.type
+965:21 call  hasattr(string, "is_integer")
+    -> <builtin>.hasattr
+965:54 call  hasattr(string, "__array__")
+    -> <builtin>.hasattr
+966:20 call  str(type(string))
+    -> <builtin>.str
+966:25 call  type(string)
+    -> <builtin>.type
+966:45 call  str(type(string)).startswith("<class 'numpy.int")
+    -> <builtin>.str.startswith
+    note: the receiver is the str that str(type(string)) returns
+969:23 call  isinstance(string, (bytes, str))
+    -> <builtin>.isinstance
+969:64 call  _isconvertible(inttype, string)
+    -> tabulate._isconvertible
+
+[tabulate._isbool]
+983:16 call  type(string)
+    -> <builtin>.type
+984:19 call  isinstance(string, (bytes, str))
+    -> <builtin>.isinstance
+
+[tabulate._type]
+1009:36 call  isinstance(string, (str, bytes))
+    -> <builtin>.isinstance
+1010:29 call  _strip_ansi(string)
+    -> tabulate._strip_ansi
+1012:37 call  isinstance(string, (bytes, str))
+    -> <builtin>.isinstance
+1013:20 call  type(None)
+    -> <builtin>.type
+1014:17 call  hasattr(string, "isoformat")
+    -> <builtin>.hasattr
+1016:17 call  _isbool(string)
+    -> tabulate._isbool
+1019:15 call  _isint(string)
+    -> tabulate._isint
+1021:23 call  isinstance(string, str)
+    -> <builtin>.isinstance
+1022:51 call  _isnumber_with_thousands_separator(string)
+    -> tabulate._isnumber_with_thousands_separator
+1028:18 call  _isnumber(string)
+    -> tabulate._isnumber
+1029:23 call  isinstance(string, str)
+    -> <builtin>.isinstance
+1029:75 call  _isnumber_with_thousands_separator(string)
+    -> tabulate._isnumber_with_thousands_separator
+1032:20 call  isinstance(string, bytes)
+    -> <builtin>.isinstance
+
+[tabulate._afterpoint]
+1053:17 call  _isnumber(string)
+    -> tabulate._isnumber
+1053:63 call  _isnumber_with_thousands_separator(string)
+    -> tabulate._isnumber_with_thousands_separator
+1054:18 call  _isint(string)
+    -> tabulate._isint
+1057:31 call  string.rfind(".")
+    -> <builtin>.str.rfind
+    -> <builtin>.bytes.rfind
+    note: _afterpoint is private; the package passes the formatted cells of a decimal column (_align_column_choose_padfn, lines 1180, 1182), which are str, except under the witness of judgement 6 of tabulate.md: a client str subclass whose replace returns bytes (line 1376), in a table with ANSI codes, reaches line 1180 with the exact bytes that re.Pattern.sub returns in _strip_ansi (line 1121); for b"1.5" _isnumber is true and _isint false, so bytes.rfind(".") is called (it binds its one argument and refuses the str in its body)
+1058:31 call  string.lower()
+    -> <builtin>.str.lower
+1058:39 call  string.lower().rfind("e")
+    -> <builtin>.str.rfind
+1060:27 call  len(string)
+    -> <builtin>.len
+
+[tabulate._padleft]
+1075:22 call  fmt.format(s)
+    -> <builtin>.str.format
+    note: fmt is the str "{0:>%ds}" % width; s is a str cell or header, so formatting runs no package code
+
+[tabulate._padright]
+1086:22 call  fmt.format(s)
+    -> <builtin>.str.format
+    note: fmt is the str "{0:<%ds}" % width; s is a str cell or header
+
+[tabulate._padboth]
+1097:22 call  fmt.format(s)
+    -> <builtin>.str.format
+    note: fmt is the str "{0:^%ds}" % width; s is a str cell or header
+
+[tabulate._strip_ansi]
+1118:18 call  isinstance(s, str)
+    -> <builtin>.isinstance
+1119:31 call  _ansi_codes.sub(r"\4", s)
+    -> re.Pattern.sub
+    note: _ansi_codes is the compiled pattern of line 833
+1121:37 call  _ansi_codes_bytes.sub(r"\4", s)
+    -> re.Pattern.sub
+    note: _ansi_codes_bytes is the compiled bytes pattern of line 834; the package passes bytes here (the callers check isinstance str or bytes, or pass str)
+
+[tabulate._visible_width]
+1136:18 call  isinstance(s, (str, bytes))
+    -> <builtin>.isinstance
+1137:22 call  len_fn(_strip_ansi(s))
+    -> wcwidth.wcswidth
+    -> <builtin>.len
+    note: len_fn is wcwidth.wcswidth when wcwidth imported and WIDE_CHARS_MODE is true (lines 1132-1133), else len; WIDE_CHARS_MODE is a documented module flag (README.md "Wide (fullwidth CJK) symbols"), and the import of wcwidth is optional (both sides run)
+1137:34 call  _strip_ansi(s)
+    -> tabulate._strip_ansi
+1139:22 call  len_fn(str(s))
+    -> wcwidth.wcswidth
+    -> <builtin>.len
+    note: len_fn as at 1137:22. _visible_width is private and the package passes str cells and headers, but a client str subclass cell whose replace override returns a non-str reaches it through _format (line 1376) with numalign=None (judgement 6 of tabulate.md)
+1139:26 call  str(s)
+    -> <builtin>.str
+    note: see 1139:22 (judgement 6 of tabulate.md)
+
+[tabulate._is_multiline]
+1143:18 call  isinstance(s, str)
+    -> <builtin>.isinstance
+1144:20 call  bool(re.search(_multiline_codes, s))
+    -> <builtin>.bool
+1144:30 call  re.search(_multiline_codes, s)
+    -> re.search
+1146:20 call  bool(re.search(_multiline_codes_bytes, s))
+    note: no edge: _is_multiline is private, and its only package call (line 2383) passes plain_text, the str that "\t".join returns (line 2367), so the bytes branch never runs
+1146:30 call  re.search(_multiline_codes_bytes, s)
+    note: no edge: as 1146:20
+
+[tabulate._multiline_width]
+1151:15 call  max(map(line_width_fn, re.split("[\r\n]", multiline_s)))
+    -> <builtin>.max
+1151:19 call  map(line_width_fn, re.split("[\r\n]", multiline_s))
+    -> <builtin>.map
+    -> tabulate._visible_width
+    note: _multiline_width is private; its only package caller is _choose_width_fn.<lambda1> (line 1163), which passes line_width_fn = _visible_width, wcwidth.wcswidth or len (lines 1156-1161). max() iterates the map in this function; it calls _visible_width back. wcwidth.wcswidth and len called back by map are library callables, not edges
+1151:43 call  re.split("[\r\n]", multiline_s)
+    -> re.split
+
+[tabulate._choose_width_fn.<lambda1>]
+1163:46 call  _multiline_width(s, line_width_fn)
+    -> tabulate._multiline_width
+
+[tabulate._align_column_choose_padfn]
+1172:31 call  s.strip()
+    -> <builtin>.str.strip
+    note: strings are the formatted cells of a column (str); _align_column_choose_padfn is private and _align_column is its only caller
+1176:31 call  s.strip()
+    -> <builtin>.str.strip
+    note: as 1172:31
+1180:36 call  _afterpoint(_strip_ansi(s))
+    -> tabulate._afterpoint
+1180:48 call  _strip_ansi(s)
+    -> tabulate._strip_ansi
+1182:36 call  _afterpoint(s)
+    -> tabulate._afterpoint
+1183:26 call  max(decimals)
+    -> <builtin>.max
+1184:69 call  zip(strings, decimals)
+    -> <builtin>.zip
+1190:31 call  s.strip()
+    -> <builtin>.str.strip
+    note: as 1172:31
+
+[tabulate._align_column_choose_width_fn.<lambda1>]
+1203:59 call  _align_column_multiline_width( # noqa: E731 s, line_width...
+    -> tabulate._align_column_multiline_width
+
+[tabulate._align_column_multiline_width]
+1213:16 call  list(map(line_width_fn, re.split("[\r\n]", multiline_s)))
+    -> <builtin>.list
+1213:20 call  map(line_width_fn, re.split("[\r\n]", multiline_s))
+    -> <builtin>.map
+    -> tabulate._visible_width
+    note: _align_column_multiline_width is private; its only package caller is _align_column_choose_width_fn.<lambda1> (line 1203), which passes line_width_fn = _visible_width, wcwidth.wcswidth or len (lines 1196-1201). list() iterates the map in this function; it calls _visible_width back. wcwidth.wcswidth and len called back by map are library callables, not edges
+1213:44 call  re.split("[\r\n]", multiline_s)
+    -> re.split
+
+[tabulate._flat_list]
+1219:22 call  isinstance(item, list)
+    -> <builtin>.isinstance
+1220:23 call  ret.extend(item)
+    -> <builtin>.list.extend
+1222:23 call  ret.append(item)
+    -> <builtin>.list.append
+
+[tabulate._align_column]
+1236:48 call  _align_column_choose_padfn( strings, alignment, has_invis...
+    -> tabulate._align_column_choose_padfn
+1239:45 call  _align_column_choose_width_fn( has_invisible, enable_wide...
+    -> tabulate._align_column_choose_width_fn
+1243:20 call  list(map(width_fn, strings))
+    -> <builtin>.list
+1243:24 call  map(width_fn, strings)
+    -> <builtin>.map
+    -> tabulate._visible_width
+    -> tabulate._align_column_choose_width_fn.<lambda1>
+    note: width_fn comes from _align_column_choose_width_fn (line 1239): _visible_width, wcwidth.wcswidth, len, or its lambda for multiline cells. list() iterates the map in this function and calls the package functions back; wcwidth.wcswidth and len called back by map are library callables, not edges
+1244:19 call  max(max(_flat_list(s_widths)), minwidth)
+    -> <builtin>.max
+1244:23 call  max(_flat_list(s_widths))
+    -> <builtin>.max
+1244:34 call  _flat_list(s_widths)
+    -> tabulate._flat_list
+1249:26 call  "\n".join([padfn(maxwidth, s) for s in ms.splitlines()])
+    -> <builtin>.str.join
+1249:33 call  padfn(maxwidth, s)
+    -> tabulate._padleft
+    -> tabulate._padboth
+    -> tabulate._padright
+    -> tabulate._padnone
+    note: padfn comes from _align_column_choose_padfn (line 1236): _padleft, _padboth, _padnone or _padright (lines 1173-1191)
+1249:69 call  ms.splitlines()
+    -> <builtin>.str.splitlines
+1254:27 call  len(s)
+    -> <builtin>.len
+1254:48 call  re.split("[\r\n]", ms)
+    -> re.split
+1256:52 call  zip(mw, ml)
+    -> <builtin>.zip
+1257:34 call  zip(s_widths, s_lens)
+    -> <builtin>.zip
+1262:26 call  "\n".join([padfn(w, s) for s, w in zip((ms.splitlines() o...
+    -> <builtin>.str.join
+1262:33 call  padfn(w, s)
+    -> tabulate._padleft
+    -> tabulate._padboth
+    -> tabulate._padright
+    -> tabulate._padnone
+    note: padfn as at 1249:33
+1262:55 call  zip((ms.splitlines() or ms), mw)
+    -> <builtin>.zip
+1262:70 call  ms.splitlines()
+    -> <builtin>.str.splitlines
+1263:34 call  zip(strings, visible_widths)
+    -> <builtin>.zip
+1267:36 call  padfn(maxwidth, s)
+    -> tabulate._padleft
+    -> tabulate._padboth
+    -> tabulate._padright
+    -> tabulate._padnone
+    note: padfn as at 1249:33
+1270:26 call  list(map(len, strings))
+    -> <builtin>.list
+1270:30 call  map(len, strings)
+    -> <builtin>.map
+    note: len called back by map is a builtin, not an edge
+1271:65 call  zip(s_widths, s_lens)
+    -> <builtin>.zip
+1274:36 call  padfn(w, s)
+    -> tabulate._padleft
+    -> tabulate._padboth
+    -> tabulate._padright
+    -> tabulate._padnone
+    note: padfn as at 1249:33
+1274:58 call  zip(strings, visible_widths)
+    -> <builtin>.zip
+
+[tabulate._more_generic]
+1280:13 call  type(None)
+    -> <builtin>.type
+1293:16 call  type(None)
+    -> <builtin>.type
+1295:22 call  max(types.get(type1, 5), types.get(type2, 5))
+    -> <builtin>.max
+1295:32 call  types.get(type1, 5)
+    -> <builtin>.dict.get
+    note: types is the dict literal of line 1279; its keys are types, hashed by type
+1295:53 call  types.get(type2, 5)
+    -> <builtin>.dict.get
+    note: as 1295:32
+
+[tabulate._column_type]
+1321:19 call  _type(s, has_invisible, numparse)
+    -> tabulate._type
+1322:18 call  reduce(_more_generic, types, bool)
+    -> functools.reduce
+    -> tabulate._more_generic
+    note: reduce calls _more_generic back for each element of types
+
+[tabulate._format]
+1339:18 call  isinstance(val, (bytes, str))
+    -> <builtin>.isinstance
+1345:22 call  isinstance(val, str)
+    -> <builtin>.isinstance
+1346:37 call  val.encode("unicode_escape")
+    -> <builtin>.str.encode
+    note: isinstance(val, str) has been checked (line 1345)
+1346:62 call  val.encode("unicode_escape").decode("utf-8")
+    -> <builtin>.bytes.decode
+1347:32 call  re.search( r"(\\[xX]+[0-9a-fA-F]+\[\d+[mM]+)([0-9.]+)(\\....
+    -> re.search
+1351:35 call  len(colored.groups())
+    -> <builtin>.len
+1351:50 call  colored.groups()
+    -> re.Match.groups
+    note: colored is the re.Match that re.search returns (a None result fails the truth test of line 1350)
+1353:43 call  colored.group(2)
+    -> re.Match.group
+1354:38 call  digits.isdigit()
+    -> <builtin>.str.isdigit
+1356:42 call  colored.group(1)
+    -> re.Match.group
+1357:37 call  format(int(digits), intfmt)
+    -> <builtin>.format
+1357:41 call  int(digits)
+    -> <builtin>.int
+1358:44 call  colored.group(3)
+    -> re.Match.group
+1360:45 call  val_new.encode("utf-8")
+    -> <builtin>.str.encode
+    note: val_new is the concatenation of three str
+1360:61 call  val_new.encode("utf-8").decode("unicode_escape")
+    -> <builtin>.bytes.decode
+1362:22 call  format(val, intfmt)
+    -> <builtin>.format
+1365:23 call  str(val, "ascii")
+    -> <builtin>.str
+    note: valtype is bytes: val is a bytes cell, or another client value of a column whose type is bytes
+1367:23 call  str(val)
+    -> <builtin>.str
+1369:59 call  isinstance(val, (str, bytes))
+    -> <builtin>.isinstance
+1371:34 call  _strip_ansi(val)
+    -> tabulate._strip_ansi
+1373:39 call  format(float(raw_val), floatfmt)
+    -> <builtin>.format
+1373:45 call  float(raw_val)
+    -> <builtin>.float
+1376:31 call  val.replace(raw_val, formatted_val)
+    -> <builtin>.str.replace
+    -> <builtin>.bytes.replace
+    note: val passed isinstance(val, (str, bytes)) (line 1369). For a str val the call is str.replace. For a bytes cell of a float column in a table with ANSI codes elsewhere (tabulate([[b"1.5"], ["\x1b[31m2\x1b[0m"]])), raw_val is bytes and formatted_val a str, and bytes.replace binds its two arguments and raises TypeError in its body: an edge (the lead's ruling for batch 6: binding of a C callable is the match of the arguments to the parameters of its signature; judgement 5 of tabulate.md)
+1378:26 call  isinstance(val, str)
+    -> <builtin>.isinstance
+1379:34 call  val.replace(",", "")
+    -> <builtin>.str.replace
+    note: isinstance(val, str) has been checked (line 1378)
+1381:30 call  format(float(val), floatfmt)
+    -> <builtin>.format
+1381:36 call  float(val)
+    -> <builtin>.float
+
+[tabulate._align_header]
+1393:32 call  re.split(_multiline_codes, header)
+    -> re.split
+1395:26 call  _align_header(h, alignment, width, width_fn(h))
+    -> tabulate._align_header
+1395:56 call  width_fn(h)
+    -> tabulate._choose_width_fn.<lambda1>
+    reject tabulate._align_column_choose_width_fn.<lambda1>: width_fn is the width function that tabulate() takes from _choose_width_fn (line 2389) and passes at line 2497
+    note: _align_header is private; its package callers are tabulate() (line 2497), which passes width_fn from _choose_width_fn (line 2389) and the same is_multiline, and itself (line 1395, with is_multiline False). This branch runs only when is_multiline is true, so width_fn is the lambda of _choose_width_fn (line 1163)
+1397:25 call  "\n".join(padded_lines)
+    -> <builtin>.str.join
+1399:21 call  len(header)
+    -> <builtin>.len
+1402:25 call  _padright(width, header)
+    -> tabulate._padright
+1404:24 call  _padboth(width, header)
+    -> tabulate._padboth
+1408:24 call  _padleft(width, header)
+    -> tabulate._padleft
+
+[tabulate._remove_separating_lines]
+1412:18 call  isinstance(rows, list)
+    -> <builtin>.isinstance
+1415:36 call  enumerate(rows)
+    -> <builtin>.enumerate
+1416:35 call  _is_separating_line(row)
+    -> tabulate._is_separating_line
+1417:40 call  separating_lines.append(index)
+    -> <builtin>.list.append
+1419:33 call  sans_rows.append(row)
+    -> <builtin>.list.append
+
+[tabulate._reinsert_separating_lines]
+1428:24 call  rows.insert(index, SEPARATING_LINE)
+    -> <builtin>.list.insert
+    note: rows is the list that _prepend_row_index builds (line 1446) or that tabulate() builds with list(zip(...)) (lines 2500, 2503)
+
+[tabulate._prepend_row_index]
+1435:18 call  isinstance(index, Sized)
+    -> <builtin>.isinstance
+1435:40 call  len(index)
+    -> <builtin>.len
+1435:54 call  len(rows)
+    -> <builtin>.len
+1436:25 call  ValueError( "index must be as long as the number of data ...
+    -> <builtin>.ValueError
+1438:32 call  len(index)
+    -> <builtin>.len
+1438:55 call  len(rows)
+    -> <builtin>.len
+1440:59 call  _remove_separating_lines(rows)
+    -> tabulate._remove_separating_lines
+1442:22 call  iter(index)
+    -> <builtin>.iter
+1444:23 call  next(index_iter)
+    -> <builtin>.next
+1445:24 call  new_rows.append([index_v] + list(row))
+    -> <builtin>.list.append
+1445:41 call  list(row)
+    -> <builtin>.list
+1447:31 call  _reinsert_separating_lines(rows, separating_lines)
+    -> tabulate._reinsert_separating_lines
+
+[tabulate._bool]
+1454:20 call  bool(val)
+    -> <builtin>.bool
+
+[tabulate._normalize_tabular_data]
+1494:13 call  bool(headers)
+    -> <builtin>.bool
+1496:23 call  list(headers)
+    -> <builtin>.list
+1504:15 call  hasattr(tabular_data, "keys")
+    -> <builtin>.hasattr
+1504:49 call  hasattr(tabular_data, "values")
+    -> <builtin>.hasattr
+1506:20 call  callable(tabular_data.values)
+    -> <builtin>.callable
+1508:37 call  tabular_data.keys()
+    -> <builtin>.dict.keys
+    note: tabular_data has a callable values: the documented "dict of iterables" (README.md, tabulate() docstring). Another mapping that the client passes is opaque (B5)
+1510:28 call  list( izip_longest(*tabular_data.values()) )
+    -> <builtin>.list
+1511:33 call  izip_longest(*tabular_data.values())
+    -> itertools.zip_longest
+    note: izip_longest is itertools.zip_longest (line 17); it iterates the client's columns
+1511:54 call  tabular_data.values()
+    -> <builtin>.dict.values
+    note: as 1508:37
+1514:32 call  TypeError(err_msg)
+    -> <builtin>.TypeError
+1516:21 call  hasattr(tabular_data, "index")
+    -> <builtin>.hasattr
+1518:24 call  list(tabular_data)
+    -> <builtin>.list
+1523:30 call  isinstance(tabular_data.index.name, list)
+    -> <builtin>.isinstance
+1529:25 call  list(tabular_data.index)
+    -> <builtin>.list
+1530:25 call  list(row)
+    -> <builtin>.list
+1532:29 call  ValueError("tabular data doesn't appear to be a dict or a...
+    -> <builtin>.ValueError
+1535:27 call  list(map(str, keys))
+    -> <builtin>.list
+1535:31 call  map(str, keys)
+    -> <builtin>.map
+    note: str called back by map is a builtin, not an edge
+1539:24 call  list(tabular_data)
+    -> <builtin>.list
+1541:28 call  TypeError(err_msg)
+    -> <builtin>.TypeError
+1548:24 call  hasattr(tabular_data, "dtype")
+    -> <builtin>.hasattr
+1555:20 call  len(rows)
+    -> <builtin>.len
+1556:27 call  isinstance(rows[0], tuple)
+    -> <builtin>.isinstance
+1557:24 call  hasattr(rows[0], "_fields")
+    -> <builtin>.hasattr
+1560:27 call  list(map(str, rows[0]._fields))
+    -> <builtin>.list
+1560:31 call  map(str, rows[0]._fields)
+    -> <builtin>.map
+    note: str called back by map is a builtin, not an edge
+1561:17 call  len(rows)
+    -> <builtin>.len
+1561:39 call  hasattr(rows[0], "keys")
+    -> <builtin>.hasattr
+1561:68 call  hasattr(rows[0], "values")
+    -> <builtin>.hasattr
+1563:28 call  set()
+    -> <builtin>.set
+1566:43 call  len(rows)
+    -> <builtin>.len
+1567:28 call  keys.extend(firstdict.keys())
+    -> <builtin>.list.extend
+1567:43 call  firstdict.keys()
+    -> <builtin>.dict.keys
+    -> collections.OrderedDict.keys
+    -> collections.UserDict.keys
+    note: firstdict is rows[0] of the documented "list or another iterable of dicts" (README.md), "list of OrderedDicts" (docstring of _normalize_tabular_data, line 1471) and "lists of UserDicts" (CHANGELOG:21, release 0.8.8; added in Codex audit round 2); judgement 3 of tabulate.md. UserDict inherits keys from collections.abc.Mapping on every supported version; it is named by the class of the receiver. Other dict-like rows are client objects (B5)
+1568:33 call  uniq_keys.update(keys)
+    -> <builtin>.set.update
+    note: uniq_keys is the set of line 1563
+1571:34 call  row.keys()
+    -> <builtin>.dict.keys
+    -> collections.OrderedDict.keys
+    -> collections.UserDict.keys
+    note: row is a dict, an OrderedDict or a UserDict, as at 1567:43 (UserDict: Codex audit round 2, CHANGELOG:21)
+1574:36 call  keys.append(k)
+    -> <builtin>.list.append
+1575:38 call  uniq_keys.add(k)
+    -> <builtin>.set.add
+1578:28 call  isinstance(headers, dict)
+    -> <builtin>.isinstance
+1580:39 call  headers.get(k, k)
+    -> <builtin>.dict.get
+    note: isinstance(headers, dict) has been checked (line 1578); the documentation passes a dict of headers (README.md "Headers")
+1581:31 call  list(map(str, headers))
+    -> <builtin>.list
+1581:35 call  map(str, headers)
+    -> <builtin>.map
+    note: str called back by map is a builtin, not an edge
+1583:23 call  len(rows)
+    -> <builtin>.len
+1584:45 call  firstdict.get(k, k)
+    -> <builtin>.dict.get
+    -> collections.OrderedDict.get
+    -> collections.UserDict.get
+    note: firstdict is a dict, an OrderedDict or a UserDict, as at 1567:43 (UserDict: Codex audit round 2, CHANGELOG:21; UserDict.get is inherited from collections.abc.Mapping on 3.10 and 3.11 and its own from 3.12, one name by the class of the receiver)
+1585:35 call  list(map(str, headers))
+    -> <builtin>.list
+1585:39 call  map(str, headers)
+    -> <builtin>.map
+    note: str called back by map is a builtin, not an edge
+1589:33 call  ValueError( "headers for a list of dicts is not a dict or...
+    -> <builtin>.ValueError
+1592:29 call  row.get(k)
+    -> <builtin>.dict.get
+    -> collections.OrderedDict.get
+    -> collections.UserDict.get
+    note: row is a dict, an OrderedDict or a UserDict, as at 1567:43 (UserDict: Codex audit round 2, CHANGELOG:21; UserDict.get is inherited from collections.abc.Mapping on 3.10 and 3.11 and its own from 3.12, one name by the class of the receiver)
+1596:24 call  hasattr(tabular_data, "description")
+    -> <builtin>.hasattr
+1597:24 call  hasattr(tabular_data, "fetchone")
+    -> <builtin>.hasattr
+1598:24 call  hasattr(tabular_data, "rowcount")
+    -> <builtin>.hasattr
+1606:20 call  len(rows)
+    -> <builtin>.len
+1607:41 call  dataclasses.is_dataclass(rows[0])
+    -> dataclasses.is_dataclass
+1610:70 call  dataclasses.fields(rows[0])
+    -> dataclasses.fields
+1615:29 call  getattr(row, f)
+    -> <builtin>.getattr
+1616:47 call  _is_separating_line(row)
+    -> tabulate._is_separating_line
+1622:39 call  len(rows)
+    -> <builtin>.len
+1624:27 call  list(map(str, range(len(rows[0]))))
+    -> <builtin>.list
+1624:31 call  map(str, range(len(rows[0])))
+    -> <builtin>.map
+    note: str called back by map is a builtin, not an edge
+1624:42 call  range(len(rows[0]))
+    -> <builtin>.range
+1624:46 call  len(rows[0])
+    -> <builtin>.len
+1627:37 call  len(rows)
+    -> <builtin>.len
+1629:40 call  list(rows[0])
+    -> <builtin>.list
+1633:23 call  list(map(str, headers))
+    -> <builtin>.list
+1633:27 call  map(str, headers)
+    -> <builtin>.map
+    note: str called back by map is a builtin, not an edge
+1638:19 call  list(map(str, headers))
+    -> <builtin>.list
+1638:23 call  map(str, headers)
+    -> <builtin>.map
+    note: str called back by map is a builtin, not an edge
+1640:16 call  list(map(lambda r: r if _is_separating_line(r) else list(...
+    -> <builtin>.list
+1640:20 call  map(lambda r: r if _is_separating_line(r) else list(r), r...
+    -> <builtin>.map
+    -> tabulate._normalize_tabular_data.<lambda1>
+    note: list() iterates the map in this function (line 1640:16) and calls the lambda back
+1643:30 call  type(showindex)
+    -> <builtin>.type
+1645:34 call  _prepend_row_index(rows, index)
+    -> tabulate._prepend_row_index
+1646:20 call  isinstance(showindex, Sized)
+    -> <builtin>.isinstance
+1647:34 call  _prepend_row_index(rows, list(showindex))
+    -> tabulate._prepend_row_index
+1647:45 call  list(showindex)
+    -> <builtin>.list
+1648:20 call  isinstance(showindex, Iterable)
+    -> <builtin>.isinstance
+1649:34 call  _prepend_row_index(rows, showindex)
+    -> tabulate._prepend_row_index
+1650:41 call  _bool(showindex)
+    -> tabulate._bool
+1652:25 call  list(range(len(rows)))
+    -> <builtin>.list
+1652:31 call  range(len(rows))
+    -> <builtin>.range
+1652:35 call  len(rows)
+    -> <builtin>.len
+1653:34 call  _prepend_row_index(rows, index)
+    -> tabulate._prepend_row_index
+1654:44 call  _bool(showindex)
+    -> tabulate._bool
+1659:23 call  len(rows)
+    -> <builtin>.len
+1660:26 call  max(0, len(rows[0]) - len(headers))
+    -> <builtin>.max
+1660:33 call  len(rows[0])
+    -> <builtin>.len
+1660:48 call  len(headers)
+    -> <builtin>.len
+
+[tabulate._normalize_tabular_data.<lambda1>]
+1640:55 call  _is_separating_line(r)
+    -> tabulate._is_separating_line
+1640:68 call  list(r)
+    -> <builtin>.list
+
+[tabulate._wrap_text_to_colwidths]
+1674:11 call  len(list_of_lists)
+    -> <builtin>.len
+1675:23 call  len(list_of_lists[0])
+    -> <builtin>.len
+1678:33 call  _expand_iterable(numparses, num_cols, True)
+    -> tabulate._expand_iterable
+1684:41 call  zip(row, colwidths, numparses)
+    -> <builtin>.zip
+1685:25 call  _isnumber(cell)
+    -> tabulate._isnumber
+1686:31 call  new_row.append(cell)
+    -> <builtin>.list.append
+1690:42 call  _CustomTextWrap( width=width, break_long_words=break_long...
+    -> tabulate._CustomTextWrap.__init__
+1703:28 call  str(cell)
+    -> <builtin>.str
+1704:51 call  _isnumber(cell)
+    -> tabulate._isnumber
+1705:33 call  str(_type(cell, numparse)(cell))
+    -> <builtin>.str
+1705:39 call  _type(cell, numparse)
+    -> tabulate._type
+1705:55 call  _type(cell, numparse)(cell)
+    -> <builtin>.str
+    -> <builtin>.bool
+    -> <builtin>.int
+    -> <builtin>.float
+    -> <builtin>.bytes
+    note: the callee is the type that _type returns (lines 1012-1035): NoneType, str, bool, int, float or bytes. Here cell is not None, not "" and not a number by _isnumber. bool: "True" or "False"; int: a str with thousands separators such as "1,000" (int() raises ValueError in its body); float: such a str with a point, "1,000.5" (float() raises ValueError); bytes: a bytes cell; str: any other cell. NoneType: a cell that is only ANSI codes, or b"" (for bytes, cell == "" is false); NoneType() refuses any argument before its body runs: no edge (judgement 4 of tabulate.md)
+1709:30 call  "\n".join(wrapper.wrap(line))
+    -> <builtin>.str.join
+1709:43 call  wrapper.wrap(line)
+    -> textwrap.TextWrapper.wrap
+    -> tabulate._CustomTextWrap._wrap_chunks
+    note: wrapper is the _CustomTextWrap of line 1690; the inherited TextWrapper.wrap splits the text into chunks and calls self._wrap_chunks, which _CustomTextWrap overrides (it overrides no other method that wrap calls)
+1710:55 call  casted_cell.splitlines()
+    -> <builtin>.str.splitlines
+    note: casted_cell is a str (str() or missingval, documented as a string; a list of missing values has no splitlines and raises AttributeError before any call)
+1711:34 call  line.strip()
+    -> <builtin>.str.strip
+1713:31 call  new_row.append("\n".join(wrapped))
+    -> <builtin>.list.append
+1713:41 call  "\n".join(wrapped)
+    -> <builtin>.str.join
+1715:31 call  new_row.append(cell)
+    -> <builtin>.list.append
+1716:22 call  result.append(new_row)
+    -> <builtin>.list.append
+
+[tabulate._to_str]
+1741:18 call  isinstance(s, bytes)
+    -> <builtin>.isinstance
+1742:24 call  s.decode(encoding=encoding, errors=errors)
+    -> <builtin>.bytes.decode
+    note: isinstance(s, bytes) has been checked (line 1741)
+1743:15 call  str(s)
+    -> <builtin>.str
+
+[tabulate.tabulate]
+2290:66 call  _normalize_tabular_data( tabular_data, headers, showindex...
+    -> tabulate._normalize_tabular_data
+2293:63 call  _remove_separating_lines(list_of_lists)
+    -> tabulate._remove_separating_lines
+2296:16 call  type(maxcolwidths)
+    -> <builtin>.type
+2297:32 call  list(maxcolwidths)
+    -> <builtin>.list
+2298:15 call  len(list_of_lists)
+    -> <builtin>.len
+2299:27 call  len(list_of_lists[0])
+    -> <builtin>.len
+2302:22 call  isinstance(maxcolwidths, int)
+    -> <builtin>.isinstance
+2303:44 call  _expand_iterable(maxcolwidths, num_cols, maxcolwidths)
+    -> tabulate._expand_iterable
+2305:44 call  _expand_iterable(maxcolwidths, num_cols, None)
+    -> tabulate._expand_iterable
+2307:37 call  _expand_numparse(disable_numparse, num_cols)
+    -> tabulate._expand_numparse
+2308:48 call  _wrap_text_to_colwidths( list_of_lists, maxcolwidths, num...
+    -> tabulate._wrap_text_to_colwidths
+2318:23 call  len(list_of_lists[0])
+    -> <builtin>.len
+2318:67 call  len(headers)
+    -> <builtin>.len
+2319:22 call  isinstance(maxheadercolwidths, int)
+    -> <builtin>.isinstance
+2320:50 call  _expand_iterable( maxheadercolwidths, num_cols, maxheader...
+    -> tabulate._expand_iterable
+2324:50 call  _expand_iterable(maxheadercolwidths, num_cols, None)
+    -> tabulate._expand_iterable
+2326:37 call  _expand_numparse(disable_numparse, num_cols)
+    -> tabulate._expand_numparse
+2327:42 call  _wrap_text_to_colwidths( [headers], maxheadercolwidths, n...
+    -> tabulate._wrap_text_to_colwidths
+2339:58 call  _rst_escape_first_column(list_of_lists, headers)
+    -> tabulate._rst_escape_first_column
+2367:27 call  "\t".join( chain( # headers map(_to_str, headers), # rows...
+    -> <builtin>.str.join
+    note: join iterates the chain of the two maps of _to_str (lines 2370, 2373), which call _to_str back; the edge is given at the map calls (same function)
+2368:14 call  chain( # headers map(_to_str, headers), # rows: chain the...
+    -> itertools.chain
+    note: chain is itertools.chain (line 17)
+2370:16 call  map(_to_str, headers)
+    -> <builtin>.map
+    -> tabulate._to_str
+    note: the map object is iterated by "\t".join in this function (line 2367)
+2373:32 call  chain.from_iterable(map(_to_str, row) for row in list_of_...
+    -> itertools.chain.from_iterable
+2373:36 call  map(_to_str, row)
+    -> <builtin>.map
+    -> tabulate._to_str
+    note: the map objects are iterated by "\t".join in this function (line 2367)
+2377:39 call  _ansi_codes.search(plain_text)
+    -> re.Pattern.search
+    note: _ansi_codes is the compiled pattern of line 833
+2381:23 call  isinstance(tablefmt, TableFormat)
+    -> <builtin>.isinstance
+2383:26 call  _is_multiline(plain_text)
+    -> tabulate._is_multiline
+2385:41 call  multiline_formats.get(tablefmt, tablefmt)
+    -> <builtin>.dict.get
+    note: multiline_formats is the dict of line 746
+2389:32 call  _choose_width_fn(has_invisible, enable_widechars, is_mult...
+    -> tabulate._choose_width_fn
+2392:16 call  list(izip_longest(*list_of_lists))
+    -> <builtin>.list
+2392:29 call  izip_longest(*list_of_lists)
+    -> itertools.zip_longest
+    note: izip_longest is itertools.zip_longest (line 17)
+2393:33 call  _expand_numparse(disable_numparse, len(cols))
+    -> tabulate._expand_numparse
+2393:55 call  len(cols)
+    -> <builtin>.len
+2394:29 call  _column_type(col, numparse=np)
+    -> tabulate._column_type
+2394:66 call  zip(cols, numparses)
+    -> <builtin>.zip
+2395:18 call  isinstance(floatfmt, str)
+    -> <builtin>.isinstance
+2396:28 call  len(cols)
+    -> <builtin>.len
+2400:29 call  list(floatfmt)
+    -> <builtin>.list
+2401:15 call  len(float_formats)
+    -> <builtin>.len
+2401:36 call  len(cols)
+    -> <builtin>.len
+2402:33 call  float_formats.extend((len(cols) - len(float_formats)) * [...
+    -> <builtin>.list.extend
+    note: float_formats is the list of line 2400
+2402:38 call  len(cols)
+    -> <builtin>.len
+2402:50 call  len(float_formats)
+    -> <builtin>.len
+2403:18 call  isinstance(intfmt, str)
+    -> <builtin>.isinstance
+2404:26 call  len(cols)
+    -> <builtin>.len
+2408:27 call  list(intfmt)
+    -> <builtin>.list
+2409:15 call  len(int_formats)
+    -> <builtin>.len
+2409:34 call  len(cols)
+    -> <builtin>.len
+2410:31 call  int_formats.extend((len(cols) - len(int_formats)) * [_DEF...
+    -> <builtin>.list.extend
+    note: int_formats is the list of line 2408
+2410:36 call  len(cols)
+    -> <builtin>.len
+2410:48 call  len(int_formats)
+    -> <builtin>.len
+2411:18 call  isinstance(missingval, str)
+    -> <builtin>.isinstance
+2412:27 call  len(cols)
+    -> <builtin>.len
+2414:28 call  list(missingval)
+    -> <builtin>.list
+2415:15 call  len(missing_vals)
+    -> <builtin>.len
+2415:35 call  len(cols)
+    -> <builtin>.len
+2416:32 call  missing_vals.extend((len(cols) - len(missing_vals)) * [_D...
+    -> <builtin>.list.extend
+    note: missing_vals is the list of line 2414
+2416:37 call  len(cols)
+    -> <builtin>.len
+2416:49 call  len(missing_vals)
+    -> <builtin>.len
+2418:17 call  _format(v, ct, fl_fmt, int_fmt, miss_v, has_invisible)
+    -> tabulate._format
+2419:50 call  zip( cols, coltypes, float_formats, int_formats, missing_...
+    -> <builtin>.zip
+2427:40 call  len(cols)
+    -> <builtin>.len
+2432:26 call  isinstance(colalign, Iterable)
+    -> <builtin>.isinstance
+2433:22 call  isinstance(colalign, str)
+    -> <builtin>.isinstance
+2434:26 call  warnings.warn( f"As a string, `colalign` is interpreted a...
+    -> warnings.warn
+2439:36 call  enumerate(colalign)
+    -> <builtin>.enumerate
+2440:29 call  len(aligns)
+    -> <builtin>.len
+2445:18 call  width_fn(h)
+    -> tabulate._visible_width
+    -> wcwidth.wcswidth
+    -> <builtin>.len
+    -> tabulate._choose_width_fn.<lambda1>
+    reject tabulate._align_column_choose_width_fn.<lambda1>: width_fn comes from _choose_width_fn (line 2389), not from _align_column_choose_width_fn
+    note: width_fn is the result of _choose_width_fn (lines 1154-1166): _visible_width (ANSI codes in the table), wcwidth.wcswidth (wide characters enabled), len, or its lambda (multiline cells). The headers are str
+2445:79 call  len(cols)
+    -> <builtin>.len
+2447:30 call  aligns.copy()
+    -> <builtin>.list.copy
+    note: aligns is the list of line 2427 or 2429
+2451:37 call  len(cols)
+    -> <builtin>.len
+2453:22 call  _align_column( c, a, minw, has_invisible, enable_widechar...
+    -> tabulate._align_column
+2462:30 call  zip(cols, aligns_copy, minwidths)
+    -> <builtin>.zip
+2468:38 call  len(headers)
+    -> <builtin>.len
+2471:56 call  len(t_cols)
+    -> <builtin>.len
+2473:56 call  len(headers)
+    -> <builtin>.len
+2476:30 call  isinstance(headersalign, Iterable)
+    -> <builtin>.isinstance
+2477:26 call  isinstance(headersalign, str)
+    -> <builtin>.isinstance
+2478:30 call  warnings.warn( f"As a string, `headersalign` is interpret...
+    -> warnings.warn
+2484:40 call  enumerate(headersalign)
+    -> <builtin>.enumerate
+2486:34 call  len(aligns_headers)
+    -> <builtin>.len
+2488:52 call  len(aligns)
+    -> <builtin>.len
+2493:16 call  max(minw, max(width_fn(cl) for cl in c))
+    -> <builtin>.max
+2493:26 call  max(width_fn(cl) for cl in c)
+    -> <builtin>.max
+    note: max iterates the generator expression, whose calls belong to this function (2493:35)
+2493:35 call  width_fn(cl)
+    -> tabulate._visible_width
+    -> wcwidth.wcswidth
+    -> <builtin>.len
+    -> tabulate._choose_width_fn.<lambda1>
+    reject tabulate._align_column_choose_width_fn.<lambda1>: width_fn comes from _choose_width_fn (line 2389)
+    note: width_fn as at 2445:18; the cells are the aligned str cells
+2494:31 call  zip(minwidths, t_cols)
+    -> <builtin>.zip
+2497:26 call  _align_header(h, a, minw, width_fn(h), is_multiline, widt...
+    -> tabulate._align_header
+2497:47 call  width_fn(h)
+    -> tabulate._visible_width
+    -> wcwidth.wcswidth
+    -> <builtin>.len
+    -> tabulate._choose_width_fn.<lambda1>
+    reject tabulate._align_column_choose_width_fn.<lambda1>: width_fn comes from _choose_width_fn (line 2389)
+    note: width_fn as at 2445:18
+2498:34 call  zip(headers, aligns_headers, minwidths)
+    -> <builtin>.zip
+2500:20 call  list(zip(*cols))
+    -> <builtin>.list
+2500:24 call  zip(*cols)
+    -> <builtin>.zip
+2502:25 call  max(width_fn(cl) for cl in c)
+    -> <builtin>.max
+    note: max iterates the generator expression, whose calls belong to this function (2502:34)
+2502:34 call  width_fn(cl)
+    -> tabulate._visible_width
+    -> wcwidth.wcswidth
+    -> <builtin>.len
+    -> tabulate._choose_width_fn.<lambda1>
+    reject tabulate._align_column_choose_width_fn.<lambda1>: width_fn comes from _choose_width_fn (line 2389)
+    note: width_fn as at 2445:18
+2503:20 call  list(zip(*cols))
+    -> <builtin>.list
+2503:24 call  zip(*cols)
+    -> <builtin>.zip
+2505:22 call  isinstance(tablefmt, TableFormat)
+    -> <builtin>.isinstance
+2506:38 call  _table_formats.get(tablefmt, _table_formats["simple"])
+    -> <builtin>.dict.get
+    note: _table_formats is the dict of line 362
+2508:40 call  isinstance(rowalign, str)
+    -> <builtin>.isinstance
+2509:33 call  _expand_iterable(rowalign, len(rows), ra_default)
+    -> tabulate._expand_iterable
+2509:47 call  len(rows)
+    -> <builtin>.len
+2510:31 call  _reinsert_separating_lines(rows, separating_lines)
+    -> tabulate._reinsert_separating_lines
+2512:25 call  _format_table( tablefmt, headers, aligns_headers, rows, m...
+    -> tabulate._format_table
+
+[tabulate._expand_numparse]
+2532:18 call  isinstance(disable_numparse, Iterable)
+    -> <builtin>.isinstance
+
+[tabulate._expand_iterable]
+2549:18 call  isinstance(original, Iterable)
+    -> <builtin>.isinstance
+2549:57 call  isinstance(original, str)
+    -> <builtin>.isinstance
+2550:57 call  len(original)
+    -> <builtin>.len
+
+[tabulate._build_simple_row]
+2569:29 call  sep.join(padded_cells)
+    -> <builtin>.str.join
+    note: rowfmt is a DataRow of str, of a package format, of simple_separated_format or of a client TableFormat (documented as tuples of str in the comment of lines 94-98), or the tuple (begin, sep, end) of a Line (line 2632); sep is a str
+2569:57 call  (begin + sep.join(padded_cells) + end).rstrip()
+    -> <builtin>.str.rstrip
+
+[tabulate._build_row]
+2576:16 call  callable(rowfmt)
+    -> <builtin>.callable
+2577:22 call  rowfmt(padded_cells, colwidths, colaligns)
+    -> functools.partial.__call__
+    -> tabulate._mediawiki_row_with_attrs
+    -> tabulate._moin_row_with_attrs
+    -> tabulate._html_row_with_attrs
+    -> tabulate._latex_row
+    -> tabulate._textile_row_with_attrs
+    -> tabulate._asciidoc_row
+    note: rowfmt is the headerrow or datarow field of the TableFormat that tabulate() passes to _format_table: a format of _table_formats (lines 362-737), whose callable rows are the partial objects of _mediawiki_row_with_attrs, _moin_row_with_attrs, _html_row_with_attrs, _latex_row and _asciidoc_row (functools.partial.__call__ calls them back) and the functions _latex_row and _textile_row_with_attrs; or a client TableFormat (public), whose callables are client callbacks. simple_separated_format makes DataRows, which are not callable
+    exclude tabulate._pipe_line_with_colons, tabulate._grid_line_with_colons, tabulate._html_begin_table_without_header, tabulate._latex_line_begin_tabular: these are line fields of the formats (lineabove, linebelowheader), which _build_line calls, never row fields
+2579:33 call  _build_simple_row(padded_cells, rowfmt)
+    -> tabulate._build_simple_row
+
+[tabulate._append_basic_row]
+2584:17 call  lines.append(_build_row(padded_cells, colwidths, colalign...
+    -> <builtin>.list.append
+2584:28 call  _build_row(padded_cells, colwidths, colaligns, rowfmt)
+    -> tabulate._build_row
+
+[tabulate._align_cell_veritically]
+2589:34 call  len(text_lines)
+    -> <builtin>.len
+
+[tabulate._append_multiline_row]
+2605:32 call  c.splitlines()
+    -> <builtin>.str.splitlines
+    note: the padded cells are str (_format_table passes the aligned rows and headers)
+2606:17 call  max(map(len, cells_lines))
+    -> <builtin>.max
+2606:21 call  map(len, cells_lines)
+    -> <builtin>.map
+    note: len called back by map is a builtin, not an edge
+2613:32 call  _align_cell_veritically(cl, nlines, w, rowalign)
+    -> tabulate._align_cell_veritically
+2614:25 call  zip(cells_lines, colwidths)
+    -> <builtin>.zip
+2616:64 call  range(nlines)
+    -> <builtin>.range
+2618:29 call  _pad_row(ln, pad)
+    -> tabulate._pad_row
+2619:26 call  _append_basic_row(lines, padded_ln, colwidths, colaligns,...
+    -> tabulate._append_basic_row
+
+[tabulate._build_line]
+2627:16 call  callable(linefmt)
+    -> <builtin>.callable
+2628:23 call  linefmt(colwidths, colaligns)
+    -> functools.partial.__call__
+    -> tabulate._html_begin_table_without_header
+    -> tabulate._latex_line_begin_tabular
+    -> tabulate._asciidoc_row
+    -> tabulate._pipe_line_with_colons
+    -> tabulate._grid_line_with_colons
+    note: linefmt is a line field of the TableFormat (lineabove, linebelowheader, linebetweenrows, linebelow, or one of them as the separating line, line 2705): in _table_formats the callable ones are _pipe_line_with_colons (pipe), _grid_line_with_colons (colon_grid), _html_begin_table_without_header (html, unsafehtml), _latex_line_begin_tabular (latex, latex_raw) and the partial objects of _latex_line_begin_tabular (latex_booktabs, latex_longtable) and _asciidoc_row (asciidoc), which functools.partial.__call__ calls back; the empty str linebelowheader of html is false and returns at line 2626. A client TableFormat's callables are client callbacks
+    exclude tabulate._mediawiki_row_with_attrs, tabulate._moin_row_with_attrs, tabulate._html_row_with_attrs, tabulate._latex_row, tabulate._textile_row_with_attrs: these are row fields (headerrow, datarow), which _build_row calls, never line fields
+2632:33 call  _build_simple_row(cells, (begin, sep, end))
+    -> tabulate._build_simple_row
+
+[tabulate._append_line]
+2636:17 call  lines.append(_build_line(colwidths, colaligns, linefmt))
+    -> <builtin>.list.append
+2636:29 call  _build_line(colwidths, colaligns, linefmt)
+    -> tabulate._build_line
+
+[tabulate._format_table]
+2667:29 call  partial(_append_multiline_row, pad=pad)
+    -> functools.partial
+    reject tabulate._append_multiline_row: partial() only stores the function; append_row(...) calls the partial object later (2678:19)
+2672:29 call  pad_row(headers, pad)
+    -> tabulate._pad_row
+    -> tabulate._format_table.<lambda1>
+    note: pad_row is the lambda of line 2665 (multiline) or _pad_row (line 2669)
+2675:21 call  _append_line(lines, padded_widths, colaligns, fmt.lineabove)
+    -> tabulate._append_line
+2678:19 call  append_row(lines, padded_headers, padded_widths, headersa...
+    -> tabulate._append_basic_row
+    -> functools.partial.__call__
+    -> tabulate._append_multiline_row
+    note: append_row is _append_basic_row (line 2670) or the partial object of _append_multiline_row (line 2667), whose __call__ calls it back
+2680:25 call  _append_line(lines, padded_widths, colaligns, fmt.linebel...
+    -> tabulate._append_line
+2684:31 call  zip(rows[:-1], rowaligns)
+    -> <builtin>.zip
+2686:27 call  append_row( lines, pad_row(row, pad), padded_widths, cola...
+    -> tabulate._append_basic_row
+    -> functools.partial.__call__
+    -> tabulate._append_multiline_row
+    note: append_row as at 2678:19; both accept the keyword rowalign
+2688:28 call  pad_row(row, pad)
+    -> tabulate._pad_row
+    -> tabulate._format_table.<lambda1>
+    note: pad_row as at 2672:29
+2694:25 call  _append_line(lines, padded_widths, colaligns, fmt.linebet...
+    -> tabulate._append_line
+2696:19 call  append_row( lines, pad_row(rows[-1], pad), padded_widths,...
+    -> tabulate._append_basic_row
+    -> functools.partial.__call__
+    -> tabulate._append_multiline_row
+    note: append_row as at 2678:19
+2698:20 call  pad_row(rows[-1], pad)
+    -> tabulate._pad_row
+    -> tabulate._format_table.<lambda1>
+    note: pad_row as at 2672:29
+2710:20 call  Line("", "", "", "")
+    note: Line is the collections.namedtuple class of line 70; a call of a namedtuple class adds no edge (its __new__ is generated code and its __init__ is object.__init__)
+2715:35 call  _is_separating_line(row)
+    -> tabulate._is_separating_line
+2716:29 call  _append_line(lines, padded_widths, colaligns, separating_...
+    -> tabulate._append_line
+2718:27 call  append_row( lines, pad_row(row, pad), padded_widths, cola...
+    -> tabulate._append_basic_row
+    -> functools.partial.__call__
+    -> tabulate._append_multiline_row
+    note: append_row as at 2678:19
+2719:35 call  pad_row(row, pad)
+    -> tabulate._pad_row
+    -> tabulate._format_table.<lambda1>
+    note: pad_row as at 2672:29
+2723:21 call  _append_line(lines, padded_widths, colaligns, fmt.linebelow)
+    -> tabulate._append_line
+2726:27 call  "\n".join(lines)
+    -> <builtin>.str.join
+2728:34 call  JupyterHTMLStr(output)
+    note: no edge: JupyterHTMLStr (line 2640) subclasses str and defines neither __new__ nor __init__; str defines only __new__, so the first __init__ of the MRO is object.__init__, which gives no edge (micro-benchmark rule; dagster-pipes precedent; audit E1)
+
+[tabulate._CustomTextWrap.__init__]
+2746:38 call  textwrap.TextWrapper.__init__(self, *args, **kwargs)
+    -> textwrap.TextWrapper.__init__
+    reject tabulate._CustomTextWrap.__init__: the call names the base class's __init__ explicitly
+
+[tabulate._CustomTextWrap._len]
+2752:31 call  _strip_ansi(item)
+    -> tabulate._strip_ansi
+2754:36 call  wcwidth.wcswidth(stripped)
+    -> wcwidth.wcswidth
+    note: the branch runs when the optional import of wcwidth succeeded (line 27)
+2756:23 call  len(stripped)
+    -> <builtin>.len
+
+[tabulate._CustomTextWrap._update_lines]
+2764:56 call  _ansi_codes.finditer(new_line)
+    -> re.Pattern.finditer
+    note: _ansi_codes is the compiled pattern of line 833
+2766:34 call  code.span()
+    -> re.Match.span
+    note: code is a re.Match from finditer
+2766:51 call  code.span()
+    -> re.Match.span
+2770:27 call  "".join(self._active_codes)
+    -> <builtin>.str.join
+2774:42 call  self._active_codes.append(code)
+    -> <builtin>.list.append
+    note: self._active_codes is the list of line 2744 or 2776
+2780:15 call  len(self._active_codes)
+    -> <builtin>.len
+2783:21 call  lines.append(new_line)
+    -> <builtin>.list.append
+    note: lines is the list of _wrap_chunks (line 2852)
+
+[tabulate._CustomTextWrap._handle_long_word]
+2807:41 call  _strip_ansi(chunk)
+    -> tabulate._strip_ansi
+2809:25 call  len(stripped_chunk)
+    -> <builtin>.len
+2809:55 call  self._len(stripped_chunk[:i])
+    -> tabulate._CustomTextWrap._len
+2815:34 call  _ansi_codes.search(chunk)
+    -> re.Pattern.search
+2816:58 call  _ansi_codes.findall(chunk)
+    -> re.Pattern.findall
+2817:37 call  len(group)
+    -> <builtin>.len
+2823:51 call  _ansi_codes.search(chunk[last_group:])
+    -> re.Pattern.search
+2824:48 call  found.end()
+    -> re.Match.end
+    note: found is the match of the group that line 2820 found in chunk
+2825:28 call  cur_line.append(chunk[: i + total_escape_len - 1])
+    -> <builtin>.list.append
+    note: cur_line is the list of _wrap_chunks (line 2871)
+2832:28 call  cur_line.append(reversed_chunks.pop())
+    -> <builtin>.list.append
+2832:48 call  reversed_chunks.pop()
+    -> <builtin>.list.pop
+    note: reversed_chunks is the list of chunks that TextWrapper._split_chunks returns
+
+[tabulate._CustomTextWrap._wrap_chunks]
+2854:29 call  ValueError("invalid width %r (must be > 0)" % self.width)
+    -> <builtin>.ValueError
+    note: self.width is a column width of maxcolwidths or maxheadercolwidths, which the client chooses (0 is an int)
+2860:25 call  self._len(indent)
+    note: no edge: every _CustomTextWrap is made at line 1690 without max_lines, so self.max_lines is None (lines 2745-2746) and this branch never runs (README B1: a private class whose instances the package makes in one state)
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2860:45 call  self._len(self.placeholder.lstrip())
+    note: no edge: self.max_lines is None for every instance (see 2860:25)
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2860:69 call  self.placeholder.lstrip()
+    note: no edge: self.max_lines is None for every instance (see 2860:25)
+2861:33 call  ValueError("placeholder too large for max width")
+    note: no edge: self.max_lines is None for every instance (see 2860:25)
+2865:23 call  chunks.reverse()
+    -> <builtin>.list.reverse
+    note: chunks is the list that TextWrapper._split_chunks returns
+2881:43 call  self._len(indent)
+    -> tabulate._CustomTextWrap._len
+2885:57 call  chunks[-1].strip()
+    -> <builtin>.str.strip
+2889:38 call  self._len(chunks[-1])
+    -> tabulate._CustomTextWrap._len
+2893:36 call  cur_line.append(chunks.pop())
+    -> <builtin>.list.append
+2893:47 call  chunks.pop()
+    -> <builtin>.list.pop
+2902:36 call  self._len(chunks[-1])
+    -> tabulate._CustomTextWrap._len
+2903:39 call  self._handle_long_word(chunks, cur_line, cur_len, width)
+    -> tabulate._CustomTextWrap._handle_long_word
+2904:30 call  sum(map(self._len, cur_line))
+    -> <builtin>.sum
+2904:34 call  map(self._len, cur_line)
+    -> <builtin>.map
+    -> tabulate._CustomTextWrap._len
+    note: sum() iterates the map in this function and calls _len back
+2907:72 call  cur_line[-1].strip()
+    -> <builtin>.str.strip
+2908:37 call  self._len(cur_line[-1])
+    -> tabulate._CustomTextWrap._len
+2914:27 call  len(lines)
+    note: no edge: self.max_lines is None for every instance (see 2860:25), so the or of line 2913 is true before this operand
+2918:32 call  len(chunks)
+    note: no edge: as 2914:27
+2919:48 call  chunks[0].strip()
+    note: no edge: as 2914:27
+2925:39 call  self._update_lines(lines, indent + "".join(cur_line))
+    -> tabulate._CustomTextWrap._update_lines
+2925:63 call  "".join(cur_line)
+    -> <builtin>.str.join
+2929:47 call  cur_line[-1].strip()
+    note: no edge: the else branch of line 2926 runs only when max_lines is not None, and it is None for every instance (see 2860:25)
+2930:52 call  self._len(self.placeholder)
+    note: no edge: as 2929:47
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2932:44 call  cur_line.append(self.placeholder)
+    note: no edge: as 2929:47
+2933:47 call  self._update_lines(lines, indent + "".join(cur_line))
+    note: no edge: as 2929:47
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2933:71 call  "".join(cur_line)
+    note: no edge: as 2929:47
+2935:45 call  self._len(cur_line[-1])
+    note: no edge: as 2929:47
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2939:57 call  lines[-1].rstrip()
+    note: no edge: as 2929:47
+2941:42 call  self._len(prev_line)
+    note: no edge: as 2929:47
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2941:65 call  self._len(self.placeholder)
+    note: no edge: as 2929:47
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2946:43 call  self._update_lines(lines, indent + self.placeholder.lstri...
+    note: no edge: as 2929:47
+    reject *: this code never runs, because max_lines is None for every _CustomTextWrap
+2946:83 call  self.placeholder.lstrip()
+    note: no edge: as 2929:47
+
+[tabulate._main]
+2978:28 call  textwrap.dedent(_main.__doc__)
+    -> textwrap.dedent
+2980:35 call  getopt.getopt( sys.argv[1:], "h1o:s:F:I:f:", [ "help", "h...
+    -> getopt.getopt
+2995:14 call  print(e)
+    -> <builtin>.print
+2996:14 call  print(usage)
+    -> <builtin>.print
+2997:17 call  sys.exit(2)
+    -> sys.exit
+3015:35 call  value.split()
+    -> <builtin>.str.split
+    note: value is the str argument of --colalign from getopt
+3018:22 call  print("%s is not a supported table format" % value)
+    -> <builtin>.print
+3019:22 call  print(usage)
+    -> <builtin>.print
+3020:25 call  sys.exit(3)
+    -> sys.exit
+3025:18 call  print(usage)
+    -> <builtin>.print
+3026:21 call  sys.exit(0)
+    -> sys.exit
+3028:48 call  open(outfile, "w")
+    -> <builtin>.open
+3032:24 call  _is_file(f)
+    -> tabulate._is_file
+3033:29 call  _pprint_file( f, headers=headers, tablefmt=tablefmt, sep=...
+    -> tabulate._pprint_file
+3044:26 call  open(f)
+    -> <builtin>.open
+3045:33 call  _pprint_file( fobj, headers=headers, tablefmt=tablefmt, s...
+    -> tabulate._pprint_file
+
+[tabulate._pprint_file]
+3058:29 call  fobject.readlines()
+    -> io.TextIOWrapper.readlines
+    note: _pprint_file is private; _main passes sys.stdin (a text stream, the default) or the text file that open(f) returns (line 3044); the arguments of the command line are str, so _is_file is true only for sys.stdin
+3059:22 call  re.split(sep, r.rstrip())
+    -> re.split
+3059:36 call  r.rstrip()
+    -> <builtin>.str.rstrip
+3059:64 call  r.strip()
+    -> <builtin>.str.strip
+3060:10 call  print( tabulate( table, headers, tablefmt, floatfmt=float...
+    -> <builtin>.print
+    note: print writes to file, the stdout or the file that _main opened; print calls its write (library code)
+3061:17 call  tabulate( table, headers, tablefmt, floatfmt=floatfmt, in...
+    -> tabulate.tabulate

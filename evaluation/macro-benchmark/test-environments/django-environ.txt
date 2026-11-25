@@ -1,0 +1,42 @@
+# The test environment of django-environ 0.14.0 (batch 6): the
+# full closure on CPython 3.14 for Linux aarch64, each file by version and
+# SHA-256. django-environ itself is not installed: the trace uses the checkout
+# projects/django-environ.
+#   pip install --require-hashes --only-binary :all: --no-deps -r django-environ.txt
+#
+# "scan" names the hashes that the security scan of the round lists (its
+# section 3; the scan took them from PyPI's JSON and read no wheel); "PyPI"
+# names the hashes taken from PyPI's JSON for that version by the builder of
+# this file; "scan and PyPI" names a native distribution whose manylinux
+# hash the scan lists and whose musllinux hash comes from PyPI's JSON. No
+# wheel was downloaded or read for this batch. Every hash below
+# was checked against PyPI's JSON for its version on 2026-11-22, and the
+# closure was computed from the requires_dist of each pinned release, with
+# the markers evaluated for CPython 3.14 on Linux aarch64 and no extra (one
+# extra where a comment says so); a wheel's own METADATA could ask for more
+# (UNVERIFIED until pip installs the list with --no-deps and trace.sh compares
+# the distributions).
+#
+# The tests import nothing but the package and the standard library: the
+# environment is pytest's stack. Not installed: Django (the lead's
+# decision; the package declares no requirement on it and has its own
+# fallback), coverage and setuptools (upstream's extra testing; no test
+# imports setuptools); never simplejson, django-redis or pymemcache (the
+# package looks for them at import and changes its constants).
+
+# scan. 9.2.0, as for batches 3 to 5 (the lead's decision: one
+# pytest stack for the benchmark, not pytest by release date).
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# scan (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# scan (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# scan (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# scan (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9

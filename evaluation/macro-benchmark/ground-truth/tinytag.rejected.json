@@ -1,0 +1,23 @@
+{
+  "tinytag.tinytag.TinyTag._get_parser_for_file_handle": {
+    "_io.BytesIO.read": "filehandle is the file_obj of TinyTag.get: a client object (annotated BinaryIO, an abstract type; B4, B5) or the io.BufferedReader that get opens itself. The test passes its own BytesIO as file_obj (test_all.py:3403, test_file_obj_compatibility); no package BytesIO reaches this function"
+  },
+  "tinytag.tinytag.TinyTag._load": {
+    "<builtin>.ValueError": "a direct test invocation of the private _load through a client subclass of TinyTag (IncompleteTag.load, test_all.py:3533-3548) with file_handle=None. Every package caller of _load sets _filehandler to a file object first (tinytag.md, judgement J4)",
+    "tinytag.tinytag.TinyTag._parse": "a direct test invocation of the private _load through a client subclass of TinyTag that does not override _parse (IncompleteTag, test_all.py:3533-3548). The package calls _load only on instances of the eight parser classes, which all override _parse (B1, C)"
+  },
+  "tinytag.tinytag.TinyTag.get": {
+    "_io.BytesIO.seek": "file_obj is a client object (annotated BinaryIO, an abstract type; B4, B5): the test passes its own BytesIO (test_all.py:3403); the package's own file here is the io.BufferedReader of open(filename, 'rb')",
+    "_io.BytesIO.tell": "file_obj is a client object (annotated BinaryIO, an abstract type; B4, B5): the test passes its own BytesIO (test_all.py:3403); the package's own file here is the io.BufferedReader of open(filename, 'rb')"
+  },
+  "tinytag.tinytag._ID3._parse": {
+    "_io.BytesIO.read": "fh.read(4) at tinytag.py:1084 runs only for an _ID3 without _only_id3, whose fh is the file of TinyTag.get; the package's BytesIO reaches _ID3._parse only from _Wave and _Aiff, with _only_id3 = True, and returns at line 1083. The BytesIO here is the test's own file_obj (test_all.py:3403; B5)"
+  },
+  "tinytag.tinytag._ID3._parse_id3v1": {
+    "_io.BytesIO.read": "_parse_id3v1 is called only at tinytag.py:1103, after the _only_id3 return, so its fh is the file of TinyTag.get; the BytesIO here is the test's own file_obj (test_all.py:3403; B5)"
+  },
+  "tinytag.tinytag._MPEG._parse": {
+    "_io.BytesIO.read": "an _MPEG gets its file from TinyTag.get or from _ID3._parse after the _only_id3 return, so its fh is the file of TinyTag.get; the BytesIO here is the test's own file_obj (test_all.py:3403; B5)",
+    "_io.BytesIO.tell": "an _MPEG gets its file from TinyTag.get or from _ID3._parse after the _only_id3 return, so its fh is the file of TinyTag.get; the BytesIO here is the test's own file_obj (test_all.py:3403; B5)"
+  }
+}

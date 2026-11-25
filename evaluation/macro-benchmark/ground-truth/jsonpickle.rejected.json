@@ -1,0 +1,48 @@
+{
+  "jsonpickle.ext.pandas.PandasTimestampHandler.flatten": {
+    "_cython_3_3_0.cython_function_or_method.__call__": "a naming artefact: the tracer names the Cython method pandas.Timestamp.isoformat (ext/pandas.py:377) by its function type; the graph names it pandas.Timestamp.isoformat"
+  },
+  "jsonpickle.pickler.Pickler._flatten_obj_instance": {
+    "<builtin>.BaseException.__reduce__": "the tests encode their own exceptions; encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "<builtin>.str.__getnewargs__": "the tests encode their own str subclasses (pickler.py:688); encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "<builtin>.tuple.__getnewargs__": "the tests encode their own tuple subclasses and struct sequences (pickler.py:688); encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "_cython_3_3_0.cython_function_or_method.__call__": "a naming artefact: the tracer names a Cython method by its function type (README, itables); here the __reduce__ of a pandas Timedelta that PandasIndexHandler.flatten forwards from a TimedeltaIndex (tests/pandas_test.py:144; ext/pandas.py:348). The graph names it pandas.Timedelta.__reduce__ (pickler.py:610; Codex audit round 1, Unsure 2)",
+    "builtins.str_ascii_iterator.__reduce__": "the tests encode their own str iterators; encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "collections.Counter.__reduce__": "the tests encode their own Counter objects; encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "collections.OrderedDict.__reduce__": "the tests encode their own OrderedDict objects; encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "collections.deque.__reduce__": "the tests encode their own deque objects; encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "collections.namedtuple.__getnewargs__": "the tests encode their own namedtuple instances (pickler.py:688); encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "datetime.tzinfo.__reduce__": "the tests encode their own time zones (the tzinfo of their datetime values, flattened by DatetimeHandler.flatten); encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "decimal.Decimal.__reduce__": "the tests encode their own Decimal objects; encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "enum.Enum.__reduce_ex__": "the tests encode their own enum members; encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)",
+    "zoneinfo.ZoneInfo.__reduce__": "the tests encode their own ZoneInfo time zones (the tzinfo of their datetime values); encode accepts any object, so the object and its pickle protocol methods are client values (B5, rule A)"
+  },
+  "jsonpickle.unpickler.Unpickler._restore_object_instance": {
+    "<builtin>.dict.__new__": "the class that a py/object entry names, here the tests' own dict subclasses (OrderedDict, defaultdict, Counter and their own); a client class, whose __new__ runs at unpickler.py:854 or 857 (rule A)",
+    "<builtin>.list.__new__": "the class that a py/object entry names, here the tests' own list subclasses; a client class, whose __new__ runs at unpickler.py:854 or 857 (rule A)",
+    "<builtin>.set.__new__": "the class that a py/object entry names, here the tests' own set subclasses; a client class, whose __new__ runs at unpickler.py:854 or 857 (rule A)",
+    "<builtin>.str.__new__": "the class that a py/object entry names, here the tests' own str subclasses; a client class, whose __new__ runs at unpickler.py:854 or 857 (rule A)",
+    "os.stat_result.__new__": "the class that a py/object entry names, here the tests' own os.stat_result values; a client class, whose __new__ runs at unpickler.py:854 or 857 (rule A)",
+    "time.struct_time.__new__": "the class that a py/object entry names, here the tests' own time.struct_time values; a client class, whose __new__ runs at unpickler.py:854 or 857 (rule A)"
+  },
+  "jsonpickle.unpickler.Unpickler._restore_object_instance_variables": {
+    "<builtin>.list.append": "instance is the tests' own list subclass (py/seq, unpickler.py:819); its append is a method of a client object (B5, rule A)",
+    "<builtin>.set.add": "instance is the tests' own set subclass (py/seq, unpickler.py:822); its add is a method of a client object (B5, rule A)"
+  },
+  "jsonpickle.unpickler.Unpickler._restore_reduce": {
+    "<builtin>.BaseException.__setstate__": "stage1 is an exception that the tests encode; its __setstate__ (unpickler.py:587) is a method of a client object (B5, rule A)",
+    "<builtin>.iter": "the reduce callable that the tests' own str iterators returns from __reduce__, restored from the py/reduce entry and called at unpickler.py:583: a client callback (rule A)",
+    "_cython_3_3_0.cython_function_or_method.__call__": "a naming artefact: the tracer names a Cython function by its function type (README, itables); here the reconstructor of a forwarded pandas Timedelta. The graph names it pandas._libs.tslibs.timedeltas._timedelta_unpickle (unpickler.py:583; Codex audit round 1, Unsure 2)",
+    "collections.Counter": "the reduce callable that the tests' own Counter objects returns from __reduce__, restored from the py/reduce entry and called at unpickler.py:583: a client callback (rule A)",
+    "collections.OrderedDict": "the reduce callable that the tests' own OrderedDict objects returns from __reduce__, restored from the py/reduce entry and called at unpickler.py:583: a client callback (rule A)",
+    "collections.OrderedDict.__setitem__": "stage1 is the tests' own OrderedDict; its __setitem__ (unpickler.py:620) is a method of a client object (B5, rule A)",
+    "collections.deque": "the reduce callable that the tests' own deque objects returns from __reduce__, restored from the py/reduce entry and called at unpickler.py:583: a client callback (rule A)",
+    "collections.deque.extend": "stage1 is the tests' own deque; its extend (unpickler.py:613) is a method of a client object (B5, rule A)",
+    "datetime.timezone": "the reduce callable that the tests' own time zones returns from __reduce__, restored from the py/reduce entry and called at unpickler.py:583: a client callback (rule A)",
+    "decimal.Decimal": "the reduce callable that the tests' own Decimal objects returns from __reduce__, restored from the py/reduce entry and called at unpickler.py:583: a client callback (rule A)",
+    "zoneinfo.ZoneInfo._unpickle": "the reduce callable that the tests' own ZoneInfo time zones returns from __reduce__, restored from the py/reduce entry and called at unpickler.py:583: a client callback (rule A)"
+  },
+  "jsonpickle.util.items": {
+    "collections.OrderedDict.items": "obj is the tests' own OrderedDict, a dict subclass that _flatten_dict_obj gets at pickler.py:713; its items is a method of a client object (B5, rule A)"
+  }
+}

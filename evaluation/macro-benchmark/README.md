@@ -1,8 +1,8 @@
 # Macro-benchmark
 
-Fifty real Python packages at pinned releases (`projects.toml`, `batch`):
-thirty in six batches of five, and batches 7 and 8, ten packages each. Each
-package gets a
+Sixty real Python packages at pinned releases (`projects.toml`, `batch`):
+thirty in six batches of five, and batches 6, 7 and 8, ten packages each.
+Each package gets a
 hand-written call graph of its source, the ground truth. It is written as a
 call-site ledger: one entry per place in the source that can call a
 function, with the callees of that site. A naive list of candidate callees
@@ -57,7 +57,7 @@ do not trigger another round.
 
 ```
 evaluation/macro-benchmark/
-├── projects.toml                  # The 50 projects: pin, licence, analysed source, tests, batch
+├── projects.toml                  # The 60 projects: pin, licence, analysed source, tests, batch
 ├── projects/                      # Empty: a copy of the sources, for reading only, goes here (not in git)
 ├── test-environments/<name>.txt        # The test environment, pinned by hash (to record the trace again)
 ├── test-environments/<name>.installed.txt  # What the container of the trace had installed
@@ -70,7 +70,7 @@ evaluation/macro-benchmark/
 ├── ground-truth/<name>.audit.md   # The blind audit
 ├── plugins/                       # pytest plugins that five traces need
 ├── wheels/                        # Wheels built from pinned sdists that PyPI has no wheel of, with their build records
-├── selection/                     # How batches 3 to 5, 7 and 8 were drawn: list, exclusions, frame, round logs; batch 8's rulings and audit samples
+├── selection/                     # How batches 3 to 8 were drawn: list, exclusions, frame, round logs; batch 8's rulings and audit samples
 ├── projects.py                    # Reads projects.toml; where the sources of the projects are
 ├── sites.py                       # Finds the call sites and their candidates (ast only)
 ├── ledger.py                      # Reads and checks a ledger, makes its graph
@@ -111,7 +111,7 @@ name is one path component of letters, digits, `_`, `-` and `.`, and names
 
 | Key | Content |
 |---|---|
-| `batch` | 1 to 5, 7 and 8, the batches in the order in which they were built, or `icse-2021`, the projects of PyCG's ICSE 2021 evaluation |
+| `batch` | 1 to 8, the batches in the order in which they were built, or `icse-2021`, the projects of PyCG's ICSE 2021 evaluation |
 | `repository`, `tag`, `commit` | A git source: the repository's URL, the release tag if the commit is one, and the pinned commit |
 | `sdist`, `sdist_url`, `sdist_sha256` | In place of a git source, a source archive from PyPI: its file name, which names the release, an https URL that ends in that name, and its SHA-256 (see "A project held as an sdist") |
 | `root` | The directory on `sys.path`; module names are relative to it |
@@ -237,10 +237,10 @@ can match two names in the graph (bottle, batch 4:
 
 ## Projects
 
-The 50 projects are in one `projects.toml`. Each has a `batch`: 1 to 5, 7
-and 8, in the order in which the batches were built, or `icse-2021` for the
-five projects of PyCG's ICSE 2021 evaluation. A command takes project
-names, so a batch is its names (five; ten in batches 7 and 8).
+The 60 projects are in one `projects.toml`. Each has a `batch`: 1 to 8, in
+the order in which the batches were built, or `icse-2021` for the five
+projects of PyCG's ICSE 2021 evaluation. A command takes project names, so
+a batch is its names (five; ten in batches 6, 7 and 8).
 
 ### How the benchmark grew
 
@@ -256,15 +256,25 @@ together on the newest batch, gains less than one point of precision and
 of recall. Batch 5 met it.
 
 Three batches of ten followed, each measured once in the same way. Batch 6
-(rounds 4 and 5) is not in this repository yet; its rulings are, because
-batches 7 and 8 follow them ("Rulings for batch 6"). Batch 7 was measured
-once, on 2026-11-23, by the frozen engine `2372b60`, before its false
-positives and false negatives were read; batch 8 was measured once, on
-2026-11-24, by the same engine, in the same way.
+was measured once, on 2026-11-22, by the frozen engine `c5c6a89`, before
+its false positives and false negatives were read; then it became a batch
+of development, as batches 2 to 5 did: its false positives and false
+negatives were read and labelled, and the engine was developed on it.
+Batch 7 was measured once, on 2026-11-23, by the next frozen engine
+(`2372b60`), and batch 8 once, on 2026-11-24, by the same engine, in the
+same way.
 
 Batches 1 and 2 were chosen before `draw.py` existed. Batches 3, 4 and 5
-were drawn by `draw.py` in rounds 1, 2 and 3, and batch 7 in rounds 6 and
-7 (`selection/round-N.json`; see "Choosing a new batch"). Round 7 skipped
+were drawn by `draw.py` in rounds 1, 2 and 3, batch 6 in rounds 4 and 5,
+and batch 7 in rounds 6 and 7 (`selection/round-N.json`; see "Choosing a
+new batch"). Round 5 skipped the five of round 4, which its log lists under
+`used`. Each round ran with one drop (`--drop`, recorded in its log under
+`dropped`), and the draw took the next project of the order in the
+stratum: round 4 dropped `sh` (the maintainer's veto, 2026-11-22; `tinytag`
+instead), round 5 dropped `attrs` (attrs 26.1.0 was analysed before the
+draw: the same release and wheel are in the corpus of the scalability runs,
+with committed runs of PyCG and of other tools; `prometheus-client`
+instead). Round 7 skipped
 the five of round 6, which its log lists under `used`, and dropped `dill`,
 because a tool run touched it (dill 0.3.9 is installed in the image of the
 call-graph tool HeaderGen); the draw took `mss`, the next project of the
@@ -1212,6 +1222,170 @@ pins, and nothing run. The whitenoise writer ran a few read-only commands
 with its working directory inside the checkout; nothing was run or written
 there, and the checkout is clean.
 
+### Batch 6
+
+The ten packages that `draw.py` drew in rounds 4 and 5
+(`selection/round-4.json`, `round-5.json`, one per size stratum and
+round; see "How the benchmark grew"). All ten are git sources at the
+draw's commits.
+
+| Project | Release | Licence | Source | Analysed source | Code lines (draw) |
+|---|---|---|---|---|---|
+| path | v17.1.1 | MIT | git | `path/` | 1126 |
+| django-constance | 4.5.0 | BSD-3-Clause | git | `constance/` | 1239 |
+| tinytag | 2.3.2 | MIT | git | `tinytag/` without `tinytag/tests/` | 2243 |
+| jsonpickle | v4.1.4 | BSD-3-Clause | git | `jsonpickle/` | 2557 |
+| json-repair | v0.64.2 | MIT | git | `src/json_repair/` (root `.`) | 3416 |
+| django-environ | v0.14.0 | MIT | git | `environ/` | 894 |
+| validators | 0.36.0 | MIT | git | `validators/` (root `src`) | 1370 |
+| tabulate | v0.10.0 | MIT | git | `tabulate/` | 1789 |
+| more-itertools | v11.2.1 | MIT | git | `more_itertools/` | 2703 |
+| prometheus-client | v0.26.0 | Apache-2.0 AND BSD-2-Clause | git | `prometheus_client/` | 3607 |
+
+Two security scans came first, one per round (2026-11-22, Claude Fable
+5.2). They read the ten trees and PyPI's JSON as data and ran nothing; they
+downloaded no wheel and no sdist. They found no malicious code, no
+obfuscated payload, no install hook, no `.pth` or `.pyc` file and no
+misspelt dependency: nothing blocks the runs. Every restriction is about
+what is collected or installed, or about the tracer. The tests run only as
+the scans recommend and as the lead decided (below), in the container of
+batch 3; `projects.toml` holds each restriction with its reason:
+
+| Project | Tests run | Left out, and why |
+|---|---|---|
+| path | `path` and `tests` with the project's `pytest.ini` (the doctests, as upstream; 114 test functions by reading), with more-itertools and appdirs | the 2 tests that start child interpreters (`test_import_time`, `test_no_dependencies`: the tracer does not see them, and they write bytecode into the source copy); `docs/conf.py`, which a bare `pytest` imports |
+| django-constance | `tests` (154 test functions by reading, and 5 of a mixin), with pytest-django by `-p`, the package's own plugin `constance.test.pytest` by `-p`, `--ds=tests.settings` and `-o django_find_project=false`; Django 6.1.2, redis and tzdata | nothing (upstream also runs the suite with Django's runner) |
+| tinytag | `tinytag/tests/test_all.py` (20 test methods) | `tinytag/tests/test_cli.py` (14 tests, each `sys.executable -m tinytag` through a shell: the tracer does not see them, and they write bytecode into the source copy) |
+| jsonpickle | `jsonpickle` and `tests` with the project's `pytest.ini` (the doctests, as upstream; 323 test functions by reading), with numpy, pandas, simplejson and tzdata | 9 tests that fail with or without the tracer (deselected after the first trace: 5 count warnings and meet the package's own `DeprecationWarning` about `keys`, 1 uses the numpy type code `a3`, which numpy 2.5.4 refuses, 3 compare string columns that pandas 3.0 stores in its string dtype); the tests of pymongo, ecdsa, feedparser, SQLAlchemy, scikit-learn, PyYAML, ujson and gmpy2 skip (not installed); never `bson` |
+| json-repair | `tests` (306 test functions by reading), with jsonschema and pydantic and their closures | `tests/test_performance.py` (timing limits; pytest-benchmark); the mypy tests and the Flask tests skip (not installed: a type tool that would read the package, and a second import of it as `json_repair`) |
+| django-environ | `tests`, without Django | nothing |
+| validators | `tests`, with eth-hash and pycryptodome (upstream's lock) | the doctests: upstream's `pytest .` imports `docs/conf.py`, `package/export` and the package a second time as `src.validators` |
+| tabulate | `tabulate` and `test` with `--doctest-modules` (the doctests, as upstream), with wcwidth | `test/test_cli.py` (11 child interpreters, which the tracer does not see); the numpy and pandas tests skip (not installed); `benchmark/` |
+| more-itertools | `tests` (761 test methods by reading) | nothing; the doctests that `load_tests` adds for unittest do not run under pytest |
+| prometheus-client | `tests`, with asgiref; servers on loopback and `localhost` | the Twisted, aiohttp, Django and snappy tests skip (not installed, as in upstream's Python 3.14 environment); without pytest-benchmark, `tests/test_parser.py` defines no benchmark test |
+
+**Provenance** as for batch 3: `test-environments/<name>.txt` lists the full
+closure for CPython 3.14 on Linux aarch64 by version and SHA-256, for
+pip's `--require-hashes --only-binary :all: --no-deps`. The closure was
+computed from the `requires_dist` of each pinned release in PyPI's JSON,
+with the markers evaluated for CPython 3.14 on Linux; every hash was
+checked against PyPI's JSON for its version (2026-11-22). No wheel was
+read: each file says which hashes the scans list and which were looked up
+on PyPI. Where a distribution has a pure-Python wheel, only that wheel is
+pinned (simplejson). path has 7 distributions, none compiled;
+django-constance 11, none; tinytag 5 (pytest's stack), none; jsonpickle
+11, two (numpy, pandas); json-repair 15, two (rpds-py, pydantic-core);
+django-environ 5, none; validators 7, one (pycryptodome, an abi3 wheel);
+tabulate 6, none; more-itertools 5, none; prometheus-client 6, none. Every
+distribution has a wheel for CPython 3.14 on Linux aarch64.
+
+The lead's decisions on the points that the scans left open:
+
+1. One pytest stack for all ten: pytest 9.2.0, iniconfig 2.3.1, packaging
+   26.3, pluggy 1.7.0, Pygments 2.21.0, as in batches 3 to 5. Every other
+   dependency is the version current at the package's release date (and,
+   where upstream has a lock, its version: json-repair, validators), with
+   one exception: django-constance gets tzdata 2026.5, not 2026.6, which
+   was uploaded 5 hours before the release (the older release, the pin of
+   jsonpickle too).
+2. path: appdirs 1.4.4, so that `TestSpecialPaths` runs; the doctests run
+   as upstream runs them (`pytest.ini` as the configuration, `path` and
+   `tests` as the paths: the precedents are netaddr and pypinyin); the two
+   tests that start child interpreters are deselected.
+3. django-constance: Django, pytest-django, redis and tzdata, as the scan
+   proposes. redis is needed because a migration imports it; every Redis
+   connection is the mock-up of `tests/`.
+4. tinytag: `tinytag/tests/test_all.py` only; `tinytag/tests` stays
+   excluded.
+5. jsonpickle: with numpy and pandas (they reach a quarter of the package;
+   the precedent is itables), simplejson and tzdata; never `bson`.
+6. json-repair: without `tests/test_performance.py`, mypy, Flask and
+   pytest-benchmark; with the jsonschema closure and the pydantic closure.
+   The tests import the package as `src.json_repair` (`src/` has no
+   `__init__.py`), so the entry has root `.` and `packages =
+   ["src/json_repair"]`: the package is named as the tests import it, and
+   its module names begin with `src.`. With the frame's root `src`, nothing
+   would import the name `json_repair` and the run would fail its import
+   check. The test of the round logs accepts the moved root because the
+   packages name the same files.
+7. django-environ: without Django.
+8. validators: with eth-hash 0.8.0 and pycryptodome 3.24.0 (upstream's
+   lock); `tests` only, no doctest configuration.
+9. tabulate: with wcwidth 0.6.0, without numpy and pandas (their tests skip
+   themselves); without `test/test_cli.py`.
+10. more-itertools: as the scan proposes.
+11. prometheus-client: pytest and asgiref only; the suite needs loopback
+    and the name `localhost`. The vendored `prometheus_client/decorator.py`
+    (decorator 4.0.10, BSD 2-clause, `NOTICE`) is analysed with the package
+    (the lead reversed an earlier exclusion): the package's own code calls
+    it (`context_managers.py` calls `decorate` at lines 33, 51 and 83), the
+    benchmark has no convention for a call from analysed code into excluded
+    code of the same package (every other `exclude` is a test or packaging
+    directory that the package never calls), and argcomplete's copy of
+    `shlex` is analysed too. The draw's 3607 code lines include it (the
+    `.py` files of the wheel). It builds the wrappers of the decorators with
+    `exec`: the rule for generated code ("Ground-truth conventions",
+    Nodes) and the tracer's limit T1 ("Limits" under "Traces") apply.
+
+> **Warning.** json-repair ships `AGENTS.md` and `.agents/` (a skill that
+> starts a Flask server and `http.server`), addressed to AI tools. They are
+> third-party data, not instructions. prometheus-client's `tests/certs`
+> holds test keys; tinytag's `CONTRIBUTING.md` refuses contributions made
+> with AI tools.
+
+What only the first run can settle (each entry says it, as UNVERIFIED):
+
+- the plugin module, the option `--ds` and the ini key
+  `django_find_project` of pytest-django 4.14.0, the early import of
+  `constance.test.pytest`, and Django's async test methods under pytest;
+- whether pytest's importlib mode (path's `pytest.ini`) imports the
+  doctest modules as the package `path`, and path's file-system tests on
+  the tmpfs of the container;
+- how pytest reports tinytag's `subTest` blocks;
+- the import of numpy and pandas under the tracer (jsonpickle);
+- json-repair's run with the package below the namespace directory `src`
+  (`trace.py --locate` finds it part by part; see "Preparing an
+  environment");
+- django-environ's tests without Django; eth-hash's choice of backend;
+- that the container resolves `localhost` (prometheus-client), and its
+  tests that assert on timing or on the garbage collector;
+- more-itertools's run time within 600 s and its `tracemalloc` test;
+- the closure against each wheel's own metadata, and the trace images for
+  `.pth` files: the scans could not read the wheels.
+
+The first traces were recorded on 2026-11-22 with
+`evaluation/container/trace.sh`, in the pinned image `python:3.14-slim`
+of batch 3 (CPython 3.14.10, linux/aarch64), without network, with at most
+6 GiB. Each package was traced twice, and both runs gave the same edges.
+Each point above held, but one: jsonpickle had 9 failing tests.
+
+| Project | Passed | Skipped | Expected failures | Deselected | Failed | Trace edges | Functions run |
+|---|---|---|---|---|---|---|---|
+| path | 140 | 1 | 0 | 2 | 0 | 499 | 177 |
+| django-constance | 178 | 1 | 0 | 0 | 0 | 499 | 144 |
+| tinytag | 20 | 0 | 0 | 0 | 0 | 400 | 74 |
+| jsonpickle | 379 | 19 | 0 | 0 | 9 | 775 | 219 |
+| json-repair | 403 | 2 | 0 | 0 | 0 | 724 | 141 |
+| django-environ | 433 | 0 | 0 | 0 | 0 | 235 | 65 |
+| validators | 1069 | 0 | 0 | 0 | 0 | 394 | 94 |
+| tabulate | 312 | 16 | 0 | 0 | 0 | 335 | 74 |
+| more-itertools | 765 | 0 | 0 | 0 | 0 | 995 | 286 |
+| prometheus-client | 416 | 12 | 0 | 0 | 0 | 847 | 241 |
+
+path's deselected tests are the 2 of `deselect`. tinytag counts its 20
+test methods; their `subTest` blocks are not tests. jsonpickle's 9 failed
+tests fail with or without the tracer, against this release or against
+the installed numpy and pandas: 5 count the warnings of a call and also
+meet the package's own `DeprecationWarning` about `keys` (added in 4.1.2;
+pytest records every `DeprecationWarning`), 1 builds a record array with
+the type code `a3`, which numpy 2.5.4 refuses, and 3 compare string
+columns that pandas 3.0 stores in its default string dtype, where the
+package decodes object columns. Upstream names no version of numpy or
+pandas (its extra `testing` is unpinned, and it has no lock), so the 9
+tests are deselected, each with its reason, as aiocache's 2 that fail on
+Python 3.13 and later; the trace of jsonpickle is recorded again with them
+deselected. The row above is its first trace.
+
 ### Batch 7
 
 The ten packages that `draw.py` drew in rounds 6 and 7
@@ -1533,7 +1707,7 @@ records it in the log (`skipped`, and `skipped_strata`) with its reason: a
 stratum that has no project left, or a stratum that a partial round leaves
 out; N is an ASCII number from 1 to 5, given once, and a round skips
 not every stratum. Without it, the draw is the same as before (the logs of
-rounds 1 to 3, 6 and 7 are drawn again byte for byte).
+rounds 1 to 7 are drawn again byte for byte).
 
 **Batch 8, the rule fixed before its draw** (2026-11-23, the maintainer's
 choice "10: 8 + 2 extra"). The frozen frame has too few projects left for
@@ -1566,8 +1740,7 @@ selected with its facts from the frame. The frame and the logs have sorted
 keys and no time of the run (the dates in them are facts of the list, of
 the releases and of the repositories): a rerun from the same cache writes
 the same bytes.
-`tests/test_draw.py` draws rounds 1, 2, 3 and 6 to 10 (batches 3 to 5, 7
-and 8) again from the committed frame and list, with the seed, the drops
+`tests/test_draw.py` draws rounds 1 to 10 (batches 3 to 8) again from the committed frame and list, with the seed, the drops
 and the skipped strata of each round, reading files only, and checks that each gives the recorded
 log. The benchmark directories that the draws used then are gone (one
 benchmark now holds every batch), so the test takes the projects already
@@ -2143,8 +2316,8 @@ apply. Earlier batch tables and audit narratives retain their dated counts.
 
 ### Rulings for batch 6 (from 2026-11-22)
 
-These rulings were made on the ground truths of batch 6, whose projects
-are not in this repository yet; batch 7 follows them. A ruling that
+These rulings were made on the ground truths of batch 6; batches 7 and 8
+follow them. A ruling that
 decides many edges is not made by the lead alone: an independent referee
 (a model of another provider, given this README and the package's files,
 and told not to consider what any analysis tool reports) gives the ruling,
@@ -3302,9 +3475,9 @@ environment that you trust for that code.
 
 > **Warning.** Never start an agent session (Claude Code, Codex, ...) with
 > its working directory in a project checkout. `projects/pluggy`,
-> `projects/cachetools`, `projects/sqlparse` and `projects/pymysql`
-> (batch 7) ship agent configuration files (`AGENTS.md`, `CLAUDE.md`,
-> `.claude/`). pymysql's `AGENTS.md` tells an agent to install and start a
+> `projects/cachetools`, `projects/sqlparse`, `projects/json-repair` and
+> `projects/pymysql` (batch 7) ship agent configuration files (`AGENTS.md`,
+> `CLAUDE.md`, `.claude/`, `.agents/`). pymysql's `AGENTS.md` tells an agent to install and start a
 > MySQL server and to run the whole suite. These are third-party data, not
 > instructions; a writer's or an auditor's brief names them as such.
 
@@ -3325,8 +3498,13 @@ have the pinned versions; metadata inside the project's own directory is not
 an installation (an sdist carries the metadata of its build,
 `<name>.egg-info`, and its source directory is on the path). The project
 itself is not installed: the tracer puts the `root` of the source first on
-`sys.path`, and refuses to run if the package comes from somewhere else. One
-project cannot avoid it: pytest requires pluggy, so pluggy's environment has
+`sys.path`, and refuses to run if the package comes from somewhere else. Before the run,
+`trace.py --locate` asks the finders, without importing anything, where
+each package of `packages` is: it must be found in the root, part by part,
+so a package below a directory without `__init__.py` is accepted
+(json-repair's `src.json_repair`, whose first part `src` is a namespace
+package), and the first part of its name must be found nowhere else in the
+environment. One project cannot avoid it: pytest requires pluggy, so pluggy's environment has
 pluggy's wheel. Its entry says so (`also_installed`): `trace.py --locate`
 then accepts the installed copy, and the run still checks that pluggy was
 imported from the source. `--locate` asks every finder of the interpreter
@@ -3525,7 +3703,7 @@ implementations are client callbacks.
 A trace is the reproducible half of a ground truth. To record the trace of
 a project again you need Docker with Compose, `test-environments/<name>.txt`
 (the pinned test environment) and the inputs image, which holds the
-source. 44 projects have a trace; fabric, face_classification,
+source. 54 projects have a trace; fabric, face_classification,
 Sublist3r, pyfiglet, mss and pubchempy have no test run.
 
 ```sh

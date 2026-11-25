@@ -1,0 +1,20 @@
+{
+  "environ.compat.choose_pymemcache_driver": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch environ.compat.find_spec with a MagicMock (test_cache.py:130); the call of the tests' own object, a client value (rule A, B5)"
+  },
+  "environ.compat.choose_rediscache_driver": {
+    "unittest.mock.CallableMixin.__call__": "the tests patch environ.compat.find_spec with a MagicMock (test_cache.py:147); the call of the tests' own object, a client value (rule A, B5)"
+  },
+  "environ.environ.Env.read_env": {
+    "_io.StringIO.read": "env_file.read() (environ.py:1103) on the io.StringIO that the test passes (test_env.py:478); env_file is annotated IO[str], an abstract type that fixes no class, so the stream is a client object (opaque, B5)"
+  },
+  "environ.environ.Env.read_env.set_environ.<lambda1>": {
+    "<builtin>.dict.update": "envval.update (environ.py:1169) on the dict that the tests assign to Env.ENVIRON (test_env.py:72, 477, 517); the tests' own value, a client object (opaque, B5); the package's own ENVIRON values are os.environ and a FileAwareMapping"
+  },
+  "environ.environ.Env.read_env.set_environ.<lambda2>": {
+    "<builtin>.dict.setdefault": "envval.setdefault (environ.py:1170) on the dict that the tests assign to Env.ENVIRON (test_env.py:72, 477, 517); the tests' own value, a client object (opaque, B5); the package's own ENVIRON values are os.environ and a FileAwareMapping"
+  },
+  "environ.fileaware_mapping.FileAwareMapping.__getitem__": {
+    "<builtin>.dict.get": "self.env.get (fileaware_mapping.py:47) on the dict that the tests pass as env (test_fileaware.py:38 and the others); the tests' own value, a client object (opaque, B5); the package's own env is the default os.environ (collections.abc.Mapping.get)"
+  }
+}

@@ -1,0 +1,4046 @@
+# Call-site ledger of prometheus-client at 9b6b971f903e7a08f88da5a95048b7a2a28f55a5.
+# Judgements: prometheus-client.md. Rules: macro-benchmark/README.md.
+default reject prometheus_client.metrics_core.Metric.__eq__: no operand of this comparison, `in` test or key lookup is a Metric; the package never compares Metric objects (only clients do, e.g. assertEqual in the tests), and Metric defines __eq__ without __hash__, so it is unhashable and never a dict key or set element; the operands here are strs, numbers, bools, tuples, lists, dicts, sets, collectors, Samples or None
+default reject prometheus_client.samples.Timestamp.__eq__: no operand of this comparison, `in` test or key lookup is a Timestamp (Timestamp defines __eq__ without __hash__, so it is unhashable and never a dict key or set element); the operands here are strs, numbers, bools, tuples or dicts of strs, lists of floats or None; the sites that compare Timestamps or lists of Samples that can hold them accept the candidate explicitly
+default reject prometheus_client.samples.Timestamp.__ne__: no operand of this `!=` is a Timestamp; the two sites of the OpenMetrics parser that compare sample timestamps accept the candidate explicitly
+default reject prometheus_client.samples.Timestamp.__lt__: no operand of this ordering comparison or sort is a Timestamp; the one site that orders sample timestamps (openmetrics/parser.py:616) accepts the candidate explicitly
+default reject prometheus_client.samples.Timestamp.__gt__: no operand of this ordering comparison or sort is a Timestamp; the one site that orders sample timestamps (openmetrics/parser.py:616) accepts the candidate explicitly
+default reject prometheus_client.samples.Timestamp.__float__: the argument of float() here is a str, int, float or bytes, never a Timestamp; the one site that converts a sample timestamp (exposition.py:306) accepts the candidate explicitly
+default reject prometheus_client.samples.Timestamp.__str__: no formatted or str()-converted value here is a Timestamp; the values are strs, numbers, bools, tuples, lists, dicts or sets of them, exceptions, or client objects (B5); the sites that format a sample or exemplar timestamp accept the candidate explicitly
+default reject prometheus_client.samples.Timestamp.__repr__: no value whose repr is taken here is a Timestamp (nor a container or Sample holding one); the site that formats a Metric's samples (metrics_core.py:50) accepts the candidate explicitly
+default reject prometheus_client.metrics_core.Metric.__repr__: no formatted value here is a Metric or a container of Metrics; the package never formats a Metric (exposition.py:350 and openmetrics/exposition.py:166 add the metric to exception.args without formatting it)
+default reject prometheus_client.metrics.MetricWrapperBase.__str__: no formatted value here is a metric wrapper; the sites that format `self` of a metric wrapper accept the candidate explicitly
+default reject prometheus_client.metrics.MetricWrapperBase.__repr__: no value whose repr is taken here is a metric wrapper; the sites that format `self` with %r accept the candidate explicitly
+default reject prometheus_client.django.exposition.PrometheusDjangoView.get: the receiver of this .get() is a dict, an os.environ mapping, a WSGI environ, the headers of a request, an ASGI scope or payload, or a ValueClass instance; the package never makes a PrometheusDjangoView (Django's view dispatch, a client, calls its get)
+default reject prometheus_client.context_managers.ExceptionCounter.__enter__: the context manager here is a lock, a file, a socket in contextlib.closing, or a package object of another class; only `with self:` in ExceptionCounter.__call__.wrapped enters an ExceptionCounter, and that site accepts the candidate explicitly
+default reject prometheus_client.context_managers.ExceptionCounter.__exit__: the context manager here is a lock, a file, a socket in contextlib.closing, or a package object of another class; only `with self:` in ExceptionCounter.__call__.wrapped enters an ExceptionCounter, and that site accepts the candidate explicitly
+default reject prometheus_client.context_managers.InprogressTracker.__enter__: the context manager here is a lock, a file, a socket in contextlib.closing, or a package object of another class; only `with self:` in InprogressTracker.__call__.wrapped enters an InprogressTracker, and that site accepts the candidate explicitly
+default reject prometheus_client.context_managers.InprogressTracker.__exit__: the context manager here is a lock, a file, a socket in contextlib.closing, or a package object of another class; only `with self:` in InprogressTracker.__call__.wrapped enters an InprogressTracker, and that site accepts the candidate explicitly
+default reject prometheus_client.context_managers.Timer.__enter__: the context manager here is a lock, a file, a socket in contextlib.closing, or a package object of another class; only `with self._new_timer():` in Timer.__call__.wrapped enters a Timer, and that site accepts the candidate explicitly
+default reject prometheus_client.context_managers.Timer.__exit__: the context manager here is a lock, a file, a socket in contextlib.closing, or a package object of another class; only `with self._new_timer():` in Timer.__call__.wrapped enters a Timer, and that site accepts the candidate explicitly
+default reject prometheus_client.values.MutexValue.get: the receiver of this .get() is a dict, an os.environ mapping, a WSGI environ, an ASGI scope or payload, or the headers of a request; only the metric wrappers' _child_samples call get() on their ValueClass instances, and those sites accept the candidate explicitly
+default reject prometheus_client.values.MultiProcessValue.MmapedValue.get: the receiver of this .get() is a dict, an os.environ mapping, a WSGI environ, an ASGI scope or payload, or the headers of a request; only the metric wrappers' _child_samples call get() on their ValueClass instances, and those sites accept the candidate explicitly
+default reject prometheus_client.decorator.getfullargspec.__iter__: getfullargspec is the class of the Python 2 branch of decorator.py (lines 45-71); on the supported versions (Python 3.9 and later, pyproject.toml) the name getfullargspec is inspect.getfullargspec and this class is never defined, so no object iterated here is one
+default reject prometheus_client.decorator.getfullargspec.__init__: getfullargspec is the class of the Python 2 branch of decorator.py (lines 45-71), never defined on the supported versions; no call here makes one (the calls getfullargspec(...) of decorator.py call inspect.getfullargspec)
+default reject prometheus_client.decorator.append: decorator.append is the module function of decorator.py:306, which only vancestors calls by its bare name (decorator.py:357, accepted there); the .append calls here are list.append
+default reject prometheus_client.decorator.dispatch_on.gen_func_dec.register: the local register of dispatch_on is reachable only as the register attribute of a generic function that dispatch_on generates (decorator.py:422); the package makes no generic function, and the receivers of .register here are collector registries
+
+== prometheus_client
+
+[prometheus_client]
+59:16 call  Counter('cc', 'A counter')
+    -> prometheus_client.metrics.MetricWrapperBase.__init__
+    note: the __main__ block of the module (it keeps its edges); Counter defines no __init__
+60:10 call  c.inc()
+    -> prometheus_client.metrics.Counter.inc
+    reject *: c is a Counter
+62:14 call  Gauge('gg', 'A gauge')
+    -> prometheus_client.metrics.Gauge.__init__
+    reject prometheus_client.metrics.MetricWrapperBase.__init__: Gauge defines its own __init__, which calls the base one itself
+63:10 call  g.set(17)
+    -> prometheus_client.metrics.Gauge.set
+    reject *: g is a Gauge
+65:16 call  Summary('ss', 'A summary', ['a', 'b'])
+    -> prometheus_client.metrics.MetricWrapperBase.__init__
+66:13 call  s.labels('c', 'd')
+    -> prometheus_client.metrics.MetricWrapperBase.labels
+    reject prometheus_client.context_managers.Timer.labels: s is a Summary
+66:31 call  s.labels('c', 'd').observe(17)
+    -> prometheus_client.metrics.Summary.observe
+    reject prometheus_client.metrics.Histogram.observe: labels() returns a child made by self.__class__, a Summary
+68:18 call  Histogram('hh', 'A histogram')
+    -> prometheus_client.metrics.Histogram.__init__
+    reject prometheus_client.metrics.MetricWrapperBase.__init__: Histogram defines its own __init__
+69:14 call  h.observe(.6)
+    -> prometheus_client.metrics.Histogram.observe
+    reject prometheus_client.metrics.Summary.observe: h is a Histogram
+71:22 call  start_http_server(8000)
+    -> prometheus_client.exposition.start_wsgi_server
+    note: start_http_server is the module alias start_http_server = start_wsgi_server (exposition.py:280), imported here
+75:19 call  time.sleep(1)
+    -> time.sleep
+
+== prometheus_client.aiohttp.exposition
+
+[prometheus_client.aiohttp.exposition.make_aiohttp_handler.prometheus_handler]
+18:44 call  request.query.getall(key)
+    -> aiohttp.web.Request.query.getall
+    note: missing module (judgement J3): aiohttp is not installed; request is annotated web.Request, the object that aiohttp (a framework that calls the package, a client) passes to a handler, so the call is named by the stub path of that annotation
+18:79 call  request.query.keys()
+    -> aiohttp.web.Request.query.keys
+    note: missing module (judgement J3)
+19:33 call  ",".join(request.headers.getall(hdrs.ACCEPT, []))
+    -> <builtin>.str.join
+19:56 call  request.headers.getall(hdrs.ACCEPT, [])
+    -> aiohttp.web.Request.headers.getall
+    note: missing module (judgement J3)
+22:47 call  _bake_output( registry, accept_header, accept_encoding_he...
+    -> prometheus_client.exposition._bake_output
+30:32 call  web.Response( status=int(status.split(" ")[0]), headers=h...
+    -> aiohttp.web.Response
+    note: missing module: aiohttp is not installed
+31:23 call  int(status.split(" ")[0])
+    -> <builtin>.int
+31:36 call  status.split(" ")
+    -> <builtin>.str.split
+    note: status is the str '200 OK' that _bake_output returns
+36:40 call  response.enable_compression()
+    -> aiohttp.web.Response.enable_compression
+    note: missing module: response is an instance of the stub aiohttp.web.Response
+
+== prometheus_client.asgi
+
+[prometheus_client.asgi.make_asgi_app.prometheus_app]
+12:25 call  scope.get("type")
+    -> <builtin>.dict.get
+    note: the ASGI server that calls the app is a client; the ASGI specification fixes scope as a dict (B4, B5: whitenoise's request.META)
+14:26 call  parse_qs(scope.get('query_string', b'').decode("utf8"))
+    -> urllib.parse.parse_qs
+14:36 call  scope.get('query_string', b'')
+    -> <builtin>.dict.get
+14:64 call  scope.get('query_string', b'').decode("utf8")
+    -> <builtin>.bytes.decode
+    note: the ASGI specification fixes query_string as a byte string
+15:33 call  ",".join([ value.decode("utf8") for (name, value) in scop...
+    -> <builtin>.str.join
+16:25 call  value.decode("utf8")
+    -> <builtin>.bytes.decode
+    note: the ASGI specification fixes each header name and value as a byte string
+16:64 call  scope.get('headers')
+    -> <builtin>.dict.get
+17:27 call  name.decode("utf8")
+    -> <builtin>.bytes.decode
+17:41 call  name.decode("utf8").lower()
+    -> <builtin>.str.lower
+19:42 call  ",".join([ value.decode("utf8") for (name, value) in scop...
+    -> <builtin>.str.join
+20:25 call  value.decode("utf8")
+    -> <builtin>.bytes.decode
+20:64 call  scope.get('headers')
+    -> <builtin>.dict.get
+21:27 call  name.decode("utf8")
+    -> <builtin>.bytes.decode
+21:41 call  name.decode("utf8").lower()
+    -> <builtin>.str.lower
+24:47 call  _bake_output(registry, accept_header, accept_encoding_hea...
+    -> prometheus_client.exposition._bake_output
+27:37 call  formatted_headers.append(tuple(x.encode('utf8') for x in ...
+    -> <builtin>.list.append
+27:43 call  tuple(x.encode('utf8') for x in header)
+    -> <builtin>.tuple
+27:52 call  x.encode('utf8')
+    -> <builtin>.str.encode
+    note: the header tuples of _bake_output hold strs
+29:32 call  receive()
+    note: no edge: receive is the callable of the ASGI server, a client callback (B5)
+30:23 call  payload.get("type")
+    note: no edge: payload is what the client callback receive() returns, a client object (B5)
+31:23 call  send( { "type": "http.response.start", "status": int(stat...
+    note: no edge: send is the callable of the ASGI server, a client callback (B5)
+34:34 call  int(status.split(' ')[0])
+    -> <builtin>.int
+34:47 call  status.split(' ')
+    -> <builtin>.str.split
+38:23 call  send({"type": "http.response.body", "body": output})
+    note: no edge: send is the callable of the ASGI server, a client callback (B5)
+
+== prometheus_client.bridge.graphite
+
+[prometheus_client.bridge.graphite]
+16:37 call  re.compile(r"[^a-zA-Z0-9_-]")
+    -> re.compile
+
+[prometheus_client.bridge.graphite._sanitize]
+20:39 call  _INVALID_GRAPHITE_CHARS.sub('_', s)
+    -> re.Pattern.sub
+
+[prometheus_client.bridge.graphite._RegularPush.__init__]
+25:14 call  super()
+    -> <builtin>.super
+25:25 call  super().__init__()
+    -> threading.Thread.__init__
+    reject *: super() of _RegularPush is threading.Thread, outside the package
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the base class
+
+[prometheus_client.bridge.graphite._RegularPush.run]
+31:35 call  default_timer()
+    -> timeit.default_timer
+34:36 call  default_timer()
+    -> timeit.default_timer
+41:27 call  time.sleep(wait_until - now)
+    -> time.sleep
+43:34 call  self._pusher.push(prefix=self._prefix)
+    -> prometheus_client.bridge.graphite.GraphiteBridge.push
+    note: _RegularPush is private; its only maker, GraphiteBridge.start, passes the GraphiteBridge self as pusher
+45:34 call  logging.exception("Push failed")
+    -> logging.exception
+
+[prometheus_client.bridge.graphite.GraphiteBridge.push]
+63:18 call  int(self._timer())
+    -> <builtin>.int
+63:30 call  self._timer()
+    -> time.time
+    note: self._timer is the _timer argument: time.time by default; a client may pass its own clock (the tests pass fake_timer), a client callback
+70:45 call  self._registry.collect()
+    -> prometheus_client.registry.CollectorRegistry.collect
+    -> prometheus_client.metrics.MetricWrapperBase.collect
+    -> prometheus_client.process_collector.ProcessCollector.collect
+    -> prometheus_client.gc_collector.GCCollector.collect
+    -> prometheus_client.platform_collector.PlatformCollector.collect
+    -> prometheus_client.multiprocess.MultiProcessCollector.collect
+    reject prometheus_client.registry.RestrictedRegistry.collect: admission to the Collector role is per parameter (B2; judgement J1, the referee's reading C): nothing passes a RestrictedRegistry to GraphiteBridge (no default, documentation, package call or test does), and it is no declared or documented Collector implementation
+    reject prometheus_client.registry.Collector.collect: Collector is a Protocol, which has no instances, and every package implementation overrides collect
+    reject prometheus_client.registry._EmptyCollector.collect: the private _EmptyCollector is only stored under the name target_info of a registry, never passed as a Collector
+    note: registry is annotated Collector, the package Protocol (judgement J1): its values are the declared and documented implementations (the metric wrappers, ProcessCollector, GCCollector, PlatformCollector, MultiProcessCollector), CollectorRegistry (the default REGISTRY, and the tests pass one) and client collectors
+79:46 call  sep.join( [fmt.format( _sanitize(k), _sanitize(v)) for k,...
+    -> <builtin>.str.join
+80:36 call  fmt.format( _sanitize(k), _sanitize(v))
+    -> <builtin>.str.format
+81:38 call  _sanitize(k)
+    -> prometheus_client.bridge.graphite._sanitize
+81:52 call  _sanitize(v)
+    -> prometheus_client.bridge.graphite._sanitize
+82:47 call  sorted(s.labels.items())
+    -> <builtin>.sorted
+82:62 call  s.labels.items()
+    -> <builtin>.dict.items
+85:30 call  output.append(f'{prefixstr}{_sanitize(s.name)}{labelstr} ...
+    -> <builtin>.list.append
+85:54 call  _sanitize(s.name)
+    -> prometheus_client.bridge.graphite._sanitize
+85:80 call  float(s.value)
+    -> <builtin>.float
+87:40 call  socket.create_connection(self._address, self._timeout)
+    -> socket.create_connection
+88:21 call  conn.sendall(''.join(output).encode('ascii'))
+    -> socket.socket.sendall
+88:29 call  ''.join(output)
+    -> <builtin>.str.join
+88:44 call  ''.join(output).encode('ascii')
+    -> <builtin>.str.encode
+89:19 call  conn.close()
+    -> socket.socket.close
+    reject prometheus_client.mmap_dict.MmapedDict.close: conn is the socket.socket of create_connection
+
+[prometheus_client.bridge.graphite.GraphiteBridge.start]
+92:25 call  _RegularPush(self, interval, prefix)
+    -> prometheus_client.bridge.graphite._RegularPush.__init__
+94:16 call  t.start()
+    -> threading.Thread.start
+    -> prometheus_client.bridge.graphite._RegularPush.run
+    reject prometheus_client.bridge.graphite.GraphiteBridge.start: t is a _RegularPush thread
+    note: Thread.start runs the run method of the _RegularPush thread (callback rule)
+
+== prometheus_client.context_managers
+
+[prometheus_client.context_managers]
+12:16 call  TypeVar("F", bound=Callable[..., Any])
+    note: no edge: under if TYPE_CHECKING (line 10), which does not run
+
+[prometheus_client.context_managers.ExceptionCounter.__exit__]
+24:22 call  isinstance(value, self._exception)
+    -> <builtin>.isinstance
+25:30 call  self._counter.inc()
+    -> prometheus_client.metrics.Counter.inc
+    reject *: counter is annotated "Counter"; the package makes ExceptionCounter only in Counter.count_exceptions, with the Counter self
+
+[prometheus_client.context_managers.ExceptionCounter.__call__]
+33:24 call  decorate(f, wrapped)
+    -> prometheus_client.decorator.decorate
+    reject *: decorate stores wrapped in the namespace of the function it generates and does not call it; the generated function calls wrapped later, when the client calls the decorated function
+    note: decorate (decorator.py:229) makes the wrapper with FunctionMaker; the function it generates with exec calls wrapped only when the client calls it, so wrapped has no package caller
+
+[prometheus_client.context_managers.ExceptionCounter.__call__.wrapped]
+30:18 with  self
+    -> prometheus_client.context_managers.ExceptionCounter.__enter__
+    -> prometheus_client.context_managers.ExceptionCounter.__exit__
+    reject *: self is the ExceptionCounter of the enclosing __call__
+31:28 call  func(*args, **kwargs)
+    note: no edge: func is the client's decorated function, which the function that decorate generates passes back (a client callback)
+
+[prometheus_client.context_managers.InprogressTracker.__enter__]
+41:24 call  self._gauge.inc()
+    -> prometheus_client.metrics.Gauge.inc
+    reject *: the package makes InprogressTracker only in Gauge.track_inprogress, with the Gauge self
+
+[prometheus_client.context_managers.InprogressTracker.__exit__]
+44:24 call  self._gauge.dec()
+    -> prometheus_client.metrics.Gauge.dec
+    reject prometheus_client.decorator.dispatch_on.gen_func_dec.register.dec: self._gauge is a Gauge (see 41:24)
+
+[prometheus_client.context_managers.InprogressTracker.__call__]
+51:24 call  decorate(f, wrapped)
+    -> prometheus_client.decorator.decorate
+    reject *: decorate stores wrapped in the namespace of the function it generates and does not call it
+
+[prometheus_client.context_managers.InprogressTracker.__call__.wrapped]
+48:18 with  self
+    -> prometheus_client.context_managers.InprogressTracker.__enter__
+    -> prometheus_client.context_managers.InprogressTracker.__exit__
+    reject *: self is the InprogressTracker of the enclosing __call__
+49:28 call  func(*args, **kwargs)
+    note: no edge: func is the client's decorated function (a client callback)
+
+[prometheus_client.context_managers.Timer._new_timer]
+61:30 call  self.__class__(self._metric, self._callback_name)
+    -> prometheus_client.context_managers.Timer.__init__
+    note: self.__class__ is Timer: the package defines no subclass of it
+
+[prometheus_client.context_managers.Timer.__enter__]
+64:36 call  default_timer()
+    -> timeit.default_timer
+
+[prometheus_client.context_managers.Timer.__exit__]
+69:28 call  max(default_timer() - self._start, 0)
+    -> <builtin>.max
+69:42 call  default_timer()
+    -> timeit.default_timer
+70:27 call  getattr(self._metric, self._callback_name)
+    -> <builtin>.getattr
+    note: the attribute is the method 'set' or 'observe' of a metric wrapper; no package property or __getattr__ runs
+71:17 call  callback(self.duration)
+    -> prometheus_client.metrics.Gauge.set
+    -> prometheus_client.metrics.Summary.observe
+    -> prometheus_client.metrics.Histogram.observe
+    note: callback is getattr(metric, callback_name); the package makes Timer in Gauge.time (callback 'set'), Summary.time and Histogram.time ('observe'), and Timer.labels replaces the metric by its child of the same class
+
+[prometheus_client.context_managers.Timer.labels]
+74:43 call  self._metric.labels(*args, **kw)
+    -> prometheus_client.metrics.MetricWrapperBase.labels
+    reject prometheus_client.context_managers.Timer.labels: self._metric is the Gauge, Summary or Histogram of the Timer
+
+[prometheus_client.context_managers.Timer.__call__]
+83:24 call  decorate(f, wrapped)
+    -> prometheus_client.decorator.decorate
+    reject *: decorate stores wrapped in the namespace of the function it generates and does not call it
+
+[prometheus_client.context_managers.Timer.__call__.wrapped]
+80:18 with  self._new_timer()
+    -> prometheus_client.context_managers.Timer.__enter__
+    -> prometheus_client.context_managers.Timer.__exit__
+    reject *: _new_timer returns a Timer
+80:33 call  self._new_timer()
+    -> prometheus_client.context_managers.Timer._new_timer
+81:28 call  func(*args, **kwargs)
+    note: no edge: func is the client's decorated function (a client callback)
+
+== prometheus_client.django.exposition
+
+[prometheus_client.django.exposition.PrometheusDjangoView.get]
+18:68 call  prometheus_client.CollectorRegistry()
+    -> prometheus_client.registry.CollectorRegistry.__init__
+19:51 call  multiprocess.MultiProcessCollector(self.registry)
+    -> prometheus_client.multiprocess.MultiProcessCollector.__init__
+22:44 call  request.headers.get("Accept")
+    -> django.http.HttpRequest.headers.get
+    note: missing module (judgement J3): Django is not installed; Django's view dispatch (a client) passes an HttpRequest, the type that its documented API fixes, so the call is named by the stub path django.http.HttpRequest
+23:53 call  request.headers.get("Accept-Encoding")
+    -> django.http.HttpRequest.headers.get
+    note: missing module (judgement J3)
+25:47 call  _bake_output( registry=self.registry, accept_header=accep...
+    -> prometheus_client.exposition._bake_output
+32:21 call  int(status.split(" ")[0])
+    -> <builtin>.int
+32:34 call  status.split(" ")
+    -> <builtin>.str.split
+33:28 call  HttpResponse( output, status=status, headers=headers, )
+    -> django.http.HttpResponse
+    note: missing module: Django is not installed
+
+[prometheus_client.django.exposition.PrometheusDjangoView.options]
+40:28 call  HttpResponse( status=200, headers={"Allow": "OPTIONS,GET"...
+    -> django.http.HttpResponse
+    note: missing module: Django is not installed
+
+== prometheus_client.decorator
+
+[prometheus_client.decorator]
+74:33 call  collections.namedtuple( 'ArgSpec', 'args varargs varkw de...
+    -> collections.namedtuple
+84:17 call  re.compile(r'\s*def\s*([_\w][_\w\d]*)\s*\(')
+    -> re.compile
+96:37 call  itertools.count()
+    -> itertools.count
+206:6 decorator  @classmethod
+    -> <builtin>.classmethod
+284:22 call  getfullargspec(_GeneratorContextManager.__init__)
+    -> inspect.getfullargspec
+    reject *: getfullargspec is inspect.getfullargspec (line 46, the branch of every supported version), which reads the signature of contextlib's _GeneratorContextManager.__init__ without calling it
+285:13 call  len(init.args)
+    -> <builtin>.len
+301:27 call  decorator(ContextManager)
+    -> prometheus_client.decorator.decorator
+
+[prometheus_client.decorator.getfullargspec.__init__]
+57:35 call  inspect.getargspec(f)
+    reject prometheus_client.decorator.getargspec: the call does not run on a supported version
+    note: no edge: the class getfullargspec is defined in the Python 2 branch (lines 51-71), which no supported version takes, so this method is never made
+
+[prometheus_client.decorator.getargspec]
+80:26 call  getfullargspec(f)
+    -> inspect.getfullargspec
+81:19 call  ArgSpec(spec.args, spec.varargs, spec.varkw, spec.defaults)
+    note: no edge: ArgSpec is a collections.namedtuple class (line 74), whose constructor is generated code
+
+[prometheus_client.decorator.FunctionMaker.__init__]
+108:34 call  inspect.isfunction(func)
+    -> inspect.isfunction
+109:41 call  getfullargspec(func)
+    -> inspect.getfullargspec
+110:43 call  getattr(func, '__annotations__', {})
+    -> <builtin>.getattr
+113:28 call  setattr(self, a, getattr(argspec, a))
+    -> <builtin>.setattr
+113:45 call  getattr(argspec, a)
+    -> <builtin>.getattr
+114:40 call  enumerate(self.args)
+    -> <builtin>.enumerate
+115:28 call  setattr(self, 'arg%d' % i, arg)
+    -> <builtin>.setattr
+118:46 call  inspect.formatargspec( formatvalue=lambda val: "", *argspec)
+    note: no edge: the branch of line 116 (sys.version_info < (3,)) runs on Python 2 only, which the release does not support
+    reject prometheus_client.decorator.FunctionMaker.__init__.<lambda1>: the call does not run on a supported version
+121:35 call  list(self.args)
+    -> <builtin>.list
+122:40 call  list(self.args)
+    -> <builtin>.list
+124:39 call  allargs.append('*' + self.varargs)
+    -> <builtin>.list.append
+125:44 call  allshortargs.append('*' + self.varargs)
+    -> <builtin>.list.append
+127:39 call  allargs.append('*')
+    -> <builtin>.list.append
+129:39 call  allargs.append('%s=None' % a)
+    -> <builtin>.list.append
+130:44 call  allshortargs.append('%s=%s' % (a, a))
+    -> <builtin>.list.append
+132:39 call  allargs.append('**' + self.varkw)
+    -> <builtin>.list.append
+133:44 call  allshortargs.append('**' + self.varkw)
+    -> <builtin>.list.append
+134:47 call  ', '.join(allargs)
+    -> <builtin>.str.join
+135:52 call  ', '.join(allshortargs)
+    -> <builtin>.str.join
+136:47 call  func.__dict__.copy()
+    note: no edge (Codex audit round 1): func is always a client's function here (decorate, decorator, ContextManager.__call__ and dispatch_on forward the client's function; decorator(ContextManager) passes a str, so func is None); a call on the __dict__ of a client object is opaque (B5; the jsonpickle ruling (c))
+151:23 call  hasattr(self, 'name')
+    -> <builtin>.hasattr
+152:23 call  hasattr(self, 'signature')
+    -> <builtin>.hasattr
+153:28 call  TypeError('You are decorating a non function: %s' % func)
+    -> <builtin>.TypeError
+
+[prometheus_client.decorator.FunctionMaker.update]
+158:31 call  getattr(self, 'doc', None)
+    -> <builtin>.getattr
+159:32 call  getattr(self, 'dict', {})
+    -> <builtin>.getattr
+160:36 call  getattr(self, 'defaults', ())
+    -> <builtin>.getattr
+161:38 call  getattr(self, 'kwonlydefaults', None)
+    -> <builtin>.getattr
+162:39 call  getattr(self, 'annotations', None)
+    -> <builtin>.getattr
+164:34 call  sys._getframe(3)
+    -> sys._getframe
+168:47 call  frame.f_globals.get('__name__', '?')
+    -> <builtin>.dict.get
+169:34 call  getattr(self, 'module', callermodule)
+    -> <builtin>.getattr
+170:29 call  func.__dict__.update(kw)
+    -> <builtin>.dict.update
+    reject prometheus_client.decorator.FunctionMaker.update: func.__dict__ is the dict of the generated function
+
+[prometheus_client.decorator.FunctionMaker.make]
+174:31 call  vars(self)
+    -> <builtin>.vars
+176:23 call  DEF.match(src)
+    -> re.Pattern.match
+178:30 call  SyntaxError('not a valid function template\n%s' % src)
+    -> <builtin>.SyntaxError
+179:24 call  mo.group(1)
+    -> re.Match.group
+180:20 call  set([name] + [arg.strip(' *') for arg in self.shortsignat...
+    -> <builtin>.set
+    reject *: set is the builtin
+180:40 call  arg.strip(' *')
+    -> <builtin>.str.strip
+181:56 call  self.shortsignature.split(',')
+    -> <builtin>.str.split
+184:32 call  NameError('%s is overridden in\n%s' % (n, src))
+    -> <builtin>.NameError
+186:28 call  src.endswith('\n')
+    -> <builtin>.str.endswith
+192:48 call  next(self._compile_count)
+    -> <builtin>.next
+194:27 call  compile(src, filename, 'single')
+    -> <builtin>.compile
+195:17 call  exec(code, evaldict)
+    -> <builtin>.exec
+    note: the generated source is one def statement whose signature has only None defaults (lines 121-135) or the client's signature string; running it defines the function and calls nothing (the generated function calls _call_ or _f_ later, when the client calls it)
+197:18 call  print('Error in generated code:', file=sys.stderr)
+    -> <builtin>.print
+198:18 call  print(src, file=sys.stderr)
+    -> <builtin>.print
+203:20 call  self.update(func, **attrs)
+    -> prometheus_client.decorator.FunctionMaker.update
+
+[prometheus_client.decorator.FunctionMaker.create]
+215:22 call  isinstance(obj, str)
+    -> <builtin>.isinstance
+216:35 call  obj.strip()
+    -> <builtin>.str.strip
+216:43 call  obj.strip().split('(', 1)
+    -> <builtin>.str.split
+223:19 call  cls(func, name, signature, defaults, doc, module)
+    -> prometheus_client.decorator.FunctionMaker.__init__
+    note: cls is FunctionMaker (create is a classmethod; the package defines no subclass)
+224:26 call  '\n'.join(' ' + line for line in body.splitlines())
+    -> <builtin>.str.join
+224:68 call  body.splitlines()
+    -> <builtin>.str.splitlines
+225:25 call  self.make('def %(name)s(%(signature)s):\n' + ibody, evald...
+    -> prometheus_client.decorator.FunctionMaker.make
+
+[prometheus_client.decorator.decorate]
+233:20 call  dict(_call_=caller, _func_=func)
+    -> <builtin>.dict
+234:31 call  FunctionMaker.create( func, "return _call_(_func_, %(shor...
+    -> prometheus_client.decorator.FunctionMaker.create
+237:15 call  hasattr(func, '__qualname__')
+    -> <builtin>.hasattr
+
+[prometheus_client.decorator.decorator]
+246:24 call  decorate(_func, caller)
+    -> prometheus_client.decorator.decorate
+248:23 call  inspect.isclass(caller)
+    -> inspect.isclass
+249:37 call  caller.__name__.lower()
+    -> <builtin>.str.lower
+252:28 call  inspect.isfunction(caller)
+    -> inspect.isfunction
+259:47 call  caller.__class__.__name__.lower()
+    note: no edge (Codex audit round 1, metadata): this branch takes a caller that is neither a class nor a function, which only a client passes (the package passes the class ContextManager, line 301); calls on the class of a client object are opaque (B5; the jsonpickle ruling (c)); the edge to str.lower stays through 249:37
+261:20 call  dict(_call_=caller, _decorate_=decorate)
+    -> <builtin>.dict
+    reject prometheus_client.decorator.decorate: dict stores decorate as _decorate_; the generated function calls it later
+262:32 call  FunctionMaker.create( '%s(func)' % name, 'return _decorat...
+    -> prometheus_client.decorator.FunctionMaker.create
+
+[prometheus_client.decorator.ContextManager.__call__]
+279:36 call  FunctionMaker.create( func, "with _self_: return _func_(%...
+    -> prometheus_client.decorator.FunctionMaker.create
+281:17 call  dict(_self_=self, _func_=func)
+    -> <builtin>.dict
+
+[prometheus_client.decorator.__init__]
+288:49 call  _GeneratorContextManager.__init__(self, g(*a, **k))
+    note: no edge: the def of line 287 is in the branch for Python 2.7 (n_args == 2 without varargs), which no supported version takes (contextlib's _GeneratorContextManager.__init__ has four arguments from Python 3.5), so it makes no function
+    reject *: the call does not run on a supported version
+288:57 call  g(*a, **k)
+    note: no edge: the def of line 287 makes no function on a supported version
+296:49 call  _GeneratorContextManager.__init__(self, g, a, k)
+    -> contextlib._GeneratorContextManager.__init__
+    reject *: the explicit call of the __init__ of contextlib's _GeneratorContextManager, outside the package
+    note: the branch n_args == 4 (line 294) is the one of every supported version (Python 3.9 and later)
+
+[prometheus_client.decorator.append]
+312:27 call  enumerate(vancestors)
+    -> <builtin>.enumerate
+313:22 call  issubclass(va, a)
+    -> <builtin>.issubclass
+316:22 call  issubclass(a, va)
+    -> <builtin>.issubclass
+320:26 call  vancestors.append(a)
+    -> <builtin>.list.append
+
+[prometheus_client.decorator.dispatch_on]
+330:39 call  ', '.join(dispatch_args)
+    -> <builtin>.str.join
+
+[prometheus_client.decorator.dispatch_on.check]
+334:17 call  wrong(len(arguments), len(dispatch_args))
+    -> operator.ne
+    -> operator.lt
+    note: wrong is the default operator.ne, or operator.lt, which register's dec passes (line 386); check is a local function that only the closures of dispatch_on call
+334:21 call  len(arguments)
+    -> <builtin>.len
+334:37 call  len(dispatch_args)
+    -> <builtin>.len
+335:28 call  TypeError('Expected %d arguments, got %d%s' % (len(dispat...
+    -> <builtin>.TypeError
+336:33 call  len(dispatch_args)
+    -> <builtin>.len
+336:53 call  len(arguments)
+    -> <builtin>.len
+
+[prometheus_client.decorator.dispatch_on.gen_func_dec]
+342:21 call  set(getfullargspec(func).args)
+    -> <builtin>.set
+    reject *: set is the builtin
+342:36 call  getfullargspec(func)
+    -> inspect.getfullargspec
+343:19 call  set(dispatch_args)
+    -> <builtin>.set
+    reject *: set is the builtin
+344:28 call  NameError('Unknown dispatch arguments %s' % dispatch_str)
+    -> <builtin>.NameError
+420:36 call  FunctionMaker.create( func, 'return _f_(%s, %%(shortsigna...
+    -> prometheus_client.decorator.FunctionMaker.create
+    reject prometheus_client.decorator.dispatch_on.gen_func_dec.ancestors, prometheus_client.decorator.dispatch_on.gen_func_dec.dispatch_info, prometheus_client.decorator.dispatch_on.gen_func_dec.vancestors: passed as attributes; update stores them on the generated function without calling them
+    reject prometheus_client.registry.CollectorRegistry.register: register here is the keyword name of an attribute that update stores, not a call
+422:17 call  dict(_f_=_dispatch)
+    -> <builtin>.dict
+    reject prometheus_client.decorator.dispatch_on.gen_func_dec._dispatch: dict stores _dispatch as _f_; the generated function calls it later
+
+[prometheus_client.decorator.dispatch_on.gen_func_dec.vancestors]
+352:18 call  check(types)
+    -> prometheus_client.decorator.dispatch_on.check
+353:37 call  range(len(dispatch_args))
+    -> <builtin>.range
+353:41 call  len(dispatch_args)
+    -> <builtin>.len
+355:40 call  zip(types, types_, ras)
+    -> <builtin>.zip
+356:34 call  issubclass(t, type_)
+    -> <builtin>.issubclass
+357:31 call  append(type_, ra)
+    -> prometheus_client.decorator.append
+358:24 call  set(ra)
+    -> <builtin>.set
+    reject *: set is the builtin
+
+[prometheus_client.decorator.dispatch_on.gen_func_dec.ancestors]
+364:18 call  check(types)
+    -> prometheus_client.decorator.dispatch_on.check
+366:30 call  zip(types, vancestors(*types))
+    -> <builtin>.zip
+366:48 call  vancestors(*types)
+    -> prometheus_client.decorator.dispatch_on.gen_func_dec.vancestors
+367:28 call  len(vas)
+    -> <builtin>.len
+369:39 call  RuntimeError( 'Ambiguous dispatch for %s: %s' % (t, vas))
+    -> <builtin>.RuntimeError
+373:31 call  type('t', (t, va), {})
+    -> <builtin>.type
+376:29 call  lists.append(mro[:-1])
+    -> <builtin>.list.append
+
+[prometheus_client.decorator.dispatch_on.gen_func_dec.register]
+383:18 call  check(types)
+    -> prometheus_client.decorator.dispatch_on.check
+
+[prometheus_client.decorator.dispatch_on.gen_func_dec.register.dec]
+386:22 call  check(getfullargspec(f).args, operator.lt, ' in ' + f.__n...
+    -> prometheus_client.decorator.dispatch_on.check
+386:37 call  getfullargspec(f)
+    -> inspect.getfullargspec
+
+[prometheus_client.decorator.dispatch_on.gen_func_dec.dispatch_info]
+396:18 call  check(types)
+    -> prometheus_client.decorator.dispatch_on.check
+398:41 call  itertools.product(*ancestors(*types))
+    -> itertools.product
+398:52 call  ancestors(*types)
+    -> prometheus_client.decorator.dispatch_on.gen_func_dec.ancestors
+399:27 call  lst.append(tuple(a.__name__ for a in anc))
+    -> <builtin>.list.append
+399:33 call  tuple(a.__name__ for a in anc)
+    -> <builtin>.tuple
+
+[prometheus_client.decorator.dispatch_on.gen_func_dec._dispatch]
+403:26 call  tuple(type(arg) for arg in dispatch_args)
+    -> <builtin>.tuple
+403:31 call  type(arg)
+    -> <builtin>.type
+409:25 call  f(*args, **kw)
+    note: no edge: f is an implementation that the client registered with register (typemap), a client callback
+410:45 call  itertools.product(*ancestors(*types))
+    -> itertools.product
+410:56 call  ancestors(*types)
+    -> prometheus_client.decorator.dispatch_on.gen_func_dec.ancestors
+411:17 call  next(combinations)
+    -> <builtin>.next
+413:32 call  typemap.get(types_)
+    -> <builtin>.dict.get
+415:29 call  f(*args, **kw)
+    note: no edge: f is an implementation that the client registered (a client callback)
+418:24 call  func(*args, **kw)
+    note: no edge: func is the client's function that gen_func_dec decorated (a client callback)
+
+
+== prometheus_client.exposition
+
+[prometheus_client.exposition]
+459:6 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[prometheus_client.exposition._PrometheusRedirectHandler.redirect_request]
+101:20 call  getattr(req, "method", req.get_method())
+    -> <builtin>.getattr
+    note: method is a plain attribute of a urllib Request (or missing); no package property or __getattr__ runs
+101:50 call  req.get_method()
+    -> prometheus_client.exposition._make_handler.handle.<lambda1>
+    -> urllib.request.Request.get_method
+    note: the argument is evaluated before getattr; urllib passes the Request that _make_handler.handle made, whose get_method is the instance attribute lambda (line 515), and on a further redirect the Request that this method made (line 105), whose get_method is the class method
+104:28 call  HTTPError(req.full_url, code, msg, headers, fp)
+    -> urllib.error.HTTPError
+105:30 call  Request( newurl.replace(' ', '%20'), # space escaping in ...
+    -> urllib.request.Request
+106:27 call  newurl.replace(' ', '%20')
+    -> <builtin>.str.replace
+
+[prometheus_client.exposition._bake_output]
+119:43 call  choose_encoder(accept_header)
+    -> prometheus_client.exposition.choose_encoder
+121:48 call  registry.restricted_registry(params['name[]'])
+    -> prometheus_client.registry.CollectorRegistry.restricted_registry
+    note: of the Collector values (judgement J1) only CollectorRegistry has restricted_registry; on the others the load raises AttributeError
+122:21 call  encoder(registry)
+    -> prometheus_client.exposition.generate_latest
+    -> prometheus_client.openmetrics.exposition.generate_latest
+    -> functools.partial.__call__
+    note: encoder is what choose_encoder returns: generate_latest itself, or a functools.partial of generate_latest or of openmetrics.generate_latest, whose __call__ calls it back
+125:49 call  gzip_accepted(accept_encoding_header)
+    -> prometheus_client.exposition.gzip_accepted
+126:31 call  gzip.compress(output)
+    -> gzip.compress
+127:23 call  headers.append(('Content-Encoding', 'gzip'))
+    -> <builtin>.list.append
+
+[prometheus_client.exposition.make_wsgi_app.prometheus_app]
+136:36 call  environ.get('HTTP_ACCEPT')
+    -> <builtin>.dict.get
+    note: environ is the WSGI environ, a dict (PEP 3333; the server that calls the app is a client, B5)
+137:45 call  environ.get('HTTP_ACCEPT_ENCODING')
+    -> <builtin>.dict.get
+138:26 call  parse_qs(environ.get('QUERY_STRING', ''))
+    -> urllib.parse.parse_qs
+138:38 call  environ.get('QUERY_STRING', '')
+    -> <builtin>.dict.get
+148:66 call  '# HTTP {}: {}; use OPTIONS or GET\n'.format(status, method)
+    -> <builtin>.str.format
+148:89 call  '# HTTP {}: {}; use OPTIONS or GET\n'.format(status, meth...
+    -> <builtin>.str.encode
+158:51 call  _bake_output(registry, accept_header, accept_encoding_hea...
+    -> prometheus_client.exposition._bake_output
+160:23 call  start_response(status, headers)
+    -> wsgiref.handlers.BaseHandler.start_response
+    note: judgement J4 (the referee's ruling): when the package's start_wsgi_server selects and starts wsgiref (lines 259-275), wsgiref's ServerHandler passes its start_response (BaseHandler.run), which keeps its library provenance; named by its canonical name (the trace's wsgiref.handlers.SimpleHandler.start_response is an alias). A start_response of an external server that calls the app is a client callback (B5): no edge
+
+[prometheus_client.exposition._get_best_family]
+187:31 call  socket.getaddrinfo(address, port, type=socket.SOCK_STREAM...
+    -> socket.getaddrinfo
+188:37 call  next(iter(infos))
+    -> <builtin>.next
+188:42 call  iter(infos)
+    -> <builtin>.iter
+
+[prometheus_client.exposition._get_ssl_ctx]
+203:29 call  ssl.SSLContext(protocol=protocol)
+    -> ssl.SSLContext
+207:42 call  ssl_cxt.load_verify_locations(cafile, capath)
+    -> ssl.SSLContext.load_verify_locations
+209:28 call  type(exc)
+    -> <builtin>.type
+210:22 call  str(exc)
+    -> <builtin>.str
+211:27 call  exc_type(f"Cannot load CA certificate chain from file " f...
+    -> ssl.SSLError
+    -> <builtin>.OSError
+    -> <builtin>.FileNotFoundError
+    -> <builtin>.PermissionError
+    -> <builtin>.IsADirectoryError
+    -> <builtin>.NotADirectoryError
+    note: exc_type is the class of the IOError (OSError) that load_verify_locations raised (judgement J5): ssl.SSLError for content OpenSSL refuses, or OSError from the errno of a failed open, which CPython makes the subclass of that errno
+215:39 call  ssl_cxt.load_default_certs(purpose=ssl.Purpose.CLIENT_AUTH)
+    -> ssl.SSLContext.load_default_certs
+217:28 call  type(exc)
+    -> <builtin>.type
+218:22 call  str(exc)
+    -> <builtin>.str
+219:27 call  exc_type(f"Cannot load default CA certificate chain: {msg}")
+    -> ssl.SSLError
+    -> <builtin>.OSError
+    -> <builtin>.FileNotFoundError
+    -> <builtin>.PermissionError
+    -> <builtin>.IsADirectoryError
+    -> <builtin>.NotADirectoryError
+    note: exc_type is the class of the OSError that load_default_certs raised (judgement J5): ssl.SSLError from set_default_verify_paths or from the Windows stores, OSError from enumerating a store, and, as at 211:27, the errno subclasses of a failed open of a certificate file, because load_default_certs also loads files: CPython's fallback certificate file and directory on Linux (ssl.py, load_default_certs; CPython 3.14) and PyPy's set_default_verify_paths, which calls load_verify_locations with the default paths (pypy3.11 lib_pypy/_cffi_ssl/_stdssl/__init__.py:1768); Codex audit round 1 (metadata) corrected the narrower list of audit W1; no edge changes
+225:32 call  ssl_cxt.load_cert_chain(certfile=certfile, keyfile=keyfile)
+    -> ssl.SSLContext.load_cert_chain
+227:24 call  type(exc)
+    -> <builtin>.type
+228:18 call  str(exc)
+    -> <builtin>.str
+229:23 call  exc_type(f"Cannot load server certificate file {certfile!...
+    -> ssl.SSLError
+    -> <builtin>.OSError
+    -> <builtin>.FileNotFoundError
+    -> <builtin>.PermissionError
+    -> <builtin>.IsADirectoryError
+    -> <builtin>.NotADirectoryError
+    note: exc_type is the class of the OSError that load_cert_chain raised (judgement J5)
+
+[prometheus_client.exposition.start_wsgi_server]
+258:54 call  _get_best_family(addr, port)
+    -> prometheus_client.exposition._get_best_family
+259:24 call  make_wsgi_app(registry)
+    -> prometheus_client.exposition.make_wsgi_app
+260:24 call  make_server(addr, port, app, TmpServer, handler_class=_Si...
+    -> wsgiref.simple_server.make_server
+    note: make_server instantiates the local TmpServer (no package __init__) and stores the app; it calls no package code
+262:31 call  _get_ssl_ctx( certfile, keyfile, protocol, client_cafile,...
+    -> prometheus_client.exposition._get_ssl_ctx
+272:43 call  context.wrap_socket(httpd.socket, server_side=True)
+    -> ssl.SSLContext.wrap_socket
+273:25 call  threading.Thread(target=httpd.serve_forever)
+    -> threading.Thread
+275:12 call  t.start()
+    -> threading.Thread.start
+    -> prometheus_client.exposition.make_wsgi_app.prometheus_app
+    -> prometheus_client.exposition._SilentHandler.log_message
+    reject prometheus_client.bridge.graphite.GraphiteBridge.start: t is a threading.Thread
+    note: the thread runs httpd.serve_forever, whose per-request handler _SilentHandler runs the app of make_wsgi_app and logs each request through log_message (BaseHTTPRequestHandler.log_request); the package call that starts this library code is the caller (B5, bottle's wsgiref precedent); the tracer misses these calls (T1: the request threads are started by socketserver)
+
+[prometheus_client.exposition.generate_latest]
+317:35 call  registry.collect()
+    -> prometheus_client.registry.CollectorRegistry.collect
+    -> prometheus_client.registry.RestrictedRegistry.collect
+    -> prometheus_client.metrics.MetricWrapperBase.collect
+    -> prometheus_client.process_collector.ProcessCollector.collect
+    -> prometheus_client.gc_collector.GCCollector.collect
+    -> prometheus_client.platform_collector.PlatformCollector.collect
+    -> prometheus_client.multiprocess.MultiProcessCollector.collect
+    reject prometheus_client.registry.Collector.collect: Collector is a Protocol, which has no instances, and every package implementation overrides collect
+    reject prometheus_client.registry._EmptyCollector.collect: the private _EmptyCollector is only stored under the name target_info of a registry, never passed as a Collector
+    note: registry is annotated Collector (judgement J1): REGISTRY by default, a RestrictedRegistry from _bake_output (line 121) and the documented restricted_registry example, and the package's other Collector implementations
+336:26 call  output.append('# HELP {} {}\n'.format( openmetrics.escape...
+    -> <builtin>.list.append
+336:50 call  '# HELP {} {}\n'.format( openmetrics.escape_metric_name(m...
+    -> <builtin>.str.format
+337:47 call  openmetrics.escape_metric_name(mname, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+337:94 call  metric.documentation.replace('\\', r'\\')
+    -> <builtin>.str.replace
+337:115 call  metric.documentation.replace('\\', r'\\').replace('\n', r...
+    -> <builtin>.str.replace
+338:26 call  output.append(f'# TYPE {openmetrics.escape_metric_name(mn...
+    -> <builtin>.list.append
+338:67 call  openmetrics.escape_metric_name(mname, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+345:46 call  om_samples.setdefault(suffix, [])
+    -> <builtin>.dict.setdefault
+345:65 call  om_samples.setdefault(suffix, []).append(sample_line(s))
+    -> <builtin>.list.append
+345:77 call  sample_line(s)
+    -> prometheus_client.exposition.generate_latest.sample_line
+348:34 call  output.append(sample_line(s))
+    -> <builtin>.list.append
+348:46 call  sample_line(s)
+    -> prometheus_client.exposition.generate_latest.sample_line
+353:36 call  sorted(om_samples.items())
+    -> <builtin>.sorted
+353:53 call  om_samples.items()
+    -> <builtin>.dict.items
+354:26 call  output.append('# HELP {} {}\n'.format(openmetrics.escape_...
+    -> <builtin>.list.append
+354:50 call  '# HELP {} {}\n'.format(openmetrics.escape_metric_name(me...
+    -> <builtin>.str.format
+354:81 call  openmetrics.escape_metric_name(metric.name + suffix, esca...
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+355:79 call  metric.documentation.replace('\\', r'\\')
+    -> <builtin>.str.replace
+355:100 call  metric.documentation.replace('\\', r'\\').replace('\n', r...
+    -> <builtin>.str.replace
+356:26 call  output.append(f'# TYPE {openmetrics.escape_metric_name(me...
+    -> <builtin>.list.append
+356:67 call  openmetrics.escape_metric_name(metric.name + suffix, esca...
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+357:26 call  output.extend(lines)
+    -> <builtin>.list.extend
+358:19 call  ''.join(output)
+    -> <builtin>.str.join
+358:34 call  ''.join(output).encode('utf-8')
+    -> <builtin>.str.encode
+
+[prometheus_client.exposition.generate_latest.sample_line]
+296:36 call  '{0}'.format(','.join( # Label values always support UTF-...
+    -> <builtin>.str.format
+296:45 call  ','.join( # Label values always support UTF-8 ['{}="{}"'....
+    -> <builtin>.str.join
+298:34 call  '{}="{}"'.format( openmetrics.escape_label_name(k, escapi...
+    -> <builtin>.str.format
+299:50 call  openmetrics.escape_label_name(k, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_label_name
+299:84 call  openmetrics._escape(v, openmetrics.ALLOWUTF8, False)
+    -> prometheus_client.openmetrics.exposition._escape
+300:39 call  sorted(samples.labels.items())
+    -> <builtin>.sorted
+300:60 call  samples.labels.items()
+    -> <builtin>.dict.items
+306:32 call  int(float(samples.timestamp) * 1000)
+    -> <builtin>.int
+306:38 call  float(samples.timestamp)
+    -> <builtin>.float
+    -> prometheus_client.samples.Timestamp.__float__
+    note: a sample timestamp is a float or a Timestamp (samples.py:45-46; the OpenMetrics parser makes Timestamps); float() of a Timestamp runs its __float__
+307:89 call  openmetrics._is_valid_legacy_metric_name(samples.name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+309:44 call  '{{{0}}}'.format(labelstr)
+    -> <builtin>.str.format
+310:53 call  openmetrics.escape_metric_name(samples.name, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+310:105 call  floatToGoString(samples.value)
+    -> prometheus_client.utils.floatToGoString
+314:51 call  openmetrics.escape_metric_name(samples.name, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+314:118 call  floatToGoString(samples.value)
+    -> prometheus_client.utils.floatToGoString
+
+[prometheus_client.exposition.choose_encoder]
+366:40 call  accept_header.split(',')
+    -> <builtin>.str.split
+367:26 call  accepted.split(';')
+    -> <builtin>.str.split
+367:40 call  accepted.split(';')[0].strip()
+    -> <builtin>.str.strip
+368:34 call  accepted.split(';')
+    -> <builtin>.str.split
+369:35 call  _get_version(toks)
+    -> prometheus_client.exposition._get_version
+370:37 call  _get_escaping(toks)
+    -> prometheus_client.exposition._get_escaping
+374:32 call  partial(openmetrics.generate_latest, escaping=openmetrics...
+    -> functools.partial
+    reject *: partial stores the function; _bake_output calls it later through encoder (122:21)
+375:41 call  parse_version(version)
+    -> prometheus_client.utils.parse_version
+376:32 call  partial(openmetrics.generate_latest, escaping=escaping, v...
+    -> functools.partial
+    reject *: partial stores the function; _bake_output calls it later through encoder (122:21)
+377:107 call  str(escaping)
+    -> <builtin>.str
+378:28 call  accepted.split(';')
+    -> <builtin>.str.split
+378:42 call  accepted.split(';')[0].strip()
+    -> <builtin>.str.strip
+379:34 call  accepted.split(';')
+    -> <builtin>.str.split
+380:35 call  _get_version(toks)
+    -> prometheus_client.exposition._get_version
+381:37 call  _get_escaping(toks)
+    -> prometheus_client.exposition._get_escaping
+384:41 call  parse_version(version)
+    -> prometheus_client.utils.parse_version
+385:32 call  partial(generate_latest, escaping=escaping)
+    -> functools.partial
+    reject *: partial stores the function; _bake_output calls it later through encoder (122:21)
+386:66 call  str(escaping)
+    -> <builtin>.str
+
+[prometheus_client.exposition._get_version]
+398:31 call  tok.strip()
+    -> <builtin>.str.strip
+398:39 call  tok.strip().split('=', 1)
+    -> <builtin>.str.split
+
+[prometheus_client.exposition._get_escaping]
+413:31 call  tok.strip()
+    -> <builtin>.str.strip
+413:39 call  tok.strip().split('=', 1)
+    -> <builtin>.str.split
+
+[prometheus_client.exposition.gzip_accepted]
+431:49 call  accept_encoding_header.split(',')
+    -> <builtin>.str.split
+432:26 call  accepted.split(';')
+    -> <builtin>.str.split
+432:40 call  accepted.split(';')[0].strip()
+    -> <builtin>.str.strip
+432:48 call  accepted.split(';')[0].strip().lower()
+    -> <builtin>.str.lower
+
+[prometheus_client.exposition.MetricsHandler.do_GET]
+444:41 call  self.headers.get('Accept')
+    -> http.client.HTTPMessage.get
+    note: self.headers is the http.client.HTTPMessage that BaseHTTPRequestHandler.parse_request makes (MessageClass)
+445:50 call  self.headers.get('Accept-Encoding')
+    -> http.client.HTTPMessage.get
+446:26 call  parse_qs(urlparse(self.path).query)
+    -> urllib.parse.parse_qs
+446:35 call  urlparse(self.path)
+    -> urllib.parse.urlparse
+448:47 call  _bake_output(registry, accept_header, accept_encoding_hea...
+    -> prometheus_client.exposition._bake_output
+450:27 call  self.send_response(int(status.split(' ')[0]))
+    -> http.server.BaseHTTPRequestHandler.send_response
+    -> prometheus_client.exposition.MetricsHandler.log_message
+    note: MetricsHandler inherits send_response, which logs the request through self.log_request, which calls the package override log_message
+450:31 call  int(status.split(' ')[0])
+    -> <builtin>.int
+450:44 call  status.split(' ')
+    -> <builtin>.str.split
+452:29 call  self.send_header(*header)
+    -> http.server.BaseHTTPRequestHandler.send_header
+453:25 call  self.end_headers()
+    -> http.server.BaseHTTPRequestHandler.end_headers
+454:25 call  self.wfile.write(output)
+    -> socketserver._SocketWriter.write
+    note: StreamRequestHandler.setup makes wfile a socketserver._SocketWriter, because BaseHTTPRequestHandler keeps wbufsize 0
+
+[prometheus_client.exposition.MetricsHandler.factory]
+469:23 call  str(cls.__name__)
+    -> <builtin>.str
+470:32 call  type(cls_name, (cls, object), {"registry": registry})
+    -> <builtin>.type
+    note: type() makes a subclass of MetricsHandler; no package __init_subclass__ or metaclass runs
+
+[prometheus_client.exposition.write_to_textfile]
+486:36 call  os.path.basename(path)
+    -> os.path.basename
+487:34 call  os.path.join(tmpdir, filename)
+    -> os.path.join
+487:64 call  os.getpid()
+    -> os.getpid
+487:93 call  threading.current_thread()
+    -> threading.current_thread
+489:38 call  os.getpid()
+    -> os.getpid
+489:67 call  threading.current_thread()
+    -> threading.current_thread
+491:18 call  open(tmppath, 'wb')
+    -> <builtin>.open
+492:20 call  f.write(generate_latest(registry, escaping))
+    -> io.BufferedWriter.write
+    note: f is the binary stream of open(tmppath, 'wb')
+492:36 call  generate_latest(registry, escaping)
+    -> prometheus_client.exposition.generate_latest
+    reject prometheus_client.openmetrics.exposition.generate_latest: the name generate_latest is the exposition module's own function
+496:23 call  os.replace(tmppath, path)
+    -> os.replace
+    note: platform branch (os.name == 'nt'); a supported platform takes each side
+498:22 call  os.rename(tmppath, path)
+    -> os.rename
+500:26 call  os.path.exists(tmppath)
+    -> os.path.exists
+501:22 call  os.remove(tmppath)
+    -> os.remove
+    reject prometheus_client.metrics.MetricWrapperBase.remove: os.remove, the standard library function
+
+[prometheus_client.exposition._make_handler.handle]
+514:26 call  Request(url, data=data)
+    -> urllib.request.Request
+517:31 call  request.add_header(k, v)
+    -> urllib.request.Request.add_header
+518:28 call  build_opener(base_handler)
+    -> urllib.request.build_opener
+518:47 call  build_opener(base_handler).open(request, timeout=timeout)
+    -> urllib.request.OpenerDirector.open
+    -> prometheus_client.exposition._make_handler.handle.<lambda1>
+    -> prometheus_client.exposition._PrometheusRedirectHandler.redirect_request
+    note: the opener calls request.get_method() (the lambda of line 515) to send the request, and on a redirect calls redirect_request of the handler when base_handler is _PrometheusRedirectHandler (passthrough_redirect_handler); a server's answer decides the redirect, so it runs
+520:26 call  OSError(f"error talking to pushgateway: {resp.code} {resp...
+    note: no edge (Codex audit round 1): the check cannot fail; build_opener keeps urllib's HTTPErrorProcessor and HTTPDefaultErrorHandler with every base_handler that the package passes (HTTPHandler, _PrometheusRedirectHandler, an HTTPSHandler), so an HTTP(S) answer outside 2xx raises HTTPError inside open() at 518:47 (urllib/request.py, HTTPErrorProcessor.http_response; CPython 3.9 to 3.14, PyPy 3.9 to 3.11), and a response of another scheme has code None; the precedent is python-barcode J7
+
+[prometheus_client.exposition.default_handler]
+536:25 call  _make_handler(url, method, timeout, headers, data, HTTPHa...
+    -> prometheus_client.exposition._make_handler
+
+[prometheus_client.exposition.passthrough_redirect_handler]
+556:25 call  _make_handler(url, method, timeout, headers, data, _Prome...
+    -> prometheus_client.exposition._make_handler
+
+[prometheus_client.exposition.basic_auth_handler.handle]
+577:57 call  f'{username}:{password}'.encode()
+    -> <builtin>.str.encode
+578:42 call  base64.b64encode(auth_value)
+    -> base64.b64encode
+580:27 call  headers.append(('Authorization', auth_header))
+    -> <builtin>.list.append
+581:24 call  default_handler(url, method, timeout, headers, data)
+    -> prometheus_client.exposition.default_handler
+581:61 call  default_handler(url, method, timeout, headers, data)()
+    -> prometheus_client.exposition._make_handler.handle
+    note: default_handler returns the closure handle of _make_handler
+
+[prometheus_client.exposition.tls_auth_handler]
+605:29 call  ssl.SSLContext(protocol=protocol)
+    -> ssl.SSLContext
+607:38 call  context.load_verify_locations(cafile)
+    -> ssl.SSLContext.load_verify_locations
+609:35 call  context.load_default_certs()
+    -> ssl.SSLContext.load_default_certs
+615:28 call  context.load_cert_chain(certfile=certfile, keyfile=keyfile)
+    -> ssl.SSLContext.load_cert_chain
+616:27 call  HTTPSHandler(context=context)
+    -> urllib.request.HTTPSHandler
+617:25 call  _make_handler(url, method, timeout, headers, data, handler)
+    -> prometheus_client.exposition._make_handler
+
+[prometheus_client.exposition.push_to_gateway]
+669:17 call  _use_gateway('PUT', gateway, job, registry, grouping_key,...
+    -> prometheus_client.exposition._use_gateway
+
+[prometheus_client.exposition.pushadd_to_gateway]
+703:17 call  _use_gateway('POST', gateway, job, registry, grouping_key...
+    -> prometheus_client.exposition._use_gateway
+
+[prometheus_client.exposition.delete_from_gateway]
+732:17 call  _use_gateway('DELETE', gateway, job, None, grouping_key, ...
+    -> prometheus_client.exposition._use_gateway
+
+[prometheus_client.exposition._use_gateway]
+745:27 call  urlparse(gateway)
+    -> urllib.parse.urlparse
+750:29 call  gateway.rstrip('/')
+    -> <builtin>.str.rstrip
+751:36 call  '{}/metrics/{}/{}'.format(gateway, *_escape_grouping_key(...
+    -> <builtin>.str.format
+751:67 call  _escape_grouping_key("job", job)
+    -> prometheus_client.exposition._escape_grouping_key
+755:19 call  ''.join( '/{}/{}'.format(*_escape_grouping_key(str(k), st...
+    -> <builtin>.str.join
+756:24 call  '/{}/{}'.format(*_escape_grouping_key(str(k), str(v)))
+    -> <builtin>.str.format
+756:46 call  _escape_grouping_key(str(k), str(v))
+    -> prometheus_client.exposition._escape_grouping_key
+756:50 call  str(k)
+    -> <builtin>.str
+756:58 call  str(v)
+    -> <builtin>.str
+757:27 call  sorted(grouping_key.items())
+    -> <builtin>.sorted
+757:46 call  grouping_key.items()
+    -> <builtin>.dict.items
+764:31 call  generate_latest(registry)
+    -> prometheus_client.exposition.generate_latest
+    reject prometheus_client.openmetrics.exposition.generate_latest: the name generate_latest is the exposition module's own function
+765:42 call  _compress_payload(data, compression)
+    -> prometheus_client.exposition._compress_payload
+770:29 call  ValueError('Compression is not supported for DELETE reque...
+    note: no edge (Codex audit round 1): _use_gateway is private; its only DELETE caller, delete_from_gateway (line 732), passes no compression, so compression is None here; push_to_gateway and pushadd_to_gateway, which pass compression, use PUT and POST
+772:12 call  handler( url=url, method=method, timeout=timeout, headers...
+    -> prometheus_client.exposition.default_handler
+    -> prometheus_client.exposition.basic_auth_handler
+    -> prometheus_client.exposition.passthrough_redirect_handler
+    note: handler is a bare Callable; its values are default_handler (the default), the built-in handlers that the documentation names for the role and that bind to these five keyword arguments (basic_auth_handler, passthrough_redirect_handler; docs/content/exporting/pushgateway.md, "Handlers"), and client functions (client callbacks); tls_auth_handler is documented only inside a client wrapper and cannot bind here (certfile and keyfile are required)
+775:6 call  handler( url=url, method=method, timeout=timeout, headers...
+    -> prometheus_client.exposition._make_handler.handle
+    -> prometheus_client.exposition.basic_auth_handler.handle
+    note: the callable that an admitted package handler returns (772:12): default_handler and passthrough_redirect_handler return _make_handler.handle, basic_auth_handler its handle; what a client's handler returns, also a documented client wrapper, is a client object (B5; Codex audit round 1, metadata)
+
+[prometheus_client.exposition._compress_payload]
+783:33 call  compression.lower()
+    -> <builtin>.str.lower
+785:23 call  headers.append(('Content-Encoding', 'gzip'))
+    -> <builtin>.list.append
+786:29 call  gzip.compress(data)
+    -> gzip.compress
+789:31 call  RuntimeError('Snappy compression requires the python-snap...
+    -> <builtin>.RuntimeError
+790:23 call  headers.append(('Content-Encoding', 'snappy'))
+    -> <builtin>.list.append
+791:45 call  snappy.StreamCompressor()
+    -> snappy.StreamCompressor
+    note: missing module: python-snappy is not installed (an optional import at lines 27-32; both sides run)
+792:41 call  compressor.compress(data)
+    -> snappy.StreamCompressor.compress
+    note: missing module: compressor is an instance of the stub snappy.StreamCompressor
+793:24 call  getattr(compressor, 'flush', None)
+    -> <builtin>.getattr
+794:20 call  callable(flush)
+    -> <builtin>.callable
+795:32 call  flush()
+    -> snappy.StreamCompressor.flush
+    note: missing module: flush is the attribute flush of the stub instance, which callable() accepts
+797:21 call  ValueError(f"Unsupported compression type: {compression}")
+    -> <builtin>.ValueError
+
+[prometheus_client.exposition._escape_grouping_key]
+807:55 call  base64.urlsafe_b64encode(v.encode("utf-8"))
+    -> base64.urlsafe_b64encode
+807:64 call  v.encode("utf-8")
+    -> <builtin>.str.encode
+807:81 call  base64.urlsafe_b64encode(v.encode("utf-8")).decode("utf-8")
+    -> <builtin>.bytes.decode
+809:29 call  quote_plus(v)
+    -> urllib.parse.quote_plus
+
+[prometheus_client.exposition.instance_ip_grouping_key]
+814:17 call  closing(socket.socket(socket.AF_INET, socket.SOCK_DGRAM))
+    -> contextlib.closing
+814:31 call  socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    -> socket.socket
+    note: socket is the module socket (the attribute socket that start_wsgi_server assigns is that of a server object)
+821:22 call  s.connect(('10.255.255.255', 1))
+    -> socket.socket.connect
+    note: platform branch (sys.platform == 'darwin'); a supported platform takes each side
+823:22 call  s.connect(('localhost', 0))
+    -> socket.socket.connect
+825:42 call  s.getsockname()
+    -> socket.socket.getsockname
+
+
+== prometheus_client.gc_collector
+
+[prometheus_client.gc_collector]
+44:27 call  GCCollector()
+    -> prometheus_client.gc_collector.GCCollector.__init__
+
+[prometheus_client.gc_collector.GCCollector.__init__]
+13:23 call  hasattr(gc, 'get_stats')
+    -> <builtin>.hasattr
+13:74 call  platform.python_implementation()
+    -> platform.python_implementation
+15:26 call  registry.register(self)
+    -> prometheus_client.registry.CollectorRegistry.register
+    note: registry is annotated CollectorRegistry; on other implementations than CPython the constructor returns before this call
+
+[prometheus_client.gc_collector.GCCollector.collect]
+18:40 call  CounterMetricFamily( 'python_gc_objects_collected', 'Obje...
+    -> prometheus_client.metrics_core.CounterMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: CounterMetricFamily defines its own __init__
+23:44 call  CounterMetricFamily( 'python_gc_objects_uncollectable', '...
+    -> prometheus_client.metrics_core.CounterMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: CounterMetricFamily defines its own __init__
+29:42 call  CounterMetricFamily( 'python_gc_collections', 'Number of ...
+    -> prometheus_client.metrics_core.CounterMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: CounterMetricFamily defines its own __init__
+35:35 call  enumerate(gc.get_stats())
+    -> <builtin>.enumerate
+35:48 call  gc.get_stats()
+    -> gc.get_stats
+36:29 call  str(gen)
+    -> <builtin>.str
+37:33 call  collected.add_metric([generation], value=stat['collected'])
+    -> prometheus_client.metrics_core.CounterMetricFamily.add_metric
+    reject *: collected is a CounterMetricFamily
+38:37 call  uncollectable.add_metric([generation], value=stat['uncoll...
+    -> prometheus_client.metrics_core.CounterMetricFamily.add_metric
+    reject *: uncollectable is a CounterMetricFamily
+39:35 call  collections.add_metric([generation], value=stat['collecti...
+    -> prometheus_client.metrics_core.CounterMetricFamily.add_metric
+    reject *: collections is a CounterMetricFamily
+
+
+== prometheus_client.metrics
+
+[prometheus_client.metrics]
+21:12 call  TypeVar('T', bound='MetricWrapperBase')
+    -> typing.TypeVar
+22:12 call  TypeVar("F", bound=Callable[..., Any])
+    -> typing.TypeVar
+48:32 call  _get_use_created()
+    -> prometheus_client.metrics._get_use_created
+410:33 call  frozenset(('all', 'liveall', 'min', 'livemin', 'max', 'li...
+    -> <builtin>.frozenset
+411:35 call  frozenset(('mostrecent', 'livemostrecent'))
+    -> <builtin>.frozenset
+
+[prometheus_client.metrics._build_full_name]
+27:25 call  ValueError('Metric name should not be empty')
+    -> <builtin>.ValueError
+34:55 call  full_name.endswith('_total')
+    -> <builtin>.str.endswith
+36:39 call  full_name.endswith("_" + unit)
+    -> <builtin>.str.endswith
+39:25 call  ValueError('Metric name is of a type that cannot have a u...
+    -> <builtin>.ValueError
+
+[prometheus_client.metrics._get_use_created]
+45:26 call  os.environ.get("PROMETHEUS_DISABLE_CREATED_SERIES", 'False')
+    -> collections.abc.Mapping.get
+    note: os.environ is an os._Environ; its get is the method that the private class inherits from the public collections.abc.Mapping (anytree config.py:6)
+45:78 call  os.environ.get("PROMETHEUS_DISABLE_CREATED_SERIES", 'Fals...
+    -> <builtin>.str.lower
+
+[prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable]
+77:35 call  self._is_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._is_observable
+78:29 call  ValueError('%s metric is missing label values' % str(self...
+    -> <builtin>.ValueError
+78:71 call  str(self._type)
+    -> <builtin>.str
+
+[prometheus_client.metrics.MetricWrapperBase._get_metric]
+84:22 call  Metric(self._name, self._documentation, self._type, self....
+    -> prometheus_client.metrics_core.Metric.__init__
+
+[prometheus_client.metrics.MetricWrapperBase.describe]
+87:33 call  self._get_metric()
+    -> prometheus_client.metrics.MetricWrapperBase._get_metric
+
+[prometheus_client.metrics.MetricWrapperBase.collect]
+90:34 call  self._get_metric()
+    -> prometheus_client.metrics.MetricWrapperBase._get_metric
+91:96 call  self._samples()
+    -> prometheus_client.metrics.MetricWrapperBase._samples
+92:30 call  metric.add_sample(self._name + suffix, labels, value, tim...
+    -> prometheus_client.metrics_core.Metric.add_sample
+
+[prometheus_client.metrics.MetricWrapperBase.__repr__]
+99:27 call  type(self)
+    -> <builtin>.type
+
+[prometheus_client.metrics.MetricWrapperBase.__init__]
+116:38 call  _build_full_name(self._type, name, namespace, subsystem, ...
+    -> prometheus_client.metrics._build_full_name
+117:48 call  _validate_labelnames(self, labelnames)
+    -> prometheus_client.validation._validate_labelnames
+118:34 call  tuple(_labelvalues or ())
+    -> <builtin>.tuple
+123:30 call  _validate_metric_name(self._name)
+    -> prometheus_client.validation._validate_metric_name
+125:27 call  self._is_parent()
+    -> prometheus_client.metrics.MetricWrapperBase._is_parent
+127:30 call  Lock()
+    -> threading.Lock
+130:31 call  self._is_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._is_observable
+131:30 call  self._metric_init()
+    -> prometheus_client.metrics.Counter._metric_init
+    -> prometheus_client.metrics.Gauge._metric_init
+    -> prometheus_client.metrics.Summary._metric_init
+    -> prometheus_client.metrics.Histogram._metric_init
+    -> prometheus_client.metrics.Info._metric_init
+    -> prometheus_client.metrics.Enum._metric_init
+    -> prometheus_client.metrics.MetricWrapperBase._metric_init
+    note: self is any metric wrapper being made; MetricWrapperBase is public and not abstract (its base Collector is a Protocol, but a class that lists a Protocol as a base is an ordinary class), so a client can make one, and a label-less MetricWrapperBase reaches its own _metric_init, which raises (judgement J2)
+136:34 call  registry.register(self)
+    -> prometheus_client.registry.CollectorRegistry.register
+    note: registry is annotated Optional[CollectorRegistry]
+
+[prometheus_client.metrics.MetricWrapperBase.labels]
+162:29 call  ValueError('No label names were set when constructing %s'...
+    -> <builtin>.ValueError
+165:29 call  ValueError('{} already has labels set ({}); can not chain...
+    -> <builtin>.ValueError
+165:103 call  '{} already has labels set ({}); can not chain calls to ....
+    -> <builtin>.str.format
+    -> prometheus_client.metrics.MetricWrapperBase.__str__
+    note: format() of self with an empty spec runs str(self), the __str__ of the metric wrapper
+167:21 call  dict(zip(self._labelnames, self._labelvalues))
+    -> <builtin>.dict
+167:25 call  zip(self._labelnames, self._labelvalues)
+    -> <builtin>.zip
+171:29 call  ValueError("Can't pass both *args and **kwargs")
+    -> <builtin>.ValueError
+174:22 call  sorted(labelkwargs)
+    -> <builtin>.sorted
+174:45 call  sorted(self._labelnames)
+    -> <builtin>.sorted
+175:33 call  ValueError('Incorrect label names')
+    -> <builtin>.ValueError
+176:36 call  tuple(str(labelkwargs[l]) for l in self._labelnames)
+    -> <builtin>.tuple
+176:40 call  str(labelkwargs[l])
+    -> <builtin>.str
+    note: the label values are client objects (annotation object: no package value, B2)
+178:19 call  len(labelvalues)
+    -> <builtin>.len
+178:39 call  len(self._labelnames)
+    -> <builtin>.len
+179:33 call  ValueError('Incorrect label count')
+    -> <builtin>.ValueError
+180:36 call  tuple(str(l) for l in labelvalues)
+    -> <builtin>.tuple
+180:40 call  str(l)
+    -> <builtin>.str
+    note: the label values are client objects (annotation object: no package value, B2)
+184:40 call  getattr(self, '_original_name', self._name)
+    -> <builtin>.getattr
+185:36 call  getattr(self, '_namespace', '')
+    -> <builtin>.getattr
+186:36 call  getattr(self, '_subsystem', '')
+    -> <builtin>.getattr
+187:31 call  getattr(self, '_unit', '')
+    -> <builtin>.getattr
+189:36 call  dict(self._kwargs)
+    -> <builtin>.dict
+191:37 call  child_kwargs.pop(k, None)
+    -> <builtin>.dict.pop
+193:64 call  self.__class__( original_name, documentation=self._docume...
+    -> prometheus_client.metrics.MetricWrapperBase.__init__
+    -> prometheus_client.metrics.Gauge.__init__
+    -> prometheus_client.metrics.Histogram.__init__
+    -> prometheus_client.metrics.Enum.__init__
+    note: self.__class__ is the class of the parent: Counter, Summary, Info and MetricWrapperBase itself (MetricWrapperBase.__init__), Gauge, Histogram or Enum (their own __init__)
+
+162:77 op  'No label names were set when constructing %s' % self
+    -> prometheus_client.metrics.MetricWrapperBase.__str__
+    note: %s of self runs str(self)
+[prometheus_client.metrics.MetricWrapperBase.remove]
+207:26 call  warnings.warn( "Removal of labels has not been implemente...
+    -> warnings.warn
+212:29 call  ValueError('No label names were set when constructing %s'...
+    -> <builtin>.ValueError
+215:15 call  len(labelvalues)
+    -> <builtin>.len
+215:35 call  len(self._labelnames)
+    -> <builtin>.len
+216:29 call  ValueError('Incorrect label count (expected %d, got %s)' ...
+    -> <builtin>.ValueError
+216:82 call  len(self._labelnames)
+    -> <builtin>.len
+217:28 call  tuple(str(l) for l in labelvalues)
+    -> <builtin>.tuple
+217:32 call  str(l)
+    -> <builtin>.str
+    note: the label values are client objects (annotation Any; no documented package value)
+
+212:77 op  'No label names were set when constructing %s' % self
+    -> prometheus_client.metrics.MetricWrapperBase.__str__
+    note: %s of self runs str(self)
+[prometheus_client.metrics.MetricWrapperBase.remove_by_labels]
+225:26 call  warnings.warn( "Removal of labels has not been implemente...
+    -> warnings.warn
+231:29 call  ValueError('No label names were set when constructing %s'...
+    -> <builtin>.ValueError
+233:26 call  isinstance(labels, dict)
+    -> <builtin>.isinstance
+234:28 call  TypeError("labels must be a dict of {label_name: label_va...
+    -> <builtin>.TypeError
+239:42 call  labels.keys()
+    -> <builtin>.dict.keys
+    note: labels is annotated dict[str, str], and the isinstance check of line 233 admits only dicts
+241:29 call  ValueError( 'Unknown label names: %s; expected %s' % (inv...
+    -> <builtin>.ValueError
+245:45 call  self._labelnames.index(k)
+    -> <builtin>.tuple.index
+    note: self._labelnames is the tuple of _validate_labelnames
+245:53 call  str(v)
+    -> <builtin>.str
+245:81 call  labels.items()
+    -> <builtin>.dict.items
+249:27 call  list(self._metrics.keys())
+    -> <builtin>.list
+249:46 call  self._metrics.keys()
+    -> <builtin>.dict.keys
+250:23 call  all(lv[pos] == want for pos, want in pos_filter.items())
+    -> <builtin>.all
+250:73 call  pos_filter.items()
+    -> <builtin>.dict.items
+252:38 call  self._metrics.pop(lv, None)
+    -> <builtin>.dict.pop
+
+231:77 op  'No label names were set when constructing %s' % self
+    -> prometheus_client.metrics.MetricWrapperBase.__str__
+    note: %s of self runs str(self)
+[prometheus_client.metrics.MetricWrapperBase.clear]
+260:26 call  warnings.warn( "Clearing labels has not been implemented ...
+    -> warnings.warn
+
+[prometheus_client.metrics.MetricWrapperBase._samples]
+267:27 call  self._is_parent()
+    -> prometheus_client.metrics.MetricWrapperBase._is_parent
+268:39 call  self._multi_samples()
+    -> prometheus_client.metrics.MetricWrapperBase._multi_samples
+270:39 call  self._child_samples()
+    -> prometheus_client.metrics.Counter._child_samples
+    -> prometheus_client.metrics.Gauge._child_samples
+    -> prometheus_client.metrics.Summary._child_samples
+    -> prometheus_client.metrics.Histogram._child_samples
+    -> prometheus_client.metrics.Info._child_samples
+    -> prometheus_client.metrics.Enum._child_samples
+    -> prometheus_client.metrics.Gauge.set_function.samples
+    reject prometheus_client.metrics.MetricWrapperBase._child_samples: self here is a metric that is not a parent; every such MetricWrapperBase raises in __init__ (its own _metric_init), so no MetricWrapperBase instance reaches this branch
+    note: self._child_samples is the class method, or, after Gauge.set_function, the instance attribute that binds the local function samples with types.MethodType (line 501)
+
+[prometheus_client.metrics.MetricWrapperBase._multi_samples]
+274:41 call  self._metrics.copy()
+    -> <builtin>.dict.copy
+275:44 call  metrics.items()
+    -> <builtin>.dict.items
+276:33 call  list(zip(self._labelnames, labels))
+    -> <builtin>.list
+276:37 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+277:109 call  metric._samples()
+    -> prometheus_client.metrics.MetricWrapperBase._samples
+278:29 call  Sample(suffix, dict(series_labels + list(sample_labels.it...
+    note: no edge: Sample is a NamedTuple class, whose constructor is generated code (asyncstdlib CacheInfo)
+278:42 call  dict(series_labels + list(sample_labels.items()))
+    -> <builtin>.dict
+278:63 call  list(sample_labels.items())
+    -> <builtin>.list
+278:83 call  sample_labels.items()
+    -> <builtin>.dict.items
+
+[prometheus_client.metrics.MetricWrapperBase._child_samples]
+281:34 call  NotImplementedError('_child_samples() must be implemented...
+    -> <builtin>.NotImplementedError
+
+281:80 op  '_child_samples() must be implemented by %r' % self
+    -> prometheus_client.metrics.MetricWrapperBase.__repr__
+    note: %r of self runs repr(self)
+[prometheus_client.metrics.MetricWrapperBase._metric_init]
+289:34 call  NotImplementedError('_metric_init() must be implemented b...
+    -> <builtin>.NotImplementedError
+
+289:78 op  '_metric_init() must be implemented by %r' % self
+    -> prometheus_client.metrics.MetricWrapperBase.__repr__
+    note: %r of self runs repr(self)
+[prometheus_client.metrics.Counter._metric_init]
+333:40 call  values.ValueClass(self._type, self._name, self._name + '_...
+    -> prometheus_client.values.MutexValue.__init__
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__init__
+    note: values.ValueClass is the class that get_value_class chose at import (values.py:163): MutexValue, or the MmapedValue class of MultiProcessValue() when PROMETHEUS_MULTIPROC_DIR (or the old lower-case name) is set, the documented multiprocess mode; the tests also assign values.ValueClass = MultiProcessValue(...)
+335:34 call  time.time()
+    -> time.time
+    reject *: time is the module time
+
+[prometheus_client.metrics.Counter.inc]
+339:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+341:29 call  ValueError('Counters can only be incremented by non-negat...
+    -> <builtin>.ValueError
+342:24 call  self._value.inc(amount)
+    -> prometheus_client.values.MutexValue.inc
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.inc
+    reject prometheus_client.metrics.Counter.inc, prometheus_client.metrics.Gauge.inc: self._value is a ValueClass instance (line 333)
+344:31 call  _validate_exemplar(exemplar)
+    -> prometheus_client.validation._validate_exemplar
+345:37 call  self._value.set_exemplar(Exemplar(exemplar, amount, time....
+    -> prometheus_client.values.MutexValue.set_exemplar
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.set_exemplar
+345:46 call  Exemplar(exemplar, amount, time.time())
+    note: no edge: Exemplar is a NamedTuple class
+345:74 call  time.time()
+    -> time.time
+    reject *: time is the module time
+
+[prometheus_client.metrics.Counter.reset]
+349:24 call  self._value.set(0)
+    -> prometheus_client.values.MutexValue.set
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.set
+    reject prometheus_client.metrics.Gauge.set: self._value is a ValueClass instance (line 333)
+350:34 call  time.time()
+    -> time.time
+    reject *: time is the module time
+
+[prometheus_client.metrics.Counter.count_exceptions]
+359:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+360:32 call  ExceptionCounter(self, exception)
+    -> prometheus_client.context_managers.ExceptionCounter.__init__
+
+[prometheus_client.metrics.Counter._child_samples]
+363:24 call  Sample('_total', {}, self._value.get(), None, self._value...
+    note: no edge: Sample is a NamedTuple class
+363:54 call  self._value.get()
+    -> prometheus_client.values.MutexValue.get
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get
+    note: self._value is a ValueClass instance (line 333)
+363:88 call  self._value.get_exemplar()
+    -> prometheus_client.values.MutexValue.get_exemplar
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get_exemplar
+367:23 call  Sample('_created', {}, self._created, None, None)
+    note: no edge: Sample is a NamedTuple class
+
+[prometheus_client.metrics.Gauge.__init__]
+426:29 call  ValueError('Invalid multiprocess mode: ' + multiprocess_m...
+    -> <builtin>.ValueError
+427:14 call  super()
+    -> <builtin>.super
+427:25 call  super().__init__( name=name, documentation=documentation,...
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics.MetricWrapperBase.__init__
+    reject *: super() of Gauge is MetricWrapperBase
+
+[prometheus_client.metrics.Gauge._metric_init]
+441:40 call  values.ValueClass( self._type, self._name, self._name, se...
+    -> prometheus_client.values.MutexValue.__init__
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__init__
+    note: values.ValueClass (see 333:40)
+
+[prometheus_client.metrics.Gauge.inc]
+449:31 call  RuntimeError("inc must not be used with the mostrecent mo...
+    -> <builtin>.RuntimeError
+450:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+451:24 call  self._value.inc(amount)
+    -> prometheus_client.values.MutexValue.inc
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.inc
+    reject prometheus_client.metrics.Counter.inc, prometheus_client.metrics.Gauge.inc: self._value is a ValueClass instance (line 441)
+
+[prometheus_client.metrics.Gauge.dec]
+456:31 call  RuntimeError("dec must not be used with the mostrecent mo...
+    -> <builtin>.RuntimeError
+457:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+458:24 call  self._value.inc(-amount)
+    -> prometheus_client.values.MutexValue.inc
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.inc
+    reject prometheus_client.metrics.Counter.inc, prometheus_client.metrics.Gauge.inc: self._value is a ValueClass instance (line 441)
+
+[prometheus_client.metrics.Gauge.set]
+462:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+464:28 call  self._value.set(float(value), timestamp=time.time())
+    -> prometheus_client.values.MutexValue.set
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.set
+    reject prometheus_client.metrics.Gauge.set: self._value is a ValueClass instance (line 441)
+464:34 call  float(value)
+    -> <builtin>.float
+464:62 call  time.time()
+    -> time.time
+    reject *: time is the module time
+466:28 call  self._value.set(float(value))
+    -> prometheus_client.values.MutexValue.set
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.set
+    reject prometheus_client.metrics.Gauge.set: self._value is a ValueClass instance (line 441)
+466:34 call  float(value)
+    -> <builtin>.float
+
+[prometheus_client.metrics.Gauge.set_to_current_time]
+470:17 call  self.set(time.time())
+    -> prometheus_client.metrics.Gauge.set
+    reject *: self is a Gauge
+470:27 call  time.time()
+    -> time.time
+    reject *: time is the module time
+
+[prometheus_client.metrics.Gauge.track_inprogress]
+479:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+480:33 call  InprogressTracker(self)
+    -> prometheus_client.context_managers.InprogressTracker.__init__
+
+[prometheus_client.metrics.Gauge.time]
+487:21 call  Timer(self, 'set')
+    -> prometheus_client.context_managers.Timer.__init__
+
+[prometheus_client.metrics.Gauge.set_function]
+496:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+501:47 call  types.MethodType(samples, self)
+    -> types.MethodType
+    reject *: MethodType binds samples to self without calling it; _samples calls it later (270:39)
+
+[prometheus_client.metrics.Gauge.set_function.samples]
+499:27 call  Sample('', {}, float(f()), None, None)
+    note: no edge: Sample is a NamedTuple class
+499:41 call  float(f())
+    -> <builtin>.float
+499:43 call  f()
+    note: no edge: f is the client's function (annotation Callable[[], float]; the documented example passes a client lambda), a client callback
+
+[prometheus_client.metrics.Gauge._child_samples]
+504:23 call  Sample('', {}, self._value.get(), None, None)
+    note: no edge: Sample is a NamedTuple class
+504:47 call  self._value.get()
+    -> prometheus_client.values.MutexValue.get
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get
+    note: self._value is a ValueClass instance (line 441)
+
+[prometheus_client.metrics.Summary._metric_init]
+541:40 call  values.ValueClass(self._type, self._name, self._name + '_...
+    -> prometheus_client.values.MutexValue.__init__
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__init__
+    note: values.ValueClass (see 333:40)
+543:38 call  values.ValueClass(self._type, self._name, self._name + '_...
+    -> prometheus_client.values.MutexValue.__init__
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__init__
+    note: values.ValueClass (see 333:40)
+544:34 call  time.time()
+    -> time.time
+    reject *: time is the module time
+
+[prometheus_client.metrics.Summary.observe]
+556:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+557:24 call  self._count.inc(1)
+    -> prometheus_client.values.MutexValue.inc
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.inc
+    reject prometheus_client.metrics.Counter.inc, prometheus_client.metrics.Gauge.inc: self._count is a ValueClass instance (line 541)
+558:22 call  self._sum.inc(amount)
+    -> prometheus_client.values.MutexValue.inc
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.inc
+    reject prometheus_client.metrics.Counter.inc, prometheus_client.metrics.Gauge.inc: self._sum is a ValueClass instance (line 543)
+
+[prometheus_client.metrics.Summary.time]
+565:21 call  Timer(self, 'observe')
+    -> prometheus_client.context_managers.Timer.__init__
+
+[prometheus_client.metrics.Summary._child_samples]
+569:19 call  Sample('_count', {}, self._count.get(), None, None)
+    note: no edge: Sample is a NamedTuple class
+569:49 call  self._count.get()
+    -> prometheus_client.values.MutexValue.get
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get
+    note: self._count is a ValueClass instance (line 541)
+570:19 call  Sample('_sum', {}, self._sum.get(), None, None)
+    note: no edge: Sample is a NamedTuple class
+570:45 call  self._sum.get()
+    -> prometheus_client.values.MutexValue.get
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get
+    note: self._sum is a ValueClass instance (line 543)
+573:27 call  samples.append(Sample('_created', {}, self._created, None...
+    -> <builtin>.list.append
+573:34 call  Sample('_created', {}, self._created, None, None)
+    note: no edge: Sample is a NamedTuple class
+574:21 call  tuple(samples)
+    -> <builtin>.tuple
+
+[prometheus_client.metrics.Histogram.__init__]
+627:30 call  self._prepare_buckets(buckets)
+    -> prometheus_client.metrics.Histogram._prepare_buckets
+628:14 call  super()
+    -> <builtin>.super
+628:25 call  super().__init__( name=name, documentation=documentation,...
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics.MetricWrapperBase.__init__
+    reject *: super() of Histogram is MetricWrapperBase
+
+[prometheus_client.metrics.Histogram._prepare_buckets]
+641:25 call  float(b)
+    -> <builtin>.float
+642:29 call  sorted(buckets)
+    -> <builtin>.sorted
+645:29 call  ValueError('Buckets not in sorted order')
+    -> <builtin>.ValueError
+647:27 call  buckets.append(INF)
+    -> <builtin>.list.append
+648:15 call  len(buckets)
+    -> <builtin>.len
+649:29 call  ValueError('Must have at least two buckets')
+    -> <builtin>.ValueError
+
+[prometheus_client.metrics.Histogram._metric_init]
+654:34 call  time.time()
+    -> time.time
+    reject *: time is the module time
+656:38 call  values.ValueClass(self._type, self._name, self._name + '_...
+    -> prometheus_client.values.MutexValue.__init__
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__init__
+    note: values.ValueClass (see 333:40)
+658:33 call  self._buckets.append(values.ValueClass( self._type, self....
+    -> <builtin>.list.append
+658:51 call  values.ValueClass( self._type, self._name, self._name + '...
+    -> prometheus_client.values.MutexValue.__init__
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__init__
+    note: values.ValueClass (see 333:40)
+663:53 call  floatToGoString(b)
+    -> prometheus_client.utils.floatToGoString
+
+[prometheus_client.metrics.Histogram.observe]
+677:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+678:22 call  self._sum.inc(amount)
+    -> prometheus_client.values.MutexValue.inc
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.inc
+    reject prometheus_client.metrics.Counter.inc, prometheus_client.metrics.Gauge.inc: self._sum is a ValueClass instance (line 656)
+679:34 call  enumerate(self._upper_bounds)
+    -> <builtin>.enumerate
+681:37 call  self._buckets[i].inc(1)
+    -> prometheus_client.values.MutexValue.inc
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.inc
+    reject prometheus_client.metrics.Counter.inc, prometheus_client.metrics.Gauge.inc: the buckets are ValueClass instances (line 658)
+683:39 call  _validate_exemplar(exemplar)
+    -> prometheus_client.validation._validate_exemplar
+684:50 call  self._buckets[i].set_exemplar(Exemplar(exemplar, amount, ...
+    -> prometheus_client.values.MutexValue.set_exemplar
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.set_exemplar
+684:59 call  Exemplar(exemplar, amount, time.time())
+    note: no edge: Exemplar is a NamedTuple class
+684:87 call  time.time()
+    -> time.time
+    reject *: time is the module time
+
+[prometheus_client.metrics.Histogram.time]
+692:21 call  Timer(self, 'observe')
+    -> prometheus_client.context_managers.Timer.__init__
+
+[prometheus_client.metrics.Histogram._child_samples]
+697:34 call  enumerate(self._upper_bounds)
+    -> <builtin>.enumerate
+698:40 call  self._buckets[i].get()
+    -> prometheus_client.values.MutexValue.get
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get
+    note: the buckets are ValueClass instances (line 658)
+699:27 call  samples.append(Sample('_bucket', {'le': floatToGoString(b...
+    -> <builtin>.list.append
+699:34 call  Sample('_bucket', {'le': floatToGoString(bound)}, acc, No...
+    note: no edge: Sample is a NamedTuple class
+699:68 call  floatToGoString(bound)
+    -> prometheus_client.utils.floatToGoString
+699:118 call  self._buckets[i].get_exemplar()
+    -> prometheus_client.values.MutexValue.get_exemplar
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get_exemplar
+700:23 call  samples.append(Sample('_count', {}, acc, None, None))
+    -> <builtin>.list.append
+700:30 call  Sample('_count', {}, acc, None, None)
+    note: no edge: Sample is a NamedTuple class
+702:27 call  samples.append(Sample('_sum', {}, self._sum.get(), None, ...
+    -> <builtin>.list.append
+702:34 call  Sample('_sum', {}, self._sum.get(), None, None)
+    note: no edge: Sample is a NamedTuple class
+702:60 call  self._sum.get()
+    -> prometheus_client.values.MutexValue.get
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.get
+    note: self._sum is a ValueClass instance (line 656)
+704:27 call  samples.append(Sample('_created', {}, self._created, None...
+    -> <builtin>.list.append
+704:34 call  Sample('_created', {}, self._created, None, None)
+    note: no edge: Sample is a NamedTuple class
+705:21 call  tuple(samples)
+    -> <builtin>.tuple
+
+[prometheus_client.metrics.Info._metric_init]
+727:34 call  set(self._labelnames)
+    -> <builtin>.set
+    reject *: set is the builtin
+728:26 call  Lock()
+    -> threading.Lock
+
+[prometheus_client.metrics.Info.info]
+733:44 call  self._labelname_set.intersection(val.keys())
+    -> <builtin>.set.intersection
+733:53 call  val.keys()
+    -> <builtin>.dict.keys
+    note: val is annotated Dict[str, str]
+734:29 call  ValueError('Overlapping labels for Info metric, metric: {...
+    -> <builtin>.ValueError
+734:95 call  'Overlapping labels for Info metric, metric: {} child: {}...
+    -> <builtin>.str.format
+736:15 call  any(i is None for i in val.values())
+    -> <builtin>.any
+736:45 call  val.values()
+    -> <builtin>.dict.values
+737:29 call  ValueError('Label value cannot be None')
+    -> <builtin>.ValueError
+739:31 call  dict(val)
+    -> <builtin>.dict
+
+[prometheus_client.metrics.Info._child_samples]
+743:27 call  Sample('_info', self._value, 1.0, None, None)
+    note: no edge: Sample is a NamedTuple class
+
+[prometheus_client.metrics.Enum.__init__]
+773:29 call  ValueError(f'Overlapping labels for Enum metric: {name}')
+    -> <builtin>.ValueError
+775:29 call  ValueError(f'No states provided for Enum metric: {name}')
+    -> <builtin>.ValueError
+776:14 call  super()
+    -> <builtin>.super
+776:25 call  super().__init__( name=name, documentation=documentation,...
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics.MetricWrapperBase.__init__
+    reject *: super() of Enum is MetricWrapperBase
+
+[prometheus_client.metrics.Enum._metric_init]
+790:26 call  Lock()
+    -> threading.Lock
+
+[prometheus_client.metrics.Enum.state]
+794:38 call  self._raise_if_not_observable()
+    -> prometheus_client.metrics.MetricWrapperBase._raise_if_not_observable
+796:45 call  self._states.index(state)
+    note: no edge: self._states is the client's states, annotated Optional[Sequence[str]], an abstract type that fixes no class (B4; the annotation decides over the List[str] of docs/content/instrumenting/enum.md:37), a client object (B5)
+
+[prometheus_client.metrics.Enum._child_samples]
+801:23 call  Sample('', {self._name: s}, 1 if i == self._value else 0,...
+    note: no edge: Sample is a NamedTuple class
+803:29 call  enumerate(self._states)
+    -> <builtin>.enumerate
+
+
+== prometheus_client.metrics_core
+
+[prometheus_client.metrics_core.Metric.__init__]
+22:38 call  name.endswith("_" + unit)
+    -> <builtin>.str.endswith
+24:30 call  _validate_metric_name(name)
+    -> prometheus_client.validation._validate_metric_name
+31:29 call  ValueError('Invalid metric type: ' + typ)
+    -> <builtin>.ValueError
+
+[prometheus_client.metrics_core.Metric.add_sample]
+39:28 call  self.samples.append(Sample(name, labels, value, timestamp...
+    -> <builtin>.list.append
+39:35 call  Sample(name, labels, value, timestamp, exemplar, native_h...
+    note: no edge: Sample is a NamedTuple class
+
+[prometheus_client.metrics_core.Metric.__eq__]
+42:27 call  isinstance(other, Metric)
+    -> <builtin>.isinstance
+
+47:34 op  self.samples == other.samples
+    -> prometheus_client.samples.Timestamp.__eq__
+    note: the lists of Samples are compared element by element, and each Sample tuple field by field: a timestamp, or the timestamp of an exemplar, is a Timestamp when the OpenMetrics parser or a client made one (samples.py:45-46), and list and tuple comparison call its __eq__
+[prometheus_client.metrics_core.Metric.__repr__]
+50:51 call  "Metric({}, {}, {}, {}, {})".format( self.name, self.docu...
+    -> <builtin>.str.format
+    -> prometheus_client.samples.Timestamp.__repr__
+    reject prometheus_client.metrics.Gauge.set_function.samples: self.samples is the list attribute of the Metric, not the local function samples
+    note: format() of the samples list runs list.__repr__, which takes the repr of each Sample, a namedtuple whose generated __repr__ takes the repr of each field: the repr of a Timestamp timestamp (or exemplar timestamp) runs Timestamp.__repr__
+
+[prometheus_client.metrics_core.Metric._restricted_metric]
+62:23 call  Metric(self.name, self.documentation, self.type)
+    -> prometheus_client.metrics_core.Metric.__init__
+
+[prometheus_client.metrics_core.UnknownMetricFamily.__init__]
+80:24 call  Metric.__init__(self, name, documentation, 'unknown', unit)
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+82:29 call  ValueError('Can only specify at most one of value and lab...
+    -> <builtin>.ValueError
+85:33 call  tuple(labels)
+    -> <builtin>.tuple
+87:28 call  self.add_metric([], value)
+    -> prometheus_client.metrics_core.UnknownMetricFamily.add_metric
+    reject *: self is an UnknownMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.UnknownMetricFamily.add_metric]
+95:28 call  self.samples.append(Sample(self.name, dict(zip(self._labe...
+    -> <builtin>.list.append
+95:35 call  Sample(self.name, dict(zip(self._labelnames, labels)), va...
+    note: no edge: Sample is a NamedTuple class
+95:51 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+95:55 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+
+[prometheus_client.metrics_core.CounterMetricFamily.__init__]
+118:25 call  name.endswith('_total')
+    -> <builtin>.str.endswith
+120:24 call  Metric.__init__(self, name, documentation, 'counter', unit)
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+122:29 call  ValueError('Can only specify at most one of value and lab...
+    -> <builtin>.ValueError
+125:33 call  tuple(labels)
+    -> <builtin>.tuple
+127:28 call  self.add_metric([], value, created, exemplar=exemplar)
+    -> prometheus_client.metrics_core.CounterMetricFamily.add_metric
+    reject *: self is a CounterMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.CounterMetricFamily.add_metric]
+143:28 call  self.samples.append(Sample(self.name + '_total', dict(zip...
+    -> <builtin>.list.append
+143:35 call  Sample(self.name + '_total', dict(zip(self._labelnames, l...
+    note: no edge: Sample is a NamedTuple class
+143:62 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+143:66 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+145:32 call  self.samples.append(Sample(self.name + '_created', dict(z...
+    -> <builtin>.list.append
+145:39 call  Sample(self.name + '_created', dict(zip(self._labelnames,...
+    note: no edge: Sample is a NamedTuple class
+145:68 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+145:72 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+
+[prometheus_client.metrics_core.GaugeMetricFamily.__init__]
+161:24 call  Metric.__init__(self, name, documentation, 'gauge', unit)
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+163:29 call  ValueError('Can only specify at most one of value and lab...
+    -> <builtin>.ValueError
+166:33 call  tuple(labels)
+    -> <builtin>.tuple
+168:28 call  self.add_metric([], value)
+    -> prometheus_client.metrics_core.GaugeMetricFamily.add_metric
+    reject *: self is a GaugeMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.GaugeMetricFamily.add_metric]
+177:28 call  self.samples.append(Sample(self.name, dict(zip(self._labe...
+    -> <builtin>.list.append
+177:35 call  Sample(self.name, dict(zip(self._labelnames, labels)), va...
+    note: no edge: Sample is a NamedTuple class
+177:51 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+177:55 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+
+[prometheus_client.metrics_core.SummaryMetricFamily.__init__]
+194:24 call  Metric.__init__(self, name, documentation, 'summary', unit)
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+196:29 call  ValueError('count_value and sum_value must be provided to...
+    -> <builtin>.ValueError
+198:29 call  ValueError('Can only specify at most one of value and lab...
+    -> <builtin>.ValueError
+201:33 call  tuple(labels)
+    -> <builtin>.tuple
+204:28 call  self.add_metric([], count_value, sum_value)
+    -> prometheus_client.metrics_core.SummaryMetricFamily.add_metric
+    reject *: self is a SummaryMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.SummaryMetricFamily.add_metric]
+220:28 call  self.samples.append(Sample(self.name + '_count', dict(zip...
+    -> <builtin>.list.append
+220:35 call  Sample(self.name + '_count', dict(zip(self._labelnames, l...
+    note: no edge: Sample is a NamedTuple class
+220:62 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+220:66 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+221:28 call  self.samples.append(Sample(self.name + '_sum', dict(zip(s...
+    -> <builtin>.list.append
+221:35 call  Sample(self.name + '_sum', dict(zip(self._labelnames, lab...
+    note: no edge: Sample is a NamedTuple class
+221:60 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+221:64 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+
+[prometheus_client.metrics_core.HistogramMetricFamily.__init__]
+238:24 call  Metric.__init__(self, name, documentation, 'histogram', u...
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+240:29 call  ValueError('sum value cannot be provided without buckets.')
+    -> <builtin>.ValueError
+242:29 call  ValueError('Can only specify at most one of buckets and l...
+    -> <builtin>.ValueError
+245:33 call  tuple(labels)
+    -> <builtin>.tuple
+247:28 call  self.add_metric([], buckets, sum_value)
+    -> prometheus_client.metrics_core.HistogramMetricFamily.add_metric
+    reject *: self is a HistogramMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.HistogramMetricFamily.add_metric]
+267:19 call  len(b)
+    -> <builtin>.len
+269:32 call  self.samples.append(Sample( self.name + '_bucket', dict(l...
+    -> <builtin>.list.append
+269:39 call  Sample( self.name + '_bucket', dict(list(zip(self._labeln...
+    note: no edge: Sample is a NamedTuple class
+271:21 call  dict(list(zip(self._labelnames, labels)) + [('le', bucket)])
+    -> <builtin>.dict
+271:26 call  list(zip(self._labelnames, labels))
+    -> <builtin>.list
+271:30 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+277:17 call  float(buckets[0][0])
+    -> <builtin>.float
+279:32 call  self.samples.append( Sample(self.name + '_count', dict(zi...
+    -> <builtin>.list.append
+280:23 call  Sample(self.name + '_count', dict(zip(self._labelnames, l...
+    note: no edge: Sample is a NamedTuple class
+280:50 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+280:54 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+281:32 call  self.samples.append( Sample(self.name + '_sum', dict(zip(...
+    -> <builtin>.list.append
+282:23 call  Sample(self.name + '_sum', dict(zip(self._labelnames, lab...
+    note: no edge: Sample is a NamedTuple class
+282:48 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+282:52 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+
+[prometheus_client.metrics_core.GaugeHistogramMetricFamily.__init__]
+299:24 call  Metric.__init__(self, name, documentation, 'gaugehistogra...
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+301:29 call  ValueError('Can only specify at most one of buckets and l...
+    -> <builtin>.ValueError
+304:33 call  tuple(labels)
+    -> <builtin>.tuple
+306:28 call  self.add_metric([], buckets, gsum_value)
+    -> prometheus_client.metrics_core.GaugeHistogramMetricFamily.add_metric
+    reject *: self is a GaugeHistogramMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.GaugeHistogramMetricFamily.add_metric]
+323:32 call  self.samples.append(Sample( self.name + '_bucket', dict(l...
+    -> <builtin>.list.append
+323:39 call  Sample( self.name + '_bucket', dict(list(zip(self._labeln...
+    note: no edge: Sample is a NamedTuple class
+325:21 call  dict(list(zip(self._labelnames, labels)) + [('le', bucket)])
+    -> <builtin>.dict
+325:26 call  list(zip(self._labelnames, labels))
+    -> <builtin>.list
+325:30 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+328:28 call  self.samples.extend([ Sample(self.name + '_gcount', dict(...
+    -> <builtin>.list.extend
+329:19 call  Sample(self.name + '_gcount', dict(zip(self._labelnames, ...
+    note: no edge: Sample is a NamedTuple class
+329:47 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+329:51 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+331:19 call  Sample(self.name + '_gsum', dict(zip(self._labelnames, la...
+    note: no edge: Sample is a NamedTuple class
+331:45 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+331:49 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+
+[prometheus_client.metrics_core.InfoMetricFamily.__init__]
+347:24 call  Metric.__init__(self, name, documentation, 'info')
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+349:29 call  ValueError('Can only specify at most one of value and lab...
+    -> <builtin>.ValueError
+352:33 call  tuple(labels)
+    -> <builtin>.tuple
+354:28 call  self.add_metric([], value)
+    -> prometheus_client.metrics_core.InfoMetricFamily.add_metric
+    reject *: self is an InfoMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.InfoMetricFamily.add_metric]
+367:28 call  self.samples.append(Sample( self.name + '_info', dict(dic...
+    -> <builtin>.list.append
+367:35 call  Sample( self.name + '_info', dict(dict(zip(self._labelnam...
+    note: no edge: Sample is a NamedTuple class
+369:17 call  dict(dict(zip(self._labelnames, labels)), **value)
+    -> <builtin>.dict
+369:22 call  dict(zip(self._labelnames, labels))
+    -> <builtin>.dict
+369:26 call  zip(self._labelnames, labels)
+    -> <builtin>.zip
+
+[prometheus_client.metrics_core.StateSetMetricFamily.__init__]
+387:24 call  Metric.__init__(self, name, documentation, 'stateset')
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> prometheus_client.metrics_core.Metric.__init__
+    reject *: the explicit Metric.__init__
+389:29 call  ValueError('Can only specify at most one of value and lab...
+    -> <builtin>.ValueError
+392:33 call  tuple(labels)
+    -> <builtin>.tuple
+394:28 call  self.add_metric([], value)
+    -> prometheus_client.metrics_core.StateSetMetricFamily.add_metric
+    reject *: self is a StateSetMetricFamily (the package defines no subclass of it)
+
+[prometheus_client.metrics_core.StateSetMetricFamily.add_metric]
+407:23 call  tuple(labels)
+    -> <builtin>.tuple
+408:37 call  sorted(value.items())
+    -> <builtin>.sorted
+408:49 call  value.items()
+    -> <builtin>.dict.items
+    note: value is annotated Dict[str, bool]
+410:32 call  self.samples.append(Sample( self.name, dict(zip(self._lab...
+    -> <builtin>.list.append
+410:39 call  Sample( self.name, dict(zip(self._labelnames + (self.name...
+    note: no edge: Sample is a NamedTuple class
+412:21 call  dict(zip(self._labelnames + (self.name,), labels + (state...
+    -> <builtin>.dict
+412:25 call  zip(self._labelnames + (self.name,), labels + (state,))
+    -> <builtin>.zip
+
+
+== prometheus_client.mmap_dict
+
+[prometheus_client.mmap_dict]
+8:35 call  struct.Struct(b'i')
+    -> struct.Struct
+9:39 call  struct.Struct(b'dd')
+    -> struct.Struct
+10:32 call  struct.Struct(b'i')
+    -> struct.Struct
+11:36 call  struct.Struct(b'dd')
+    -> struct.Struct
+84:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[prometheus_client.mmap_dict._pack_two_doubles]
+20:48 call  _pack_two_doubles_func(value, timestamp)
+    -> struct.Struct.pack
+    note: _pack_two_doubles_func is the bound method struct.Struct(b'dd').pack (line 9)
+
+[prometheus_client.mmap_dict._pack_integer]
+24:43 call  _pack_integer_func(value)
+    -> struct.Struct.pack
+    note: _pack_integer_func is the bound method struct.Struct(b'i').pack (line 8)
+
+[prometheus_client.mmap_dict._read_all_values]
+32:31 call  _unpack_integer(data, 0)
+    -> struct.Struct.unpack_from
+    note: _unpack_integer is the bound method struct.Struct(b'i').unpack_from (line 10)
+37:38 call  _unpack_integer(data, pos)
+    -> struct.Struct.unpack_from
+    note: _unpack_integer is the bound method struct.Struct(b'i').unpack_from (line 10)
+40:31 call  RuntimeError('Read beyond file size detected, file is cor...
+    -> <builtin>.RuntimeError
+45:47 call  _unpack_two_doubles(data, pos)
+    -> struct.Struct.unpack_from
+    note: _unpack_two_doubles is the bound method struct.Struct(b'dd').unpack_from (line 11)
+46:33 call  encoded_key.decode('utf-8')
+    -> <builtin>.bytes.decode
+    note: encoded_key is a slice of the mmap or of the bytes read from the file, both bytes
+
+[prometheus_client.mmap_dict.MmapedDict.__init__]
+64:23 call  open(filename, 'rb' if read_mode else 'a+b')
+    -> <builtin>.open
+66:28 call  os.fstat(self._f.fileno())
+    -> os.fstat
+66:43 call  self._f.fileno()
+    -> io.BufferedRandom.fileno
+    -> io.BufferedReader.fileno
+    note: self._f is the binary file of open(): mode 'a+b' gives a BufferedRandom, read_mode (a public constructor argument) mode 'rb' a BufferedReader
+68:29 call  self._f.truncate(_INITIAL_MMAP_SIZE)
+    -> io.BufferedRandom.truncate
+    -> io.BufferedReader.truncate
+    note: self._f is a BufferedRandom or, with read_mode, a BufferedReader (see 66:43)
+71:28 call  mmap.mmap(self._f.fileno(), self._capacity, access=mmap.A...
+    -> mmap.mmap
+71:43 call  self._f.fileno()
+    -> io.BufferedRandom.fileno
+    -> io.BufferedReader.fileno
+75:37 call  _unpack_integer(self._m, 0)
+    -> struct.Struct.unpack_from
+    note: _unpack_integer is the bound method struct.Struct(b'i').unpack_from (line 10)
+78:26 call  _pack_integer(self._m, 0, self._used)
+    -> prometheus_client.mmap_dict._pack_integer
+81:60 call  self._read_all_values()
+    -> prometheus_client.mmap_dict.MmapedDict._read_all_values
+    reject prometheus_client.mmap_dict._read_all_values: self._read_all_values is the method
+
+[prometheus_client.mmap_dict.MmapedDict.read_all_values_from_file]
+86:18 call  open(filename, 'rb')
+    -> <builtin>.open
+89:29 call  infp.read(mmap.PAGESIZE)
+    -> io.BufferedReader.read
+90:35 call  _unpack_integer(data, 0)
+    -> struct.Struct.unpack_from
+    note: _unpack_integer is the bound method struct.Struct(b'i').unpack_from (line 10)
+91:26 call  len(data)
+    -> <builtin>.len
+92:34 call  infp.read(used - len(data))
+    -> io.BufferedReader.read
+92:45 call  len(data)
+    -> <builtin>.len
+93:32 call  _read_all_values(data, used)
+    -> prometheus_client.mmap_dict._read_all_values
+    reject prometheus_client.mmap_dict.MmapedDict._read_all_values: the module function _read_all_values
+
+[prometheus_client.mmap_dict.MmapedDict._init_value]
+97:29 call  key.encode('utf-8')
+    -> <builtin>.str.encode
+    note: the key is the str of mmap_key (json.dumps)
+99:45 call  len(encoded)
+    -> <builtin>.len
+100:28 call  struct.pack(f'i{len(padded)}sdd'.encode(), len(encoded), ...
+    -> struct.pack
+100:36 call  len(padded)
+    -> <builtin>.len
+100:56 call  f'i{len(padded)}sdd'.encode()
+    -> <builtin>.str.encode
+100:63 call  len(encoded)
+    -> <builtin>.len
+101:31 call  len(value)
+    -> <builtin>.len
+103:29 call  self._f.truncate(self._capacity)
+    -> io.BufferedRandom.truncate
+    -> io.BufferedReader.truncate
+    note: self._f is a BufferedRandom or, with read_mode, a BufferedReader (see 66:43)
+104:32 call  mmap.mmap(self._f.fileno(), self._capacity)
+    -> mmap.mmap
+104:47 call  self._f.fileno()
+    -> io.BufferedRandom.fileno
+    note: Codex audit round 1: with read_mode the file is a BufferedReader, whose truncate at 103:29 raises (the raw FileIO is not writable), so a BufferedReader never reaches this call; only the BufferedRandom of mode 'a+b' does
+105:44 call  len(value)
+    -> <builtin>.len
+108:26 call  len(value)
+    -> <builtin>.len
+109:22 call  _pack_integer(self._m, 0, self._used)
+    -> prometheus_client.mmap_dict._pack_integer
+
+[prometheus_client.mmap_dict.MmapedDict._read_all_values]
+114:32 call  _read_all_values(data=self._m, used=self._used)
+    -> prometheus_client.mmap_dict._read_all_values
+    reject prometheus_client.mmap_dict.MmapedDict._read_all_values: the module function _read_all_values
+
+[prometheus_client.mmap_dict.MmapedDict.read_all_values]
+118:49 call  self._read_all_values()
+    -> prometheus_client.mmap_dict.MmapedDict._read_all_values
+    reject prometheus_client.mmap_dict._read_all_values: self._read_all_values is the method
+
+[prometheus_client.mmap_dict.MmapedDict.read_value]
+123:29 call  self._init_value(key)
+    -> prometheus_client.mmap_dict.MmapedDict._init_value
+125:35 call  _unpack_two_doubles(self._m, pos)
+    -> struct.Struct.unpack_from
+    note: _unpack_two_doubles is the bound method struct.Struct(b'dd').unpack_from (line 11)
+
+[prometheus_client.mmap_dict.MmapedDict.write_value]
+129:29 call  self._init_value(key)
+    -> prometheus_client.mmap_dict.MmapedDict._init_value
+131:26 call  _pack_two_doubles(self._m, pos, value, timestamp)
+    -> prometheus_client.mmap_dict._pack_two_doubles
+
+[prometheus_client.mmap_dict.MmapedDict.close]
+135:26 call  self._m.close()
+    -> mmap.mmap.close
+    reject prometheus_client.mmap_dict.MmapedDict.close: self._m is the mmap.mmap of __init__
+137:26 call  self._f.close()
+    -> io.BufferedRandom.close
+    -> io.BufferedReader.close
+    reject prometheus_client.mmap_dict.MmapedDict.close: self._f is the file of __init__ (see 66:43)
+
+[prometheus_client.mmap_dict.mmap_key]
+144:18 call  dict(zip(labelnames, labelvalues))
+    -> <builtin>.dict
+144:22 call  zip(labelnames, labelvalues)
+    -> <builtin>.zip
+145:22 call  json.dumps([metric_name, name, labels, help_text], sort_k...
+    -> json.dumps
+
+
+== prometheus_client.multiprocess
+
+[prometheus_client.multiprocess]
+35:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+46:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+88:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+174:84 call  m.startswith('live')
+    -> <builtin>.str.startswith
+
+[prometheus_client.multiprocess.MultiProcessCollector.__init__]
+27:30 call  warnings.warn("prometheus_multiproc_dir variable has been...
+    -> warnings.warn
+28:34 call  os.environ.get('PROMETHEUS_MULTIPROC_DIR')
+    -> collections.abc.Mapping.get
+    note: os.environ.get, the method that os._Environ inherits from collections.abc.Mapping
+29:41 call  os.path.isdir(path)
+    -> os.path.isdir
+30:29 call  ValueError('env PROMETHEUS_MULTIPROC_DIR is not set or no...
+    -> <builtin>.ValueError
+33:30 call  registry.register(self)
+    -> prometheus_client.registry.CollectorRegistry.register
+    note: registry is the CollectorRegistry that the documentation names (docs/content/multiprocess/_index.md, API reference), or None
+
+[prometheus_client.multiprocess.MultiProcessCollector.merge]
+43:54 call  MultiProcessCollector._read_metrics(files)
+    -> prometheus_client.multiprocess.MultiProcessCollector._read_metrics
+44:57 call  MultiProcessCollector._accumulate_metrics(metrics, accumu...
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics
+
+[prometheus_client.multiprocess.MultiProcessCollector._read_metrics]
+60:37 call  os.path.basename(f)
+    -> os.path.basename
+60:46 call  os.path.basename(f).split('_')
+    -> <builtin>.str.split
+63:67 call  MmapedDict.read_all_values_from_file(f)
+    -> prometheus_client.mmap_dict.MmapedDict.read_all_values_from_file
+65:58 call  parts[1].startswith('live')
+    -> <builtin>.str.startswith
+72:78 call  _parse_key(key)
+    -> prometheus_client.multiprocess.MultiProcessCollector._read_metrics._parse_key
+74:37 call  metrics.get(metric_name)
+    -> <builtin>.dict.get
+76:36 call  Metric(metric_name, help_text, typ)
+    -> prometheus_client.metrics_core.Metric.__init__
+82:38 call  metric.add_sample(name, labels_key + (('pid', pid),), val...
+    -> prometheus_client.metrics_core.Metric.add_sample
+85:38 call  metric.add_sample(name, labels_key, value)
+    -> prometheus_client.metrics_core.Metric.add_sample
+
+[prometheus_client.multiprocess.MultiProcessCollector._read_metrics._parse_key]
+52:32 call  key_cache.get(key)
+    -> <builtin>.dict.get
+54:66 call  json.loads(key)
+    -> json.loads
+55:35 call  tuple(sorted(labels.items()))
+    -> <builtin>.tuple
+55:42 call  sorted(labels.items())
+    -> <builtin>.sorted
+55:55 call  labels.items()
+    -> <builtin>.dict.items
+    note: labels is the JSON object of the key, a dict
+
+[prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics]
+90:37 call  metrics.values()
+    -> <builtin>.dict.values
+    note: metrics is the dict of _read_metrics (merge is the only caller)
+91:34 call  defaultdict(lambda: defaultdict(float))
+    -> collections.defaultdict
+    reject *: defaultdict stores the lambda as its default factory; it calls it later, at the first lookup of each missing key (the samples[labels] sites)
+92:44 call  defaultdict(lambda: defaultdict(float))
+    -> collections.defaultdict
+    reject *: defaultdict stores the lambda as its default factory; it calls it later, at the first lookup of each missing key (the sample_timestamps[labels] sites)
+93:34 call  defaultdict(lambda: defaultdict(float))
+    -> collections.defaultdict
+    reject *: defaultdict stores the lambda as its default factory; it calls it later, at the first lookup of each missing key (the buckets[without_le] site)
+106:35 call  tuple(l for l in labels if l[0] != 'pid')
+    -> <builtin>.tuple
+110:61 call  samples[labels].setdefault((name, labels), value)
+    -> collections.defaultdict.setdefault
+    note: samples[labels] is the inner defaultdict(float)
+114:61 call  samples[labels].setdefault((name, labels), value)
+    -> collections.defaultdict.setdefault
+121:42 call  float(timestamp or 0)
+    -> <builtin>.float
+133:49 call  float(l[1])
+    -> <builtin>.float
+135:47 call  tuple(l for l in labels if l[0] != 'le')
+    -> <builtin>.tuple
+147:52 call  buckets.items()
+    -> collections.defaultdict.items
+149:48 call  sorted(values.items())
+    -> <builtin>.sorted
+149:61 call  values.items()
+    -> collections.defaultdict.items
+    note: values is an inner defaultdict(float) of buckets
+152:61 call  floatToGoString(bucket)
+    -> prometheus_client.utils.floatToGoString
+164:54 call  samples.items()
+    -> collections.defaultdict.items
+165:70 call  samples_by_labels.items()
+    -> collections.defaultdict.items
+166:42 call  metric.samples.append(Sample(name_, dict(labels), value))
+    -> <builtin>.list.append
+166:49 call  Sample(name_, dict(labels), value)
+    note: no edge: Sample is a NamedTuple class
+166:61 call  dict(labels)
+    -> <builtin>.dict
+167:30 call  metrics.values()
+    -> <builtin>.dict.values
+
+110:42 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: samples is a defaultdict whose default factory is <lambda1> (line 91); the lookup of a missing key calls it (callback rule)
+114:42 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+118:32 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+120:62 getitem  sample_timestamps[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda2>
+    note: sample_timestamps is a defaultdict whose default factory is <lambda2> (line 92)
+123:36 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+126:32 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+136:36 getitem  buckets[without_le]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda3>
+    note: buckets is a defaultdict whose default factory is <lambda3> (line 93)
+140:32 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+143:28 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+156:36 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+158:36 getitem  samples[labels]
+    -> prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>
+    note: the default factory <lambda1> of samples (line 91)
+[prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda1>]
+91:54 call  defaultdict(float)
+    -> collections.defaultdict
+
+[prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda2>]
+92:64 call  defaultdict(float)
+    -> collections.defaultdict
+
+[prometheus_client.multiprocess.MultiProcessCollector._accumulate_metrics.<lambda3>]
+93:54 call  defaultdict(float)
+    -> collections.defaultdict
+
+[prometheus_client.multiprocess.MultiProcessCollector.collect]
+170:26 call  glob.glob(os.path.join(self._path, '*.db'))
+    -> glob.glob
+170:39 call  os.path.join(self._path, '*.db')
+    -> os.path.join
+171:26 call  self.merge(files, accumulate=True)
+    -> prometheus_client.multiprocess.MultiProcessCollector.merge
+
+[prometheus_client.multiprocess.mark_process_dead]
+180:30 call  os.environ.get('PROMETHEUS_MULTIPROC_DIR', os.environ.get...
+    -> collections.abc.Mapping.get
+180:73 call  os.environ.get('prometheus_multiproc_dir')
+    -> collections.abc.Mapping.get
+182:27 call  glob.glob(os.path.join(path, f'gauge_{mode}_{pid}.db'))
+    -> glob.glob
+182:40 call  os.path.join(path, f'gauge_{mode}_{pid}.db')
+    -> os.path.join
+183:22 call  os.remove(f)
+    -> os.remove
+    reject prometheus_client.metrics.MetricWrapperBase.remove: os.remove, the standard library function
+
+
+== prometheus_client.openmetrics.exposition
+
+[prometheus_client.openmetrics.exposition._is_valid_exemplar_metric]
+26:57 call  sample.name.endswith('_total')
+    -> <builtin>.str.endswith
+28:64 call  sample.name.endswith('_bucket')
+    -> <builtin>.str.endswith
+30:60 call  sample.name.endswith('_bucket')
+    -> <builtin>.str.endswith
+
+[prometheus_client.openmetrics.exposition._compose_exemplar_string]
+37:37 call  _is_valid_exemplar_metric(metric, sample)
+    -> prometheus_client.openmetrics.exposition._is_valid_exemplar_metric
+38:25 call  ValueError(f"Metric {metric.name} has exemplars, but is n...
+    -> <builtin>.ValueError
+39:30 call  '{{{0}}}'.format(','.join( ['{}="{}"'.format( k, v.replac...
+    -> <builtin>.str.format
+39:39 call  ','.join( ['{}="{}"'.format( k, v.replace('\\', r'\\').re...
+    -> <builtin>.str.join
+40:26 call  '{}="{}"'.format( k, v.replace('\\', r'\\').replace('\n',...
+    -> <builtin>.str.format
+41:25 call  v.replace('\\', r'\\')
+    -> <builtin>.str.replace
+41:46 call  v.replace('\\', r'\\').replace('\n', r'\n')
+    -> <builtin>.str.replace
+41:67 call  v.replace('\\', r'\\').replace('\n', r'\n').replace('"', ...
+    -> <builtin>.str.replace
+42:31 call  sorted(exemplar.labels.items())
+    -> <builtin>.sorted
+42:53 call  exemplar.labels.items()
+    -> <builtin>.dict.items
+44:43 call  ' # {} {} {}'.format( labels, floatToGoString(exemplar.va...
+    -> <builtin>.str.format
+    -> prometheus_client.samples.Timestamp.__str__
+    note: exemplar.timestamp is a float or a Timestamp (samples.py:51; the OpenMetrics parser makes Timestamps); format() with an empty spec runs str() of a Timestamp, its __str__
+46:28 call  floatToGoString(exemplar.value)
+    -> prometheus_client.utils.floatToGoString
+50:40 call  ' # {} {}'.format( labels, floatToGoString(exemplar.value...
+    -> <builtin>.str.format
+52:28 call  floatToGoString(exemplar.value)
+    -> prometheus_client.utils.floatToGoString
+
+[prometheus_client.openmetrics.exposition.generate_latest]
+61:35 call  registry.collect()
+    -> prometheus_client.registry.CollectorRegistry.collect
+    -> prometheus_client.registry.RestrictedRegistry.collect
+    -> prometheus_client.metrics.MetricWrapperBase.collect
+    -> prometheus_client.process_collector.ProcessCollector.collect
+    -> prometheus_client.gc_collector.GCCollector.collect
+    -> prometheus_client.platform_collector.PlatformCollector.collect
+    -> prometheus_client.multiprocess.MultiProcessCollector.collect
+    reject prometheus_client.registry.Collector.collect: Collector is a Protocol, which has no instances, and every package implementation overrides collect
+    reject prometheus_client.registry._EmptyCollector.collect: the private _EmptyCollector is only stored under the name target_info of a registry, never passed as a Collector
+    note: registry has no annotation; the package passes the Collector of _bake_output (exposition.py:122, through the partial of choose_encoder), so its values are those of the Collector role (judgement J1)
+64:26 call  output.append('# HELP {} {}\n'.format( escape_metric_name...
+    -> <builtin>.list.append
+64:50 call  '# HELP {} {}\n'.format( escape_metric_name(mname, escapi...
+    -> <builtin>.str.format
+65:35 call  escape_metric_name(mname, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+65:61 call  _escape(metric.documentation, ALLOWUTF8, _is_legacy_label...
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; the package function _escape calls it, not this function
+66:26 call  output.append(f'# TYPE {escape_metric_name(mname, escapin...
+    -> <builtin>.list.append
+66:55 call  escape_metric_name(mname, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+68:30 call  output.append(f'# UNIT {escape_metric_name(mname, escapin...
+    -> <builtin>.list.append
+68:59 call  escape_metric_name(mname, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+70:78 call  _is_valid_legacy_metric_name(s.name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+71:50 call  escape_metric_name(s.name, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_metric_name
+78:35 call  sorted(s.labels.items())
+    -> <builtin>.sorted
+78:50 call  s.labels.items()
+    -> <builtin>.dict.items
+80:41 call  ','.join( ['{}="{}"'.format( escape_label_name(k, escapin...
+    -> <builtin>.str.join
+81:42 call  '{}="{}"'.format( escape_label_name(k, escaping), _escape...
+    -> <builtin>.str.format
+82:46 call  escape_label_name(k, escaping)
+    -> prometheus_client.openmetrics.exposition.escape_label_name
+82:68 call  _escape(v, ALLOWUTF8, _is_legacy_labelname_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; the package function _escape calls it, not this function
+87:59 call  _compose_exemplar_string(metric, s, s.exemplar)
+    -> prometheus_client.openmetrics.exposition._compose_exemplar_string
+95:56 call  parse_version(version)
+    -> prometheus_client.utils.parse_version
+118:50 call  ','.join([f'{ns[0]}:{ns[1]}' for ns in s.native_histogram...
+    -> <builtin>.str.join
+119:51 call  ','.join(str(nd) for nd in s.native_histogram.neg_deltas)
+    -> <builtin>.str.join
+119:55 call  str(nd)
+    -> <builtin>.str
+121:36 call  args.append(negative_spans)
+    -> <builtin>.list.append
+123:36 call  args.append(negative_deltas)
+    -> <builtin>.list.append
+127:50 call  ','.join([f'{ps[0]}:{ps[1]}' for ps in s.native_histogram...
+    -> <builtin>.str.join
+128:51 call  ','.join(f'{pd}' for pd in s.native_histogram.pos_deltas)
+    -> <builtin>.str.join
+130:36 call  args.append(positive_spans)
+    -> <builtin>.list.append
+132:36 call  args.append(positive_deltas)
+    -> <builtin>.list.append
+138:65 call  nh_sample_template.format(*args)
+    -> <builtin>.str.format
+142:70 call  _compose_exemplar_string(metric, s, nh_ex)
+    -> prometheus_client.openmetrics.exposition._compose_exemplar_string
+149:44 call  floatToGoString(s.value)
+    -> prometheus_client.utils.floatToGoString
+150:75 call  _is_valid_legacy_metric_name(s.name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+151:34 call  output.append('{}{} {}{}{}\n'.format( _escape(s.name, esc...
+    -> <builtin>.list.append
+151:57 call  '{}{} {}{}{}\n'.format( _escape(s.name, escaping, _is_leg...
+    -> <builtin>.str.format
+152:32 call  _escape(s.name, escaping, _is_legacy_labelname_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; the package function _escape calls it, not this function
+159:34 call  output.append('{} {}{}{}\n'.format( labelstr, value, time...
+    -> <builtin>.list.append
+159:55 call  '{} {}{}{}\n'.format( labelstr, value, timestamp, exempla...
+    -> <builtin>.str.format
+169:18 call  output.append('# EOF\n')
+    -> <builtin>.list.append
+170:19 call  ''.join(output)
+    -> <builtin>.str.join
+170:34 call  ''.join(output).encode('utf-8')
+    -> <builtin>.str.encode
+
+92:36 format  {s.timestamp}
+    -> prometheus_client.samples.Timestamp.__str__
+    note: s.timestamp is a float or a Timestamp (samples.py:72); an empty format spec runs str() of a Timestamp
+[prometheus_client.openmetrics.exposition.escape_metric_name]
+177:11 call  len(s)
+    -> <builtin>.len
+180:44 call  _is_valid_legacy_metric_name(s)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+181:33 call  '"{}"'.format(_escape(s, escaping, _is_legacy_metric_rune))
+    -> <builtin>.str.format
+181:41 call  _escape(s, escaping, _is_legacy_metric_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_metric_rune: passed as an argument; _escape calls it
+182:23 call  _escape(s, escaping, _is_legacy_metric_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_metric_rune: passed as an argument; _escape calls it
+184:40 call  _is_valid_legacy_metric_name(s)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+186:23 call  _escape(s, escaping, _is_legacy_metric_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_metric_rune: passed as an argument; _escape calls it
+188:23 call  _escape(s, escaping, _is_legacy_metric_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_metric_rune: passed as an argument; _escape calls it
+190:40 call  _is_valid_legacy_metric_name(s)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+192:23 call  _escape(s, escaping, _is_legacy_metric_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_metric_rune: passed as an argument; _escape calls it
+
+[prometheus_client.openmetrics.exposition.escape_label_name]
+200:11 call  len(s)
+    -> <builtin>.len
+203:42 call  _is_valid_legacy_labelname(s)
+    -> prometheus_client.validation._is_valid_legacy_labelname
+204:33 call  '"{}"'.format(_escape(s, escaping, _is_legacy_labelname_r...
+    -> <builtin>.str.format
+204:41 call  _escape(s, escaping, _is_legacy_labelname_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; _escape calls it
+205:23 call  _escape(s, escaping, _is_legacy_labelname_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; _escape calls it
+207:38 call  _is_valid_legacy_labelname(s)
+    -> prometheus_client.validation._is_valid_legacy_labelname
+209:23 call  _escape(s, escaping, _is_legacy_labelname_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; _escape calls it
+211:23 call  _escape(s, escaping, _is_legacy_labelname_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; _escape calls it
+213:38 call  _is_valid_legacy_labelname(s)
+    -> prometheus_client.validation._is_valid_legacy_labelname
+215:23 call  _escape(s, escaping, _is_legacy_labelname_rune)
+    -> prometheus_client.openmetrics.exposition._escape
+    reject prometheus_client.openmetrics.exposition._is_legacy_labelname_rune: passed as an argument; _escape calls it
+
+[prometheus_client.openmetrics.exposition._escape]
+224:25 call  s.replace('\\', r'\\')
+    -> <builtin>.str.replace
+224:46 call  s.replace('\\', r'\\').replace('\n', r'\n')
+    -> <builtin>.str.replace
+224:67 call  s.replace('\\', r'\\').replace('\n', r'\n').replace('"', ...
+    -> <builtin>.str.replace
+226:27 call  StringIO()
+    -> io.StringIO
+227:30 call  enumerate(s)
+    -> <builtin>.enumerate
+228:29 call  valid_rune_fn(b, i)
+    -> prometheus_client.openmetrics.exposition._is_legacy_labelname_rune
+    -> prometheus_client.openmetrics.exposition._is_legacy_metric_rune
+    note: _escape is private; the package passes _is_legacy_labelname_rune or _is_legacy_metric_rune as valid_rune_fn, or False with ALLOWUTF8 (exposition.py:299), which never reaches this branch
+229:30 call  escaped.write(b)
+    -> io.StringIO.write
+231:30 call  escaped.write('_')
+    -> io.StringIO.write
+232:32 call  escaped.getvalue()
+    -> io.StringIO.getvalue
+234:27 call  StringIO()
+    -> io.StringIO
+235:30 call  enumerate(s)
+    -> <builtin>.enumerate
+237:30 call  escaped.write('__')
+    -> io.StringIO.write
+239:30 call  escaped.write('_dot_')
+    -> io.StringIO.write
+240:31 call  valid_rune_fn(b, i)
+    -> prometheus_client.openmetrics.exposition._is_legacy_labelname_rune
+    -> prometheus_client.openmetrics.exposition._is_legacy_metric_rune
+    note: valid_rune_fn (see 228:29)
+241:30 call  escaped.write(b)
+    -> io.StringIO.write
+243:30 call  escaped.write('__')
+    -> io.StringIO.write
+244:32 call  escaped.getvalue()
+    -> io.StringIO.getvalue
+246:27 call  StringIO()
+    -> io.StringIO
+247:22 call  escaped.write("U__")
+    -> io.StringIO.write
+248:30 call  enumerate(s)
+    -> <builtin>.enumerate
+250:30 call  escaped.write("__")
+    -> io.StringIO.write
+251:31 call  valid_rune_fn(b, i)
+    -> prometheus_client.openmetrics.exposition._is_legacy_labelname_rune
+    -> prometheus_client.openmetrics.exposition._is_legacy_metric_rune
+    note: valid_rune_fn (see 228:29)
+252:30 call  escaped.write(b)
+    -> io.StringIO.write
+253:36 call  _is_valid_utf8(b)
+    -> prometheus_client.openmetrics.exposition._is_valid_utf8
+254:30 call  escaped.write("_FFFD_")
+    -> io.StringIO.write
+256:30 call  escaped.write('_')
+    -> io.StringIO.write
+257:30 call  escaped.write(format(ord(b), 'x'))
+    -> io.StringIO.write
+257:37 call  format(ord(b), 'x')
+    -> <builtin>.format
+257:41 call  ord(b)
+    -> <builtin>.ord
+258:30 call  escaped.write('_')
+    -> io.StringIO.write
+259:32 call  escaped.getvalue()
+    -> io.StringIO.getvalue
+
+[prometheus_client.openmetrics.exposition._is_legacy_metric_rune]
+264:37 call  _is_legacy_labelname_rune(b, i)
+    -> prometheus_client.openmetrics.exposition._is_legacy_labelname_rune
+
+[prometheus_client.openmetrics.exposition._is_legacy_labelname_rune]
+268:11 call  len(b)
+    -> <builtin>.len
+269:25 call  ValueError("Input 'b' must be a single character.")
+    -> <builtin>.ValueError
+
+[prometheus_client.openmetrics.exposition._is_valid_utf8]
+283:16 call  ord(s)
+    -> <builtin>.ord
+285:28 call  ord(s)
+    -> <builtin>.ord
+
+
+== prometheus_client.openmetrics.parser
+
+[prometheus_client.openmetrics.parser]
+26:28 call  float("inf")
+    -> <builtin>.float
+47:25 call  re.compile(r'\\[\\n"]')
+    -> re.compile
+
+[prometheus_client.openmetrics.parser.text_string_to_metric_families]
+23:42 call  text_fd_to_metric_families(StringIO.StringIO(text))
+    -> prometheus_client.openmetrics.parser.text_fd_to_metric_families
+    reject prometheus_client.parser.text_fd_to_metric_families: the name is this module's own function (line 462)
+23:60 call  StringIO.StringIO(text)
+    -> io.StringIO
+    note: StringIO is the module io (import io as StringIO)
+
+[prometheus_client.openmetrics.parser._isUncanonicalNumber]
+30:14 call  float(s)
+    -> <builtin>.float
+33:32 call  floatToGoString(f)
+    -> prometheus_client.utils.floatToGoString
+
+[prometheus_client.openmetrics.parser._replace_escape_sequence]
+44:40 call  match.group(0)
+    -> re.Match.group
+
+[prometheus_client.openmetrics.parser._replace_escaping]
+51:27 call  ESCAPING_RE.sub(_replace_escape_sequence, s)
+    -> re.Pattern.sub
+    -> prometheus_client.openmetrics.parser._replace_escape_sequence
+    note: re.Pattern.sub calls the package function back for each match (callback rule)
+
+[prometheus_client.openmetrics.parser._unescape_help]
+61:30 call  result.append('\\')
+    -> <builtin>.list.append
+63:30 call  result.append('"')
+    -> <builtin>.list.append
+65:30 call  result.append('\n')
+    -> <builtin>.list.append
+67:30 call  result.append('\\' + char)
+    -> <builtin>.list.append
+73:30 call  result.append(char)
+    -> <builtin>.list.append
+76:22 call  result.append('\\')
+    -> <builtin>.list.append
+78:19 call  ''.join(result)
+    -> <builtin>.str.join
+
+[prometheus_client.openmetrics.parser._parse_timestamp]
+82:24 call  ''.join(timestamp)
+    -> <builtin>.str.join
+    note: timestamp is the list of characters of _parse_remaining_text
+85:36 call  timestamp.strip()
+    -> <builtin>.str.strip
+86:25 call  ValueError(f"Invalid timestamp: {timestamp!r}")
+    -> <builtin>.ValueError
+89:25 call  Timestamp(int(timestamp), 0)
+    -> prometheus_client.samples.Timestamp.__init__
+89:29 call  int(timestamp)
+    -> <builtin>.int
+93:36 call  timestamp.split('.', 1)
+    -> <builtin>.str.split
+94:29 call  Timestamp(int(parts[0]), int(parts[1][:9].ljust(9, "0")))
+    -> prometheus_client.samples.Timestamp.__init__
+94:33 call  int(parts[0])
+    -> <builtin>.int
+94:48 call  int(parts[1][:9].ljust(9, "0"))
+    -> <builtin>.int
+94:67 call  parts[1][:9].ljust(9, "0")
+    -> <builtin>.str.ljust
+97:23 call  float(timestamp)
+    -> <builtin>.float
+98:26 call  math.isnan(ts)
+    -> math.isnan
+98:44 call  math.isinf(ts)
+    -> math.isinf
+99:33 call  ValueError(f"Invalid timestamp: {timestamp!r}")
+    -> <builtin>.ValueError
+
+[prometheus_client.openmetrics.parser._parse_sample]
+114:38 call  _next_unquoted_char(text, '{')
+    -> prometheus_client.parser._next_unquoted_char
+117:39 call  _next_unquoted_char(text, ' ')
+    -> prometheus_client.parser._next_unquoted_char
+119:44 call  _is_valid_legacy_metric_name(name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+120:29 call  ValueError("invalid metric name:" + text)
+    -> <builtin>.ValueError
+123:59 call  _parse_remaining_text(remaining_text)
+    -> prometheus_client.openmetrics.parser._parse_remaining_text
+124:22 call  Sample(name, {}, value, timestamp, exemplar)
+    note: no edge: Sample is a NamedTuple class
+126:36 call  _next_unquoted_char(text, '}')
+    -> prometheus_client.parser._next_unquoted_char
+127:26 call  parse_labels(text[label_start + 1:label_end], True)
+    -> prometheus_client.parser.parse_labels
+135:25 call  ValueError("metric name specified more than once")
+    -> <builtin>.ValueError
+138:55 call  _parse_remaining_text(remaining_text)
+    -> prometheus_client.openmetrics.parser._parse_remaining_text
+139:18 call  Sample(name, labels, value, timestamp, exemplar)
+    note: no edge: Sample is a NamedTuple class
+
+[prometheus_client.openmetrics.parser._parse_remaining_text]
+143:28 call  text.split(" ", 1)
+    -> <builtin>.str.split
+144:23 call  _parse_value(split_text[0])
+    -> prometheus_client.parser._parse_value
+145:11 call  len(split_text)
+    -> <builtin>.len
+157:14 call  iter(text)
+    -> <builtin>.iter
+170:33 call  timestamp.append(char)
+    -> <builtin>.list.append
+175:33 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+180:33 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+183:50 call  _next_unquoted_char(text, '{')
+    -> prometheus_client.parser._next_unquoted_char
+184:48 call  _last_unquoted_char(text, '}')
+    -> prometheus_client.parser._last_unquoted_char
+185:47 call  parse_labels(text[label_start + 1:label_end], True)
+    -> prometheus_client.parser.parse_labels
+188:33 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+196:33 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+199:33 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+203:38 call  exemplar_value.append(char)
+    -> <builtin>.list.append
+205:38 call  exemplar_timestamp.append(char)
+    -> <builtin>.list.append
+209:25 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+213:25 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+217:25 call  ValueError("Invalid line: " + text)
+    -> <builtin>.ValueError
+219:26 call  _parse_timestamp(timestamp)
+    -> prometheus_client.openmetrics.parser._parse_timestamp
+222:30 call  sum(len(k) + len(v) for k, v in exemplar_labels.items())
+    -> <builtin>.sum
+222:34 call  len(k)
+    -> <builtin>.len
+222:43 call  len(v)
+    -> <builtin>.len
+222:80 call  exemplar_labels.items()
+    -> <builtin>.dict.items
+    note: exemplar_labels is the dict of parse_labels
+224:29 call  ValueError("Exemplar labels are too long: " + text)
+    -> <builtin>.ValueError
+225:28 call  Exemplar( exemplar_labels, _parse_value(exemplar_value), ...
+    note: no edge: Exemplar is a NamedTuple class
+227:25 call  _parse_value(exemplar_value)
+    -> prometheus_client.parser._parse_value
+228:29 call  _parse_timestamp(exemplar_timestamp)
+    -> prometheus_client.openmetrics.parser._parse_timestamp
+
+[prometheus_client.openmetrics.parser._parse_nh_sample]
+236:39 call  _next_unquoted_char(text, '{')
+    -> prometheus_client.parser._next_unquoted_char
+248:28 call  _next_unquoted_char(text, ' {')
+    -> prometheus_client.parser._next_unquoted_char
+257:45 call  _next_unquoted_char(text, '}', i)
+    -> prometheus_client.parser._next_unquoted_char
+262:41 call  _next_unquoted_char(text, '{', i + 1)
+    -> prometheus_client.parser._next_unquoted_char
+268:35 call  _next_unquoted_char(text, '#', i + 1)
+    -> prometheus_client.parser._next_unquoted_char
+272:39 call  _next_unquoted_char(text, '}', nh_value_start)
+    -> prometheus_client.parser._next_unquoted_char
+278:30 call  parse_labels(labelstext, True)
+    -> prometheus_client.parser.parse_labels
+281:25 call  name.endswith(suffixes)
+    -> <builtin>.str.endswith
+282:29 call  ValueError("the sample name of a native histogram with la...
+    -> <builtin>.ValueError
+294:42 call  _parse_nh_struct(nh_value)
+    -> prometheus_client.openmetrics.parser._parse_nh_struct
+295:22 call  Sample(name, labels, None, None, None, nat_hist_value)
+    note: no edge: Sample is a NamedTuple class
+301:25 call  name.endswith(suffixes)
+    -> <builtin>.str.endswith
+302:29 call  ValueError("the sample name of a native histogram should ...
+    -> <builtin>.ValueError
+304:42 call  _parse_nh_struct(nh_value)
+    -> prometheus_client.openmetrics.parser._parse_nh_struct
+305:22 call  Sample(name, None, None, None, None, nat_hist_value)
+    note: no edge: Sample is a NamedTuple class
+
+[prometheus_client.openmetrics.parser._parse_nh_struct]
+310:26 call  re.compile(r'(positive_spans|negative_spans):\[(\d+:\d+(,...
+    -> re.compile
+311:27 call  re.compile(r'(positive_deltas|negative_deltas):\[(-?\d+(?...
+    -> re.compile
+313:17 call  dict(re.findall(pattern, text))
+    -> <builtin>.dict
+313:28 call  re.findall(pattern, text)
+    -> re.findall
+314:36 call  re_spans.findall(text)
+    -> re.Pattern.findall
+315:18 call  dict(re_deltas.findall(text))
+    -> <builtin>.dict
+315:36 call  re_deltas.findall(text)
+    -> re.Pattern.findall
+317:22 call  int(items['count'])
+    -> <builtin>.int
+318:22 call  float(items['sum'])
+    -> <builtin>.float
+319:17 call  int(items['schema'])
+    -> <builtin>.int
+320:27 call  float(items['zero_threshold'])
+    -> <builtin>.float
+321:21 call  int(items['zero_count'])
+    -> <builtin>.int
+323:31 call  _compose_spans(span_matches, 'positive_spans')
+    -> prometheus_client.openmetrics.parser._compose_spans
+324:31 call  _compose_spans(span_matches, 'negative_spans')
+    -> prometheus_client.openmetrics.parser._compose_spans
+325:33 call  _compose_deltas(deltas, 'positive_deltas')
+    -> prometheus_client.openmetrics.parser._compose_deltas
+326:33 call  _compose_deltas(deltas, 'negative_deltas')
+    -> prometheus_client.openmetrics.parser._compose_deltas
+328:27 call  NativeHistogram( count_value=count_value, sum_value=sum_v...
+    note: no edge: NativeHistogram is a NamedTuple class
+
+[prometheus_client.openmetrics.parser._compose_spans]
+352:23 call  tuple(map(int, pair.split(':')))
+    -> <builtin>.tuple
+352:27 call  map(int, pair.split(':'))
+    -> <builtin>.map
+352:43 call  pair.split(':')
+    -> <builtin>.str.split
+352:77 call  match[1].split(',')
+    -> <builtin>.str.split
+362:25 call  out_spans.append(BucketSpan(start, end))
+    -> <builtin>.list.append
+362:36 call  BucketSpan(start, end)
+    note: no edge: BucketSpan is a NamedTuple class
+364:28 call  tuple(out_spans)
+    -> <builtin>.tuple
+
+[prometheus_client.openmetrics.parser._compose_deltas]
+373:28 call  deltas.get(deltas_name)
+    -> <builtin>.dict.get
+374:51 call  out_deltas.strip()
+    -> <builtin>.str.strip
+375:33 call  out_deltas.split(',')
+    -> <builtin>.str.split
+378:29 call  tuple(int(x.strip()) for x in elems)
+    -> <builtin>.tuple
+378:33 call  int(x.strip())
+    -> <builtin>.int
+378:41 call  x.strip()
+    -> <builtin>.str.strip
+
+[prometheus_client.openmetrics.parser._group_for_sample]
+387:31 call  sample.labels.copy()
+    -> <builtin>.dict.copy
+    note: the labels of a parsed sample are the dict of parse_labels
+391:31 call  sample.labels.copy()
+    -> <builtin>.dict.copy
+395:31 call  sample.labels.copy()
+    -> <builtin>.dict.copy
+
+[prometheus_client.openmetrics.parser._check_histogram]
+422:28 call  len(name)
+    -> <builtin>.len
+423:30 call  _group_for_sample(s, name, 'histogram')
+    -> prometheus_client.openmetrics.parser._group_for_sample
+424:15 call  len(suffix)
+    -> <builtin>.len
+428:26 call  do_checks()
+    -> prometheus_client.openmetrics.parser._check_histogram.do_checks
+440:22 call  float(s.labels['le'])
+    -> <builtin>.float
+444:33 call  ValueError("Buckets out of order: " + name)
+    -> <builtin>.ValueError
+446:33 call  ValueError("Bucket values out of order: " + name)
+    -> <builtin>.ValueError
+459:18 call  do_checks()
+    -> prometheus_client.openmetrics.parser._check_histogram.do_checks
+
+426:38 op  s.timestamp != timestamp
+    -> prometheus_client.samples.Timestamp.__ne__
+    note: the sample timestamps are Timestamps, floats or None (_parse_timestamp); != runs Timestamp.__ne__, directly or reflected when the left operand is a float or None
+[prometheus_client.openmetrics.parser._check_histogram.do_checks]
+406:27 call  float('+Inf')
+    -> <builtin>.float
+407:29 call  ValueError("+Inf bucket missing: " + name)
+    -> <builtin>.ValueError
+409:29 call  ValueError("Count does not match +Inf value: " + name)
+    -> <builtin>.ValueError
+411:29 call  ValueError("_count must be present if _sum is present: " ...
+    -> <builtin>.ValueError
+413:29 call  ValueError("_gcount must be present if _gsum is present: ...
+    -> <builtin>.ValueError
+415:29 call  ValueError("_sum/_gsum must be present if _count is prese...
+    -> <builtin>.ValueError
+417:29 call  ValueError("Cannot have _sum with negative buckets: " + n...
+    -> <builtin>.ValueError
+419:29 call  ValueError("Cannot have negative _gsum with non-negative ...
+    -> <builtin>.ValueError
+
+[prometheus_client.openmetrics.parser.text_fd_to_metric_families]
+475:21 call  set()
+    -> <builtin>.set
+    reject *: set is the builtin
+514:29 call  ValueError("Received line after # EOF: " + line)
+    -> <builtin>.ValueError
+517:29 call  ValueError("Received blank line")
+    -> <builtin>.ValueError
+521:29 call  line.startswith('#')
+    -> <builtin>.str.startswith
+522:34 call  _split_quoted(line, ' ', 3)
+    -> prometheus_client.parser._split_quoted
+523:19 call  len(parts)
+    -> <builtin>.len
+524:33 call  ValueError("Invalid line: " + line)
+    -> <builtin>.ValueError
+525:55 call  _unquote_unescape(parts[2])
+    -> prometheus_client.parser._unquote_unescape
+526:63 call  _is_valid_legacy_metric_name(candidate_name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+529:33 call  ValueError("Received metadata after samples: " + line)
+    -> <builtin>.ValueError
+532:39 call  build_metric(name, documentation, typ, unit, samples)
+    -> prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 484)
+539:34 call  set()
+    -> <builtin>.set
+    reject *: set is the builtin
+541:46 call  set()
+    -> <builtin>.set
+    reject *: set is the builtin
+547:37 call  ValueError("More than one HELP for metric: " + line)
+    -> <builtin>.ValueError
+548:47 call  _unescape_help(parts[3])
+    -> prometheus_client.openmetrics.parser._unescape_help
+551:37 call  ValueError("More than one TYPE for metric: " + line)
+    -> <builtin>.ValueError
+554:37 call  ValueError("Invalid TYPE for metric: " + line)
+    -> <builtin>.ValueError
+555:69 call  type_suffixes.get(typ, [''])
+    -> <builtin>.dict.get
+558:37 call  ValueError("More than one UNIT for metric: " + line)
+    -> <builtin>.ValueError
+561:33 call  ValueError("Invalid line: " + line)
+    -> <builtin>.ValueError
+566:42 call  _parse_nh_sample(line, tuple(type_suffixes['histogram']))
+    -> prometheus_client.openmetrics.parser._parse_nh_sample
+566:54 call  tuple(type_suffixes['histogram'])
+    -> <builtin>.tuple
+570:43 call  _parse_sample(line)
+    -> prometheus_client.openmetrics.parser._parse_sample
+    reject prometheus_client.parser._parse_sample: _parse_sample is this module's own function (line 111)
+573:39 call  _parse_sample(line)
+    -> prometheus_client.openmetrics.parser._parse_sample
+    reject prometheus_client.parser._parse_sample: _parse_sample is this module's own function (line 111)
+576:39 call  build_metric(name, documentation, typ, unit, samples)
+    -> prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 484)
+578:59 call  _unquote_unescape(sample.name)
+    -> prometheus_client.parser._unquote_unescape
+579:67 call  _is_valid_legacy_metric_name(candidate_name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+588:46 call  set()
+    -> <builtin>.set
+    reject *: set is the builtin
+589:34 call  set()
+    -> <builtin>.set
+    reject *: set is the builtin
+593:33 call  ValueError("Stateset missing label: " + line)
+    -> <builtin>.ValueError
+595:43 call  sample.labels.get('le', "NaN")
+    -> <builtin>.dict.get
+596:49 call  _isUncanonicalNumber(sample.labels['le'])
+    -> prometheus_client.openmetrics.parser._isUncanonicalNumber
+597:33 call  ValueError("Invalid le label: " + line)
+    -> <builtin>.ValueError
+599:40 call  isinstance(sample.value, int)
+    -> <builtin>.isinstance
+599:91 call  sample.value.is_integer()
+    -> <builtin>.float.is_integer
+    note: a sample value that is not an int is the float of _parse_value
+600:33 call  ValueError("Bucket value must be an integer: " + line)
+    -> <builtin>.ValueError
+602:40 call  isinstance(sample.value, int)
+    -> <builtin>.isinstance
+602:91 call  sample.value.is_integer()
+    -> <builtin>.float.is_integer
+603:33 call  ValueError("Count value must be an integer: " + line)
+    -> <builtin>.ValueError
+605:41 call  float(sample.labels.get('quantile', -1))
+    -> <builtin>.float
+605:59 call  sample.labels.get('quantile', -1)
+    -> <builtin>.dict.get
+606:49 call  _isUncanonicalNumber(sample.labels['quantile'])
+    -> prometheus_client.openmetrics.parser._isUncanonicalNumber
+607:33 call  ValueError("Invalid quantile label: " + line)
+    -> <builtin>.ValueError
+610:26 call  tuple(sorted(_group_for_sample(sample, name, typ).items()))
+    -> <builtin>.tuple
+610:33 call  sorted(_group_for_sample(sample, name, typ).items())
+    -> <builtin>.sorted
+610:51 call  _group_for_sample(sample, name, typ)
+    -> prometheus_client.openmetrics.parser._group_for_sample
+610:76 call  _group_for_sample(sample, name, typ).items()
+    -> <builtin>.dict.items
+612:37 call  ValueError("Invalid metric grouping: " + line)
+    -> <builtin>.ValueError
+615:41 call  ValueError("Mix of timestamp presence within a group: " +...
+    -> <builtin>.ValueError
+617:41 call  ValueError("Timestamps went backwards within a group: " +...
+    -> <builtin>.ValueError
+619:50 call  set()
+    -> <builtin>.set
+    reject *: set is the builtin
+621:48 call  tuple(sorted(sample.labels.items()))
+    -> <builtin>.tuple
+621:55 call  sorted(sample.labels.items())
+    -> <builtin>.sorted
+621:75 call  sample.labels.items()
+    -> <builtin>.dict.items
+624:35 call  samples.append(sample)
+    -> <builtin>.list.append
+625:44 call  group_timestamp_samples.add(series_id)
+    -> <builtin>.set.add
+629:32 call  seen_groups.add(g)
+    -> <builtin>.set.add
+631:31 call  samples.append(sample)
+    -> <builtin>.list.append
+634:33 call  ValueError("Stateset samples can only have values zero an...
+    -> <builtin>.ValueError
+636:33 call  ValueError("Info samples can only have value one: " + line)
+    -> <builtin>.ValueError
+638:33 call  ValueError("Quantile values cannot be negative: " + line)
+    -> <builtin>.ValueError
+639:31 call  len(name)
+    -> <builtin>.len
+639:117 call  math.isnan( sample.value)
+    -> math.isnan
+641:33 call  ValueError("Counter-like samples cannot be NaN: " + line)
+    -> <builtin>.ValueError
+642:31 call  len(name)
+    -> <builtin>.len
+643:33 call  ValueError("Counter-like samples cannot be negative: " + ...
+    -> <builtin>.ValueError
+645:85 call  sample.name.endswith('_bucket')
+    -> <builtin>.str.endswith
+646:68 call  sample.name.endswith('_total')
+    -> <builtin>.str.endswith
+647:33 call  ValueError("Invalid line only histogram/gaugehistogram bu...
+    -> <builtin>.ValueError
+650:27 call  build_metric(name, documentation, typ, unit, samples)
+    -> prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 484)
+653:25 call  ValueError("Missing # EOF at end")
+    -> <builtin>.ValueError
+
+616:72 op  group_timestamp > sample.timestamp
+    -> prometheus_client.samples.Timestamp.__gt__
+    -> prometheus_client.samples.Timestamp.__lt__
+    note: the timestamps of one group are Timestamps or floats (_parse_timestamp returns a float for a timestamp with an exponent); > runs Timestamp.__gt__ when the left one is a Timestamp, and the reflected Timestamp.__lt__ when only the right one is
+622:37 op  sample.timestamp != group_timestamp
+    -> prometheus_client.samples.Timestamp.__ne__
+    note: the sample timestamps are Timestamps, floats or None; != runs Timestamp.__ne__, directly or reflected
+[prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric]
+487:26 call  set(type_suffixes.get(typ, []) + [""])
+    -> <builtin>.set
+    reject *: set is the builtin
+487:44 call  type_suffixes.get(typ, [])
+    -> <builtin>.dict.get
+489:33 call  ValueError("Clashing name: " + name + suffix)
+    -> <builtin>.ValueError
+490:27 call  seen_names.add(name + suffix)
+    -> <builtin>.set.add
+495:38 call  name.endswith("_" + unit)
+    -> <builtin>.str.endswith
+496:29 call  ValueError("Unit does not match metric name: " + name)
+    -> <builtin>.ValueError
+498:29 call  ValueError("Units not allowed for this metric type: " + n...
+    -> <builtin>.ValueError
+500:29 call  _check_histogram(samples, name)
+    -> prometheus_client.openmetrics.parser._check_histogram
+501:30 call  _validate_metric_name(name)
+    -> prometheus_client.validation._validate_metric_name
+502:24 call  Metric(name, documentation, typ, unit)
+    -> prometheus_client.metrics_core.Metric.__init__
+
+
+== prometheus_client.parser
+
+[prometheus_client.parser]
+32:30 call  re.compile(r'\\[\\n]')
+    -> re.compile
+33:25 call  re.compile(r'\\[\\n"]')
+    -> re.compile
+
+[prometheus_client.parser.text_string_to_metric_families]
+18:42 call  text_fd_to_metric_families(StringIO.StringIO(text))
+    -> prometheus_client.parser.text_fd_to_metric_families
+    reject prometheus_client.openmetrics.parser.text_fd_to_metric_families: the name is this module's own function (line 275)
+18:60 call  StringIO.StringIO(text)
+    -> io.StringIO
+    note: StringIO is the module io (import io as StringIO)
+
+[prometheus_client.parser.replace_escape_sequence]
+29:40 call  match.group(0)
+    -> re.Match.group
+
+[prometheus_client.parser._replace_help_escaping]
+37:32 call  HELP_ESCAPING_RE.sub(replace_escape_sequence, s)
+    -> re.Pattern.sub
+    -> prometheus_client.parser.replace_escape_sequence
+    note: re.Pattern.sub calls the package function back for each match (callback rule)
+
+[prometheus_client.parser._replace_escaping]
+41:27 call  ESCAPING_RE.sub(replace_escape_sequence, s)
+    -> re.Pattern.sub
+    -> prometheus_client.parser.replace_escape_sequence
+    note: re.Pattern.sub calls the package function back for each match (callback rule)
+
+[prometheus_client.parser.parse_labels]
+56:37 call  labels_string.strip()
+    -> <builtin>.str.strip
+58:25 call  ValueError("leading comma: " + labels_string)
+    -> <builtin>.ValueError
+65:59 call  _next_term(sub_labels, openmetrics)
+    -> prometheus_client.parser._next_term
+68:37 call  ValueError("empty term in line: " + labels_string)
+    -> <builtin>.ValueError
+71:56 call  _unquote_unescape(name_term)
+    -> prometheus_client.parser._unquote_unescape
+73:68 call  _is_valid_legacy_metric_name(label_name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+74:33 call  ValueError("unquoted UTF-8 metric name")
+    -> <builtin>.ValueError
+83:26 call  len(value_term)
+    -> <builtin>.len
+84:37 call  value_term.index('"', i)
+    -> <builtin>.str.index
+85:45 call  _is_character_escaped(value_term[:i], i)
+    -> prometheus_client.parser._is_character_escaped
+    reject prometheus_client.openmetrics.parser._is_character_escaped: the name is this module's own function (line 44)
+90:32 call  len(value_term)
+    -> <builtin>.len
+91:33 call  ValueError("unexpected text after quote: " + labels_string)
+    -> <builtin>.ValueError
+93:47 call  _unquote_unescape(value_term)
+    -> prometheus_client.parser._unquote_unescape
+95:38 call  _validate_metric_name(label_name)
+    -> prometheus_client.validation._validate_metric_name
+97:36 call  _validate_labelname(label_name)
+    -> prometheus_client.validation._validate_labelname
+99:33 call  ValueError("invalid line, duplicate label name: " + label...
+    -> <builtin>.ValueError
+103:25 call  ValueError("Invalid labels: " + labels_string)
+    -> <builtin>.ValueError
+
+[prometheus_client.parser._next_term]
+120:29 call  ValueError("multiple commas")
+    -> <builtin>.ValueError
+122:35 call  _next_unquoted_char(text, '=,}')
+    -> prometheus_client.parser._next_unquoted_char
+126:39 call  _next_unquoted_char(text, ',}')
+    -> prometheus_client.parser._next_unquoted_char
+131:23 call  len(text)
+    -> <builtin>.len
+134:25 call  ValueError("empty term:", term)
+    -> <builtin>.ValueError
+137:33 call  term.strip()
+    -> <builtin>.str.strip
+137:47 call  rest.strip()
+    -> <builtin>.str.strip
+
+[prometheus_client.parser._next_unquoted_char]
+150:26 call  enumerate(text[startidx:])
+    -> <builtin>.enumerate
+151:50 call  _is_character_escaped(text, startidx + i)
+    -> prometheus_client.parser._is_character_escaped
+    reject prometheus_client.openmetrics.parser._is_character_escaped: the name is this module's own function (line 44)
+
+[prometheus_client.parser._last_unquoted_char]
+161:12 call  len(text)
+    -> <builtin>.len
+166:56 call  _is_character_escaped(text, i)
+    -> prometheus_client.parser._is_character_escaped
+    reject prometheus_client.openmetrics.parser._is_character_escaped: the name is this module's own function (line 44)
+
+[prometheus_client.parser._split_quoted]
+183:18 call  len(text)
+    -> <builtin>.len
+184:40 call  _next_unquoted_char(text, separator, x)
+    -> prometheus_client.parser._next_unquoted_char
+187:20 call  len(text)
+    -> <builtin>.len
+195:32 call  len(tokens)
+    -> <builtin>.len
+200:22 call  tokens.append('')
+    -> <builtin>.list.append
+
+[prometheus_client.parser._unquote_unescape]
+209:22 call  text.strip()
+    -> <builtin>.str.strip
+211:15 call  len(text)
+    -> <builtin>.len
+212:29 call  ValueError("missing close quote")
+    -> <builtin>.ValueError
+216:33 call  _replace_escaping(text)
+    -> prometheus_client.parser._replace_escaping
+    reject prometheus_client.openmetrics.parser._replace_escaping: the name is this module's own function (line 40)
+
+[prometheus_client.parser._parse_value_and_timestamp]
+222:17 call  s.lstrip()
+    -> <builtin>.str.lstrip
+226:26 call  value.strip()
+    -> <builtin>.str.strip
+226:49 call  s.split(separator)
+    -> <builtin>.str.split
+226:75 call  value.strip()
+    -> <builtin>.str.strip
+228:21 call  float(s)
+    -> <builtin>.float
+229:25 call  _parse_value(values[0])
+    -> prometheus_client.parser._parse_value
+230:30 call  _parse_value(values[-1])
+    -> prometheus_client.parser._parse_value
+230:57 call  len(values)
+    -> <builtin>.len
+
+[prometheus_client.parser._parse_value]
+235:20 call  ''.join(value)
+    -> <builtin>.str.join
+    note: value is a str (parser) or the list of characters of the OpenMetrics parser (openmetrics/parser.py:227)
+236:28 call  value.strip()
+    -> <builtin>.str.strip
+237:25 call  ValueError(f"Invalid value: {value!r}")
+    -> <builtin>.ValueError
+239:19 call  int(value)
+    -> <builtin>.int
+241:21 call  float(value)
+    -> <builtin>.float
+
+[prometheus_client.parser._parse_sample]
+247:38 call  _next_unquoted_char(text, '{')
+    -> prometheus_client.parser._next_unquoted_char
+250:39 call  _next_unquoted_char(text, ' \t')
+    -> prometheus_client.parser._next_unquoted_char
+251:37 call  text[:name_end].strip()
+    -> <builtin>.str.strip
+252:44 call  _is_valid_legacy_metric_name(name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+253:29 call  ValueError("invalid metric name:" + text)
+    -> <builtin>.ValueError
+256:54 call  _parse_value_and_timestamp(remaining_text)
+    -> prometheus_client.parser._parse_value_and_timestamp
+257:22 call  Sample(name, {}, value, timestamp)
+    note: no edge: Sample is a NamedTuple class
+258:36 call  text[:label_start].strip()
+    -> <builtin>.str.strip
+259:36 call  _next_unquoted_char(text[label_start:], '}')
+    -> prometheus_client.parser._next_unquoted_char
+260:26 call  parse_labels(text[label_start + 1:label_end], False)
+    -> prometheus_client.parser.parse_labels
+268:25 call  ValueError("metric name specified more than once")
+    -> <builtin>.ValueError
+271:50 call  _parse_value_and_timestamp(remaining_text)
+    -> prometheus_client.parser._parse_value_and_timestamp
+272:18 call  Sample(name, labels, value, timestamp)
+    note: no edge: Sample is a NamedTuple class
+
+[prometheus_client.parser.text_fd_to_metric_families]
+306:26 call  line.strip()
+    -> <builtin>.str.strip
+    note: the lines of the text stream are strs (the io.StringIO of text_string_to_metric_families, or the client's text file)
+308:27 call  line.startswith('#')
+    -> <builtin>.str.startswith
+309:34 call  _split_quoted(line, None, 3)
+    -> prometheus_client.parser._split_quoted
+310:19 call  len(parts)
+    -> <builtin>.len
+313:19 call  len(parts)
+    -> <builtin>.len
+317:59 call  _unquote_unescape(parts[2])
+    -> prometheus_client.parser._unquote_unescape
+318:67 call  _is_valid_legacy_metric_name(candidate_name)
+    -> prometheus_client.validation._is_valid_legacy_metric_name
+323:43 call  build_metric(name, documentation, typ, samples)
+    -> prometheus_client.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 290)
+329:23 call  len(parts)
+    -> <builtin>.len
+330:59 call  _replace_help_escaping(parts[3])
+    -> prometheus_client.parser._replace_help_escaping
+334:23 call  len(parts)
+    -> <builtin>.len
+338:43 call  build_metric(name, documentation, typ, samples)
+    -> prometheus_client.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 290)
+349:22 call  { 'counter': [''], 'gauge': [''], 'summary': ['_count', '...
+    -> <builtin>.dict.get
+355:35 call  _parse_sample(line)
+    -> prometheus_client.parser._parse_sample
+    reject prometheus_client.openmetrics.parser._parse_sample: the name is this module's own function (line 244)
+358:39 call  build_metric(name, documentation, typ, samples)
+    -> prometheus_client.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 290)
+365:35 call  build_metric(sample[0], documentation, typ, [sample])
+    -> prometheus_client.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 290)
+367:31 call  samples.append(sample)
+    -> <builtin>.list.append
+370:27 call  build_metric(name, documentation, typ, samples)
+    -> prometheus_client.parser.text_fd_to_metric_families.build_metric
+    reject prometheus_client.openmetrics.parser.text_fd_to_metric_families.build_metric: build_metric is the local function of this function (line 290)
+
+[prometheus_client.parser.text_fd_to_metric_families.build_metric]
+294:29 call  name.endswith('_total')
+    -> <builtin>.str.endswith
+299:39 call  new_samples.append(Sample(s[0] + '_total', *s[1:]))
+    -> <builtin>.list.append
+299:46 call  Sample(s[0] + '_total', *s[1:])
+    note: no edge: Sample is a NamedTuple class
+301:24 call  Metric(name, documentation, typ)
+    -> prometheus_client.metrics_core.Metric.__init__
+
+
+== prometheus_client.platform_collector
+
+[prometheus_client.platform_collector]
+29:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+58:39 call  PlatformCollector()
+    -> prometheus_client.platform_collector.PlatformCollector.__init__
+
+[prometheus_client.platform_collector.PlatformCollector.__init__]
+16:26 call  self._info()
+    -> prometheus_client.platform_collector.PlatformCollector._info
+17:39 call  self._platform.system()
+    -> platform.system
+    note: self._platform is the platform module by default, or the client's module (the platform argument, "intended for testing"), a client object (B5)
+19:24 call  info.update(self._java())
+    reject prometheus_client.decorator.FunctionMaker.update: info is the dict of _info
+    -> <builtin>.dict.update
+    note: info is the dict of _info; the branch runs when the platform object answers "Java" (a client platform module; B5: client control flow counts)
+19:35 call  self._java()
+    -> prometheus_client.platform_collector.PlatformCollector._java
+21:29 call  self._add_metric("python_info", "Python platform informat...
+    -> prometheus_client.platform_collector.PlatformCollector._add_metric
+24:30 call  registry.register(self)
+    -> prometheus_client.registry.CollectorRegistry.register
+
+[prometheus_client.platform_collector.PlatformCollector._add_metric]
+31:27 call  data.keys()
+    -> <builtin>.dict.keys
+33:30 call  GaugeMetricFamily(name, documentation, labels=labels)
+    -> prometheus_client.metrics_core.GaugeMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: GaugeMetricFamily defines its own __init__
+34:21 call  g.add_metric(values, 1)
+    -> prometheus_client.metrics_core.GaugeMetricFamily.add_metric
+    reject *: g is a GaugeMetricFamily
+
+[prometheus_client.platform_collector.PlatformCollector._info]
+38:71 call  self._platform.python_version_tuple()
+    -> platform.python_version_tuple
+    note: self._platform is the platform module, or a client module (no callee)
+40:53 call  self._platform.python_version()
+    -> platform.python_version
+41:67 call  self._platform.python_implementation()
+    -> platform.python_implementation
+
+[prometheus_client.platform_collector.PlatformCollector._java]
+48:66 call  self._platform.java_ver()
+    note: no edge: _java runs only when self._platform.system() returned "Java", which the platform module does only on Jython, an implementation that the release does not support (CPython and PyPy, pyproject.toml classifiers); so self._platform here is a client module (B5)
+
+
+== prometheus_client.process_collector
+
+[prometheus_client.process_collector]
+10:37 call  resource.getpagesize()
+    -> resource.getpagesize
+    note: optional import (lines 7-13); both sides run
+100:37 call  ProcessCollector()
+    -> prometheus_client.process_collector.ProcessCollector.__init__
+
+[prometheus_client.process_collector.ProcessCollector.__init__]
+33:37 call  os.sysconf('SC_CLK_TCK')
+    -> os.sysconf
+42:42 call  self._boot_time()
+    -> prometheus_client.process_collector.ProcessCollector._boot_time
+46:30 call  registry.register(self)
+    -> prometheus_client.registry.CollectorRegistry.register
+    note: registry is annotated Optional[CollectorRegistry]
+
+[prometheus_client.process_collector.ProcessCollector._boot_time]
+49:18 call  open(os.path.join(self._proc, 'stat'), 'rb')
+    -> <builtin>.open
+49:31 call  os.path.join(self._proc, 'stat')
+    -> os.path.join
+51:35 call  line.startswith(b'btime ')
+    -> <builtin>.bytes.startswith
+52:33 call  float(line.split()[1])
+    -> <builtin>.float
+52:44 call  line.split()
+    -> <builtin>.bytes.split
+
+[prometheus_client.process_collector.ProcessCollector.collect]
+58:27 call  os.path.join(self._proc, str(self._pid()).strip())
+    -> os.path.join
+58:43 call  str(self._pid())
+    -> <builtin>.str
+58:53 call  self._pid()
+    -> prometheus_client.process_collector.ProcessCollector.<lambda1>
+    note: self._pid is the pid argument: the default lambda: 'self' of the signature, or the client's callable (the documented example passes a client lambda), a client callback
+58:62 call  str(self._pid()).strip()
+    -> <builtin>.str.strip
+62:22 call  open(os.path.join(pid, 'stat'), 'rb')
+    -> <builtin>.open
+62:35 call  os.path.join(pid, 'stat')
+    -> os.path.join
+63:35 call  stat.read()
+    -> io.BufferedReader.read
+63:43 call  stat.read().split(b')')
+    -> <builtin>.bytes.split
+63:59 call  stat.read().split(b')')[-1].split()
+    -> <builtin>.bytes.split
+65:37 call  GaugeMetricFamily(self._prefix + 'virtual_memory_bytes', ...
+    -> prometheus_client.metrics_core.GaugeMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: GaugeMetricFamily defines its own __init__
+66:82 call  float(parts[20])
+    -> <builtin>.float
+67:36 call  GaugeMetricFamily(self._prefix + 'resident_memory_bytes',...
+    -> prometheus_client.metrics_core.GaugeMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: GaugeMetricFamily defines its own __init__
+68:48 call  float(parts[21])
+    -> <builtin>.float
+69:36 call  float(parts[19])
+    -> <builtin>.float
+70:43 call  GaugeMetricFamily(self._prefix + 'start_time_seconds', 'S...
+    -> prometheus_client.metrics_core.GaugeMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: GaugeMetricFamily defines its own __init__
+73:26 call  float(parts[11])
+    -> <builtin>.float
+74:26 call  float(parts[12])
+    -> <builtin>.float
+75:38 call  CounterMetricFamily(self._prefix + 'cpu_seconds_total', '...
+    -> prometheus_client.metrics_core.CounterMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: CounterMetricFamily defines its own __init__
+78:26 call  result.extend([vmem, rss, start_time, cpu])
+    -> <builtin>.list.extend
+83:22 call  open(os.path.join(pid, 'limits'), 'rb')
+    -> <builtin>.open
+83:35 call  os.path.join(pid, 'limits')
+    -> os.path.join
+85:39 call  line.startswith(b'Max open file')
+    -> <builtin>.bytes.startswith
+86:52 call  GaugeMetricFamily(self._prefix + 'max_fds', 'Maximum numb...
+    -> prometheus_client.metrics_core.GaugeMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: GaugeMetricFamily defines its own __init__
+88:64 call  float(line.split()[3])
+    -> <builtin>.float
+88:75 call  line.split()
+    -> <builtin>.bytes.split
+90:41 call  GaugeMetricFamily(self._prefix + 'open_fds', 'Number of o...
+    -> prometheus_client.metrics_core.GaugeMetricFamily.__init__
+    reject prometheus_client.metrics_core.Metric.__init__: GaugeMetricFamily defines its own __init__
+92:45 call  len(os.listdir(os.path.join(pid, 'fd')))
+    -> <builtin>.len
+92:56 call  os.listdir(os.path.join(pid, 'fd'))
+    -> os.listdir
+92:69 call  os.path.join(pid, 'fd')
+    -> os.path.join
+93:26 call  result.extend([open_fds, max_fds])
+    -> <builtin>.list.extend
+
+
+== prometheus_client.registry
+
+[prometheus_client.registry]
+178:29 call  CollectorRegistry(auto_describe=True)
+    -> prometheus_client.registry.CollectorRegistry.__init__
+
+[prometheus_client.registry.DuplicateTimeseries.__init__]
+20:70 call  'Duplicated timeseries in CollectorRegistry: {}'.format( ...
+    -> <builtin>.str.format
+22:14 call  super()
+    -> <builtin>.super
+22:25 call  super().__init__(msg)
+    note: a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the named class
+    -> <builtin>.ValueError.__init__
+    reject *: super() of DuplicateTimeseries is ValueError, outside the package
+
+[prometheus_client.registry.CollectorRegistry.__init__]
+39:26 call  Lock()
+    -> threading.Lock
+43:29 call  self.set_target_info(target_info)
+    -> prometheus_client.registry.CollectorRegistry.set_target_info
+
+[prometheus_client.registry.CollectorRegistry.register]
+48:36 call  self._get_names(collector)
+    -> prometheus_client.registry.CollectorRegistry._get_names
+49:29 call  set(self._names_to_collectors)
+    -> <builtin>.set
+    reject *: set is the builtin
+49:69 call  set(self._names_to_collectors).intersection(names)
+    -> <builtin>.set.intersection
+51:42 call  DuplicateTimeseries(duplicates)
+    -> prometheus_client.registry.DuplicateTimeseries.__init__
+56:54 call  self._collectors_without_names.append(collector)
+    -> <builtin>.list.append
+
+[prometheus_client.registry.CollectorRegistry.unregister]
+65:54 call  self._collectors_without_names.remove(collector)
+    -> <builtin>.list.remove
+    reject prometheus_client.metrics.MetricWrapperBase.remove: self._collectors_without_names is a list
+
+[prometheus_client.registry.CollectorRegistry._get_names]
+90:32 call  desc_func()
+    -> prometheus_client.metrics.MetricWrapperBase.describe
+    -> prometheus_client.process_collector.ProcessCollector.collect
+    -> prometheus_client.gc_collector.GCCollector.collect
+    -> prometheus_client.platform_collector.PlatformCollector.collect
+    -> prometheus_client.multiprocess.MultiProcessCollector.collect
+    exclude prometheus_client.metrics.MetricWrapperBase.collect: a metric wrapper always has describe, a bound method, which is true, so its collect is never chosen here
+    note: desc_func is collector.describe, or collector.collect when the collector has no describe and auto_describe is set; the package's collectors that reach register (judgement J1): the metric wrappers (describe), and ProcessCollector, GCCollector, PlatformCollector and MultiProcessCollector (no describe); client collectors are client callbacks
+91:26 call  result.append(metric.name)
+    -> <builtin>.list.append
+92:44 call  type_suffixes.get(metric.type, [])
+    -> <builtin>.dict.get
+93:30 call  result.append(metric.name + suffix)
+    -> <builtin>.list.append
+
+[prometheus_client.registry.CollectorRegistry.collect]
+101:35 call  copy.copy(self._collector_to_names)
+    -> copy.copy
+103:46 call  self._target_info_metric()
+    -> prometheus_client.registry.CollectorRegistry._target_info_metric
+107:41 call  collector.collect()
+    -> prometheus_client.metrics.MetricWrapperBase.collect
+    -> prometheus_client.process_collector.ProcessCollector.collect
+    -> prometheus_client.gc_collector.GCCollector.collect
+    -> prometheus_client.platform_collector.PlatformCollector.collect
+    -> prometheus_client.multiprocess.MultiProcessCollector.collect
+    reject prometheus_client.registry.CollectorRegistry.collect, prometheus_client.registry.RestrictedRegistry.collect: the collectors are those that reached register; admission to the Collector role is per parameter (B2; judgement J1, the referee's reading C): register admits the declared and documented implementations and what the package registers, its metric wrappers and collectors; no default, documentation, package call or test passes a registry to register
+    reject prometheus_client.registry.Collector.collect: Collector is a Protocol, which has no instances
+    reject prometheus_client.registry._EmptyCollector.collect: _EmptyCollector is stored only in _names_to_collectors, never in _collector_to_names
+    note: the registered collectors (judgement J1); client collectors are client callbacks
+
+[prometheus_client.registry.CollectorRegistry.restricted_registry]
+119:20 call  set(names)
+    -> <builtin>.set
+    reject *: set is the builtin
+120:34 call  RestrictedRegistry(names, self)
+    -> prometheus_client.registry.RestrictedRegistry.__init__
+
+[prometheus_client.registry.CollectorRegistry.set_target_info]
+126:37 call  ValueError('CollectorRegistry already contains a target_i...
+    -> <builtin>.ValueError
+127:75 call  _EmptyCollector()
+    note: no edge: _EmptyCollector defines no __init__ (its first __init__ is object.__init__)
+129:46 call  self._names_to_collectors.pop('target_info', None)
+    -> <builtin>.dict.pop
+
+[prometheus_client.registry.CollectorRegistry._target_info_metric]
+137:19 call  Metric('target', 'Target metadata', 'info')
+    -> prometheus_client.metrics_core.Metric.__init__
+138:21 call  m.add_sample('target_info', self._target_info, 1)
+    -> prometheus_client.metrics_core.Metric.add_sample
+
+[prometheus_client.registry.CollectorRegistry.get_sample_value]
+148:35 call  self.collect()
+    -> prometheus_client.registry.CollectorRegistry.collect
+    reject *: self is a CollectorRegistry (the package defines no subclass of it)
+
+[prometheus_client.registry.RestrictedRegistry.__init__]
+157:29 call  set(names)
+    -> <builtin>.set
+    reject *: set is the builtin
+
+[prometheus_client.registry.RestrictedRegistry.collect]
+161:25 call  set(self._registry._collectors_without_names)
+    -> <builtin>.set
+    reject *: set is the builtin
+165:72 call  self._registry._target_info_metric()
+    -> prometheus_client.registry.CollectorRegistry._target_info_metric
+168:35 call  collectors.add(self._registry._names_to_collectors[name])
+    -> <builtin>.set.add
+172:44 call  collector.collect()
+    -> prometheus_client.metrics.MetricWrapperBase.collect
+    -> prometheus_client.process_collector.ProcessCollector.collect
+    -> prometheus_client.gc_collector.GCCollector.collect
+    -> prometheus_client.platform_collector.PlatformCollector.collect
+    -> prometheus_client.multiprocess.MultiProcessCollector.collect
+    reject prometheus_client.registry.CollectorRegistry.collect, prometheus_client.registry.RestrictedRegistry.collect: the collectors are those registered in the CollectorRegistry (see 107:41)
+    reject prometheus_client.registry.Collector.collect: Collector is a Protocol, which has no instances
+    reject prometheus_client.registry._EmptyCollector.collect: the loop of line 166 skips the name target_info, the only name that maps to an _EmptyCollector
+    note: the collectors registered without names and those of the restricted names (judgement J1); client collectors are client callbacks
+173:46 call  metric._restricted_metric(self._name_set)
+    -> prometheus_client.metrics_core.Metric._restricted_metric
+    note: the metrics that collect() returns are Metric objects (the metric families are subclasses that inherit the method)
+
+
+== prometheus_client.samples
+
+[prometheus_client.samples.Timestamp.__init__]
+9:29 call  ValueError(f"Invalid value for nanoseconds in Timestamp: ...
+    -> <builtin>.ValueError
+12:28 call  int(sec)
+    -> <builtin>.int
+13:29 call  int(nsec)
+    -> <builtin>.int
+
+[prometheus_client.samples.Timestamp.__float__]
+22:21 call  float(self.sec)
+    -> <builtin>.float
+22:39 call  float(self.nsec)
+    -> <builtin>.float
+
+[prometheus_client.samples.Timestamp.__eq__]
+25:26 call  isinstance(other, Timestamp)
+    -> <builtin>.isinstance
+
+
+[prometheus_client.samples.Timestamp.__ne__]
+28:25 op  self == other
+    -> prometheus_client.samples.Timestamp.__eq__
+    note: self is a Timestamp; == runs its __eq__
+
+== prometheus_client.twisted._exposition
+
+[prometheus_client.twisted._exposition.<lambda1>]
+6:57 call  WSGIResource( reactor, reactor.getThreadPool(), expositio...
+    -> twisted.web.wsgi.WSGIResource
+    note: missing module: Twisted is not installed
+7:35 call  reactor.getThreadPool()
+    -> twisted.internet.reactor.getThreadPool
+    note: missing module: reactor is the stub twisted.internet.reactor
+7:63 call  exposition.make_wsgi_app(registry)
+    -> prometheus_client.exposition.make_wsgi_app
+
+
+== prometheus_client.utils
+
+[prometheus_client.utils]
+4:12 call  float("inf")
+    -> <builtin>.float
+5:18 call  float("-inf")
+    -> <builtin>.float
+6:12 call  float("NaN")
+    -> <builtin>.float
+
+[prometheus_client.utils.floatToGoString]
+10:14 call  float(d)
+    -> <builtin>.float
+15:20 call  math.isnan(d)
+    -> math.isnan
+18:17 call  repr(d)
+    -> <builtin>.repr
+19:21 call  s.find('.')
+    -> <builtin>.str.find
+23:64 call  f'{s[0]}.{s[1:dot]}{s[dot + 1:]}'.rstrip('0.')
+    -> <builtin>.str.rstrip
+
+[prometheus_client.utils.parse_version]
+30:34 call  version_str.split('.')
+    -> <builtin>.str.split
+32:27 call  version.append(int(part))
+    -> <builtin>.list.append
+32:31 call  int(part)
+    -> <builtin>.int
+34:27 call  version.append(part)
+    -> <builtin>.list.append
+36:17 call  tuple(version)
+    -> <builtin>.tuple
+
+
+== prometheus_client.validation
+
+[prometheus_client.validation]
+4:28 call  re.compile(r'^[a-zA-Z_:][a-zA-Z0-9_:]*$')
+    -> re.compile
+5:34 call  re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$')
+    -> re.compile
+6:43 call  re.compile(r'^__.*$')
+    -> re.compile
+14:45 call  _init_legacy_validation()
+    -> prometheus_client.validation._init_legacy_validation
+
+[prometheus_client.validation._init_legacy_validation]
+11:26 call  os.environ.get("PROMETHEUS_LEGACY_NAME_VALIDATION", 'False')
+    -> collections.abc.Mapping.get
+    note: os.environ.get, the method that os._Environ inherits from collections.abc.Mapping
+11:78 call  os.environ.get("PROMETHEUS_LEGACY_NAME_VALIDATION", 'Fals...
+    -> <builtin>.str.lower
+
+[prometheus_client.validation._validate_metric_name]
+40:25 call  ValueError("metric name cannot be empty")
+    -> <builtin>.ValueError
+42:36 call  METRIC_NAME_RE.match(name)
+    -> re.Pattern.match
+43:29 call  ValueError("invalid metric name " + name)
+    -> <builtin>.ValueError
+45:20 call  name.encode('utf-8')
+    -> <builtin>.str.encode
+47:25 call  ValueError("invalid metric name " + name)
+    -> <builtin>.ValueError
+
+[prometheus_client.validation._is_valid_legacy_metric_name]
+52:11 call  len(name)
+    -> <builtin>.len
+54:32 call  METRIC_NAME_RE.match(name)
+    -> re.Pattern.match
+
+[prometheus_client.validation._validate_metric_label_name_token]
+63:25 call  ValueError("invalid label name token " + tok)
+    -> <builtin>.ValueError
+66:42 call  METRIC_LABEL_NAME_RE.match(tok)
+    -> re.Pattern.match
+67:29 call  ValueError("invalid label name token " + tok)
+    -> <builtin>.ValueError
+70:19 call  tok.encode('utf-8')
+    -> <builtin>.str.encode
+72:25 call  ValueError("invalid label name token " + tok)
+    -> <builtin>.ValueError
+
+[prometheus_client.validation._validate_labelname]
+80:29 call  get_legacy_validation()
+    -> prometheus_client.validation.get_legacy_validation
+81:42 call  METRIC_LABEL_NAME_RE.match(l)
+    -> re.Pattern.match
+82:29 call  ValueError('Invalid label metric name: ' + l)
+    -> <builtin>.ValueError
+83:47 call  RESERVED_METRIC_LABEL_NAME_RE.match(l)
+    -> re.Pattern.match
+84:29 call  ValueError('Reserved label metric name: ' + l)
+    -> <builtin>.ValueError
+87:21 call  l.encode('utf-8')
+    -> <builtin>.str.encode
+89:29 call  ValueError('Invalid label metric name: ' + l)
+    -> <builtin>.ValueError
+90:47 call  RESERVED_METRIC_LABEL_NAME_RE.match(l)
+    -> re.Pattern.match
+91:29 call  ValueError('Reserved label metric name: ' + l)
+    -> <builtin>.ValueError
+
+[prometheus_client.validation._is_valid_legacy_labelname]
+96:11 call  len(l)
+    -> <builtin>.len
+98:34 call  METRIC_LABEL_NAME_RE.match(l)
+    -> re.Pattern.match
+100:47 call  RESERVED_METRIC_LABEL_NAME_RE.match(l)
+    -> re.Pattern.match
+
+[prometheus_client.validation._validate_labelnames]
+108:23 call  tuple(labelnames)
+    -> <builtin>.tuple
+110:28 call  _validate_labelname(l)
+    -> prometheus_client.validation._validate_labelname
+112:29 call  ValueError('Reserved label methe fric name: ' + l)
+    -> <builtin>.ValueError
+
+[prometheus_client.validation._validate_exemplar]
+119:31 call  exemplar.items()
+    -> <builtin>.dict.items
+    note: exemplar is the Dict[str, str] that Counter.inc and Histogram.observe pass
+120:28 call  _validate_labelname(k)
+    -> prometheus_client.validation._validate_labelname
+121:21 call  len(k)
+    -> <builtin>.len
+122:21 call  len(v)
+    -> <builtin>.len
+124:25 call  ValueError('Exemplar labels have %d UTF-8 characters, exc...
+    -> <builtin>.ValueError
+
+
+== prometheus_client.values
+
+[prometheus_client.values]
+163:29 call  get_value_class()
+    -> prometheus_client.values.get_value_class
+
+[prometheus_client.values.close_all_multiprocess_files]
+13:16 call  cleanup()
+    -> prometheus_client.values.MultiProcessValue.cleanup
+    note: _multi_process_cleanups holds the cleanup closures that MultiProcessValue appends (line 69); the package appends nothing else
+14:34 call  _multi_process_cleanups.clear()
+    -> <builtin>.list.clear
+    reject prometheus_client.metrics.MetricWrapperBase.clear: _multi_process_cleanups is a list
+
+[prometheus_client.values.MutexValue.__init__]
+25:26 call  Lock()
+    -> threading.Lock
+
+[prometheus_client.values.MultiProcessValue]
+58:39 call  process_identifier()
+    -> os.getpid
+    note: process_identifier is os.getpid by default, or the client's function (a client callback; the docstring warns against it)
+62:16 call  Lock()
+    -> threading.Lock
+69:35 call  _multi_process_cleanups.append(cleanup)
+    -> <builtin>.list.append
+    reject prometheus_client.values.MultiProcessValue.cleanup: append stores the closure; close_all_multiprocess_files calls it later (13:16)
+141:10 decorator  @classmethod
+    -> <builtin>.classmethod
+
+[prometheus_client.values.MultiProcessValue.cleanup]
+65:30 call  files.values()
+    -> <builtin>.dict.values
+66:20 call  f.close()
+    -> prometheus_client.mmap_dict.MmapedDict.close
+    note: files maps file prefixes to the MmapedDict objects of __reset (line 98)
+67:20 call  files.clear()
+    -> <builtin>.dict.clear
+    reject prometheus_client.metrics.MetricWrapperBase.clear: files is a dict
+68:21 call  values.clear()
+    -> <builtin>.list.clear
+    reject prometheus_client.metrics.MetricWrapperBase.clear: values is a list
+
+[prometheus_client.values.MultiProcessValue.MmapedValue.__init__]
+81:30 call  warnings.warn("prometheus_multiproc_dir variable has been...
+    -> warnings.warn
+83:44 call  self.__check_for_pid_change()
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__check_for_pid_change
+84:29 call  self.__reset()
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__reset
+85:30 call  values.append(self)
+    -> <builtin>.list.append
+
+[prometheus_client.values.MultiProcessValue.MmapedValue.__reset]
+94:40 call  os.path.join( os.environ.get('PROMETHEUS_MULTIPROC_DIR'),...
+    -> os.path.join
+95:35 call  os.environ.get('PROMETHEUS_MULTIPROC_DIR')
+    -> collections.abc.Mapping.get
+96:38 call  '{}_{}.db'.format(file_prefix, pid['value'])
+    -> <builtin>.str.format
+98:48 call  MmapedDict(filename)
+    -> prometheus_client.mmap_dict.MmapedDict.__init__
+100:33 call  mmap_key(metric_name, name, labelnames, labelvalues, help...
+    -> prometheus_client.mmap_dict.mmap_key
+101:65 call  self._file.read_value(self._key)
+    -> prometheus_client.mmap_dict.MmapedDict.read_value
+
+[prometheus_client.values.MultiProcessValue.MmapedValue.__check_for_pid_change]
+104:44 call  process_identifier()
+    -> os.getpid
+    note: process_identifier is os.getpid by default, or the client's function (a client callback)
+108:38 call  files.values()
+    -> <builtin>.dict.values
+109:28 call  f.close()
+    -> prometheus_client.mmap_dict.MmapedDict.close
+110:28 call  files.clear()
+    -> <builtin>.dict.clear
+    reject prometheus_client.metrics.MetricWrapperBase.clear: files is a dict
+112:34 call  value.__reset()
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__reset
+    note: values holds the MmapedValue instances of this closure (line 85)
+
+[prometheus_client.values.MultiProcessValue.MmapedValue.inc]
+116:44 call  self.__check_for_pid_change()
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__check_for_pid_change
+119:39 call  self._file.write_value(self._key, self._value, self._time...
+    -> prometheus_client.mmap_dict.MmapedDict.write_value
+
+[prometheus_client.values.MultiProcessValue.MmapedValue.set]
+123:44 call  self.__check_for_pid_change()
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__check_for_pid_change
+126:39 call  self._file.write_value(self._key, self._value, self._time...
+    -> prometheus_client.mmap_dict.MmapedDict.write_value
+
+[prometheus_client.values.MultiProcessValue.MmapedValue.get]
+134:44 call  self.__check_for_pid_change()
+    -> prometheus_client.values.MultiProcessValue.MmapedValue.__check_for_pid_change
+
+[prometheus_client.values.MultiProcessValue.MmapedValue.close_all_files]
+144:38 call  files.values()
+    -> <builtin>.dict.values
+145:28 call  f.close()
+    -> prometheus_client.mmap_dict.MmapedDict.close
+146:28 call  files.clear()
+    -> <builtin>.dict.clear
+    reject prometheus_client.metrics.MetricWrapperBase.clear: files is a dict
+147:29 call  values.clear()
+    -> <builtin>.list.clear
+    reject prometheus_client.metrics.MetricWrapperBase.clear: values is a list
+
+[prometheus_client.values.get_value_class]
+158:33 call  MultiProcessValue()
+    -> prometheus_client.values.MultiProcessValue

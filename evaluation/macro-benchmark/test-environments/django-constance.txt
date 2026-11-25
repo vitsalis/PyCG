@@ -1,0 +1,70 @@
+# The test environment of django-constance 4.5.0 (batch 6): the
+# full closure on CPython 3.14 for Linux aarch64, each file by version and
+# SHA-256. django-constance itself is not installed: the trace uses the checkout
+# projects/django-constance.
+#   pip install --require-hashes --only-binary :all: --no-deps -r django-constance.txt
+#
+# "scan" names the hashes that the security scan of the round lists (its
+# section 3; the scan took them from PyPI's JSON and read no wheel); "PyPI"
+# names the hashes taken from PyPI's JSON for that version by the builder of
+# this file; "scan and PyPI" names a native distribution whose manylinux
+# hash the scan lists and whose musllinux hash comes from PyPI's JSON. No
+# wheel was downloaded or read for this batch. Every hash below
+# was checked against PyPI's JSON for its version on 2026-11-22, and the
+# closure was computed from the requires_dist of each pinned release, with
+# the markers evaluated for CPython 3.14 on Linux aarch64 and no extra (one
+# extra where a comment says so); a wheel's own METADATA could ask for more
+# (UNVERIFIED until pip installs the list with --no-deps and trace.sh compares
+# the distributions).
+#
+# Each version but pytest's stack is the newest release that is not yanked
+# and was uploaded on or before the release of django-constance (2026-10-28);
+# Django 6.1.2 is in the series of upstream's environment dj61 (6.1.3 came
+# on 2026-11-03). tzdata is the exception, below.
+# Every distribution has a pure-Python wheel; no native code.
+# Not installed: coverage and pytest-cov (upstream's tox environments).
+
+# scan. 9.2.0, as for batches 3 to 5 (the lead's decision: one
+# pytest stack for the benchmark, not pytest by release date).
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# scan (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# scan (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# scan (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# scan (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+
+# scan. Sets up Django for the tests (-p pytest_django.plugin,
+# --ds=tests.settings): the package's TestCase classes need a configured
+# Django.
+pytest-django==4.14.0 \
+    --hash=sha256:c533b08d89cc675efcd5398eea270b34547e35f9a3608e2c9748dd88428ea187
+# scan. Every module of the package imports Django; the release declares
+# no dependency.
+django==6.1.2 \
+    --hash=sha256:141efee6ec64d1db6db90683bf734c550102450f444fb099063b0be1bd27d991
+# scan (django). The async tests run through it.
+asgiref==3.13.0 \
+    --hash=sha256:f9596a2434512686473d50f96ff6207fbba49ae1a785dfac614df4aeb085674d
+# scan (django).
+sqlparse==0.6.0 \
+    --hash=sha256:b861c0288ce2fa56209a9a6412d2e066ac664b3873b89c26c9d8415e8e32996f
+# scan. The migration 0003_drop_pickle.py imports redis when the backend
+# is a Redis backend (the default of tests/settings.py); every connection
+# is the mock-up of tests/redis_mockup.py, and no client connects.
+redis==8.1.0 \
+    --hash=sha256:a4fe1aac3d3b3cc791d4b3d5931c5a956045dc951ee74d1c913ee3ac4d2ee9fb
+# scan. A time zone database for Django (USE_TZ = True, TIME_ZONE by
+# default America/Chicago): python:3.14-slim has none. Data only. 2026.5
+# (2026-10-03), not 2026.6, which was uploaded on the release date, 5 hours
+# before django-constance 4.5.0 (the lead's decision: the older release, the
+# same pin as jsonpickle's).
+tzdata==2026.5 \
+    --hash=sha256:b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac

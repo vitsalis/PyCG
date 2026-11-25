@@ -1,0 +1,2194 @@
+# Call-site ledger of django-constance at 1032c50d39ef5e737b99a42870d60bf8e2e34c39.
+# The scope rules A, B1-B5 and C are in macro-benchmark/README.md;
+# django-constance.md shows how this ledger applies them.
+default reject constance.base.Config.__getattr__: the receiver of this attribute load is not a Config that lacks the attribute; it is a module, a class, a Django object, a dict, a str, another package object, or a Config whose loaded attribute (the instance attribute _backend, a method) normal lookup finds; a LazyConfig forwards a load to its Config only through LazyObject.__getattr__, which the getattr(config, name) calls reach and accept explicitly
+default reject constance.base.Config.__setattr__: the store target is not a Config; the package stores attributes on its other objects, on Django objects (a QuerySet, a request, a model instance, the admin's Meta object) and on client test classes, and stores Config's own _backend with object.__setattr__ (base.py:135); the setattr(config, ...) calls accept the candidate explicitly
+default reject constance.base.AsyncValueProxy.__add__, constance.base.AsyncValueProxy.__await__, constance.base.AsyncValueProxy.__bool__, constance.base.AsyncValueProxy.__contains__, constance.base.AsyncValueProxy.__eq__, constance.base.AsyncValueProxy.__float__, constance.base.AsyncValueProxy.__ge__, constance.base.AsyncValueProxy.__getitem__, constance.base.AsyncValueProxy.__gt__, constance.base.AsyncValueProxy.__hash__, constance.base.AsyncValueProxy.__index__, constance.base.AsyncValueProxy.__int__, constance.base.AsyncValueProxy.__iter__, constance.base.AsyncValueProxy.__le__, constance.base.AsyncValueProxy.__len__, constance.base.AsyncValueProxy.__lt__, constance.base.AsyncValueProxy.__mod__, constance.base.AsyncValueProxy.__mul__, constance.base.AsyncValueProxy.__ne__, constance.base.AsyncValueProxy.__radd__, constance.base.AsyncValueProxy.__repr__, constance.base.AsyncValueProxy.__rmod__, constance.base.AsyncValueProxy.__rmul__, constance.base.AsyncValueProxy.__rsub__, constance.base.AsyncValueProxy.__str__, constance.base.AsyncValueProxy.__sub__: no AsyncValueProxy is the operand here; the package makes one only in Config.__getattr__ (base.py:159), as the value of a config attribute in a thread with a running event loop, and such a value reaches package code only through getattr(config, name) and through the values that the Memory backend stores and returns (judgement 2), at the sites that accept the candidate explicitly
+default reject constance.models.Constance.__str__: no package code converts or formats a Constance model instance; the formatted and converted values are strs, ints, config values, settings values, Django objects and exceptions
+
+== constance
+
+[constance]
+11:20 call  LazyConfig()
+    -> django.utils.functional.LazyObject.__init__
+    note: LazyConfig defines only _setup; LazyObject.__init__ stores the marker `empty` in __dict__ (LazyObject.__setattr__ for _wrapped), which runs no package code
+
+[constance.LazyConfig._setup]
+8:31 call  Config()
+    -> constance.base.Config.__init__
+
+== constance.admin
+
+[constance.admin]
+29:20 call  LazyConfig()
+    -> django.utils.functional.LazyObject.__init__
+106:6 decorator  @csrf_protect_m
+    -> django.contrib.admin.options.csrf_protect_m
+    note: csrf_protect_m = method_decorator(csrf_protect); the decorator is method_decorator's local _dec, a Python function installed at the public attribute django.contrib.admin.options.csrf_protect_m (trace: method_decorator._dec); _dec only wraps changelist_view (update_wrapper), it calls no package code
+259:32 call  _("config")
+    -> django.utils.translation.gettext_lazy
+    note: _ is gettext_lazy = lazy(gettext, str), a Python function installed at django.utils.translation.gettext_lazy (trace: lazy.__wrapper__); it makes a lazy proxy and calls no package code
+270:10 decorator  @property
+    -> <builtin>.property
+274:10 decorator  @property
+    -> <builtin>.property
+278:10 decorator  @property
+    -> <builtin>.property
+282:17 call  Meta()
+    note: Config.Meta defines no __init__ and no __new__; object's run, implicit and outside the package: no edge
+285:20 call  admin.site.register([Config], ConstanceAdmin)
+    -> django.contrib.admin.AdminSite.register
+    -> constance.admin.ConstanceAdmin.__init__
+    note: admin.site is Django's DefaultAdminSite (a LazyObject); AdminSite.register instantiates admin_class(model, self) for the model Config, which runs ConstanceAdmin.__init__ (callback through library code; the trace has it); register reads only plain attributes of Config._meta (abstract, is_composite_pk, swapped)
+
+[constance.admin.ConstanceAdmin.__init__]
+38:14 call  super()
+    -> <builtin>.super
+38:25 call  super().__init__(model, admin_site)
+    -> django.contrib.admin.ModelAdmin.__init__
+    reject *: super() in ConstanceAdmin resolves to django's ModelAdmin; ModelAdmin.__init__ and BaseModelAdmin.__init__ store the model, its _meta and the site and copy the formfield overrides, calling no package code
+
+[constance.admin.ConstanceAdmin.get_urls]
+43:17 call  path("", self.admin_site.admin_view(self.changelist_view)...
+    -> functools.partial.__call__
+    note: django.urls.path is partial(_path, Pattern=RoutePattern), a functools.partial object (trace: functools.partial.__call__); it builds a URLPattern and calls no package code
+43:48 call  self.admin_site.admin_view(self.changelist_view)
+    -> django.contrib.admin.AdminSite.admin_view
+    reject constance.admin.ConstanceAdmin.changelist_view: admin_view only wraps the view (never_cache, csrf_protect, update_wrapper); Django's URL resolver calls the view later, for a client request
+44:17 call  path("", self.admin_site.admin_view(self.changelist_view)...
+    -> functools.partial.__call__
+44:48 call  self.admin_site.admin_view(self.changelist_view)
+    -> django.contrib.admin.AdminSite.admin_view
+    reject constance.admin.ConstanceAdmin.changelist_view: admin_view only wraps the view; Django's URL resolver calls it later, for a client request
+48:17 call  path( "<path:object_id>/change/", self.admin_site.admin_v...
+    -> functools.partial.__call__
+50:43 call  self.admin_site.admin_view(lambda request, object_id: Htt...
+    -> django.contrib.admin.AdminSite.admin_view
+    reject constance.admin.ConstanceAdmin.get_urls.<lambda1>: admin_view only wraps the lambda; Django's URL resolver calls it later, for a client request
+53:17 call  path("history/", self.admin_site.admin_view(self.history_...
+    -> functools.partial.__call__
+53:56 call  self.admin_site.admin_view(self.history_view)
+    -> django.contrib.admin.AdminSite.admin_view
+    reject constance.admin.ConstanceAdmin.history_view: admin_view only wraps the view; Django's URL resolver calls it later, for a client request
+
+[constance.admin.ConstanceAdmin.get_urls.<lambda1>]
+50:91 call  HttpResponseRedirect("../../")
+    -> django.http.HttpResponseRedirect
+
+[constance.admin.ConstanceAdmin.get_config_value]
+59:15 call  len(options)
+    -> <builtin>.len
+62:28 call  initial.get(name)
+    -> <builtin>.dict.get
+    reject *: initial is the dict that get_values returns (changelist_view, admin.py:110), not a backend
+65:28 call  getattr(config, name)
+    -> <builtin>.getattr
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    note: config is the module's own LazyConfig (admin.py:29); LazyObject.__getattr__ runs LazyConfig._setup on the first load in a fresh process, then getattr on the Config, whose __getattr__ runs because a config name is no attribute of Config
+70:32 call  localize(default)
+    -> django.utils.formats.localize
+72:27 call  _(help_text)
+    -> django.utils.translation.gettext_lazy
+73:30 call  localize(value)
+    -> django.utils.formats.localize
+    note: localize returns a value of no type it formats (str, bool, Decimal, float, int, datetime, date, time) unchanged, so an AsyncValueProxy runs no package code in it
+74:33 call  localize(value)
+    -> django.utils.formats.localize
+74:41 op  localize(value) != localize(default)
+    -> constance.base.AsyncValueProxy.__ne__
+    reject constance.base.AsyncValueProxy.__eq__: AsyncValueProxy defines __ne__, which returns the result of the inner comparison and never NotImplemented, so no __eq__ runs
+    note: judgement 2: value comes from getattr(config, name) (line 65), an AsyncValueProxy when a thread with a running event loop renders the view (the documented async and background-loop setups), or from initial, where the Memory backend can return a stored proxy; localize returns the proxy unchanged and the proxy is the left operand
+74:52 call  localize(default)
+    -> django.utils.formats.localize
+76:34 call  isinstance(default, date)
+    -> <builtin>.isinstance
+77:38 call  isinstance(default, datetime)
+    -> <builtin>.isinstance
+78:38 call  isinstance(form_field.field.widget, forms.CheckboxInput)
+    -> <builtin>.isinstance
+79:42 call  isinstance(form_field.field.widget, forms.SelectMultiple ...
+    -> <builtin>.isinstance
+80:34 call  isinstance(form_field.field.widget, forms.FileInput)
+    -> <builtin>.isinstance
+83:64 call  form[name].field.prepare_value(default)
+    -> django.forms.fields.ChoiceField.prepare_value
+    -> django.forms.ImageField.prepare_value
+    -> django.forms.fields.JSONField.prepare_value
+    -> django.forms.fields.CharField.prepare_value
+    -> django.forms.fields.EmailField.prepare_value
+    -> django.forms.fields.TypedMultipleChoiceField.prepare_value
+    note: judgement 3: the branch runs only when the config's type is a key of CONSTANCE_ADDITIONAL_FIELDS, so the form field is made from that setting: the documented ChoiceField, ImageField and JSONField (docs/index.rst:131-182), and the field classes of the package's own test settings (ruling R1): CharField, EmailField and TypedMultipleChoiceField; a client's own field class is client code (B5)
+86:67 call  form[name].field.prepare_value(value)
+    -> django.forms.fields.ChoiceField.prepare_value
+    -> django.forms.ImageField.prepare_value
+    -> django.forms.fields.JSONField.prepare_value
+    -> django.forms.fields.CharField.prepare_value
+    -> django.forms.fields.EmailField.prepare_value
+    -> django.forms.fields.TypedMultipleChoiceField.prepare_value
+    note: judgement 3: the branch runs only when the config's type is a key of CONSTANCE_ADDITIONAL_FIELDS, so the form field is made from that setting: the documented ChoiceField, ImageField and JSONField (docs/index.rst:131-182), and the field classes of the package's own test settings (ruling R1): CharField, EmailField and TypedMultipleChoiceField; a client's own field class is client code (B5)
+90:26 call  isinstance(raw_def, list | tuple | set)
+    -> <builtin>.isinstance
+91:36 call  list(raw_def)
+    -> <builtin>.list
+    note: raw_def is the client's default (a list, tuple or set here) or the field's prepared value; iterating it runs no package code
+96:54 call  json.dumps(default_list)
+    -> json.dumps
+    reject constance.codecs.dumps: another function; json is the standard library module (admin.py:1)
+
+[constance.admin.ConstanceAdmin.changelist_view]
+108:50 call  self.has_view_or_change_permission(request)
+    -> django.contrib.admin.ModelAdmin.has_view_or_change_permission
+    -> constance.admin.ConstanceAdmin.has_view_permission
+    -> constance.admin.ConstanceAdmin.has_change_permission
+    note: inherited from Django; it returns self.has_view_permission(request, obj) or self.has_change_permission(request, obj), the package's overrides (callback through library code; the trace has both)
+110:29 call  get_values()
+    -> constance.utils.get_values
+111:44 call  self.get_changelist_form(request)
+    -> constance.admin.ConstanceAdmin.get_changelist_form
+112:24 call  form_cls(initial=initial, request=request)
+    -> constance.forms.ConstanceForm.__init__
+    note: form_cls is what get_changelist_form returns, self.change_list_form, which is ConstanceForm (admin.py:34); the subclasses and forms that the documentation shows (docs/index.rst:473-516) are client classes
+113:62 call  request.user.has_perm("constance.change_config")
+    -> django.contrib.auth.models.User.has_perm
+    -> django.contrib.auth.models.AnonymousUser.has_perm
+    note: request is Django's HttpRequest (a framework value, B5); its documented user is an instance of AUTH_USER_MODEL, by default auth.User (has_perm from PermissionsMixin, as the trace names it), or an AnonymousUser
+    note: Codex audit round 2: an AnonymousUser can get here. With CONSTANCE_SUPERUSER_ONLY false, line 108 asks has_view_permission, and AnonymousUser.has_perm returns True when a configured authentication backend's has_perm does (django/contrib/auth/models.py:605, _user_has_perm 266-278 in 6.1.2; 479, 212-224 in 4.2.30). The client's backend stays opaque, and its effect on control flow counts (B5, "Client control flow")
+114:28 call  form_cls(data=request.POST, files=request.FILES, initial=...
+    -> constance.forms.ConstanceForm.__init__
+    note: form_cls is ConstanceForm, as at 112:24
+115:29 call  form.is_valid()
+    -> django.forms.Form.is_valid
+    -> constance.forms.ConstanceForm.clean_version
+    -> constance.forms.ConstanceForm.clean
+    note: BaseForm.is_valid computes errors with full_clean, which calls the form's clean_<name> method for each field (clean_version for the field version) and then clean (callback through library code; the trace has both)
+116:43 call  form.save()
+    -> constance.forms.ConstanceForm.save
+118:44 call  self._log_config_change(request, changed_fields)
+    -> constance.admin.ConstanceAdmin._log_config_change
+119:37 call  messages.add_message(request, messages.SUCCESS, _("Live s...
+    -> django.contrib.messages.api.add_message
+119:66 call  _("Live settings updated successfully.")
+    -> django.utils.translation.gettext_lazy
+120:44 call  HttpResponseRedirect(".")
+    -> django.http.HttpResponseRedirect
+121:33 call  messages.add_message(request, messages.ERROR, _("Failed t...
+    -> django.contrib.messages.api.add_message
+121:60 call  _("Failed to update live settings.")
+    -> django.utils.translation.gettext_lazy
+123:43 call  self.admin_site.each_context(request)
+    -> django.contrib.admin.AdminSite.each_context
+    -> constance.admin.ConstanceAdmin.has_add_permission
+    -> constance.admin.ConstanceAdmin.has_change_permission
+    -> constance.admin.ConstanceAdmin.has_delete_permission
+    -> constance.admin.ConstanceAdmin.has_view_permission
+    note: each_context builds available_apps with get_app_list, which calls get_model_perms of every registered ModelAdmin, among them this ConstanceAdmin (registered at admin.py:285); get_model_perms calls the four has_*_permission overrides (callback through library code; the trace has all four)
+126:39 getattr  self.model._meta.app_config
+    -> constance.admin.Config.Meta.app_config
+    note: self.model is the pseudo model Config registered at admin.py:285; its _meta is a Config.Meta instance, whose app_config is the property of admin.py:271
+132:42 call  get_version()
+    -> django.utils.version.get_version
+    note: Codex audit round 1: django/__init__.py:1 re-exports get_version without an __all__, so the function is named where it is defined (django/utils/version.py; README, "Callees outside the package": termios.tcsetattr for tty.tcsetattr); the same in the six admitted Django families
+134:51 call  settings.CONFIG.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+    note: CONSTANCE_CONFIG is documented as a dict or an OrderedDict (docs/index.rst:42, 196), and the package tests isinstance(settings.CONFIG, OrderedDict) (line 174)
+135:44 call  context["config_values"].append(self.get_config_value(nam...
+    -> <builtin>.list.append
+135:66 call  self.get_config_value(name, options, form, initial)
+    -> constance.admin.ConstanceAdmin.get_config_value
+138:26 call  isinstance(settings.CONFIG_FIELDSETS, dict)
+    -> <builtin>.isinstance
+139:65 call  settings.CONFIG_FIELDSETS.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+    note: after isinstance(..., dict); the fieldsets are documented as a dict or a tuple (docs/index.rst:216, 266), and line 171 handles an OrderedDict explicitly
+145:30 call  isinstance(fieldset_data, dict)
+    -> <builtin>.isinstance
+147:49 call  fieldset_data.get("collapse", False)
+    -> <builtin>.dict.get
+    reject *: fieldset_data is a dict after isinstance (the documented {'fields': ..., 'collapse': True}), not a backend
+153:23 call  any(absent_fields)
+    -> <builtin>.any
+154:37 call  ValueError( "CONSTANCE_CONFIG_FIELDSETS contains field(s)...
+    -> <builtin>.ValueError
+155:105 call  "CONSTANCE_CONFIG_FIELDSETS contains field(s) that does n...
+    -> <builtin>.str.format
+156:38 call  ", ".join(absent_fields)
+    -> <builtin>.str.join
+163:50 call  settings.CONFIG.get(name)
+    -> <builtin>.dict.get
+    -> collections.OrderedDict.get
+    reject *: settings.CONFIG is the client's config mapping, a dict or an OrderedDict, not a backend
+165:45 call  config_values.append(self.get_config_value(name, options,...
+    -> <builtin>.list.append
+165:67 call  self.get_config_value(name, options, form, initial)
+    -> constance.admin.ConstanceAdmin.get_config_value
+170:44 call  context["fieldsets"].append(fieldset_context)
+    -> <builtin>.list.append
+171:30 call  isinstance(settings.CONFIG_FIELDSETS, OrderedDict | tuple)
+    -> <builtin>.isinstance
+172:42 call  context["fieldsets"].sort(key=itemgetter("title"))
+    -> <builtin>.list.sort
+172:57 call  itemgetter("title")
+    -> operator.itemgetter
+174:26 call  isinstance(settings.CONFIG, OrderedDict)
+    -> <builtin>.isinstance
+175:42 call  context["config_values"].sort(key=itemgetter("name"))
+    -> <builtin>.list.sort
+175:57 call  itemgetter("name")
+    -> operator.itemgetter
+177:32 call  TemplateResponse(request, self.change_list_template, cont...
+    -> django.template.response.TemplateResponse
+    note: a TemplateResponse renders later, when Django's handler asks for its content; the constructor renders nothing
+
+[constance.admin.ConstanceAdmin.history_view]
+181:50 call  self.has_view_or_change_permission(request)
+    -> django.contrib.admin.ModelAdmin.has_view_or_change_permission
+    -> constance.admin.ConstanceAdmin.has_view_permission
+    -> constance.admin.ConstanceAdmin.has_change_permission
+    note: as at 108:50
+184:47 call  ContentType.objects.get_for_model(self.model)
+    -> django.contrib.contenttypes.models.ContentTypeManager.get_for_model
+    note: get_for_model reads model._meta.concrete_model (set to Config at admin.py:37) and the plain attributes app_label and model_name; no package property runs
+186:36 call  LogEntry.objects.filter( content_type=ct, object_id="Conf...
+    -> django.contrib.admin.models.LogEntryManager.filter
+    note: LogEntry.objects.filter is a manager method that Manager copies from QuerySet (create_method), as the trace names it
+190:28 call  LogEntry.objects.filter( content_type=ct, object_id="Conf...
+    -> django.db.models.query.QuerySet.select_related
+191:22 call  LogEntry.objects.filter( content_type=ct, object_id="Conf...
+    -> django.db.models.query.QuerySet.order_by
+194:39 call  self.get_paginator(request, action_list, 100)
+    -> django.contrib.admin.ModelAdmin.get_paginator
+195:38 call  request.GET.get(PAGE_VAR, 1)
+    -> django.http.QueryDict.get
+    reject *: request.GET is Django's QueryDict (a MultiValueDict), not a backend
+196:38 call  paginator.get_page(page_number)
+    -> django.core.paginator.Paginator.get_page
+197:53 call  paginator.get_elided_page_range(page_obj.number)
+    -> django.core.paginator.Paginator.get_elided_page_range
+200:43 call  self.admin_site.each_context(request)
+    -> django.contrib.admin.AdminSite.each_context
+    -> constance.admin.ConstanceAdmin.has_add_permission
+    -> constance.admin.ConstanceAdmin.has_change_permission
+    -> constance.admin.ConstanceAdmin.has_delete_permission
+    -> constance.admin.ConstanceAdmin.has_view_permission
+    note: as at 123:43
+201:23 call  _("Change history: %s")
+    -> django.utils.translation.gettext_lazy
+201:95 call  self.model._meta.verbose_name_plural.capitalize()
+    -> django.utils.functional.lazy.__wrapper__
+    -> django.utils.functional.lazy.__proxy__.__promise__.__wrapper__
+    note: verbose_name_plural is the lazy proxy _("config") (admin.py:259); capitalize is a method wrapper that lazy() installs on its proxy class: lazy's local __wrapper__ from Django 5.0, __proxy__.__promise__'s local __wrapper__ in Django 4.2 (the classifiers admit 4.2 to 6.1); both names are verified: utils/functional.py:184 from 5.0 to 6.1, and :144-152 in 4.2.30 (judgement 9)
+212:32 call  TemplateResponse( request, "admin/constance/config_histor...
+    -> django.template.response.TemplateResponse
+
+[constance.admin.ConstanceAdmin._log_config_change]
+225:47 call  ContentType.objects.get_for_model(self.model)
+    -> django.contrib.contenttypes.models.ContentTypeManager.get_for_model
+226:36 call  json.dumps([{"changed": {"fields": changed_fields}}])
+    -> json.dumps
+    reject constance.codecs.dumps: another function; json is the standard library module (admin.py:1)
+227:32 call  LogEntry.objects.create( user_id=request.user.pk, content...
+    -> django.contrib.admin.models.LogEntryManager.create
+    note: QuerySet.create through the manager; the package connects post_save only for its Constance model (database.py:44), so saving a LogEntry runs no package receiver
+
+[constance.admin.ConstanceAdmin.has_view_permission]
+245:21 call  super()
+    -> <builtin>.super
+245:43 call  super().has_view_permission(request, obj)
+    -> django.contrib.admin.ModelAdmin.has_view_permission
+    reject constance.admin.ConstanceAdmin.has_view_permission: super() skips ConstanceAdmin; Django's method builds the codenames with get_permission_codename and calls request.user.has_perm
+
+[constance.admin.ConstanceAdmin.has_change_permission]
+250:21 call  super()
+    -> <builtin>.super
+250:45 call  super().has_change_permission(request, obj)
+    -> django.contrib.admin.ModelAdmin.has_change_permission
+    reject constance.admin.ConstanceAdmin.has_change_permission: super() skips ConstanceAdmin; Django's method calls request.user.has_perm
+
+[constance.admin.Config.Meta.app_config]
+272:39 call  apps.get_app_config(self.app_label)
+    -> django.apps.registry.Apps.get_app_config
+
+== constance.apps
+
+[constance.apps]
+10:21 call  _("Constance")
+    -> django.utils.translation.gettext_lazy
+
+[constance.apps.ConstanceConfig.ready]
+14:24 call  checks.register(check_fieldsets, "constance")
+    -> django.core.checks.registry.CheckRegistry.register
+    reject constance.checks.check_fieldsets: register only adds the check to the registry (after func_accepts_kwargs inspects its signature); Django's check framework runs it later, for the client's command
+
+== constance.backends
+
+[constance.backends]
+8:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+16:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+24:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+33:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+42:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+47:6 decorator  @abstractmethod
+    -> abc.abstractmethod
+
+== constance.backends.database
+
+[constance.backends.database.DatabaseBackend.__init__]
+27:30 getattr  self._model._meta.app_config
+    reject constance.admin.Config.Meta.app_config: self._model is the Django model Constance (database.py:22); its _meta is Django's Options, whose app_config is Django's property
+28:39 call  ImproperlyConfigured( "The constance.backends.database ap...
+    -> django.core.exceptions.ImproperlyConfigured
+35:26 call  isinstance(self._cache, LocMemCache)
+    -> <builtin>.isinstance
+36:43 call  ImproperlyConfigured( "The CONSTANCE_DATABASE_CACHE_BACKE...
+    -> django.core.exceptions.ImproperlyConfigured
+44:26 call  post_save.connect(self.clear, sender=self._model)
+    -> django.db.models.signals.ModelSignal.connect
+    reject constance.backends.database.DatabaseBackend.clear: connect only registers the bound method as a receiver (it inspects its signature, func_accepts_kwargs); Django calls it when a Constance object is saved, at the save sites of DatabaseBackend.set (judgement 5)
+
+[constance.backends.database.DatabaseBackend.autofill]
+52:40 call  self.add_prefix(self._autofill_cachekey)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+53:27 call  self._cache.get(full_cachekey)
+    reject *: self._cache is the cache of CONSTANCE_DATABASE_CACHE_BACKEND, not a backend
+    note: judgement 3: the cache is the client's configured Django cache; Django's default (LocMemCache) is refused at line 35 and the documented MemcachedCache (docs/backends.rst:126) does not exist in the admitted Django 4.2 to 6.1, so the object is client configuration (B5) and its methods have no callee
+56:36 call  self.mget(settings.CONFIG)
+    -> constance.backends.database.DatabaseBackend.mget
+    reject *: self is a DatabaseBackend; the package defines no subclass of it
+56:59 call  self.mget(settings.CONFIG).items()
+    -> <builtin>.dict.items
+57:44 call  self.add_prefix(key)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+58:29 call  self._cache.set_many(autofill_values, timeout=self._autof...
+    note: the client's configured cache (judgement 3): no callee
+
+[constance.backends.database.DatabaseBackend.mget]
+64:32 call  self.add_prefix(key)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+66:57 call  self._model._default_manager.filter(key__in=keys)
+    -> django.db.models.Manager.filter
+    note: the default manager of the Constance model is a django Manager; filter is a manager method copied from QuerySet, as the trace names it
+68:48 call  loads(const.value)
+    -> constance.codecs.loads
+
+[constance.backends.database.DatabaseBackend.get]
+74:30 call  self.add_prefix(key)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+77:36 call  self._cache.get(key)
+    reject *: self._cache is the client's configured cache (judgement 3), not a backend
+    note: the client's configured cache (judgement 3): no callee
+79:30 call  self.autofill()
+    -> constance.backends.database.DatabaseBackend.autofill
+80:40 call  self._cache.get(key)
+    reject *: self._cache is the client's configured cache (judgement 3), not a backend
+    note: the client's configured cache (judgement 3): no callee
+82:56 call  self._model._default_manager.filter(key=key)
+    -> django.db.models.Manager.filter
+82:70 call  self._model._default_manager.filter(key=key).only("value")
+    -> django.db.models.query.QuerySet.only
+82:85 call  self._model._default_manager.filter(key=key).only("value"...
+    -> django.db.models.query.QuerySet.first
+84:30 call  loads(match.value)
+    -> constance.codecs.loads
+86:36 call  self._cache.add(key, value)
+    note: the client's configured cache (judgement 3): no callee
+
+[constance.backends.database.DatabaseBackend.aget]
+92:39 call  self.add_prefix(key)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+95:43 call  self._cache.aget(prefixed_key)
+    reject *: self._cache is the client's configured cache (judgement 3), not a backend
+    note: the client's configured cache (judgement 3): no callee
+97:36 call  sync_to_async(self.autofill, thread_sensitive=True)
+    -> asgiref.sync.sync_to_async
+    reject constance.backends.database.DatabaseBackend.autofill: sync_to_async only wraps the method; the call of the wrapper at 97:74 runs it (judgement 7)
+97:74 call  sync_to_async(self.autofill, thread_sensitive=True)()
+    -> asgiref.sync.SyncToAsync.__call__
+    -> constance.backends.database.DatabaseBackend.autofill
+    note: the callee is the SyncToAsync object made at 97:36; its coroutine __call__, which aget awaits, runs self.autofill in asgiref's executor thread (judgement 7)
+98:47 call  self._cache.aget(prefixed_key)
+    reject *: self._cache is the client's configured cache (judgement 3), not a backend
+    note: the client's configured cache (judgement 3): no callee
+100:62 call  self._model._default_manager.filter(key=prefixed_key)
+    -> django.db.models.Manager.filter
+100:85 call  self._model._default_manager.filter(key=prefixed_key).onl...
+    -> django.db.models.query.QuerySet.only
+100:101 call  self._model._default_manager.filter(key=prefixed_key).onl...
+    -> django.db.models.query.QuerySet.afirst
+102:30 call  loads(match.value)
+    -> constance.codecs.loads
+104:43 call  self._cache.aadd(prefixed_key, value)
+    note: the client's configured cache (judgement 3): no callee
+
+[constance.backends.database.DatabaseBackend.amget]
+111:45 call  self.add_prefix(key)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+115:56 call  self._cache.aget_many(prefixed_keys_map.keys())
+    note: the client's configured cache (judgement 3): no callee
+115:79 call  prefixed_keys_map.keys()
+    -> <builtin>.dict.keys
+116:59 call  cache_results.items()
+    note: cache_results is what the client's configured cache returns (judgement 3), a client object (B5): no callee
+122:71 call  self._model._default_manager.filter(key__in=missing_prefi...
+    -> django.db.models.Manager.filter
+    note: the async for over the QuerySet runs Django's QuerySet.__aiter__, an implicit call outside the package
+123:66 call  loads(const.value)
+    -> constance.codecs.loads
+
+[constance.backends.database.DatabaseBackend.set]
+130:30 call  self.add_prefix(key)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+132:52 call  self._model._default_manager.all()
+    -> django.db.models.Manager.all
+138:37 call  queryset.get(key=key)
+    -> django.db.models.query.QuerySet.get
+    reject *: queryset is the Django QuerySet of line 132, not a backend
+144:22 with  transaction.atomic(using=queryset.db)
+    reject *: the context manager is Django's Atomic, whose __enter__ and __exit__ are outside the package
+144:40 call  transaction.atomic(using=queryset.db)
+    -> django.db.transaction.atomic
+    note: transaction is django.db.transaction (database.py:7) and atomic its function; the name atomic is also the class attribute `atomic = False` of the migration 0002, which is not this object
+145:36 call  queryset.create(key=key, value=dumps(value))
+    -> django.db.models.query.QuerySet.create
+    -> constance.backends.database.DatabaseBackend.clear
+    note: QuerySet.create saves the new Constance object; Model.save sends post_save, which calls the receivers that DatabaseBackend.__init__ connected for the Constance model, the bound clear methods (judgement 5)
+145:57 call  dumps(value)
+    -> constance.codecs.dumps
+149:41 call  queryset.get(key=key)
+    -> django.db.models.query.QuerySet.get
+    reject *: queryset is the Django QuerySet of line 132, not a backend
+152:30 call  loads(constance.value)
+    -> constance.codecs.loads
+153:36 call  dumps(value)
+    -> constance.codecs.dumps
+154:27 call  constance.save(update_fields=["value"])
+    -> django.db.models.Model.save
+    -> constance.backends.database.DatabaseBackend.clear
+    reject constance.forms.ConstanceForm.save: constance is a Constance model object, which inherits save from Django's Model
+    note: Model.save sends post_save for the Constance model, which calls the connected clear receivers (judgement 5; the trace has set -> clear)
+159:28 call  self._cache.set(key, value)
+    reject *: self._cache is the client's configured cache (judgement 3), not a backend
+    note: the client's configured cache (judgement 3): no callee
+161:36 call  signals.config_updated.send(sender=config, key=key, old_v...
+    -> django.dispatch.Signal.send
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (database.py:10), not the context processor
+    note: judgement 4: when a receiver is connected (the documented @receiver(config_updated), docs/index.rst:80), Signal.send looks the sender up in its dict sender_receivers_cache, which hashes it, and _live_receivers computes _make_id(sender), which runs hasattr(sender, '__func__'); on the LazyConfig constance.config, LazyObject.__hash__ and LazyObject.__getattr__ run LazyConfig._setup if it was never loaded in the process (the backend can be reached through another LazyConfig, those of utils, admin and forms), and the forwarded load of __func__ runs Config.__getattr__, which raises AttributeError; receivers are client callbacks
+
+[constance.backends.database.DatabaseBackend.aset]
+168:35 call  sync_to_async(self.set, thread_sensitive=True)
+    -> asgiref.sync.sync_to_async
+    reject *: sync_to_async only wraps the method; the call of the wrapper at 168:68 runs it (judgement 7)
+168:68 call  sync_to_async(self.set, thread_sensitive=True)(key, value)
+    -> asgiref.sync.SyncToAsync.__call__
+    -> constance.backends.database.DatabaseBackend.set
+    note: the callee is the SyncToAsync object made at 168:35; its coroutine __call__ runs self.set (a DatabaseBackend; no package subclass) in asgiref's executor thread (judgement 7)
+
+[constance.backends.database.DatabaseBackend.clear]
+172:36 call  self.add_prefix(k)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+173:24 call  keys.append(self.add_prefix(self._autofill_cachekey))
+    -> <builtin>.list.append
+173:40 call  self.add_prefix(self._autofill_cachekey)
+    -> constance.backends.database.DatabaseBackend.add_prefix
+    reject constance.backends.redisd.RedisBackend.add_prefix: self is a DatabaseBackend
+174:36 call  self._cache.delete_many(keys)
+    note: the client's configured cache (judgement 3): no callee
+175:26 call  self.autofill()
+    -> constance.backends.database.DatabaseBackend.autofill
+
+== constance.backends.memory
+
+[constance.backends.memory]
+13:17 call  Lock()
+    -> threading.Lock
+    note: threading.Lock is _thread.allocate_lock before Python 3.13 and the lock class from 3.13; the trace names _thread.lock with the alias threading.Lock (the precedent of Sublist3r)
+
+[constance.backends.memory.MemoryBackend.__init__]
+16:14 call  super()
+    -> <builtin>.super
+16:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: Backend defines no __init__; the method that runs is object.__init__, named through the nearest base outside the package, ABC (the trace: <builtin>.object.__init__)
+
+[constance.backends.memory.MemoryBackend.get]
+19:14 with  self._lock
+    reject *: self._lock is the threading.Lock of line 13, whose __enter__ and __exit__ are outside the package
+20:37 call  self._storage.get(key)
+    -> <builtin>.dict.get
+    reject *: self._storage is the class attribute dict of line 12, not a backend
+
+[constance.backends.memory.MemoryBackend.aget]
+24:24 call  self.get(key)
+    -> constance.backends.memory.MemoryBackend.get
+    reject *: self is a MemoryBackend; the package defines no subclass of it
+
+[constance.backends.memory.MemoryBackend.mget]
+29:14 with  self._lock
+    reject *: self._lock is the threading.Lock of line 13, whose __enter__ and __exit__ are outside the package
+
+[constance.backends.memory.MemoryBackend.amget]
+35:14 with  self._lock
+    reject *: self._lock is the threading.Lock of line 13, whose __enter__ and __exit__ are outside the package
+
+[constance.backends.memory.MemoryBackend.set]
+39:14 with  self._lock
+    reject *: self._lock is the threading.Lock of line 13, whose __enter__ and __exit__ are outside the package
+40:42 call  self._storage.get(key)
+    -> <builtin>.dict.get
+    reject *: self._storage is the class attribute dict of line 12, not a backend
+42:40 call  signals.config_updated.send(sender=config, key=key, old_v...
+    -> django.dispatch.Signal.send
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (memory.py:3), not the context processor
+    note: judgement 4, as at database.py:161
+
+[constance.backends.memory.MemoryBackend.aset]
+46:17 call  self.set(key, value)
+    -> constance.backends.memory.MemoryBackend.set
+    reject *: self is a MemoryBackend; the package defines no subclass of it
+
+== constance.backends.redisd
+
+[constance.backends.redisd]
+108:23 call  object()
+    -> <builtin>.object
+109:18 call  RLock()
+    -> threading.RLock
+
+[constance.backends.redisd.RedisBackend.__init__]
+18:14 call  super()
+    -> <builtin>.super
+18:25 call  super().__init__()
+    -> abc.ABC.__init__
+    reject *: super() in RedisBackend is Backend, which defines no __init__; the method that runs is object.__init__, named through the nearest base outside the package, ABC (the trace: <builtin>.object.__init__)
+24:48 call  utils.import_module_attr(connection_cls)
+    -> constance.utils.import_module_attr
+    reject constance.migrations.0003_drop_pickle.import_module_attr: utils is constance.utils (redisd.py:10)
+24:64 call  utils.import_module_attr(connection_cls)()
+    -> django_redis.get_redis_connection
+    note: judgement 3: the callable that CONSTANCE_REDIS_CONNECTION_CLASS names; the documented configurations (docs/backends.rst:64, 70) are a project's own mock-up class (client code) and django_redis.get_redis_connection, a library that the package does not require and the environment lacks, named as a missing module; any other configured callable is client code
+29:43 call  ImproperlyConfigured("The Redis backend requires redis-py...
+    -> django.core.exceptions.ImproperlyConfigured
+    note: the except ImportError side of the optional import of redis runs (README, Judgements)
+31:30 call  isinstance(settings.REDIS_CONNECTION, str)
+    -> <builtin>.isinstance
+32:46 call  redis.from_url(settings.REDIS_CONNECTION)
+    -> redis.from_url
+    note: redis is installed (a dependency of the entry); redis.from_url is redis.utils.from_url, which returns Redis.from_url(url), a redis.client.Redis (judgement 9)
+34:43 call  redis.Redis(**settings.REDIS_CONNECTION)
+    -> redis.Redis
+37:49 call  utils.import_module_attr(async_connection_cls)
+    -> constance.utils.import_module_attr
+    reject constance.migrations.0003_drop_pickle.import_module_attr: utils is constance.utils (redisd.py:10)
+37:71 call  utils.import_module_attr(async_connection_cls)()
+    note: the callable that CONSTANCE_REDIS_ASYNC_CONNECTION_CLASS names, client configuration (the documentation names no value for this setting): no callee (judgement 3)
+46:30 call  isinstance(settings.REDIS_CONNECTION, str)
+    -> <builtin>.isinstance
+47:48 call  aredis.from_url(settings.REDIS_CONNECTION)
+    -> redis.asyncio.from_url
+    note: aredis is redis.asyncio (redis 4.2 and later; the except ImportError side sets self._ard to None); its from_url is redis.asyncio.utils.from_url, which returns a redis.asyncio.client.Redis (judgement 9)
+49:45 call  aredis.Redis(**settings.REDIS_CONNECTION)
+    -> redis.asyncio.Redis
+
+[constance.backends.redisd.RedisBackend._check_async_support]
+56:39 call  ImproperlyConfigured( "Async support for the Redis backen...
+    -> django.core.exceptions.ImproperlyConfigured
+
+[constance.backends.redisd.RedisBackend.get]
+62:29 call  self._rd.get(self.add_prefix(key))
+    -> redis.Redis.get
+    -> django_redis.get_redis_connection.get
+    reject *: self._rd is the redis client of __init__, not a package backend
+    note: self._rd is a redis.client.Redis (redis.Redis or redis.from_url, lines 32 and 34), or what the documented connection callable django_redis.get_redis_connection returns (judgement 3): a stub value of a missing module, whose methods keep the factory's access path (referee ruling N1; "a redis connection", docs/backends.rst:68, fixes no class under B4); a client's own connection class is opaque
+62:45 call  self.add_prefix(key)
+    -> constance.backends.redisd.RedisBackend.add_prefix
+    reject constance.backends.database.DatabaseBackend.add_prefix: self is a RedisBackend or a CachingRedisBackend, which inherits add_prefix
+64:25 call  loads(value)
+    -> constance.codecs.loads
+
+[constance.backends.redisd.RedisBackend.aget]
+68:34 call  self._check_async_support()
+    -> constance.backends.redisd.RedisBackend._check_async_support
+69:36 call  self._ard.get(self.add_prefix(key))
+    -> redis.asyncio.Redis.get
+    reject *: self._ard is the asyncio redis client of __init__, not a package backend
+    note: self._ard is a redis.asyncio.client.Redis (lines 47 and 49), or the client's configured async connection (opaque, judgement 3)
+69:52 call  self.add_prefix(key)
+    -> constance.backends.redisd.RedisBackend.add_prefix
+    reject constance.backends.database.DatabaseBackend.add_prefix: self is a RedisBackend or a CachingRedisBackend
+71:25 call  loads(value)
+    -> constance.codecs.loads
+
+[constance.backends.redisd.RedisBackend.mget]
+77:41 call  self.add_prefix(key)
+    -> constance.backends.redisd.RedisBackend.add_prefix
+    reject constance.backends.database.DatabaseBackend.add_prefix: self is a RedisBackend (CachingRedisBackend overrides mget and never calls this one)
+78:27 call  loads(value)
+    -> constance.codecs.loads
+78:56 call  zip(keys, self._rd.mget(prefixed_keys), strict=False)
+    -> <builtin>.zip
+78:76 call  self._rd.mget(prefixed_keys)
+    -> redis.Redis.mget
+    -> django_redis.get_redis_connection.mget
+    reject *: self._rd is the redis client of __init__, not a package backend
+
+[constance.backends.redisd.RedisBackend.amget]
+83:34 call  self._check_async_support()
+    -> constance.backends.redisd.RedisBackend._check_async_support
+84:41 call  self.add_prefix(key)
+    -> constance.backends.redisd.RedisBackend.add_prefix
+    reject constance.backends.database.DatabaseBackend.add_prefix: self is a RedisBackend or a CachingRedisBackend (whose amget calls this one through super())
+85:38 call  self._ard.mget(prefixed_keys)
+    -> redis.asyncio.Redis.mget
+    reject *: self._ard is the asyncio redis client of __init__, not a package backend
+86:27 call  loads(value)
+    -> constance.codecs.loads
+86:56 call  zip(keys, values, strict=False)
+    -> <builtin>.zip
+
+[constance.backends.redisd.RedisBackend.set]
+89:29 call  self.get(key)
+    -> constance.backends.redisd.RedisBackend.get
+    -> constance.backends.redisd.CachingRedisBackend.get
+    reject constance.backends.Backend.get, constance.backends.database.DatabaseBackend.get, constance.backends.memory.MemoryBackend.get: self is a RedisBackend, or a CachingRedisBackend through super().set (redisd.py:165)
+90:21 call  self._rd.set(self.add_prefix(key), dumps(value))
+    -> redis.Redis.set
+    -> django_redis.get_redis_connection.set
+    reject *: self._rd is the redis client of __init__, not a package backend
+90:37 call  self.add_prefix(key)
+    -> constance.backends.redisd.RedisBackend.add_prefix
+    reject constance.backends.database.DatabaseBackend.add_prefix: self is a RedisBackend or a CachingRedisBackend
+90:49 call  dumps(value)
+    -> constance.codecs.dumps
+91:36 call  signals.config_updated.send(sender=config, key=key, old_v...
+    -> django.dispatch.Signal.send
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (redisd.py:7), not the context processor
+    note: judgement 4, as at database.py:161
+
+[constance.backends.redisd.RedisBackend._aset_internal]
+98:34 call  self._check_async_support()
+    -> constance.backends.redisd.RedisBackend._check_async_support
+99:28 call  self._ard.set(self.add_prefix(key), dumps(value))
+    -> redis.asyncio.Redis.set
+    reject *: self._ard is the asyncio redis client of __init__, not a package backend
+99:44 call  self.add_prefix(key)
+    -> constance.backends.redisd.RedisBackend.add_prefix
+    reject constance.backends.database.DatabaseBackend.add_prefix: self is a RedisBackend or a CachingRedisBackend
+99:56 call  dumps(value)
+    -> constance.codecs.dumps
+100:36 call  signals.config_updated.send(sender=config, key=key, old_v...
+    -> django.dispatch.Signal.send
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (redisd.py:7), not the context processor
+    note: judgement 4, as at database.py:161
+
+[constance.backends.redisd.RedisBackend.aset]
+103:36 call  self.aget(key)
+    -> constance.backends.redisd.RedisBackend.aget
+    reject *: self is a RedisBackend; CachingRedisBackend overrides aset and never calls RedisBackend.aset on itself (B1)
+104:34 call  self._aset_internal(key, value, old_value)
+    -> constance.backends.redisd.RedisBackend._aset_internal
+
+[constance.backends.redisd.CachingRedisBackend.__init__]
+113:14 call  super()
+    -> <builtin>.super
+113:25 call  super().__init__()
+    -> constance.backends.redisd.RedisBackend.__init__
+    reject *: super() in CachingRedisBackend is RedisBackend
+116:32 call  object()
+    -> <builtin>.object
+
+[constance.backends.redisd.CachingRedisBackend._get_async_lock]
+121:44 call  asyncio.Lock()
+    -> asyncio.Lock
+
+[constance.backends.redisd.CachingRedisBackend._has_expired]
+125:37 call  monotonic()
+    -> time.monotonic
+
+[constance.backends.redisd.CachingRedisBackend._cache_value]
+128:38 call  monotonic()
+    -> time.monotonic
+
+[constance.backends.redisd.CachingRedisBackend.get]
+131:32 call  self._cache.get(key, self._sentinel)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of __init__ (line 115), not a backend
+133:56 call  self._has_expired(value)
+    -> constance.backends.redisd.CachingRedisBackend._has_expired
+134:18 with  self._lock
+    reject *: self._lock is the threading.RLock of line 109, whose __enter__ and __exit__ are outside the package
+135:34 call  super()
+    -> <builtin>.super
+135:40 call  super().get(key)
+    -> constance.backends.redisd.RedisBackend.get
+    reject *: super() in CachingRedisBackend is RedisBackend
+136:34 call  self._cache_value(key, new_value)
+    -> constance.backends.redisd.CachingRedisBackend._cache_value
+
+[constance.backends.redisd.CachingRedisBackend._aget_unlocked]
+146:32 call  self._cache.get(key, self._sentinel)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of __init__ (line 115), not a backend
+147:56 call  self._has_expired(value)
+    -> constance.backends.redisd.CachingRedisBackend._has_expired
+148:36 call  super()
+    -> <builtin>.super
+148:43 call  super().aget(key)
+    -> constance.backends.redisd.RedisBackend.aget
+    reject *: super() in CachingRedisBackend is RedisBackend
+149:30 call  self._cache_value(key, new_value)
+    -> constance.backends.redisd.CachingRedisBackend._cache_value
+
+[constance.backends.redisd.CachingRedisBackend.aget]
+154:32 call  self._cache.get(key, self._sentinel)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of __init__ (line 115), not a backend
+156:56 call  self._has_expired(value)
+    -> constance.backends.redisd.CachingRedisBackend._has_expired
+157:44 call  self._get_async_lock()
+    -> constance.backends.redisd.CachingRedisBackend._get_async_lock
+159:49 call  self._aget_unlocked(key)
+    -> constance.backends.redisd.CachingRedisBackend._aget_unlocked
+
+[constance.backends.redisd.CachingRedisBackend.set]
+164:14 with  self._lock
+    reject *: self._lock is the threading.RLock of line 109, whose __enter__ and __exit__ are outside the package
+165:18 call  super()
+    -> <builtin>.super
+165:24 call  super().set(key, value)
+    -> constance.backends.redisd.RedisBackend.set
+    reject *: super() in CachingRedisBackend is RedisBackend
+166:30 call  self._cache_value(key, value)
+    -> constance.backends.redisd.CachingRedisBackend._cache_value
+
+[constance.backends.redisd.CachingRedisBackend.aset]
+169:40 call  self._get_async_lock()
+    -> constance.backends.redisd.CachingRedisBackend._get_async_lock
+171:50 call  self._aget_unlocked(key)
+    -> constance.backends.redisd.CachingRedisBackend._aget_unlocked
+173:38 call  self._aset_internal(key, value, old_value)
+    -> constance.backends.redisd.RedisBackend._aset_internal
+174:30 call  self._cache_value(key, value)
+    -> constance.backends.redisd.CachingRedisBackend._cache_value
+
+[constance.backends.redisd.CachingRedisBackend.mget]
+181:29 call  self.get(key)
+    -> constance.backends.redisd.CachingRedisBackend.get
+    reject *: self is a CachingRedisBackend, whose own get overrides RedisBackend.get
+
+[constance.backends.redisd.CachingRedisBackend.amget]
+195:36 call  self._cache.get(key, self._sentinel)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of __init__ (line 115), not a backend
+196:69 call  self._has_expired(value)
+    -> constance.backends.redisd.CachingRedisBackend._has_expired
+199:36 call  missing_keys.append(key)
+    -> <builtin>.list.append
+203:44 call  self._get_async_lock()
+    -> constance.backends.redisd.CachingRedisBackend._get_async_lock
+207:44 call  self._cache.get(key, self._sentinel)
+    -> <builtin>.dict.get
+    reject *: self._cache is the dict of __init__ (line 115), not a backend
+208:77 call  self._has_expired(value)
+    -> constance.backends.redisd.CachingRedisBackend._has_expired
+211:45 call  still_missing.append(key)
+    -> <builtin>.list.append
+214:42 call  super()
+    -> <builtin>.super
+214:50 call  super().amget(still_missing)
+    -> constance.backends.redisd.RedisBackend.amget
+    reject *: super() in CachingRedisBackend is RedisBackend
+215:52 call  fetched.items()
+    -> <builtin>.dict.items
+    note: fetched is the dict that RedisBackend.amget returns
+216:42 call  self._cache_value(key, value)
+    -> constance.backends.redisd.CachingRedisBackend._cache_value
+
+== constance.base
+
+[constance.base.AsyncValueProxy.__await__]
+19:31 call  self._get_value()
+    -> constance.base.AsyncValueProxy._get_value
+19:43 call  self._get_value().__await__()
+    -> types.CoroutineType.__await__
+    reject constance.base.AsyncValueProxy.__await__: the receiver is the coroutine that the coroutine function _get_value returns, not an AsyncValueProxy
+
+[constance.base.AsyncValueProxy._get_value]
+23:54 call  self._config._backend.aget(self._key)
+    -> constance.backends.database.DatabaseBackend.aget
+    -> constance.backends.memory.MemoryBackend.aget
+    -> constance.backends.redisd.CachingRedisBackend.aget
+    -> constance.backends.redisd.RedisBackend.aget
+    reject constance.backends.Backend.aget: Backend is abstract by abc and every package backend overrides aget (B1)
+    note: self._config is the Config that made the proxy (base.py:159); its _backend is made from CONSTANCE_BACKEND (base.py:135), whose documented values are the four package backends (docs/backends.rst:27, 33, 94, 162); a client's own backend class is client code
+26:40 call  self._config.aset(self._key, result)
+    -> constance.base.Config.aset
+    reject *: self._config is a Config (base.py:159), not a backend
+
+[constance.base.AsyncValueProxy._get_sync_value]
+32:22 call  warnings.warn( f"Synchronous access to Constance setting ...
+    -> warnings.warn
+38:44 call  self._config._get_sync_value(self._key, self._default)
+    -> constance.base.Config._get_sync_value
+    reject constance.base.AsyncValueProxy._get_sync_value: self._config is a Config (base.py:159)
+
+
+[constance.base.AsyncValueProxy.__str__]
+41:19 call  str(self._get_sync_value())
+    -> <builtin>.str
+    -> constance.base.AsyncValueProxy.__str__
+    reject constance.base.AsyncValueProxy.__repr__: str() calls __str__, which AsyncValueProxy defines
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code
+41:40 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__repr__]
+44:20 call  repr(self._get_sync_value())
+    -> <builtin>.repr
+    -> constance.base.AsyncValueProxy.__repr__
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code
+44:41 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__int__]
+47:19 call  int(self._get_sync_value())
+    -> <builtin>.int
+    -> constance.base.AsyncValueProxy.__int__
+    reject constance.base.AsyncValueProxy.__index__: int() calls __int__, which AsyncValueProxy defines, before __index__
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code
+47:40 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__float__]
+50:21 call  float(self._get_sync_value())
+    -> <builtin>.float
+    -> constance.base.AsyncValueProxy.__float__
+    reject constance.base.AsyncValueProxy.__index__: float() calls __float__, which AsyncValueProxy defines, before __index__
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code
+50:42 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__bool__]
+53:20 call  bool(self._get_sync_value())
+    -> <builtin>.bool
+    -> constance.base.AsyncValueProxy.__bool__
+    reject constance.base.AsyncValueProxy.__len__: bool() calls __bool__, which AsyncValueProxy defines, before __len__
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code
+53:41 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__eq__]
+56:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+56:39 op  self._get_sync_value() == other
+    -> constance.base.AsyncValueProxy.__eq__
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)
+
+[constance.base.AsyncValueProxy.__ne__]
+59:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+59:39 op  self._get_sync_value() != other
+    -> constance.base.AsyncValueProxy.__ne__
+    reject constance.base.AsyncValueProxy.__eq__: __ne__ is defined and never returns NotImplemented
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)
+
+[constance.base.AsyncValueProxy.__lt__]
+62:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+62:39 op  self._get_sync_value() < other
+    -> constance.base.AsyncValueProxy.__lt__
+    reject constance.base.AsyncValueProxy.__gt__: the proxy is the left operand and its __lt__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)
+
+[constance.base.AsyncValueProxy.__le__]
+65:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+65:39 op  self._get_sync_value() <= other
+    -> constance.base.AsyncValueProxy.__le__
+    reject constance.base.AsyncValueProxy.__ge__: the proxy is the left operand and its __le__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)
+
+[constance.base.AsyncValueProxy.__gt__]
+68:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+68:39 op  self._get_sync_value() > other
+    -> constance.base.AsyncValueProxy.__gt__
+    reject constance.base.AsyncValueProxy.__lt__: the proxy is the left operand and its __gt__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)
+
+[constance.base.AsyncValueProxy.__ge__]
+71:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+71:39 op  self._get_sync_value() >= other
+    -> constance.base.AsyncValueProxy.__ge__
+    reject constance.base.AsyncValueProxy.__le__: the proxy is the left operand and its __ge__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)
+
+[constance.base.AsyncValueProxy.__getitem__]
+74:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+74:38 getitem  self._get_sync_value()[key]
+    -> constance.base.AsyncValueProxy.__getitem__
+    reject constance.base.AsyncValueProxy.__eq__, constance.base.AsyncValueProxy.__hash__, constance.base.AsyncValueProxy.__index__: key is the client's value (B5); a proxy container is subscripted through its own __getitem__, which hashes nothing
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns
+
+[constance.base.AsyncValueProxy.__iter__]
+77:20 call  iter(self._get_sync_value())
+    -> <builtin>.iter
+    -> constance.base.AsyncValueProxy.__iter__
+    reject constance.base.AsyncValueProxy.__getitem__: iter() calls __iter__, which AsyncValueProxy defines
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns
+77:41 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__len__]
+80:19 call  len(self._get_sync_value())
+    -> <builtin>.len
+    -> constance.base.AsyncValueProxy.__len__
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns
+80:40 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__contains__]
+83:21 op  item in self._get_sync_value()
+    -> constance.base.AsyncValueProxy.__contains__
+    reject constance.base.AsyncValueProxy.__eq__, constance.base.AsyncValueProxy.__getitem__, constance.base.AsyncValueProxy.__hash__, constance.base.AsyncValueProxy.__iter__: a proxy container answers `in` with its own __contains__, which AsyncValueProxy defines; item is the client's value (B5)
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the container
+83:44 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__hash__]
+86:20 call  hash(self._get_sync_value())
+    -> <builtin>.hash
+    -> constance.base.AsyncValueProxy.__hash__
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns
+86:41 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+
+[constance.base.AsyncValueProxy.__add__]
+89:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+89:39 op  self._get_sync_value() + other
+    -> constance.base.AsyncValueProxy.__add__
+    reject constance.base.AsyncValueProxy.__radd__: the proxy is the left operand and its __add__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand
+
+[constance.base.AsyncValueProxy.__sub__]
+92:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+92:39 op  self._get_sync_value() - other
+    -> constance.base.AsyncValueProxy.__sub__
+    reject constance.base.AsyncValueProxy.__rsub__: the proxy is the left operand and its __sub__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand
+
+[constance.base.AsyncValueProxy.__mul__]
+95:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+95:39 op  self._get_sync_value() * other
+    -> constance.base.AsyncValueProxy.__mul__
+    reject constance.base.AsyncValueProxy.__rmul__: the proxy is the left operand and its __mul__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand
+
+[constance.base.AsyncValueProxy.__truediv__]
+98:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+98:39 op  self._get_sync_value() / other
+    -> constance.base.AsyncValueProxy.__truediv__
+    reject constance.base.AsyncValueProxy.__rtruediv__: the proxy is the left operand and its __truediv__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand
+
+[constance.base.AsyncValueProxy.__floordiv__]
+101:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+101:39 op  self._get_sync_value() // other
+    -> constance.base.AsyncValueProxy.__floordiv__
+    reject constance.base.AsyncValueProxy.__rfloordiv__: the proxy is the left operand and its __floordiv__ never returns NotImplemented; the reflected method belongs to other, the client's operand
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand
+
+[constance.base.AsyncValueProxy.__mod__]
+104:36 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+104:39 op  self._get_sync_value() % other
+    -> constance.base.AsyncValueProxy.__mod__
+    reject constance.base.AsyncValueProxy.__float__, constance.base.AsyncValueProxy.__getitem__, constance.base.AsyncValueProxy.__index__, constance.base.AsyncValueProxy.__int__, constance.base.AsyncValueProxy.__repr__, constance.base.AsyncValueProxy.__str__: a proxy on the left of % runs its own __mod__, never str formatting; other is the client's value (B5)
+    reject constance.base.AsyncValueProxy.__rmod__: the proxy is the left operand and its __mod__ never returns NotImplemented
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand
+
+
+[constance.base.AsyncValueProxy.__radd__]
+107:22 op  other + self._get_sync_value()
+    -> constance.base.AsyncValueProxy.__radd__
+    reject constance.base.AsyncValueProxy.__add__: the left operand other is the client's value (B5); the proxy on the right runs its reflected __radd__ when other's method returns NotImplemented (an int or a str operand)
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand
+107:44 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__rsub__]
+110:22 op  other - self._get_sync_value()
+    -> constance.base.AsyncValueProxy.__rsub__
+    reject constance.base.AsyncValueProxy.__sub__: the left operand other is the client's value (B5); the proxy on the right runs its reflected __rsub__ when other's method returns NotImplemented (an int or a str operand)
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand
+110:44 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__rmul__]
+113:22 op  other * self._get_sync_value()
+    -> constance.base.AsyncValueProxy.__rmul__
+    reject constance.base.AsyncValueProxy.__mul__: the left operand other is the client's value (B5); the proxy on the right runs its reflected __rmul__ when other's method returns NotImplemented (an int or a str operand)
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand
+113:44 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__rtruediv__]
+116:22 op  other / self._get_sync_value()
+    -> constance.base.AsyncValueProxy.__rtruediv__
+    reject constance.base.AsyncValueProxy.__truediv__: the left operand other is the client's value (B5); the proxy on the right runs its reflected __rtruediv__ when other's method returns NotImplemented (an int or a str operand)
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand
+116:44 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__rfloordiv__]
+119:22 op  other // self._get_sync_value()
+    -> constance.base.AsyncValueProxy.__rfloordiv__
+    reject constance.base.AsyncValueProxy.__floordiv__: the left operand other is the client's value (B5); the proxy on the right runs its reflected __rfloordiv__ when other's method returns NotImplemented (an int or a str operand)
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand
+119:45 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__rmod__]
+122:22 op  other % self._get_sync_value()
+    -> constance.base.AsyncValueProxy.__rmod__
+    -> constance.base.AsyncValueProxy.__str__
+    -> constance.base.AsyncValueProxy.__repr__
+    -> constance.base.AsyncValueProxy.__int__
+    -> constance.base.AsyncValueProxy.__float__
+    -> constance.base.AsyncValueProxy.__index__
+    -> constance.base.AsyncValueProxy.__getitem__
+    reject constance.base.AsyncValueProxy.__mod__: the left operand other is the client's value (B5)
+    note: judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand: other's __mod__ returning NotImplemented (an int) runs the proxy's __rmod__; __rmod__ is a public method (rule C), and a client str passed as other formats the proxy with str's % (%s __str__, %r and %a __repr__, %d __int__, %f __float__, %x and %c __index__, %(k)s __getitem__, the proxy being a mapping)
+122:44 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+
+[constance.base.AsyncValueProxy.__index__]
+125:35 call  self._get_sync_value()
+    -> constance.base.AsyncValueProxy._get_sync_value
+    reject constance.base.Config._get_sync_value: self is an AsyncValueProxy
+126:19 call  hasattr(val, "__index__")
+    -> <builtin>.hasattr
+    note: __index__ is a class attribute of every type that has one; no package __getattr__ runs
+127:33 call  val.__index__()
+    -> <builtin>.int.__index__
+    -> <builtin>.bool.__index__
+    -> constance.base.AsyncValueProxy.__index__
+    note: of the documented value types only int and bool have __index__ (bool inherits int's; named by the receiver's class); judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns
+128:24 call  TypeError(f"'{type(val).__name__}' object cannot be inter...
+    -> <builtin>.TypeError
+128:33 call  type(val)
+    -> <builtin>.type
+
+[constance.base.Config.__init__]
+135:14 call  super()
+    -> <builtin>.super
+135:28 call  super().__setattr__("_backend", utils.import_module_attr(...
+    -> <builtin>.object.__setattr__
+135:65 call  utils.import_module_attr(settings.BACKEND)
+    -> constance.utils.import_module_attr
+    reject constance.migrations.0003_drop_pickle.import_module_attr: utils is constance.utils (base.py:7)
+135:83 call  utils.import_module_attr(settings.BACKEND)()
+    -> constance.backends.database.DatabaseBackend.__init__
+    -> constance.backends.memory.MemoryBackend.__init__
+    -> constance.backends.redisd.CachingRedisBackend.__init__
+    -> constance.backends.redisd.RedisBackend.__init__
+    note: the class that CONSTANCE_BACKEND names: the default RedisBackend (settings.py:3) and the documented package backends CachingRedisBackend, DatabaseBackend and MemoryBackend (docs/backends.rst:27, 33, 94, 162); a client's own backend class is client code
+
+[constance.base.Config._get_sync_value]
+138:35 call  self._backend.get(key)
+    -> constance.backends.database.DatabaseBackend.get
+    -> constance.backends.memory.MemoryBackend.get
+    -> constance.backends.redisd.CachingRedisBackend.get
+    -> constance.backends.redisd.RedisBackend.get
+    reject constance.backends.Backend.get: Backend is abstract by abc and every package backend overrides get (B1)
+    note: self._backend is the backend of base.py:135 (the four package backends)
+141:20 call  setattr(self, key, default)
+    -> <builtin>.setattr
+    -> constance.base.Config.__setattr__
+    note: self is a Config, so setattr runs Config.__setattr__
+
+[constance.base.Config.__getattr__]
+146:25 call  super()
+    note: judgement 10 (referee ruling): the _backend branch is reached by no admitted use; normal lookup always finds _backend, and a direct hook call with the private name is not considered: no edge
+146:44 call  super().__getattribute__(key)
+    note: judgement 10 (referee ruling): the _backend branch is reached by no admitted use; normal lookup always finds _backend, and a direct hook call with the private name is not considered: no edge
+148:19 call  len(settings.CONFIG[key])
+    -> <builtin>.len
+149:37 call  AttributeError(key)
+    -> <builtin>.AttributeError
+152:33 call  AttributeError(key)
+    -> <builtin>.AttributeError
+154:19 call  getattr(django_settings, "CONSTANCE_DETECT_ASYNCIO", geta...
+    -> <builtin>.getattr
+    note: django_settings is Django's LazySettings; its __getattr__ is outside the package
+154:72 call  getattr(settings, "DETECT_ASYNCIO", True)
+    -> <builtin>.getattr
+    note: settings is the module constance.settings
+156:41 call  asyncio.get_running_loop()
+    -> asyncio.get_running_loop
+158:44 call  self._get_sync_value(key, default)
+    -> constance.base.Config._get_sync_value
+    reject constance.base.AsyncValueProxy._get_sync_value: self is a Config
+159:35 call  AsyncValueProxy(key, self, default)
+    -> constance.base.AsyncValueProxy.__init__
+160:36 call  self._get_sync_value(key, default)
+    -> constance.base.Config._get_sync_value
+    reject constance.base.AsyncValueProxy._get_sync_value: self is a Config
+
+[constance.base.Config.__setattr__]
+164:18 call  super()
+    note: judgement 10 (referee ruling): the _backend branch needs a store of the private name _backend (Config.__init__ uses object.__setattr__ directly), which is not considered: no edge
+164:32 call  super().__setattr__(key, value)
+    note: judgement 10 (referee ruling): the _backend branch needs a store of the private name _backend (Config.__init__ uses object.__setattr__ directly), which is not considered: no edge
+167:33 call  AttributeError(key)
+    -> <builtin>.AttributeError
+168:26 call  self._backend.set(key, value)
+    -> constance.backends.database.DatabaseBackend.set
+    -> constance.backends.memory.MemoryBackend.set
+    -> constance.backends.redisd.CachingRedisBackend.set
+    -> constance.backends.redisd.RedisBackend.set
+    reject constance.backends.Backend.set: Backend is abstract by abc and every package backend overrides set (B1)
+    note: self._backend is the backend of base.py:135 (the four package backends)
+
+[constance.base.Config.aset]
+173:33 call  AttributeError(key)
+    -> <builtin>.AttributeError
+174:33 call  self._backend.aset(key, value)
+    -> constance.backends.database.DatabaseBackend.aset
+    -> constance.backends.memory.MemoryBackend.aset
+    -> constance.backends.redisd.CachingRedisBackend.aset
+    -> constance.backends.redisd.RedisBackend.aset
+    reject constance.backends.Backend.aset: Backend is abstract by abc and every package backend overrides aset (B1)
+    reject constance.base.Config.aset: self._backend is a backend, not a Config
+    note: self._backend is the backend of base.py:135 (the four package backends)
+
+[constance.base.Config.amget]
+177:51 call  self._backend.amget(keys)
+    -> constance.backends.database.DatabaseBackend.amget
+    -> constance.backends.memory.MemoryBackend.amget
+    -> constance.backends.redisd.CachingRedisBackend.amget
+    -> constance.backends.redisd.RedisBackend.amget
+    reject constance.backends.Backend.amget: Backend is abstract by abc and every package backend overrides amget (B1)
+    reject constance.base.Config.amget: self._backend is a backend, not a Config
+    note: self._backend is the backend of base.py:135 (the four package backends)
+180:20 call  dict(default_initial, **backend_values)
+    -> <builtin>.dict
+
+[constance.base.Config.__dir__]
+183:36 call  settings.CONFIG.keys()
+    -> <builtin>.dict.keys
+    -> collections.OrderedDict.keys
+    note: CONSTANCE_CONFIG is documented as a dict or an OrderedDict (docs/index.rst:42, 196)
+
+
+== constance.checks
+
+[constance.checks.check_fieldsets]
+17:15 call  hasattr(settings, "CONFIG_FIELDSETS")
+    -> <builtin>.hasattr
+18:63 call  get_inconsistent_fieldnames()
+    -> constance.checks.get_inconsistent_fieldnames
+20:35 call  checks.Warning( _("CONSTANCE_CONFIG_FIELDSETS is missing ...
+    -> django.core.checks.Warning
+21:18 call  _("CONSTANCE_CONFIG_FIELDSETS is missing field(s) that ex...
+    -> django.utils.translation.gettext_lazy
+22:31 call  ", ".join(sorted(missing_keys))
+    -> <builtin>.str.join
+22:38 call  sorted(missing_keys)
+    -> <builtin>.sorted
+26:26 call  errors.append(check)
+    -> <builtin>.list.append
+28:35 call  checks.Warning( _("CONSTANCE_CONFIG_FIELDSETS contains ex...
+    -> django.core.checks.Warning
+29:18 call  _("CONSTANCE_CONFIG_FIELDSETS contains extra field(s) tha...
+    -> django.utils.translation.gettext_lazy
+30:31 call  ", ".join(sorted(extra_keys))
+    -> <builtin>.str.join
+30:38 call  sorted(extra_keys)
+    -> <builtin>.sorted
+34:26 call  errors.append(check)
+    -> <builtin>.list.append
+
+[constance.checks.get_inconsistent_fieldnames]
+47:18 call  isinstance(settings.CONFIG_FIELDSETS, dict)
+    -> <builtin>.isinstance
+48:57 call  settings.CONFIG_FIELDSETS.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+    note: after isinstance(..., dict); the fieldsets are documented as a dict or a tuple, and admin.py:171 handles an OrderedDict explicitly
+52:29 call  set()
+    -> <builtin>.set
+    reject *: the builtin set, not a backend method
+56:22 call  isinstance(fields_list, dict)
+    -> <builtin>.isinstance
+58:34 call  unique_field_names.update(fields_list)
+    -> <builtin>.set.update
+61:22 call  set(settings.CONFIG.keys())
+    -> <builtin>.set
+    reject *: the builtin set, not a backend method
+61:43 call  settings.CONFIG.keys()
+    -> <builtin>.dict.keys
+    -> collections.OrderedDict.keys
+
+== constance.codecs
+
+[constance.codecs]
+15:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+69:12 call  TypeVar("T")
+    -> typing.TypeVar
+101:24 call  _register_default_types()
+    -> constance.codecs._register_default_types
+
+[constance.codecs.JSONEncoder.default]
+24:60 call  _codecs.items()
+    -> <builtin>.dict.items
+25:26 call  isinstance(o, t)
+    -> <builtin>.isinstance
+26:27 call  _as(discriminator, encoder(o))
+    -> constance.codecs._as
+26:50 call  encoder(o)
+    -> datetime.datetime.isoformat
+    -> constance.codecs._register_default_types.<lambda1>
+    -> constance.codecs._register_default_types.<lambda3>
+    -> <builtin>.str
+    -> constance.codecs._register_default_types.<lambda4>
+    -> constance.codecs._register_default_types.<lambda5>
+    note: the encoders of _codecs: the six defaults that _register_default_types registers (codecs.py:93-98: datetime.isoformat, the lambdas for date, time, UUID and timedelta, str for Decimal); an encoder that a client registers with register_type is a client callback
+27:24 call  TypeError(f"Object of type {o.__class__.__name__} is not ...
+    -> <builtin>.TypeError
+
+[constance.codecs.dumps]
+37:33 call  isinstance(obj, list | dict | str | int | bool | float | ...
+    -> <builtin>.isinstance
+37:84 call  type(None)
+    -> <builtin>.type
+38:18 call  _dumps( _as(DEFAULT_DISCRIMINATOR, obj) if is_default_typ...
+    -> json.dumps
+    -> constance.codecs.JSONEncoder.default
+    note: _dumps is the default json.dumps and cls the default JSONEncoder at every package call (database.py:145, 153; redisd.py:90, 99; 0003_drop_pickle.py:36, 59); json.dumps calls the encoder's default for each value that JSON cannot encode (callback through library code; the trace has it); a client's _dumps or cls is a client callback
+39:12 call  _as(DEFAULT_DISCRIMINATOR, obj)
+    -> constance.codecs._as
+39:85 call  dict(default_kwargs, **kwargs)
+    -> <builtin>.dict
+
+[constance.codecs.loads]
+46:22 call  _loads(s, object_hook=object_hook, **kwargs)
+    -> json.loads
+    -> constance.codecs.object_hook
+    note: _loads is the default json.loads at every package call (the backends); json.loads calls object_hook for each decoded JSON object (callback through library code; the trace has it); a client's _loads is a client callback
+47:18 call  isinstance(s, dict)
+    -> <builtin>.isinstance
+48:25 call  loads(v, first_level=False)
+    -> constance.codecs.loads
+48:67 call  s.items()
+    -> <builtin>.dict.items
+49:18 call  isinstance(s, list)
+    -> <builtin>.isinstance
+50:20 call  list(loads(v, first_level=False) for v in s)
+    -> <builtin>.list
+50:26 call  loads(v, first_level=False)
+    -> constance.codecs.loads
+51:18 call  _loads(s, object_hook=object_hook, **kwargs)
+    -> json.loads
+    -> constance.codecs.object_hook
+    note: as at 46:22; reached only with first_level=False, from loads itself (lines 48 and 50, which pass the default _loads) or from a client
+
+[constance.codecs.object_hook]
+56:14 call  o.keys()
+    -> <builtin>.dict.keys
+59:28 call  _codecs.get(o["__type__"])
+    -> <builtin>.dict.get
+    reject *: _codecs is the module's dict (codecs.py:88), not a backend
+61:29 call  ValueError(f"Unsupported type: {o['__type__']}")
+    -> <builtin>.ValueError
+62:24 call  codec[1](o["__value__"])
+    -> datetime.datetime.fromisoformat
+    -> constance.codecs._register_default_types.<lambda2>
+    -> datetime.time.fromisoformat
+    -> decimal.Decimal
+    -> uuid.UUID
+    -> constance.codecs._register_default_types.<lambda6>
+    note: the decoders of _codecs: the six defaults of codecs.py:93-98; a decoder that a client registers with register_type is a client callback
+65:17 call  logger.error("Cannot deserialize object: %s", o)
+    -> logging.Logger.error
+66:21 call  ValueError(f"Invalid object: {o}")
+    -> <builtin>.ValueError
+
+[constance.codecs.register_type]
+82:25 call  ValueError("Discriminator must be specified")
+    -> <builtin>.ValueError
+83:19 call  _codecs.get(discriminator)
+    -> <builtin>.dict.get
+    reject *: _codecs is the module's dict (codecs.py:88), not a backend
+84:25 call  ValueError(f"Type with discriminator {discriminator} is a...
+    -> <builtin>.ValueError
+
+[constance.codecs._register_default_types]
+93:18 call  register_type(datetime, "datetime", datetime.isoformat, d...
+    -> constance.codecs.register_type
+94:18 call  register_type(date, "date", lambda o: o.isoformat(), lamb...
+    -> constance.codecs.register_type
+    reject constance.codecs._register_default_types.<lambda1>, constance.codecs._register_default_types.<lambda2>: register_type only stores the lambdas in _codecs; JSONEncoder.default and object_hook call them
+95:18 call  register_type(time, "time", lambda o: o.isoformat(), time...
+    -> constance.codecs.register_type
+    reject constance.codecs._register_default_types.<lambda3>: register_type only stores the lambda in _codecs; JSONEncoder.default calls it
+96:18 call  register_type(Decimal, "decimal", str, Decimal)
+    -> constance.codecs.register_type
+97:18 call  register_type(uuid.UUID, "uuid", lambda o: o.hex, uuid.UUID)
+    -> constance.codecs.register_type
+    reject constance.codecs._register_default_types.<lambda4>: register_type only stores the lambda in _codecs; JSONEncoder.default calls it
+98:18 call  register_type(timedelta, "timedelta", lambda o: o.total_s...
+    -> constance.codecs.register_type
+    reject constance.codecs._register_default_types.<lambda5>, constance.codecs._register_default_types.<lambda6>: register_type only stores the lambdas in _codecs; JSONEncoder.default and object_hook call them
+
+[constance.codecs._register_default_types.<lambda1>]
+94:54 call  o.isoformat()
+    -> datetime.date.isoformat
+    note: JSONEncoder.default tries the codecs in registration order, so a datetime matches the datetime codec first and this encoder gets a date
+
+[constance.codecs._register_default_types.<lambda2>]
+94:90 call  datetime.fromisoformat(o)
+    -> datetime.datetime.fromisoformat
+94:98 call  datetime.fromisoformat(o).date()
+    -> datetime.datetime.date
+
+[constance.codecs._register_default_types.<lambda3>]
+95:54 call  o.isoformat()
+    -> datetime.time.isoformat
+
+[constance.codecs._register_default_types.<lambda5>]
+98:68 call  o.total_seconds()
+    -> datetime.timedelta.total_seconds
+
+[constance.codecs._register_default_types.<lambda6>]
+98:91 call  timedelta(seconds=o)
+    -> datetime.timedelta
+
+== constance.forms
+
+[constance.forms]
+26:20 call  LazyConfig()
+    -> django.utils.functional.LazyObject.__init__
+28:33 call  forms.TextInput(attrs={"size": 10})
+    -> django.forms.TextInput
+34:33 call  forms.Textarea(attrs={"rows": 3})
+    -> django.forms.Textarea
+73:14 call  FIELDS.update(parse_additional_fields(settings.ADDITIONAL...
+    -> <builtin>.dict.update
+73:38 call  parse_additional_fields(settings.ADDITIONAL_FIELDS)
+    -> constance.forms.parse_additional_fields
+77:30 call  forms.CharField(widget=forms.HiddenInput)
+    -> django.forms.CharField
+
+[constance.forms.parse_additional_fields]
+54:21 call  list(fields[key])
+    -> <builtin>.list
+56:15 call  len(field)
+    -> <builtin>.len
+57:25 call  field.append({})
+    -> <builtin>.list.append
+59:33 call  import_string(field[0])
+    -> django.utils.module_loading.import_string
+62:34 call  import_string(field[1]["widget"])
+    -> django.utils.module_loading.import_string
+63:39 call  klass(**(field[1].get("widget_kwargs", {}) or {}))
+    -> django.forms.Select
+    -> django.forms.Textarea
+    -> django.forms.CheckboxSelectMultiple
+    note: judgement 3: klass is the widget class that CONSTANCE_ADDITIONAL_FIELDS names; the documented configurations give django.forms.Select (docs/index.rst:133) and django.forms.Textarea (docs/index.rst:177), and the package's own test configurations (ruling R1) also django.forms.CheckboxSelectMultiple (tests/test_admin.py:285); a client's own widget class is client code (B5)
+63:55 call  field[1].get("widget_kwargs", {})
+    -> <builtin>.dict.get
+    reject *: field[1] is the field's configuration dict (docs/index.rst:122), not a backend
+
+[constance.forms.ConstanceForm.__init__]
+80:14 call  super()
+    -> <builtin>.super
+80:25 call  super().__init__(*args, initial=initial, **kwargs)
+    -> django.forms.Form.__init__
+    reject *: super() in ConstanceForm resolves to Django's Form, whose __init__ is BaseForm's; it deep-copies the declared fields and calls no package code
+81:38 call  hashlib.sha256()
+    -> hashlib.sha256
+83:58 call  request.user.has_perm("constance.change_config")
+    -> django.contrib.auth.models.User.has_perm
+    -> django.contrib.auth.models.AnonymousUser.has_perm
+    note: request is the Django HttpRequest of the admin view (admin.py:112, 114) or a client's; its user is the default auth.User or AnonymousUser, as at admin.py:113
+85:29 call  messages.warning( request, _("You don't have permission t...
+    -> django.contrib.messages.api.warning
+87:18 call  _("You don't have permission to change these values")
+    -> django.utils.translation.gettext_lazy
+90:51 call  settings.CONFIG.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+    note: CONSTANCE_CONFIG is documented as a dict or an OrderedDict
+92:19 call  len(options)
+    -> <builtin>.len
+94:84 call  isinstance(default, config_type)
+    -> <builtin>.isinstance
+95:47 call  ImproperlyConfigured( _( "Default value type must be " "e...
+    -> django.core.exceptions.ImproperlyConfigured
+96:26 call  _( "Default value type must be " "equal to declared confi...
+    -> django.utils.translation.gettext_lazy
+106:35 call  type(default)
+    -> <builtin>.type
+109:43 call  ImproperlyConfigured( _( "Constance doesn't support " "co...
+    -> django.core.exceptions.ImproperlyConfigured
+110:22 call  _( "Constance doesn't support " "config values of the typ...
+    -> django.utils.translation.gettext_lazy
+119:33 call  kwargs.copy()
+    -> <builtin>.dict.copy
+122:44 call  field_class(label=name, **kwargs)
+    -> django.forms.fields.BooleanField
+    -> django.forms.fields.IntegerField
+    -> django.forms.fields.DecimalField
+    -> django.forms.fields.CharField
+    -> django.forms.fields.SplitDateTimeField
+    -> django.forms.fields.DurationField
+    -> django.forms.fields.DateField
+    -> django.forms.fields.TimeField
+    -> django.forms.fields.FloatField
+    -> django.forms.fields.ChoiceField
+    -> django.forms.ImageField
+    -> django.forms.fields.JSONField
+    -> django.forms.fields.EmailField
+    -> django.forms.fields.TypedMultipleChoiceField
+    note: field_class comes from FIELDS: the nine field classes of forms.py:39-49, and the classes that CONSTANCE_ADDITIONAL_FIELDS names: the documented ChoiceField, ImageField and JSONField (docs/index.rst:132, 147, 177) and those of the package's own test settings (ruling R1): EmailField (tests/settings.py:61), CharField (tests/settings.py:62-63, already among the FIELDS classes) and TypedMultipleChoiceField (tests/test_admin.py:282); a client's own field class is client code (judgement 3)
+124:32 call  version_hash.update(smart_bytes(initial.get(name, "")))
+    -> _hashlib.HASH.update
+    -> _sha256.sha256.update
+    -> _sha2.SHA256Type.update
+    note: hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.10 and 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2 and validators)
+124:44 call  smart_bytes(initial.get(name, ""))
+    -> django.utils.encoding.smart_bytes
+    -> constance.base.AsyncValueProxy.__str__
+    note: smart_bytes calls force_bytes, which returns str(s).encode() for a value that is neither bytes nor memoryview; initial is the dict of get_values (admin.py:110, constance.py:20), whose values the Memory backend can return as a stored AsyncValueProxy, whose __str__ str() runs (judgement 2, stored proxy)
+124:56 call  initial.get(name, "")
+    -> <builtin>.dict.get
+    reject *: initial is the dict of get_values or the client's dict, not a backend
+125:57 call  version_hash.hexdigest()
+    -> _hashlib.HASH.hexdigest
+    -> _sha256.sha256.hexdigest
+    -> _sha2.SHA256Type.hexdigest
+    note: the hash object of line 81, as at 124:32
+
+[constance.forms.ConstanceForm.save]
+135:65 call  default_storage.save(join(settings.FILE_ROOT, file.name),...
+    -> django.core.files.storage.FileSystemStorage.save
+    reject constance.forms.ConstanceForm.save: default_storage is Django's DefaultStorage (a LazyObject), not a form
+    note: Django's default storage, FileSystemStorage (STORAGES default, judgement 3); a configured other storage is client code; Storage.save reads the client's uploaded file and calls no package code
+135:70 call  join(settings.FILE_ROOT, file.name)
+    -> os.path.join
+139:30 call  getattr(config, name)
+    -> <builtin>.getattr
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    note: config is the module's own LazyConfig (forms.py:26): LazyObject.__getattr__ runs _setup on the first load in a fresh process, then the Config's __getattr__ (the trace has both)
+142:26 call  isinstance(new, str)
+    -> <builtin>.isinstance
+143:41 call  normalize_newlines(new)
+    -> django.utils.text.normalize_newlines
+    note: normalize_newlines is decorated with keep_lazy_text; the wrapper is a Python function installed at the public attribute django.utils.text.normalize_newlines (trace: keep_lazy.decorator.wrapper)
+145:51 call  isinstance(current, datetime)
+    -> <builtin>.isinstance
+145:96 call  timezone.is_aware(current)
+    -> django.utils.timezone.is_aware
+146:46 call  timezone.make_aware(current)
+    -> django.utils.timezone.make_aware
+148:24 op  current != new
+    -> constance.base.AsyncValueProxy.__ne__
+    reject constance.base.AsyncValueProxy.__eq__: AsyncValueProxy defines __ne__, which never returns NotImplemented
+    note: judgement 2: current comes from getattr(config, name) (line 139), an AsyncValueProxy when the form is saved in a thread with a running event loop, or the stored proxy that the Memory backend returns; it is the left operand; new is a cleaned form value
+149:24 call  setattr(config, name, new)
+    -> <builtin>.setattr
+    -> constance.base.Config.__setattr__
+    note: LazyObject.__setattr__ forwards the store to the Config, which runs Config.__setattr__; no LazyConfig._setup here, because the getattr on the same LazyConfig at line 139 in the same iteration has already set it up (Codex confirmation pass)
+150:38 call  changed_fields.append(name)
+    -> <builtin>.list.append
+
+[constance.forms.ConstanceForm.clean_version]
+161:40 call  forms.ValidationError( _("The settings have been modified...
+    -> django.forms.ValidationError
+162:18 call  _("The settings have been modified by someone else. Pleas...
+    -> django.utils.translation.gettext_lazy
+
+[constance.forms.ConstanceForm.clean]
+167:29 call  super()
+    -> <builtin>.super
+167:37 call  super().clean()
+    -> django.forms.Form.clean
+    reject constance.forms.ConstanceForm.clean: super() skips ConstanceForm; Django's BaseForm.clean returns cleaned_data
+172:63 call  get_inconsistent_fieldnames()
+    -> constance.checks.get_inconsistent_fieldnames
+174:40 call  forms.ValidationError( _("CONSTANCE_CONFIG_FIELDSETS is m...
+    -> django.forms.ValidationError
+175:18 call  _("CONSTANCE_CONFIG_FIELDSETS is missing field(s) that ex...
+    -> django.utils.translation.gettext_lazy
+
+== constance.management.commands.constance
+
+[constance.management.commands.constance]
+29:13 call  _("Get/Set In-database config settings handled by Constan...
+    -> django.utils.translation.gettext
+    note: _ is gettext here (constance.py:5), not gettext_lazy
+
+[constance.management.commands.constance._set_constance_value]
+20:25 call  ConstanceForm(initial=get_values())
+    -> constance.forms.ConstanceForm.__init__
+20:44 call  get_values()
+    -> constance.utils.get_values
+24:30 call  field.clean(field.to_python(value))
+    -> django.forms.fields.BooleanField.clean
+    -> django.forms.fields.IntegerField.clean
+    -> django.forms.fields.DecimalField.clean
+    -> django.forms.fields.CharField.clean
+    -> django.forms.fields.SplitDateTimeField.clean
+    -> django.forms.fields.DurationField.clean
+    -> django.forms.fields.DateField.clean
+    -> django.forms.fields.TimeField.clean
+    -> django.forms.fields.FloatField.clean
+    -> django.forms.fields.ChoiceField.clean
+    -> django.forms.ImageField.clean
+    -> django.forms.fields.JSONField.clean
+    -> django.forms.fields.EmailField.clean
+    -> django.forms.fields.TypedMultipleChoiceField.clean
+    reject constance.forms.ConstanceForm.clean: field is a form field of ConstanceForm.fields, not the form
+    note: field is the form field that ConstanceForm.__init__ makes for key (forms.py:122): the field classes of FIELDS, the documented additional ones and those of the package's own test settings (judgement 3, ruling R1); methods are named by the field's class (inherited from Field, MultiValueField or FileField)
+24:46 call  field.to_python(value)
+    -> django.forms.fields.BooleanField.to_python
+    -> django.forms.fields.IntegerField.to_python
+    -> django.forms.fields.DecimalField.to_python
+    -> django.forms.fields.CharField.to_python
+    -> django.forms.fields.SplitDateTimeField.to_python
+    -> django.forms.fields.DurationField.to_python
+    -> django.forms.fields.DateField.to_python
+    -> django.forms.fields.TimeField.to_python
+    -> django.forms.fields.FloatField.to_python
+    -> django.forms.fields.ChoiceField.to_python
+    -> django.forms.ImageField.to_python
+    -> django.forms.fields.JSONField.to_python
+    -> django.forms.fields.EmailField.to_python
+    -> django.forms.fields.TypedMultipleChoiceField.to_python
+    note: as at 24:30
+25:12 call  setattr(config, key, clean_value)
+    -> <builtin>.setattr
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__setattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (constance.py:7), not the context processor
+    note: LazyObject.__setattr__ runs _setup if constance.config is empty, then Config.__setattr__
+
+[constance.management.commands.constance.Command.add_arguments]
+37:43 call  parser.add_subparsers(dest="command")
+    -> django.core.management.base.CommandParser.add_subparsers
+    note: parser is the CommandParser that Django's BaseCommand.create_parser makes (the whitenoise ruling L1); its subparsers are CommandParsers too
+38:30 call  subparsers.add_parser(self.LIST, help="list all Constance...
+    -> argparse._SubParsersAction.add_parser
+40:43 call  subparsers.add_parser(self.GET, help="get the value of a ...
+    -> argparse._SubParsersAction.add_parser
+41:32 call  parser_get.add_argument("key", help="name of the key to g...
+    -> django.core.management.base.CommandParser.add_argument
+43:43 call  subparsers.add_parser(self.SET, help="set the value of a ...
+    -> argparse._SubParsersAction.add_parser
+44:32 call  parser_set.add_argument("key", help="name of the key to s...
+    -> django.core.management.base.CommandParser.add_argument
+46:32 call  parser_set.add_argument("value", help="value to set", met...
+    -> django.core.management.base.CommandParser.add_argument
+48:30 call  subparsers.add_parser( self.REMOVE_STALE_KEYS, help="dele...
+    -> argparse._SubParsersAction.add_parser
+
+[constance.management.commands.constance.Command.handle]
+56:34 call  self.stdout.write(str(getattr(config, key)), ending="\n")
+    -> django.core.management.base.OutputWrapper.write
+56:38 call  str(getattr(config, key))
+    -> <builtin>.str
+    -> constance.base.AsyncValueProxy.__str__
+    note: judgement 2: the value is an AsyncValueProxy when the command runs in a thread with a running event loop (call_command from async code, or the documented background-loop setup), or the stored proxy that the Memory backend returns; str() runs its __str__
+56:46 call  getattr(config, key)
+    -> <builtin>.getattr
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (constance.py:7), not the context processor
+58:35 call  CommandError(f"{key} is not defined in settings.CONSTANCE...
+    -> django.core.management.CommandError
+61:23 call  len(value)
+    -> <builtin>.len
+64:37 call  _set_constance_value(key, value)
+    -> constance.management.commands.constance._set_constance_value
+66:35 call  CommandError(f"{key} is not defined in settings.CONSTANCE...
+    -> django.core.management.CommandError
+68:35 call  CommandError(", ".join(e))
+    -> django.core.management.CommandError
+68:45 call  ", ".join(e)
+    -> <builtin>.str.join
+    note: e is Django's ValidationError; join iterates it with its own __iter__, outside the package
+70:35 call  get_values()
+    -> constance.utils.get_values
+70:43 call  get_values().items()
+    -> <builtin>.dict.items
+71:34 call  self.stdout.write(f"{k}\t{v}", ending="\n")
+    -> django.core.management.base.OutputWrapper.write
+71:42 format  {v}
+    -> constance.base.AsyncValueProxy.__str__
+    reject constance.base.AsyncValueProxy.__repr__: an f-string field without a conversion runs format(), and object.__format__ with an empty spec runs str()
+    note: v is a value of get_values, which the Memory backend can return as a stored AsyncValueProxy (judgement 2, stored proxy); AsyncValueProxy defines no __format__
+73:29 call  getattr(settings, "CONSTANCE_DATABASE_PREFIX", "")
+    -> <builtin>.getattr
+    note: settings is Django's LazySettings here (constance.py:1)
+75:54 call  Constance.objects.exclude(key__in=actual_keys)
+    -> django.db.models.Manager.exclude
+77:34 call  self.stdout.write("The following record will be deleted:"...
+    -> django.core.management.base.OutputWrapper.write
+79:34 call  self.stdout.write("There are no stale records in the data...
+    -> django.core.management.base.OutputWrapper.write
+81:34 call  self.stdout.write(f"{stale_record.key}\t{stale_record.val...
+    -> django.core.management.base.OutputWrapper.write
+82:33 call  stale_records.delete()
+    -> django.db.models.query.QuerySet.delete
+    note: deleting Constance objects sends pre_delete and post_delete, for which the package connects no receiver
+84:31 call  CommandError("Invalid command")
+    -> django.core.management.CommandError
+
+== constance.migrations.0001_initial
+
+[constance.migrations.0001_initial]
+11:31 call  migrations.CreateModel( name="Constance", fields=[ ("id",...
+    -> django.db.migrations.CreateModel
+14:40 call  models.AutoField(auto_created=True, primary_key=True, ser...
+    -> django.db.models.AutoField
+15:41 call  models.CharField(max_length=255, unique=True)
+    -> django.db.models.CharField
+16:43 call  models.TextField(blank=True, editable=False, null=True)
+    -> django.db.models.TextField
+
+== constance.migrations.0002_migrate_from_old_table
+
+[constance.migrations.0002_migrate_from_old_table]
+6:19 call  getLogger(__name__)
+    -> logging.getLogger
+40:29 call  migrations.RunPython(_migrate_from_old_table, reverse_cod...
+    -> django.db.migrations.RunPython
+    reject *: RunPython only stores the forward and reverse functions; Django's migration executor calls them later, for the client's migrate command
+
+[constance.migrations.0002_migrate_from_old_table._migrate_from_old_table]
+15:30 call  ", ".join([connection.ops.quote_name(item) for item in ["...
+    -> <builtin>.str.join
+15:57 call  connection.ops.quote_name(item)
+    -> django.db.backends.sqlite3.operations.DatabaseOperations.quote_name
+    note: judgement 8 (ruling R1): the package's own test settings select the SQLite backend (tests/settings.py:21-30), so connection is a django.db.backends.sqlite3 DatabaseWrapper; Django has no default engine and the package documents none; another configured backend is client code
+17:10 with  connection.cursor()
+    reject *: the cursor of the client's connection (judgement 8); its __enter__ and __exit__ are outside the package
+17:27 call  connection.cursor()
+    -> django.db.backends.sqlite3.base.DatabaseWrapper.cursor
+    note: judgement 8 (ruling R1): the package's own test settings select the SQLite backend (tests/settings.py:21-30), so connection is a django.db.backends.sqlite3 DatabaseWrapper; Django has no default engine and the package documents none; another configured backend is client code; cursor is BaseDatabaseWrapper.cursor, decorated with async_unsafe (trace: async_unsafe.decorator.inner), named through the receiver's class
+18:70 call  connection.introspection.table_names()
+    -> django.db.backends.sqlite3.introspection.DatabaseIntrospection.table_names
+    note: judgement 8 (ruling R1): the package's own test settings select the SQLite backend (tests/settings.py:21-30), so connection is a django.db.backends.sqlite3 DatabaseWrapper; Django has no default engine and the package documents none; another configured backend is client code; table_names is BaseDatabaseIntrospection's, named through the receiver's class
+19:24 call  logger.info("Old table does not exist, skipping")
+    -> logging.Logger.info
+21:23 call  cursor.execute( f"INSERT INTO constance_constance ( {quot...
+    -> django.db.backends.utils.CursorWrapper.execute
+    -> django.db.backends.utils.CursorDebugWrapper.execute
+    note: judgement 8: the cursor of the SQLite connection is a CursorWrapper, or a CursorDebugWrapper when queries are logged (DEBUG, as in tests/settings.py:96; BaseDatabaseWrapper._prepare_cursor)
+25:23 call  cursor.execute(f"DROP TABLE {old_table_name}", [])
+    -> django.db.backends.utils.CursorWrapper.execute
+    -> django.db.backends.utils.CursorDebugWrapper.execute
+    note: judgement 8: the cursor of the SQLite connection is a CursorWrapper, or a CursorDebugWrapper when queries are logged (DEBUG, as in tests/settings.py:96; BaseDatabaseWrapper._prepare_cursor)
+27:31 call  apps.get_model("constance", "Constance")
+    -> django.apps.registry.Apps.get_model
+    note: apps is the historical app registry that Django's migration framework passes to a RunPython function, documented as an instance of django.apps.registry.Apps (it is a StateApps, which inherits get_model)
+28:53 call  connection.ops.sequence_reset_sql(no_style(), [Constance])
+    -> django.db.backends.sqlite3.operations.DatabaseOperations.sequence_reset_sql
+    note: judgement 8 (ruling R1): the package's own test settings select the SQLite backend (tests/settings.py:21-30), so connection is a django.db.backends.sqlite3 DatabaseWrapper; Django has no default engine and the package documents none; another configured backend is client code; SQLite inherits BaseDatabaseOperations.sequence_reset_sql, which returns [], so the loop at line 30 runs no execute
+28:62 call  no_style()
+    -> functools._lru_cache_wrapper.__call__
+    note: django.core.management.color.no_style is decorated with functools.cache (lru_cache), so the callee is the wrapper object (judgement 9)
+29:10 with  connection.cursor()
+    reject *: the cursor of the client's connection (judgement 8); its __enter__ and __exit__ are outside the package
+29:27 call  connection.cursor()
+    -> django.db.backends.sqlite3.base.DatabaseWrapper.cursor
+    note: as at 17:27 (judgement 8)
+31:27 call  cursor.execute(sql)
+    note: judgement 8: sequence_sql is the [] that SQLite's sequence_reset_sql returns (line 28), so this call never runs; no callee
+
+== constance.migrations.0003_drop_pickle
+
+[constance.migrations.0003_drop_pickle]
+12:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+68:29 call  migrations.RunPython(migrate_pickled_data)
+    -> django.db.migrations.RunPython
+    reject constance.migrations.0003_drop_pickle.migrate_pickled_data: RunPython only stores the function; Django's migration executor calls it later, for the client's migrate command
+
+[constance.migrations.0003_drop_pickle.is_already_migrated]
+17:26 call  json.loads(value)
+    -> json.loads
+    reject constance.codecs.loads: another function; json is the standard library module (0003_drop_pickle.py:1)
+18:22 call  isinstance(data, dict)
+    -> <builtin>.isinstance
+18:42 call  set(data.keys())
+    -> <builtin>.set
+    reject *: the builtin set, not a backend method
+18:52 call  data.keys()
+    -> <builtin>.dict.keys
+
+[constance.migrations.0003_drop_pickle.import_module_attr]
+26:34 call  path.rsplit(".", 1)
+    -> <builtin>.str.rsplit
+27:19 call  getattr(import_module(package), module)
+    -> <builtin>.getattr
+27:33 call  import_module(package)
+    -> importlib.import_module
+
+[constance.migrations.0003_drop_pickle.migrate_pickled_data]
+31:31 call  apps.get_model("constance", "Constance")
+    -> django.apps.registry.Apps.get_model
+34:45 call  Constance.objects.using(db_alias)
+    -> django.db.models.Manager.using
+34:63 call  Constance.objects.using(db_alias).exclude(value=None)
+    -> django.db.models.query.QuerySet.exclude
+35:35 call  is_already_migrated(constance.value)
+    -> constance.migrations.0003_drop_pickle.is_already_migrated
+36:36 call  dumps(pickle.loads(b64decode(constance.value.encode())))
+    -> constance.codecs.dumps
+36:49 call  pickle.loads(b64decode(constance.value.encode()))
+    -> pickle.loads
+    reject constance.codecs.loads: another function; pickle is the standard library module (0003_drop_pickle.py:3)
+36:59 call  b64decode(constance.value.encode())
+    -> base64.b64decode
+36:82 call  constance.value.encode()
+    -> <builtin>.str.encode
+37:27 call  constance.save(using=db_alias, update_fields=["value"])
+    -> django.db.models.Model.save
+    reject constance.forms.ConstanceForm.save: constance is an object of the historical Constance model, which has Django's Model.save
+    note: the historical model is a class of the migration state, not constance.models.Constance, so the post_save receivers that DatabaseBackend connects for the real model (database.py:44) do not run
+48:37 call  import_module_attr(connection_cls)
+    -> constance.migrations.0003_drop_pickle.import_module_attr
+    reject constance.utils.import_module_attr: the module's own function (0003_drop_pickle.py:25)
+48:53 call  import_module_attr(connection_cls)()
+    -> django_redis.get_redis_connection
+    note: the callable that CONSTANCE_REDIS_CONNECTION_CLASS names, as at redisd.py:24:64 (judgement 3)
+50:26 call  isinstance(settings.REDIS_CONNECTION, str)
+    -> <builtin>.isinstance
+51:37 call  redis.from_url(settings.REDIS_CONNECTION)
+    -> redis.from_url
+53:34 call  redis.Redis(**settings.REDIS_CONNECTION)
+    -> redis.Redis
+57:28 call  _rd.get(prefixed_key)
+    -> redis.Redis.get
+    -> django_redis.get_redis_connection.get
+    reject *: _rd is the redis client of lines 48-53, not a package backend
+    note: as at redisd.py:62:29: a redis.client.Redis, or the stub value that django_redis.get_redis_connection returns (judgement 3, ruling N1)
+58:61 call  is_already_migrated(value)
+    -> constance.migrations.0003_drop_pickle.is_already_migrated
+59:58 call  dumps(pickle.loads(value))
+    -> constance.codecs.dumps
+59:71 call  pickle.loads(value)
+    -> pickle.loads
+    reject constance.codecs.loads: another function; pickle is the standard library module (0003_drop_pickle.py:3)
+60:61 call  redis_migrated_data.items()
+    -> <builtin>.dict.items
+61:20 call  _rd.set(prefixed_key, value)
+    -> redis.Redis.set
+    -> django_redis.get_redis_connection.set
+    reject *: _rd is the redis client of lines 48-53, not a package backend
+
+== constance.models
+
+[constance.models]
+6:27 call  models.CharField(max_length=255, unique=True)
+    -> django.db.models.CharField
+7:29 call  models.TextField(null=True, blank=True, editable=False)
+    -> django.db.models.TextField
+10:25 call  _("constance")
+    -> django.utils.translation.gettext_lazy
+11:32 call  _("constances")
+    -> django.utils.translation.gettext_lazy
+
+== constance.settings
+
+[constance.settings]
+3:18 call  getattr(settings, "CONSTANCE_BACKEND", "constance.backend...
+    -> <builtin>.getattr
+    note: settings is Django's LazySettings (settings.py:1); its __getattr__ is outside the package
+5:17 call  getattr(settings, "CONSTANCE_CONFIG", {})
+    -> <builtin>.getattr
+7:27 call  getattr(settings, "CONSTANCE_CONFIG_FIELDSETS", {})
+    -> <builtin>.getattr
+9:28 call  getattr(settings, "CONSTANCE_ADDITIONAL_FIELDS", {})
+    -> <builtin>.getattr
+11:20 call  getattr(settings, "CONSTANCE_FILE_ROOT", "")
+    -> <builtin>.getattr
+13:33 call  getattr(settings, "CONSTANCE_DATABASE_CACHE_BACKEND", None)
+    -> <builtin>.getattr
+15:42 call  getattr(settings, "CONSTANCE_DATABASE_CACHE_AUTOFILL_TIME...
+    -> <builtin>.getattr
+17:26 call  getattr(settings, "CONSTANCE_DATABASE_PREFIX", "")
+    -> <builtin>.getattr
+19:23 call  getattr(settings, "CONSTANCE_REDIS_PREFIX", "constance:")
+    -> <builtin>.getattr
+21:30 call  getattr(settings, "CONSTANCE_REDIS_CACHE_TIMEOUT", 60)
+    -> <builtin>.getattr
+23:33 call  getattr(settings, "CONSTANCE_REDIS_CONNECTION_CLASS", None)
+    -> <builtin>.getattr
+25:39 call  getattr(settings, "CONSTANCE_REDIS_ASYNC_CONNECTION_CLASS...
+    -> <builtin>.getattr
+27:27 call  getattr(settings, "CONSTANCE_REDIS_CONNECTION", {})
+    -> <builtin>.getattr
+29:25 call  getattr(settings, "CONSTANCE_SUPERUSER_ONLY", True)
+    -> <builtin>.getattr
+31:37 call  getattr(settings, "CONSTANCE_IGNORE_ADMIN_VERSION_CHECK",...
+    -> <builtin>.getattr
+33:25 call  getattr(settings, "CONSTANCE_DETECT_ASYNCIO", True)
+    -> <builtin>.getattr
+
+== constance.signals
+
+[constance.signals]
+3:40 call  django.dispatch.Signal()
+    -> django.dispatch.Signal
+
+== constance.test.pytest
+
+[constance.test.pytest]
+14:2 decorator  @pytest.hookimpl(trylast=True)
+    -> pluggy._decorators.HookimplMarker.__call__.setattr_hookimpl_opts
+    note: pytest.hookimpl is pluggy's HookimplMarker("pytest"); called without a function it returns its local setattr_hookimpl_opts, which the decorator applies (it only sets an attribute on the hook function); names verified in the pinned pytest 9.2.0 (_pytest/config/__init__.py:103) and pluggy 1.7.0 (_decorators.py:117, 215), the package declaring no pytest requirement (judgement 9)
+14:17 call  pytest.hookimpl(trylast=True)
+    -> pluggy.HookimplMarker.__call__
+20:2 decorator  @pytest.hookimpl(hookwrapper=True)
+    -> pluggy._decorators.HookimplMarker.__call__.setattr_hookimpl_opts
+    note: as at 14:2
+20:17 call  pytest.hookimpl(hookwrapper=True)
+    -> pluggy.HookimplMarker.__call__
+62:2 decorator  @pytest.fixture(name="override_config")
+    -> _pytest.fixtures.FixtureFunctionMarker.__call__
+    note: pytest.fixture called without the function returns a FixtureFunctionMarker, whose __call__ the decorator applies (it wraps _override_config in a fixture definition and calls it not)
+62:16 call  pytest.fixture(name="override_config")
+    -> pytest.fixture
+
+[constance.test.pytest.pytest_configure]
+17:28 call  config.addinivalue_line("markers", ("override_config(**kw...
+    -> pytest.Config.addinivalue_line
+    note: config is the pytest Config that pytest passes to the hook (a framework value, named by its documented type)
+
+[constance.test.pytest.pytest_runtest_call]
+23:37 call  item.get_closest_marker("override_config")
+    -> pytest.Item.get_closest_marker
+    note: item is the pytest Item that pytest passes to the hook (documented type pytest.Item; the method is Node's)
+26:24 call  pytest.fail("Constance override can not not accept positi...
+    -> _pytest.outcomes._Fail.__call__
+    note: in the pinned pytest 9.2.0, pytest.fail is the instance `fail: _Fail = _Fail()` (_pytest/outcomes.py:165), so the callee is its class's __call__ (outcomes.py:160; micro-benchmark rule "Calls of instances")
+27:14 with  override_config(**marker.kwargs)
+    -> constance.test.pytest.override_config.__enter__
+    -> constance.test.pytest.override_config.__exit__
+    note: override_config here is the module's own class (pytest.py:33)
+27:29 call  override_config(**marker.kwargs)
+    -> constance.test.pytest.override_config.__init__
+    reject constance.test.unittest.override_config.__init__: the module's own class override_config (pytest.py:33), not the one of constance.test.unittest
+
+[constance.test.pytest.override_config.enable]
+42:50 call  self._to_override.items()
+    -> <builtin>.dict.items
+43:49 call  getattr(constance_config, key)
+    -> <builtin>.getattr
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    note: constance_config is the LazyConfig constance.config (pytest.py:11); a running event loop in the thread makes the value an AsyncValueProxy, which the instance keeps in _original_values (judgement 2)
+44:20 call  setattr(constance_config, key, value)
+    -> <builtin>.setattr
+    -> constance.base.Config.__setattr__
+    note: no LazyConfig._setup here: the getattr on the same constance.config at line 43 in the same iteration has already set it up (Codex confirmation pass)
+
+[constance.test.pytest.override_config.disable]
+48:54 call  self._original_values.items()
+    -> <builtin>.dict.items
+49:20 call  setattr(constance_config, key, value)
+    -> <builtin>.setattr
+    -> constance.base.Config.__setattr__
+    note: the values are those that enable read (judgement 2: possibly an AsyncValueProxy, which the Memory backend then stores)
+    note: Codex audit round 1: no LazyConfig._setup here: _original_values starts empty (line 53) and only enable fills it, after its getattr on the same singleton constance.config (line 43) has set it up; an object left half-changed by a failed enable is not considered (B3)
+
+[constance.test.pytest.override_config.__init__]
+52:40 call  kwargs.copy()
+    -> <builtin>.dict.copy
+
+[constance.test.pytest.override_config.__enter__]
+56:20 call  self.enable()
+    -> constance.test.pytest.override_config.enable
+    reject constance.test.unittest.override_config.enable: self is the pytest override_config; the package defines no subclass of it
+
+[constance.test.pytest.override_config.__exit__]
+59:21 call  self.disable()
+    -> constance.test.pytest.override_config.disable
+    reject constance.test.unittest.override_config.disable: self is the pytest override_config; the package defines no subclass of it
+
+== constance.test.unittest
+
+[constance.test.unittest]
+99:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[constance.test.unittest.override_config.__init__]
+22:14 call  super()
+    -> <builtin>.super
+22:25 call  super().__init__(**kwargs)
+    -> django.test.utils.override_settings.__init__
+    reject *: super() in override_config is Django's override_settings; its __init__ stores the options and calls TestContextDecorator.__init__, no package code
+
+[constance.test.unittest.override_config.__call__]
+27:22 call  isinstance(test_func, type)
+    -> <builtin>.isinstance
+28:30 call  issubclass(test_func, SimpleTestCase)
+    -> <builtin>.issubclass
+29:32 call  Exception("Only subclasses of Django SimpleTestCase can b...
+    -> <builtin>.Exception
+30:41 call  self.modify_test_case(test_func)
+    -> constance.test.unittest.override_config.modify_test_case
+32:31 call  iscoroutinefunction(test_func)
+    -> inspect.iscoroutinefunction
+    -> asyncio.coroutines.iscoroutinefunction
+    note: Codex audit round 1: asgiref/sync.py (3.13.0, which needs Python 3.11 or later) has no __all__ and binds iscoroutinefunction to inspect.iscoroutinefunction where inspect has markcoroutinefunction (Python 3.12 and later, the trace) and to asyncio.iscoroutinefunction on Python 3.11 (sync.py:60-64); a re-export without __all__ is named where the function is defined: inspect, and asyncio/coroutines.py (in its __all__); asgiref is read at the audit pin only (judgement 1), so the Python 3.10 case, which needs an older asgiref, is not considered
+34:14 decorator  @wraps(test_func)
+    -> functools.partial.__call__
+    note: wraps returns partial(update_wrapper, wrapped=test_func, ...), a functools.partial object; applying it runs update_wrapper, which copies attributes and calls no package code
+34:19 call  wraps(test_func)
+    -> functools.wraps
+44:14 decorator  @wraps(test_func)
+    -> functools.partial.__call__
+    note: as at 34:14
+44:19 call  wraps(test_func)
+    -> functools.wraps
+
+[constance.test.unittest.override_config.__call__.inner]
+37:40 call  sync_to_async(self.enable, thread_sensitive=True)
+    -> asgiref.sync.sync_to_async
+    reject *: sync_to_async only wraps the method; the call of the wrapper at 37:76 runs it (judgement 7)
+37:76 call  sync_to_async(self.enable, thread_sensitive=True)()
+    -> asgiref.sync.SyncToAsync.__call__
+    -> constance.test.unittest.override_config.enable
+    note: the callee is the SyncToAsync object of 37:40; its coroutine __call__, which inner awaits, runs self.enable (the unittest override_config; no package subclass) in asgiref's sync thread (judgement 7)
+38:43 call  test_func(*args, **kwargs)
+    note: test_func is the client's decorated test function (B5): no callee
+40:40 call  sync_to_async(self.disable, thread_sensitive=True)
+    -> asgiref.sync.sync_to_async
+    reject *: sync_to_async only wraps the method; the call of the wrapper at 40:77 runs it (judgement 7)
+40:77 call  sync_to_async(self.disable, thread_sensitive=True)()
+    -> asgiref.sync.SyncToAsync.__call__
+    -> constance.test.unittest.override_config.disable
+    note: as at 37:76
+46:22 with  self
+    -> constance.test.unittest.override_config.enable
+    -> constance.test.unittest.override_config.disable
+    reject *: self is the unittest override_config, an override_settings, not the pytest override_config
+    note: the context manager methods are Django's TestContextDecorator.__enter__ (return self.enable()) and __exit__ (self.disable()), which call the package's overrides (callback through library code)
+47:37 call  test_func(*args, **kwargs)
+    note: test_func is the client's decorated test function (B5): no callee
+
+[constance.test.unittest.override_config.modify_test_case]
+70:14 decorator  @classmethod
+    -> <builtin>.classmethod
+    note: judgement 1: the branch DJANGO_VERSION < (5, 2) (line 62) and its else both run, for the Django versions 4.2 to 6.1 that the classifiers name
+
+[constance.test.unittest.override_config.modify_test_case._pre_setup]
+65:28 call  self.enable()
+    -> constance.test.unittest.override_config.enable
+    reject constance.test.pytest.override_config.enable: self is the unittest override_config of modify_test_case (the closure's self)
+66:35 call  original_pre_setup(inner_self)
+    -> django.test.SimpleTestCase._pre_setup
+    -> django.test.TransactionTestCase._pre_setup
+    -> constance.test.unittest.override_config.modify_test_case._pre_setup
+    note: Codex audit round 1: a class decorated a second time (or a decorated subclass of a decorated class) captures at line 59 the package's own _pre_setup that the first decoration installed at line 81; the call binds (inner_self before Django 5.2, the bound classmethod from 5.2)
+    note: original_pre_setup is the decorated class's _pre_setup (line 59); the class is a SimpleTestCase subclass (checked at line 28), documented as a TestCase (docs/testing.rst:16), so the method is SimpleTestCase's or TransactionTestCase's (TestCase inherits it); a client's own override is client code
+74:28 call  self.enable()
+    -> constance.test.unittest.override_config.enable
+    reject constance.test.pytest.override_config.enable: self is the unittest override_config of modify_test_case (the closure's self)
+75:35 call  original_pre_setup()
+    -> django.test.SimpleTestCase._pre_setup
+    -> django.test.TransactionTestCase._pre_setup
+    -> constance.test.unittest.override_config.modify_test_case._pre_setup
+    note: Codex audit round 1: as at 66:35, the package's classmethod _pre_setup of an earlier decoration, bound at line 59
+    note: as at 66:35; from Django 5.2 the method is a classmethod, bound to the class at line 59
+
+[constance.test.unittest.override_config.modify_test_case._post_teardown]
+78:35 call  original_post_teardown(inner_self)
+    -> django.test.SimpleTestCase._post_teardown
+    -> django.test.TransactionTestCase._post_teardown
+    -> constance.test.unittest.override_config.modify_test_case._post_teardown
+    note: Codex audit round 1: a second decoration captures at line 60 the package's _post_teardown that the first installed at line 82; it binds with inner_self
+    note: original_post_teardown is the decorated class's _post_teardown (line 60), as at 66:35
+79:25 call  self.disable()
+    -> constance.test.unittest.override_config.disable
+    reject constance.test.pytest.override_config.disable: self is the unittest override_config of modify_test_case (the closure's self)
+
+[constance.test.unittest.override_config.enable]
+90:55 call  getattr(config, config_key)
+    -> <builtin>.getattr
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__getattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (unittest.py:9), not the context processor
+    note: a running event loop in the thread makes the value an AsyncValueProxy, which the instance keeps in original_values (judgement 2)
+93:27 call  self.unpack_values(self.options)
+    -> constance.test.unittest.override_config.unpack_values
+
+[constance.test.unittest.override_config.disable]
+97:27 call  self.unpack_values(self.original_values)
+    -> constance.test.unittest.override_config.unpack_values
+
+[constance.test.unittest.override_config.unpack_values]
+102:41 call  options.items()
+    -> <builtin>.dict.items
+103:20 call  setattr(config, name, value)
+    -> <builtin>.setattr
+    -> constance.LazyConfig._setup
+    -> constance.base.Config.__setattr__
+    reject constance.context_processors.config: config here is the LazyConfig object constance.config (unittest.py:9), not the context processor
+    note: the values are the overrides or those that enable read (judgement 2: possibly an AsyncValueProxy, which the Memory backend then stores)
+
+== constance.utils
+
+[constance.utils]
+6:20 call  LazyConfig()
+    -> django.utils.functional.LazyObject.__init__
+
+[constance.utils.import_module_attr]
+10:34 call  path.rsplit(".", 1)
+    -> <builtin>.str.rsplit
+11:19 call  getattr(import_module(package), module)
+    -> <builtin>.getattr
+11:33 call  import_module(package)
+    -> importlib.import_module
+
+[constance.utils.get_values]
+20:85 call  settings.CONFIG.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+22:16 call  dict(default_initial, **config._backend.mget(settings.CON...
+    -> <builtin>.dict
+22:43 getattr  config._backend
+    -> constance.LazyConfig._setup
+    note: config is the module's own LazyConfig (utils.py:6); LazyObject.__getattr__ runs _setup on the first load in a fresh process (the trace has it), then getattr on the Config, which finds _backend in the instance (no Config.__getattr__)
+22:56 call  config._backend.mget(settings.CONFIG)
+    -> constance.backends.database.DatabaseBackend.mget
+    -> constance.backends.memory.MemoryBackend.mget
+    -> constance.backends.redisd.CachingRedisBackend.mget
+    -> constance.backends.redisd.RedisBackend.mget
+    reject constance.backends.Backend.mget: Backend is abstract by abc and every package backend overrides mget (B1)
+    note: the backend of the Config (base.py:135: the four package backends)
+
+[constance.utils.aget_values]
+30:83 call  settings.CONFIG.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+31:35 getattr  config.amget
+    -> constance.LazyConfig._setup
+    note: as at 22:43; amget is a method of Config, which normal lookup finds
+31:40 call  config.amget(settings.CONFIG.keys())
+    -> constance.base.Config.amget
+    reject *: config is the module's LazyConfig, which forwards to its Config, not a backend
+31:61 call  settings.CONFIG.keys()
+    -> <builtin>.dict.keys
+    -> collections.OrderedDict.keys
+32:16 call  dict(default_initial, **backend_values)
+    -> <builtin>.dict
+
+[constance.utils.get_values_for_keys]
+43:22 call  isinstance(keys, list | tuple | set)
+    -> <builtin>.isinstance
+44:24 call  TypeError("keys must be a list, tuple, or set of strings")
+    -> <builtin>.TypeError
+47:83 call  settings.CONFIG.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+52:29 call  AttributeError(f'"{", ".join(missing_keys)}" keys not fou...
+    -> <builtin>.AttributeError
+52:43 call  ", ".join(missing_keys)
+    -> <builtin>.str.join
+55:16 call  dict(default_initial, **config._backend.mget(keys))
+    -> <builtin>.dict
+55:43 getattr  config._backend
+    -> constance.LazyConfig._setup
+    note: as at 22:43
+55:56 call  config._backend.mget(keys)
+    -> constance.backends.database.DatabaseBackend.mget
+    -> constance.backends.memory.MemoryBackend.mget
+    -> constance.backends.redisd.CachingRedisBackend.mget
+    -> constance.backends.redisd.RedisBackend.mget
+    reject constance.backends.Backend.mget: Backend is abstract by abc and every package backend overrides mget (B1)
+
+[constance.utils.aget_values_for_keys]
+66:22 call  isinstance(keys, list | tuple | set)
+    -> <builtin>.isinstance
+67:24 call  TypeError("keys must be a list, tuple, or set of strings")
+    -> <builtin>.TypeError
+69:83 call  settings.CONFIG.items()
+    -> <builtin>.dict.items
+    -> collections.OrderedDict.items
+73:29 call  AttributeError(f'"{", ".join(missing_keys)}" keys not fou...
+    -> <builtin>.AttributeError
+73:43 call  ", ".join(missing_keys)
+    -> <builtin>.str.join
+75:35 getattr  config.amget
+    -> constance.LazyConfig._setup
+    note: as at 31:35
+75:40 call  config.amget(keys)
+    -> constance.base.Config.amget
+    reject *: config is the module's LazyConfig, which forwards to its Config, not a backend
+76:16 call  dict(default_initial, **backend_values)
+    -> <builtin>.dict

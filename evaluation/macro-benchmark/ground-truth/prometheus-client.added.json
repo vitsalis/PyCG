@@ -1,0 +1,981 @@
+{
+  "edges": {
+    "prometheus_client": {
+      "prometheus_client.exposition.start_wsgi_server": [
+        "prometheus_client 71:22 call  start_http_server(8000)"
+      ],
+      "prometheus_client.metrics.Counter.inc": [
+        "prometheus_client 60:10 call  c.inc()"
+      ],
+      "prometheus_client.metrics.Gauge.__init__": [
+        "prometheus_client 62:14 call  Gauge('gg', 'A gauge')"
+      ],
+      "prometheus_client.metrics.Gauge.set": [
+        "prometheus_client 63:10 call  g.set(17)"
+      ],
+      "prometheus_client.metrics.Histogram.__init__": [
+        "prometheus_client 68:18 call  Histogram('hh', 'A histogram')"
+      ],
+      "prometheus_client.metrics.Histogram.observe": [
+        "prometheus_client 69:14 call  h.observe(.6)"
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.__init__": [
+        "prometheus_client 59:16 call  Counter('cc', 'A counter')",
+        "prometheus_client 65:16 call  Summary('ss', 'A summary', ['a', 'b'])"
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.labels": [
+        "prometheus_client 66:13 call  s.labels('c', 'd')"
+      ],
+      "prometheus_client.metrics.Summary.observe": [
+        "prometheus_client 66:31 call  s.labels('c', 'd').observe(17)"
+      ],
+      "time.sleep": [
+        "prometheus_client 75:19 call  time.sleep(1)"
+      ]
+    },
+    "prometheus_client.aiohttp.exposition.make_aiohttp_handler.prometheus_handler": {
+      "<builtin>.int": [
+        "prometheus_client.aiohttp.exposition 31:23 call  int(status.split(\" \")[0])"
+      ],
+      "<builtin>.str.join": [
+        "prometheus_client.aiohttp.exposition 19:33 call  \",\".join(request.headers.getall(hdrs.ACCEPT, []))"
+      ],
+      "<builtin>.str.split": [
+        "prometheus_client.aiohttp.exposition 31:36 call  status.split(\" \")"
+      ],
+      "aiohttp.web.Request.headers.getall": [
+        "prometheus_client.aiohttp.exposition 19:56 call  request.headers.getall(hdrs.ACCEPT, [])"
+      ],
+      "aiohttp.web.Request.query.getall": [
+        "prometheus_client.aiohttp.exposition 18:44 call  request.query.getall(key)"
+      ],
+      "aiohttp.web.Request.query.keys": [
+        "prometheus_client.aiohttp.exposition 18:79 call  request.query.keys()"
+      ],
+      "aiohttp.web.Response": [
+        "prometheus_client.aiohttp.exposition 30:32 call  web.Response( status=int(status.split(\" \")[0]), headers=h..."
+      ],
+      "aiohttp.web.Response.enable_compression": [
+        "prometheus_client.aiohttp.exposition 36:40 call  response.enable_compression()"
+      ],
+      "prometheus_client.exposition._bake_output": [
+        "prometheus_client.aiohttp.exposition 22:47 call  _bake_output( registry, accept_header, accept_encoding_he..."
+      ]
+    },
+    "prometheus_client.bridge.graphite.GraphiteBridge.push": {
+      "prometheus_client.gc_collector.GCCollector.collect": [
+        "prometheus_client.bridge.graphite 70:45 call  self._registry.collect()"
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.collect": [
+        "prometheus_client.bridge.graphite 70:45 call  self._registry.collect()"
+      ],
+      "prometheus_client.multiprocess.MultiProcessCollector.collect": [
+        "prometheus_client.bridge.graphite 70:45 call  self._registry.collect()"
+      ],
+      "prometheus_client.platform_collector.PlatformCollector.collect": [
+        "prometheus_client.bridge.graphite 70:45 call  self._registry.collect()"
+      ],
+      "prometheus_client.process_collector.ProcessCollector.collect": [
+        "prometheus_client.bridge.graphite 70:45 call  self._registry.collect()"
+      ],
+      "time.time": [
+        "prometheus_client.bridge.graphite 63:30 call  self._timer()"
+      ]
+    },
+    "prometheus_client.bridge.graphite.GraphiteBridge.start": {
+      "prometheus_client.bridge.graphite._RegularPush.__init__": [
+        "prometheus_client.bridge.graphite 92:25 call  _RegularPush(self, interval, prefix)"
+      ],
+      "prometheus_client.bridge.graphite._RegularPush.run": [
+        "prometheus_client.bridge.graphite 94:16 call  t.start()"
+      ],
+      "threading.Thread.start": [
+        "prometheus_client.bridge.graphite 94:16 call  t.start()"
+      ]
+    },
+    "prometheus_client.bridge.graphite._RegularPush.__init__": {
+      "<builtin>.super": [
+        "prometheus_client.bridge.graphite 25:14 call  super()"
+      ],
+      "threading.Thread.__init__": [
+        "prometheus_client.bridge.graphite 25:25 call  super().__init__()"
+      ]
+    },
+    "prometheus_client.bridge.graphite._RegularPush.run": {
+      "logging.exception": [
+        "prometheus_client.bridge.graphite 45:34 call  logging.exception(\"Push failed\")"
+      ],
+      "prometheus_client.bridge.graphite.GraphiteBridge.push": [
+        "prometheus_client.bridge.graphite 43:34 call  self._pusher.push(prefix=self._prefix)"
+      ],
+      "time.sleep": [
+        "prometheus_client.bridge.graphite 41:27 call  time.sleep(wait_until - now)"
+      ],
+      "timeit.default_timer": [
+        "prometheus_client.bridge.graphite 31:35 call  default_timer()",
+        "prometheus_client.bridge.graphite 34:36 call  default_timer()"
+      ]
+    },
+    "prometheus_client.decorator.ContextManager.__call__": {
+      "<builtin>.dict": [
+        "prometheus_client.decorator 281:17 call  dict(_self_=self, _func_=func)"
+      ],
+      "prometheus_client.decorator.FunctionMaker.create": [
+        "prometheus_client.decorator 279:36 call  FunctionMaker.create( func, \"with _self_: return _func_(%..."
+      ]
+    },
+    "prometheus_client.decorator.FunctionMaker.__init__": {
+      "<builtin>.TypeError": [
+        "prometheus_client.decorator 153:28 call  TypeError('You are decorating a non function: %s' % func)"
+      ],
+      "<builtin>.list.append": [
+        "prometheus_client.decorator 124:39 call  allargs.append('*' + self.varargs)",
+        "prometheus_client.decorator 125:44 call  allshortargs.append('*' + self.varargs)",
+        "prometheus_client.decorator 127:39 call  allargs.append('*')",
+        "prometheus_client.decorator 129:39 call  allargs.append('%s=None' % a)",
+        "prometheus_client.decorator 130:44 call  allshortargs.append('%s=%s' % (a, a))",
+        "prometheus_client.decorator 132:39 call  allargs.append('**' + self.varkw)",
+        "prometheus_client.decorator 133:44 call  allshortargs.append('**' + self.varkw)"
+      ]
+    },
+    "prometheus_client.decorator.FunctionMaker.make": {
+      "<builtin>.NameError": [
+        "prometheus_client.decorator 184:32 call  NameError('%s is overridden in\\n%s' % (n, src))"
+      ],
+      "<builtin>.SyntaxError": [
+        "prometheus_client.decorator 178:30 call  SyntaxError('not a valid function template\\n%s' % src)"
+      ],
+      "<builtin>.print": [
+        "prometheus_client.decorator 197:18 call  print('Error in generated code:', file=sys.stderr)",
+        "prometheus_client.decorator 198:18 call  print(src, file=sys.stderr)"
+      ]
+    },
+    "prometheus_client.decorator.__init__": {
+      "contextlib._GeneratorContextManager.__init__": [
+        "prometheus_client.decorator 296:49 call  _GeneratorContextManager.__init__(self, g, a, k)"
+      ]
+    },
+    "prometheus_client.decorator.append": {
+      "<builtin>.enumerate": [
+        "prometheus_client.decorator 312:27 call  enumerate(vancestors)"
+      ],
+      "<builtin>.issubclass": [
+        "prometheus_client.decorator 313:22 call  issubclass(va, a)",
+        "prometheus_client.decorator 316:22 call  issubclass(a, va)"
+      ],
+      "<builtin>.list.append": [
+        "prometheus_client.decorator 320:26 call  vancestors.append(a)"
+      ]
+    },
+    "prometheus_client.decorator.decorator": {
+      "inspect.isfunction": [
+        "prometheus_client.decorator 252:28 call  inspect.isfunction(caller)"
+      ],
+      "prometheus_client.decorator.decorate": [
+        "prometheus_client.decorator 246:24 call  decorate(_func, caller)"
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on": {
+      "<builtin>.str.join": [
+        "prometheus_client.decorator 330:39 call  ', '.join(dispatch_args)"
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.check": {
+      "<builtin>.TypeError": [
+        "prometheus_client.decorator 335:28 call  TypeError('Expected %d arguments, got %d%s' % (len(dispat..."
+      ],
+      "<builtin>.len": [
+        "prometheus_client.decorator 334:21 call  len(arguments)",
+        "prometheus_client.decorator 334:37 call  len(dispatch_args)",
+        "prometheus_client.decorator 336:33 call  len(dispatch_args)",
+        "prometheus_client.decorator 336:53 call  len(arguments)"
+      ],
+      "operator.lt": [
+        "prometheus_client.decorator 334:17 call  wrong(len(arguments), len(dispatch_args))"
+      ],
+      "operator.ne": [
+        "prometheus_client.decorator 334:17 call  wrong(len(arguments), len(dispatch_args))"
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.gen_func_dec": {
+      "<builtin>.NameError": [
+        "prometheus_client.decorator 344:28 call  NameError('Unknown dispatch arguments %s' % dispatch_str)"
+      ],
+      "<builtin>.dict": [
+        "prometheus_client.decorator 422:17 call  dict(_f_=_dispatch)"
+      ],
+      "<builtin>.set": [
+        "prometheus_client.decorator 342:21 call  set(getfullargspec(func).args)",
+        "prometheus_client.decorator 343:19 call  set(dispatch_args)"
+      ],
+      "inspect.getfullargspec": [
+        "prometheus_client.decorator 342:36 call  getfullargspec(func)"
+      ],
+      "prometheus_client.decorator.FunctionMaker.create": [
+        "prometheus_client.decorator 420:36 call  FunctionMaker.create( func, 'return _f_(%s, %%(shortsigna..."
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.gen_func_dec._dispatch": {
+      "<builtin>.dict.get": [
+        "prometheus_client.decorator 413:32 call  typemap.get(types_)"
+      ],
+      "<builtin>.next": [
+        "prometheus_client.decorator 411:17 call  next(combinations)"
+      ],
+      "<builtin>.tuple": [
+        "prometheus_client.decorator 403:26 call  tuple(type(arg) for arg in dispatch_args)"
+      ],
+      "<builtin>.type": [
+        "prometheus_client.decorator 403:31 call  type(arg)"
+      ],
+      "itertools.product": [
+        "prometheus_client.decorator 410:45 call  itertools.product(*ancestors(*types))"
+      ],
+      "prometheus_client.decorator.dispatch_on.gen_func_dec.ancestors": [
+        "prometheus_client.decorator 410:56 call  ancestors(*types)"
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.gen_func_dec.ancestors": {
+      "<builtin>.RuntimeError": [
+        "prometheus_client.decorator 369:39 call  RuntimeError( 'Ambiguous dispatch for %s: %s' % (t, vas))"
+      ],
+      "<builtin>.len": [
+        "prometheus_client.decorator 367:28 call  len(vas)"
+      ],
+      "<builtin>.list.append": [
+        "prometheus_client.decorator 376:29 call  lists.append(mro[:-1])"
+      ],
+      "<builtin>.type": [
+        "prometheus_client.decorator 373:31 call  type('t', (t, va), {})"
+      ],
+      "<builtin>.zip": [
+        "prometheus_client.decorator 366:30 call  zip(types, vancestors(*types))"
+      ],
+      "prometheus_client.decorator.dispatch_on.check": [
+        "prometheus_client.decorator 364:18 call  check(types)"
+      ],
+      "prometheus_client.decorator.dispatch_on.gen_func_dec.vancestors": [
+        "prometheus_client.decorator 366:48 call  vancestors(*types)"
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.gen_func_dec.dispatch_info": {
+      "<builtin>.list.append": [
+        "prometheus_client.decorator 399:27 call  lst.append(tuple(a.__name__ for a in anc))"
+      ],
+      "<builtin>.tuple": [
+        "prometheus_client.decorator 399:33 call  tuple(a.__name__ for a in anc)"
+      ],
+      "itertools.product": [
+        "prometheus_client.decorator 398:41 call  itertools.product(*ancestors(*types))"
+      ],
+      "prometheus_client.decorator.dispatch_on.check": [
+        "prometheus_client.decorator 396:18 call  check(types)"
+      ],
+      "prometheus_client.decorator.dispatch_on.gen_func_dec.ancestors": [
+        "prometheus_client.decorator 398:52 call  ancestors(*types)"
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.gen_func_dec.register": {
+      "prometheus_client.decorator.dispatch_on.check": [
+        "prometheus_client.decorator 383:18 call  check(types)"
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.gen_func_dec.register.dec": {
+      "inspect.getfullargspec": [
+        "prometheus_client.decorator 386:37 call  getfullargspec(f)"
+      ],
+      "prometheus_client.decorator.dispatch_on.check": [
+        "prometheus_client.decorator 386:22 call  check(getfullargspec(f).args, operator.lt, ' in ' + f.__n..."
+      ]
+    },
+    "prometheus_client.decorator.dispatch_on.gen_func_dec.vancestors": {
+      "<builtin>.issubclass": [
+        "prometheus_client.decorator 356:34 call  issubclass(t, type_)"
+      ],
+      "<builtin>.len": [
+        "prometheus_client.decorator 353:41 call  len(dispatch_args)"
+      ],
+      "<builtin>.range": [
+        "prometheus_client.decorator 353:37 call  range(len(dispatch_args))"
+      ],
+      "<builtin>.set": [
+        "prometheus_client.decorator 358:24 call  set(ra)"
+      ],
+      "<builtin>.zip": [
+        "prometheus_client.decorator 355:40 call  zip(types, types_, ras)"
+      ],
+      "prometheus_client.decorator.append": [
+        "prometheus_client.decorator 357:31 call  append(type_, ra)"
+      ],
+      "prometheus_client.decorator.dispatch_on.check": [
+        "prometheus_client.decorator 352:18 call  check(types)"
+      ]
+    },
+    "prometheus_client.django.exposition.PrometheusDjangoView.get": {
+      "<builtin>.int": [
+        "prometheus_client.django.exposition 32:21 call  int(status.split(\" \")[0])"
+      ],
+      "<builtin>.str.split": [
+        "prometheus_client.django.exposition 32:34 call  status.split(\" \")"
+      ],
+      "django.http.HttpRequest.headers.get": [
+        "prometheus_client.django.exposition 22:44 call  request.headers.get(\"Accept\")",
+        "prometheus_client.django.exposition 23:53 call  request.headers.get(\"Accept-Encoding\")"
+      ],
+      "django.http.HttpResponse": [
+        "prometheus_client.django.exposition 33:28 call  HttpResponse( output, status=status, headers=headers, )"
+      ],
+      "prometheus_client.exposition._bake_output": [
+        "prometheus_client.django.exposition 25:47 call  _bake_output( registry=self.registry, accept_header=accep..."
+      ],
+      "prometheus_client.multiprocess.MultiProcessCollector.__init__": [
+        "prometheus_client.django.exposition 19:51 call  multiprocess.MultiProcessCollector(self.registry)"
+      ],
+      "prometheus_client.registry.CollectorRegistry.__init__": [
+        "prometheus_client.django.exposition 18:68 call  prometheus_client.CollectorRegistry()"
+      ]
+    },
+    "prometheus_client.django.exposition.PrometheusDjangoView.options": {
+      "django.http.HttpResponse": [
+        "prometheus_client.django.exposition 40:28 call  HttpResponse( status=200, headers={\"Allow\": \"OPTIONS,GET\"..."
+      ]
+    },
+    "prometheus_client.exposition.MetricsHandler.do_GET": {
+      "<builtin>.int": [
+        "prometheus_client.exposition 450:31 call  int(status.split(' ')[0])"
+      ],
+      "<builtin>.str.split": [
+        "prometheus_client.exposition 450:44 call  status.split(' ')"
+      ],
+      "http.client.HTTPMessage.get": [
+        "prometheus_client.exposition 444:41 call  self.headers.get('Accept')",
+        "prometheus_client.exposition 445:50 call  self.headers.get('Accept-Encoding')"
+      ],
+      "http.server.BaseHTTPRequestHandler.end_headers": [
+        "prometheus_client.exposition 453:25 call  self.end_headers()"
+      ],
+      "http.server.BaseHTTPRequestHandler.send_header": [
+        "prometheus_client.exposition 452:29 call  self.send_header(*header)"
+      ],
+      "http.server.BaseHTTPRequestHandler.send_response": [
+        "prometheus_client.exposition 450:27 call  self.send_response(int(status.split(' ')[0]))"
+      ],
+      "prometheus_client.exposition.MetricsHandler.log_message": [
+        "prometheus_client.exposition 450:27 call  self.send_response(int(status.split(' ')[0]))"
+      ],
+      "prometheus_client.exposition._bake_output": [
+        "prometheus_client.exposition 448:47 call  _bake_output(registry, accept_header, accept_encoding_hea..."
+      ],
+      "socketserver._SocketWriter.write": [
+        "prometheus_client.exposition 454:25 call  self.wfile.write(output)"
+      ],
+      "urllib.parse.parse_qs": [
+        "prometheus_client.exposition 446:26 call  parse_qs(urlparse(self.path).query)"
+      ],
+      "urllib.parse.urlparse": [
+        "prometheus_client.exposition 446:35 call  urlparse(self.path)"
+      ]
+    },
+    "prometheus_client.exposition._PrometheusRedirectHandler.redirect_request": {
+      "urllib.error.HTTPError": [
+        "prometheus_client.exposition 104:28 call  HTTPError(req.full_url, code, msg, headers, fp)"
+      ],
+      "urllib.request.Request.get_method": [
+        "prometheus_client.exposition 101:50 call  req.get_method()"
+      ]
+    },
+    "prometheus_client.exposition._compress_payload": {
+      "<builtin>.RuntimeError": [
+        "prometheus_client.exposition 789:31 call  RuntimeError('Snappy compression requires the python-snap..."
+      ],
+      "<builtin>.callable": [
+        "prometheus_client.exposition 794:20 call  callable(flush)"
+      ],
+      "<builtin>.getattr": [
+        "prometheus_client.exposition 793:24 call  getattr(compressor, 'flush', None)"
+      ],
+      "snappy.StreamCompressor": [
+        "prometheus_client.exposition 791:45 call  snappy.StreamCompressor()"
+      ],
+      "snappy.StreamCompressor.compress": [
+        "prometheus_client.exposition 792:41 call  compressor.compress(data)"
+      ],
+      "snappy.StreamCompressor.flush": [
+        "prometheus_client.exposition 795:32 call  flush()"
+      ]
+    },
+    "prometheus_client.exposition._get_ssl_ctx": {
+      "<builtin>.FileNotFoundError": [
+        "prometheus_client.exposition 211:27 call  exc_type(f\"Cannot load CA certificate chain from file \" f...",
+        "prometheus_client.exposition 219:27 call  exc_type(f\"Cannot load default CA certificate chain: {msg}\")",
+        "prometheus_client.exposition 229:23 call  exc_type(f\"Cannot load server certificate file {certfile!..."
+      ],
+      "<builtin>.IsADirectoryError": [
+        "prometheus_client.exposition 211:27 call  exc_type(f\"Cannot load CA certificate chain from file \" f...",
+        "prometheus_client.exposition 219:27 call  exc_type(f\"Cannot load default CA certificate chain: {msg}\")",
+        "prometheus_client.exposition 229:23 call  exc_type(f\"Cannot load server certificate file {certfile!..."
+      ],
+      "<builtin>.NotADirectoryError": [
+        "prometheus_client.exposition 211:27 call  exc_type(f\"Cannot load CA certificate chain from file \" f...",
+        "prometheus_client.exposition 219:27 call  exc_type(f\"Cannot load default CA certificate chain: {msg}\")",
+        "prometheus_client.exposition 229:23 call  exc_type(f\"Cannot load server certificate file {certfile!..."
+      ],
+      "<builtin>.OSError": [
+        "prometheus_client.exposition 211:27 call  exc_type(f\"Cannot load CA certificate chain from file \" f...",
+        "prometheus_client.exposition 219:27 call  exc_type(f\"Cannot load default CA certificate chain: {msg}\")",
+        "prometheus_client.exposition 229:23 call  exc_type(f\"Cannot load server certificate file {certfile!..."
+      ],
+      "<builtin>.PermissionError": [
+        "prometheus_client.exposition 211:27 call  exc_type(f\"Cannot load CA certificate chain from file \" f...",
+        "prometheus_client.exposition 219:27 call  exc_type(f\"Cannot load default CA certificate chain: {msg}\")",
+        "prometheus_client.exposition 229:23 call  exc_type(f\"Cannot load server certificate file {certfile!..."
+      ],
+      "<builtin>.str": [
+        "prometheus_client.exposition 210:22 call  str(exc)",
+        "prometheus_client.exposition 218:22 call  str(exc)",
+        "prometheus_client.exposition 228:18 call  str(exc)"
+      ],
+      "<builtin>.type": [
+        "prometheus_client.exposition 209:28 call  type(exc)",
+        "prometheus_client.exposition 217:28 call  type(exc)",
+        "prometheus_client.exposition 227:24 call  type(exc)"
+      ],
+      "ssl.SSLError": [
+        "prometheus_client.exposition 211:27 call  exc_type(f\"Cannot load CA certificate chain from file \" f...",
+        "prometheus_client.exposition 219:27 call  exc_type(f\"Cannot load default CA certificate chain: {msg}\")",
+        "prometheus_client.exposition 229:23 call  exc_type(f\"Cannot load server certificate file {certfile!..."
+      ]
+    },
+    "prometheus_client.exposition._use_gateway": {
+      "prometheus_client.exposition.basic_auth_handler": [
+        "prometheus_client.exposition 772:12 call  handler( url=url, method=method, timeout=timeout, headers..."
+      ],
+      "prometheus_client.exposition.passthrough_redirect_handler": [
+        "prometheus_client.exposition 772:12 call  handler( url=url, method=method, timeout=timeout, headers..."
+      ]
+    },
+    "prometheus_client.exposition.generate_latest": {
+      "prometheus_client.gc_collector.GCCollector.collect": [
+        "prometheus_client.exposition 317:35 call  registry.collect()"
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.collect": [
+        "prometheus_client.exposition 317:35 call  registry.collect()"
+      ],
+      "prometheus_client.multiprocess.MultiProcessCollector.collect": [
+        "prometheus_client.exposition 317:35 call  registry.collect()"
+      ],
+      "prometheus_client.platform_collector.PlatformCollector.collect": [
+        "prometheus_client.exposition 317:35 call  registry.collect()"
+      ],
+      "prometheus_client.process_collector.ProcessCollector.collect": [
+        "prometheus_client.exposition 317:35 call  registry.collect()"
+      ]
+    },
+    "prometheus_client.exposition.make_wsgi_app.prometheus_app": {
+      "<builtin>.str.encode": [
+        "prometheus_client.exposition 148:89 call  '# HTTP {}: {}; use OPTIONS or GET\\n'.format(status, meth..."
+      ],
+      "<builtin>.str.format": [
+        "prometheus_client.exposition 148:66 call  '# HTTP {}: {}; use OPTIONS or GET\\n'.format(status, method)"
+      ]
+    },
+    "prometheus_client.exposition.start_wsgi_server": {
+      "prometheus_client.exposition._SilentHandler.log_message": [
+        "prometheus_client.exposition 275:12 call  t.start()"
+      ],
+      "prometheus_client.exposition.make_wsgi_app.prometheus_app": [
+        "prometheus_client.exposition 275:12 call  t.start()"
+      ]
+    },
+    "prometheus_client.exposition.tls_auth_handler": {
+      "ssl.SSLContext.load_verify_locations": [
+        "prometheus_client.exposition 607:38 call  context.load_verify_locations(cafile)"
+      ]
+    },
+    "prometheus_client.exposition.write_to_textfile": {
+      "<builtin>.open": [
+        "prometheus_client.exposition 491:18 call  open(tmppath, 'wb')"
+      ],
+      "io.BufferedWriter.write": [
+        "prometheus_client.exposition 492:20 call  f.write(generate_latest(registry, escaping))"
+      ],
+      "os.getpid": [
+        "prometheus_client.exposition 487:64 call  os.getpid()",
+        "prometheus_client.exposition 489:38 call  os.getpid()"
+      ],
+      "os.path.basename": [
+        "prometheus_client.exposition 486:36 call  os.path.basename(path)"
+      ],
+      "os.path.exists": [
+        "prometheus_client.exposition 500:26 call  os.path.exists(tmppath)"
+      ],
+      "os.path.join": [
+        "prometheus_client.exposition 487:34 call  os.path.join(tmpdir, filename)"
+      ],
+      "os.remove": [
+        "prometheus_client.exposition 501:22 call  os.remove(tmppath)"
+      ],
+      "os.rename": [
+        "prometheus_client.exposition 498:22 call  os.rename(tmppath, path)"
+      ],
+      "os.replace": [
+        "prometheus_client.exposition 496:23 call  os.replace(tmppath, path)"
+      ],
+      "prometheus_client.exposition.generate_latest": [
+        "prometheus_client.exposition 492:36 call  generate_latest(registry, escaping)"
+      ],
+      "threading.current_thread": [
+        "prometheus_client.exposition 487:93 call  threading.current_thread()",
+        "prometheus_client.exposition 489:67 call  threading.current_thread()"
+      ]
+    },
+    "prometheus_client.metrics.Counter._child_samples": {
+      "prometheus_client.values.MultiProcessValue.MmapedValue.get": [
+        "prometheus_client.metrics 363:54 call  self._value.get()"
+      ],
+      "prometheus_client.values.MultiProcessValue.MmapedValue.get_exemplar": [
+        "prometheus_client.metrics 363:88 call  self._value.get_exemplar()"
+      ]
+    },
+    "prometheus_client.metrics.Counter.inc": {
+      "prometheus_client.values.MultiProcessValue.MmapedValue.set_exemplar": [
+        "prometheus_client.metrics 345:37 call  self._value.set_exemplar(Exemplar(exemplar, amount, time...."
+      ]
+    },
+    "prometheus_client.metrics.Counter.reset": {
+      "prometheus_client.values.MultiProcessValue.MmapedValue.set": [
+        "prometheus_client.metrics 349:24 call  self._value.set(0)"
+      ]
+    },
+    "prometheus_client.metrics.Gauge.__init__": {
+      "<builtin>.ValueError": [
+        "prometheus_client.metrics 426:29 call  ValueError('Invalid multiprocess mode: ' + multiprocess_m..."
+      ]
+    },
+    "prometheus_client.metrics.Gauge._child_samples": {
+      "prometheus_client.values.MultiProcessValue.MmapedValue.get": [
+        "prometheus_client.metrics 504:47 call  self._value.get()"
+      ]
+    },
+    "prometheus_client.metrics.Gauge.dec": {
+      "<builtin>.RuntimeError": [
+        "prometheus_client.metrics 456:31 call  RuntimeError(\"dec must not be used with the mostrecent mo..."
+      ],
+      "prometheus_client.values.MultiProcessValue.MmapedValue.inc": [
+        "prometheus_client.metrics 458:24 call  self._value.inc(-amount)"
+      ]
+    },
+    "prometheus_client.metrics.Gauge.inc": {
+      "<builtin>.RuntimeError": [
+        "prometheus_client.metrics 449:31 call  RuntimeError(\"inc must not be used with the mostrecent mo..."
+      ],
+      "prometheus_client.values.MultiProcessValue.MmapedValue.inc": [
+        "prometheus_client.metrics 451:24 call  self._value.inc(amount)"
+      ]
+    },
+    "prometheus_client.metrics.Gauge.set_to_current_time": {
+      "prometheus_client.metrics.Gauge.set": [
+        "prometheus_client.metrics 470:17 call  self.set(time.time())"
+      ],
+      "time.time": [
+        "prometheus_client.metrics 470:27 call  time.time()"
+      ]
+    },
+    "prometheus_client.metrics.Histogram._child_samples": {
+      "prometheus_client.values.MultiProcessValue.MmapedValue.get": [
+        "prometheus_client.metrics 698:40 call  self._buckets[i].get()",
+        "prometheus_client.metrics 702:60 call  self._sum.get()"
+      ],
+      "prometheus_client.values.MultiProcessValue.MmapedValue.get_exemplar": [
+        "prometheus_client.metrics 699:118 call  self._buckets[i].get_exemplar()"
+      ]
+    },
+    "prometheus_client.metrics.Histogram.observe": {
+      "prometheus_client.values.MultiProcessValue.MmapedValue.set_exemplar": [
+        "prometheus_client.metrics 684:50 call  self._buckets[i].set_exemplar(Exemplar(exemplar, amount, ..."
+      ]
+    },
+    "prometheus_client.metrics.MetricWrapperBase.__init__": {
+      "prometheus_client.metrics.MetricWrapperBase._metric_init": [
+        "prometheus_client.metrics 131:30 call  self._metric_init()"
+      ]
+    },
+    "prometheus_client.metrics.MetricWrapperBase._child_samples": {
+      "<builtin>.NotImplementedError": [
+        "prometheus_client.metrics 281:34 call  NotImplementedError('_child_samples() must be implemented..."
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.__repr__": [
+        "prometheus_client.metrics 281:80 op  '_child_samples() must be implemented by %r' % self"
+      ]
+    },
+    "prometheus_client.metrics.MetricWrapperBase._metric_init": {
+      "<builtin>.NotImplementedError": [
+        "prometheus_client.metrics 289:34 call  NotImplementedError('_metric_init() must be implemented b..."
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.__repr__": [
+        "prometheus_client.metrics 289:78 op  '_metric_init() must be implemented by %r' % self"
+      ]
+    },
+    "prometheus_client.metrics.MetricWrapperBase.remove": {
+      "prometheus_client.metrics.MetricWrapperBase.__str__": [
+        "prometheus_client.metrics 212:77 op  'No label names were set when constructing %s' % self"
+      ]
+    },
+    "prometheus_client.metrics.MetricWrapperBase.remove_by_labels": {
+      "<builtin>.TypeError": [
+        "prometheus_client.metrics 234:28 call  TypeError(\"labels must be a dict of {label_name: label_va..."
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.__str__": [
+        "prometheus_client.metrics 231:77 op  'No label names were set when constructing %s' % self"
+      ],
+      "warnings.warn": [
+        "prometheus_client.metrics 225:26 call  warnings.warn( \"Removal of labels has not been implemente..."
+      ]
+    },
+    "prometheus_client.metrics.Summary._child_samples": {
+      "prometheus_client.values.MultiProcessValue.MmapedValue.get": [
+        "prometheus_client.metrics 569:49 call  self._count.get()",
+        "prometheus_client.metrics 570:45 call  self._sum.get()"
+      ]
+    },
+    "prometheus_client.metrics_core.GaugeHistogramMetricFamily.__init__": {
+      "<builtin>.ValueError": [
+        "prometheus_client.metrics_core 301:29 call  ValueError('Can only specify at most one of buckets and l..."
+      ]
+    },
+    "prometheus_client.metrics_core.Metric.__repr__": {
+      "<builtin>.str.format": [
+        "prometheus_client.metrics_core 50:51 call  \"Metric({}, {}, {}, {}, {})\".format( self.name, self.docu..."
+      ],
+      "prometheus_client.samples.Timestamp.__repr__": [
+        "prometheus_client.metrics_core 50:51 call  \"Metric({}, {}, {}, {}, {})\".format( self.name, self.docu..."
+      ]
+    },
+    "prometheus_client.mmap_dict.MmapedDict.__init__": {
+      "io.BufferedReader.fileno": [
+        "prometheus_client.mmap_dict 66:43 call  self._f.fileno()",
+        "prometheus_client.mmap_dict 71:43 call  self._f.fileno()"
+      ],
+      "io.BufferedReader.truncate": [
+        "prometheus_client.mmap_dict 68:29 call  self._f.truncate(_INITIAL_MMAP_SIZE)"
+      ]
+    },
+    "prometheus_client.mmap_dict.MmapedDict._init_value": {
+      "io.BufferedReader.truncate": [
+        "prometheus_client.mmap_dict 103:29 call  self._f.truncate(self._capacity)"
+      ]
+    },
+    "prometheus_client.mmap_dict.MmapedDict.close": {
+      "io.BufferedReader.close": [
+        "prometheus_client.mmap_dict 137:26 call  self._f.close()"
+      ]
+    },
+    "prometheus_client.openmetrics.exposition._compose_exemplar_string": {
+      "prometheus_client.samples.Timestamp.__str__": [
+        "prometheus_client.openmetrics.exposition 44:43 call  ' # {} {} {}'.format( labels, floatToGoString(exemplar.va..."
+      ]
+    },
+    "prometheus_client.openmetrics.exposition._is_legacy_labelname_rune": {
+      "<builtin>.ValueError": [
+        "prometheus_client.openmetrics.exposition 269:25 call  ValueError(\"Input 'b' must be a single character.\")"
+      ]
+    },
+    "prometheus_client.openmetrics.exposition.generate_latest": {
+      "prometheus_client.gc_collector.GCCollector.collect": [
+        "prometheus_client.openmetrics.exposition 61:35 call  registry.collect()"
+      ],
+      "prometheus_client.metrics.MetricWrapperBase.collect": [
+        "prometheus_client.openmetrics.exposition 61:35 call  registry.collect()"
+      ],
+      "prometheus_client.multiprocess.MultiProcessCollector.collect": [
+        "prometheus_client.openmetrics.exposition 61:35 call  registry.collect()"
+      ],
+      "prometheus_client.platform_collector.PlatformCollector.collect": [
+        "prometheus_client.openmetrics.exposition 61:35 call  registry.collect()"
+      ],
+      "prometheus_client.process_collector.ProcessCollector.collect": [
+        "prometheus_client.openmetrics.exposition 61:35 call  registry.collect()"
+      ],
+      "prometheus_client.registry.RestrictedRegistry.collect": [
+        "prometheus_client.openmetrics.exposition 61:35 call  registry.collect()"
+      ]
+    },
+    "prometheus_client.openmetrics.parser._replace_escape_sequence": {
+      "re.Match.group": [
+        "prometheus_client.openmetrics.parser 44:40 call  match.group(0)"
+      ]
+    },
+    "prometheus_client.openmetrics.parser._replace_escaping": {
+      "prometheus_client.openmetrics.parser._replace_escape_sequence": [
+        "prometheus_client.openmetrics.parser 51:27 call  ESCAPING_RE.sub(_replace_escape_sequence, s)"
+      ],
+      "re.Pattern.sub": [
+        "prometheus_client.openmetrics.parser 51:27 call  ESCAPING_RE.sub(_replace_escape_sequence, s)"
+      ]
+    },
+    "prometheus_client.openmetrics.parser.text_fd_to_metric_families": {
+      "prometheus_client.samples.Timestamp.__lt__": [
+        "prometheus_client.openmetrics.parser 616:72 op  group_timestamp > sample.timestamp"
+      ]
+    },
+    "prometheus_client.parser._last_unquoted_char": {
+      "prometheus_client.parser._is_character_escaped": [
+        "prometheus_client.parser 166:56 call  _is_character_escaped(text, i)"
+      ]
+    },
+    "prometheus_client.parser._parse_sample": {
+      "<builtin>.ValueError": [
+        "prometheus_client.parser 253:29 call  ValueError(\"invalid metric name:\" + text)",
+        "prometheus_client.parser 268:25 call  ValueError(\"metric name specified more than once\")"
+      ]
+    },
+    "prometheus_client.parser._parse_value_and_timestamp": {
+      "<builtin>.float": [
+        "prometheus_client.parser 228:21 call  float(s)"
+      ]
+    },
+    "prometheus_client.parser._unquote_unescape": {
+      "<builtin>.ValueError": [
+        "prometheus_client.parser 212:29 call  ValueError(\"missing close quote\")"
+      ]
+    },
+    "prometheus_client.registry.CollectorRegistry._get_names": {
+      "prometheus_client.multiprocess.MultiProcessCollector.collect": [
+        "prometheus_client.registry 90:32 call  desc_func()"
+      ]
+    },
+    "prometheus_client.registry.RestrictedRegistry.collect": {
+      "prometheus_client.gc_collector.GCCollector.collect": [
+        "prometheus_client.registry 172:44 call  collector.collect()"
+      ],
+      "prometheus_client.platform_collector.PlatformCollector.collect": [
+        "prometheus_client.registry 172:44 call  collector.collect()"
+      ],
+      "prometheus_client.process_collector.ProcessCollector.collect": [
+        "prometheus_client.registry 172:44 call  collector.collect()"
+      ]
+    },
+    "prometheus_client.samples.Timestamp.__init__": {
+      "<builtin>.ValueError": [
+        "prometheus_client.samples 9:29 call  ValueError(f\"Invalid value for nanoseconds in Timestamp: ..."
+      ]
+    },
+    "prometheus_client.twisted._exposition.<lambda1>": {
+      "prometheus_client.exposition.make_wsgi_app": [
+        "prometheus_client.twisted._exposition 7:63 call  exposition.make_wsgi_app(registry)"
+      ],
+      "twisted.internet.reactor.getThreadPool": [
+        "prometheus_client.twisted._exposition 7:35 call  reactor.getThreadPool()"
+      ],
+      "twisted.web.wsgi.WSGIResource": [
+        "prometheus_client.twisted._exposition 6:57 call  WSGIResource( reactor, reactor.getThreadPool(), expositio..."
+      ]
+    },
+    "prometheus_client.validation._validate_metric_label_name_token": {
+      "<builtin>.ValueError": [
+        "prometheus_client.validation 63:25 call  ValueError(\"invalid label name token \" + tok)",
+        "prometheus_client.validation 67:29 call  ValueError(\"invalid label name token \" + tok)",
+        "prometheus_client.validation 72:25 call  ValueError(\"invalid label name token \" + tok)"
+      ],
+      "<builtin>.str.encode": [
+        "prometheus_client.validation 70:19 call  tok.encode('utf-8')"
+      ],
+      "re.Pattern.match": [
+        "prometheus_client.validation 66:42 call  METRIC_LABEL_NAME_RE.match(tok)"
+      ]
+    },
+    "prometheus_client.values.MultiProcessValue.MmapedValue.__init__": {
+      "warnings.warn": [
+        "prometheus_client.values 81:30 call  warnings.warn(\"prometheus_multiproc_dir variable has been..."
+      ]
+    },
+    "prometheus_client.values.MultiProcessValue.MmapedValue.close_all_files": {
+      "<builtin>.dict.clear": [
+        "prometheus_client.values 146:28 call  files.clear()"
+      ],
+      "<builtin>.dict.values": [
+        "prometheus_client.values 144:38 call  files.values()"
+      ],
+      "<builtin>.list.clear": [
+        "prometheus_client.values 147:29 call  values.clear()"
+      ],
+      "prometheus_client.mmap_dict.MmapedDict.close": [
+        "prometheus_client.values 145:28 call  f.close()"
+      ]
+    }
+  },
+  "notes": {
+    "prometheus_client 59:16 call  Counter('cc', 'A counter')": [
+      "the __main__ block of the module (it keeps its edges); Counter defines no __init__"
+    ],
+    "prometheus_client 71:22 call  start_http_server(8000)": [
+      "start_http_server is the module alias start_http_server = start_wsgi_server (exposition.py:280), imported here"
+    ],
+    "prometheus_client.aiohttp.exposition 18:44 call  request.query.getall(key)": [
+      "missing module (judgement J3): aiohttp is not installed; request is annotated web.Request, the object that aiohttp (a framework that calls the package, a client) passes to a handler, so the call is named by the stub path of that annotation"
+    ],
+    "prometheus_client.aiohttp.exposition 18:79 call  request.query.keys()": [
+      "missing module (judgement J3)"
+    ],
+    "prometheus_client.aiohttp.exposition 19:56 call  request.headers.getall(hdrs.ACCEPT, [])": [
+      "missing module (judgement J3)"
+    ],
+    "prometheus_client.aiohttp.exposition 30:32 call  web.Response( status=int(status.split(\" \")[0]), headers=h...": [
+      "missing module: aiohttp is not installed"
+    ],
+    "prometheus_client.aiohttp.exposition 31:36 call  status.split(\" \")": [
+      "status is the str '200 OK' that _bake_output returns"
+    ],
+    "prometheus_client.aiohttp.exposition 36:40 call  response.enable_compression()": [
+      "missing module: response is an instance of the stub aiohttp.web.Response"
+    ],
+    "prometheus_client.bridge.graphite 25:25 call  super().__init__()": [
+      "a value site only by name (decorator.py:291 and 299 assign an attribute __init__, to ContextManager); here the attribute is the __init__ of the base class"
+    ],
+    "prometheus_client.bridge.graphite 43:34 call  self._pusher.push(prefix=self._prefix)": [
+      "_RegularPush is private; its only maker, GraphiteBridge.start, passes the GraphiteBridge self as pusher"
+    ],
+    "prometheus_client.bridge.graphite 63:30 call  self._timer()": [
+      "self._timer is the _timer argument: time.time by default; a client may pass its own clock (the tests pass fake_timer), a client callback"
+    ],
+    "prometheus_client.bridge.graphite 70:45 call  self._registry.collect()": [
+      "registry is annotated Collector, the package Protocol (judgement J1): its values are the declared and documented implementations (the metric wrappers, ProcessCollector, GCCollector, PlatformCollector, MultiProcessCollector), CollectorRegistry (the default REGISTRY, and the tests pass one) and client collectors"
+    ],
+    "prometheus_client.bridge.graphite 94:16 call  t.start()": [
+      "Thread.start runs the run method of the _RegularPush thread (callback rule)"
+    ],
+    "prometheus_client.decorator 296:49 call  _GeneratorContextManager.__init__(self, g, a, k)": [
+      "the branch n_args == 4 (line 294) is the one of every supported version (Python 3.9 and later)"
+    ],
+    "prometheus_client.decorator 334:17 call  wrong(len(arguments), len(dispatch_args))": [
+      "wrong is the default operator.ne, or operator.lt, which register's dec passes (line 386); check is a local function that only the closures of dispatch_on call"
+    ],
+    "prometheus_client.django.exposition 22:44 call  request.headers.get(\"Accept\")": [
+      "missing module (judgement J3): Django is not installed; Django's view dispatch (a client) passes an HttpRequest, the type that its documented API fixes, so the call is named by the stub path django.http.HttpRequest"
+    ],
+    "prometheus_client.django.exposition 23:53 call  request.headers.get(\"Accept-Encoding\")": [
+      "missing module (judgement J3)"
+    ],
+    "prometheus_client.django.exposition 33:28 call  HttpResponse( output, status=status, headers=headers, )": [
+      "missing module: Django is not installed"
+    ],
+    "prometheus_client.django.exposition 40:28 call  HttpResponse( status=200, headers={\"Allow\": \"OPTIONS,GET\"...": [
+      "missing module: Django is not installed"
+    ],
+    "prometheus_client.exposition 101:50 call  req.get_method()": [
+      "the argument is evaluated before getattr; urllib passes the Request that _make_handler.handle made, whose get_method is the instance attribute lambda (line 515), and on a further redirect the Request that this method made (line 105), whose get_method is the class method"
+    ],
+    "prometheus_client.exposition 211:27 call  exc_type(f\"Cannot load CA certificate chain from file \" f...": [
+      "exc_type is the class of the IOError (OSError) that load_verify_locations raised (judgement J5): ssl.SSLError for content OpenSSL refuses, or OSError from the errno of a failed open, which CPython makes the subclass of that errno"
+    ],
+    "prometheus_client.exposition 219:27 call  exc_type(f\"Cannot load default CA certificate chain: {msg}\")": [
+      "exc_type is the class of the OSError that load_default_certs raised (judgement J5): ssl.SSLError from set_default_verify_paths or from the Windows stores, OSError from enumerating a store, and, as at 211:27, the errno subclasses of a failed open of a certificate file, because load_default_certs also loads files: CPython's fallback certificate file and directory on Linux (ssl.py, load_default_certs; CPython 3.14) and PyPy's set_default_verify_paths, which calls load_verify_locations with the default paths (pypy3.11 lib_pypy/_cffi_ssl/_stdssl/__init__.py:1768); Codex audit round 1 (metadata) corrected the narrower list of audit W1; no edge changes"
+    ],
+    "prometheus_client.exposition 229:23 call  exc_type(f\"Cannot load server certificate file {certfile!...": [
+      "exc_type is the class of the OSError that load_cert_chain raised (judgement J5)"
+    ],
+    "prometheus_client.exposition 275:12 call  t.start()": [
+      "the thread runs httpd.serve_forever, whose per-request handler _SilentHandler runs the app of make_wsgi_app and logs each request through log_message (BaseHTTPRequestHandler.log_request); the package call that starts this library code is the caller (B5, bottle's wsgiref precedent); the tracer misses these calls (T1: the request threads are started by socketserver)"
+    ],
+    "prometheus_client.exposition 317:35 call  registry.collect()": [
+      "registry is annotated Collector (judgement J1): REGISTRY by default, a RestrictedRegistry from _bake_output (line 121) and the documented restricted_registry example, and the package's other Collector implementations"
+    ],
+    "prometheus_client.exposition 444:41 call  self.headers.get('Accept')": [
+      "self.headers is the http.client.HTTPMessage that BaseHTTPRequestHandler.parse_request makes (MessageClass)"
+    ],
+    "prometheus_client.exposition 450:27 call  self.send_response(int(status.split(' ')[0]))": [
+      "MetricsHandler inherits send_response, which logs the request through self.log_request, which calls the package override log_message"
+    ],
+    "prometheus_client.exposition 454:25 call  self.wfile.write(output)": [
+      "StreamRequestHandler.setup makes wfile a socketserver._SocketWriter, because BaseHTTPRequestHandler keeps wbufsize 0"
+    ],
+    "prometheus_client.exposition 492:20 call  f.write(generate_latest(registry, escaping))": [
+      "f is the binary stream of open(tmppath, 'wb')"
+    ],
+    "prometheus_client.exposition 496:23 call  os.replace(tmppath, path)": [
+      "platform branch (os.name == 'nt'); a supported platform takes each side"
+    ],
+    "prometheus_client.exposition 772:12 call  handler( url=url, method=method, timeout=timeout, headers...": [
+      "handler is a bare Callable; its values are default_handler (the default), the built-in handlers that the documentation names for the role and that bind to these five keyword arguments (basic_auth_handler, passthrough_redirect_handler; docs/content/exporting/pushgateway.md, \"Handlers\"), and client functions (client callbacks); tls_auth_handler is documented only inside a client wrapper and cannot bind here (certfile and keyfile are required)"
+    ],
+    "prometheus_client.exposition 791:45 call  snappy.StreamCompressor()": [
+      "missing module: python-snappy is not installed (an optional import at lines 27-32; both sides run)"
+    ],
+    "prometheus_client.exposition 792:41 call  compressor.compress(data)": [
+      "missing module: compressor is an instance of the stub snappy.StreamCompressor"
+    ],
+    "prometheus_client.exposition 795:32 call  flush()": [
+      "missing module: flush is the attribute flush of the stub instance, which callable() accepts"
+    ],
+    "prometheus_client.metrics 131:30 call  self._metric_init()": [
+      "self is any metric wrapper being made; MetricWrapperBase is public and not abstract (its base Collector is a Protocol, but a class that lists a Protocol as a base is an ordinary class), so a client can make one, and a label-less MetricWrapperBase reaches its own _metric_init, which raises (judgement J2)"
+    ],
+    "prometheus_client.metrics 212:77 op  'No label names were set when constructing %s' % self": [
+      "%s of self runs str(self)"
+    ],
+    "prometheus_client.metrics 231:77 op  'No label names were set when constructing %s' % self": [
+      "%s of self runs str(self)"
+    ],
+    "prometheus_client.metrics 281:80 op  '_child_samples() must be implemented by %r' % self": [
+      "%r of self runs repr(self)"
+    ],
+    "prometheus_client.metrics 289:78 op  '_metric_init() must be implemented by %r' % self": [
+      "%r of self runs repr(self)"
+    ],
+    "prometheus_client.metrics 363:54 call  self._value.get()": [
+      "self._value is a ValueClass instance (line 333)"
+    ],
+    "prometheus_client.metrics 504:47 call  self._value.get()": [
+      "self._value is a ValueClass instance (line 441)"
+    ],
+    "prometheus_client.metrics 569:49 call  self._count.get()": [
+      "self._count is a ValueClass instance (line 541)"
+    ],
+    "prometheus_client.metrics 570:45 call  self._sum.get()": [
+      "self._sum is a ValueClass instance (line 543)"
+    ],
+    "prometheus_client.metrics 698:40 call  self._buckets[i].get()": [
+      "the buckets are ValueClass instances (line 658)"
+    ],
+    "prometheus_client.metrics 702:60 call  self._sum.get()": [
+      "self._sum is a ValueClass instance (line 656)"
+    ],
+    "prometheus_client.metrics_core 50:51 call  \"Metric({}, {}, {}, {}, {})\".format( self.name, self.docu...": [
+      "format() of the samples list runs list.__repr__, which takes the repr of each Sample, a namedtuple whose generated __repr__ takes the repr of each field: the repr of a Timestamp timestamp (or exemplar timestamp) runs Timestamp.__repr__"
+    ],
+    "prometheus_client.mmap_dict 103:29 call  self._f.truncate(self._capacity)": [
+      "self._f is a BufferedRandom or, with read_mode, a BufferedReader (see 66:43)"
+    ],
+    "prometheus_client.mmap_dict 66:43 call  self._f.fileno()": [
+      "self._f is the binary file of open(): mode 'a+b' gives a BufferedRandom, read_mode (a public constructor argument) mode 'rb' a BufferedReader"
+    ],
+    "prometheus_client.mmap_dict 68:29 call  self._f.truncate(_INITIAL_MMAP_SIZE)": [
+      "self._f is a BufferedRandom or, with read_mode, a BufferedReader (see 66:43)"
+    ],
+    "prometheus_client.openmetrics.exposition 44:43 call  ' # {} {} {}'.format( labels, floatToGoString(exemplar.va...": [
+      "exemplar.timestamp is a float or a Timestamp (samples.py:51; the OpenMetrics parser makes Timestamps); format() with an empty spec runs str() of a Timestamp, its __str__"
+    ],
+    "prometheus_client.openmetrics.exposition 61:35 call  registry.collect()": [
+      "registry has no annotation; the package passes the Collector of _bake_output (exposition.py:122, through the partial of choose_encoder), so its values are those of the Collector role (judgement J1)"
+    ],
+    "prometheus_client.openmetrics.parser 51:27 call  ESCAPING_RE.sub(_replace_escape_sequence, s)": [
+      "re.Pattern.sub calls the package function back for each match (callback rule)"
+    ],
+    "prometheus_client.openmetrics.parser 616:72 op  group_timestamp > sample.timestamp": [
+      "the timestamps of one group are Timestamps or floats (_parse_timestamp returns a float for a timestamp with an exponent); > runs Timestamp.__gt__ when the left one is a Timestamp, and the reflected Timestamp.__lt__ when only the right one is"
+    ],
+    "prometheus_client.registry 172:44 call  collector.collect()": [
+      "the collectors registered without names and those of the restricted names (judgement J1); client collectors are client callbacks"
+    ],
+    "prometheus_client.registry 90:32 call  desc_func()": [
+      "desc_func is collector.describe, or collector.collect when the collector has no describe and auto_describe is set; the package's collectors that reach register (judgement J1): the metric wrappers (describe), and ProcessCollector, GCCollector, PlatformCollector and MultiProcessCollector (no describe); client collectors are client callbacks"
+    ],
+    "prometheus_client.twisted._exposition 6:57 call  WSGIResource( reactor, reactor.getThreadPool(), expositio...": [
+      "missing module: Twisted is not installed"
+    ],
+    "prometheus_client.twisted._exposition 7:35 call  reactor.getThreadPool()": [
+      "missing module: reactor is the stub twisted.internet.reactor"
+    ]
+  },
+  "trace": "dynamic/prometheus-client.json"
+}

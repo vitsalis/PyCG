@@ -1,0 +1,281 @@
+{
+  "edges": {
+    "src.json_repair.__main__": {
+      "src.json_repair.json_repair.cli": [
+        "src.json_repair.__main__ 6:17 call  cli()"
+      ],
+      "sys.exit": [
+        "src.json_repair.__main__ 6:13 call  sys.exit(cli())"
+      ]
+    },
+    "src.json_repair.json_parser.JSONParser._next_top_level_value_is_comma_separated": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.json_parser 184:41 getitem  self.json_str[idx]",
+        "src.json_repair.json_parser 186:42 getitem  self.json_str[idx]"
+      ]
+    },
+    "src.json_repair.json_parser.JSONParser._parse_top_level_salvage_with_schema": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__": [
+        "src.json_repair.json_parser 120:31 call  len(self.json_str)",
+        "src.json_repair.json_parser 131:37 call  len(self.json_str)"
+      ]
+    },
+    "src.json_repair.json_repair": {
+      "src.json_repair.json_repair.cli": [
+        "src.json_repair.json_repair 484:17 call  cli()"
+      ],
+      "sys.exit": [
+        "src.json_repair.json_repair 484:13 call  sys.exit(cli())"
+      ]
+    },
+    "src.json_repair.json_repair.cli": {
+      "io.TextIOWrapper.read": [
+        "src.json_repair.json_repair 463:34 call  sys.stdin.read()"
+      ],
+      "pathlib.WindowsPath.open": [
+        "src.json_repair.json_repair 448:40 call  Path(args.schema).open()",
+        "src.json_repair.json_repair 472:57 call  Path(args.output or args.filename).open(mode=\"w\")"
+      ]
+    },
+    "src.json_repair.json_repair.from_file": {
+      "pathlib.WindowsPath.open": [
+        "src.json_repair.json_repair 326:29 call  Path(filename).open()"
+      ]
+    },
+    "src.json_repair.parse_object._classify_empty_object_repair": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parse_object 103:37 getitem  self.json_str[start_index - 1 : self.index + 1]"
+      ]
+    },
+    "src.json_repair.parse_object._complete_object_parse": {
+      "src.json_repair.json_parser.JSONParser._log": [
+        "src.json_repair.parse_object 384:21 call  self.log( \"Found an extra closing brace that shouldn't be...",
+        "src.json_repair.parse_object 395:21 call  self.log( \"Found a comma and string delimiter after objec..."
+      ]
+    },
+    "src.json_repair.parse_object._merge_object_array_continuation": {
+      "src.json_repair.json_parser.JSONParser._log": [
+        "src.json_repair.parse_object 171:33 call  self.log( \"While parsing an object we found row values wi...",
+        "src.json_repair.parse_object 180:33 call  self.log( \"While parsing an object we found additional ro..."
+      ]
+    },
+    "src.json_repair.parse_object._parse_object_key": {
+      "src.json_repair.json_parser.JSONParser._log": [
+        "src.json_repair.parse_object 216:29 call  self.log( \"Empty key found in strict mode while parsing o..."
+      ]
+    },
+    "src.json_repair.parse_object._parse_object_value": {
+      "src.json_repair.json_parser.JSONParser._log": [
+        "src.json_repair.parse_object 308:21 call  self.log( f\"While parsing an object value we found a stra..."
+      ]
+    },
+    "src.json_repair.parse_object._repair_empty_object_result": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parse_object 342:38 getitem  self.json_str[: start_index - 1]",
+        "src.json_repair.parse_object 342:93 getitem  self.json_str[end_index:]"
+      ]
+    },
+    "src.json_repair.parse_object._resolve_object_property_schema": {
+      "src.json_repair.json_parser.JSONParser.__init__.<lambda1>": [
+        "src.json_repair.parse_object 276:17 call  self.log( f\"Skipped unsupported patternProperties regex '..."
+      ]
+    },
+    "src.json_repair.parse_object._split_object_on_duplicate_key": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parse_object 239:34 getitem  self.json_str[: self.index + 1]",
+        "src.json_repair.parse_object 239:74 getitem  self.json_str[self.index + 1 :]"
+      ]
+    },
+    "src.json_repair.parse_string._cached_skip_to_character": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__": [
+        "src.json_repair.parse_string 169:23 call  len(self.json_str)"
+      ]
+    },
+    "src.json_repair.parse_string._normalize_escape_sequence": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parse_string 307:61 getitem  self.json_str[run_end]",
+        "src.json_repair.parse_string 336:35 getitem  self.json_str[self.index + 1 : self.index + 1 + num_chars]"
+      ],
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__": [
+        "src.json_repair.parse_string 307:28 call  len(self.json_str)"
+      ]
+    },
+    "src.json_repair.parse_string._scan_string_body": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parse_string 726:60 getitem  self.json_str[self.index : self.index + container_end_idx]"
+      ]
+    },
+    "src.json_repair.parse_string_helpers.object_value_context._bare_member_has_recoverable_value": {
+      "src.json_repair.json_parser.JSONParser.skip_to_character": [
+        "src.json_repair.parse_string_helpers.object_value_context 34:38 call  skip_to_character([*STRING_DELIMITERS, \"}\"], value_start_..."
+      ]
+    },
+    "src.json_repair.parse_string_helpers.parse_json_llm_block.parse_json_llm_block": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parse_string_helpers.parse_json_llm_block 14:23 getitem  parser.json_str[parser.index : parser.index + 7]",
+        "src.json_repair.parse_string_helpers.parse_json_llm_block 16:27 getitem  parser.json_str[parser.index + i : parser.index + i + 3]"
+      ]
+    },
+    "src.json_repair.parser_parenthesized.parenthesized_is_explicit_tuple": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parser_parenthesized 25:29 getitem  parser.json_str[i]"
+      ],
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__": [
+        "src.json_repair.parser_parenthesized 16:12 call  len(parser.json_str)"
+      ]
+    },
+    "src.json_repair.parser_parenthesized.top_level_parenthesized_can_start_value": {
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__getitem__": [
+        "src.json_repair.parser_parenthesized 91:29 getitem  parser.json_str[i]",
+        "src.json_repair.parser_parenthesized 103:33 getitem  parser.json_str[parser.index + idx :]",
+        "src.json_repair.parser_parenthesized 122:29 getitem  parser.json_str[i]",
+        "src.json_repair.parser_parenthesized 150:46 getitem  parser.json_str[i]"
+      ],
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__": [
+        "src.json_repair.parser_parenthesized 114:12 call  len(parser.json_str)"
+      ]
+    },
+    "src.json_repair.schema_repair.SchemaRepairer._repair_type_union": {
+      "src.json_repair.utils.constants.MissingValueType.__deepcopy__": [
+        "src.json_repair.schema_repair 337:63 call  copy.deepcopy(value)"
+      ]
+    },
+    "src.json_repair.schema_repair.SchemaRepairer._repair_union": {
+      "src.json_repair.utils.constants.MissingValueType.__deepcopy__": [
+        "src.json_repair.schema_repair 315:60 call  copy.deepcopy(value)"
+      ]
+    },
+    "src.json_repair.schema_repair._require_jsonschema": {
+      "<builtin>.ValueError": [
+        "src.json_repair.schema_repair 35:25 call  ValueError(\"jsonschema is required when using schema-awar..."
+      ]
+    },
+    "src.json_repair.schema_repair._require_pydantic": {
+      "<builtin>.ValueError": [
+        "src.json_repair.schema_repair 42:25 call  ValueError(\"pydantic is required when using schema models.\")"
+      ]
+    },
+    "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__setitem__": {
+      "<builtin>.isinstance": [
+        "src.json_repair.utils.string_file_wrapper 157:47 call  isinstance(index, slice)"
+      ],
+      "<builtin>.len": [
+        "src.json_repair.utils.string_file_wrapper 160:25 call  len(self)"
+      ],
+      "io.TextIOWrapper.seek": [
+        "src.json_repair.utils.string_file_wrapper 163:21 call  self.fd.seek(self._initial_position + start)"
+      ],
+      "io.TextIOWrapper.tell": [
+        "src.json_repair.utils.string_file_wrapper 162:40 call  self.fd.tell()"
+      ],
+      "io.TextIOWrapper.write": [
+        "src.json_repair.utils.string_file_wrapper 164:22 call  self.fd.write(value)"
+      ],
+      "src.json_repair.utils.string_file_wrapper.StringFileWrapper.__len__": [
+        "src.json_repair.utils.string_file_wrapper 160:25 call  len(self)"
+      ]
+    }
+  },
+  "notes": {
+    "src.json_repair.__main__ 6:13 call  sys.exit(cli())": [
+      "module code under `if __name__ == \"__main__\":` (python -m src.json_repair); it keeps its edges"
+    ],
+    "src.json_repair.json_parser 120:31 call  len(self.json_str)": [
+      "self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62); len() of a StringFileWrapper runs its __len__"
+    ],
+    "src.json_repair.json_parser 131:37 call  len(self.json_str)": [
+      "self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.json_parser 184:41 getitem  self.json_str[idx]": [
+      "self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.json_repair 326:29 call  Path(filename).open()": [
+      "Path(...) makes a PosixPath or a WindowsPath on the corresponding platform (the package declares Operating System :: OS Independent)"
+    ],
+    "src.json_repair.json_repair 448:40 call  Path(args.schema).open()": [
+      "Path(...) makes a PosixPath or a WindowsPath on the corresponding platform"
+    ],
+    "src.json_repair.json_repair 463:34 call  sys.stdin.read()": [
+      "the default sys.stdin is an io.TextIOWrapper; a stream that a client puts in its place is a client object (the tests' io.StringIO, rejected in json-repair.rejected.json)"
+    ],
+    "src.json_repair.json_repair 472:57 call  Path(args.output or args.filename).open(mode=\"w\")": [
+      "Path(...) makes a PosixPath or a WindowsPath on the corresponding platform"
+    ],
+    "src.json_repair.json_repair 484:13 call  sys.exit(cli())": [
+      "module code under `if __name__ == \"__main__\":`; it keeps its edges"
+    ],
+    "src.json_repair.parse_object 103:37 getitem  self.json_str[start_index - 1 : self.index + 1]": [
+      "self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.parse_object 171:33 call  self.log( \"While parsing an object we found row values wi...": [
+      "the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable"
+    ],
+    "src.json_repair.parse_object 180:33 call  self.log( \"While parsing an object we found additional ro...": [
+      "the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable"
+    ],
+    "src.json_repair.parse_object 216:29 call  self.log( \"Empty key found in strict mode while parsing o...": [
+      "the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable"
+    ],
+    "src.json_repair.parse_object 239:34 getitem  self.json_str[: self.index + 1]": [
+      "self.json_str is a str or a StringFileWrapper until this assignment makes it a str"
+    ],
+    "src.json_repair.parse_object 276:17 call  self.log( f\"Skipped unsupported patternProperties regex '...": [
+      "the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable"
+    ],
+    "src.json_repair.parse_object 308:21 call  self.log( f\"While parsing an object value we found a stra...": [
+      "the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable"
+    ],
+    "src.json_repair.parse_object 342:38 getitem  self.json_str[: start_index - 1]": [
+      "self.json_str is a str or a StringFileWrapper until this assignment makes it a str"
+    ],
+    "src.json_repair.parse_object 384:21 call  self.log( \"Found an extra closing brace that shouldn't be...": [
+      "the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable"
+    ],
+    "src.json_repair.parse_object 395:21 call  self.log( \"Found a comma and string delimiter after objec...": [
+      "the parser's log is assigned only in JSONParser.__init__ (json_parser.py:76, 79): the bound method _log when logging is true, else the no-op lambda; both are reachable"
+    ],
+    "src.json_repair.parse_string 169:23 call  len(self.json_str)": [
+      "self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.parse_string 307:28 call  len(self.json_str)": [
+      "self.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.parse_string_helpers.object_value_context 34:38 call  skip_to_character([*STRING_DELIMITERS, \"}\"], value_start_...": [
+      "_bare_member_has_recoverable_value is private; its one package call (73:90) passes classify_object_value_comma's skip_to_character, which is cached_skip_to_character or parser.skip_to_character (42:25)"
+    ],
+    "src.json_repair.parse_string_helpers.parse_json_llm_block 14:23 getitem  parser.json_str[parser.index : parser.index + 7]": [
+      "parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.parser_parenthesized 114:12 call  len(parser.json_str)": [
+      "parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.parser_parenthesized 16:12 call  len(parser.json_str)": [
+      "parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.parser_parenthesized 25:29 getitem  parser.json_str[i]": [
+      "parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.parser_parenthesized 91:29 getitem  parser.json_str[i]": [
+      "parser.json_str is a str or a StringFileWrapper (json_parser.py:58, 62)"
+    ],
+    "src.json_repair.schema_repair 315:60 call  copy.deepcopy(value)": [
+      "value is not MISSING_VALUE itself (repair_value returned for it at 273), but it can be a container that holds it: the package's tests pass {\"a\": MISSING_VALUE} to the public repair_value (tests/test_schema_repairer.py:479-480), an admitted value by B2's test clause (the lead's ruling on audit F1); with a schema {\"anyOf\": [...]} that dict reaches this deepcopy, which calls MISSING_VALUE.__deepcopy__ back"
+    ],
+    "src.json_repair.schema_repair 337:63 call  copy.deepcopy(value)": [
+      "the tests' container {\"a\": MISSING_VALUE} (see 315:60) reaches this deepcopy with a schema whose type is a list, such as {\"type\": [\"object\", \"null\"]}; deepcopy calls MISSING_VALUE.__deepcopy__ back"
+    ],
+    "src.json_repair.utils.string_file_wrapper 160:25 call  len(self)": [
+      "len(self) of a StringFileWrapper runs its __len__"
+    ],
+    "src.json_repair.utils.string_file_wrapper 162:40 call  self.fd.tell()": [
+      "referee's ruling (a) after Codex audit round 1: rule A keeps the body edges of this method, which the package never calls, and B1 admits the wrappers that the package creates, whose fd is the io.TextIOWrapper of from_file (json_repair.py:326, json_parser.py:62); the instance need not escape to the client; a client's own stream stays opaque (B5)"
+    ],
+    "src.json_repair.utils.string_file_wrapper 163:21 call  self.fd.seek(self._initial_position + start)": [
+      "self.fd: the io.TextIOWrapper of from_file (see 162:40)"
+    ],
+    "src.json_repair.utils.string_file_wrapper 164:22 call  self.fd.write(value)": [
+      "the arguments bind; on the read-only stream of from_file write is entered and raises io.UnsupportedOperation in its body, which keeps the edge (batch-6 ruling on binding for a callable written in C)"
+    ]
+  },
+  "trace": "dynamic/json-repair.json"
+}

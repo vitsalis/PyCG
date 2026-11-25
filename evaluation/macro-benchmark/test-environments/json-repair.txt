@@ -1,0 +1,82 @@
+# The test environment of json-repair 0.64.2 (batch 6): the
+# full closure on CPython 3.14 for Linux aarch64, each file by version and
+# SHA-256. json-repair itself is not installed: the trace uses the checkout
+# projects/json-repair.
+#   pip install --require-hashes --only-binary :all: --no-deps -r json-repair.txt
+#
+# "scan" names the hashes that the security scan of the round lists (its
+# section 3; the scan took them from PyPI's JSON and read no wheel); "PyPI"
+# names the hashes taken from PyPI's JSON for that version by the builder of
+# this file; "scan and PyPI" names a native distribution whose manylinux
+# hash the scan lists and whose musllinux hash comes from PyPI's JSON. No
+# wheel was downloaded or read for this batch. Every hash below
+# was checked against PyPI's JSON for its version on 2026-11-22, and the
+# closure was computed from the requires_dist of each pinned release, with
+# the markers evaluated for CPython 3.14 on Linux aarch64 and no extra (one
+# extra where a comment says so); a wheel's own METADATA could ask for more
+# (UNVERIFIED until pip installs the list with --no-deps and trace.sh compares
+# the distributions).
+#
+# Each version but pytest's stack is the newest release that is not yanked
+# and was uploaded on or before the release of json-repair (2026-10-23);
+# these are also the versions of upstream's uv.lock at the tag for Python
+# 3.11 and later (the scan compared every locked hash with PyPI's).
+# Where a distribution has a pure-Python wheel, only that wheel is pinned.
+# Platform wheels: the cp314 aarch64 wheels for Linux, manylinux (glibc, the
+# python:3.14-slim image) and musllinux.
+# Installed by the lead's decision: jsonschema and pydantic with their
+# closures (upstream's dependency group schema). Not installed: coverage,
+# pytest-benchmark and its dependency py-cpuinfo2 (tests/test_performance.py
+# is left out), mypy and ty (type tools that would read the package), Flask.
+
+# scan. 9.2.0, as for batches 3 to 5 (the lead's decision: one
+# pytest stack for the benchmark, not pytest by release date).
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# scan (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# scan (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# scan (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# scan (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+
+# scan. The schema-guided repair validates with it (about 50 tests).
+jsonschema==4.26.0 \
+    --hash=sha256:d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce
+# scan (jsonschema, referencing). A library here; attrs was dropped from
+# round 5 (analysed before the draw).
+attrs==26.1.0 \
+    --hash=sha256:c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309
+# scan (jsonschema). Data: the meta-schemas.
+jsonschema-specifications==2025.9.1 \
+    --hash=sha256:98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe
+# scan (jsonschema, jsonschema-specifications).
+referencing==0.37.0 \
+    --hash=sha256:381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231
+# scan and PyPI (jsonschema, referencing). A Rust extension; no pure wheel.
+rpds-py==2026.9.1 \
+    --hash=sha256:07deecbfce94c78473018bc7d10b337cc651d12df87a1eb2cb3e4024bc9c33d0 \
+    --hash=sha256:e6d198bad4e49dd6732fbd636e2fc5c082f45c8cad0b4acb756b00c82c76072e
+# scan. The model paths of schema_from_input and load_schema_model (11
+# tests).
+pydantic==2.14.1 \
+    --hash=sha256:9195d967ec791692a04438115466764fb8b9a27b31f14a760437694f40d6b454
+# scan and PyPI (pydantic). A Rust extension; no pure wheel.
+pydantic-core==2.50.1 \
+    --hash=sha256:0036473f5583e6a60e50b8b21651511564277a3f05cc5dab8cf579f552cd5f6c \
+    --hash=sha256:844b869f118e22a41a091bdcedda8a71bc1b0f62c38d1a0c3211cece47e1d8fc
+# scan (pydantic).
+annotated-types==0.8.0 \
+    --hash=sha256:f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0
+# scan (pydantic, pydantic-core, typing-inspection).
+typing-extensions==4.16.0 \
+    --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8
+# scan (pydantic).
+typing-inspection==0.4.4 \
+    --hash=sha256:65b8397ba37ccbce054456aaccddfc91e6e3083c92824df348d96ca832f3f147

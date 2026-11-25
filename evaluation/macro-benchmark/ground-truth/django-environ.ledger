@@ -1,0 +1,994 @@
+# Call-site ledger of django-environ at 6e1b461125e2313cae362e1ab9426a97d9e843b0 (v0.14.0).
+# Decide every `undecided` line; see macro-benchmark/README.md.
+#
+# django-environ.md ("Scope rules") shows how this ledger applies the global
+# rules A, B1-B5 and C. Where package objects flow:
+# - A Path (environ.environ.Path) reaches package code only as `self` in
+#   Path's methods, as `other` in Path.__eq__/__add__/__contains__ (after an
+#   isinstance test, only its __root__ str is used), and through Env.path:
+#   Env.path's `default` is annotated Union['Path', NoValue], so get_value's
+#   `default` (and its result `value`) can be a Path, smart casting makes
+#   `cast = type(default)` the class Path, and Path.__init__ can get a Path as
+#   `start`. Path.__root__ is always the str that os.path.abspath returns.
+#   Path defines __eq__ without __hash__, so it is unhashable.
+# - A FileAwareMapping reaches package code as `self` in its own methods and
+#   as Env.ENVIRON of FileAwareEnv (environ.py:1193). FileAwareMapping.env is
+#   the package default os.environ or a client mapping (opaque, B5).
+# - Env.ENVIRON is os.environ (Env), the FileAwareMapping of FileAwareEnv, or
+#   a dict that the tests assign (B2: the tests make the assignment); that
+#   dict is the client's own value (opaque, B5).
+# - The config dicts, cfg dicts, files_cache and **overrides are dicts; url is
+#   a urllib.parse.ParseResult (documented "urllib.parse.ParseResult or str
+#   url"; a str is parsed with urlparse); its fields are strs.
+default reject environ.environ.Path.__eq__: no operand of this comparison, `in` test or dict key lookup is a Path; the compared and looked-up values are strs, bytes, ints, ParseResult fields, lists, tuples, dicts, typing forms, cast types and client values (opaque, B5); a Path reaches only get_value's `value != default` (which runs Path.__ne__) and Path's own methods (which compare __root__ strs), and Path is unhashable (__eq__ without __hash__), so it is never a dict key or set element
+default reject environ.environ.Path.__getitem__: no Path is subscripted, iterated, unpacked or searched by the package; the operands are strs, lists, tuples, dicts, ParseResults, parse_qs results, re.Match objects, typing forms in annotations, os.environ, a FileAwareMapping, or client values (opaque, B5)
+default reject environ.fileaware_mapping.FileAwareMapping.__getitem__: the package subscripts or searches a FileAwareMapping only as Env.ENVIRON of FileAwareEnv (accepted at get_value's self.ENVIRON[var_name], at Env.__contains__ and in read_env's lambdas); at this site the operand is a str, list, tuple, dict, ParseResult, parse_qs result, typing form, os.environ, or a client value or mapping (FileAwareMapping.env, opaque, B5)
+default reject environ.fileaware_mapping.FileAwareMapping.__len__: no truth test or len() of the package has a FileAwareMapping operand; the tested values are bools, strs, ints, None, lists, tuples, dicts, ParseResult fields, re.Match objects, cast values and client values (opaque, B5)
+default reject environ.fileaware_mapping.FileAwareMapping.__iter__: no iteration, unpacking, `in` test or iterating builtin of the package has a FileAwareMapping operand, except iter(self) in FileAwareMapping.__len__ (accepted there); the operands are strs, lists, tuples, dicts and their views, parse_qs results, os.environ, or client mappings (FileAwareMapping.env, opaque, B5)
+default reject environ.fileaware_mapping.FileAwareMapping.__setitem__: the stored-to objects are dicts (config, config_options, cfg, files_cache, **overrides) or FileAwareMapping.env (os.environ or a client mapping); the package writes into a FileAwareMapping only through MutableMapping.update and .setdefault in read_env's lambdas (accepted there)
+default reject environ.environ.Env.__contains__, environ.environ.Path.__contains__: no `in` test of the package has an Env or a Path as its container; the containers are strs, lists, tuples, dicts, os.environ, a FileAwareMapping, or client values
+default reject environ.environ.Path.__add__: no `+` or `+=` of the package has a Path as its left operand; the operands are strs, tuples and ints
+default reject environ.environ.Path.__repr__, environ.environ.NoValue.__repr__: no format field, %r/%s argument or repr() of the package has a Path operand, and a NoValue only at Env.str's {value} (282:38) and parse_value's cast(value) (613:25), which accept it (audit F1, F2); the formatted values are strs, ints, None, dicts of those, classes (type(...)), cast values or client values (opaque, B5), and the logged values are the client's var and cast and env_file (str, pathlib.Path or a client stream)
+
+== environ.compat
+
+[environ.compat]
+14:13 call  find_spec('simplejson')
+    -> importlib.util.find_spec
+19:13 call  find_spec('django')
+    -> importlib.util.find_spec
+62:40 call  choose_rediscache_driver()
+    -> environ.compat.choose_rediscache_driver
+65:41 call  choose_postgres_driver()
+    -> environ.compat.choose_postgres_driver
+68:45 call  choose_pymemcache_driver()
+    -> environ.compat.choose_pymemcache_driver
+
+[environ.compat.choose_rediscache_driver]
+33:17 call  find_spec('django_redis')
+    -> importlib.util.find_spec
+    note: the tests patch environ.compat.find_spec with a MagicMock (test_cache.py:147); that call is the tests' own object (rejected trace edge)
+
+[environ.compat.choose_pymemcache_driver]
+55:35 call  find_spec('pymemcache')
+    -> importlib.util.find_spec
+    note: the tests patch environ.compat.find_spec with a MagicMock (test_cache.py:130); that call is the tests' own object (rejected trace edge)
+
+== environ.environ
+
+[environ.environ]
+48:27 call  logging.getLogger(__name__)
+    -> logging.getLogger
+121:21 call  NoValue()
+    note: NoValue defines no __init__; the first __init__ of its MRO is object.__init__, which adds no edge
+220:49 call  scheme.startswith("elasticsearch")
+    -> <builtin>.str.startswith
+    note: class-body comprehension over the keys (strs) of SEARCH_SCHEMES; its calls belong to the module
+558:6 decorator  @classmethod
+    -> <builtin>.classmethod
+616:6 decorator  @classmethod
+    -> <builtin>.classmethod
+761:6 decorator  @classmethod
+    -> <builtin>.classmethod
+843:6 decorator  @classmethod
+    -> <builtin>.classmethod
+896:6 decorator  @classmethod
+    -> <builtin>.classmethod
+924:6 decorator  @classmethod
+    -> <builtin>.classmethod
+942:6 decorator  @classmethod
+    -> <builtin>.classmethod
+964:6 decorator  @classmethod
+    -> <builtin>.classmethod
+974:6 decorator  @classmethod
+    -> <builtin>.classmethod
+983:6 decorator  @classmethod
+    -> <builtin>.classmethod
+990:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1049:6 decorator  @classmethod
+    -> <builtin>.classmethod
+1193:31 call  FileAwareMapping()
+    -> environ.fileaware_mapping.FileAwareMapping.__init__
+1219:6 decorator  @property
+    -> <builtin>.property
+1300:6 decorator  @staticmethod
+    -> <builtin>.staticmethod
+
+[environ.environ._cast]
+61:32 call  ast.literal_eval(value)
+    -> ast.literal_eval
+
+[environ.environ._cast_int]
+68:15 call  int(v)
+    -> <builtin>.int
+    reject environ.environ.Env.int: the name int in a function body is the builtin; Env.int is a class attribute, not in scope
+68:29 call  hasattr(v, 'isdigit')
+    -> <builtin>.hasattr
+68:57 call  v.isdigit()
+    -> <builtin>.str.isdigit
+    note: v is a parse_qs value (str), a ParseResult port (int or None, no isdigit) or the joined port str of db_url_config; only a str has isdigit
+
+[environ.environ._cast_urlstr]
+72:19 call  unquote(v)
+    -> urllib.parse.unquote
+72:36 call  isinstance(v, str)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.str: the argument str is the builtin; Env.str is a class attribute, not in scope
+
+[environ.environ._urlparse_quote]
+76:20 call  urlparse(quote(url, safe=':/?&=@'))
+    -> urllib.parse.urlparse
+76:26 call  quote(url, safe=':/?&=@')
+    -> urllib.parse.quote
+
+[environ.environ.NoValue.__repr__]
+83:19 format  {self.__class__.__name__}
+    reject *: the field is the class name, a str
+
+[environ.environ.Env.__call__]
+250:30 call  self.get_value( var, cast=cast, default=default, parse_de...
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.__contains__]
+261:20 op  var in self.ENVIRON
+    -> environ.fileaware_mapping.FileAwareMapping.__getitem__
+    reject environ.environ.Env.__contains__, environ.environ.Path.__contains__: the container is Env.ENVIRON (os.environ, a FileAwareMapping or the tests' dict), not an Env or a Path
+    reject environ.environ.Path.__eq__, environ.environ.Path.__getitem__, environ.fileaware_mapping.FileAwareMapping.__iter__: var is a str (annotated _str); a FileAwareMapping inherits collections.abc.Mapping.__contains__, which looks the key up with self[key] and does not iterate
+    note: for FileAwareEnv, ENVIRON is the FileAwareMapping of environ.py:1193, and Mapping.__contains__ calls FileAwareMapping.__getitem__; os.environ and the tests' dict run no package code
+
+[environ.environ.Env.str]
+275:31 call  self.get_value(var, cast=str, default=default)
+    -> environ.environ.Env.get_value
+    reject environ.environ.Env.str: the argument str is the builtin; Env.str is a class attribute, not in scope
+277:26 call  re.sub(r'(\\r)?\\n', r'\n', value)
+    -> re.sub
+281:43 call  ImproperlyConfigured( f"Invalid value: {value} not in {ch...
+    -> <builtin>.Exception.__init__
+    -> django.core.exceptions.ImproperlyConfigured
+    note: optional import compat.py:19-25: with Django, ImproperlyConfigured is django.core.exceptions.ImproperlyConfigured (not installed in the test environment: a missing module); without it, the package class compat.ImproperlyConfigured(Exception), whose first __init__ is Exception's
+282:38 format  {value}
+    -> environ.environ.NoValue.__repr__
+    reject environ.environ.Path.__str__: value is the str that get_value(cast=str) returns, or the default, annotated Union[str, NoValue]; a Path is not admitted
+    note: the default can be a NoValue other than NOTSET (B2: the annotation names the public class NoValue; get_value tests the default by identity, 522): env.str('UNSET', default=NoValue(), choices=['a']) returns that NoValue, and formatting it runs object.__str__, then NoValue.__repr__ (audit F1)
+282:53 format  {choices}
+    reject *: choices is a client value (opaque, B5)
+
+[environ.environ.Env.bytes]
+296:31 call  self.get_value(var, cast=str, default=default)
+    -> environ.environ.Env.get_value
+    reject environ.environ.Env.str: the argument str is the builtin; Env.str is a class attribute, not in scope
+297:19 call  hasattr(value, 'encode')
+    -> <builtin>.hasattr
+298:32 call  value.encode(encoding)
+    -> <builtin>.str.encode
+    note: value is the str of the str cast; the bytes default (annotation Union[bytes, NoValue]) has no encode
+
+[environ.environ.Env.bool]
+307:30 call  self.get_value(var, cast=bool, default=default)
+    -> environ.environ.Env.get_value
+    reject environ.environ.Env.bool: the argument bool is the builtin; Env.bool is a class attribute, not in scope
+
+[environ.environ.Env.int]
+315:30 call  self.get_value(var, cast=int, default=default)
+    -> environ.environ.Env.get_value
+    reject environ.environ.Env.int: the argument int is the builtin; Env.int is a class attribute, not in scope
+
+[environ.environ.Env.float]
+325:30 call  self.get_value(var, cast=float, default=default)
+    -> environ.environ.Env.get_value
+    reject environ.environ.Env.float: the argument float is the builtin; Env.float is a class attribute, not in scope
+
+[environ.environ.Env.json]
+332:30 call  self.get_value(var, cast=json.loads, default=default)
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.list]
+339:30 call  self.get_value( var, cast=list if not cast else [cast], d...
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.tuple]
+350:30 call  self.get_value( var, cast=tuple if not cast else (cast,),...
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.dict]
+361:30 call  self.get_value(var, cast=cast, default=default)
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.url]
+368:30 call  self.get_value( var, cast=urlparse, default=default, pars...
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.db_url]
+386:34 call  self.db_url_config( self.get_value(var, default=default),...
+    -> environ.environ.Env.db_url_config
+387:27 call  self.get_value(var, default=default)
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.cache_url]
+404:37 call  self.cache_url_config( self.url(var, default=default), ba...
+    -> environ.environ.Env.cache_url_config
+405:21 call  self.url(var, default=default)
+    -> environ.environ.Env.url
+
+[environ.environ.Env.email_url]
+422:37 call  self.email_url_config( self.url(var, default=default), ba...
+    -> environ.environ.Env.email_url_config
+423:21 call  self.url(var, default=default)
+    -> environ.environ.Env.url
+
+[environ.environ.Env.search_url]
+438:38 call  self.search_url_config( self.url(var, default=default), e...
+    -> environ.environ.Env.search_url_config
+439:21 call  self.url(var, default=default)
+    -> environ.environ.Env.url
+
+[environ.environ.Env.channels_url]
+454:40 call  self.channels_url_config( self.url(var, default=default),...
+    -> environ.environ.Env.channels_url_config
+455:21 call  self.url(var, default=default)
+    -> environ.environ.Env.url
+
+[environ.environ.Env.path]
+471:20 call  Path(self.get_value(var, default=default), **kwargs)
+    -> environ.environ.Path.__init__
+471:35 call  self.get_value(var, default=default)
+    -> environ.environ.Env.get_value
+
+[environ.environ.Env.get_value]
+493:21 call  logger.debug( "get %r casted as %r with default type %s",...
+    -> logging.Logger.debug
+    note: logger is logging.getLogger(__name__), a logging.Logger; the lazily formatted arguments are var (a str), cast (a builtin, json.loads, urlparse, the class Path, a list or tuple of a cast, or a client value) and a class name: no package __repr__ runs
+495:28 call  type(default)
+    -> <builtin>.type
+497:22 format  {self.prefix}
+    reject *: prefix is a str ("" in __init__; the documentation assigns a str, docs/tips.rst "Handling prefixes")
+497:35 format  {var}
+    reject *: var is annotated _str (a str; bytes in the proxy recursion of line 540)
+502:34 call  len(var_info)
+    -> <builtin>.len
+    note: var_info is a value of the client's scheme (a cast or a (cast, default) tuple)
+520:33 getitem  self.ENVIRON[var_name]
+    -> environ.fileaware_mapping.FileAwareMapping.__getitem__
+    reject environ.environ.Path.__eq__, environ.environ.Path.__getitem__: the subscripted object is Env.ENVIRON (os.environ, a FileAwareMapping or the tests' dict) and the key a str
+    note: for FileAwareEnv, ENVIRON is the FileAwareMapping of environ.py:1193
+523:39 format  {var_name}
+    reject *: var_name is a str
+524:43 call  ImproperlyConfigured(error_msg)
+    -> <builtin>.Exception.__init__
+    -> django.core.exceptions.ImproperlyConfigured
+    note: optional import compat.py:19-25 (see Env.str, 281:43)
+528:30 call  warnings.warn( f'{var_name} environment variable not set;...
+    -> warnings.warn
+    note: warnings instantiates DefaultValueWarning, whose __init__ is UserWarning's (outside, no edge)
+529:23 format  {var_name}
+    reject *: var_name is a str
+536:36 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.bytes: the argument bytes is the builtin; Env.bytes is a class attribute, not in scope
+537:38 call  isinstance(value, bytes)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.bytes: the argument bytes is the builtin; Env.bytes is a class attribute, not in scope
+538:19 call  hasattr(value, 'startswith')
+    -> <builtin>.hasattr
+538:61 call  value.startswith(prefix)
+    -> <builtin>.str.startswith
+    -> <builtin>.bytes.startswith
+    note: value is the str of os.environ or of a FileAwareMapping, or the default; Env.bytes passes a default annotated Union[bytes, NoValue], and lines 536-537 handle bytes explicitly; a Path has no startswith
+539:33 call  value.lstrip(prefix)
+    -> <builtin>.str.lstrip
+    -> <builtin>.bytes.lstrip
+    note: a str value, or the bytes default of Env.bytes when it starts with b'$'
+540:35 call  self.get_value(value, cast=cast, default=default)
+    -> environ.environ.Env.get_value
+542:41 call  hasattr(value, 'replace')
+    -> <builtin>.hasattr
+543:34 call  value.replace(escape, prefix)
+    -> <builtin>.str.replace
+    -> <builtin>.bytes.replace
+    note: escape_proxy is documented (docs/tips.rst "Escape Proxy"); the value is a str or the bytes default of Env.bytes (escape and prefix are bytes then)
+548:35 call  isinstance(default, NoValue)
+    -> <builtin>.isinstance
+549:28 call  type(default)
+    -> <builtin>.type
+553:18 op  value != default
+    -> environ.environ.Path.__ne__
+    note: Env.path passes a default annotated Union['Path', NoValue]; then value is that Path or the str of the environment, and `!=` runs Path.__ne__ (reflected for str != Path, since str.__ne__ returns NotImplemented); Path.__ne__ calls Path.__eq__ itself
+554:37 call  self.parse_value(value, cast)
+    -> environ.environ.Env.parse_value
+
+[environ.environ.Env.parse_value]
+571:28 call  int(value)
+    -> <builtin>.int
+    reject environ.environ.Env.int: the name int in a function body is the builtin; Env.int is a class attribute, not in scope
+571:36 op  int(value) != 0
+    reject environ.environ.Path.__ne__: the operands are ints
+573:36 call  value.lower()
+    -> <builtin>.str.lower
+    note: reached when int(value) raises ValueError: value is a str of the environment or a parse_qs value (_parse_common_search_params passes a str)
+573:44 call  value.lower().strip()
+    -> <builtin>.str.strip
+574:24 call  isinstance(cast, list)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.list: the argument list is the builtin; Env.list is a class attribute, not in scope
+575:25 call  list(map(cast[0], [x for x in value.split(',') if x]))
+    -> <builtin>.list
+    reject environ.environ.Env.list: the name list in a function body is the builtin; Env.list is a class attribute, not in scope
+575:29 call  map(cast[0], [x for x in value.split(',') if x])
+    -> <builtin>.map
+    note: cast[0] is the cast that the client passes to Env.list or in a list of its scheme or dict cast (a client callback, B2/B5); the package makes no list cast of its own
+575:62 call  value.split(',')
+    -> <builtin>.str.split
+576:24 call  isinstance(cast, tuple)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.tuple: the argument tuple is the builtin; Env.tuple is a class attribute, not in scope
+577:30 call  value.strip('(')
+    -> <builtin>.str.strip
+577:41 call  value.strip('(').strip(')')
+    -> <builtin>.str.strip
+577:52 call  value.strip('(').strip(')').split(',')
+    -> <builtin>.str.split
+578:26 call  tuple(map(cast[0], [x for x in val if x]))
+    -> <builtin>.tuple
+    reject environ.environ.Env.tuple: the name tuple in a function body is the builtin; Env.tuple is a class attribute, not in scope
+578:30 call  map(cast[0], [x for x in val if x])
+    -> <builtin>.map
+    note: cast[0] is the cast that the client passes to Env.tuple or in a tuple of its scheme or dict cast (a client callback, B2/B5)
+579:24 call  isinstance(cast, dict)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.dict: the argument dict is the builtin; Env.dict is a class attribute, not in scope
+580:32 call  cast.get('key', str)
+    -> <builtin>.dict.get
+    reject environ.environ.Env.str: the argument str is the builtin; Env.str is a class attribute, not in scope
+    note: cast is a dict (isinstance at 579; docs/types.rst passes dict(value=str, cast=dict(...)))
+581:34 call  cast.get('value', str)
+    -> <builtin>.dict.get
+    reject environ.environ.Env.str: the argument str is the builtin; Env.str is a class attribute, not in scope
+582:41 call  cast.get('cast', {})
+    -> <builtin>.dict.get
+583:25 call  dict(map( lambda kv: ( key_cast(kv[0]), cls.parse_value( ...
+    -> <builtin>.dict
+    reject environ.environ.Env.dict: the name dict in a function body is the builtin; Env.dict is a class attribute, not in scope
+583:29 call  map( lambda kv: ( key_cast(kv[0]), cls.parse_value( kv[1]...
+    -> <builtin>.map
+    -> environ.environ.Env.parse_value.<lambda1>
+    note: dict() iterates the lazy map in this function, so the lambda is a callee of the map site (README, "Limits of the site finder")
+591:27 call  val.split('=')
+    -> <builtin>.str.split
+591:55 call  value.split(';')
+    -> <builtin>.str.split
+594:25 call  dict([v.split('=', 1) for v in value.split(',') if v])
+    -> <builtin>.dict
+    reject environ.environ.Env.dict: the name dict in a function body is the builtin; Env.dict is a class attribute, not in scope
+594:34 call  v.split('=', 1)
+    -> <builtin>.str.split
+594:63 call  value.split(',')
+    -> <builtin>.str.split
+596:44 call  value.split(',')
+    -> <builtin>.str.split
+598:30 call  value.strip('(')
+    -> <builtin>.str.strip
+598:41 call  value.strip('(').strip(')')
+    -> <builtin>.str.strip
+598:52 call  value.strip('(').strip(')').split(',')
+    -> <builtin>.str.split
+600:26 call  tuple([x for x in val if x])
+    -> <builtin>.tuple
+    reject environ.environ.Env.tuple: the name tuple in a function body is the builtin; Env.tuple is a class attribute, not in scope
+603:31 call  re.sub(r'[^\d,.-]', '', value)
+    -> re.sub
+606:29 call  re.split(r'[,.]', float_str)
+    -> re.split
+607:19 call  len(parts)
+    -> <builtin>.len
+610:31 format  {''.join(parts[0:-1])}
+    reject *: the field is a str
+610:39 call  ''.join(parts[0:-1])
+    -> <builtin>.str.join
+610:54 format  {parts[-1]}
+    reject *: the field is a str (an item of re.split)
+611:26 call  float(float_str)
+    -> <builtin>.float
+    reject environ.environ.Env.float: the name float in a function body is the builtin; Env.float is a class attribute, not in scope
+613:25 call  cast(value)
+    -> <builtin>.str
+    -> <builtin>.int
+    -> json.loads
+    -> simplejson.loads
+    -> urllib.parse.urlparse
+    -> environ.environ.Path.__init__
+    -> environ.environ.Path.__str__
+    -> environ.environ.NoValue.__repr__
+    note: a value site. The package's own casts that reach this branch: str (Env.str, Env.bytes, the key and value defaults of a dict cast, 580-581), int (Env.int, the search parameters 939, 958, 969, 980), compat.json.loads (Env.json; json, or simplejson when installed: optional import compat.py:14-17, simplejson is a missing module), urlparse (Env.url) and the class Path (smart casting, 549, of the Path default of Env.path) or Path.__init__. bool, float, list, tuple, dict and the list/tuple/dict casts have their own branches. Path.__str__: str(value) of a Path value, when the client passes a Path default (admitted through Env.path, B2), cast=str and parse_default=True to get_value or Env.__call__ for an unset variable. NoValue.__repr__: the same witness with a NoValue default (admitted: the package passes its annotated Union[X, NoValue] defaults and NOTSET there; smart casting skips a NoValue, 548); str() of a NoValue runs object.__str__, then NoValue.__repr__ (audit F2; the combination rule of the lead's ruling on J5). Every other cast is the client's (its argument, its scheme, or the class of its own default through smart casting): a client callback (B2/B5)
+
+[environ.environ.Env.parse_value.<lambda1>]
+585:29 call  key_cast(kv[0])
+    -> <builtin>.str
+    note: a value site. key_cast is cast.get('key', str) (580): the package default str, or the client's key cast (a client callback, B2/B5)
+586:36 call  cls.parse_value( kv[1], value_cast_by_key.get(kv[0], valu...
+    -> environ.environ.Env.parse_value
+588:46 call  value_cast_by_key.get(kv[0], value_cast)
+    -> <builtin>.dict.get
+    note: value_cast_by_key is the client's 'cast' dict (documented as dict(foo=float, ...), docs/types.rst) or the package default {}
+
+[environ.environ.Env.db_url_config]
+644:26 call  isinstance(url, cls.URL_CLASS)
+    -> <builtin>.isinstance
+655:31 call  urlparse(url)
+    -> urllib.parse.urlparse
+658:38 call  _urlparse_quote(url)
+    -> environ.environ._urlparse_quote
+664:34 call  _urlparse_quote(urlunparse(url))
+    -> environ.environ._urlparse_quote
+664:45 call  urlunparse(url)
+    -> urllib.parse.urlunparse
+667:28 call  unquote_plus(path.split('?', 2)[0])
+    -> urllib.parse.unquote_plus
+667:39 call  path.split('?', 2)
+    -> <builtin>.str.split
+676:30 call  warnings.warn( f'SQLite URL contains host component {url....
+    -> warnings.warn
+682:22 format  {url.scheme}
+    reject *: a ParseResult field, a str
+682:37 format  {url.hostname}
+    reject *: ParseResult.hostname, a str or None
+684:28 format  {url.port}
+    reject *: ParseResult.port, an int
+686:38 call  url.netloc.rsplit('@', 1)
+    -> <builtin>.str.rsplit
+687:28 call  unquote(user_host[-1])
+    -> urllib.parse.unquote
+691:40 call  db_netloc.split(',')
+    -> <builtin>.str.split
+692:35 call  host.startswith('[')
+    -> <builtin>.str.startswith
+693:36 call  host.find(']')
+    -> <builtin>.str.find
+    reject environ.environ.Path.find: host is a str (an item of str.split)
+694:28 op  end != -1
+    reject environ.environ.Path.__ne__: the operands are ints
+695:42 call  host_parts.append((host[:end + 1], host[end + 2:]))
+    -> <builtin>.list.append
+697:42 call  host_parts.append((host, ''))
+    -> <builtin>.list.append
+699:41 call  host.rsplit(':', 1)
+    -> <builtin>.str.rsplit
+700:27 call  len(hparts)
+    -> <builtin>.len
+700:62 call  hparts[1].isdigit()
+    -> <builtin>.str.isdigit
+701:42 call  host_parts.append(tuple(hparts))
+    -> <builtin>.list.append
+701:48 call  tuple(hparts)
+    -> <builtin>.tuple
+    reject environ.environ.Env.tuple: the name tuple in a function body is the builtin; Env.tuple is a class attribute, not in scope
+703:42 call  host_parts.append((host, ''))
+    -> <builtin>.list.append
+705:25 call  list(itertools.zip_longest(*host_parts))
+    -> <builtin>.list
+    reject environ.environ.Env.list: the name list in a function body is the builtin; Env.list is a class attribute, not in scope
+705:47 call  itertools.zip_longest(*host_parts)
+    -> itertools.zip_longest
+706:32 call  ','.join(hinfo[0])
+    -> <builtin>.str.join
+707:28 call  ','.join(filter(None, hinfo[1]))
+    -> <builtin>.str.join
+707:35 call  filter(None, hinfo[1])
+    -> <builtin>.filter
+707:59 call  len(hinfo)
+    -> <builtin>.len
+713:22 call  config.update({ 'NAME': path or '', 'USER': _cast_urlstr(...
+    -> <builtin>.dict.update
+715:33 call  _cast_urlstr(url.username)
+    -> environ.environ._cast_urlstr
+716:37 call  _cast_urlstr(url.password)
+    -> environ.environ._cast_urlstr
+718:30 call  _cast_int(port)
+    -> environ.environ._cast_int
+722:70 call  path.startswith('/')
+    -> <builtin>.str.startswith
+723:60 call  path.startswith('/')
+    -> <builtin>.str.startswith
+725:57 call  path.rsplit('/', 1)
+    -> <builtin>.str.rsplit
+734:27 delitem  config['PORT']
+    reject *: config is a dict
+736:37 call  str(config['PORT'])
+    -> <builtin>.str
+    reject environ.environ.Env.str: the name str in a function body is the builtin; Env.str is a class attribute, not in scope
+    reject environ.environ.Path.__str__: PORT is the int that _cast_int returns, or a str
+740:33 call  parse_qs(url.query)
+    -> urllib.parse.parse_qs
+740:50 call  parse_qs(url.query).items()
+    -> <builtin>.dict.items
+741:27 call  k.upper()
+    -> <builtin>.str.upper
+742:34 call  config.update({k.upper(): _cast(v[0])})
+    -> <builtin>.dict.update
+742:43 call  k.upper()
+    -> <builtin>.str.upper
+742:52 call  _cast(v[0])
+    -> environ.environ._cast
+744:42 call  config_options.update({k: _cast_int(v[0])})
+    -> <builtin>.dict.update
+744:56 call  _cast_int(v[0])
+    -> environ.environ._cast_int
+755:26 call  config.get('ENGINE', False)
+    -> <builtin>.dict.get
+756:26 call  warnings.warn(f'Engine not recognized from url: {config}')
+    -> warnings.warn
+756:61 format  {config}
+    reject *: config is a dict of strs, ints, None, literal_eval results and an OPTIONS dict of those; its repr runs no package code
+
+[environ.environ.Env.cache_url_config]
+772:26 call  isinstance(url, cls.URL_CLASS)
+    -> <builtin>.isinstance
+775:27 call  urlparse(url)
+    -> urllib.parse.urlparse
+778:39 call  ImproperlyConfigured(f'Invalid cache schema {url.scheme}')
+    -> <builtin>.Exception.__init__
+    -> django.core.exceptions.ImproperlyConfigured
+    note: optional import compat.py:19-25 (see Env.str, 281:43)
+778:63 format  {url.scheme}
+    reject *: a ParseResult field, a str
+780:36 call  url.netloc.split(',')
+    -> <builtin>.str.split
+781:15 call  len(location)
+    -> <builtin>.len
+791:26 call  config.update({ 'LOCATION': url.netloc + url.path, })
+    -> <builtin>.dict.update
+804:26 call  config.update({ 'LOCATION': 'unix:' + url.path, })
+    -> <builtin>.dict.update
+807:35 call  url.scheme.startswith('redis')
+    -> <builtin>.str.startswith
+809:44 call  url.scheme.replace('cache', '')
+    -> <builtin>.str.replace
+813:53 call  url.netloc.split(',')
+    -> <builtin>.str.split
+814:19 call  len(locations)
+    -> <builtin>.len
+832:33 call  parse_qs(url.query)
+    -> urllib.parse.parse_qs
+832:50 call  parse_qs(url.query).items()
+    -> <builtin>.dict.items
+833:30 call  getattr(k, key_modifier)
+    -> <builtin>.getattr
+833:47 call  getattr(k, key_modifier)()
+    -> <builtin>.str.lower
+    -> <builtin>.str.upper
+    note: a value site. k is a parse_qs key (a str) and key_modifier is 'lower' or 'upper' (827-830), so the callee is the bound str.lower or str.upper
+834:34 call  _cast(v[0])
+    -> environ.environ._cast
+835:27 call  k.upper()
+    -> <builtin>.str.upper
+836:34 call  config.update(opt)
+    -> <builtin>.dict.update
+838:42 call  config_options.update(opt)
+    -> <builtin>.dict.update
+
+[environ.environ.Env.email_url_config]
+857:23 call  urlparse(url)
+    -> urllib.parse.urlparse
+857:46 call  isinstance(url, cls.URL_CLASS)
+    -> <builtin>.isinstance
+861:28 call  unquote_plus(path.split('?', 2)[0])
+    -> urllib.parse.unquote_plus
+861:39 call  path.split('?', 2)
+    -> <builtin>.str.split
+864:22 call  config.update({ 'EMAIL_FILE_PATH': path, 'EMAIL_HOST_USER...
+    -> <builtin>.dict.update
+866:44 call  _cast_urlstr(url.username)
+    -> environ.environ._cast_urlstr
+867:48 call  _cast_urlstr(url.password)
+    -> environ.environ._cast_urlstr
+869:36 call  _cast_int(url.port)
+    -> environ.environ._cast_int
+875:39 call  ImproperlyConfigured(f'Invalid email schema {url.scheme}')
+    -> <builtin>.Exception.__init__
+    -> django.core.exceptions.ImproperlyConfigured
+    note: optional import compat.py:19-25 (see Env.str, 281:43)
+875:63 format  {url.scheme}
+    reject *: a ParseResult field, a str
+886:33 call  parse_qs(url.query)
+    -> urllib.parse.parse_qs
+886:50 call  parse_qs(url.query).items()
+    -> <builtin>.dict.items
+887:31 call  k.upper()
+    -> <builtin>.str.upper
+887:44 call  _cast_int(v[0])
+    -> environ.environ._cast_int
+888:27 call  k.upper()
+    -> <builtin>.str.upper
+889:34 call  config.update(opt)
+    -> <builtin>.dict.update
+891:42 call  config_options.update(opt)
+    -> <builtin>.dict.update
+
+[environ.environ.Env.channels_url_config]
+908:23 call  urlparse(url)
+    -> urllib.parse.urlparse
+908:46 call  isinstance(url, cls.URL_CLASS)
+    -> <builtin>.isinstance
+913:39 call  ImproperlyConfigured(f"Invalid channels schema {url.schem...
+    -> <builtin>.Exception.__init__
+    -> django.core.exceptions.ImproperlyConfigured
+    note: optional import compat.py:19-25 (see Env.str, 281:43)
+913:66 format  {url.scheme}
+    reject *: a ParseResult field, a str
+916:37 call  url.scheme.startswith("redis")
+    -> <builtin>.str.startswith
+917:52 call  url.scheme.split("+")
+    -> <builtin>.str.split
+919:43 call  url._replace(scheme=redis_scheme)
+    -> urllib.parse.ParseResult._replace
+    note: url is a urllib.parse.ParseResult (the documented type, or urlparse's result); _replace is the namedtuple method, named through the class of the receiver. On PyPy 3.10 and 3.11 namedtuple makes _replace with exec (lib-python/3/collections/__init__.py:465 and :488), so it has no name there (generated library code); the edge stays through CPython, which defines it with def (Codex audit round 1, metadata)
+919:71 call  url._replace(scheme=redis_scheme).geturl()
+    -> urllib.parse.ParseResult.geturl
+
+[environ.environ.Env._parse_common_search_params]
+929:32 call  str(url.query)
+    -> <builtin>.str
+    reject environ.environ.Env.str: the name str in a function body is the builtin; Env.str is a class attribute, not in scope
+    reject environ.environ.Path.__str__: url.query is a ParseResult field, a str
+932:23 call  parse_qs(url.query)
+    -> urllib.parse.parse_qs
+934:71 call  prs['EXCLUDED_INDEXES'][0].split(',')
+    -> <builtin>.str.split
+937:54 call  cls.parse_value(val, bool)
+    -> environ.environ.Env.parse_value
+    reject environ.environ.Env.bool: the argument bool is the builtin; Env.bool is a class attribute, not in scope
+939:48 call  cls.parse_value(prs['BATCH_SIZE'][0], int)
+    -> environ.environ.Env.parse_value
+    reject environ.environ.Env.int: the argument int is the builtin; Env.int is a class attribute, not in scope
+
+[environ.environ.Env._parse_elasticsearch_search_params]
+945:28 call  path.rsplit('/', 1)
+    -> <builtin>.str.rsplit
+947:15 call  len(split)
+    -> <builtin>.len
+948:28 call  '/'.join(split[:-1])
+    -> <builtin>.str.join
+954:32 call  urlunparse( ('https' if secure else 'http', url[1], path,...
+    -> urllib.parse.urlunparse
+958:45 call  cls.parse_value(params['TIMEOUT'][0], int)
+    -> environ.environ.Env.parse_value
+    reject environ.environ.Env.int: the argument int is the builtin; Env.int is a class attribute, not in scope
+
+[environ.environ.Env._parse_solr_search_params]
+967:32 call  urlunparse(('http',) + url[1:2] + (path,) + ('', '', ''))
+    -> urllib.parse.urlunparse
+969:45 call  cls.parse_value(params['TIMEOUT'][0], int)
+    -> environ.environ.Env.parse_value
+    reject environ.environ.Env.int: the argument int is the builtin; Env.int is a class attribute, not in scope
+
+[environ.environ.Env._parse_whoosh_search_params]
+980:48 call  cls.parse_value(params['POST_LIMIT'][0], int)
+    -> environ.environ.Env.parse_value
+    reject environ.environ.Env.int: the argument int is the builtin; Env.int is a class attribute, not in scope
+
+[environ.environ.Env.search_url_config]
+1002:23 call  urlparse(url)
+    -> urllib.parse.urlparse
+1002:46 call  isinstance(url, cls.URL_CLASS)
+    -> <builtin>.isinstance
+1005:28 call  unquote_plus(url.path[1:].split('?', 2)[0])
+    -> urllib.parse.unquote_plus
+1005:47 call  url.path[1:].split('?', 2)
+    -> <builtin>.str.split
+1010:66 call  scheme.endswith('s')
+    -> <builtin>.str.endswith
+1014:39 call  ImproperlyConfigured(f'Invalid search schema {url.scheme}')
+    -> <builtin>.Exception.__init__
+    -> django.core.exceptions.ImproperlyConfigured
+    note: optional import compat.py:19-25 (see Env.str, 281:43)
+1014:64 format  {url.scheme}
+    reject *: a ParseResult field, a str
+1018:54 call  cls._parse_common_search_params(url)
+    -> environ.environ.Env._parse_common_search_params
+1019:22 call  config.update(cfg)
+    -> <builtin>.dict.update
+1025:25 call  path.endswith('/')
+    -> <builtin>.str.endswith
+1029:26 call  config.update(cls._parse_solr_search_params(url, path, pa...
+    -> <builtin>.dict.update
+1029:56 call  cls._parse_solr_search_params(url, path, params)
+    -> environ.environ.Env._parse_solr_search_params
+1033:26 call  config.update(cls._parse_elasticsearch_search_params( url...
+    -> <builtin>.dict.update
+1033:65 call  cls._parse_elasticsearch_search_params( url, path, secure...
+    -> environ.environ.Env._parse_elasticsearch_search_params
+1040:26 call  config.update(cls._parse_whoosh_search_params(params))
+    -> <builtin>.dict.update
+1040:58 call  cls._parse_whoosh_search_params(params)
+    -> environ.environ.Env._parse_whoosh_search_params
+1042:26 call  config.update(cls._parse_xapian_search_params(params))
+    -> <builtin>.dict.update
+1042:58 call  cls._parse_xapian_search_params(params)
+    -> environ.environ.Env._parse_xapian_search_params
+
+[environ.environ.Env.read_env]
+1084:34 call  sys._getframe()
+    -> sys._getframe
+1087:35 call  RuntimeError('Unable to determine caller frame')
+    -> <builtin>.RuntimeError
+    note: reached when read_env runs with no Python caller frame, as when a client starts it with _thread.start_new_thread(Env.read_env, ()) or registers it with atexit: f_back of its frame is then None
+1088:36 call  os.path.join( os.path.dirname(caller_frame.f_code.co_file...
+    -> os.path.join
+1089:32 call  os.path.dirname(caller_frame.f_code.co_filename)
+    -> os.path.dirname
+1092:34 call  os.path.exists(env_file)
+    -> os.path.exists
+1093:28 call  logger.info( "%s doesn't exist - if you're not configurin...
+    -> logging.Logger.info
+1099:26 call  isinstance(env_file, OPENABLE)
+    -> <builtin>.isinstance
+1100:26 call  open(env_file, encoding=encoding)
+    -> <builtin>.open
+    note: env_file is annotated Optional[Union[str, pathlib.Path, IO[str]]]: a str or a pathlib.Path here (os.PathLike, OPENABLE); environ.Path is not admitted, so no Path.__fspath__
+1101:37 call  f.read()
+    -> io.TextIOWrapper.read
+1103:40 call  env_file.read()
+    note: env_file is the client's stream (annotated IO[str], an abstract type that fixes no class): opaque (B5); the trace's _io.StringIO.read is the tests' stream (rejected)
+1105:24 call  logger.info( "%s not found - if you're not configuring yo...
+    -> logging.Logger.info
+1110:21 call  logger.debug('Read environment variables from: %s', env_f...
+    -> logging.Logger.debug
+1119:39 call  content.splitlines()
+    -> <builtin>.str.splitlines
+    note: content is the str that a text-mode file returns; the str of a client stream's read is the client's
+1120:26 call  re.match(r'\A(?:export )?([A-Za-z_0-9]+)=(.*)\Z', line)
+    -> re.match
+1128:36 call  m1.group(1)
+    -> re.Match.group
+1128:49 call  m1.group(2)
+    -> re.Match.group
+1134:34 call  re.match(r"\A'(.*)'\Z", val)
+    -> re.match
+1136:39 call  m2.group(1)
+    -> re.Match.group
+1140:34 call  re.match(r"\A\s*'(?<!\\)(.*)'\s*(#.*\s*)?\Z", val)
+    -> re.match
+1142:39 call  m2.group(1)
+    -> re.Match.group
+1146:39 call  re.match(r"\A(.*?)(#.*\s*)?\Z", val)
+    -> re.match
+1148:44 call  m2a.group(1)
+    -> re.Match.group
+1151:30 call  re.match(r'\A"(.*)"\Z', val)
+    -> re.match
+1153:33 call  re.sub(r'\\(.)', _keep_escaped_format_characters, m3.grou...
+    -> re.sub
+    -> environ.environ.Env.read_env._keep_escaped_format_characters
+    note: re.sub calls the local function back for each match
+1154:42 call  m3.group(1)
+    -> re.Match.group
+1156:37 call  str(val)
+    -> <builtin>.str
+    reject environ.environ.Env.str: the name str in a function body is the builtin; Env.str is a class attribute, not in scope
+    reject environ.environ.Path.__str__: val is a str (a regex group or re.sub's result)
+1157:45 call  line.startswith('#')
+    -> <builtin>.str.startswith
+1161:31 call  logger.warning('Invalid line: %s', line)
+    -> logging.Logger.warning
+1172:29 call  set_environ(cls.ENVIRON)
+    -> environ.environ.Env.read_env.set_environ
+1174:42 call  overrides.items()
+    -> <builtin>.dict.items
+1175:19 call  setenv(key, value)
+    -> environ.environ.Env.read_env.set_environ.<lambda1>
+    -> environ.environ.Env.read_env.set_environ.<lambda2>
+    note: a value site. setenv is the lambda that set_environ returns (1169 with overwrite, else 1170)
+
+[environ.environ.Env.read_env._keep_escaped_format_characters]
+1114:39 call  match.group(1)
+    -> re.Match.group
+    note: match is the re.Match that re.sub passes (1153)
+
+[environ.environ.Env.read_env.set_environ.<lambda1>]
+1169:50 call  envval.update({k: str(v)})
+    -> collections.abc.MutableMapping.update
+    -> environ.fileaware_mapping.FileAwareMapping.__setitem__
+    note: envval is cls.ENVIRON: os.environ (os._Environ inherits update from collections.abc.MutableMapping), the FileAwareMapping of FileAwareEnv (MutableMapping.update stores each item with self[key] = value, so FileAwareMapping.__setitem__ runs), or the tests' dict (opaque, B5; its dict.update trace edge is rejected)
+1169:58 call  str(v)
+    -> <builtin>.str
+    reject environ.environ.Env.str: the name str in a function body is the builtin; Env.str is a class attribute, not in scope
+    reject environ.environ.Path.__str__: v is a value of **overrides: a str that read_env parsed, or a client keyword value; a package object passed there is not considered (B3; the tests pass Path(...).__root__, a str)
+
+[environ.environ.Env.read_env.set_environ.<lambda2>]
+1170:50 call  envval.setdefault(k, str(v))
+    -> os._Environ.setdefault
+    -> collections.abc.MutableMapping.setdefault
+    -> environ.fileaware_mapping.FileAwareMapping.__getitem__
+    -> environ.fileaware_mapping.FileAwareMapping.__setitem__
+    note: envval is cls.ENVIRON: os.environ (os._Environ defines setdefault itself; os.py, the asciinema precedent os._Environ.copy), the FileAwareMapping of FileAwareEnv (it inherits collections.abc.MutableMapping.setdefault, which reads self[key] and stores self[key] = default on KeyError), or the tests' dict (opaque, B5; its dict.setdefault trace edge is rejected)
+1170:57 call  str(v)
+    -> <builtin>.str
+    reject environ.environ.Env.str: the name str in a function body is the builtin; Env.str is a class attribute, not in scope
+    reject environ.environ.Path.__str__: v is a value of **overrides: a str that read_env parsed, or a client keyword value; a package object passed there is not considered (B3; the tests pass Path(...).__root__, a str)
+
+[environ.environ.Path.path]
+1206:30 call  self.__class__(self.__root__, *paths, **kwargs)
+    -> environ.environ.Path.__init__
+    note: a value site. self is a Path (the package defines no subclass of it), so self.__class__ is Path
+
+[environ.environ.Path.file]
+1217:20 call  open(self(name), *args, **kwargs)
+    -> <builtin>.open
+1217:25 call  self(name)
+    -> environ.environ.Path.__call__
+    note: a value site. self is a Path; calling it runs Path.__call__
+
+[environ.environ.Path.__init__]
+1227:14 call  super()
+    -> <builtin>.super
+1227:25 call  super().__init__()
+    -> <builtin>.object.__init__
+    reject environ.environ.Env.__init__, environ.fileaware_mapping.FileAwareMapping.__init__: another class; Path's only base is object
+    reject environ.environ.Path.__init__: super() skips Path in its own MRO; the next class is object
+1229:22 call  kwargs.get('is_file', False)
+    -> <builtin>.dict.get
+1230:36 call  os.path.dirname(start)
+    -> os.path.dirname
+    -> environ.environ.Path.__fspath__
+    note: start can be a Path: Env.path passes the result of get_value, which is its Path default (annotated Union['Path', NoValue]) or the Path that smart casting makes (parse_value 613); os.path.dirname calls os.fspath, which calls Path.__fspath__ (is_file passes through Env.path's **kwargs)
+1232:44 call  self._absolute_join(start, *paths, **kwargs)
+    -> environ.environ.Path._absolute_join
+
+[environ.environ.Path.__call__]
+1240:35 call  self._absolute_join(self.__root__, *paths, **kwargs)
+    -> environ.environ.Path._absolute_join
+
+[environ.environ.Path.__eq__]
+1243:22 call  isinstance(other, Path)
+    -> <builtin>.isinstance
+
+[environ.environ.Path.__ne__]
+1248:31 call  self.__eq__(other)
+    -> environ.environ.Path.__eq__
+
+[environ.environ.Path.__add__]
+1251:26 call  isinstance(other, Path)
+    -> <builtin>.isinstance
+1252:24 call  Path(self.__root__, other)
+    -> environ.environ.Path.__init__
+1253:20 call  Path(self.__root__, other.__root__)
+    -> environ.environ.Path.__init__
+
+[environ.environ.Path.__sub__]
+1256:22 call  isinstance(other, int)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.int: the argument int is the builtin; Env.int is a class attribute, not in scope
+1257:29 call  self.path('../' * other)
+    -> environ.environ.Path.path
+    reject environ.environ.Env.path: the receiver self is a Path
+1258:22 call  isinstance(other, str)
+    -> <builtin>.isinstance
+    reject environ.environ.Env.str: the argument str is the builtin; Env.str is a class attribute, not in scope
+1258:61 call  self.__root__.endswith(other)
+    -> <builtin>.str.endswith
+1259:24 call  Path(self.__root__.rstrip(other))
+    -> environ.environ.Path.__init__
+1259:45 call  self.__root__.rstrip(other)
+    -> <builtin>.str.rstrip
+1261:24 call  TypeError( "unsupported operand type(s) for -: '{self}' a...
+    -> <builtin>.TypeError
+1263:71 call  "unsupported operand type(s) for -: '{self}' and '{other}...
+    -> <builtin>.str.format
+    reject environ.environ.Path.__str__: the fields format type(self) and type(other), classes
+1264:26 call  type(self)
+    -> <builtin>.type
+1264:44 call  type(other)
+    -> <builtin>.type
+
+[environ.environ.Path.__invert__]
+1269:25 call  self.path('..')
+    -> environ.environ.Path.path
+    reject environ.environ.Env.path: the receiver self is a Path
+
+[environ.environ.Path.__contains__]
+1273:15 call  len(base_path)
+    -> <builtin>.len
+1274:37 call  os.path.join(base_path, '')
+    -> os.path.join
+1275:40 call  item.__root__.startswith(base_path)
+    -> <builtin>.str.startswith
+    note: item is a Path (the tests' `root in Path('/')`); its __root__ is a str
+
+[environ.environ.Path.__repr__]
+1278:24 format  {self.__root__}
+    reject *: __root__ is a str
+
+[environ.environ.Path.__unicode__]
+1284:28 call  self.__str__()
+    -> environ.environ.Path.__str__
+
+[environ.environ.Path.__getitem__]
+1287:28 call  self.__str__()
+    -> environ.environ.Path.__str__
+1287:42 call  self.__str__().__getitem__(*args, **kwargs)
+    -> <builtin>.str.__getitem__
+
+[environ.environ.Path.__fspath__]
+1290:28 call  self.__str__()
+    -> environ.environ.Path.__str__
+
+[environ.environ.Path.rfind]
+1294:19 call  str(self)
+    -> <builtin>.str
+    -> environ.environ.Path.__str__
+    reject environ.environ.Env.str: the name str in a function body is the builtin; Env.str is a class attribute, not in scope
+1294:31 call  str(self).rfind(*args, **kwargs)
+    -> <builtin>.str.rfind
+    reject environ.environ.Path.rfind: the receiver is the str that str(self) returns
+
+[environ.environ.Path.find]
+1298:19 call  str(self)
+    -> <builtin>.str
+    -> environ.environ.Path.__str__
+    reject environ.environ.Env.str: the name str in a function body is the builtin; Env.str is a class attribute, not in scope
+1298:30 call  str(self).find(*args, **kwargs)
+    -> <builtin>.str.find
+    reject environ.environ.Path.find: the receiver is the str that str(self) returns
+
+[environ.environ.Path._absolute_join]
+1302:40 call  os.path.abspath(os.path.join(base, *paths))
+    -> os.path.abspath
+1302:53 call  os.path.join(base, *paths)
+    -> os.path.join
+    -> environ.environ.Path.__fspath__
+    note: base is the start of Path.__init__, which can be a Path (see 1230:36); os.path.join calls os.fspath on it. paths are the client's sub-path strs (a package object there is not considered, B3; Path.__add__ passes other.__root__)
+1303:22 call  kwargs.get('required', False)
+    -> <builtin>.dict.get
+1303:64 call  os.path.exists(absolute_path)
+    -> os.path.exists
+1304:39 call  ImproperlyConfigured( f'Create required path: {absolute_p...
+    -> <builtin>.Exception.__init__
+    -> django.core.exceptions.ImproperlyConfigured
+    note: optional import compat.py:19-25 (see Env.str, 281:43)
+1305:41 format  {absolute_path}
+    reject *: absolute_path is the str of os.path.abspath
+
+== environ.fileaware_mapping
+
+[environ.fileaware_mapping.FileAwareMapping.__getitem__]
+47:32 call  self.env.get(key + "_FILE")
+    -> collections.abc.Mapping.get
+    note: self.env is the package default os.environ (an os._Environ, which inherits get from collections.abc.Mapping; anytree precedent) or the client's mapping (opaque, B5; the tests' dict.get trace edge is rejected)
+49:22 call  open(key_file, encoding='utf-8')
+    -> <builtin>.open
+50:31 call  f.read()
+    -> io.TextIOWrapper.read
+
+[environ.fileaware_mapping.FileAwareMapping.__iter__]
+63:28 call  key.endswith("_FILE")
+    -> <builtin>.str.endswith
+    note: key is a key of os.environ (a str) or of the client's mapping
+
+[environ.fileaware_mapping.FileAwareMapping.__len__]
+73:19 call  len(tuple(iter(self)))
+    -> <builtin>.len
+73:25 call  tuple(iter(self))
+    -> <builtin>.tuple
+    reject environ.environ.Env.tuple: the name tuple in a function body is the builtin; Env.tuple is a class attribute, not in scope
+73:30 call  iter(self)
+    -> <builtin>.iter
+    -> environ.fileaware_mapping.FileAwareMapping.__iter__
+    note: iter() calls the generator function __iter__ of self
+
+[environ.fileaware_mapping.FileAwareMapping.__setitem__]
+77:39 call  key.endswith("_FILE")
+    -> <builtin>.str.endswith
+80:37 delitem  self.files_cache[no_file_key]
+    reject *: files_cache is a dict
+
+[environ.fileaware_mapping.FileAwareMapping.__delitem__]
+85:21 delitem  self[file_key]
+    -> environ.fileaware_mapping.FileAwareMapping.__delitem__
+87:29 delitem  self.env[key]
+    reject *: self.env is os.environ or the client's mapping
+89:39 call  key.endswith("_FILE")
+    -> <builtin>.str.endswith
+92:37 delitem  self.files_cache[no_file_key]
+    reject *: files_cache is a dict
+93:21 delitem  self.env[key]
+    reject *: self.env is os.environ or the client's mapping

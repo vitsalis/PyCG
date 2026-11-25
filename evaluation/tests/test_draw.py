@@ -11,7 +11,7 @@ draw = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(draw)
 
 
-@pytest.mark.parametrize("number", [1, 2, 3, 6, 7, 8, 9, 10])
+@pytest.mark.parametrize("number", range(1, 11))
 def test_each_recorded_round_is_drawn_again_from_its_seed(
     tmp_path, monkeypatch, number
 ):

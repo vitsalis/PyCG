@@ -1,0 +1,993 @@
+{
+  "edges": {
+    "constance.admin.ConstanceAdmin.changelist_view": {
+      "<builtin>.ValueError": [
+        "constance.admin 154:37 call  ValueError( \"CONSTANCE_CONFIG_FIELDSETS contains field(s)..."
+      ],
+      "<builtin>.str.format": [
+        "constance.admin 155:105 call  \"CONSTANCE_CONFIG_FIELDSETS contains field(s) that does n..."
+      ],
+      "<builtin>.str.join": [
+        "constance.admin 156:38 call  \", \".join(absent_fields)"
+      ],
+      "collections.OrderedDict.get": [
+        "constance.admin 163:50 call  settings.CONFIG.get(name)"
+      ],
+      "collections.OrderedDict.items": [
+        "constance.admin 134:51 call  settings.CONFIG.items()",
+        "constance.admin 139:65 call  settings.CONFIG_FIELDSETS.items()"
+      ],
+      "django.contrib.auth.models.AnonymousUser.has_perm": [
+        "constance.admin 113:62 call  request.user.has_perm(\"constance.change_config\")"
+      ],
+      "django.contrib.messages.api.add_message": [
+        "constance.admin 119:37 call  messages.add_message(request, messages.SUCCESS, _(\"Live s...",
+        "constance.admin 121:33 call  messages.add_message(request, messages.ERROR, _(\"Failed t..."
+      ]
+    },
+    "constance.admin.ConstanceAdmin.get_config_value": {
+      "<builtin>.getattr": [
+        "constance.admin 65:28 call  getattr(config, name)"
+      ],
+      "constance.LazyConfig._setup": [
+        "constance.admin 65:28 call  getattr(config, name)"
+      ],
+      "constance.base.AsyncValueProxy.__ne__": [
+        "constance.admin 74:41 op  localize(value) != localize(default)"
+      ],
+      "constance.base.Config.__getattr__": [
+        "constance.admin 65:28 call  getattr(config, name)"
+      ],
+      "django.forms.ImageField.prepare_value": [
+        "constance.admin 83:64 call  form[name].field.prepare_value(default)",
+        "constance.admin 86:67 call  form[name].field.prepare_value(value)"
+      ],
+      "django.forms.fields.JSONField.prepare_value": [
+        "constance.admin 83:64 call  form[name].field.prepare_value(default)",
+        "constance.admin 86:67 call  form[name].field.prepare_value(value)"
+      ]
+    },
+    "constance.admin.ConstanceAdmin.history_view": {
+      "django.utils.functional.lazy.__proxy__.__promise__.__wrapper__": [
+        "constance.admin 201:95 call  self.model._meta.verbose_name_plural.capitalize()"
+      ]
+    },
+    "constance.backends.database.DatabaseBackend.__init__": {
+      "django.core.exceptions.ImproperlyConfigured": [
+        "constance.backends.database 28:39 call  ImproperlyConfigured( \"The constance.backends.database ap...",
+        "constance.backends.database 36:43 call  ImproperlyConfigured( \"The CONSTANCE_DATABASE_CACHE_BACKE..."
+      ]
+    },
+    "constance.backends.database.DatabaseBackend.aget": {
+      "constance.backends.database.DatabaseBackend.autofill": [
+        "constance.backends.database 97:74 call  sync_to_async(self.autofill, thread_sensitive=True)()"
+      ]
+    },
+    "constance.backends.database.DatabaseBackend.aset": {
+      "constance.backends.database.DatabaseBackend.set": [
+        "constance.backends.database 168:68 call  sync_to_async(self.set, thread_sensitive=True)(key, value)"
+      ]
+    },
+    "constance.backends.database.DatabaseBackend.set": {
+      "constance.LazyConfig._setup": [
+        "constance.backends.database 161:36 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ],
+      "constance.base.Config.__getattr__": [
+        "constance.backends.database 161:36 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ]
+    },
+    "constance.backends.memory.MemoryBackend.set": {
+      "constance.LazyConfig._setup": [
+        "constance.backends.memory 42:40 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ],
+      "constance.base.Config.__getattr__": [
+        "constance.backends.memory 42:40 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ]
+    },
+    "constance.backends.redisd.RedisBackend.__init__": {
+      "django_redis.get_redis_connection": [
+        "constance.backends.redisd 24:64 call  utils.import_module_attr(connection_cls)()"
+      ],
+      "redis.Redis": [
+        "constance.backends.redisd 34:43 call  redis.Redis(**settings.REDIS_CONNECTION)"
+      ],
+      "redis.asyncio.Redis": [
+        "constance.backends.redisd 49:45 call  aredis.Redis(**settings.REDIS_CONNECTION)"
+      ],
+      "redis.asyncio.from_url": [
+        "constance.backends.redisd 47:48 call  aredis.from_url(settings.REDIS_CONNECTION)"
+      ],
+      "redis.from_url": [
+        "constance.backends.redisd 32:46 call  redis.from_url(settings.REDIS_CONNECTION)"
+      ]
+    },
+    "constance.backends.redisd.RedisBackend._aset_internal": {
+      "constance.LazyConfig._setup": [
+        "constance.backends.redisd 100:36 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ],
+      "constance.base.Config.__getattr__": [
+        "constance.backends.redisd 100:36 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ],
+      "redis.asyncio.Redis.set": [
+        "constance.backends.redisd 99:28 call  self._ard.set(self.add_prefix(key), dumps(value))"
+      ]
+    },
+    "constance.backends.redisd.RedisBackend.aget": {
+      "redis.asyncio.Redis.get": [
+        "constance.backends.redisd 69:36 call  self._ard.get(self.add_prefix(key))"
+      ]
+    },
+    "constance.backends.redisd.RedisBackend.amget": {
+      "redis.asyncio.Redis.mget": [
+        "constance.backends.redisd 85:38 call  self._ard.mget(prefixed_keys)"
+      ]
+    },
+    "constance.backends.redisd.RedisBackend.get": {
+      "django_redis.get_redis_connection.get": [
+        "constance.backends.redisd 62:29 call  self._rd.get(self.add_prefix(key))"
+      ],
+      "redis.Redis.get": [
+        "constance.backends.redisd 62:29 call  self._rd.get(self.add_prefix(key))"
+      ]
+    },
+    "constance.backends.redisd.RedisBackend.mget": {
+      "django_redis.get_redis_connection.mget": [
+        "constance.backends.redisd 78:76 call  self._rd.mget(prefixed_keys)"
+      ],
+      "redis.Redis.mget": [
+        "constance.backends.redisd 78:76 call  self._rd.mget(prefixed_keys)"
+      ]
+    },
+    "constance.backends.redisd.RedisBackend.set": {
+      "constance.LazyConfig._setup": [
+        "constance.backends.redisd 91:36 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ],
+      "constance.base.Config.__getattr__": [
+        "constance.backends.redisd 91:36 call  signals.config_updated.send(sender=config, key=key, old_v..."
+      ],
+      "django_redis.get_redis_connection.set": [
+        "constance.backends.redisd 90:21 call  self._rd.set(self.add_prefix(key), dumps(value))"
+      ],
+      "redis.Redis.set": [
+        "constance.backends.redisd 90:21 call  self._rd.set(self.add_prefix(key), dumps(value))"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__add__": {
+      "constance.base.AsyncValueProxy.__add__": [
+        "constance.base 89:39 op  self._get_sync_value() + other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__bool__": {
+      "constance.base.AsyncValueProxy.__bool__": [
+        "constance.base 53:20 call  bool(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__contains__": {
+      "constance.base.AsyncValueProxy.__contains__": [
+        "constance.base 83:21 op  item in self._get_sync_value()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__eq__": {
+      "constance.base.AsyncValueProxy.__eq__": [
+        "constance.base 56:39 op  self._get_sync_value() == other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__float__": {
+      "constance.base.AsyncValueProxy.__float__": [
+        "constance.base 50:21 call  float(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__floordiv__": {
+      "constance.base.AsyncValueProxy.__floordiv__": [
+        "constance.base 101:39 op  self._get_sync_value() // other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__ge__": {
+      "constance.base.AsyncValueProxy.__ge__": [
+        "constance.base 71:39 op  self._get_sync_value() >= other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__getitem__": {
+      "constance.base.AsyncValueProxy.__getitem__": [
+        "constance.base 74:38 getitem  self._get_sync_value()[key]"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__gt__": {
+      "constance.base.AsyncValueProxy.__gt__": [
+        "constance.base 68:39 op  self._get_sync_value() > other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__hash__": {
+      "constance.base.AsyncValueProxy.__hash__": [
+        "constance.base 86:20 call  hash(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__index__": {
+      "<builtin>.TypeError": [
+        "constance.base 128:24 call  TypeError(f\"'{type(val).__name__}' object cannot be inter..."
+      ],
+      "<builtin>.bool.__index__": [
+        "constance.base 127:33 call  val.__index__()"
+      ],
+      "<builtin>.type": [
+        "constance.base 128:33 call  type(val)"
+      ],
+      "constance.base.AsyncValueProxy.__index__": [
+        "constance.base 127:33 call  val.__index__()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__int__": {
+      "constance.base.AsyncValueProxy.__int__": [
+        "constance.base 47:19 call  int(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__iter__": {
+      "constance.base.AsyncValueProxy.__iter__": [
+        "constance.base 77:20 call  iter(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__le__": {
+      "constance.base.AsyncValueProxy.__le__": [
+        "constance.base 65:39 op  self._get_sync_value() <= other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__len__": {
+      "constance.base.AsyncValueProxy.__len__": [
+        "constance.base 80:19 call  len(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__lt__": {
+      "constance.base.AsyncValueProxy.__lt__": [
+        "constance.base 62:39 op  self._get_sync_value() < other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__mod__": {
+      "constance.base.AsyncValueProxy.__mod__": [
+        "constance.base 104:39 op  self._get_sync_value() % other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__mul__": {
+      "constance.base.AsyncValueProxy.__mul__": [
+        "constance.base 95:39 op  self._get_sync_value() * other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__ne__": {
+      "constance.base.AsyncValueProxy.__ne__": [
+        "constance.base 59:39 op  self._get_sync_value() != other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__radd__": {
+      "constance.base.AsyncValueProxy.__radd__": [
+        "constance.base 107:22 op  other + self._get_sync_value()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__repr__": {
+      "constance.base.AsyncValueProxy.__repr__": [
+        "constance.base 44:20 call  repr(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__rfloordiv__": {
+      "constance.base.AsyncValueProxy.__rfloordiv__": [
+        "constance.base 119:22 op  other // self._get_sync_value()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__rmod__": {
+      "constance.base.AsyncValueProxy.__float__": [
+        "constance.base 122:22 op  other % self._get_sync_value()"
+      ],
+      "constance.base.AsyncValueProxy.__getitem__": [
+        "constance.base 122:22 op  other % self._get_sync_value()"
+      ],
+      "constance.base.AsyncValueProxy.__index__": [
+        "constance.base 122:22 op  other % self._get_sync_value()"
+      ],
+      "constance.base.AsyncValueProxy.__int__": [
+        "constance.base 122:22 op  other % self._get_sync_value()"
+      ],
+      "constance.base.AsyncValueProxy.__repr__": [
+        "constance.base 122:22 op  other % self._get_sync_value()"
+      ],
+      "constance.base.AsyncValueProxy.__rmod__": [
+        "constance.base 122:22 op  other % self._get_sync_value()"
+      ],
+      "constance.base.AsyncValueProxy.__str__": [
+        "constance.base 122:22 op  other % self._get_sync_value()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__rmul__": {
+      "constance.base.AsyncValueProxy.__rmul__": [
+        "constance.base 113:22 op  other * self._get_sync_value()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__rsub__": {
+      "constance.base.AsyncValueProxy.__rsub__": [
+        "constance.base 110:22 op  other - self._get_sync_value()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__rtruediv__": {
+      "constance.base.AsyncValueProxy.__rtruediv__": [
+        "constance.base 116:22 op  other / self._get_sync_value()"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__str__": {
+      "constance.base.AsyncValueProxy.__str__": [
+        "constance.base 41:19 call  str(self._get_sync_value())"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__sub__": {
+      "constance.base.AsyncValueProxy.__sub__": [
+        "constance.base 92:39 op  self._get_sync_value() - other"
+      ]
+    },
+    "constance.base.AsyncValueProxy.__truediv__": {
+      "constance.base.AsyncValueProxy.__truediv__": [
+        "constance.base 98:39 op  self._get_sync_value() / other"
+      ]
+    },
+    "constance.base.AsyncValueProxy._get_value": {
+      "constance.backends.memory.MemoryBackend.aget": [
+        "constance.base 23:54 call  self._config._backend.aget(self._key)"
+      ],
+      "constance.backends.redisd.CachingRedisBackend.aget": [
+        "constance.base 23:54 call  self._config._backend.aget(self._key)"
+      ]
+    },
+    "constance.base.Config.__dir__": {
+      "collections.OrderedDict.keys": [
+        "constance.base 183:36 call  settings.CONFIG.keys()"
+      ]
+    },
+    "constance.base.Config.amget": {
+      "constance.backends.database.DatabaseBackend.amget": [
+        "constance.base 177:51 call  self._backend.amget(keys)"
+      ],
+      "constance.backends.memory.MemoryBackend.amget": [
+        "constance.base 177:51 call  self._backend.amget(keys)"
+      ],
+      "constance.backends.redisd.CachingRedisBackend.amget": [
+        "constance.base 177:51 call  self._backend.amget(keys)"
+      ]
+    },
+    "constance.base.Config.aset": {
+      "constance.backends.memory.MemoryBackend.aset": [
+        "constance.base 174:33 call  self._backend.aset(key, value)"
+      ],
+      "constance.backends.redisd.CachingRedisBackend.aset": [
+        "constance.base 174:33 call  self._backend.aset(key, value)"
+      ]
+    },
+    "constance.checks.get_inconsistent_fieldnames": {
+      "collections.OrderedDict.items": [
+        "constance.checks 48:57 call  settings.CONFIG_FIELDSETS.items()"
+      ],
+      "collections.OrderedDict.keys": [
+        "constance.checks 61:43 call  settings.CONFIG.keys()"
+      ]
+    },
+    "constance.codecs.loads": {
+      "<builtin>.dict.items": [
+        "constance.codecs 48:67 call  s.items()"
+      ],
+      "<builtin>.isinstance": [
+        "constance.codecs 47:18 call  isinstance(s, dict)",
+        "constance.codecs 49:18 call  isinstance(s, list)"
+      ],
+      "<builtin>.list": [
+        "constance.codecs 50:20 call  list(loads(v, first_level=False) for v in s)"
+      ],
+      "constance.codecs.loads": [
+        "constance.codecs 48:25 call  loads(v, first_level=False)",
+        "constance.codecs 50:26 call  loads(v, first_level=False)"
+      ]
+    },
+    "constance.forms.ConstanceForm.__init__": {
+      "<builtin>.isinstance": [
+        "constance.forms 94:84 call  isinstance(default, config_type)"
+      ],
+      "_sha2.SHA256Type.hexdigest": [
+        "constance.forms 125:57 call  version_hash.hexdigest()"
+      ],
+      "_sha2.SHA256Type.update": [
+        "constance.forms 124:32 call  version_hash.update(smart_bytes(initial.get(name, \"\")))"
+      ],
+      "_sha256.sha256.hexdigest": [
+        "constance.forms 125:57 call  version_hash.hexdigest()"
+      ],
+      "_sha256.sha256.update": [
+        "constance.forms 124:32 call  version_hash.update(smart_bytes(initial.get(name, \"\")))"
+      ],
+      "collections.OrderedDict.items": [
+        "constance.forms 90:51 call  settings.CONFIG.items()"
+      ],
+      "constance.base.AsyncValueProxy.__str__": [
+        "constance.forms 124:44 call  smart_bytes(initial.get(name, \"\"))"
+      ],
+      "django.contrib.auth.models.AnonymousUser.has_perm": [
+        "constance.forms 83:58 call  request.user.has_perm(\"constance.change_config\")"
+      ],
+      "django.contrib.messages.api.warning": [
+        "constance.forms 85:29 call  messages.warning( request, _(\"You don't have permission t..."
+      ],
+      "django.core.exceptions.ImproperlyConfigured": [
+        "constance.forms 95:47 call  ImproperlyConfigured( _( \"Default value type must be \" \"e...",
+        "constance.forms 109:43 call  ImproperlyConfigured( _( \"Constance doesn't support \" \"co..."
+      ],
+      "django.forms.ImageField": [
+        "constance.forms 122:44 call  field_class(label=name, **kwargs)"
+      ],
+      "django.forms.fields.JSONField": [
+        "constance.forms 122:44 call  field_class(label=name, **kwargs)"
+      ]
+    },
+    "constance.forms.ConstanceForm.clean_version": {
+      "django.forms.ValidationError": [
+        "constance.forms 161:40 call  forms.ValidationError( _(\"The settings have been modified..."
+      ],
+      "django.utils.translation.gettext_lazy": [
+        "constance.forms 162:18 call  _(\"The settings have been modified by someone else. Pleas..."
+      ]
+    },
+    "constance.forms.ConstanceForm.save": {
+      "constance.base.AsyncValueProxy.__ne__": [
+        "constance.forms 148:24 op  current != new"
+      ],
+      "django.core.files.storage.FileSystemStorage.save": [
+        "constance.forms 135:65 call  default_storage.save(join(settings.FILE_ROOT, file.name),..."
+      ],
+      "os.path.join": [
+        "constance.forms 135:70 call  join(settings.FILE_ROOT, file.name)"
+      ]
+    },
+    "constance.management.commands.constance.Command.handle": {
+      "constance.LazyConfig._setup": [
+        "constance.management.commands.constance 56:46 call  getattr(config, key)"
+      ],
+      "constance.base.AsyncValueProxy.__str__": [
+        "constance.management.commands.constance 56:38 call  str(getattr(config, key))",
+        "constance.management.commands.constance 71:42 format  {v}"
+      ]
+    },
+    "constance.management.commands.constance._set_constance_value": {
+      "constance.LazyConfig._setup": [
+        "constance.management.commands.constance 25:12 call  setattr(config, key, clean_value)"
+      ],
+      "django.forms.ImageField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.ImageField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.BooleanField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.BooleanField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.ChoiceField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.DateField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.DateField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.DecimalField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.DecimalField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.DurationField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.DurationField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.FloatField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.FloatField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.JSONField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.JSONField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.TimeField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.TimeField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ],
+      "django.forms.fields.TypedMultipleChoiceField.clean": [
+        "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))"
+      ],
+      "django.forms.fields.TypedMultipleChoiceField.to_python": [
+        "constance.management.commands.constance 24:46 call  field.to_python(value)"
+      ]
+    },
+    "constance.migrations.0002_migrate_from_old_table._migrate_from_old_table": {
+      "django.apps.registry.Apps.get_model": [
+        "constance.migrations.0002_migrate_from_old_table 27:31 call  apps.get_model(\"constance\", \"Constance\")"
+      ],
+      "django.db.backends.sqlite3.operations.DatabaseOperations.sequence_reset_sql": [
+        "constance.migrations.0002_migrate_from_old_table 28:53 call  connection.ops.sequence_reset_sql(no_style(), [Constance])"
+      ],
+      "django.db.backends.utils.CursorDebugWrapper.execute": [
+        "constance.migrations.0002_migrate_from_old_table 21:23 call  cursor.execute( f\"INSERT INTO constance_constance ( {quot...",
+        "constance.migrations.0002_migrate_from_old_table 25:23 call  cursor.execute(f\"DROP TABLE {old_table_name}\", [])"
+      ],
+      "django.db.backends.utils.CursorWrapper.execute": [
+        "constance.migrations.0002_migrate_from_old_table 21:23 call  cursor.execute( f\"INSERT INTO constance_constance ( {quot...",
+        "constance.migrations.0002_migrate_from_old_table 25:23 call  cursor.execute(f\"DROP TABLE {old_table_name}\", [])"
+      ],
+      "functools._lru_cache_wrapper.__call__": [
+        "constance.migrations.0002_migrate_from_old_table 28:62 call  no_style()"
+      ]
+    },
+    "constance.migrations.0003_drop_pickle.is_already_migrated": {
+      "<builtin>.dict.keys": [
+        "constance.migrations.0003_drop_pickle 18:52 call  data.keys()"
+      ],
+      "<builtin>.isinstance": [
+        "constance.migrations.0003_drop_pickle 18:22 call  isinstance(data, dict)"
+      ],
+      "<builtin>.set": [
+        "constance.migrations.0003_drop_pickle 18:42 call  set(data.keys())"
+      ],
+      "json.loads": [
+        "constance.migrations.0003_drop_pickle 17:26 call  json.loads(value)"
+      ]
+    },
+    "constance.migrations.0003_drop_pickle.migrate_pickled_data": {
+      "<builtin>.isinstance": [
+        "constance.migrations.0003_drop_pickle 50:26 call  isinstance(settings.REDIS_CONNECTION, str)"
+      ],
+      "<builtin>.str.encode": [
+        "constance.migrations.0003_drop_pickle 36:82 call  constance.value.encode()"
+      ],
+      "base64.b64decode": [
+        "constance.migrations.0003_drop_pickle 36:59 call  b64decode(constance.value.encode())"
+      ],
+      "constance.codecs.dumps": [
+        "constance.migrations.0003_drop_pickle 36:36 call  dumps(pickle.loads(b64decode(constance.value.encode())))",
+        "constance.migrations.0003_drop_pickle 59:58 call  dumps(pickle.loads(value))"
+      ],
+      "constance.migrations.0003_drop_pickle.is_already_migrated": [
+        "constance.migrations.0003_drop_pickle 35:35 call  is_already_migrated(constance.value)",
+        "constance.migrations.0003_drop_pickle 58:61 call  is_already_migrated(value)"
+      ],
+      "django.db.models.Model.save": [
+        "constance.migrations.0003_drop_pickle 37:27 call  constance.save(using=db_alias, update_fields=[\"value\"])"
+      ],
+      "django_redis.get_redis_connection": [
+        "constance.migrations.0003_drop_pickle 48:53 call  import_module_attr(connection_cls)()"
+      ],
+      "django_redis.get_redis_connection.get": [
+        "constance.migrations.0003_drop_pickle 57:28 call  _rd.get(prefixed_key)"
+      ],
+      "django_redis.get_redis_connection.set": [
+        "constance.migrations.0003_drop_pickle 61:20 call  _rd.set(prefixed_key, value)"
+      ],
+      "pickle.loads": [
+        "constance.migrations.0003_drop_pickle 36:49 call  pickle.loads(b64decode(constance.value.encode()))",
+        "constance.migrations.0003_drop_pickle 59:71 call  pickle.loads(value)"
+      ],
+      "redis.Redis": [
+        "constance.migrations.0003_drop_pickle 53:34 call  redis.Redis(**settings.REDIS_CONNECTION)"
+      ],
+      "redis.Redis.get": [
+        "constance.migrations.0003_drop_pickle 57:28 call  _rd.get(prefixed_key)"
+      ],
+      "redis.Redis.set": [
+        "constance.migrations.0003_drop_pickle 61:20 call  _rd.set(prefixed_key, value)"
+      ],
+      "redis.from_url": [
+        "constance.migrations.0003_drop_pickle 51:37 call  redis.from_url(settings.REDIS_CONNECTION)"
+      ]
+    },
+    "constance.test.pytest": {
+      "_pytest.fixtures.FixtureFunctionMarker.__call__": [
+        "constance.test.pytest 62:2 decorator  @pytest.fixture(name=\"override_config\")"
+      ],
+      "pluggy.HookimplMarker.__call__": [
+        "constance.test.pytest 14:17 call  pytest.hookimpl(trylast=True)",
+        "constance.test.pytest 20:17 call  pytest.hookimpl(hookwrapper=True)"
+      ],
+      "pluggy._decorators.HookimplMarker.__call__.setattr_hookimpl_opts": [
+        "constance.test.pytest 14:2 decorator  @pytest.hookimpl(trylast=True)",
+        "constance.test.pytest 20:2 decorator  @pytest.hookimpl(hookwrapper=True)"
+      ],
+      "pytest.fixture": [
+        "constance.test.pytest 62:16 call  pytest.fixture(name=\"override_config\")"
+      ]
+    },
+    "constance.test.pytest.override_config.enable": {
+      "constance.LazyConfig._setup": [
+        "constance.test.pytest 43:49 call  getattr(constance_config, key)"
+      ]
+    },
+    "constance.test.pytest.pytest_configure": {
+      "pytest.Config.addinivalue_line": [
+        "constance.test.pytest 17:28 call  config.addinivalue_line(\"markers\", (\"override_config(**kw..."
+      ]
+    },
+    "constance.test.pytest.pytest_runtest_call": {
+      "_pytest.outcomes._Fail.__call__": [
+        "constance.test.pytest 26:24 call  pytest.fail(\"Constance override can not not accept positi..."
+      ],
+      "pytest.Item.get_closest_marker": [
+        "constance.test.pytest 23:37 call  item.get_closest_marker(\"override_config\")"
+      ]
+    },
+    "constance.test.unittest.override_config.__call__": {
+      "<builtin>.Exception": [
+        "constance.test.unittest 29:32 call  Exception(\"Only subclasses of Django SimpleTestCase can b..."
+      ],
+      "asyncio.coroutines.iscoroutinefunction": [
+        "constance.test.unittest 32:31 call  iscoroutinefunction(test_func)"
+      ]
+    },
+    "constance.test.unittest.override_config.enable": {
+      "constance.LazyConfig._setup": [
+        "constance.test.unittest 90:55 call  getattr(config, config_key)"
+      ]
+    },
+    "constance.test.unittest.override_config.modify_test_case._post_teardown": {
+      "constance.test.unittest.override_config.modify_test_case._post_teardown": [
+        "constance.test.unittest 78:35 call  original_post_teardown(inner_self)"
+      ],
+      "django.test.SimpleTestCase._post_teardown": [
+        "constance.test.unittest 78:35 call  original_post_teardown(inner_self)"
+      ]
+    },
+    "constance.test.unittest.override_config.modify_test_case._pre_setup": {
+      "constance.test.unittest.override_config.modify_test_case._pre_setup": [
+        "constance.test.unittest 66:35 call  original_pre_setup(inner_self)",
+        "constance.test.unittest 75:35 call  original_pre_setup()"
+      ],
+      "django.test.SimpleTestCase._pre_setup": [
+        "constance.test.unittest 66:35 call  original_pre_setup(inner_self)",
+        "constance.test.unittest 75:35 call  original_pre_setup()"
+      ]
+    },
+    "constance.test.unittest.override_config.unpack_values": {
+      "constance.LazyConfig._setup": [
+        "constance.test.unittest 103:20 call  setattr(config, name, value)"
+      ]
+    },
+    "constance.utils.aget_values": {
+      "collections.OrderedDict.items": [
+        "constance.utils 30:83 call  settings.CONFIG.items()"
+      ],
+      "collections.OrderedDict.keys": [
+        "constance.utils 31:61 call  settings.CONFIG.keys()"
+      ],
+      "constance.LazyConfig._setup": [
+        "constance.utils 31:35 getattr  config.amget"
+      ]
+    },
+    "constance.utils.aget_values_for_keys": {
+      "collections.OrderedDict.items": [
+        "constance.utils 69:83 call  settings.CONFIG.items()"
+      ],
+      "constance.LazyConfig._setup": [
+        "constance.utils 75:35 getattr  config.amget"
+      ]
+    },
+    "constance.utils.get_values": {
+      "collections.OrderedDict.items": [
+        "constance.utils 20:85 call  settings.CONFIG.items()"
+      ],
+      "constance.backends.database.DatabaseBackend.mget": [
+        "constance.utils 22:56 call  config._backend.mget(settings.CONFIG)"
+      ],
+      "constance.backends.memory.MemoryBackend.mget": [
+        "constance.utils 22:56 call  config._backend.mget(settings.CONFIG)"
+      ],
+      "constance.backends.redisd.CachingRedisBackend.mget": [
+        "constance.utils 22:56 call  config._backend.mget(settings.CONFIG)"
+      ]
+    },
+    "constance.utils.get_values_for_keys": {
+      "collections.OrderedDict.items": [
+        "constance.utils 47:83 call  settings.CONFIG.items()"
+      ],
+      "constance.LazyConfig._setup": [
+        "constance.utils 55:43 getattr  config._backend"
+      ],
+      "constance.backends.database.DatabaseBackend.mget": [
+        "constance.utils 55:56 call  config._backend.mget(keys)"
+      ],
+      "constance.backends.memory.MemoryBackend.mget": [
+        "constance.utils 55:56 call  config._backend.mget(keys)"
+      ],
+      "constance.backends.redisd.CachingRedisBackend.mget": [
+        "constance.utils 55:56 call  config._backend.mget(keys)"
+      ]
+    }
+  },
+  "notes": {
+    "constance.admin 113:62 call  request.user.has_perm(\"constance.change_config\")": [
+      "request is Django's HttpRequest (a framework value, B5); its documented user is an instance of AUTH_USER_MODEL, by default auth.User (has_perm from PermissionsMixin, as the trace names it), or an AnonymousUser",
+      "Codex audit round 2: an AnonymousUser can get here. With CONSTANCE_SUPERUSER_ONLY false, line 108 asks has_view_permission, and AnonymousUser.has_perm returns True when a configured authentication backend's has_perm does (django/contrib/auth/models.py:605, _user_has_perm 266-278 in 6.1.2; 479, 212-224 in 4.2.30). The client's backend stays opaque, and its effect on control flow counts (B5, \"Client control flow\")"
+    ],
+    "constance.admin 134:51 call  settings.CONFIG.items()": [
+      "CONSTANCE_CONFIG is documented as a dict or an OrderedDict (docs/index.rst:42, 196), and the package tests isinstance(settings.CONFIG, OrderedDict) (line 174)"
+    ],
+    "constance.admin 139:65 call  settings.CONFIG_FIELDSETS.items()": [
+      "after isinstance(..., dict); the fieldsets are documented as a dict or a tuple (docs/index.rst:216, 266), and line 171 handles an OrderedDict explicitly"
+    ],
+    "constance.admin 201:95 call  self.model._meta.verbose_name_plural.capitalize()": [
+      "verbose_name_plural is the lazy proxy _(\"config\") (admin.py:259); capitalize is a method wrapper that lazy() installs on its proxy class: lazy's local __wrapper__ from Django 5.0, __proxy__.__promise__'s local __wrapper__ in Django 4.2 (the classifiers admit 4.2 to 6.1); both names are verified: utils/functional.py:184 from 5.0 to 6.1, and :144-152 in 4.2.30 (judgement 9)"
+    ],
+    "constance.admin 65:28 call  getattr(config, name)": [
+      "config is the module's own LazyConfig (admin.py:29); LazyObject.__getattr__ runs LazyConfig._setup on the first load in a fresh process, then getattr on the Config, whose __getattr__ runs because a config name is no attribute of Config"
+    ],
+    "constance.admin 74:41 op  localize(value) != localize(default)": [
+      "judgement 2: value comes from getattr(config, name) (line 65), an AsyncValueProxy when a thread with a running event loop renders the view (the documented async and background-loop setups), or from initial, where the Memory backend can return a stored proxy; localize returns the proxy unchanged and the proxy is the left operand"
+    ],
+    "constance.admin 83:64 call  form[name].field.prepare_value(default)": [
+      "judgement 3: the branch runs only when the config's type is a key of CONSTANCE_ADDITIONAL_FIELDS, so the form field is made from that setting: the documented ChoiceField, ImageField and JSONField (docs/index.rst:131-182), and the field classes of the package's own test settings (ruling R1): CharField, EmailField and TypedMultipleChoiceField; a client's own field class is client code (B5)"
+    ],
+    "constance.admin 86:67 call  form[name].field.prepare_value(value)": [
+      "judgement 3: the branch runs only when the config's type is a key of CONSTANCE_ADDITIONAL_FIELDS, so the form field is made from that setting: the documented ChoiceField, ImageField and JSONField (docs/index.rst:131-182), and the field classes of the package's own test settings (ruling R1): CharField, EmailField and TypedMultipleChoiceField; a client's own field class is client code (B5)"
+    ],
+    "constance.backends.database 161:36 call  signals.config_updated.send(sender=config, key=key, old_v...": [
+      "judgement 4: when a receiver is connected (the documented @receiver(config_updated), docs/index.rst:80), Signal.send looks the sender up in its dict sender_receivers_cache, which hashes it, and _live_receivers computes _make_id(sender), which runs hasattr(sender, '__func__'); on the LazyConfig constance.config, LazyObject.__hash__ and LazyObject.__getattr__ run LazyConfig._setup if it was never loaded in the process (the backend can be reached through another LazyConfig, those of utils, admin and forms), and the forwarded load of __func__ runs Config.__getattr__, which raises AttributeError; receivers are client callbacks"
+    ],
+    "constance.backends.database 168:68 call  sync_to_async(self.set, thread_sensitive=True)(key, value)": [
+      "the callee is the SyncToAsync object made at 168:35; its coroutine __call__ runs self.set (a DatabaseBackend; no package subclass) in asgiref's executor thread (judgement 7)"
+    ],
+    "constance.backends.database 97:74 call  sync_to_async(self.autofill, thread_sensitive=True)()": [
+      "the callee is the SyncToAsync object made at 97:36; its coroutine __call__, which aget awaits, runs self.autofill in asgiref's executor thread (judgement 7)"
+    ],
+    "constance.backends.memory 42:40 call  signals.config_updated.send(sender=config, key=key, old_v...": [
+      "judgement 4, as at database.py:161"
+    ],
+    "constance.backends.redisd 100:36 call  signals.config_updated.send(sender=config, key=key, old_v...": [
+      "judgement 4, as at database.py:161"
+    ],
+    "constance.backends.redisd 24:64 call  utils.import_module_attr(connection_cls)()": [
+      "judgement 3: the callable that CONSTANCE_REDIS_CONNECTION_CLASS names; the documented configurations (docs/backends.rst:64, 70) are a project's own mock-up class (client code) and django_redis.get_redis_connection, a library that the package does not require and the environment lacks, named as a missing module; any other configured callable is client code"
+    ],
+    "constance.backends.redisd 32:46 call  redis.from_url(settings.REDIS_CONNECTION)": [
+      "redis is installed (a dependency of the entry); redis.from_url is redis.utils.from_url, which returns Redis.from_url(url), a redis.client.Redis (judgement 9)"
+    ],
+    "constance.backends.redisd 47:48 call  aredis.from_url(settings.REDIS_CONNECTION)": [
+      "aredis is redis.asyncio (redis 4.2 and later; the except ImportError side sets self._ard to None); its from_url is redis.asyncio.utils.from_url, which returns a redis.asyncio.client.Redis (judgement 9)"
+    ],
+    "constance.backends.redisd 62:29 call  self._rd.get(self.add_prefix(key))": [
+      "self._rd is a redis.client.Redis (redis.Redis or redis.from_url, lines 32 and 34), or what the documented connection callable django_redis.get_redis_connection returns (judgement 3): a stub value of a missing module, whose methods keep the factory's access path (referee ruling N1; \"a redis connection\", docs/backends.rst:68, fixes no class under B4); a client's own connection class is opaque"
+    ],
+    "constance.backends.redisd 69:36 call  self._ard.get(self.add_prefix(key))": [
+      "self._ard is a redis.asyncio.client.Redis (lines 47 and 49), or the client's configured async connection (opaque, judgement 3)"
+    ],
+    "constance.backends.redisd 91:36 call  signals.config_updated.send(sender=config, key=key, old_v...": [
+      "judgement 4, as at database.py:161"
+    ],
+    "constance.base 101:39 op  self._get_sync_value() // other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand"
+    ],
+    "constance.base 104:39 op  self._get_sync_value() % other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand"
+    ],
+    "constance.base 107:22 op  other + self._get_sync_value()": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand"
+    ],
+    "constance.base 110:22 op  other - self._get_sync_value()": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand"
+    ],
+    "constance.base 113:22 op  other * self._get_sync_value()": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand"
+    ],
+    "constance.base 116:22 op  other / self._get_sync_value()": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand"
+    ],
+    "constance.base 119:22 op  other // self._get_sync_value()": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand"
+    ],
+    "constance.base 122:22 op  other % self._get_sync_value()": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the right operand: other's __mod__ returning NotImplemented (an int) runs the proxy's __rmod__; __rmod__ is a public method (rule C), and a client str passed as other formats the proxy with str's % (%s __str__, %r and %a __repr__, %d __int__, %f __float__, %x and %c __index__, %(k)s __getitem__, the proxy being a mapping)"
+    ],
+    "constance.base 127:33 call  val.__index__()": [
+      "of the documented value types only int and bool have __index__ (bool inherits int's; named by the receiver's class); judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns"
+    ],
+    "constance.base 174:33 call  self._backend.aset(key, value)": [
+      "self._backend is the backend of base.py:135 (the four package backends)"
+    ],
+    "constance.base 177:51 call  self._backend.amget(keys)": [
+      "self._backend is the backend of base.py:135 (the four package backends)"
+    ],
+    "constance.base 183:36 call  settings.CONFIG.keys()": [
+      "CONSTANCE_CONFIG is documented as a dict or an OrderedDict (docs/index.rst:42, 196)"
+    ],
+    "constance.base 23:54 call  self._config._backend.aget(self._key)": [
+      "self._config is the Config that made the proxy (base.py:159); its _backend is made from CONSTANCE_BACKEND (base.py:135), whose documented values are the four package backends (docs/backends.rst:27, 33, 94, 162); a client's own backend class is client code"
+    ],
+    "constance.base 41:19 call  str(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code"
+    ],
+    "constance.base 44:20 call  repr(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code"
+    ],
+    "constance.base 47:19 call  int(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code"
+    ],
+    "constance.base 50:21 call  float(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code"
+    ],
+    "constance.base 53:20 call  bool(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns; for the documented value types (bool, int, float, Decimal, str, datetime, date, time, timedelta, list, dict) the builtin runs no package code"
+    ],
+    "constance.base 56:39 op  self._get_sync_value() == other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)"
+    ],
+    "constance.base 59:39 op  self._get_sync_value() != other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)"
+    ],
+    "constance.base 62:39 op  self._get_sync_value() < other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)"
+    ],
+    "constance.base 65:39 op  self._get_sync_value() <= other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)"
+    ],
+    "constance.base 68:39 op  self._get_sync_value() > other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)"
+    ],
+    "constance.base 71:39 op  self._get_sync_value() >= other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand; other is the client's value (B5)"
+    ],
+    "constance.base 74:38 getitem  self._get_sync_value()[key]": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns"
+    ],
+    "constance.base 77:20 call  iter(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns"
+    ],
+    "constance.base 80:19 call  len(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns"
+    ],
+    "constance.base 83:21 op  item in self._get_sync_value()": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the container"
+    ],
+    "constance.base 86:20 call  hash(self._get_sync_value())": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns"
+    ],
+    "constance.base 89:39 op  self._get_sync_value() + other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand"
+    ],
+    "constance.base 92:39 op  self._get_sync_value() - other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand"
+    ],
+    "constance.base 95:39 op  self._get_sync_value() * other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand"
+    ],
+    "constance.base 98:39 op  self._get_sync_value() / other": [
+      "judgement 2 (stored proxy): the value can itself be an AsyncValueProxy that the Memory backend stores and returns, the left operand"
+    ],
+    "constance.checks 48:57 call  settings.CONFIG_FIELDSETS.items()": [
+      "after isinstance(..., dict); the fieldsets are documented as a dict or a tuple, and admin.py:171 handles an OrderedDict explicitly"
+    ],
+    "constance.forms 122:44 call  field_class(label=name, **kwargs)": [
+      "field_class comes from FIELDS: the nine field classes of forms.py:39-49, and the classes that CONSTANCE_ADDITIONAL_FIELDS names: the documented ChoiceField, ImageField and JSONField (docs/index.rst:132, 147, 177) and those of the package's own test settings (ruling R1): EmailField (tests/settings.py:61), CharField (tests/settings.py:62-63, already among the FIELDS classes) and TypedMultipleChoiceField (tests/test_admin.py:282); a client's own field class is client code (judgement 3)"
+    ],
+    "constance.forms 124:32 call  version_hash.update(smart_bytes(initial.get(name, \"\")))": [
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.10 and 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2 and validators)"
+    ],
+    "constance.forms 124:44 call  smart_bytes(initial.get(name, \"\"))": [
+      "smart_bytes calls force_bytes, which returns str(s).encode() for a value that is neither bytes nor memoryview; initial is the dict of get_values (admin.py:110, constance.py:20), whose values the Memory backend can return as a stored AsyncValueProxy, whose __str__ str() runs (judgement 2, stored proxy)"
+    ],
+    "constance.forms 125:57 call  version_hash.hexdigest()": [
+      "the hash object of line 81, as at 124:32"
+    ],
+    "constance.forms 135:65 call  default_storage.save(join(settings.FILE_ROOT, file.name),...": [
+      "Django's default storage, FileSystemStorage (STORAGES default, judgement 3); a configured other storage is client code; Storage.save reads the client's uploaded file and calls no package code"
+    ],
+    "constance.forms 148:24 op  current != new": [
+      "judgement 2: current comes from getattr(config, name) (line 139), an AsyncValueProxy when the form is saved in a thread with a running event loop, or the stored proxy that the Memory backend returns; it is the left operand; new is a cleaned form value"
+    ],
+    "constance.forms 83:58 call  request.user.has_perm(\"constance.change_config\")": [
+      "request is the Django HttpRequest of the admin view (admin.py:112, 114) or a client's; its user is the default auth.User or AnonymousUser, as at admin.py:113"
+    ],
+    "constance.forms 90:51 call  settings.CONFIG.items()": [
+      "CONSTANCE_CONFIG is documented as a dict or an OrderedDict"
+    ],
+    "constance.management.commands.constance 24:30 call  field.clean(field.to_python(value))": [
+      "field is the form field that ConstanceForm.__init__ makes for key (forms.py:122): the field classes of FIELDS, the documented additional ones and those of the package's own test settings (judgement 3, ruling R1); methods are named by the field's class (inherited from Field, MultiValueField or FileField)"
+    ],
+    "constance.management.commands.constance 24:46 call  field.to_python(value)": [
+      "as at 24:30"
+    ],
+    "constance.management.commands.constance 25:12 call  setattr(config, key, clean_value)": [
+      "LazyObject.__setattr__ runs _setup if constance.config is empty, then Config.__setattr__"
+    ],
+    "constance.management.commands.constance 56:38 call  str(getattr(config, key))": [
+      "judgement 2: the value is an AsyncValueProxy when the command runs in a thread with a running event loop (call_command from async code, or the documented background-loop setup), or the stored proxy that the Memory backend returns; str() runs its __str__"
+    ],
+    "constance.management.commands.constance 71:42 format  {v}": [
+      "v is a value of get_values, which the Memory backend can return as a stored AsyncValueProxy (judgement 2, stored proxy); AsyncValueProxy defines no __format__"
+    ],
+    "constance.migrations.0002_migrate_from_old_table 21:23 call  cursor.execute( f\"INSERT INTO constance_constance ( {quot...": [
+      "judgement 8: the cursor of the SQLite connection is a CursorWrapper, or a CursorDebugWrapper when queries are logged (DEBUG, as in tests/settings.py:96; BaseDatabaseWrapper._prepare_cursor)"
+    ],
+    "constance.migrations.0002_migrate_from_old_table 25:23 call  cursor.execute(f\"DROP TABLE {old_table_name}\", [])": [
+      "judgement 8: the cursor of the SQLite connection is a CursorWrapper, or a CursorDebugWrapper when queries are logged (DEBUG, as in tests/settings.py:96; BaseDatabaseWrapper._prepare_cursor)"
+    ],
+    "constance.migrations.0002_migrate_from_old_table 27:31 call  apps.get_model(\"constance\", \"Constance\")": [
+      "apps is the historical app registry that Django's migration framework passes to a RunPython function, documented as an instance of django.apps.registry.Apps (it is a StateApps, which inherits get_model)"
+    ],
+    "constance.migrations.0002_migrate_from_old_table 28:53 call  connection.ops.sequence_reset_sql(no_style(), [Constance])": [
+      "judgement 8 (ruling R1): the package's own test settings select the SQLite backend (tests/settings.py:21-30), so connection is a django.db.backends.sqlite3 DatabaseWrapper; Django has no default engine and the package documents none; another configured backend is client code; SQLite inherits BaseDatabaseOperations.sequence_reset_sql, which returns [], so the loop at line 30 runs no execute"
+    ],
+    "constance.migrations.0002_migrate_from_old_table 28:62 call  no_style()": [
+      "django.core.management.color.no_style is decorated with functools.cache (lru_cache), so the callee is the wrapper object (judgement 9)"
+    ],
+    "constance.migrations.0003_drop_pickle 37:27 call  constance.save(using=db_alias, update_fields=[\"value\"])": [
+      "the historical model is a class of the migration state, not constance.models.Constance, so the post_save receivers that DatabaseBackend connects for the real model (database.py:44) do not run"
+    ],
+    "constance.migrations.0003_drop_pickle 48:53 call  import_module_attr(connection_cls)()": [
+      "the callable that CONSTANCE_REDIS_CONNECTION_CLASS names, as at redisd.py:24:64 (judgement 3)"
+    ],
+    "constance.migrations.0003_drop_pickle 57:28 call  _rd.get(prefixed_key)": [
+      "as at redisd.py:62:29: a redis.client.Redis, or the stub value that django_redis.get_redis_connection returns (judgement 3, ruling N1)"
+    ],
+    "constance.test.pytest 14:2 decorator  @pytest.hookimpl(trylast=True)": [
+      "pytest.hookimpl is pluggy's HookimplMarker(\"pytest\"); called without a function it returns its local setattr_hookimpl_opts, which the decorator applies (it only sets an attribute on the hook function); names verified in the pinned pytest 9.2.0 (_pytest/config/__init__.py:103) and pluggy 1.7.0 (_decorators.py:117, 215), the package declaring no pytest requirement (judgement 9)"
+    ],
+    "constance.test.pytest 17:28 call  config.addinivalue_line(\"markers\", (\"override_config(**kw...": [
+      "config is the pytest Config that pytest passes to the hook (a framework value, named by its documented type)"
+    ],
+    "constance.test.pytest 20:2 decorator  @pytest.hookimpl(hookwrapper=True)": [
+      "as at 14:2"
+    ],
+    "constance.test.pytest 23:37 call  item.get_closest_marker(\"override_config\")": [
+      "item is the pytest Item that pytest passes to the hook (documented type pytest.Item; the method is Node's)"
+    ],
+    "constance.test.pytest 26:24 call  pytest.fail(\"Constance override can not not accept positi...": [
+      "in the pinned pytest 9.2.0, pytest.fail is the instance `fail: _Fail = _Fail()` (_pytest/outcomes.py:165), so the callee is its class's __call__ (outcomes.py:160; micro-benchmark rule \"Calls of instances\")"
+    ],
+    "constance.test.pytest 43:49 call  getattr(constance_config, key)": [
+      "constance_config is the LazyConfig constance.config (pytest.py:11); a running event loop in the thread makes the value an AsyncValueProxy, which the instance keeps in _original_values (judgement 2)"
+    ],
+    "constance.test.pytest 62:2 decorator  @pytest.fixture(name=\"override_config\")": [
+      "pytest.fixture called without the function returns a FixtureFunctionMarker, whose __call__ the decorator applies (it wraps _override_config in a fixture definition and calls it not)"
+    ],
+    "constance.test.unittest 103:20 call  setattr(config, name, value)": [
+      "the values are the overrides or those that enable read (judgement 2: possibly an AsyncValueProxy, which the Memory backend then stores)"
+    ],
+    "constance.test.unittest 32:31 call  iscoroutinefunction(test_func)": [
+      "Codex audit round 1: asgiref/sync.py (3.13.0, which needs Python 3.11 or later) has no __all__ and binds iscoroutinefunction to inspect.iscoroutinefunction where inspect has markcoroutinefunction (Python 3.12 and later, the trace) and to asyncio.iscoroutinefunction on Python 3.11 (sync.py:60-64); a re-export without __all__ is named where the function is defined: inspect, and asyncio/coroutines.py (in its __all__); asgiref is read at the audit pin only (judgement 1), so the Python 3.10 case, which needs an older asgiref, is not considered"
+    ],
+    "constance.test.unittest 66:35 call  original_pre_setup(inner_self)": [
+      "Codex audit round 1: a class decorated a second time (or a decorated subclass of a decorated class) captures at line 59 the package's own _pre_setup that the first decoration installed at line 81; the call binds (inner_self before Django 5.2, the bound classmethod from 5.2)",
+      "original_pre_setup is the decorated class's _pre_setup (line 59); the class is a SimpleTestCase subclass (checked at line 28), documented as a TestCase (docs/testing.rst:16), so the method is SimpleTestCase's or TransactionTestCase's (TestCase inherits it); a client's own override is client code"
+    ],
+    "constance.test.unittest 75:35 call  original_pre_setup()": [
+      "Codex audit round 1: as at 66:35, the package's classmethod _pre_setup of an earlier decoration, bound at line 59",
+      "as at 66:35; from Django 5.2 the method is a classmethod, bound to the class at line 59"
+    ],
+    "constance.test.unittest 78:35 call  original_post_teardown(inner_self)": [
+      "Codex audit round 1: a second decoration captures at line 60 the package's _post_teardown that the first installed at line 82; it binds with inner_self",
+      "original_post_teardown is the decorated class's _post_teardown (line 60), as at 66:35"
+    ],
+    "constance.test.unittest 90:55 call  getattr(config, config_key)": [
+      "a running event loop in the thread makes the value an AsyncValueProxy, which the instance keeps in original_values (judgement 2)"
+    ],
+    "constance.utils 22:56 call  config._backend.mget(settings.CONFIG)": [
+      "the backend of the Config (base.py:135: the four package backends)"
+    ],
+    "constance.utils 31:35 getattr  config.amget": [
+      "as at 22:43; amget is a method of Config, which normal lookup finds"
+    ],
+    "constance.utils 55:43 getattr  config._backend": [
+      "as at 22:43"
+    ],
+    "constance.utils 75:35 getattr  config.amget": [
+      "as at 31:35"
+    ]
+  },
+  "trace": "dynamic/django-constance.json"
+}

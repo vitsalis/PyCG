@@ -13,7 +13,7 @@ _GIT_KEYS = ("repository", "tag", "commit")
 _SDIST_KEYS = ("sdist", "sdist_url", "sdist_sha256")
 _SDIST_FILE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*\.tar\.gz")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-BATCHES = (1, 2, 3, 4, 5, 7, 8, "icse-2021")
+BATCHES = (1, 2, 3, 4, 5, 6, 7, 8, "icse-2021")
 
 
 class Sdist(NamedTuple):

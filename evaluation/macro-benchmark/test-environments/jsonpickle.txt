@@ -1,0 +1,72 @@
+# The test environment of jsonpickle 4.1.4 (batch 6): the
+# full closure on CPython 3.14 for Linux aarch64, each file by version and
+# SHA-256. jsonpickle itself is not installed: the trace uses the checkout
+# projects/jsonpickle.
+#   pip install --require-hashes --only-binary :all: --no-deps -r jsonpickle.txt
+#
+# "scan" names the hashes that the security scan of the round lists (its
+# section 3; the scan took them from PyPI's JSON and read no wheel); "PyPI"
+# names the hashes taken from PyPI's JSON for that version by the builder of
+# this file; "scan and PyPI" names a native distribution whose manylinux
+# hash the scan lists and whose musllinux hash comes from PyPI's JSON. No
+# wheel was downloaded or read for this batch. Every hash below
+# was checked against PyPI's JSON for its version on 2026-11-22, and the
+# closure was computed from the requires_dist of each pinned release, with
+# the markers evaluated for CPython 3.14 on Linux aarch64 and no extra (one
+# extra where a comment says so); a wheel's own METADATA could ask for more
+# (UNVERIFIED until pip installs the list with --no-deps and trace.sh compares
+# the distributions).
+#
+# Each version but pytest's stack is the newest release that is not yanked
+# and was uploaded on or before the release of jsonpickle (2026-10-15).
+# Where a distribution has a pure-Python wheel, only that wheel is pinned.
+# Platform wheels: the cp314 aarch64 wheels for Linux, manylinux (glibc, the
+# python:3.14-slim image) and musllinux.
+# Installed by the lead's decision: numpy and pandas (with python-dateutil
+# and six; the precedent is itables), simplejson and tzdata. Not installed:
+# pymongo, ecdsa, feedparser, SQLAlchemy, scikit-learn, scipy, PyYAML,
+# ujson, gmpy2 and the pytest plugins of the extra testing; never bson (a
+# different project, sdist only, with the same top-level module as
+# pymongo's bson).
+
+# scan. 9.2.0, as for batches 3 to 5 (the lead's decision: one
+# pytest stack for the benchmark, not pytest by release date).
+pytest==9.2.0 \
+    --hash=sha256:07acdcf88ec174f907dc01af70bf52d49b014bbab03faeeade31c96b18c2e588
+# scan (pytest).
+iniconfig==2.3.1 \
+    --hash=sha256:9121e2c1fdb355232495be3194c8dfe87ccc2d5dee45947b78e68f499790d7a7
+# scan (pytest).
+packaging==26.3 \
+    --hash=sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c
+# scan (pytest).
+pluggy==1.7.0 \
+    --hash=sha256:7dd7b0d8832ba3cb632c306926ded123429211b83641b35dc5c41ad2d34f9bec
+# scan (pytest).
+pygments==2.21.0 \
+    --hash=sha256:2363c69b61c4a97c838da3b130dcd6468f4848992b21a82f2a63ec34377137d9
+
+# scan. The ZoneInfo tests (zoneinfo_test.py, datetime_test.py) need a time
+# zone database, which python:3.14-slim lacks. Data only.
+tzdata==2026.5 \
+    --hash=sha256:b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac
+# scan. The pure wheel only. The simplejson backend of
+# tests/backend_test.py.
+simplejson==4.2.0 \
+    --hash=sha256:c2a2e5f43287cbe3413f7b73b04d5a6f75c7bd93d783e628f5978853a2ef738d
+# scan and PyPI. tests/numpy_test.py and jsonpickle/ext/numpy.py. A C extension; no
+# pure wheel.
+numpy==2.5.4 \
+    --hash=sha256:4054173604cd8658796053f1f3bc0befb68ec1c0762c57fdad61e199256a8617 \
+    --hash=sha256:823874a507a84af050493b622affde94b6f7c3a0dc22cb2801381bc03b871c00
+# scan and PyPI. tests/pandas_test.py, jsonpickle/ext/pandas.py and tags_pd.py. A C
+# extension; no pure wheel.
+pandas==3.0.6 \
+    --hash=sha256:654aae059295dbba6ecd2328ca12712a2cf1676214c8699f1c29213f7ccf9c34 \
+    --hash=sha256:22172a92e7ee678ec0140c7af4fc9366b55413834a1cd86af78b3caa0b0574de
+# scan (pandas). 4.0.0 came on 2026-11-01, after the date.
+python-dateutil==2.9.0.post0 \
+    --hash=sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427
+# scan (python-dateutil).
+six==1.17.0 \
+    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274

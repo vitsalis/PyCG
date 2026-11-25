@@ -1,0 +1,177 @@
+{
+  "edges": {
+    "validators.card.amex": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 106:12 truth  card_number(value)"
+      ]
+    },
+    "validators.card.diners": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 150:12 truth  card_number(value)"
+      ]
+    },
+    "validators.card.discover": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 194:12 truth  card_number(value)"
+      ]
+    },
+    "validators.card.jcb": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 172:12 truth  card_number(value)"
+      ]
+    },
+    "validators.card.mastercard": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 84:12 truth  card_number(value)"
+      ]
+    },
+    "validators.card.mir": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 216:12 truth  card_number(value)"
+      ]
+    },
+    "validators.card.unionpay": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 128:12 truth  card_number(value)"
+      ]
+    },
+    "validators.card.visa": {
+      "validators.utils.ValidationError.__bool__": [
+        "validators.card 62:12 truth  card_number(value)"
+      ]
+    },
+    "validators.country.country_code": {
+      "<builtin>.str.upper": [
+        "validators.country 310:24 call  value.upper()",
+        "validators.country 315:27 call  value.upper()"
+      ]
+    },
+    "validators.crypto_addresses.btc_address._validate_old_btc_address": {
+      "_sha2.SHA256Type.digest": [
+        "validators.crypto_addresses.btc_address 23:52 call  sha256(header).digest()",
+        "validators.crypto_addresses.btc_address 23:62 call  sha256(sha256(header).digest()).digest()"
+      ],
+      "_sha256.sha256.digest": [
+        "validators.crypto_addresses.btc_address 23:52 call  sha256(header).digest()",
+        "validators.crypto_addresses.btc_address 23:62 call  sha256(sha256(header).digest()).digest()"
+      ]
+    },
+    "validators.crypto_addresses.eth_address.eth_address": {
+      "<builtin>.ImportError": [
+        "validators.crypto_addresses.eth_address 55:26 call  ImportError( \"Do `pip install validators[crypto-eth-addre..."
+      ]
+    },
+    "validators.crypto_addresses.trx_address._validate_trx_checksum_address": {
+      "_sha2.SHA256Type.digest": [
+        "validators.crypto_addresses.trx_address 33:67 call  hashlib.sha256(address[:-4]).digest()",
+        "validators.crypto_addresses.trx_address 33:77 call  hashlib.sha256(hashlib.sha256(address[:-4]).digest()).dig..."
+      ],
+      "_sha256.sha256.digest": [
+        "validators.crypto_addresses.trx_address 33:67 call  hashlib.sha256(address[:-4]).digest()",
+        "validators.crypto_addresses.trx_address 33:77 call  hashlib.sha256(hashlib.sha256(address[:-4]).digest()).dig..."
+      ]
+    },
+    "validators.domain._IanaTLD._retrieve": {
+      "pathlib.WindowsPath.joinpath": [
+        "validators.domain 23:44 call  Path(__file__).parent.joinpath(\"_tld.txt\")"
+      ],
+      "pathlib.WindowsPath.open": [
+        "validators.domain 23:61 call  Path(__file__).parent.joinpath(\"_tld.txt\").open()"
+      ]
+    },
+    "validators.email.email": {
+      "<builtin>.str.endswith": [
+        "validators.email 68:64 call  domain_part.endswith(\"]\")"
+      ],
+      "<builtin>.str.lstrip": [
+        "validators.email 70:45 call  domain_part.lstrip(\"[\")"
+      ],
+      "<builtin>.str.rstrip": [
+        "validators.email 70:57 call  domain_part.lstrip(\"[\").rstrip(\"]\")"
+      ],
+      "<builtin>.str.startswith": [
+        "validators.email 68:34 call  domain_part.startswith(\"[\")"
+      ]
+    },
+    "validators.ip_address.ipv4": {
+      "<builtin>.ValueError": [
+        "validators.ip_address 90:33 call  ValueError(\"IPv4 address was expected in CIDR notation\")"
+      ]
+    },
+    "validators.ip_address.ipv6": {
+      "<builtin>.ValueError": [
+        "validators.ip_address 135:33 call  ValueError(\"IPv6 address was expected in CIDR notation\")"
+      ]
+    },
+    "validators.uri._file_url": {
+      "<builtin>.str.startswith": [
+        "validators.uri 17:28 call  value.startswith(\"file:///\")"
+      ]
+    },
+    "validators.uri._ipfs_url": {
+      "<builtin>.str.startswith": [
+        "validators.uri 23:28 call  value.startswith(\"ipfs://\")"
+      ]
+    },
+    "validators.uri.uri": {
+      "<builtin>.len": [
+        "validators.uri 119:31 call  len(\"mailto:\")"
+      ],
+      "validators.uri._file_url": [
+        "validators.uri 123:25 call  _file_url(value)"
+      ],
+      "validators.uri._ipfs_url": [
+        "validators.uri 127:25 call  _ipfs_url(value)"
+      ],
+      "validators.utils.validator.wrapper": [
+        "validators.uri 115:19 call  url(value)",
+        "validators.uri 119:21 call  email(value[len(\"mailto:\") :])"
+      ]
+    }
+  },
+  "notes": {
+    "validators.card 106:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.card 128:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.card 150:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.card 172:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.card 194:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.card 216:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.card 62:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.card 84:12 truth  card_number(value)": [
+      "the result of a call of a decorated validator: the wrapper returns True or a ValidationError (utils.py:89-100), whose __bool__ runs here (card_number)"
+    ],
+    "validators.crypto_addresses.btc_address 23:52 call  sha256(header).digest()": [
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later"
+    ],
+    "validators.crypto_addresses.btc_address 23:62 call  sha256(sha256(header).digest()).digest()": [
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later"
+    ],
+    "validators.crypto_addresses.trx_address 33:67 call  hashlib.sha256(address[:-4]).digest()": [
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later"
+    ],
+    "validators.crypto_addresses.trx_address 33:77 call  hashlib.sha256(hashlib.sha256(address[:-4]).digest()).dig...": [
+      "hashlib.sha256 returns an OpenSSL _hashlib.HASH, or, by hashlib's documented fallback when OpenSSL does not provide SHA-256, the builtin object: _sha256.sha256 on CPython 3.11 and _sha2.SHA256Type from 3.12 (the precedent of markdown2, markdown2.py:150); validators supports CPython 3.11 and later"
+    ],
+    "validators.domain 23:44 call  Path(__file__).parent.joinpath(\"_tld.txt\")": [
+      "Path(__file__) makes a PosixPath or a WindowsPath (the package declares Operating System :: OS Independent); .parent and joinpath keep the flavour (the precedent of netaddr and itables)"
+    ],
+    "validators.domain 23:61 call  Path(__file__).parent.joinpath(\"_tld.txt\").open()": [
+      "Path(__file__) makes a PosixPath or a WindowsPath (the package declares Operating System :: OS Independent); .parent and joinpath keep the flavour (the precedent of netaddr and itables)"
+    ]
+  },
+  "trace": "dynamic/validators.json"
+}
