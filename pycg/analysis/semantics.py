@@ -641,7 +641,8 @@ class Analysis(
         if not self._may_bind(function, call, receiver):
             return
         self._add_call_edge(call, function.name)
-        self._called.add(function)
+        if call.caller != function.name:
+            self._called.add(function)
         self._function_result(function, call, receiver)
 
     def _function_result(self, function, call, receiver):

@@ -2036,7 +2036,12 @@ function:
   arrives later is added; a class (an instance of a metaclass) is not
   checked. Saturated and unknown values pass as before.
 - A function that no analysed code calls gets its defaults; elsewhere a
-  default flows at each call that may omit the argument.
+  default flows at each call that may omit the argument. A call from the
+  function itself does not count, since a recursion runs only after some
+  other caller entered the function: a function whose only analysed
+  caller is itself is still an entry point.
+  - Limit: a recursion through another function or a nested function
+    (`f` calls `g`, `g` calls `f`) counts as a call.
 - A class is among the instances of each analysed metaclass of it, so the
   receiver of a metaclass method that no analysed code calls gets the
   classes (see *Metaclasses*).
