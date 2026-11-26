@@ -837,6 +837,7 @@ NOT_COUNTED = {
     "_subscriptions",
     "_compared_keys",
     "_watches",
+    "_waiting_rules",
     "_field_readers",
     "_keyed",
     "_pattern_operands",

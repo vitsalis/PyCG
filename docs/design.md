@@ -2706,23 +2706,30 @@ The first lookup of the name through an instance of the class is the
 *witness*. Until it gets an object or an edge, each rule waits as one
 entry in a list of the class and the name, with its instance; then the
 rules of the list run, and make the lookups and constraints that they
-would have made at once, which had nothing to act on before. On
-matplotlib, four lookups through an instance in five never get an object
-(an attribute that the instance itself has, `self.x`, or a special method
-that no class defines), and their records are not made. Likewise, the node
-of an attribute of an instance is made at its first write
-(`Analysis.field`: a store, `setattr`, a write to `__dict__`); until then
-a load of it is an entry in a list of the class and the name
-(`read_field`), which the write connects. On matplotlib 88 % of those
-nodes stayed empty. So the assignment graph for tests (`output_points_to`)
-lists no attribute of an instance that nothing stores. The other lookups
-through an instance are made at once: a deletion, a load through
-`super()`, the special methods of a descriptor and the hook of its
-accessor (made only once the class has answered), and the `__getitem__` of
-the sequence protocol. Waiting would save little there: 1.0 % to 1.6 % of
-the peak memory for the sequence protocol on pylint, matplotlib and
-pydantic, 0.5 % for `super()` on matplotlib (measured); the others are
-few. *Rules that wait* says why the results do not change.
+would have made at once, which had nothing to act on before. An entry is
+two slots of the list, the rule and the instance; the rule, with its
+arguments, is one tuple that every class waiting on it shares, and the
+rules run grouped by rule in the order in which each first waited. On
+openai, 2.75 million entries wait at the end of the solve, a site times
+each of the 2,662 classes of instances that reach it (truth tests,
+attribute hooks), for 23,576 rules; a tuple, a bound method and a list per
+entry made 658 MiB of the peak. On matplotlib, four lookups through an
+instance in five never get an object (an attribute that the instance
+itself has, `self.x`, or a special method that no class defines), and
+their records are not made. Likewise, the node of an attribute of an
+instance is made at its first write (`Analysis.field`: a store, `setattr`,
+a write to `__dict__`); until then a load of it is an entry in a list of
+the class and the name (`read_field`), which the write connects. On
+matplotlib 88 % of those nodes stayed empty. So the assignment graph for
+tests (`output_points_to`) lists no attribute of an instance that nothing
+stores. The other lookups through an instance are made at once: a
+deletion, a load through `super()`, the special methods of a descriptor
+and the hook of its accessor (made only once the class has answered), and
+the `__getitem__` of the sequence protocol. Waiting would save little
+there: 1.0 % to 1.6 % of the peak memory for the sequence protocol on
+pylint, matplotlib and pydantic, 0.5 % for `super()` on matplotlib
+(measured); the others are few. *Rules that wait* says why the results do
+not change.
 
 #### `super()`
 
@@ -3519,7 +3526,14 @@ function), with each stored key that is another object (the stored key's
 `__eq__`, where the stored key is an instance or class, as Python does
 where the hashes are equal; the same object is found by identity). The
 stored keys of a set method that takes iterables include their elements,
-which Python puts in a new set.
+which Python puts in a new set. The comparisons of a site are one record
+(`_KeyLookup`), which every stored key reaches once per container that
+holds it. Until the first key arrives, it keeps each stored key once;
+from then on it compares each stored key but the first as it arrives, so
+it keeps only whether the first key was stored, to compare it when a
+second key arrives. On openai a `.get` site meets the keys of 653 dicts
+that hold the same instances, and a list of every arrival held 1.9 GiB
+at the end of the solve.
 
 - Limit: keys whose hash is reused are stored keys only: Python also
   compares them, as they enter, with the keys of a set or dict that is

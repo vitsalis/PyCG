@@ -97,11 +97,12 @@ def no_rule_sees_what_is_opaque(monkeypatch):
 
     def guard_wake(wake):
         def guarded(watch):
-            if watch.waiting:
-                watch.waiting = {
-                    (guard(rule, 0), *args): receivers
-                    for (rule, *args), receivers in watch.waiting.items()
-                }
+            guarded_rules = {}
+            for index in range(0, len(watch.waiting or ()), 2):
+                rule, *args = waiting = watch.waiting[index]
+                if waiting not in guarded_rules:
+                    guarded_rules[waiting] = (guard(rule, 0), *args)
+                watch.waiting[index] = guarded_rules[waiting]
             return wake(watch)
 
         return guarded

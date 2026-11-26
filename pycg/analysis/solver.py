@@ -51,11 +51,18 @@ class Watch:
     __slots__ = ("waiting",)
 
     def __init__(self):
-        self.waiting = {}
+        self.waiting = []
+
+    def wait(self, rule, receiver):
+        self.waiting.append(rule)
+        self.waiting.append(receiver)
 
     def wake(self):
         waiting, self.waiting = self.waiting, None
-        for (rule, *args), receivers in waiting.items():
+        receivers_by_rule = {}
+        for index in range(0, len(waiting), 2):
+            receivers_by_rule.setdefault(waiting[index], []).append(waiting[index + 1])
+        for (rule, *args), receivers in receivers_by_rule.items():
             for receiver in receivers:
                 rule(receiver, *args)
 

@@ -129,6 +129,7 @@ class Analysis(
         self._dict_hubs = {}
         self._subscript_keys = {}
         self._watches = {}
+        self._waiting_rules = {}
         self._field_readers = {}
         self._notices = deque()
         self._notifying = False
