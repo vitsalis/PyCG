@@ -829,8 +829,8 @@ class Analysis(
     def _implicit_call(self, owner, name, call, dst, unless=()):
         base, receivers = self._prefixes.get(call, (call, ()))
         root = self._roots.get(base, base)
-        typed = owner.cls if type(owner) is Instance else owner
-        key = (typed, type(owner) is Instance, name, root, unless)
+        typed = None if type(owner) is Instance else owner
+        key = (typed, name, root, unless)
         template = self._dunder_calls.get(key)
         if template is None:
             template = Call(
