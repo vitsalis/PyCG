@@ -12,6 +12,7 @@ from .builtin_models import (
     LIBRARY_ITERATION,
     OPENERS,
     REFLECTION_CALLS,
+    RETURNS_ARGUMENT,
     STUB_RESULTS,
     VARIABLE_FUNCTIONS,
     VARIABLE_TYPES,
@@ -107,6 +108,21 @@ MRO_ENTRIES = {
 }
 TYPES_SAYING_NOTHING = frozenset({OBJECT})
 METHOD_TYPE = "types.MethodType"
+GROUP_EXCLUDED_PATHS = frozenset(
+    {
+        METHOD_TYPE,
+        SUBCLASSES,
+        *CONTAINER_CLASSES,
+        *HASHED_ARGUMENTS,
+        *ORDERING_COMPARISON_BY_BUILTIN,
+        *CALLS_BACK,
+        *LENGTH_HINTS,
+        *LIBRARY_ITERATION,
+        *OPENERS,
+        *CLOSURES,
+        *REFLECTION_CALLS,
+    }
+)
 STRING_CONSTANT_CLASSES = {str: "builtins.str", bytes: "builtins.bytes"}
 
 FUNCTION_TYPES = frozenset(
@@ -359,9 +375,15 @@ class Outside:
 
     def call_outside(self, external, definitions, call):
         base, receivers = self._prefixes.get(call, (call, ()))
+        group = self._groups.get(call)
+        assert group is None or self.bound_in_group(external), external
         if self.returns_argument(external, call):
             return
-        if not (receivers and self._unknown_class(receivers[0])):
+        if group is not None:
+            unknown = group.unknown
+        else:
+            unknown = receivers and self._unknown_class(receivers[0])
+        if not unknown:
             self.add_external_call_edge(external.name, call, "stub")
             for definition in definitions:
                 wrapper = CACHED_FUNCTIONS.get(definition.path)
@@ -369,7 +391,7 @@ class Outside:
                     name = f"{self.typed(wrapper).name}.__call__"
                     self.add_external_call_edge(name, call, "stub")
         receiver = external if external.inexact else None
-        if receivers and isinstance(receivers[0], Class):
+        if group is None and receivers and isinstance(receivers[0], Class):
             if any(d.path == SUBCLASSES for d in definitions):
                 self._subclasses(receivers[0], call)
                 return
@@ -566,17 +588,23 @@ class Outside:
             for index, signature in enumerate(signatures)
             if _fits(signature["p"][skip:], call)
         ] or range(len(signatures))
-        overloads, results = [], []
+        overloads, results, typed = [], [], []
         for index in fitting:
             signature = signatures[index]
             parameters = signature["p"][skip:]
             bound = self.bind_stub(call, definition.path, index, parameters)
-            if call.dst is not None:
+            if call.dst is not None and type(receivers) is not tuple:
+                typed.append((signature["r"], bound, parameters))
+            elif call.dst is not None:
                 context = _Context(call, receivers, bound, parameters)
                 entry = LIBRARY_ITERATION.get(definition.path)
                 context.deferred = entry is not None and entry[0] in LAZY_MODES
                 results.append((signature["r"], context))
             overloads.append((parameters, signature["r"], bound))
+        if type(receivers) is not tuple:
+            if typed:
+                receivers.observe(self._add_results_of, call, typed)
+            return overloads
         unpacked = call.star or call.double_star
         if results and definition.path in OPENERS and not unpacked:
             self.open_file(call, overloads[0][2], results)
@@ -593,6 +621,30 @@ class Outside:
                 each = Each(self._new_instance, call, results=(call.dst,))
                 self.solver.attach(call.args[0], each)
         return overloads
+
+    def _add_results_of(self, receivers, call, typed):
+        for reduced, bound, parameters in typed:
+            context = _Context(call, receivers, bound, parameters)
+            self.add_type(reduced, call.dst, context)
+
+    def bound_in_group(self, external):
+        found = self._grouped_externals.get(external)
+        if found is None:
+            found = self._grouped_externals[external] = self._bound_in_group(external)
+        return found
+
+    def _bound_in_group(self, external):
+        if type(external) is not External:
+            return False
+        if external.name in RETURNS_ARGUMENT or self.builtin_function_rule(external):
+            return False
+        definitions = self.stub_definitions(external)
+        return bool(definitions) and all(
+            definition.kind == "function"
+            and not definition.path.startswith(f"{STUB_BUILTINS}.")
+            and definition.path not in GROUP_EXCLUDED_PATHS
+            for definition in definitions
+        )
 
     def _class_method_owner(self, definition, external):
         if external is not None and "." in external.name:

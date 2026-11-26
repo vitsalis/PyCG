@@ -4332,8 +4332,8 @@ another origin without a bound.
 | Module, class, function | its definition |
 | Call expression | the expression (one `Call`, made by the builder) |
 | Implicit call of a construct (`__iter__` of a for loop, `__eq__` of `in`, a descriptor accessor, an attribute hook) | scope, site (start and end), role; its origin is that key |
-| Implicit call of a special method (`call_dunder`) | instance or class, method name, the root call (the call expression, construct call or call back that a chain of implicit calls copies) and `unless`, plus at most three receivers (as below); a copy has the arguments of its root |
-| Call that a bound method makes | the call that it extends (never itself such a call) and at most three receivers |
+| Implicit call of a special method (`call_dunder`) | the class for a class (a call of its metaclass), nothing for an instance (each instance's own lookup is attached to the shared call), method name, the root call (the call expression, construct call or call back that a chain of implicit calls copies) and `unless`, plus at most three receivers (as below); a copy has the arguments of its root |
+| Call that a bound method makes | the call that it extends (never itself such a call) and at most three receivers; for a plain stub method, the call that it extends, the method, the number of receivers and whether the class of the first is unknown, one call for up to the cap of receivers, whose receiver nodes hold them |
 | Call back from outside code | the origin of the outside calls; every call with that origin passes its arguments to it once |
 | `Instance` | class and origin; one more per class, the abstract instance |
 | `Container` | kind, origin and the rule that makes it: a display or comprehension; a call origin and the model (`tuple(x)` and the pair of `d.items()` at one call are two containers), and for the tuples of `zip` their length (a call that adds receivers keeps the origin and passes more iterables); a slice, operator or unpacking of the source; `(scope, site, role)` for an iterator that `iter()` makes; the container, for the iterator of an exact collection and for its inexact alias; the function and parameter (or class and field) whose annotation names it; the class, for its namespace; for the result of a stubbed call, the call origin (or the stub attribute, never the receiver that it is loaded through, which may itself be such a container: `x = x.__dict__` in a loop), the position in the type and the type, which the stub data bounds; an instance of a generic stub class likewise |
@@ -4377,6 +4377,22 @@ that a construct iterates, what an unpacked argument passes, the node that
 `in` compares, the number of arguments of a site call), and a hit asserts
 that it was asked with the same, so a kind of call that broke the rule
 fails the tests instead of losing values.
+
+A plain stub method (one that no model, protocol or library rule reads: a
+function of a non-builtin stub) called through bound methods of many
+receivers at one call is one call for all of them, up to the cap of
+receivers: its receiver positions are nodes that hold the receivers, and its
+binding, typed callbacks and call edges are made once. What a single
+receiver decides is still decided per receiver: the results that name the
+receiver (`*self`, `type[Self]`) are added for each receiver, whether the
+call edge is reported depends on whether the class of the first receiver is
+unknown, which is part of the key, and any other use of the call (a call of
+something else with it, a bound method or implicit call that extends it)
+goes through each receiver's own call. The parameters of the binding get the
+union of the receivers, which is what the result and the callees received
+from the calls of every receiver. A group takes at most the cap of
+receivers, so its receiver nodes never saturate, as no receiver node of one
+receiver's call did.
 
 **Receivers are bounded.** A bound method has one receiver: only a
 function is bound, so binding never nests. The cap of three receivers

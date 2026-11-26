@@ -783,6 +783,9 @@ COUNTED = {
 }
 
 NOT_COUNTED = {
+    "_bound_groups",
+    "_groups",
+    "_grouped_externals",
     "_accessor_hooks",
     "_accessor_receivers",
     "_dunder_owners",

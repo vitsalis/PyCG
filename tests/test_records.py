@@ -341,3 +341,32 @@ def test_the_receivers_of_an_accessor_at_a_site_share_one_record(tmp_path):
     assert all(len(hooks.receivers) == 3 for hooks in analysis._accessor_hooks.values())
     graph = generator.output()
     assert {"main.Shape.area", "main.Getter.__get__"} <= set(graph["main.measure"])
+
+
+def test_the_receivers_of_a_stub_method_at_a_site_share_one_call(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            import pathlib
+            class Location(pathlib.PurePosixPath):
+                pass
+            def rename(path):
+                return path.with_suffix(".txt")
+            first = rename(Location("a"))
+            rename(Location("b")); rename(Location("c"))
+            """
+        },
+    )
+    analysis = generator.program.analysis
+
+    groups = {
+        callee.name: found
+        for (_, callee, _, _), found in analysis._bound_groups.items()
+    }
+    (group,) = groups["pathlib.PurePosixPath.with_suffix"]
+    assert len(group.receivers) == 3
+    assert generator.output()["main.rename"] == ["pathlib.PurePosixPath.with_suffix"]
+    first = generator.output_points_to()["main.first"]
+    instances = [name for name in first if name.startswith("main.Location@main")]
+    assert len(instances) == 3

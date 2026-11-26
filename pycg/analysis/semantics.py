@@ -76,6 +76,9 @@ class Analysis(
         self._instances = {}
         self._dunder_calls = {}
         self._dunder_owners = {}
+        self._bound_groups = {}
+        self._groups = {}
+        self._grouped_externals = {}
         self._new_results = {}
         self._class_instances = {}
         self._statement_calls = {}
@@ -490,6 +493,10 @@ class Analysis(
         return functions
 
     def call(self, obj, call):
+        group = self._groups.get(call)
+        if group is not None and obj is not group.callee:
+            group.observe(self._call_prefixed, obj, group.base)
+            return
         match obj:
             case Function():
                 if not self.returns_argument(obj, call):
@@ -591,13 +598,56 @@ class Analysis(
         self.call(obj, callback)
 
     def call_bound(self, obj, receivers, call):
+        group = self._groups.get(call)
+        if group is not None:
+            group.observe(self._call_bound_prefixed, obj, receivers, group.base)
+            return
         base, prefix = self._prefixes.get(call, (call, ()))
         receivers = (receivers + prefix)[:RECEIVERS_PER_CALL_MAX]
         if isinstance(obj, Function):
             rest = self._prefixed_call(base, receivers[1:])
             self._call_function(obj, rest, receivers[0])
+        elif self.bound_in_group(obj):
+            self._bound_group(base, obj, receivers).add(receivers)
         else:
             self.call(obj, self._prefixed_call(base, receivers))
+
+    def _call_prefixed(self, prefix, obj, base):
+        self.call(obj, self._prefixed_call(base, prefix))
+
+    def _call_bound_prefixed(self, prefix, obj, receivers, base):
+        self.call_bound(obj, receivers, self._prefixed_call(base, prefix))
+
+    def _bound_group(self, base, callee, receivers):
+        unknown = bool(self._unknown_class(receivers[0]))
+        key = (base, callee, len(receivers), unknown)
+        groups = self._bound_groups.setdefault(key, [])
+        for group in groups:
+            if receivers in group.receivers:
+                return group
+        cap = self.solver.cap
+        if groups and (cap is None or len(groups[-1].receivers) < cap):
+            return groups[-1]
+        call = Call(
+            self,
+            base.caller,
+            [*(self.node() for _ in receivers), *base.args],
+            base.keywords,
+            base.dst,
+            base.site,
+            base.origin,
+            base.star,
+            base.double_star,
+            base.implicit,
+        )
+        call.decorator = base.decorator
+        call.applies = base.applies
+        group = _BoundGroup(self, base, callee, call, len(receivers), unknown)
+        groups.append(group)
+        self._groups[call] = group
+        self._prefixes[call] = (base, group)
+        self.call(callee, call)
+        return group
 
     def _prefixed_call(self, base, receivers):
         if not receivers:
@@ -828,6 +878,7 @@ class Analysis(
 
     def _implicit_call(self, owner, name, call, dst, unless=()):
         base, receivers = self._prefixes.get(call, (call, ()))
+        assert type(receivers) is tuple, call
         root = self._roots.get(base, base)
         typed = None if type(owner) is Instance else owner
         key = (typed, name, root, unless)
@@ -939,6 +990,47 @@ class Call(Constraint):
 
     def results(self):
         return (self.dst,)
+
+
+class _BoundGroup:
+    __slots__ = (
+        "analysis",
+        "base",
+        "callee",
+        "call",
+        "width",
+        "unknown",
+        "receivers",
+        "observers",
+    )
+
+    def __init__(self, analysis, base, callee, call, width, unknown):
+        self.analysis = analysis
+        self.base = base
+        self.callee = callee
+        self.call = call
+        self.width = width
+        self.unknown = unknown
+        self.receivers = {}
+        self.observers = []
+
+    def __len__(self):
+        return self.width
+
+    def add(self, receivers):
+        if receivers in self.receivers:
+            return
+        self.receivers[receivers] = None
+        analysis = self.analysis
+        for receiver, node in zip(receivers, self.call.args):
+            analysis.add_edge(analysis.constant(receiver), node)
+        for function, args in list(self.observers):
+            function(receivers, *args)
+
+    def observe(self, function, *args):
+        self.observers.append((function, args))
+        for receivers in list(self.receivers):
+            function(receivers, *args)
 
 
 class _Returned:
