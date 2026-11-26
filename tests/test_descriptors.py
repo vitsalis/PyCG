@@ -554,6 +554,60 @@ def test_a_store_waits_for_a_base_that_a_call_gives(tmp_path):
     assert index_callees(graph, "main.use") == ["main.Rows.index"]
 
 
+def test_each_instance_decides_its_store_by_what_the_class_gives(tmp_path):
+    graph = stored_graph(
+        tmp_path,
+        """
+        class Field:
+            def __get__(self, obj, owner=None): return Rows()
+            def __set__(self, obj, value): obj.written()
+        class Lazy:
+            def __get__(self, obj, owner=None): return Rows()
+        class Model:
+            field = Field()
+            lazy = Lazy()
+            def written(self): pass
+            @property
+            def fixed(self): return Rows()
+        def store(model):
+            model.field = Pairs()
+            model.lazy = Pairs()
+            model.fixed = Pairs()
+            model.plain = Pairs()
+            model.late = Pairs()
+        def field(model):
+            model.field.index(1)
+        def lazy(model):
+            model.lazy.index(1)
+        def fixed(model):
+            model.fixed.index(1)
+        def plain(model):
+            model.plain.index(1)
+        def late(model):
+            model.late.index(1)
+        for model in (Model(), Model()):
+            store(model)
+            field(model)
+            lazy(model)
+            fixed(model)
+            plain(model)
+            late(model)
+        Model.late = Field()
+        """,
+    )
+
+    assert "main.Field.__set__" in callees(graph, "main.store")
+    assert "main.Model.written" in callees(graph, "main.Field.__set__")
+    for caller in ("field", "fixed"):
+        assert index_callees(graph, f"main.{caller}") == ["main.Rows.index"]
+    for caller in ("lazy", "late"):
+        assert index_callees(graph, f"main.{caller}") == [
+            "main.Pairs.index",
+            "main.Rows.index",
+        ]
+    assert index_callees(graph, "main.plain") == ["main.Pairs.index"]
+
+
 def test_limit_a_member_whose_value_the_analysis_does_not_see_takes_the_store(
     tmp_path,
 ):

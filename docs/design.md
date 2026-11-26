@@ -2700,8 +2700,10 @@ obj.attr  =  Field(obj, attr)                the instance's own field
 only; only what the class gives is bound to the instance. So a rule that
 looks a name up on the class of an instance, and acts only on what the
 lookup finds, is applied for that instance once the class may have the
-name (`Hierarchy.later`): the class side of a load and of a store, the
-attribute hook of an access, and the special method of an implicit call.
+name (`Hierarchy.later`): the class side of a load and of a store (for a
+store, its accessor and whether a property or a descriptor that the
+lookup finds takes the store from the field), the attribute hook of an
+access, and the special method of an implicit call.
 The first lookup of the name through an instance of the class is the
 *witness*. Until it gets an object or an edge, each rule waits as one
 entry in a list of the class and the name, with its instance; then the
