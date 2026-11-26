@@ -3152,17 +3152,24 @@ its accessor is called from both.
 
 The accessor calls of one class and hook are one record (`_AccessorHooks`),
 attached to Python's own hook of the class and to the lookup of the hook
-through the first receiver. It keeps the receivers of each accessor and
-access, and the callers that the hook values give (the hook's function, or
-the access itself): a caller that arrives calls every accessor with every
-receiver, and a receiver or an accessor that arrives is called from every
-caller seen. The value of a hook gives only its caller, which is the same
-for every instance of the class. The calls of one accessor from one caller
-are one record (`_Accessors`, by accessor, call, kinds and width), which
-binds each receiver as its own call did (the instance, or the instance and
-its class); a receiver that arrives gets every method of the accessor seen.
-Once one of the two nodes holds the saturated value, an accessor that
-arrives saturates its result.
+through each of its receivers, once per lookup. Through the first receiver
+alone, the record would act in the round in which that receiver's lookup fills:
+a receiver whose lookup an earlier store made answers at once, one whose lookup
+is new a round later, and which receiver comes first depends on the order of
+the solve (see *Saturation and the rounds*). An accessor and access met while
+Python's own hook or the lookup of the hook through the receiver holds the
+saturated value get a record of their own, by class, hook and entry, so no hook
+that the shared record saw before the saturation calls them. A record keeps the
+receivers of each accessor and access, and the callers that the hook values
+give (the hook's function, or the access itself): a caller that arrives calls
+every accessor with every receiver, and a receiver or an accessor that arrives
+is called from every caller seen. The value of a hook gives only its caller,
+which is the same for every instance of the class. The calls of one accessor
+from one caller are one record (`_Accessors`, by accessor, call, kinds and
+width), which binds each receiver as its own call did (the instance, or the
+instance and its class); a receiver that arrives gets every method of the
+accessor seen. Once one of the nodes of the record holds the saturated value,
+an accessor that arrives saturates its result.
 
 - Limit: a hook that replaces Python's (`self.__dict__[name] = value`)
   never calls the accessor, but gets the edge.
@@ -4646,7 +4653,7 @@ them, so no kind of node keys another of its own kind:
 | Key lookup of a subscript (`_subscript_keys`) | key node, scope and site |
 | Sequence fallback of an iteration (`_Sequences`) | class, kind of the iterated object, iteration and result node |
 | Hook calls of an instance (`_HookCalls`) | lookup node of the hook |
-| Accessor calls of a class (`_AccessorHooks`; `_Accessors`) | class and hook; accessor node, call, kinds and width |
+| Accessor calls of a class (`_AccessorHooks`; `_Accessors`) | class and hook, or class, hook and entry for an entry met after a saturation; accessor node, call, kinds and width |
 | Field writes of a store decision (`_FieldWrites`) | decision node |
 | Loads through a lookup (`_Deliveries`) | lookup node |
 | Group of bound calls of a plain stub method (`_BoundGroup`) | the call that it extends, the method, the number of receivers and whether the class of the first is unknown; a list of groups of at most the cap of receivers |
