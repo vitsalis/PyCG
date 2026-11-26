@@ -1,4 +1,5 @@
 import ast
+import gc
 import logging
 import os
 import tokenize
@@ -45,6 +46,15 @@ class Program:
         self._modules_declaring_all = set()
 
     def analyse(self):
+        collecting = gc.isenabled()
+        gc.disable()
+        try:
+            self._analyse()
+        finally:
+            if collecting:
+                gc.enable()
+
+    def _analyse(self):
         named = {}
         for path in self.entry_points:
             name = self._module_name(path)

@@ -11,7 +11,7 @@ from .model import (
     Typed,
 )
 from .outside import REFLECTED_COMPARISONS
-from .solver import Each
+from .solver import Constraint, Each
 
 CONVERSIONS = {
     "str": (("__str__", ()), ("__repr__", ("__str__",))),
@@ -57,6 +57,20 @@ _COMPARISON_FAMILY_BY_KIND = {
 }
 
 
+_OPERAND_KINDS = {
+    (membership, constants): (
+        Instance,
+        Class,
+        Container,
+        *((Generator, External) if membership else ()),
+        Typed,
+        *((Const,) if constants else ()),
+    )
+    for membership in (False, True)
+    for constants in (False, True)
+}
+
+
 def comparison_family(container):
     family = _COMPARISON_FAMILY_BY_KIND.get(container.kind)
     if family is None and is_dict(container):
@@ -81,19 +95,10 @@ class Protocols:
         operation = _Operator(
             self, left, right, method, reflected, inplace, dst, unary, caller, site
         )
-        if method == "__contains__":
-            kinds = (Instance, Class, Container, Generator, External, Typed)
-        else:
-            kinds = (Instance, Class, Container, Typed)
-        if constants:
-            kinds = (*kinds, Const)
-        results = (dst,) if method != "__contains__" else ()
+        kinds = _OPERAND_KINDS[method == "__contains__", constants]
         for node, is_left in ((left, True), (right, False)):
             if node is not None:
-                operand = Each(
-                    self._operand, operation, is_left, kinds=kinds, results=results
-                )
-                self.solver.attach(node, operand)
+                self.solver.attach(node, _Operand(operation, is_left, kinds))
 
     def _operand(self, obj, operation, is_left):
         if isinstance(obj, Const):
@@ -164,7 +169,9 @@ class Protocols:
     def _searched_type(self, cls, operation):
         if not isinstance(cls, Class):
             self._compare_value(operation)
-        elif cls not in operation.classes:
+        elif operation.classes is None or cls not in operation.classes:
+            if operation.classes is None:
+                operation.classes = set()
             operation.classes.add(cls)
             python = self.python_method(cls, "__contains__")
             self.solver.attach(python, Each(self._python_contains, operation))
@@ -408,11 +415,11 @@ class _Operator:
         self.unary = unary
         self.caller = caller
         self.site = site
-        self._calls = {}
+        self._calls = None
         self._membership = None
-        self._compare_calls = {}
+        self._compare_calls = None
         self.elements = None
-        self.classes = set()
+        self.classes = None
         self._comparison = None
 
     def membership(self):
@@ -434,6 +441,8 @@ class _Operator:
         return self._comparison
 
     def compare_call(self, side, other):
+        if self._compare_calls is None:
+            self._compare_calls = {}
         if side not in self._compare_calls:
             call = self.analysis.site_call(
                 self.caller, self.site, ("compare", side), [other]
@@ -444,6 +453,8 @@ class _Operator:
         return call
 
     def call(self, is_left):
+        if self._calls is None:
+            self._calls = {}
         if is_left not in self._calls:
             if self.unary:
                 args = []
@@ -454,6 +465,24 @@ class _Operator:
                 self.caller, self.site, role, args
             )
         return self._calls[is_left]
+
+
+class _Operand(Constraint):
+    __slots__ = ("operation", "is_left", "kinds")
+
+    def __init__(self, operation, is_left, kinds):
+        self.operation = operation
+        self.is_left = is_left
+        self.kinds = kinds
+
+    def apply(self, obj):
+        if isinstance(obj, self.kinds):
+            self.operation.analysis._operand(obj, self.operation, self.is_left)
+
+    def results(self):
+        if self.operation.method == "__contains__":
+            return ()
+        return (self.operation.dst,)
 
 
 class _ElementComparison:
