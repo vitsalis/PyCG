@@ -35,6 +35,7 @@ FUNCTIONS = {
         "value",
         "format_spec",
     ),
+    "pow": ("(base, exp, mod=None)", "pow"),
     "print": ("(*values, sep=None, end=None, file=None, flush=False)", "print"),
     "getattr": ("(object, name, default=None, /)", "getattr", "getattr"),
     "hasattr": ("(obj, name, /)", "getattr", "hasattr"),

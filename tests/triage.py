@@ -659,10 +659,6 @@ CASES = {
         "a function passed to library code is not a call: calling a functools.partial"
         " calls its function",
     ),
-    "new_syntax/pow_three_args_rpow": (
-        "language/new-syntax",
-        "pow with three arguments does not call __rpow__",
-    ),
     "operators/contains_operator": (
         "flow/uncalled",
         "calls in __iter__, which `in` never calls as __contains__ answers, count",

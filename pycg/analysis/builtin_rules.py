@@ -455,6 +455,20 @@ class BuiltinRules:
         self.add_conversion(args[parameter], kind, call.caller, call.site, spec)
         self._result(call, self.typed("builtins.str"))
 
+    def _rule_pow(self, call, receiver, args):
+        extra = (args["mod"],) if args.given("mod") else ()
+        self.add_operator(
+            args["base"],
+            args["exp"],
+            "__pow__",
+            "__rpow__",
+            False,
+            self._result_node(call),
+            call.caller,
+            call.site,
+            extra=extra,
+        )
+
     def _rule_print(self, call, receiver, args):
         values = self.every(args.varargs)
         self.add_conversion(values, "str", call.caller, call.site)

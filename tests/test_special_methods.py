@@ -46,6 +46,72 @@ use(Number(), Number())
     ]
 
 
+POWER = """
+def f(): pass
+class Power:
+    def __pow__(self, exp, mod=None):
+        return self
+    def __rpow__(self, base, mod=None):
+        return f
+    def run(self): pass
+"""
+
+
+def test_pow_calls_what_the_power_operator_calls(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        POWER
+        + """
+def two(a):
+    pow(a, 2).run()
+    pow(2, a)()
+def three(a):
+    pow(a, 2, 5).run()
+    pow(2, a, 5)()
+def keywords(a):
+    pow(2, exp=a, mod=5)()
+two(Power())
+three(Power())
+keywords(Power())
+""",
+    )
+
+    for caller in ("two", "three"):
+        assert callees(graph, f"main.{caller}") == [
+            "<builtin>.pow",
+            "main.Power.__pow__",
+            "main.Power.__rpow__",
+            "main.Power.run",
+            "main.f",
+        ]
+    assert callees(graph, "main.keywords") == [
+        "<builtin>.pow",
+        "main.Power.__rpow__",
+        "main.f",
+    ]
+
+
+def test_pow_passes_the_modulus_to_both_methods(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+def g(): pass
+class Mod:
+    def __call__(self): g()
+class Power:
+    def __pow__(self, exp, mod=None):
+        mod()
+    def __rpow__(self, base, mod=None):
+        mod()
+pow(Power(), 2, Mod())
+pow(2, Power(), Mod())
+""",
+    )
+
+    assert callees(graph, "main.Power.__pow__") == ["main.Mod.__call__"]
+    assert callees(graph, "main.Power.__rpow__") == ["main.Mod.__call__"]
+
+
 def test_inplace_operator_falls_back_to_the_binary_one(tmp_path):
     graph = main_graph(
         tmp_path,

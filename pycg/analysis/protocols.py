@@ -77,9 +77,20 @@ class Protocols:
         site,
         unary=False,
         constants=False,
+        extra=(),
     ):
         operation = _Operator(
-            self, left, right, method, reflected, inplace, dst, unary, caller, site
+            self,
+            left,
+            right,
+            method,
+            reflected,
+            inplace,
+            dst,
+            unary,
+            caller,
+            site,
+            extra,
         )
         if method == "__contains__":
             kinds = (Instance, Class, Container, Generator, External, Typed)
@@ -383,6 +394,7 @@ class _Operator:
         "elements",
         "classes",
         "_comparison",
+        "extra",
     )
 
     def __init__(
@@ -397,6 +409,7 @@ class _Operator:
         unary,
         caller,
         site,
+        extra=(),
     ):
         self.analysis = analysis
         self.left = left
@@ -414,6 +427,7 @@ class _Operator:
         self.elements = None
         self.classes = set()
         self._comparison = None
+        self.extra = extra
 
     def membership(self):
         if self._membership is None:
@@ -448,7 +462,7 @@ class _Operator:
             if self.unary:
                 args = []
             else:
-                args = [self.right if is_left else self.left]
+                args = [self.right if is_left else self.left, *self.extra]
             role = ("operator", self.method, is_left)
             self._calls[is_left] = self.analysis.site_call(
                 self.caller, self.site, role, args

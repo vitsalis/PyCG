@@ -130,7 +130,6 @@ new_syntax/copy_replace: language/new-syntax: copy.replace does not call __repla
 new_syntax/int_ignores_trunc: language/new-syntax: math.trunc does not call __trunc__
 new_syntax/json_array_hook: outside/library-calls-back: a function passed to library code is not a call: json.loads calls its array_hook
 new_syntax/partial_placeholder: outside/library-calls-back: a function passed to library code is not a call: calling a functools.partial calls its function
-new_syntax/pow_three_args_rpow: language/new-syntax: pow with three arguments does not call __rpow__
 operators/contains_operator: flow/uncalled: calls in __iter__, which `in` never calls as __contains__ answers, count
 operators/copy_protocol: outside/library-calls-back: copy.copy and copy.deepcopy do not call __copy__ and __deepcopy__
 operators/operator_module: outside/library-calls-back: functions of the operator module do not call the special methods of their arguments
