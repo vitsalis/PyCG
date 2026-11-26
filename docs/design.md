@@ -904,6 +904,20 @@ and compares them with the keys of its target. A source dict or a target
 that arrives after the second dict goes through the hub at once; the
 direct copies made before stay, and give what the hub gives.
 
+A subscript read (`x[k]`) and an unpacking (`a, b = x`) read a field of
+every container of their base node at every site: containers times keys
+times sites. On scikit-learn hundreds of sites read about 2,900 containers
+that reach their nodes together, and on numpy hundreds of sites read the
+same 650. So the containers that reach a site's node in one step of the
+solve are read as a group (`_ContainerGroup`, one per set of containers,
+whichever sites receive it): the group reads each key once into a node of
+its own, which the site's result node then gets. A key's node holds the
+union of what `read_key` gives for each container of the group, which is
+what the site's result node got from them one by one, so the result is the
+same; a node only holds more objects past the cap, and the result node
+holds at least as many, so it saturates whenever the group's node does. A
+lone container is still read directly.
+
 A program has millions of `Each` constraints and of nodes with a successor.
 An `Each` keeps its function and the function's owner, not a bound method
 (64 bytes), and its one result node itself, not a tuple of one (56 bytes).

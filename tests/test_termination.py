@@ -794,6 +794,7 @@ NOT_COUNTED = {
     "_dunder_owners",
     "_sequences",
     "_dict_hubs",
+    "_container_groups",
     "_subscript_keys",
     "_stub_definitions",
     "_library_calls",
