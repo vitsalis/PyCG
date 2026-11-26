@@ -289,6 +289,21 @@ class Solver:
         finally:
             self._attach_nesting -= 1
 
+    def apply_now(self, node, constraint):
+        if node.representative is not None:
+            node = _find_representative(node)
+        seen = node.done
+        if not seen:
+            return
+        if self._attach_nesting >= _ATTACH_NESTING_MAX:
+            self._attach_deferred.append((constraint, seen))
+            return
+        self._attach_nesting += 1
+        try:
+            self._apply([constraint], seen)
+        finally:
+            self._attach_nesting -= 1
+
     def objects(self, node):
         node = _find_representative(node)
         done = node.done

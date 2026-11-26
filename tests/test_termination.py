@@ -790,6 +790,7 @@ NOT_COUNTED = {
     "_accessor_receivers",
     "_hook_calls",
     "_field_writes",
+    "_deliveries",
     "_dunder_owners",
     "_sequences",
     "_dict_hubs",

@@ -2742,6 +2742,16 @@ pylint, matplotlib and pydantic, 0.5 % for `super()` on matplotlib
 (measured); the others are few. *Rules that wait* says why the results do
 not change.
 
+The loads that reach an instance through one lookup of a name are one
+record on that lookup (`_Deliveries`), with the instance and the hook
+(`__getattribute__`, or none through `super()`): each value that the lookup
+gets is delivered to every load of the record, and a load that joins later
+gets the values that the lookup holds at once, as a constraint attached to
+it then would, the saturated value included. A value that the lookup held
+but had not yet given the record reaches the new load twice, which changes
+nothing. On xarray these were 3.4 million constraints at 2.5 GiB, one per
+instance and load site.
+
 #### `super()`
 
 `Super(C, r)` looks up in the MRO of `r`'s class (or of `r`
