@@ -90,16 +90,17 @@ when no file of it does.
   - `analysed`: the analysis built the whole module;
   - `failed`: the file cannot be decoded or parsed. The module has no
     definitions but itself (with lines `[0, 0]`) and no calls;
-  - `partial`: the analysis stopped before the end of the module (its code
-    is nested deeper than the analysis follows, `RecursionError`). The
-    definitions and calls that it built before it stopped are kept, and
-    the module may call less than its code does. Where the analysis stops
-    depends on the depth of Python's stack.
+  - `partial`: the analysis stopped before a top-level statement that
+    nests deeper than it follows (247 levels, `docs/design.md`), with the
+    cause `DeepNesting (line 3)`, the line of that statement. The
+    definitions and calls of the statements before it are kept, and the
+    module may call less than its code does.
 
-  Nothing is dropped silently. The cause is the type of the error, with
-  its line or byte where Python gives one (`SyntaxError (line 3)`,
-  `UnicodeDecodeError (byte 17)`, `SyntaxError`, `RecursionError`): not
-  its message, so that it is the same on every version of Python.
+  Nothing is dropped silently. The cause of a failed module is the type
+  of the error, with its line or byte where Python gives one
+  (`SyntaxError (line 3)`, `UnicodeDecodeError (byte 17)`, `SyntaxError`,
+  `RecursionError`): not its message, so that it is the same on every
+  version of Python.
 
 **`definitions`** has every module, class and function (lambdas included)
 that the analysed source defines, by qualified name: its `kind`, its
