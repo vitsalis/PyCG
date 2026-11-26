@@ -313,3 +313,31 @@ def test_the_instances_of_a_class_iterated_at_a_site_share_one_record(tmp_path):
     assert records["main.Indexed"].found and not records["main.Plain"].found
     assert len(records["main.Plain"].objects) == 2
     assert "main.Indexed.__getitem__" in generator.output()["main.loop"]
+
+
+def test_the_receivers_of_an_accessor_at_a_site_share_one_record(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class Getter:
+                def __get__(self, instance, owner): return instance
+            class Shape:
+                described = Getter()
+                @property
+                def area(self): return 1
+            def measure(shape):
+                shape.area
+                shape.described
+            measure(Shape()); measure(Shape()); measure(Shape())
+            """
+        },
+    )
+    analysis = generator.program.analysis
+
+    records = list(analysis._accessor_receivers.values())
+    assert sorted(len(record.receivers) for record in records) == [3, 3]
+    assert {record.width for record in records} == {1, 2}
+    assert all(len(hooks.receivers) == 3 for hooks in analysis._accessor_hooks.values())
+    graph = generator.output()
+    assert {"main.Shape.area", "main.Getter.__get__"} <= set(graph["main.measure"])
