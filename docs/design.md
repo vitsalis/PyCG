@@ -4004,31 +4004,34 @@ so the calls, and what the factories make (a copy of the dict, another
 
 #### Iteration
 
-Iterating a container gives its elements (the keys of a dict); a
-generator gives what its function yields; an instance or class calls
-`__iter__` and then the `__next__` of what it returns (`__aiter__` and
-`__anext__` for `async for`), with edges from the iterating scope; an
-external gives itself. `iter()` of a list, tuple, set, frozenset or dict
-(or a collection of `collections`) that the analysed code makes gives its
-iterator, one per container, of kind `list_iterator` (and so on), whose
-elements are the container's; `iter()` of any other container, an
-iterator or a generator gives the object itself. If no analysed class and no builtin class (`list`)
-of its type defines `__iter__` but one defines `__getitem__`, `iter()`
-gives an iterator whose `next()` calls `__getitem__` with an index that is
-not known (the sequence protocol), from the scope that iterates. That
-fallback is one record per class, kind of the iterated object, iteration
-and result (`_Sequences`), on one lookup of `__getitem__` through the
-first object: the rule reads only whether the lookup finds a method, and
-the objects of one kind and class find the same, so the first object's
-lookup answers for each. An object that arrives later is iterated at once,
-and an opaque one gives the result the saturated value. Every
-iteration, `iter()`, `next()` and an explicit `__next__()` of these
-iterators and of generators go through one rule. `iter(callable,
-sentinel)` gives an iterator whose `next()` calls the callable, implicitly,
-from the scope that iterates. `next()`, `iter()`, `send()` and `yield from`
-are modelled; the value of a `yield` expression is what is sent; `yield
-from` gives the inner generator's return value. The edge to a generator
-function comes from the scope that calls it.
+Iterating a container gives its elements (the keys of a dict); a generator
+gives what its function yields; an instance or class calls `__iter__` and then
+the `__next__` of what it returns (`__aiter__` and `__anext__` for `async
+for`), with edges from the iterating scope; an external gives itself. `iter()`
+of a list, tuple, set, frozenset or dict (or a collection of `collections`)
+that the analysed code makes gives its iterator, one per container, of kind
+`list_iterator` (and so on), whose elements are the container's; `iter()` of
+any other container, an iterator or a generator gives the object itself. If no
+analysed class and no builtin class (`list`) of its type defines `__iter__` but
+one defines `__getitem__`, `iter()` gives an iterator whose `next()` calls
+`__getitem__` with an index that is not known (the sequence protocol), from the
+scope that iterates. That fallback is one record per class, kind of the
+iterated object, iteration and result (`_Sequences`), attached to the lookup of
+`__getitem__` through each of its objects, once per lookup: the rule reads only
+whether a lookup finds a method, and the objects of one kind and class find the
+same, but not in the same round. Through the first object alone, the record
+would iterate in the round in which that object's lookup fills: at once for an
+object that another iteration met earlier, a round later for one whose lookup
+is new, and which object comes first depends on the order of the solve (see
+*Saturation and the rounds*). An object that arrives later is iterated at once,
+and an opaque one gives the result the saturated value. Every iteration,
+`iter()`, `next()` and an explicit `__next__()` of these iterators and of
+generators go through one rule. `iter(callable, sentinel)` gives an iterator
+whose `next()` calls the callable, implicitly, from the scope that iterates.
+`next()`, `iter()`, `send()` and `yield from` are modelled; the value of a
+`yield` expression is what is sent; `yield from` gives the inner generator's
+return value. The edge to a generator function comes from the scope that calls
+it.
 
 `async for` has no sequence protocol: an instance whose type defines
 `__getitem__` but no `__aiter__` gives nothing to `async for`, and no

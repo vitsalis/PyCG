@@ -2765,6 +2765,31 @@ SATURATING = {
         + "def run(handler):\n    handler()\n"
         "for handler in [f, g0, g1, g2]:\n    run(handler)\n",
     },
+    "a sequence iterated through the lookup of each instance": {
+        "main.py": "def f(): pass\ndef g(): pass\n"
+        + "".join(f"def h{i}(): pass\n" for i in range(2))
+        + "def sink(x):\n    x()\n"
+        "class S:\n"
+        "    def __init__(self, cb):\n        self.cb = cb\n"
+        "    def __getitem__(self, i):\n        return self.cb\n"
+        "a = S(f)\nb = S(g)\n"
+        "for item in a:\n    pass\n"
+        "class A0:\n    def next(self):\n        return A1()\n"
+        "class A1:\n    def next(self):\n        return a\n"
+        "class B0:\n    def next(self):\n        return B1()\n"
+        "class B1:\n    def next(self):\n        return b\n"
+        "def run(s):\n    for e in s:\n        sink(e)\n"
+        "run(A0().next().next())\nrun(B0().next().next())\n"
+        + "".join(
+            f"class H{i}:\n    def next(self):\n        return I{i}()\n"
+            f"class I{i}:\n    def next(self):\n        return J{i}()\n"
+            f"class J{i}:\n    def next(self):\n        return h{i}\n"
+            for i in range(2)
+        )
+        + "".join(f"sink(H{i}().next().next().next())\n" for i in range(2))
+        + "def call(handler):\n    handler()\n"
+        "for handler in [f, g, h0, h1]:\n    call(handler)\n",
+    },
 }
 
 
