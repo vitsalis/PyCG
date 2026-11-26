@@ -1,0 +1,25 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/pycg_syntax",
+    "crates/pycg_stubs",
+    "crates/pycg_solver",
+    "crates/pycg_analysis",
+    "crates/pycg_document",
+    "crates/pycg",
+    "crates/pycg_dump",
+]
+
+[workspace.package]
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.100.0"
+license = "Apache-2.0"
+authors = ["Vitalis Salis <vitsalis@gmail.com>"]
+repository = "https://github.com/vitsalis/PyCG"
+
+[workspace.lints.rust]
+warnings = "deny"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
