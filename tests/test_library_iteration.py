@@ -970,3 +970,186 @@ wrap(Item())
     assert "main.compare" in callees(graph, "main.order")
     assert "main.compare" not in callees(graph, "main.wrap")
     assert callees(graph, "main.compare") == ["main.Item.ping"]
+
+
+def test_dist_reads_tuple_storage_without_iterating(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import math
+        import somelib
+        import time
+        class Stored(time.struct_time):
+            def __iter__(self): return iter([])
+        class Unknown(somelib.Base):
+            def __iter__(self): return iter([])
+        def stored(point):
+            math.dist(point, point)
+        def unknown(point):
+            math.dist(point, point)
+        stored(Stored())
+        unknown(Unknown())
+        """,
+    )
+
+    assert callees(graph, "main.stored") == ["math.dist"]
+    assert callees(graph, "main.unknown") == ["main.Unknown.__iter__", "math.dist"]
+
+
+TWO_PATHS_TO_ONE_CALL = """
+import itertools
+def b(): pass
+class M(type):
+    def __iter__(cls): return iter([b, b])
+class Factory:
+    __call__ = staticmethod(itertools.{name})
+class C(metaclass=M):
+    __new__ = Factory()
+"""
+
+
+def test_a_new_position_of_product_joins_the_tuples_made_before(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        TWO_PATHS_TO_ONE_CALL.format(name="product")
+        + """
+def use(factory):
+    for t in factory([b]):
+        t[0]()
+use(C)
+use(itertools.product)
+""",
+    )
+
+    assert callees(graph, "main.use") == [
+        "itertools.product",
+        "main.M.__iter__",
+        "main.b",
+    ]
+
+
+def test_a_repeated_object_given_after_the_result_is_advanced(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        TWO_PATHS_TO_ONE_CALL.format(name="repeat")
+        + """
+def use(factory):
+    next(factory())()
+use(C)
+use(itertools.repeat)
+""",
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.next", "itertools.repeat"]
+
+
+def test_a_repeated_object_given_at_both_paths_to_one_call(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        TWO_PATHS_TO_ONE_CALL.format(name="repeat")
+        + """
+def use(factory):
+    next(factory(2))
+use(C)
+use(itertools.repeat)
+""",
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.next", "itertools.repeat"]
+
+
+def test_permutations_reached_twice_at_one_call_keep_their_tuples(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        TWO_PATHS_TO_ONE_CALL.format(name="permutations")
+        + """
+class N(int):
+    def __iter__(self): return iter([b, b])
+def use(factory):
+    for x, y in factory(N(2)):
+        x()
+use(C)
+use(itertools.permutations)
+""",
+    )
+
+    assert inside(graph, "main.use") == ["main.M.__iter__", "main.N.__iter__", "main.b"]
+
+
+def test_groupby_whose_key_becomes_the_item_after_it_is_advanced(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        TWO_PATHS_TO_ONE_CALL.format(name="groupby")
+        + """
+class Both:
+    def __iter__(self): return iter([b])
+    def __call__(self, item): return item
+def use(factory):
+    for key, group in factory(Both()):
+        key()
+class Holder:
+    def get(self):
+        return self.deeper()
+    def deeper(self):
+        return [itertools.groupby][0]
+use(C)
+use(Holder().get())
+""",
+    )
+
+    assert inside(graph, "main.use") == [
+        "main.Both.__iter__",
+        "main.M.__iter__",
+        "main.b",
+    ]
+
+
+def test_compress_without_selectors_keeps_its_data(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import itertools
+        def b(): pass
+        for g in itertools.compress([b]):
+            g()
+        """,
+    )
+
+    assert callees(graph, "main") == ["itertools.compress", "main.b"]
+
+
+def test_a_method_of_a_group_of_groupby_is_of_an_unknown_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import itertools
+        for key, group in itertools.groupby([1]):
+            group.__sizeof__()
+        """,
+    )
+
+    assert callees(graph, "main") == ["itertools.groupby"]
+
+
+def test_iter_reached_through_another_module_does_not_consume(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        from six.moves.builtins import iter
+        iter([1])
+        """,
+    )
+
+    assert callees(graph, "main") == ["six.moves.builtins.iter"]
+
+
+def test_bytes_of_unpacked_keywords_consumes_no_iterable(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        options = {}
+        bytes(**options)
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.bytes"]

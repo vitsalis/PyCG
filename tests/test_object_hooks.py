@@ -385,6 +385,18 @@ ALLOCATING_NEWS = {
     def __new__(cls):
         return super().__new__(cls)
 """,
+    "a nested function": """
+    def __new__(cls, *args):
+        def other():
+            return object.__new__(Loud)
+        return object.__new__(cls)
+""",
+    "a generator expression": """
+    def __new__(cls, *args):
+        instance = object.__new__(cls)
+        list(instance for instance in args)
+        return instance
+""",
 }
 
 OTHER_NEWS = {
@@ -414,6 +426,52 @@ OTHER_NEWS = {
     @keep
     def __new__(cls, *args):
         return object.__new__(cls)
+""",
+    "no positional parameter": """
+    def __new__(*args):
+        return object.__new__(Loud)
+""",
+    "a module variable": """
+    def __new__(cls, *args):
+        global cached
+        cached = object.__new__(Loud)
+        return cached
+""",
+    "a local bound by a loop": """
+    def __new__(cls, *args):
+        for instance in (object.__new__(cls), object.__new__(Loud)):
+            pass
+        return instance
+""",
+    "a local bound by a capture pattern": """
+    def __new__(cls, *args):
+        instance = object.__new__(cls)
+        match args:
+            case [instance]:
+                pass
+        return instance
+""",
+    "a local bound by a mapping pattern": """
+    def __new__(cls, *args, **kwargs):
+        instance = object.__new__(cls)
+        match kwargs:
+            case {**instance}:
+                pass
+        return instance
+""",
+    "a local bound by an except clause": """
+    def __new__(cls, *args):
+        instance = object.__new__(cls)
+        try:
+            args[0]
+        except IndexError as instance:
+            return instance
+        return instance
+""",
+    "rebound by a walrus in the class body": """
+    def __new__(cls, *args):
+        return object.__new__(cls)
+    keep(__new__ := lambda cls, *args: object.__new__(Loud))
 """,
 }
 
@@ -538,3 +596,47 @@ def test_a_class_whose_mro_reaches_a_new_that_gives_another_keeps_it(tmp_path):
 
     assert callees(graph, "main.made") == ["main.Factory.__new__", "main.Real.run"]
     assert callees(graph, "main.plain") == ["main.Allocating.__new__", "main.Plain.run"]
+
+
+@pytest.mark.parametrize(
+    "new",
+    [
+        """
+    def __new__(cls, *args):
+        pass
+""",
+        """
+    def __new__(cls, *args):
+        yield object.__new__(cls)
+""",
+        """
+    def __new__(cls, *args):
+        __class__ = Loud
+        return super().__new__(cls)
+""",
+    ],
+    ids=["no return", "a generator", "a super without the class cell"],
+)
+def test_a_new_that_gives_no_instance_of_its_class_makes_none(tmp_path, new):
+    source = SHARED_NEW.format(prelude="", new=new)
+    graph = graph_of(tmp_path, source)
+
+    assert "main.Quiet.speak" not in callees(graph, "main")
+    assert "main.Loud.__getattr__" not in callees(graph, "main")
+
+
+def test_keywords_unpacked_into_a_class_statement_reach_init_subclass(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        class Plugin:
+            def __init_subclass__(cls, **options):
+                options["handler"]()
+        options = {"handler": f}
+        class Audio(Plugin, **options):
+            pass
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.Plugin.__init_subclass__"]
+    assert callees(graph, "main.Plugin.__init_subclass__") == ["main.f"]

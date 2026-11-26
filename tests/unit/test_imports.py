@@ -571,3 +571,11 @@ def test_limit_a_submodule_that_a_package_attribute_shadows_is_analysed(
         f"pkg.{name}": [f"pkg.{name}.hit"],
         f"pkg.{name}.hit": [],
     }
+
+
+def test_directory_named_like_an_extension_binary_is_not_a_module(tmp_path):
+    (tmp_path / "ext.cpython-312-x86_64-linux-gnu.so").mkdir()
+    im = manager_in(tmp_path, "main", "main.py")
+
+    assert im.handle_import("ext", 0) is None
+    assert im.extension_modules == {}

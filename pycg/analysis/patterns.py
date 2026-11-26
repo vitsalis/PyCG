@@ -158,9 +158,9 @@ class Patterns:
 
     def _pattern_target(self, obj, pattern, access):
         state = self._pattern_states[pattern]
-        if access in state.targets.setdefault(obj, []):
-            return
-        state.targets[obj].append(access)
+        targets = state.targets.setdefault(obj, [])
+        assert access not in targets, "a pattern access sees an object twice"
+        targets.append(access)
         if isinstance(obj, Instance):
             self._watch_classes(pattern)
             for name in sorted(self._store_names):

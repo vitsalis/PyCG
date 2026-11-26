@@ -204,11 +204,8 @@ class LibraryIteration:
         if state.values_as_given is None:
             state.values_as_given = self.node()
             for activation in state.activations:
-                if state.values == POSITIONS:
-                    for shape in activation.shapes.values():
-                        self.add_edge(state.values_as_given, self.unknown(shape))
-                else:
-                    self.add_edge(state.values_as_given, activation.found)
+                assert state.values != POSITIONS, state.path
+                self.add_edge(state.values_as_given, activation.found)
         return state.values_as_given
 
     def _arity(self, state, arity):

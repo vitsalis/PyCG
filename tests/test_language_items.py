@@ -512,6 +512,42 @@ import audit
     assert callees(graph, "audit") == ["audit.record"]
 
 
+def test_a_listed_module_imported_from_and_read_runs(tmp_path):
+    graph = lazy_graph(
+        tmp_path,
+        """
+__lazy_modules__ = ["audit"]
+from audit import record
+record()
+""",
+    )
+
+    assert callees(graph, "audit") == ["audit.record"]
+    assert callees(graph, "main") == ["audit.record"]
+
+
+def test_an_annotated_lazy_modules_makes_its_imports_lazy(tmp_path):
+    graph = lazy_graph(
+        tmp_path, '__lazy_modules__: list[str] = ["audit"]\nimport audit\n'
+    )
+
+    assert "audit" not in graph
+
+
+def test_a_name_that_shadows_sys_keeps_lazy_imports_unread(tmp_path):
+    graph = lazy_graph(
+        tmp_path,
+        """
+__lazy_modules__ = ["audit"]
+import audit
+import os as sys
+sys.modules[__name__]
+""",
+    )
+
+    assert "audit" not in graph
+
+
 def test_limit_a_coroutine_names_an_attribute_that_it_lacks(tmp_path):
     graph = graph_of(
         tmp_path,
@@ -621,3 +657,139 @@ def test_the_name_of_a_module_is_a_string(tmp_path):
     )
 
     assert callees(graph, "pkg.mod.parent") == ["<builtin>.str.rpartition"]
+
+
+def test_an_attribute_or_item_of_a_constant_still_evaluates_the_operands(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        None.x += f()
+        None[0] += g()
+        None.y = f()
+        None[1] = g()
+        del None.x
+        del None[0]
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.f", "main.g"]
+
+
+def test_an_import_as_of_a_submodule_without_a_file_reads_the_package_attribute(
+    tmp_path,
+):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": """
+            import pkg.alias as alias
+            alias.run()
+            """,
+            "pkg/__init__.py": """
+            import sys
+            from . import real
+            alias = real
+            sys.modules[__name__ + ".alias"] = real
+            """,
+            "pkg/real.py": "def run(): pass\n",
+        },
+    )
+
+    assert callees(graph, "main") == ["pkg.real.run"]
+
+
+def test_a_relative_import_beyond_the_top_level_package_is_outside(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        from . import helper
+        helper.run()
+        """,
+    )
+
+    assert callees(graph, "main") == ["helper.run"]
+
+
+def test_await_of_a_value_without_objects_awaits_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def take(value): pass
+        async def run():
+            take(await 0.5)
+        """,
+    )
+
+    assert callees(graph, "main.run") == ["main.take"]
+
+
+def test_yield_outside_a_function_yields_to_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        yield f
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_yield_from_a_value_without_objects_delegates_to_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def take(value): pass
+        def gen():
+            take((yield from 0.5))
+        """,
+    )
+
+    assert callees(graph, "main.gen") == ["main.take"]
+
+
+def test_unpacked_class_bases_are_evaluated(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        class A: pass
+        def bases(): return (A,)
+        class B(*bases()): pass
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.bases"]
+
+
+def test_a_star_import_of_an_outside_module_without_a_stub_binds_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        from nosuchoutsidemodule import *
+        def use():
+            run()
+        """,
+    )
+
+    assert callees(graph, "main.use") == []
+
+
+def test_a_star_import_of_an_outside_module_into_a_module_with_all(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": """
+from a import *
+def use():
+    run()
+    join("p")
+""",
+            "a.py": """
+__all__ = ["run"]
+from os.path import *
+def run():
+    pass
+""",
+        },
+    )
+
+    assert callees(graph, "main.use") == ["a.run"]

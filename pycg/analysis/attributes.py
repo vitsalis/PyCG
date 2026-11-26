@@ -441,8 +441,7 @@ class _HookCalls(Constraint):
 
 
 def _saturate(solver, call):
-    if call.dst is not None:
-        solver.add_object(call.dst, solver.saturated)
+    solver.add_object(call.dst, solver.saturated)
 
 
 class _Access(Constraint):

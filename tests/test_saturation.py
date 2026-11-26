@@ -1015,3 +1015,75 @@ def test_limit_a_widening_for_an_alias_may_saturate_a_node_at_cap_1(
             found = {c for found in graph.values() for c in found}
             hit = "<builtin>.str.upper" in found or "main.target" in found
             assert hit is (cap != 1), (name, cap)
+
+
+SATURATED_PICK = """
+def h0(self): pass
+def h1(self): pass
+def h2(self): pass
+def h3(self): pass
+def h4(self): pass
+HANDLERS = [h0, h1, h2, h3, h4]
+def pick():
+    for h in HANDLERS:
+        return h
+"""
+
+
+def delayed(name, steps, value):
+    chain = "".join(
+        f"def {name}{index}(): return {name}{index + 1}\n" for index in range(steps)
+    )
+    return chain + f"def {name}{steps}(): return {value}\n"
+
+
+def test_a_property_whose_getter_saturates_saturates_its_reads(tmp_path):
+    source = SATURATED_PICK + (
+        "class C:\n    p = property(pick())\ndef use():\n    C().p.run()\nuse()\n"
+    )
+
+    assert sites(tmp_path, source, "main.use", cap=4) == [
+        (line_of(source, "C().p.run()"), [], "saturated")
+    ]
+
+
+def test_a_super_object_read_after_its_class_saturated_is_saturated(tmp_path):
+    bases = "".join(f"class B{i}:\n    def run(self): pass\n" for i in range(5))
+    chains = "".join(delayed(f"c{i}_", 6, f"B{i}") for i in range(1, 5))
+    grow = "".join(f"REG.append(c{i}_0()()()()()()())\n" for i in range(1, 5))
+    late = delayed("k", 14, "identity")
+    source = (
+        bases
+        + chains
+        + "REG = [B0]\n"
+        + grow
+        + "def pick():\n    for b in REG:\n        return b\n"
+        + "HOLD = []\n"
+        + "class D(pick()):\n    def __init__(self):\n        HOLD.append(super())\n"
+        + "D()\n"
+        + late
+        + "def identity(x): return x\n"
+        + "def use():\n    k0()()()()()()()()()()()()()()()(HOLD[0]).other()\n"
+        + "use()\n"
+    )
+    found = sites(tmp_path, source, "main.use", cap=4)
+
+    assert found[-1] == (line_of(source, ".other()"), [], "saturated")
+
+
+def test_a_subclass_that_saturated_keeps_its_place_when_its_base_changes(
+    tmp_path,
+):
+    source = (
+        SATURATED_PICK
+        + "class Mixin:\n    def run(self): pass\n"
+        + delayed("c", 6, "Mixin")
+        + "class Late(c0()()()()()()()): pass\n"
+        + "class Sub(Late, pick()): pass\n"
+        + "def use():\n    Late().run()\n    Sub().run()\nuse()\n"
+    )
+
+    found = sites(tmp_path, source, "main.use", cap=4)
+
+    assert (line_of(source, "Late().run()"), ["main.Mixin.run"], None) in found
+    assert (line_of(source, "Sub().run()"), [], "saturated") in found

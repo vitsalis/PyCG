@@ -77,9 +77,6 @@ class Scope:
     def caller(self):
         return self.parent.caller if self.kind in (CLASS, COMPREHENSION) else self
 
-    def __repr__(self):
-        return f"<Scope {self.kind} {self.name}>"
-
     def mangle(self, name):
         return mangle(self.private_class, name)
 

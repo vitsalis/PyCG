@@ -399,8 +399,7 @@ class Containers:
     def _yield_from(self, obj, function, dst):
         if isinstance(obj, Generator):
             self.add_edge(function.sent_node, obj.function.sent_node)
-            if dst is not None:
-                self.add_edge(obj.function.return_node, dst)
+            self.add_edge(obj.function.return_node, dst)
 
     def add_dict_items(self, target, source, caller, site):
         hub = self._dict_hubs.get(source)
@@ -572,8 +571,7 @@ class Containers:
             self.add_edge(elements, self.unknown(result))
             if obj.kind == "list":
                 self.add_length_hint(operation.right, operation.caller, site)
-        if operation.dst is not None:
-            self.add_object(operation.dst, result)
+        self.add_object(operation.dst, result)
 
     def copy_fields(self, source, target):
         pair = (source, target, "copy fields")

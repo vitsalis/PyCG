@@ -483,3 +483,163 @@ def test_a_class_statement_first_calls_the_metaclass_prepare(tmp_path):
 
     assert callees(graph, "main") == ["<builtin>.classmethod", "main.Meta.__prepare__"]
     assert callees(graph, "main.Meta.__prepare__") == ["main.Meta.check", "main.make"]
+
+
+def test_a_metaclass_getitem_from_the_stubs_hides_class_getitem(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import enum
+        class Color(enum.Enum):
+            RED = 1
+            def __class_getitem__(cls, key): return cls
+        Color["RED"]
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_an_outside_function_as_metaclass_leaves_class_getitem(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import types
+        class A(metaclass=types.new_class):
+            def __class_getitem__(cls, key): return cls
+        A[int]
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.A.__class_getitem__"]
+
+
+def test_a_class_with_two_metaclasses_calls_class_getitem_once(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import sys
+        class M1(type): pass
+        class M2(type): pass
+        class A(metaclass=M1 if sys.argv else M2):
+            def __class_getitem__(cls, key): return cls
+        A[int]
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.A.__class_getitem__"]
+
+
+def test_a_metaclass_with_an_unknown_outside_base_prepares_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import somelib
+        class Meta(somelib.Meta): pass
+        class C(metaclass=Meta): pass
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_a_metaclass_that_is_an_outside_function_gives_no_member(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import types
+        class C(metaclass=types.new_class):
+            def __class_getitem__(cls, key): pass
+        C[0]
+        C.missing()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.C.__class_getitem__"]
+
+
+def test_an_init_subclass_hook_that_is_a_class_is_instantiated(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Hook:
+            def __init__(self, **options): pass
+        class Base:
+            __init_subclass__ = Hook
+        class Derived(Base): pass
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.Hook.__init__"]
+
+
+def test_an_outside_init_subclass_hook_takes_the_class_keywords(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import itertools
+        class Base:
+            __init_subclass__ = itertools.groupby
+        class Derived(Base, key=None): pass
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_unpacked_bases_leave_the_class_and_its_metaclass(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            def f(self): pass
+        class Meta(type):
+            def __init__(cls, name, bases, namespace): pass
+        bases = (A,)
+        class C(*bases):
+            def g(self): pass
+        class D(*bases, metaclass=Meta): pass
+        C().g()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.C.g", "main.Meta.__init__"]
+
+
+def test_a_metaclass_new_that_gives_another_class_runs_no_init(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Plain: pass
+        class Meta(type):
+            def __new__(mcs, name, bases, namespace): return Plain
+            def __init__(cls, name, bases, namespace): pass
+        class Made(metaclass=Meta): pass
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.Meta.__new__"]
+
+
+def test_a_class_made_before_its_metaclass_is_known_runs_its_init(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Inner(type):
+            def __init__(cls, name, bases, namespace): pass
+        def c0(): return c1
+        def c1(): return c2
+        def c2(): return c3
+        def c3(): return c4
+        def c4(): return c5
+        def c5(): return c6
+        def c6(): return Inner
+        class Late(metaclass=c0()()()()()()()): pass
+        class Outer(type):
+            def __new__(mcs, name, bases, namespace): return Late
+        class Made(metaclass=Outer): pass
+        """,
+    )
+
+    assert "main.Inner.__init__" in callees(graph, "main")
+    assert "main.Outer.__new__" in callees(graph, "main")

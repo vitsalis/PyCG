@@ -30,9 +30,6 @@ class Definition:
         self.entry = entry
         self.owner = owner
 
-    def __repr__(self):
-        return f"<{self.kind} {self.path}>"
-
     def __eq__(self, other):
         return isinstance(other, Definition) and (self.kind, self.path, self.owner) == (
             other.kind,
@@ -216,12 +213,12 @@ class Stubs:
                     continue
                 reach.add(current)
                 definition = self.definition(current)
-                if definition is not None and definition.kind == "class":
-                    for base in definition.entry["b"]:
-                        for name in class_names(base):
-                            target = self.definition(name)
-                            if target is not None and target.kind == "class":
-                                pending.append(name)
+                assert definition is not None and definition.kind == "class", current
+                for base in definition.entry["b"]:
+                    for name in class_names(base):
+                        target = self.definition(name)
+                        if target is not None and target.kind == "class":
+                            pending.append(name)
             self._abstract_reach_by_class[cls] = frozenset(reach)
         return self._abstract_reach_by_class[cls]
 

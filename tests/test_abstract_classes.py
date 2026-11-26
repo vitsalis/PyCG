@@ -422,3 +422,73 @@ def test_an_assignment_expression_in_a_default_under_a_compound_statement(
     )
 
     assert "main.C.__init__" in callees(graph, "main")
+
+
+EXHAUSTIVE_BASES = """
+import abc
+import sys
+class X1: pass
+class Y1: pass
+class X2: pass
+class Y2: pass
+class X3: pass
+class Y3: pass
+class X4: pass
+class Y4: pass
+"""
+
+CHOSEN = (
+    "X1 if sys.argv else Y1, X2 if sys.argv else Y2, "
+    "X3 if sys.argv else Y3, X4 if sys.argv else Y4"
+)
+
+
+def test_an_exhaustive_order_through_a_namespace_user_may_be_concrete(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        EXHAUSTIVE_BASES
+        + f"""
+class Base(abc.ABC):
+    @abc.abstractmethod
+    def run(self): pass
+class Namespace:
+    locals()
+class E(Base, Namespace, {CHOSEN}):
+    def __init__(self): pass
+E()
+""",
+    )
+
+    assert "main.E.__init__" in callees(graph, "main")
+
+
+def test_an_outside_function_as_a_base_is_not_abstract(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import abc
+        import os
+        class E(abc.ABC, os.getcwd):
+            def __init__(self): pass
+        E()
+        """,
+    )
+
+    assert "main.E.__init__" in callees(graph, "main")
+
+
+def test_a_class_attribute_stored_on_a_diamond_reaches_each_subclass(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def f(): pass
+        class A: pass
+        class B(A): pass
+        class C(A): pass
+        class D(B, C): pass
+        A.x = f
+        D.x()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.f"]

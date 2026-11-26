@@ -182,7 +182,8 @@ class Flow:
                 self.analysis.add_edge(node, head)
 
     def jump(self, leaves):
-        if self._loops and self.state.reachable:
+        assert self.state.reachable, "a jump from an unreachable statement"
+        if self._loops:
             heads = self._loops[-1].heads
             self._jump(leaves, {name: self.state.get(name) for name in heads})
         self.end_path()
