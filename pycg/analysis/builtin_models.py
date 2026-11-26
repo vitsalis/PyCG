@@ -326,6 +326,10 @@ STUB_RESULTS = {
 
 CACHED_FUNCTIONS = {"urllib.parse.urlsplit": "functools._lru_cache_wrapper"}
 
+SPECIAL_METHOD_CALLS = {
+    "copy.replace": ("(obj, /, **changes)", "special_method", "obj", "__replace__"),
+}
+
 REFLECTION_CALLS = {
     "builtins.vars": ("(object=None, /)", "namespace"),
     "inspect.getmembers": ("(object, predicate=None)", "members"),

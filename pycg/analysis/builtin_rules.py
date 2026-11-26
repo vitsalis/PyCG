@@ -25,6 +25,7 @@ from .model import (
     Instance,
     Pattern,
     Signature,
+    Typed,
     Wrapper,
 )
 from .solver import Each
@@ -468,6 +469,28 @@ class BuiltinRules:
             call.site,
             extra=extra,
         )
+
+    def _rule_special_method(self, call, receiver, args, parameter, method):
+        if call.star or not call.args:
+            return
+        forwarded = self.call_past_first_argument(call)
+        dst = self._result_node(call)
+        each = Each(
+            self._special_method_of,
+            method,
+            forwarded,
+            dst,
+            (call.caller, call.site, "special", method),
+            kinds=(Instance, Typed),
+            results=(dst,),
+        )
+        self.solver.attach(args[parameter], each)
+
+    def _special_method_of(self, obj, method, forwarded, dst, origin):
+        if isinstance(obj, Instance):
+            self.call_dunder(obj, method, forwarded, dst)
+        else:
+            self.typed_special(obj, method, dst, origin)
 
     def _rule_print(self, call, receiver, args):
         values = self.every(args.varargs)

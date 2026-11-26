@@ -112,6 +112,84 @@ pow(2, Power(), Mod())
     assert callees(graph, "main.Power.__rpow__") == ["main.Mod.__call__"]
 
 
+REPLACEABLE = """
+import copy
+class Point:
+    def __init__(self, x):
+        self.x = x
+    def __replace__(self, **changes):
+        return Point(**changes)
+    def show(self): pass
+"""
+
+
+def test_copy_replace_calls_replace_with_the_changes(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        REPLACEABLE
+        + """
+def use():
+    copy.replace(Point(1), x=2).show()
+use()
+""",
+    )
+
+    assert callees(graph, "main.use") == [
+        "copy.replace",
+        "main.Point.__init__",
+        "main.Point.__replace__",
+        "main.Point.show",
+    ]
+    assert callees(graph, "main.Point.__replace__") == ["main.Point.__init__"]
+
+
+def test_copy_replace_of_an_outside_value_gives_what_its_replace_returns(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import copy
+        import datetime
+        def use(day: datetime.date):
+            copy.replace(day, year=2000).isoformat()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["copy.replace", "datetime.date.isoformat"]
+
+
+def test_limit_copy_replace_of_an_unpacked_argument_calls_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        REPLACEABLE
+        + """
+def use():
+    copy.replace(*[Point(1)], x=2)
+use()
+""",
+    )
+
+    assert "main.Point.__replace__" not in callees(graph, "main.use")
+
+
+def test_limit_the_replace_of_a_dataclass_is_not_made(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import copy
+        import dataclasses
+        @dataclasses.dataclass
+        class Data:
+            x: int
+            def show(self): pass
+        def use():
+            copy.replace(Data(1), x=2).show()
+        use()
+        """,
+    )
+
+    assert "main.Data.show" not in callees(graph, "main.use")
+
+
 def test_inplace_operator_falls_back_to_the_binary_one(tmp_path):
     graph = main_graph(
         tmp_path,
