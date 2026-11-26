@@ -183,7 +183,7 @@ def test_a_special_method_call_is_attached_once(tmp_path):
 
     requests = {
         call: (name, unless)
-        for (_, _, name, _, unless), call in analysis._dunder_calls.items()
+        for (_, name, _, unless), call in analysis._dunder_calls.items()
     }
     attached = [
         (owner, call, *requests[call])
@@ -225,7 +225,7 @@ def test_the_calls_of_a_class_share_the_set_of_its_instances(tmp_path):
 
     classes = {
         call: owner
-        for (owner, _, name, _, _), call in analysis._dunder_calls.items()
+        for (owner, name, _, _), call in analysis._dunder_calls.items()
         if name == "__new__"
     }
     by_class = {}
