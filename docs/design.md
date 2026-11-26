@@ -3011,7 +3011,13 @@ and a bound method or a callable instance keeps its own receiver, as in
 CPython. An outside hook (`__setattr__ = object.__setattr__`) is Python's
 own, which is not called. The instance's fields are read and written in
 every case, and an explicit `object.__setattr__(self, name, value)` is not
-a store.
+a store. The calls of a hook at the sites that one instance reaches are one
+record on the instance's lookup of the hook (xarray: 3.3 million calls of
+instances and sites): each hook value that the lookup gets is called at
+every site of the record, and a site that joins later calls the values that
+the lookup holds, as a constraint attached to it then would: none once it
+holds the saturated value, and the saturated value as its result when one
+of them is opaque.
 
 Python's own hooks call the descriptor accessors (a property's, and
 `__get__`, `__set__` and `__delete__` of an instance's class) from the

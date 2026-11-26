@@ -206,8 +206,12 @@ class Attributes:
 
     def _call_hook(self, instance, hook, call):
         found = self.lookup(instance.cls, hook, instance)
-        each = Each(self._call_analysed_hook, call, results=(call.dst,))
-        self.solver.attach(found, each)
+        hooks = self._hook_calls.get(found)
+        if hooks is None:
+            hooks = _HookCalls(self, found)
+            self._hook_calls[found] = hooks
+            self.solver.attach(found, hooks)
+        hooks.add(call)
 
     def _call_analysed_hook(self, obj, call):
         if not isinstance(obj, External):
@@ -325,6 +329,49 @@ class _Accessors(Constraint):
         prefix = _prefix(receiver, self.width)
         for method in list(self.methods):
             self.analysis.call_bound(method, prefix, self.call)
+
+
+class _HookCalls(Constraint):
+    __slots__ = ("analysis", "found", "calls", "hooks", "saw_opaque")
+
+    def __init__(self, analysis, found):
+        self.analysis = analysis
+        self.found = found
+        self.calls = []
+        self.hooks = []
+        self.saw_opaque = False
+
+    def results(self):
+        return tuple(call.dst for call in self.calls)
+
+    def saturate(self, solver):
+        self.saw_opaque = True
+        super().saturate(solver)
+
+    def apply(self, hook):
+        if isinstance(hook, External):
+            return
+        self.hooks.append(hook)
+        for call in list(self.calls):
+            self.analysis.call(hook, call)
+
+    def add(self, call):
+        self.calls.append(call)
+        solver = self.analysis.solver
+        if solver.is_saturated(self.found):
+            _saturate(solver, call)
+            return
+        opaque = solver.opaque
+        hooks = [hook for hook in self.hooks if not (opaque and opaque(hook))]
+        if self.saw_opaque or len(hooks) < len(self.hooks):
+            _saturate(solver, call)
+        for hook in hooks:
+            self.analysis.call(hook, call)
+
+
+def _saturate(solver, call):
+    if call.dst is not None:
+        solver.add_object(call.dst, solver.saturated)
 
 
 class _Access(Constraint):

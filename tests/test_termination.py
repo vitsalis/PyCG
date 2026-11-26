@@ -788,6 +788,7 @@ NOT_COUNTED = {
     "_grouped_externals",
     "_accessor_hooks",
     "_accessor_receivers",
+    "_hook_calls",
     "_dunder_owners",
     "_sequences",
     "_dict_hubs",

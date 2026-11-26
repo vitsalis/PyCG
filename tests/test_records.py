@@ -1,5 +1,5 @@
 import pytest
-from programs import analysed
+from programs import analysed, no_rule_sees_what_is_opaque
 
 
 def _analysis(tmp_path, source):
@@ -370,3 +370,129 @@ def test_the_receivers_of_a_stub_method_at_a_site_share_one_call(tmp_path):
     first = generator.output_points_to()["main.first"]
     instances = [name for name in first if name.startswith("main.Location@main")]
     assert len(instances) == 3
+
+
+def test_each_instance_binds_the_hook_at_every_site_that_it_reaches(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class Logged:
+                def __setattr__(self, name, value): pass
+                def __delattr__(self, name): pass
+            class Keeper:
+                def put(self, name, value): pass
+            class Kept:
+                pass
+            def paint(shape):
+                shape.color = 1
+                shape.width = 2
+            def erase(shape):
+                del shape.color
+            first = Logged()
+            second = Logged()
+            paint(first); paint(second); erase(first)
+            keeper = Keeper()
+            Kept.__setattr__ = keeper.put
+            paint(Kept()); paint(Kept())
+            """
+        },
+    )
+    graph = generator.output()
+    assert {"main.Logged.__setattr__", "main.Keeper.put"} <= set(graph["main.paint"])
+    assert "main.Logged.__delattr__" in graph["main.erase"]
+    points_to = generator.output_points_to()
+    receivers = points_to["main.Logged.__setattr__.self"]
+    assert len(receivers) == 2 and all("main.Logged@" in name for name in receivers)
+    assert points_to["main.Keeper.put.self"] == points_to["main.keeper"]
+
+
+def test_a_site_that_reaches_a_saturated_hook_lookup_calls_no_hook(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class C:
+                pass
+            def h1(self, name, value): pass
+            def h2(self, name, value): pass
+            def h3(self, name, value): pass
+            C.__setattr__ = h1
+            def early(c):
+                c.a = 1
+            def late(c):
+                c.b = 1
+            def s1(): return s2
+            def s2(): return s3
+            def s3(): return (h2, h3)
+            for hook in s1()()():
+                C.__setattr__ = hook
+            def l1(): return l2
+            def l2(): return l3
+            def l3(): return l4
+            def l4(): return l5
+            def l5(): return late
+            c = C()
+            early(c)
+            l1()()()()()(c)
+            """
+        },
+        cap=2,
+    )
+
+    graph = generator.output()
+    assert graph["main.early"] == ["main.h1"]
+    assert graph["main.late"] == []
+
+
+def test_a_hook_whose_class_became_unknown_is_not_called_at_a_later_site(
+    tmp_path, monkeypatch
+):
+    no_rule_sees_what_is_opaque(monkeypatch)
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class Caller:
+                def __call__(self, name, value): pass
+            class Base:
+                pass
+            Holder = Base
+            def b1(): return b2
+            def b2(): return b3
+            def b3(): return b4
+            def b4(): return b5
+            def b5(): return (int, str)
+            for base in b1()()()()():
+                Holder = base
+            class Late(Holder, Caller):
+                def __call__(self, name, value): pass
+            class C:
+                pass
+            C.__setattr__ = Late()
+            def early(c):
+                c.a = 1
+            def late(c):
+                c.b = 1
+            def l1(): return l2
+            def l2(): return l3
+            def l3(): return l4
+            def l4(): return l5
+            def l5(): return l6
+            def l6(): return l7
+            def l7(): return l8
+            def l8(): return late
+            c = C()
+            early(c)
+            l1()()()()()()()()(c)
+            """
+        },
+        cap=2,
+    )
+
+    graph = generator.output()
+    assert [cls.name for cls in generator.program.analysis.classes if cls.unknown] == [
+        "main.Late"
+    ]
+    assert graph["main.early"] == ["main.Late.__call__"]
+    assert graph["main.late"] == []
