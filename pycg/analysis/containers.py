@@ -896,7 +896,15 @@ class _Unpack(_Site):
 
 
 class _KeyLookup:
-    __slots__ = ("analysis", "call", "compared", "first", "many", "stored_keys")
+    __slots__ = (
+        "analysis",
+        "call",
+        "compared",
+        "first",
+        "many",
+        "stored_keys",
+        "first_stored",
+    )
 
     def __init__(self, analysis, call, compared):
         self.analysis = analysis
@@ -904,24 +912,31 @@ class _KeyLookup:
         self.compared = compared
         self.first = None
         self.many = False
-        self.stored_keys = []
+        self.stored_keys = {}
+        self.first_stored = False
 
     def key(self, obj):
         if self.many or obj is self.first:
             return
         if self.first is None:
             self.first = obj
-            compared = [s for s in self.stored_keys if s is not obj]
-        else:
-            self.many = True
-            compared = self.stored_keys
-        for stored in compared:
-            self.analysis.solver.revisit(self._compare, stored)
+            stored_keys, self.stored_keys = self.stored_keys, None
+            self.first_stored = obj in stored_keys
+            for stored in stored_keys:
+                if stored is not obj:
+                    self.analysis.solver.revisit(self._compare, stored)
+            return
+        self.many = True
+        if self.first_stored:
+            self.analysis.solver.revisit(self._compare, self.first)
 
     def stored(self, instance):
-        self.stored_keys.append(instance)
-        if self.many or (self.first is not None and instance is not self.first):
+        if self.first is None:
+            self.stored_keys[instance] = None
+        elif self.many or instance is not self.first:
             self._compare(instance)
+        else:
+            self.first_stored = True
 
     def _compare(self, stored):
         if stored not in self.compared:

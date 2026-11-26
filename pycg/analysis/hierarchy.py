@@ -120,7 +120,8 @@ class Hierarchy:
         if watch.waiting is None:
             rule(receiver, *args)
         else:
-            watch.waiting.setdefault((rule, *args), []).append(receiver)
+            waiting = (rule, *args)
+            watch.wait(self._waiting_rules.setdefault(waiting, waiting), receiver)
 
     def unknown_classes(self):
         solver = self.solver
