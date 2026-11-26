@@ -33,7 +33,15 @@ build-backend = "hatchling.build"
 path = "pycg/__init__.py"
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/evaluation/**", "!/evaluation/micro-benchmark/**"]
+exclude = [
+    "/evaluation/**",
+    "!/evaluation/micro-benchmark/**",
+    "/Cargo.toml",
+    "/Cargo.lock",
+    "/clippy.toml",
+    "/rust-toolchain.toml",
+    "/crates/**",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "evaluation/tests"]
