@@ -190,8 +190,6 @@ class Attributes:
         self.solver.attach(
             written, Each(self._write_field, src, field, results=(field,))
         )
-        found = self.lookup(obj.cls, attr, obj)
-        self.solver.attach(found, Each(self._store_past, src, field, results=(field,)))
 
     def _write_field(self, marker, src, field):
         self.add_edge(src, field)
@@ -212,6 +210,9 @@ class Attributes:
 
     def _found_store(self, obj, store):
         found = self.lookup(obj.cls, store.attr, obj)
+        field = self.field(obj, store.attr)
+        past = Each(self._store_past, store.src, field, results=(field,))
+        self.solver.attach(found, past)
         self.solver.attach(found, Each(self._deliver_store, obj, store))
 
     def deliver(self, obj, receiver, load, hook):
