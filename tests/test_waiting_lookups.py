@@ -348,6 +348,66 @@ C.field = Field()
 D.slow = later()()()
 """
 
+HOOK_SATURATED_LATER = """
+def first(self, name):
+    return object.__getattribute__(self, name)
+def third(self, name):
+    return object.__getattribute__(self, name)
+def later():
+    return lambda: lambda: lambda: third
+def pick(flag):
+    return first if flag else later()()()()
+class C:
+    __getattribute__ = pick(True)
+    @property
+    def a(self):
+        return 1
+    @property
+    def b(self):
+        return 1
+c = C()
+c.a
+def use(x):
+    return x.b
+def delay():
+    return lambda: lambda: lambda: lambda: lambda: lambda: lambda: lambda: use
+delay()()()()()()()()()(c)
+"""
+
+
+SETATTR_SATURATED_LATER = """
+def first(self, name, value):
+    object.__setattr__(self, name, value)
+def third(self, name, value):
+    object.__setattr__(self, name, value)
+def later():
+    return lambda: lambda: lambda: third
+def pick(flag):
+    return first if flag else later()()()()
+class C:
+    __setattr__ = pick(True)
+    @property
+    def a(self):
+        return 1
+    @a.setter
+    def a(self, value):
+        pass
+    @property
+    def b(self):
+        return 1
+    @b.setter
+    def b(self, value):
+        pass
+c = C()
+c.a = 1
+def use(x):
+    x.b = 2
+def delay():
+    return lambda: lambda: lambda: lambda: lambda: lambda: lambda: lambda: use
+delay()()()()()()()()()(c)
+"""
+
+
 INVARIANT_PROGRAMS = {
     "shared hook site": SHARED_HOOK_SITE,
     "fallback then method": FALLBACK_THEN_METHOD,
@@ -356,6 +416,8 @@ INVARIANT_PROGRAMS = {
     "stored later": STORED_LATER,
     "descriptor and dataclass": DESCRIPTOR_AND_DATACLASS,
     "store decided later": STORE_DECIDED_LATER,
+    "hook saturated later": HOOK_SATURATED_LATER,
+    "setattr saturated later": SETATTR_SATURATED_LATER,
 }
 
 
@@ -453,3 +515,20 @@ def test_an_instance_attribute_that_nothing_stores_has_no_node(tmp_path):
     assert points_to["main.C@main:6:4.written"] == ["main.use"]
     assert points_to["main.C@main:6:4.set"] == ["main.use"]
     assert "main.C@main:6:4.read" not in points_to
+
+
+def test_an_accessor_met_after_its_hook_lookup_saturated_is_not_called_by_the_hook(
+    tmp_path,
+):
+    generator = analysed(tmp_path, {"main.py": HOOK_SATURATED_LATER}, cap=1)
+
+    assert set(generator.output()["main.first"]) == {
+        "main.C.a",
+        "<builtin>.object.__getattribute__",
+    }
+
+
+def test_a_store_met_after_its_setattr_lookup_saturated_calls_no_setter(tmp_path):
+    generator = analysed(tmp_path, {"main.py": SETATTR_SATURATED_LATER}, cap=1)
+
+    assert generator.output()["main.first"] == ["<builtin>.object.__setattr__"]
