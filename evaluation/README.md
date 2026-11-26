@@ -10,11 +10,11 @@ are data: PyCG reads them, and no script imports or runs them.
 
 | Command | What it does |
 |---|---|
-| `make eval [BASE=<ref>]` | Pulls the inputs images by their key, or builds them when the pull fails (below, "The inputs image"), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary and runs the gate (below); the graphs and `result.json` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
-| `make eval-record [BASE=<ref>]` | Writes `metrics.json`: each best is the larger of the base's and the measured value (measures first if this commit has no result) |
-| `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures the engine of BASE on this checkout's benchmarks, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
+| `make eval` | Pulls the inputs images by their key, or builds them when the pull fails (below, "The inputs image"), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary, and reports the values against the bests of `metrics.json` (below, "The gate"); the graphs, `result.json` and `benchmark_sha256` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
+| `make eval-record` | Writes `metrics.json`: each best is the larger of the stored and the measured value, or the measured value when the benchmark changed (measures first if this commit has no result) |
+| `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures BASE on its own benchmark, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
 | `make eval-determinism` | Measures this commit again with `PYTHONHASHSEED=1` for the analyses and fails unless every graph is byte-identical to that of seed 0 |
-| `make eval-measure-pr`, `eval-measure-seed1`, `eval-measure-base BASE=<ref>`; `make eval-gate`, `eval-compare BASE=<ref>`, `eval-same-graphs`, `eval-labels BASE=<ref> [LABELS=<file>]` | The pieces of the targets above, which CI runs in separate jobs: each of the first three measures one result into `EVAL_OUT` without gating; the others check results that are there. `eval-labels` (`common/labels.py`) decides the labels `metrics-changed` (a TP, FP or FN count of the micro-benchmark or of the macro-benchmark inside or outside the package differs from the base's) and `benchmark-changed` (a changed path is protected: `PROTECTED` of `labels.py` lists the paths of AGENTS.md, "Protected files") of a pull request, appends the decision to SUMMARY and writes `<label>=true|false` lines to LABELS |
+| `make eval-measure-pr`, `eval-measure-seed1`, `eval-measure-base BASE=<ref>`; `make eval-gate BASE=<ref>`, `eval-report`, `eval-compare BASE=<ref>`, `eval-same-graphs`, `eval-labels BASE=<ref> [LABELS=<file>]` | The pieces of the targets above, which CI runs in separate jobs: each of the first three measures one result into `EVAL_OUT` without gating; the others check results that are there. `eval-labels` (`common/labels.py`) decides the labels `metrics-changed` (a TP, FP or FN count of the micro-benchmark or of the macro-benchmark inside or outside the package differs from the base's) and `benchmark-changed` (a changed path is protected: `PROTECTED` of `labels.py` lists the paths of AGENTS.md, "Protected files") of a pull request, appends the decision to SUMMARY and writes `<label>=true|false` lines to LABELS |
 | `python -I evaluation/common/loop.py compare OLD NEW` | Lists the edges and micro cases that changed between two result directories, scored again now (Python 3.14 or later) |
 | `NAME=<project> docker compose -f evaluation/compose.yaml run --rm trace --compare` | Records the trace of one project again and compares it with the committed one (`macro-benchmark/README.md`, "Re-recording a trace") |
 
@@ -52,23 +52,43 @@ writes the decision to the job summary. On a push they always run.
 
 ## The gate
 
-`metrics.json` holds, for six values, the best value that main has
-reached, the margin, and `benchmark_sha256`, the digest of the benchmark
-on which the bests were measured: micro edge precision and recall (all
-edges), and the macro-benchmark's precision and recall inside and outside
-the package, summed over the 60 projects. `make eval` (`common/gate.py
-check`) fails when a value is below its best minus the margin, when a run
-failed, or when the digest is not that of this checkout. With `BASE`, it
-also fails unless `metrics.json` is what `make eval-record` writes from the
-base's file and this measurement: on the base's benchmark, floors only
-rise; on a changed benchmark, the measured values are the new bests, and
-the summary of the pull request says "benchmark changed: floors
-re-based". A base without `metrics.json` (an empty base file) has no
-floors to check. Every `metrics.json` carries `benchmark_sha256`: the gate
-fails with an assertion on one without it. `gate.py summary` writes the Markdown of a pull request: each value of the
-base and of the result with its floor, whether the benchmark changed, the
-changes that `loop.py compare` wrote, and the time and peak memory of each
-macro package. Time and memory are reported, not gated.
+Six values are gated: micro edge precision and recall (all edges), and
+the macro-benchmark's precision and recall inside and outside the package,
+summed over the 60 projects. Every measurement writes `benchmark_sha256`
+next to its `result.json`: the digest of the benchmark of the checkout
+measured (below).
+
+CI measures a pull request on its benchmark and its base (`BASE`) on the
+base's own benchmark: `make eval-measure-base` checks the base out and
+runs the base's `loop.py` on it, with the base's macro sources (copied
+from this checkout when the two have the same inputs key, `make
+eval-inputs` of the base otherwise). `make eval-gate` (`common/gate.py
+check`) then compares the two:
+
+1. On the same benchmark (the same digest), the floor of each value is the
+   base's value minus the margin of the base's `metrics.json`. The gate
+   fails when a value is below its floor.
+2. On a changed benchmark, the values of the two measure different
+   things, so there are no floors: the gate says "benchmark changed:
+   floors re-based", and the pull request's values are the base of the
+   pull requests after it.
+3. In both, the gate fails when a run of the pull request failed.
+
+The gate never reads the pull request's own `metrics.json`. A base
+without `metrics.json` has no margin: the gate fails. `gate.py summary`
+writes the Markdown of a pull request: each value of the base and of the
+pull request with its floor, whether the benchmark changed, the changes
+that `loop.py compare` wrote, and the time and peak memory of each macro
+package. Time and memory are reported, not gated.
+
+`metrics.json` holds, for each value, the best value that main has
+reached, the margin, and the digest of the benchmark on which the bests
+were measured. On a push, CI runs `make eval-report` (`gate.py report`,
+also the last step of `make eval`): for each value, its best and the
+measured value, whether it rose, and the `metrics.json` that `make
+eval-record` writes on that commit. It fails when a run failed or, on the
+benchmark of the bests, a value is below its best minus the margin. A
+pull request that commits only that `metrics.json` raises the bests.
 
 The digest is `sha256sum FILES | sha256sum`, FILES sorted by path: the
 files that a measurement reads besides the code of PyCG and of the
@@ -95,7 +115,7 @@ floors, and cannot re-base them.
 | `common/score.py` | Scores call graphs against the ground truths |
 | `common/loop.py` | `run`: run and score a checkout, print a summary; `compare`: what changed between two runs |
 | `common/labels.py` | The labels of a pull request: a changed TP, FP or FN count; a changed protected file |
-| `common/gate.py` | The gate: the values of a result against `metrics.json`, the new `metrics.json`, the summary of a pull request |
+| `common/gate.py` | The gate: the values of a pull request against its base's, the summary of a pull request, the report against `metrics.json` and the new `metrics.json`, the digest of a benchmark |
 | `metrics.json` | The best value of each gated value, the margin, and the digest of the benchmark |
 | `common/same_function.json` | Names of one function of the standard library, which the scorer matches as one callee |
 | `common/lookup.py` | The static lookup of standard-library names that `tests/test_same_function_table.py` checks the table with |

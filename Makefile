@@ -26,23 +26,31 @@ SANDBOX = docker run --rm --network none --read-only --tmpfs /tmp \
 LOOP = $(SANDBOX) $(CURDIR)/evaluation/common/loop.py
 GATE = $(SANDBOX) $(CURDIR)/evaluation/common/gate.py
 LABELER = $(SANDBOX) $(CURDIR)/evaluation/common/labels.py
-measure = $(LOOP) run --flavour new --checkout $(1) --name $(2) --hash-seed $(3) \
-	--micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT)
-measured = test -f $(RESULT)/result.json || $(call measure,$(CURDIR),$(notdir $(RESULT)),0)
-base_metrics = $(if $(BASE),git rev-parse --verify --quiet $(BASE)^{commit} > /dev/null \
+measure = $(SANDBOX) $(1)/evaluation/common/loop.py run --flavour new --checkout $(1) \
+	--name $(2) --hash-seed $(3) --micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT) \
+	&& $(GATE) digest $(1) > $(EVAL_OUT)/$(2)/benchmark_sha256
+measured = test -f $(RESULT)/result.json || ($(call measure,$(CURDIR),$(notdir $(RESULT)),0))
+base_metrics = git rev-parse --verify --quiet $(BASE)^{commit} > /dev/null \
 	&& (git show $(BASE):$(METRICS) > $(BASE_METRICS) 2> /dev/null \
-	|| : > $(BASE_METRICS)))
-base_flag = $(if $(BASE),--base $(BASE_METRICS))
+	|| : > $(BASE_METRICS))
+base_inputs = if [ "$$(python3 -I $(BASE_TREE)/tools/inputs_key.py)" = "$$(python3 -I tools/inputs_key.py)" ]; \
+	then cp -RP $(PROJECTS) $(BASE_TREE)/$(PROJECTS); \
+	else $(MAKE) --no-print-directory -C $(BASE_TREE) eval-inputs \
+	&& $(MAKE) --no-print-directory eval-inputs; fi
 need_base = $(if $(BASE),,$(error $@ needs BASE=<git ref of the base commit>))
 
 define gate
 $(base_metrics)
-$(GATE) check $(RESULT)/result.json $(CURDIR)/$(METRICS) $(base_flag)
+$(GATE) check $(RESULT) $(BASE_RESULT) $(BASE_METRICS)
+endef
+
+define report
+$(GATE) report $(RESULT) $(CURDIR)/$(METRICS) >> $(SUMMARY)
 endef
 
 define measure_base
 git worktree add --detach $(BASE_TREE) $(BASE)
-$(call measure,$(BASE_TREE),$(notdir $(BASE_RESULT)),0) \
+($(base_inputs) && $(call measure,$(BASE_TREE),$(notdir $(BASE_RESULT)),0)) \
 	|| (git worktree remove --force $(BASE_TREE) && false)
 git worktree remove --force $(BASE_TREE)
 endef
@@ -50,8 +58,7 @@ endef
 define compare
 $(LOOP) compare $(BASE_RESULT) $(RESULT) > $(RESULT)-changes.txt
 $(base_metrics)
-$(GATE) summary $(RESULT)/result.json $(CURDIR)/$(METRICS) $(base_flag) \
-	--base-result $(BASE_RESULT)/result.json \
+$(GATE) summary $(RESULT) $(BASE_RESULT) $(BASE_METRICS) \
 	--changes $(RESULT)-changes.txt >> $(SUMMARY)
 endef
 
@@ -61,7 +68,7 @@ diff -rq -x runs.json -x result.json $(RESULT) $(RESULT)-seed1
 endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
-	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-compare \
+	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
 	eval-same-graphs eval-labels eval-changes
 
 setup:
@@ -107,13 +114,11 @@ eval-inputs:
 
 eval: eval-inputs
 	$(call measure,$(CURDIR),$(notdir $(RESULT)),0)
-	$(gate)
+	$(report)
 
 eval-record: eval-inputs
 	$(measured)
-	$(base_metrics)
-	$(GATE) record $(RESULT)/result.json $(CURDIR)/$(METRICS) $(base_flag) \
-		> $(EVAL_OUT)/metrics-$(COMMIT).json
+	$(GATE) record $(RESULT) $(CURDIR)/$(METRICS) > $(EVAL_OUT)/metrics-$(COMMIT).json
 	cp $(EVAL_OUT)/metrics-$(COMMIT).json $(METRICS)
 
 eval-diff: eval-inputs
@@ -138,7 +143,11 @@ eval-measure-base: eval-inputs
 	$(measure_base)
 
 eval-gate: eval-inputs
+	$(need_base)
 	$(gate)
+
+eval-report: eval-inputs
+	$(report)
 
 eval-compare: eval-inputs
 	$(need_base)

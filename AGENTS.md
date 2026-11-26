@@ -25,7 +25,7 @@ make check FULL=1       # every check, as make lint and make test
 make test               # all tests: the engine's and the evaluation's
 make lint               # ruff check, format check, no comments
 make format             # apply formatting
-make eval               # measure this commit on both benchmarks and gate it (Docker)
+make eval               # measure this commit on both benchmarks, report it against the bests (Docker)
 make eval-record        # raise evaluation/metrics.json to the values measured
 uv run pytest -k classes/call   # one benchmark case
 ```
@@ -135,10 +135,12 @@ Every agent follows these rules:
    stop and report the change you would make and why.
 2. Never change a protected file to make a test, the gate or CI pass.
 3. Only `make eval-record` writes `evaluation/metrics.json`. Never edit it by
-   hand, never lower a value, never change the margin. Run `make
-   eval-record` when a change raises a value or changes the benchmark (its
-   digest in the file; the measured values then become the bests), and
-   commit the file with the change.
+   hand, never lower a value, never change the margin. A pull request that
+   changes the engine or the benchmark does not touch it: its gate compares
+   it with its base. The bests are raised after a merge, when the report of
+   CI on main says that a value rose or the benchmark changed: a separate
+   pull request commits only the file that `make eval-record` writes on
+   that commit of main.
 4. Only `tests/triage.py` writes `tests/known_failures.txt`. A case leaves
    the file when it passes. Add a case only with `tests/triage.py
    --readmit`, and only when your task says so.
@@ -177,16 +179,15 @@ pytest tests/test_x.py -k name`). Before pushing, run `make check` and
 nothing more. Then push the branch and open a draft pull request at once.
 CI runs the full tests on every supported Python and, when the diff touches
 a path that can move the metrics (`EVAL_PATHS` of `tools/check.py`), the
-gate of `make eval` and the determinism check; do not run them locally as
-well. Run `make eval` locally only to investigate a metrics change, or
-before `make eval-record` when the gate of CI reports that a value rose and
-must be recorded.
+gate (the pull request against its base) and the determinism check; do
+not run them locally as well. Run `make eval` or `make eval-diff` locally
+only to investigate a metrics change.
 
 Mark a pull request ready only when CI is green for its exact current
 commit: lint, tests, the gate (no value below its floor, no failed run) and
 the determinism check. Its description carries the metrics table of the job
-summary of CI. When the gate reports that a value rose or the benchmark
-changed, say so: `evaluation/metrics.json` is recorded with `make
-eval-record` before the pull request merges.
+summary of CI. When a value rose above the base's or the benchmark
+changed, say so; do not run `make eval-record`: after the merge, the
+report of CI on main gives the new `evaluation/metrics.json` (rule 3).
 
 Nothing lives only on one machine: push what you have before you stop.
