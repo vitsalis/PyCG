@@ -143,6 +143,14 @@ LIBRARY_ITERATION = {
         "itertools.chain",
     ),
 }
+KEYED_OPERATIONS = frozenset({"heapq.nlargest", "heapq.nsmallest", "heapq.merge"})
+KEYED_SEQUENCES = {
+    "_bisect.bisect_left": (),
+    "_bisect.bisect_right": (),
+    "_bisect.insort_left": ("x",),
+    "_bisect.insort_right": ("x",),
+}
+KEY_WRAPPERS = {"functools.cmp_to_key": "mycmp"}
 LIBRARY_VALUES = {
     "itertools.zip_longest": "fillvalue",
     "itertools.accumulate": "initial",

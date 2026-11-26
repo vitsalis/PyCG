@@ -4,6 +4,7 @@ from .builtin_models import (
     GROUPBY,
     GROUPER,
     ITEMS,
+    KEYED_OPERATIONS,
     LARGEST,
     LAZY,
     LAZY_ALL,
@@ -47,6 +48,7 @@ class _OperationState:
         "key_is_item",
         "group",
         "activations",
+        "key",
     )
 
     def __init__(self, path, mode, values, caller, site):
@@ -66,6 +68,7 @@ class _OperationState:
         self.key_is_item = False
         self.group = None
         self.activations = []
+        self.key = None
 
 
 class _Activation:
@@ -104,6 +107,9 @@ class LibraryIteration:
             repeat = REPEATS.get(path)
             if repeat is not None and bound.given(repeat):
                 arity = None
+            if state.key is not None and bound.given("key"):
+                if bound["key"] is not None:
+                    self.add_edge(bound["key"], state.key)
             if mode == GROUPBY and _groupby_key_may_be_item(
                 self, call, parameters, bound
             ):
@@ -115,6 +121,8 @@ class LibraryIteration:
 
     def _new_operation(self, call, path, mode, values, kind):
         state = _OperationState(path, mode, values, call.caller, call.site)
+        if path in KEYED_OPERATIONS:
+            state.key = self.node()
         origin, site = call.origin, call.site
         if mode == MATERIALIZE:
             if kind is not None:
@@ -177,7 +185,9 @@ class LibraryIteration:
             self.add_length_hint(node, caller, site, LENGTH_SPECIAL_CALLS)
             iterators = self._obtain(node, caller, site, tag)
             again = self._obtain(iterators, caller, site, (*tag, "again"))
-            self._advance(again, self.node(), caller, site, ("library", tag))
+            items = self.node()
+            self._advance(again, items, caller, site, ("library", tag))
+            self.call_key(state.key, items, caller, site, ("key", state.path))
         else:
             if mode in (LAZY_ALL, MERGE):
                 source = node
@@ -234,6 +244,12 @@ class LibraryIteration:
             self.add_edge(items, self.unknown(shape))
         elif position != POSITION_UNKNOWN and position < arity:
             self.add_edge(items, self.element(shape, position))
+
+    def call_key(self, key, items, caller, site, role):
+        if key is None:
+            return
+        back = self.site_call(caller, site, role, [items])
+        self.add_edge(key, self._callee(back))
 
     def _make_groupby_key_the_item(self, state):
         if state.key_is_item:
@@ -295,6 +311,8 @@ class LibraryIteration:
             )
             self._advance(iterators, found, caller, site, role)
             self._advance(again, found, caller, site, (*role, "again"))
+            role = ("iterate", "key", state.path)
+            self.call_key(state.key, found, caller, site, role)
             return
         items = activation.items[position] = self.node()
         self._advance(source, items, caller, site, role)

@@ -1927,8 +1927,29 @@ function, bound method or callable instance that the call binds to
 `repl`, by position or keyword, is called from the scope of the call, as
 `map` calls its function (a class is instantiated); a str replacement
 calls nothing. The call back is implicit and passes one argument, the
-match, which holds no value. No other library function calls back, also
-where its stub types a parameter as a callable: on 15 packages of the
+match, which holds no value.
+
+The third exception is the key functions of `heapq` and `bisect`
+(`KEYED_OPERATIONS` and `KEYED_SEQUENCES` in `builtin_models.py`), and
+the function that `functools.cmp_to_key` wraps (`KEY_WRAPPERS`). Like
+`sorted`, they call their key on the items that they take, from the scope
+that takes them, implicitly and with the item: `heapq.nsmallest` and
+`nlargest` at the call, on the items that they iterate, `heapq.merge`
+where the merged iterator is advanced, on the items of each iterable, and
+`bisect_left`, `bisect_right`, `insort_left` and `insort_right` (also
+through the aliases `bisect` and `insort`) at the call, on the items of
+the sequence, which they read by subscript (its `__getitem__`), and for
+`insort` also on the inserted item. `cmp_to_key(f)` gives what its stub
+says and `f` as well, so a key call of the wrapper, by a builtin that
+compares or by one of these operations, calls `f` from where the keys
+are compared; an explicit call of the wrapper with one argument cannot
+bind `f`'s two parameters and calls nothing.
+
+- Limit: Python calls the function of `cmp_to_key` with two items; the
+  key call passes one, so `f`'s second parameter gets nothing.
+
+No other library function calls back, also where its stub types a
+parameter as a callable: on 15 packages of the
 macro-benchmark, calling back every such parameter found the same 38 true
 edges as `re.sub` alone, and 53 false ones (45 in one package, through
 `inspect.iscoroutinefunction`, whose overloads take callables but only
@@ -2069,7 +2090,8 @@ Limits, each pinned by a test:
 
 - The callbacks of these operations (`starmap`'s function, the predicates
   of `takewhile`, `dropwhile`, `filterfalse`, `groupby`'s key,
-  `accumulate`'s function and its `__add__`) are not called.
+  `accumulate`'s function and its `__add__`) are not called; the key
+  functions of `heapq` are (see *Call backs*).
 - Counts are not read: `tee(x, 0)` and `product(x, repeat=0)` iterate and
   `islice(x, 0)` advances, where Python does not
   (`test_limit_a_count_of_zero_still_iterates`); `nlargest(1, x)` asks the
