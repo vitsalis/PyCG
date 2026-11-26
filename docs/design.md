@@ -88,10 +88,11 @@ value whose type the stubs give. Outside code is not assumed to call what
 the analysed code gives it. Only the builtins of Python apply their
 arguments: `map`, `sorted(key=...)`, and the special methods of their
 protocol parameters (`len(x)` calls `x.__len__`). The other exceptions are
-`re.sub` and `re.subn`, which call a callable replacement, and a table of
-selected standard-library operations (`itertools`, `functools.reduce`,
-`math.sumprod`, `heapq.nlargest`, ...), which iterate what they get: at
-the call, or, for a lazy object, where analysed code advances it.
+`re.sub` and `re.subn`, which call a callable replacement, `copy.replace`,
+which calls `__replace__`, and a table of selected standard-library
+operations (`itertools`, `functools.reduce`, `math.sumprod`,
+`heapq.nlargest`, ...), which iterate what they get: at the call, or, for a
+lazy object, where analysed code advances it.
 
 ```python
 m = re.match("a+", text)  # a re.Match
@@ -2010,8 +2011,12 @@ elements (see *Comparisons of containers*). Like a builtin with a hand
 rule, these call through their protocols only the methods that are not
 special.
 
-Outside code other than `builtins` and the operations below calls no
-method of the analysed objects it gets (`Thread.start` and `run`,
+`copy.replace(obj, **changes)` calls `obj.__replace__(**changes)` from
+the scope of the call and gives what it returns (`SPECIAL_METHOD_CALLS`); for
+an outside value it gives what the stub of its `__replace__` returns.
+
+Outside code other than `builtins`, `copy.replace` and the operations below
+calls no method of the analysed objects it gets (`Thread.start` and `run`,
 `Logger.warning` and a handler's `emit`, `ExitStack.enter_context` and
 `__enter__`).
 
@@ -2025,6 +2030,12 @@ method of the analysed objects it gets (`Thread.start` and `run`,
   compared too.
 - Limit: with an unpacked argument every overload fits, so `min(*[a, b])`
   also iterates `a`.
+- Limit: a `copy.replace` that unpacks its positional arguments
+  (`copy.replace(*args)`) calls nothing
+  (`test_limit_copy_replace_of_an_unpacked_argument_calls_nothing`).
+- Limit: the `__replace__` that a dataclass or a named tuple gets from
+  Python 3.13 is not made, so replacing one gives no value
+  (`test_limit_the_replace_of_a_dataclass_is_not_made`).
 
 ### Selected standard-library operations
 

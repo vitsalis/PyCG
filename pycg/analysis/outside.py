@@ -15,6 +15,7 @@ from .builtin_models import (
     OPENERS,
     REFLECTION_CALLS,
     RETURNS_ARGUMENT,
+    SPECIAL_METHOD_CALLS,
     STUB_RESULTS,
     VARIABLE_FUNCTIONS,
     VARIABLE_TYPES,
@@ -123,6 +124,7 @@ GROUP_EXCLUDED_PATHS = frozenset(
         *OPENERS,
         *CLOSURES,
         *REFLECTION_CALLS,
+        *SPECIAL_METHOD_CALLS,
     }
 )
 STRING_CONSTANT_CLASSES = {str: "builtins.str", bytes: "builtins.bytes"}
@@ -474,6 +476,8 @@ class Outside:
                 self.consume_library(call, consuming)
             for definition in definitions:
                 entry = REFLECTION_CALLS.get(definition.path)
+                if entry is None:
+                    entry = SPECIAL_METHOD_CALLS.get(definition.path)
                 if entry is not None:
                     self.apply_rule(entry, call, None)
 

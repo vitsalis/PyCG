@@ -598,6 +598,20 @@ class Analysis(
                 )
                 self.solver.attach(value, call_back)
 
+    def call_past_first_argument(self, call):
+        return Call(
+            self,
+            call.caller,
+            call.args[1:],
+            call.keywords,
+            self.node(),
+            call.site,
+            None,
+            (),
+            call.double_star,
+            True,
+        )
+
     def _call_back_object(self, obj, callback):
         self.call(obj, callback)
 
