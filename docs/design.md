@@ -952,6 +952,16 @@ was attached for (`_dunder_owners`): the first one itself, and a set from
 the second one on, which answers whether an object is new as the set
 would.
 
+Every lookup of an attribute through an instance is the instance's own node,
+walked over the classes of its MRO, and binds the value of each class field
+that it meets to its receiver. One constraint per field and kind of binding
+(to an instance, or to a class) does that for every lookup that meets the
+field: it keeps their nodes and receivers and binds each value that the
+field gets to each of them, and a lookup that meets the field later gets the
+field's values bound at once, as its own constraint would have; a receiver
+of an unknown class still gets the saturated value. On sqlalchemy these were
+2.9 million constraints, one per field, receiver and lookup.
+
 A node that no rule can read yet need not exist. A call of a modelled builtin
 or of a stubbed function binds its arguments to the parameters of each
 signature that it fits, and no rule reads most of those parameters (on sphinx,
