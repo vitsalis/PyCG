@@ -1,13 +1,14 @@
 # The inputs image (the service `inputs` of evaluation/compose.yaml): the
 # sources of the macro-benchmark, fetched by their pins when the image is
-# built. The trace image takes what it needs from it at its own build (the
+# built, and, in the target `macro` alone, those of the scale set. The trace image takes what it needs from it at its own build (the
 # additional context `inputs: service:inputs`); nothing is fetched when a
 # service runs.
 #
 #   /inputs/macro-benchmark/projects/<name>   each project of projects.toml (fetch.py macro)
+#   /inputs/scale/projects/<name>             each package of scale/projects.toml (fetch.py scale)
 #
 # A step fails, and so the build, if a source is not its pin: git checks the
-# commit, fetch.py the SHA-256 of an sdist. git and the downloads run only
+# commit, fetch.py the SHA-256 of an sdist, a wheel or a git archive. git and the downloads run only
 # here, as a user without rights, with git's hooks, submodules and
 # configuration off (fetch.py); nothing fetched is installed, imported or
 # run.
@@ -39,12 +40,22 @@ WORKDIR /repo
 FROM network AS maintain
 RUN pip install --no-cache-dir uv
 
+# The scale set: not part of the benchmark, so the trace image, which takes
+# the image below, does not get it; `make eval-inputs` copies it out of the
+# target `macro`.
+FROM network AS scale
+USER 10001:10001
+COPY evaluation/scale/projects.py evaluation/scale/projects.toml evaluation/scale/
+COPY evaluation/container/fetch.py evaluation/container/
+RUN python3 -I -B evaluation/container/fetch.py scale /inputs/scale/projects
+
 FROM network AS macro
 USER 10001:10001
 COPY evaluation/macro-benchmark/projects.py evaluation/macro-benchmark/projects.toml \
     evaluation/macro-benchmark/
 COPY evaluation/container/fetch.py evaluation/container/
 RUN python3 -I -B evaluation/container/fetch.py macro /inputs/macro-benchmark/projects
+COPY --from=scale /inputs/scale /inputs/scale
 
 # The image: the plain Python image and the inputs, without git. Its shell
 # and Python serve the commands of the README that read the sources (a

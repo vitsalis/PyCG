@@ -10,6 +10,7 @@ REPOSITORY = EVALUATION.parent
 NOT_SCANNED = (
     EVALUATION / "tests",
     EVALUATION / "macro-benchmark" / "projects",
+    EVALUATION / "scale" / "projects",
     EVALUATION / "micro-benchmark" / "snippets",
 )
 OWN = "our own checkout"
