@@ -207,6 +207,50 @@ def test_instance_call_inherited_from_outside_is_named_through_the_owner(tmp_pat
     }
 
 
+def test_instance_call_is_named_through_the_concrete_class(tmp_path):
+    edges = edges_of(
+        tmp_path,
+        {
+            "main.py": """
+                import ctypes
+                import typing
+
+                libc = ctypes.CDLL(None)
+                libc.getpid()
+                typing.Deque[int]()
+            """
+        },
+    )
+    assert ("main", "ctypes.CDLL.__init__._FuncPtr.__call__") in edges
+    assert ("main", "typing._GenericAlias.__call__") in edges
+    assert not any(
+        "CFuncPtr" in callee or "_BaseGenericAlias" in callee for _, callee in edges
+    )
+
+
+def test_instance_call_matches_a_name_of_the_concrete_class_only(tmp_path):
+    files = {"main.py": "import functools\nfunctools.partial(len, [])()\n"}
+    for name, problems in (
+        ("_functools.partial.__call__", []),
+        ("functools.partial.__call__", []),
+        (
+            "builtins.object.__call__",
+            [
+                "missing edge: main -> functools.partial.__call__",
+                "unobserved edge: main -> builtins.object.__call__",
+            ],
+        ),
+    ):
+        graph = {
+            "main": ["functools.partial", name],
+            "functools.partial": [],
+            name: [],
+        }
+        case = make_case(tmp_path / name, files, graph)
+        found = [p for p in validate.validate(case) if "node" not in p]
+        assert found == problems, name
+
+
 def test_calls_in_class_body_belong_to_enclosing_scope(tmp_path):
     edges = edges_of(
         tmp_path,

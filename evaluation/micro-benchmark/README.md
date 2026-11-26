@@ -195,7 +195,15 @@ This command:
    through `builtins` and through modules that are already imported, so
    resolving imports nothing. A call that no expected name matches is shown
    under the name of the module and class that define the function (e.g.,
-   `posixpath.join`). A stub name does not resolve and must be equal.
+   `posixpath.join`). A call of an instance of a class outside the snippet
+   (see Calls of instances) is matched by the class instead: an expected
+   `<path>.__call__` matches if `<path>` resolves to the class of the
+   instance, wherever the class finds `__call__` (`typing._GenericAlias`
+   inherits it from `typing._BaseGenericAlias`). Else the call is shown
+   under the module and qualified name of that class without `<locals>`,
+   also where that path does not resolve because the class is local to a
+   function (`ctypes.CDLL.__init__._FuncPtr.__call__`). A stub name does not
+   resolve and must be equal.
 4. Compares the result with `callgraph.json` and prints each problem. The exit
    status is 1 if any case has a problem.
 
