@@ -62,7 +62,7 @@ def read(path):
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
 
 
-def dump(tmp_path, name, seed):
+def dump(tmp_path, name, seed, cap=None):
     program = tmp_path / name / "program"
     if not program.exists():
         program.mkdir(parents=True)
@@ -81,6 +81,7 @@ def dump(tmp_path, name, seed):
             str(out),
             "--package",
             str(program),
+            *([] if cap is None else ["--cap", str(cap)]),
             str(program / "main.py"),
         ],
         env={"PYTHONHASHSEED": str(seed)},
@@ -145,6 +146,61 @@ def test_an_unread_lazy_import_is_written_by_its_position(tmp_path):
     records = read(out / "D1.jsonl")
 
     assert {"module": "main", "unread_lazy": [["alias", 3, 7, 3, 12]]} in records
+
+
+@pytest.mark.parametrize("name", sorted(PROGRAMS))
+def test_the_trace_declares_every_object_and_constraint_before_it_is_used(dumped, name):
+    first, _ = dumped[name]
+    objects = {}
+    constraints = {}
+    nodes = set()
+    for record in read(first / "D3.jsonl"):
+        operation = record["op"]
+        if operation == "object":
+            assert record["object"] not in objects
+            assert record["types"][-1] == "Object"
+            assert record["opacity"] is None or record["opacity"] in (
+                {"saturated", record["object"]} | set(objects)
+            )
+            objects[record["object"]] = record
+        elif operation == "constraint":
+            assert set(record["captured"]) <= set(objects)
+            assert record["mode"] in ("each", "apply", "batch")
+            constraints[record["constraint"]] = record
+        elif operation == "node":
+            nodes.add(record["node"])
+        elif operation in ("constant", "add_object"):
+            assert record["args"][-1]["object"] in objects
+        elif operation in ("attach", "apply_now"):
+            assert next(iter(record["args"][1].values())) in constraints
+        elif operation == "apply":
+            assert record["constraint"] in constraints
+            assert all(o["object"] in objects for o in record["objects"])
+        elif operation == "wake":
+            assert record["node"] in nodes
+    assert any(record["mode"] == "each" for record in constraints.values())
+
+
+def test_a_class_that_becomes_unknown_is_named_between_rounds(tmp_path):
+    PROGRAMS["unknown"] = """
+        def b1(): return b2
+        def b2(): return (int, str, bytes)
+        for base in b1()():
+            Holder = base
+        class Late(Holder):
+            def run(self): pass
+        Late().run()
+        """
+    try:
+        out = dump(tmp_path, "unknown", 0, cap=2)
+    finally:
+        del PROGRAMS["unknown"]
+    trace = read(out / "D3.jsonl")
+    done = [r for r in trace if r["op"] == "between_rounds_done"]
+
+    assert ["Class:main.Late"] in [r["unknown"] for r in done]
+    starts = [i for i, r in enumerate(trace) if r["op"] == "between_rounds"]
+    assert len(starts) == len(done)
 
 
 def copy_as_input(source, root, key):
