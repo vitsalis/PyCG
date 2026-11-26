@@ -1989,6 +1989,13 @@ analysed class that defines the method, the call is implicit and comes
 from the scope of the builtin's call, with no arguments; arguments bind as
 for a function, unpacked ones too.
 
+`pow(base, exp)` is `base ** exp`, a builtin with a hand rule: it calls
+what the operator calls and gives its result. With `mod`, both methods also
+get the modulus: `base.__pow__(exp, mod)`, and `exp.__rpow__(base, mod)`,
+which Python tries from 3.14 (every version counts). Through its protocols
+the stubs would call `exp.__pow__` (they type `exp` of a float base as a
+power protocol), which Python never does.
+
 `sorted`, `list.sort` and `min` compare their items with `<`, `max` with
 `>`: `__lt__`, or the reflected `__gt__` where no class defines `__lt__`
 (`COMPARISONS`). The items are what a fitting overload binds to its
