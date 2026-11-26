@@ -820,7 +820,7 @@ also stated at its place in the conventions below):
 4. Two kinds of callee by version (fastjsonschema judgement 2, audits R2
    and V1): `urlsplit` is a plain function on Python 3.10 and an
    `lru_cache` wrapper from 3.11, so `ref_resolver.py:52:29` and `64:31`
-   name `urllib.parse.urlsplit` and `functools._lru_cache_wrapper.__call__`.
+   name `urllib.parse.urlsplit` and `_functools._lru_cache_wrapper.__call__`.
    The writer's reading of the CPython 3.10 to 3.12 sources is kept. No
    change.
 5. fastjsonschema: no default rejection for `Indent.__enter__` and
@@ -1933,7 +1933,7 @@ are the differences:
   the method has both class names. So does a
   callee that is a plain function on one supported version and a wrapper
   object on another (fastjsonschema: `urllib.parse.urlsplit` and
-  `functools._lru_cache_wrapper.__call__`, `ref_resolver.py:52` and `64`;
+  `_functools._lru_cache_wrapper.__call__`, `ref_resolver.py:52` and `64`;
   `urlsplit` has `lru_cache` from Python 3.11). A call of a
   `NamedTuple` class, or of a `collections.namedtuple` class, adds no edge:
   its `__new__` is generated code and its `__init__` is `object.__init__`
@@ -3234,6 +3234,32 @@ records the application under "Corrections of 2026-11-25".
   sources; the lead keeps them beside the added aliases there (no source
   excludes the fallback, and the benchmark removes an edge only on
   evidence that it cannot happen).
+- **A private re-export of an extension type (configargparse,
+  django-constance, einops, fastjsonschema, flit-core, itables, m3u8,
+  markdown2, more-itertools, nodeenv, pyflakes, tablib, validators; the
+  referee, `ruling-lru-3.md`; it applies the batch-7 private-class
+  re-export ruling and `b8-ruling-c-type-names-1.md`).** A private
+  re-export outside a public module's `__all__` establishes no public
+  class path. Where no public class alias exists, an extension type is
+  named through the defining extension's exported type attribute, and
+  through its type name only on a runtime that exports no attribute; per
+  admitted runtime, distinct implementations kept, never two aliases of
+  one class on one runtime. `functools` imports the `lru_cache` wrapper
+  type from `_functools` (`Lib/functools.py`, CPython 3.10.22 `:642`,
+  3.12.16 `:645`, 3.15.2 `:738`) without listing it in `__all__` (`:12`),
+  and `_functools` exports it as `_lru_cache_wrapper`
+  (`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, 3.15.2 `:1969`;
+  `PyModule_AddType` takes the last component of the type name
+  `functools._lru_cache_wrapper`): a call of a wrapper on CPython is
+  `_functools._lru_cache_wrapper.__call__`, while PyPy's Python closure
+  stays `functools._lru_cache_wrapper.wrapper`. 36 graph edges renamed
+  at 40 sites in the 13 packages, no count changed; the micro-benchmark
+  README's "Calls of instances" and the expected graph of
+  `decorators/functools_cache` follow. The tracer names the type by its
+  facade qualname, so the 33 traced pairs in 11 packages are rejected as
+  naming artefacts (rule A). It names already-admitted calls
+  only: no new receiver, no implicit outside edge, no renamed Python
+  closure, and public aliases such as `functools.partial` stay.
 
 ## Call sites and candidates
 

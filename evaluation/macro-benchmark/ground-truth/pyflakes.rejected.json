@@ -5,6 +5,12 @@
     "pyflakes.checker.Checker.NAME": {
         "<builtin>.RuntimeError": "Global-scope audit 2026-11-15: The only constructor call is the else after ctx is checked against ast.Load, ast.Store and ast.Del (1915-1927). Supported parser-produced Name contexts are exactly those three; no annotation admits an arbitrary hand-built context. The observed trace edge comes from test_undefined_names.py:824-832: ast.parse(\"x = 10\") at829 followed by tree.body[0].targets[0].ctx = object() at831. That deliberately invalid client mutation is excluded by global B3. Rule A preserves function bodies but does not make impossible argument values admissible."
     },
+    "pyflakes.checker.Checker.__init__": {
+        "functools._lru_cache_wrapper.__call__": "naming artefact (rule A): the type that _functools exports as _lru_cache_wrapper, named _functools._lru_cache_wrapper.__call__ (ruling-lru-3); the tracer names it by its facade qualname functools._lru_cache_wrapper"
+    },
+    "pyflakes.checker.Checker.handleDoctests": {
+        "functools._lru_cache_wrapper.__call__": "naming artefact (rule A): the type that _functools exports as _lru_cache_wrapper, named _functools._lru_cache_wrapper.__call__ (ruling-lru-3); the tracer names it by its facade qualname functools._lru_cache_wrapper"
+    },
     "pyflakes.reporter.Reporter.flake": {
         "_io.StringIO.write": "client object: the tests pass io.StringIO streams to Reporter, and TestMain replaces sys.stdout with one (pyflakes/test/test_api.py:61, 307); the package's own stream is the default sys.stdout, an io.TextIOWrapper"
     },

@@ -26,7 +26,8 @@ execution as a working union, not an affirmative user approval. Removing
 assertions or docstrings adds no graph pair for the admitted value roles.
 
 The ledger is `pyflakes.ledger`; the graph `pyflakes.json` is generated from
-it. Five trace edges are rejected in `pyflakes.rejected.json` (an invalid
+it. Seven trace edges are rejected in `pyflakes.rejected.json` (two
+`lru_cache` wrapper spellings since the Corrections of 2026-11-25; an invalid
 client-mutated AST and client
 streams of the tests). The ledger was written from the source; the trace
 came after and was used as a check only.
@@ -162,7 +163,7 @@ The trace (3.14) has 27 of the 30 edges. Two absent constructors are
   sqlparse `utils.indent`). The tracer does not see the generator function
   started by library code, so 15 such edges come from reading only.
 - `_custom_builtins()` (`:739`) and `_doctest_parser()` (`:1259`) call
-  `functools._lru_cache_wrapper.__call__` on CPython, or
+  `_functools._lru_cache_wrapper.__call__` on CPython, or
   `functools._lru_cache_wrapper.wrapper` on supported PyPy. Both wrappers
   call the package function on a cache miss. Pyflakes declares PyPy support
   in `setup.py` and tests `pypy3` in `tox.ini`. PyPy 7.3.20 implements
@@ -324,7 +325,34 @@ the `__init__` of `EagerUseOfLazyImport`, `LazyImportStarNotPermitted`
 | Default rejections | 6 candidates in 3 lines |
 | Nodes | 197 (8 modules, 189 functions) |
 | Edges | 644: 376 in the package, 268 outside |
-| Graph edges with a trace name or alias | 592 of 644 (91.9%) |
-| Edges only from reading | 52 |
-| Trace edges rejected | 5 |
+| Graph edges with a trace name or alias | 590 of 644 (91.6%) |
+| Edges only from reading | 54 |
+| Trace edges rejected | 7 |
 | Functions that the tests run | 180 of 189 |
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `pyflakes.checker.Checker.__init__` | `pyflakes/checker.py:739:56` |
+| `pyflakes.checker.Checker.handleDoctests` | `pyflakes/checker.py:1259:53` |
+
+PyPy's Python closure `functools._lru_cache_wrapper.wrapper` stays where
+the ledger names it.
+
+The trace names the type by its facade qualname, so its 2 pairs `caller ->
+functools._lru_cache_wrapper.__call__` are rejected as naming artefacts in
+`pyflakes.rejected.json` (rule A).

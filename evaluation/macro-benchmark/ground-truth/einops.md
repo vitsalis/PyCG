@@ -4,8 +4,9 @@
 
 - Done (pass 1 and a second reading, 2026-11-23 00:10): every site of the
   skeleton has an entry; `check.py --write einops` and `check.py einops`
-  report no error; the 3 trace edges that the graph lacks are in
-  `einops.rejected.json` (J7, J8).
+  report no error; the 12 trace edges that the graph lacks are in
+  `einops.rejected.json` (J7, J8; 9 of them since the Corrections of
+  2026-11-25).
 - J3 and J5 are decided (J3 by the referee's ruling; J5 from the framework
   sources under `deps/einops/`). J1 is overruled by the referee (2026-11-23):
   35 sites carry the ruling's path families ("Stub paths"), 12 of them open
@@ -395,7 +396,8 @@ Both classes are made only by the tensorflow backends:
 ## Other judgements
 
 - **J8: rejected trace edges** (`einops.rejected.json`): the three
-  `_EinmixDebugger` edges of J7.
+  `_EinmixDebugger` edges of J7, and the nine `lru_cache` wrapper
+  spellings (Corrections of 2026-11-25).
 - **J9: `allow_ops_in_compiled_graph`** (`_torch_specific.py:103-132`):
   `torch` is a missing module; the version tests and the `ImportError`
   are answers of the library, so every branch runs (README, "Missing
@@ -408,7 +410,7 @@ Both classes are made only by the tensorflow backends:
 - **J11: the lru_cache wrappers.** `_prepare_transformation_recipe`,
   `_compactify_pattern_for_einsum`, `analyze_pattern` and
   `_reconstruct_from_shape` are `functools.lru_cache` wrappers; a call of
-  one has the callees `functools._lru_cache_wrapper.__call__` and the
+  one has the callees `_functools._lru_cache_wrapper.__call__` and the
   wrapped function (on a cache miss, which a fresh process has). The
   decorator sites name `functools.lru_cache.decorating_function`, which
   wraps without calling.
@@ -512,3 +514,35 @@ Both classes are made only by the tensorflow backends:
   restricts them, so 32-bit Linux, where these classes are distinct from
   `int32`/`uint32` (`numpy/_core/src/multiarray/arraytypes.h.src:99`),
   is admitted. No edge change.
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `einops.array_api.reduce` | `einops/array_api.py:17:48` |
+| `einops.array_api.pack` | `einops/array_api.py:53:60` |
+| `einops.array_api.unpack` | `einops/array_api.py:74:60` |
+| `einops.einops._apply_recipe` | `einops/einops.py:235:119` |
+| `einops.einops._apply_recipe_array_api` | `einops/einops.py:259:115` |
+| `einops.einops._prepare_recipes_for_all_dims` | `einops/einops.py:457:49` |
+| `einops.einops.reduce` | `einops/einops.py:539:48` |
+| `einops.einops.einsum` | `einops/einops.py:938:45` |
+| `einops.packing.pack` | `einops/packing.py:69:60` |
+| `einops.packing.unpack` | `einops/packing.py:138:60` |
+
+The trace names the type by its facade qualname, so its 9 pairs `caller ->
+functools._lru_cache_wrapper.__call__` are rejected as naming artefacts in
+`einops.rejected.json` (rule A).

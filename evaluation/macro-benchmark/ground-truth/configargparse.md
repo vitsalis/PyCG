@@ -17,7 +17,8 @@ declared upper bound. The round-4 working scope includes normal, `-O` and
 an explicit user approval. The current graph has 408 edges on 68 nodes.
 
 The ledger is `configargparse.ledger`; the graph `configargparse.json` is
-generated from it. `configargparse.rejected.json` rejects 6 trace edges.
+generated from it. `configargparse.rejected.json` rejects 8 trace edges (two
+`lru_cache` wrapper spellings since the Corrections of 2026-11-25).
 The naming-only rejection `add_argument -> argparse._ActionsContainer.add_argument`
 records the original definition name in the trace. Import replaces that
 attribute with package code; the graph instead uses the three saved
@@ -227,7 +228,7 @@ and the `_`-methods of `ArgumentParser`.
 12. **`functools.lru_cache`.** The decorator (`:577:2`) is the local
     function `functools.lru_cache.decorating_function`. A call of
     `is_quoted` (`:599:17`, `:860:33`) runs
-    `functools._lru_cache_wrapper.__call__` on CPython. On the supported
+    `_functools._lru_cache_wrapper.__call__` on CPython. On the supported
     PyPy 3.11 / 7.3.20 release it runs the Python function
     `functools._lru_cache_wrapper.wrapper`. PyPy provides no `_functools`
     accelerator; `hidden_applevel` returns the same function. Both wrappers
@@ -308,9 +309,9 @@ suggest.
 | Default rejections | 0 |
 | Nodes | 68 |
 | Edges | 408: 94 in the package, 314 to 112 callees outside |
-| Edges that the trace confirms | 330 of 408 (80.9%) |
-| Edges only from reading | 78 (34 in the package, 44 outside) |
-| Trace edges rejected | 6 |
+| Edges that the trace confirms | 328 of 408 (80.4%) |
+| Edges only from reading | 80 (34 in the package, 46 outside) |
+| Trace edges rejected | 8 |
 | Functions that the tests run | 58 of 67 |
 
 ## Round 3: supported PyPy cache wrappers (2026-11-16)
@@ -338,3 +339,30 @@ and Python 3.6 regex and argparse alternatives remain.
 
 The pass-2 heading now labels 406 as its historical result. The current table
 and round-3 result correctly show 408. Historical audit prose is preserved.
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `configargparse.unquote_str` | `configargparse.py:599:17` |
+| `configargparse.IniConfigParser.parse` | `configargparse.py:860:33` |
+
+PyPy's Python closure `functools._lru_cache_wrapper.wrapper` stays where
+the ledger names it.
+
+The trace names the type by its facade qualname, so its 2 pairs `caller ->
+functools._lru_cache_wrapper.__call__` are rejected as naming artefacts in
+`configargparse.rejected.json` (rule A).

@@ -1958,7 +1958,7 @@ default reject flit_core.config.EntryPointsConflict.__str__: no formatted or str
 69:34 call  micros_str.ljust(6, "0")
     -> <builtin>.str.ljust
 71:41 call  cached_tz( offset_hour_str, offset_minute_str, offset_sig...
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> flit_core.vendor.tomli._re.cached_tz
     note: cached_tz is the lru_cache wrapper of the function (81:2); on a cache miss the wrapper calls the function (no PyPy is admitted, so no functools._lru_cache_wrapper.wrapper)
 78:20 call  datetime(year, month, day, hour, minute, sec, micros, tzi...

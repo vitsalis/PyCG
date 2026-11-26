@@ -5113,6 +5113,9 @@
       "<builtin>.RuntimeError.__init__": [
         "einops.array_api 61:30 call  EinopsError( f\"packed tensor #{i} (enumeration starts wit..."
       ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.array_api 53:60 call  analyze_pattern(pattern, \"pack\")"
+      ],
       "einops.packing.analyze_pattern": [
         "einops.array_api 53:60 call  analyze_pattern(pattern, \"pack\")"
       ]
@@ -5126,6 +5129,9 @@
       ],
       "<builtin>.len": [
         "einops.array_api 9:15 call  len(tensor)"
+      ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.array_api 17:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n..."
       ],
       "einops.einops._prepare_transformation_recipe": [
         "einops.array_api 17:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n..."
@@ -5142,11 +5148,17 @@
         "einops.array_api 79:26 call  EinopsError(f\"unpack(..., {pattern}) received input of wr...",
         "einops.array_api 87:26 call  EinopsError( f\"unpack(..., {pattern}) received more than ..."
       ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.array_api 74:60 call  analyze_pattern(pattern, opname=\"unpack\")"
+      ],
       "einops.packing.analyze_pattern": [
         "einops.array_api 74:60 call  analyze_pattern(pattern, opname=\"unpack\")"
       ]
     },
     "einops.einops._apply_recipe": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.einops 235:119 call  _reconstruct_from_shape( recipe, backend.shape(tensor), a..."
+      ],
       "einops._backends.OneFlowBackend.add_axes": [
         "einops.einops 249:34 call  backend.add_axes(tensor, n_axes=n_axes_w_added, pos2len=a..."
       ],
@@ -5218,6 +5230,9 @@
       ]
     },
     "einops.einops._apply_recipe_array_api": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.einops 259:115 call  _reconstruct_from_shape( recipe, tensor.shape, axes_lengt..."
+      ],
       "einops.einops._reconstruct_from_shape_uncached": [
         "einops.einops 259:115 call  _reconstruct_from_shape( recipe, tensor.shape, axes_lengt..."
       ]
@@ -5295,14 +5310,14 @@
       "<builtin>.str.split": [
         "einops.einops 452:39 call  pattern.split(\"->\")"
       ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.einops 457:49 call  _prepare_transformation_recipe(pattern, operation, axes_n..."
+      ],
       "einops.einops._prepare_transformation_recipe": [
         "einops.einops 457:49 call  _prepare_transformation_recipe(pattern, operation, axes_n..."
       ],
       "einops.parsing.ParsedExpression.__init__": [
         "einops.einops 453:28 call  ParsedExpression(left_str)"
-      ],
-      "functools._lru_cache_wrapper.__call__": [
-        "einops.einops 457:49 call  _prepare_transformation_recipe(pattern, operation, axes_n..."
       ]
     },
     "einops.einops._prepare_transformation_recipe": {
@@ -5426,6 +5441,9 @@
       ]
     },
     "einops.einops.einsum": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.einops 938:45 call  _compactify_pattern_for_einsum(pattern)"
+      ],
       "einops._backends.AbstractBackend.einsum": [
         "einops.einops 939:42 call  get_backend(tensors[0]).einsum(pattern, *tensors)"
       ],
@@ -5486,6 +5504,9 @@
     "einops.einops.reduce": {
       "<builtin>.TypeError": [
         "einops.einops 531:32 call  TypeError(\"Rearrange/Reduce/Repeat can't be applied to an..."
+      ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.einops 539:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n..."
       ],
       "einops._backends.CupyBackend.stack_on_zeroth_dimension": [
         "einops.einops 533:55 call  backend.stack_on_zeroth_dimension(tensor)"
@@ -6018,6 +6039,9 @@
       ]
     },
     "einops.packing.pack": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.packing 69:60 call  analyze_pattern(pattern, \"pack\")"
+      ],
       "einops._backends.CupyBackend.concat": [
         "einops.packing 87:26 call  backend.concat(reshaped_tensors, axis=n_axes_before)"
       ],
@@ -6083,6 +6107,9 @@
       ]
     },
     "einops.packing.unpack": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "einops.packing 138:60 call  analyze_pattern(pattern, opname=\"unpack\")"
+      ],
       "einops._backends.HashableTuple.__getitem__": [
         "einops.packing 161:62 getitem  input_shape[unpacked_axis]",
         "einops.packing 172:30 getitem  input_shape[:unpacked_axis]",
@@ -6360,6 +6387,9 @@
     "einops.einops 539:109 call  len(shape)": [
       "shape is the result of backend.shape, a HashableTuple for the tensorflow backends (einops.md, \"Shapes\")"
     ],
+    "einops.einops 539:48 call  _prepare_transformation_recipe(pattern, reduction, axes_n...": [
+      "the lru_cache wrapper (einops.py:289) calls the function on a cache miss; its key holds strs, an int and the client's reduction (a str or a client callable)"
+    ],
     "einops.einops 707:11 call  len(shape)": [
       "shape is the result of backend.shape, a HashableTuple for the tensorflow backends"
     ],
@@ -6380,6 +6410,9 @@
     ],
     "einops.einops 776:40 call  get_backend(tensor).to_numpy(tensor)": [
       "the receiver comes from get_backend; TFKerasBackend inherits AbstractBackend.to_numpy, which raises"
+    ],
+    "einops.einops 938:45 call  _compactify_pattern_for_einsum(pattern)": [
+      "the lru_cache wrapper (einops.py:795) calls the function on a cache miss"
     ],
     "einops.einops 939:42 call  get_backend(tensors[0]).einsum(pattern, *tensors)": [
       "the receiver comes from get_backend; TFKerasBackend inherits AbstractBackend.einsum, which raises"
@@ -6495,6 +6528,9 @@
     ],
     "einops.packing 161:62 getitem  input_shape[unpacked_axis]": [
       "input_shape is a HashableTuple for the tensorflow backends"
+    ],
+    "einops.packing 69:60 call  analyze_pattern(pattern, \"pack\")": [
+      "analyze_pattern is the lru_cache wrapper of the function (line 13); on a cache miss it calls the function"
     ],
     "einops.packing 78:15 call  len(shape)": [
       "shape is the result of backend.shape, a HashableTuple for the tensorflow backends"

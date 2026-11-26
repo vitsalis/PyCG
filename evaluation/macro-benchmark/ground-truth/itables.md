@@ -18,7 +18,8 @@ no required dependency, so the supported versions are 3.9 and later, and
 every import outside the standard library is optional.
 
 The ledger is `itables.ledger`; the graph `itables.json` is generated from
-it. Four trace spellings are rejected (`itables.rejected.json`).
+it. Five trace spellings are rejected (`itables.rejected.json`; the fifth,
+the `lru_cache` wrapper, since the Corrections of 2026-11-25).
 
 ## Architecture, as the ledger uses it
 
@@ -301,8 +302,8 @@ its outside callee.
 | Default rejections | 1, deciding 706 sites |
 | Nodes | 150 (21 modules, 129 functions) |
 | Edges | 930: 188 in the package, 742 outside |
-| Graph edges with a trace name or alias | 610 of 930 (65.6%) |
-| Trace edges rejected | 4 |
+| Graph edges with a trace name or alias | 609 of 930 (65.5%) |
+| Trace edges rejected | 5 |
 | Functions that the tests run | 104 of 129 |
 
 The 2026-11-15 audit replaces generic dtype-base method names with
@@ -414,3 +415,26 @@ takes the result: `config.py:62` and `:90` are `in` tests (implicit, no
 outside edge), and the loop at `:106` unpacks items, which have no path.
 Four graph edges added (outside), none removed: 930 edges, 188 in the
 package, 742 outside.
+
+## Corrections of 2026-11-25: the lru_cache wrapper
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `itables.sample_pandas_dfs.generate_random_series` | `src/itables/sample_pandas_dfs.py:350:33` |
+
+The trace names the type by its facade qualname, so its 1 pair `caller ->
+functools._lru_cache_wrapper.__call__` is rejected as a naming artefact in
+`itables.rejected.json` (rule A).

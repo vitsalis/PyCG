@@ -248,6 +248,9 @@
         "configargparse 866:64 call  str(e)",
         "configargparse 875:64 call  str(e)"
       ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "configargparse 860:33 call  is_quoted(strip_v)"
+      ],
       "functools._lru_cache_wrapper.wrapper": [
         "configargparse 860:33 call  is_quoted(strip_v)"
       ]
@@ -298,6 +301,9 @@
       ],
       "<builtin>.isinstance": [
         "configargparse 602:30 call  isinstance(s, str)"
+      ],
+      "_functools._lru_cache_wrapper.__call__": [
+        "configargparse 599:17 call  is_quoted(text, triple=triple)"
       ],
       "ast.literal_eval": [
         "configargparse 601:33 call  ast.literal_eval(text)"
@@ -387,7 +393,7 @@
       "On admitted CPython3.6 the concrete regex type has no public re.Pattern/re.Match alias, so its _sre.SRE_Pattern/_sre.SRE_Match name also counts. The modern re name remains for3.7+. Same source-created receiver and call on both versions."
     ],
     "configargparse 599:17 call  is_quoted(text, triple=triple)": [
-      "is_quoted is cached at line 577; CPython calls functools._lru_cache_wrapper.__call__, while supported PyPy 3.11 / 7.3.20 calls the Python function functools._lru_cache_wrapper.wrapper (functools.py:577-619; hidden_applevel returns the same function). Both call configargparse.is_quoted on a cache miss."
+      "is_quoted is cached at line 577; CPython calls _functools._lru_cache_wrapper.__call__, while supported PyPy 3.11 / 7.3.20 calls the Python function functools._lru_cache_wrapper.wrapper (functools.py:577-619; hidden_applevel returns the same function). Both call configargparse.is_quoted on a cache miss."
     ],
     "configargparse 709:32 call  toml.loads(content)": [
       "toml is tomllib on Python 3.11 and later, else the toml package (optional import, lines 692-701): both sides run (judgement 2 of configargparse.md)"

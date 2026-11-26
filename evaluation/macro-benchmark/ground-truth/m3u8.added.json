@@ -40,6 +40,9 @@
       ]
     },
     "m3u8.load": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "m3u8 93:16 call  urlsplit(uri)"
+      ],
       "m3u8.httpclient.DefaultHTTPClient.download": [
         "m3u8 94:49 call  http_client.download(uri, timeout, headers, verify_ssl)"
       ],
@@ -51,6 +54,10 @@
       ]
     },
     "m3u8.mixins.BasePathMixin.absolute_uri": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "m3u8.mixins 12:43 call  urlsplit(self.base_uri)",
+        "m3u8.mixins 15:24 call  urlsplit(ret)"
+      ],
       "urllib.parse.urlsplit": [
         "m3u8.mixins 12:43 call  urlsplit(self.base_uri)",
         "m3u8.mixins 15:24 call  urlsplit(ret)"

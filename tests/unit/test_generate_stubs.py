@@ -370,3 +370,129 @@ def test_the_committed_data_says_where_it_comes_from():
     assert "list" in builtins["modules"]["builtins"]["names"]
     yaml = json.loads((data / "third_party" / "yaml.json").read_text())
     assert "load" in yaml["modules"]["yaml"]["names"]
+    assert "https://github.com/python/cpython" in readme
+    for version in ("3.12.16", "3.13.18", "3.14.10", "3.15.2"):
+        assert f"| {version} | `" in readme
+    functools = json.loads((data / "functools.json").read_text())
+    wrapper = functools["modules"]["functools"]["names"]["_lru_cache_wrapper"]
+    assert wrapper["pub"] == "_functools._lru_cache_wrapper"
+
+
+FACADE_STUB = """
+class _Wrapper:
+    class Inner: ...
+class _Pure: ...
+class _Redefined: ...
+class _Disputed: ...
+class _Newer: ...
+class _Conditional: ...
+class Exported: ...
+class Unlisted: ...
+__all__ = ["Exported"]
+"""
+
+
+def _cpython_library(root, version, modules):
+    checkout = root / f"cpython-{version}"
+    (checkout / "Include").mkdir(parents=True)
+    (checkout / "Include/patchlevel.h").write_text(
+        f'#define PY_VERSION              "{version}"\n'
+    )
+    for path, text in modules.items():
+        (checkout / "Lib" / path).parent.mkdir(parents=True, exist_ok=True)
+        (checkout / "Lib" / path).write_text(textwrap.dedent(text))
+    return generate_stubs.read_cpython_library(checkout, f"commit-{version}")
+
+
+def _facade_source(newer=""):
+    return f"""
+        try:
+            from _facade import _Wrapper
+        except ImportError:
+            def _Wrapper(): pass
+        from _facade_py import _Pure
+        from _facade import _Redefined
+        class _Redefined: pass
+        from _facade import _Disputed
+        if FLAG:
+            from _facade import _Conditional
+        from _facade import Exported, Unlisted
+        {newer}
+    """
+
+
+def _facade_names(tmp_path, versions):
+    libraries = [
+        _cpython_library(tmp_path, version, modules)
+        for version, modules in versions.items()
+    ]
+    reader = generate_stubs.StubReader(
+        {"facade": (FACADE_STUB, False)}, cpython_libraries=libraries
+    )
+    names = reader.generate()["facade"]["modules"]["facade"]["names"]
+    return names, reader.extension_name_conflicts
+
+
+def test_a_class_that_the_facade_imports_from_an_extension_is_named_there(tmp_path):
+    names, conflicts = _facade_names(
+        tmp_path,
+        {
+            "3.12.1": {
+                "facade.py": _facade_source(),
+                "_facade_py.py": "class _Pure: pass\n",
+            },
+            "3.14.1": {
+                "facade.py": _facade_source("from _facade import _Newer"),
+                "_facade_py.py": "class _Pure: pass\n",
+            },
+            "3.15.1": {
+                "facade/__init__.py": _facade_source(
+                    "from _facade import _Newer"
+                ).replace("import _Disputed", "import _Other as _Disputed"),
+                "_facade_py.py": "class _Pure: pass\n",
+            },
+        },
+    )
+    assert names["_Wrapper"]["pub"] == "_facade._Wrapper"
+    assert names["_Wrapper"]["m"]["Inner"]["pub"] == "_facade._Wrapper.Inner"
+    assert names["_Newer"]["pub"] == "_facade._Newer"
+    assert names["Unlisted"]["pub"] == "_facade.Unlisted"
+    for kept in ("_Pure", "_Redefined", "_Disputed", "_Conditional", "Exported"):
+        assert "pub" not in names[kept], kept
+    assert conflicts == [
+        "facade._Disputed (3.12.1: _facade._Disputed, 3.14.1: _facade._Disputed,"
+        " 3.15.1: _facade._Other)"
+    ]
+
+
+def test_without_cpython_sources_the_stub_names_stay(tmp_path):
+    names, conflicts = _facade_names(tmp_path, {})
+    assert all("pub" not in entry for entry in names.values())
+    assert conflicts == []
+
+
+def test_a_cpython_library_records_its_version_and_python_modules(tmp_path):
+    library = _cpython_library(
+        tmp_path, "3.13.2", {"pkg/__init__.py": "", "pkg/mod.py": "", "plain.py": ""}
+    )
+    assert library.version == "3.13.2"
+    assert library.commit == "commit-3.13.2"
+    assert {"pkg", "pkg.mod", "plain"} <= library.python_modules
+    assert generate_stubs.final_binding(library, "absent", "name") is None
+    assert generate_stubs.final_binding(library, "plain", "name") is None
+
+
+def test_the_readme_records_the_cpython_commits(tmp_path, reader, data):
+    libraries = [
+        _cpython_library(tmp_path, version, {})
+        for version in ("3.15.0", "3.12.9", "3.13.1")
+    ]
+    generate_stubs.write(data, tmp_path / "out", "abc123", None, (), libraries)
+    readme = (tmp_path / "out" / "README.md").read_text()
+    rows = [line for line in readme.splitlines() if line.startswith("| 3.")]
+    assert rows == [
+        "| 3.12.9 | `commit-3.12.9` |",
+        "| 3.13.1 | `commit-3.13.1` |",
+        "| 3.15.0 | `commit-3.15.0` |",
+    ]
+    assert "`docs/design.md` describes the" in readme

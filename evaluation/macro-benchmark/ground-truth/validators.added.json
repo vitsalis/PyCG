@@ -93,6 +93,32 @@
         "validators.email 68:34 call  domain_part.startswith(\"[\")"
       ]
     },
+    "validators.hostname._port_validator": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.hostname 37:23 call  _port_regex()",
+        "validators.hostname 43:23 call  _port_regex()"
+      ]
+    },
+    "validators.hostname.hostname._matches_simple_hostname": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.hostname 123:38 call  _simple_hostname_regex()"
+      ]
+    },
+    "validators.i18n.fi.fi_business_id": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.i18n.fi 57:41 call  _business_id_pattern()"
+      ]
+    },
+    "validators.i18n.fi.fi_ssn": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.i18n.fi 95:44 call  _ssn_pattern(ssn_check_marks)"
+      ]
+    },
+    "validators.i18n.fr.fr_ssn": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.i18n.fr 96:36 call  _ssn_pattern()"
+      ]
+    },
     "validators.ip_address.ipv4": {
       "<builtin>.ValueError": [
         "validators.ip_address 90:33 call  ValueError(\"IPv4 address was expected in CIDR notation\")"
@@ -113,6 +139,11 @@
         "validators.uri 23:28 call  value.startswith(\"ipfs://\")"
       ]
     },
+    "validators.uri._telnet_url": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.uri 54:57 call  urlsplit(value)"
+      ]
+    },
     "validators.uri.uri": {
       "<builtin>.len": [
         "validators.uri 119:31 call  len(\"mailto:\")"
@@ -126,6 +157,23 @@
       "validators.utils.validator.wrapper": [
         "validators.uri 115:19 call  url(value)",
         "validators.uri 119:21 call  email(value[len(\"mailto:\") :])"
+      ]
+    },
+    "validators.url._validate_auth_segment": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.url 81:31 call  _username_regex()",
+        "validators.url 83:31 call  _username_regex()",
+        "validators.url 85:27 call  _username_regex()"
+      ]
+    },
+    "validators.url._validate_optionals": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.url 142:46 call  _path_regex()"
+      ]
+    },
+    "validators.url.url": {
+      "_functools._lru_cache_wrapper.__call__": [
+        "validators.url 240:57 call  urlsplit(value)"
       ]
     }
   },
@@ -171,6 +219,12 @@
     ],
     "validators.domain 23:61 call  Path(__file__).parent.joinpath(\"_tld.txt\").open()": [
       "Path(__file__) makes a PosixPath or a WindowsPath (the package declares Operating System :: OS Independent); .parent and joinpath keep the flavour (the precedent of netaddr and itables)"
+    ],
+    "validators.uri 54:57 call  urlsplit(value)": [
+      "from Python 3.11 on, urllib.parse.urlsplit is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code); validators supports 3.11 and later (the precedent of fastjsonschema, ref_resolver.py:52)"
+    ],
+    "validators.url 240:57 call  urlsplit(value)": [
+      "from Python 3.11 on, urllib.parse.urlsplit is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code); validators supports 3.11 and later (the precedent of fastjsonschema, ref_resolver.py:52)"
     ]
   },
   "trace": "dynamic/validators.json"

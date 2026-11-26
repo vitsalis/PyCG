@@ -2105,8 +2105,8 @@ EXPECTED_CALLEES = {
         "main.use",
         "",
         [
+            "_functools._lru_cache_wrapper.__call__",
             "contextlib.contextmanager.helper",
-            "functools._lru_cache_wrapper.__call__",
             "main.cached",
             "main.managed",
         ],

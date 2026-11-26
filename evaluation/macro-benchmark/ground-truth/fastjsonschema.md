@@ -12,8 +12,8 @@ Release v2.22.3 (commit `9d3f5ee`). Analysed source: `fastjsonschema/`
 3.10 and later.
 
 The ledger is `fastjsonschema.ledger`; the graph `fastjsonschema.json` is
-generated from it. One trace edge is rejected
-(`fastjsonschema.rejected.json`).
+generated from it. Three trace edges are rejected
+(`fastjsonschema.rejected.json`; two since the Corrections of 2026-11-25).
 
 ## Architecture, as the ledger uses it
 
@@ -152,7 +152,7 @@ helpers of `generator.py` (the tests call `serialize_regexes`).
    with `@functools.lru_cache(typed=True)` (read in the CPython sources of
    3.10, 3.11, 3.12 from GitHub, and 3.13 to 3.15 locally). The site has
    both names: `urllib.parse.urlsplit` and
-   `functools._lru_cache_wrapper.__call__` (the README's rule of a receiver
+   `_functools._lru_cache_wrapper.__call__` (the README's rule of a receiver
    with two classes across admitted versions, applied to a function). The
    trace (3.14) has the second.
 3. **Remote `$ref` without a handler** (`ref_resolver.py:68-75`). It runs:
@@ -200,8 +200,11 @@ helpers of `generator.py` (the tests call `serialize_regexes`).
 Recorded in the container (CPython 3.14.10): 846 passed, 4 skipped, 12
 deselected; 496 edges. Resolved:
 
-- **Added from the trace**: the `functools._lru_cache_wrapper.__call__`
-  name of `urlsplit` (judgement 2).
+- **Added from the trace**: the `lru_cache` wrapper callee of `urlsplit`
+  (judgement 2), which the trace spells `functools._lru_cache_wrapper.__call__`;
+  since the Corrections of 2026-11-25 the graph names it
+  `_functools._lru_cache_wrapper.__call__`, and the trace's spelling is a
+  rejected naming artefact.
 - **Rejected**: `resolve_remote -> <builtin>.dict.__getitem__`. The tests
   pass a dict's bound `__getitem__` as a handler (`tests/test_integration.py:141`,
   `test_composition.py:63`): a client callback.
@@ -240,9 +243,9 @@ run.
 | Callee lines / rejection lines (`reject *`) / exclusion lines / notes | 917 / 25 (17) / 0 / 102 |
 | Default rejections | 1, deciding 159 explicit sites |
 | Edges | 548: 314 in the package, 234 outside |
-| Graph edges with a trace name or alias | 495 of 548 (90.3%) |
-| Edges only from reading | 53 |
-| Trace edges rejected | 1 |
+| Graph edges with a trace name or alias | 493 of 548 (90.0%) |
+| Edges only from reading | 55 |
+| Trace edges rejected | 3 |
 | Functions that the tests run | 92 of 95 |
 
 ## Round 3: public outside cache wrapper check (2026-11-16)
@@ -281,3 +284,27 @@ while the local flags argument is a string. This changes no target. Source,
 pair, site, body and default/exclusion coverage is retained in
 /tmp/pycg-macro-audit-pass4/fastjsonschema-agent. Structural and origin gates
 are reserved for the root acceptance step; this record does not claim them.
+
+## Corrections of 2026-11-25
+
+The referee's `ruling-lru-3.md` (adopted by the lead; README, "Rulings for
+the corrections of 2026-11-25") names a call of an `lru_cache` wrapper on
+CPython through the type that `_functools` exports: `functools` imports
+`_lru_cache_wrapper` from `_functools` without listing it in `__all__`
+(CPython 3.10.22 `Lib/functools.py:12`, `:642`; 3.12.16 `:645`; 3.15.2
+`:738`), a private re-export that establishes no public class path, and
+`_functools` exports the type under that attribute
+(`Modules/_functoolsmodule.c`, 3.10.22 `:1462`, type name
+`functools._lru_cache_wrapper` at `:1419`; 3.15.2 `:1969`, `:1908`).
+`functools._lru_cache_wrapper.__call__` becomes
+`_functools._lru_cache_wrapper.__call__` here (outside; edge count
+unchanged):
+
+| Caller | Site |
+|---|---|
+| `fastjsonschema.ref_resolver.normalize` | `fastjsonschema/ref_resolver.py:52:29` |
+| `fastjsonschema.ref_resolver.resolve_remote` | `fastjsonschema/ref_resolver.py:64:31` |
+
+The trace names the type by its facade qualname, so its 2 pairs `caller ->
+functools._lru_cache_wrapper.__call__` are rejected as naming artefacts in
+`fastjsonschema.rejected.json` (rule A).

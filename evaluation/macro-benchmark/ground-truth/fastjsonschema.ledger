@@ -1888,7 +1888,7 @@ default reject fastjsonschema.generator.CodeGenerator.l: CodeGenerator.l is deco
 [fastjsonschema.ref_resolver.normalize]
 52:29 call  urlparse.urlsplit(uri)
     -> urllib.parse.urlsplit
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     note: on Python 3.10 urlsplit is a plain function; from 3.11 on it is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code; read in the CPython sources of 3.10 to 3.15)
 52:41 call  urlparse.urlsplit(uri).geturl()
     -> urllib.parse.SplitResult.geturl
@@ -1897,7 +1897,7 @@ default reject fastjsonschema.generator.CodeGenerator.l: CodeGenerator.l is deco
 [fastjsonschema.ref_resolver.resolve_remote]
 64:31 call  urlparse.urlsplit(uri)
     -> urllib.parse.urlsplit
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     note: on Python 3.10 urlsplit is a plain function; from 3.11 on it is decorated with @functools.lru_cache(typed=True), so the call runs the functools._lru_cache_wrapper, which calls urlsplit itself (library code; read in the CPython sources of 3.10 to 3.15)
 66:34 call  handlers[scheme](uri)
     note: handlers maps a scheme to a client callable (annotated Mapping[str, Callable[[str], Any]], a bare callable: no package value, B2); the package's default is {}, where this branch never runs. The call is client behaviour (B5)

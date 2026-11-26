@@ -3988,7 +3988,7 @@ default reject tablib._vendor.dbfpy.utils._InvalidValue.__str__, tablib.core.Dat
 164:36 call  enumerate(row)
     -> <builtin>.enumerate
 165:44 call  get_column_letter(j + 1)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> openpyxl.utils.cell.get_column_letter
     note: get_column_letter is a functools.lru_cache wrapper in openpyxl 3.1.5 (utils/cell.py:78) and a plain function of openpyxl.utils.cell in 2.6.0, 2.6.4 and 3.0.10 (utils/cell.py:107, 107, 105), re-exported by openpyxl.utils without __all__ (audit F4, the lead's ruling on admitted releases)
 169:50 getattr  dataset.headers
@@ -4036,7 +4036,7 @@ default reject tablib._vendor.dbfpy.utils._InvalidValue.__str__, tablib.core.Dat
 217:41 call  enumerate(column_widths, 1)
     -> <builtin>.enumerate
 218:58 call  get_column_letter(i)
-    -> functools._lru_cache_wrapper.__call__
+    -> _functools._lru_cache_wrapper.__call__
     -> openpyxl.utils.cell.get_column_letter
     note: as at 165:44
 
