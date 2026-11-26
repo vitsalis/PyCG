@@ -99,6 +99,7 @@ lint:
 	$(RUN) ruff check $(LINTED)
 	$(RUN) ruff format --check $(LINTED)
 	$(RUN) python tools/no_comments.py
+	$(RUN) python tools/sdist_check.py
 
 check:
 	$(RUN) python tools/check.py $(if $(FULL),--full) $(if $(BASE),--base $(BASE))
