@@ -293,6 +293,9 @@ class Solver:
         objects = done.union(*_received(node), added or ())
         return sorted(objects, key=self._number_by_object.__getitem__)
 
+    def is_saturated(self, node):
+        return _find_representative(node).done is self._saturated_set
+
     def holds(self, node, obj):
         node = _find_representative(node)
         if obj in node.done:
