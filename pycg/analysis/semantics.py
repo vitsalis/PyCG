@@ -498,9 +498,7 @@ class Analysis(
 
     def call(self, obj, call):
         group = self._groups.get(call)
-        if group is not None and obj is not group.callee:
-            group.observe(self._call_prefixed, obj, group.base)
-            return
+        assert group is None or obj is group.callee, call
         match obj:
             case Function():
                 if not self.returns_argument(obj, call):
@@ -532,8 +530,8 @@ class Analysis(
                 module = self.literal_imports.get(call.site)
                 if module is not None and obj.name in LITERAL_IMPORTERS:
                     self.add_external_call_edge(obj.name, call, "stub")
-                    if call.dst is not None:
-                        self.add_edge(module, call.dst)
+                    assert call.dst is not None, call.site
+                    self.add_edge(module, call.dst)
                     return
                 definitions = self.stub_definitions(obj)
                 if definitions is not None:
@@ -602,10 +600,7 @@ class Analysis(
         self.call(obj, callback)
 
     def call_bound(self, obj, receivers, call):
-        group = self._groups.get(call)
-        if group is not None:
-            group.observe(self._call_bound_prefixed, obj, receivers, group.base)
-            return
+        assert call not in self._groups, call
         base, prefix = self._prefixes.get(call, (call, ()))
         receivers = (receivers + prefix)[:RECEIVERS_PER_CALL_MAX]
         if isinstance(obj, Function):
@@ -615,12 +610,6 @@ class Analysis(
             self._bound_group(base, obj, receivers).add(receivers)
         else:
             self.call(obj, self._prefixed_call(base, receivers))
-
-    def _call_prefixed(self, prefix, obj, base):
-        self.call(obj, self._prefixed_call(base, prefix))
-
-    def _call_bound_prefixed(self, prefix, obj, receivers, base):
-        self.call_bound(obj, receivers, self._prefixed_call(base, prefix))
 
     def _bound_group(self, base, callee, receivers):
         unknown = bool(self._unknown_class(receivers[0]))
@@ -1032,9 +1021,8 @@ class _BoundGroup:
             function(receivers, *args)
 
     def observe(self, function, *args):
+        assert not self.receivers, self.call
         self.observers.append((function, args))
-        for receivers in list(self.receivers):
-            function(receivers, *args)
 
 
 class _Returned:
@@ -1088,11 +1076,10 @@ class _Returned:
             self.analysis.add_object(self.dst, obj)
 
     def release(self, marker):
-        if not self.another:
-            self.another = True
-            for obj in self.held:
-                self.analysis.add_object(self.dst, obj)
-            self.held = []
+        self.another = True
+        for obj in self.held:
+            self.analysis.add_object(self.dst, obj)
+        self.held = []
 
     def by_new(self, obj):
         self.returned.add(obj)

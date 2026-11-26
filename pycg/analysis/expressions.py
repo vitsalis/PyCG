@@ -117,9 +117,7 @@ class Expressions:
 
     def _walk(self, node):
         for child in ast.iter_child_nodes(node):
-            if isinstance(child, ast.stmt):
-                self.statement(child)
-            elif isinstance(child, ast.expr):
+            if isinstance(child, ast.expr):
                 self.expression(child)
             else:
                 self._walk(child)
@@ -781,8 +779,7 @@ class Expressions:
         return tuple(bounds)
 
     def _subscript(self, base, index, dst, src, node, delete=False):
-        if dst is None and src is None and not delete:
-            return
+        assert dst is not None or src is not None or delete, "a subscript does nothing"
         site, caller = self._site(node), self._caller
         if isinstance(index, Bounds):
             bounds = index.bounds

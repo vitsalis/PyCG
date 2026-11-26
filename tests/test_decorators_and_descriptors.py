@@ -1380,3 +1380,46 @@ def test_a_hook_named_late_still_runs_for_earlier_accesses(tmp_path, name):
     assert "main.target" in callees(graph, caller_of_target)
     other_caller = "main.hook" if caller_of_target == "main.use" else "main.use"
     assert "main.target" not in callees(graph, other_caller)
+
+
+def test_two_decorators_that_use_wraps_each_return_their_wrapper(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import functools
+        def first(f):
+            @functools.wraps(f)
+            def inner_first(): return f()
+            return inner_first
+        def second(f):
+            @functools.wraps(f)
+            def inner_second(): return f()
+            return inner_second
+        @first
+        def a(): pass
+        @second
+        def b(): pass
+        a()
+        b()
+        """,
+    )
+
+    assert "main.first.inner_first" in callees(graph, "main")
+    assert "main.second.inner_second" in callees(graph, "main")
+
+
+def test_property_reached_directly_and_through_a_call_hook_at_one_site(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        def getter(self): return 1
+        class Maker:
+            __call__ = property
+        make = property if sys.argv else Maker()
+        class C:
+            p = make(getter)
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.property"]

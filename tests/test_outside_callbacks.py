@@ -614,3 +614,18 @@ frozendict(Table())
     assert callees(graph, "main.Log.report") == ["<builtin>.print", "main.Log.write"]
     assert {"main.Table.keys", "main.Table.__getitem__"} <= set(callees(graph, "main"))
     assert "main.Table.__iter__" not in callees(graph, "main")
+
+
+def test_one_site_that_binds_two_receivers_calls_its_callback_back(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class First(classmethod): pass
+        class Second(classmethod): pass
+        def f(cls): pass
+        for kind in (First, Second):
+            kind(f)
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.classmethod.__init__", "main.f"]

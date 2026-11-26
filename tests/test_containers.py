@@ -1482,3 +1482,149 @@ ordered.move_to_end("a")
         "collections.OrderedDict",
         "collections.OrderedDict.move_to_end",
     ]
+
+
+def test_displays_of_values_without_objects_keep_the_other_items(tmp_path):
+    assert run(
+        tmp_path,
+        """
+def value(): return 1
+None[f()]
+s = {*None, value()}
+l = [*None, value()]
+d = {**None, "k": value()}
+""",
+    ) == ["main.f", "main.value"]
+
+
+def test_comprehensions_of_values_without_objects(tmp_path):
+    assert run(
+        tmp_path,
+        """
+d = {None: f for _ in (1,)}
+l = [None for _ in (1,)]
+d[None]()
+""",
+    ) == ["main.f"]
+
+
+def test_one_list_held_by_two_classes(tmp_path):
+    assert run(
+        tmp_path,
+        """
+L = [f]
+class A:
+    x = L
+class B:
+    x = L
+A.x[0]()
+B.x[0]()
+""",
+    ) == ["main.f"]
+
+
+def test_copies_of_two_defaultdicts_at_one_site_keep_both_factories(tmp_path):
+    assert run(
+        tmp_path,
+        """
+from collections import defaultdict
+def copy(d):
+    return d.copy()
+copy(defaultdict(f))
+d = copy(defaultdict(g))
+d["k"]()
+""",
+    ) == ["collections.defaultdict", "main.copy", "main.f", "main.g"]
+
+
+def test_one_site_that_hashes_the_items_of_two_arguments(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+class Key:
+    def __hash__(self): return 1
+def add(s, items):
+    s.update(items)
+add(set(), [Key()])
+add(set(), (Key(),))
+""",
+    )
+
+    assert callees(graph, "main.add") == ["<builtin>.set.update", "main.Key.__hash__"]
+
+
+def test_two_iterators_of_one_list(tmp_path):
+    assert "main.f" in run(
+        tmp_path,
+        """
+L = [f]
+next(iter(L))()
+next(iter(L))()
+""",
+    )
+
+
+def test_a_slice_of_an_int_gives_nothing(tmp_path):
+    assert run(
+        tmp_path,
+        """
+n = 5
+n[1:2]()
+f()
+""",
+    ) == ["main.f"]
+
+
+def test_a_slice_of_an_outside_value_is_an_outside_value(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+import foo
+foo.bar[1:].baz()
+""",
+    )
+
+    assert callees(graph, "main") == ["foo.bar.baz"]
+
+
+def test_a_type_form_as_a_dict_key(tmp_path):
+    assert run(
+        tmp_path,
+        """
+class A: pass
+Alias = list[A]
+d = {Alias: f}
+d[Alias]()
+e = {}
+e[Alias] = g
+e[Alias]()
+""",
+    ) == ["main.f", "main.g"]
+
+
+def test_one_loop_over_two_callable_iterators(tmp_path):
+    assert run(
+        tmp_path,
+        """
+import sys
+def a(): return f
+def b(): return g
+for each in (iter(a, None) if sys.argv else iter(b, None)):
+    each()
+""",
+    ) == ["<builtin>.iter", "main.a", "main.b", "main.f", "main.g"]
+
+
+def test_a_store_into_a_slice_of_an_outside_value_reaches_no_call(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import somelib
+        def f(): pass
+        def use():
+            somelib.items[0:1] = [f]
+            somelib.items[0]()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["somelib.items"]

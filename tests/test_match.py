@@ -256,3 +256,81 @@ def test_a_guard_reads_the_captures_of_its_case(tmp_path):
     )
 
     assert callees(graph, "main.use") == ["main.f", "main.g"]
+
+
+def test_a_mapping_pattern_never_matches_a_literal_subject(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def use():
+            match 1:
+                case {"a": x}:
+                    f()
+                case _:
+                    g()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["main.g"]
+
+
+def test_a_mapping_pattern_with_only_a_rest_binds_the_items(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def use(value):
+            match value:
+                case {**rest}:
+                    rest["k"]()
+        use({"k": f})
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["main.f"]
+
+
+def test_patterns_on_a_subject_without_a_value_bind_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        class C:
+            __match_args__ = ("a",)
+        def use():
+            n = None
+            match n.attr:
+                case 1.5:
+                    f()
+                case {**rest}:
+                    rest.get("k")
+                case [a]:
+                    g()
+                case [*r]:
+                    h()
+                case C(a=y):
+                    y()
+                case C(z):
+                    z()
+        """,
+    )
+
+    assert callees(graph, "main.use") == [
+        "<builtin>.dict.get",
+        "main.f",
+        "main.g",
+        "main.h",
+    ]
+
+
+def test_a_mapping_pattern_with_a_key_without_a_value_reads_any_item(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def use(value):
+            match value:
+                case {None: v}:
+                    v()
+        use({None: f})
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["main.f"]

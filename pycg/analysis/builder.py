@@ -571,8 +571,6 @@ class ModuleBuilder(
                 return False
         else:
             return False
-        if self.scopes.resolve(self._scope, name) is not self._scope:
-            return False
         if self.scopes.tracked(self._scope, name):
             if self._flow.definition(name)[:2] != (function.parameters[name], False):
                 return False
@@ -643,7 +641,7 @@ class ModuleBuilder(
                     self.analysis.add_load(base, attr, current, self._caller, site)
                 value = self.expression(node.value)
                 result = self._operator(current, value, node)
-                if base is not None and result is not None:
+                if base is not None:
                     self.analysis.add_store(base, attr, result, self._caller, site)
             case ast.Subscript():
                 base, index = self._subscript_parts(target)
@@ -654,12 +652,7 @@ class ModuleBuilder(
                 value = self.expression(node.value)
                 if base is not None:
                     result = self._operator(current, value, node)
-                    if result is None:
-                        result = self.analysis.node()
                     self._subscript(base, index, None, result, target)
-            case _:
-                self.expression(target)
-                self.expression(node.value)
 
     def _stmt_Assert(self, node):
         self.condition(node.test)
@@ -1043,8 +1036,6 @@ class ModuleBuilder(
                     self._subscript(base, index, None, value, target)
             case ast.Tuple() | ast.List():
                 self._unpack(target, value)
-            case _:
-                self.expression(target)
 
     def _unpack(self, target, value):
         elements = target.elts

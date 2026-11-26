@@ -340,8 +340,7 @@ class AnnotationBuilder:
             operator = "|"
         else:
             return None
-        if self.annotation(value) is None:
-            return None
+        self.annotation(value)
         form = self.analysis.type_form(operator, (), self._site(value))
         gate = self.analysis.node()
         self.analysis.gate_type_form(form, gate)

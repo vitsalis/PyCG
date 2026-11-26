@@ -224,3 +224,23 @@ def test_handler_with_a_tuple_that_contains_itself_terminates(tmp_path):
     )
 
     assert "main.Error.report" in callees(graph, "main")
+
+
+def test_a_handler_tuple_nested_twice_catches_its_class_once(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class E(Exception):
+            def m(self): pass
+        inner = (E,)
+        outer = (inner,)
+        def run():
+            try:
+                pass
+            except (inner, outer) as error:
+                error.m()
+        run()
+        """,
+    )
+
+    assert callees(graph, "main.run") == ["main.E.m"]

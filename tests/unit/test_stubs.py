@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -188,3 +189,27 @@ def test_third_party_definitions(stubs):
 )
 def test_class_names(reduced, names):
     assert class_names(reduced) == names
+
+
+def test_the_definition_of_a_path(stubs):
+    assert stubs.definition("re").kind == "module"
+    assert stubs.definition("no_such_module.f") is None
+    assert stubs.definition("re.compile.cache") is None
+    assert stubs.definition("collections.abc.MutableMapping") is None
+
+
+def test_names_that_the_data_does_not_define(tmp_path):
+    names = {
+        "Meta": {"k": "c", "b": [], "m": {}, "meta": "*any"},
+        "Alias": {"k": "r", "to": [["m", "Missing"]]},
+        "Child": {"k": "c", "b": ["m.Missing"], "m": {}},
+        "Proto": {"k": "c", "b": ["m.Missing"], "m": {}, "proto": 1},
+    }
+    (tmp_path / "m.json").write_text(json.dumps({"modules": {"m": {"names": names}}}))
+    stubs = Stubs(tmp_path)
+
+    assert stubs.metaclass("m.Meta") == "builtins.type"
+    assert stubs.find("m.Alias") == []
+    assert stubs.mro("m.Child") == ["m.Child", "builtins.object"]
+    assert stubs.abstract("m.Child") is False
+    assert stubs.abstract_reach("m.Proto") == frozenset({"m.Proto"})

@@ -69,8 +69,8 @@ class ImportManager(object):
         self.input_file = os.path.abspath(fname)
 
     def get_filepath(self, modname):
-        if modname in self.import_graph:
-            return self.import_graph[modname]["filename"]
+        assert modname in self.import_graph, modname
+        return self.import_graph[modname]["filename"]
 
     def set_filepath(self, node_name, filename):
         if not filename or not isinstance(filename, str):

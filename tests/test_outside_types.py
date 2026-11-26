@@ -1315,3 +1315,380 @@ def test_a_class_method_returning_self_gives_the_class_it_was_loaded_through(
     )
 
     assert "datetime.datetime.timestamp" in callees(graph, "main")
+
+
+def test_open_with_a_mode_that_repeats_or_lacks_letters_gives_no_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def doubled():
+            open("p", "rr").close()
+        def unknown_letter():
+            open("p", "rq").close()
+        doubled()
+        unknown_letter()
+        """,
+    )
+
+    assert callees(graph, "main.doubled") == ["<builtin>.open"]
+    assert callees(graph, "main.unknown_letter") == ["<builtin>.open"]
+
+
+def test_a_name_that_one_stub_binds_to_a_value_and_another_to_a_function(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        from kafka.codec import lz4_decode
+        lz4_decode(b"")
+        """,
+    )
+
+    assert callees(graph, "main") == ["kafka.codec.lz4_decode"]
+
+
+def test_a_named_member_past_the_bound_of_outside_steps_is_unknown(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import argparse
+        argparse.HelpFormatter._Section.format_help(None)
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_a_static_method_of_a_builtin_value_is_not_bound(tmp_path):
+    graph = main_graph(tmp_path, 'b"x".maketrans(b"a", b"b")\n')
+
+    assert callees(graph, "main") == ["<builtin>.bytes.maketrans"]
+
+
+def test_a_class_method_of_a_constant_binds_its_class(tmp_path):
+    graph = main_graph(tmp_path, '(5).from_bytes(b"\\x00", "big")\n')
+
+    assert callees(graph, "main") == ["<builtin>.int.from_bytes"]
+
+
+def test_a_class_method_of_a_wrapper_or_a_string_pattern_binds_its_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def f():
+            pass
+        def wrapper():
+            staticmethod(f).__subclasshook__(int)
+        def pattern(x):
+            f"a{x}".__subclasshook__(int)
+        """,
+    )
+
+    assert callees(graph, "main.wrapper") == [
+        "<builtin>.staticmethod",
+        "<builtin>.staticmethod.__subclasshook__",
+    ]
+    assert callees(graph, "main.pattern") == ["<builtin>.str.__subclasshook__"]
+
+
+def test_a_class_nested_in_an_outside_class_is_an_attribute_of_its_instance(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import imaplib
+        m = imaplib.IMAP4()
+        m.error("x")
+        """,
+    )
+
+    assert callees(graph, "main") == ["imaplib.IMAP4", "imaplib.IMAP4.error"]
+
+
+def test_method_type_of_one_argument_makes_no_method(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import types
+        def f(self):
+            pass
+        types.MethodType(f)()
+        """,
+    )
+
+    assert callees(graph, "main") == ["types.MethodType"]
+
+
+def test_object_new_of_a_metaclass_gives_the_classes_it_made(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class M(type):
+            def ping(cls): pass
+        class K(metaclass=M):
+            pass
+        object.__new__(M).ping()
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.object.__new__", "main.M.ping"]
+
+
+def test_object_new_without_a_class_or_of_a_value_makes_no_instance(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def bare():
+            object.__new__().ping()
+        def value():
+            object.__new__(5).ping()
+        """,
+    )
+
+    assert callees(graph, "main.bare") == ["<builtin>.object.__new__"]
+    assert callees(graph, "main.value") == ["<builtin>.object.__new__"]
+
+
+def test_an_operator_that_a_stub_class_binds_to_a_value_gives_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import peewee
+        f = peewee.Field()
+        (f * 2).ping()
+        """,
+    )
+
+    assert callees(graph, "main") == ["peewee.Field"]
+
+
+def test_a_type_that_the_stubs_do_not_define_is_unknown(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        from django_filters.constants import EMPTY_VALUES
+        EMPTY_VALUES.count(1)
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_a_class_method_returning_self_gives_an_instance_of_the_subclass(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import datetime
+        class D(datetime.date):
+            def ping(self): pass
+        D.today().ping()
+        """,
+    )
+
+    assert callees(graph, "main") == ["datetime.date.today", "main.D.ping"]
+
+
+def test_new_of_a_constant_returns_its_type(tmp_path):
+    graph = main_graph(tmp_path, "(5).__new__(int).bit_length()\n")
+
+    assert callees(graph, "main") == [
+        "<builtin>.int.__new__",
+        "<builtin>.int.bit_length",
+    ]
+
+
+def test_a_returned_type_of_a_union_gives_each_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import psutil._pslinux
+        psutil._pslinux._scputimes_ntuple()()
+        """,
+    )
+
+    assert callees(graph, "main") == [
+        "psutil._ntuples.scputimes",
+        "psutil._pslinux._scputimes_ntuple",
+    ]
+
+
+def test_a_returned_type_of_an_unbound_variable_gives_its_bound(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import tensorflow as tf
+        tf.TypeSpec.experimental_type_proto()()
+        """,
+    )
+
+    assert callees(graph, "main") == [
+        "google.protobuf.message.Message",
+        "tensorflow.TypeSpec.experimental_type_proto",
+    ]
+
+
+def test_a_returned_type_of_object_gives_no_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import gunicorn.util
+        gunicorn.util.load_entry_point("a", "b", "c")()
+        """,
+    )
+
+    assert callees(graph, "main") == ["gunicorn.util.load_entry_point"]
+
+
+def test_a_cast_to_an_outside_class_gives_its_instance(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import ctypes
+        ctypes.cast(None, ctypes.c_int).value.bit_length()
+        """,
+    )
+
+    assert callees(graph, "main") == ["ctypes.cast"]
+
+
+def test_a_metaclass_property_of_an_outside_base_is_not_a_method(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import enum
+        class E(enum.Enum):
+            X = 1
+        E.__members__.items()
+        """,
+    )
+
+    assert callees(graph, "main") == ["types.MappingProxyType.items"]
+
+
+def test_a_property_of_an_outside_base_read_on_the_class_gives_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class I(int):
+            pass
+        I.real.bit_length()
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_an_outside_class_or_closure_as_init_subclass_is_called_without_result(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import contextlib
+        import threading
+        def g():
+            yield
+        class A:
+            __init_subclass__ = threading.Thread
+        class B(A):
+            pass
+        class C:
+            __init_subclass__ = contextlib.contextmanager(g)
+        class D(C):
+            pass
+        class E:
+            __init_subclass__ = A.__subclasses__
+        class F(E):
+            pass
+        """,
+    )
+
+    assert callees(graph, "main") == ["contextlib.contextmanager"]
+
+
+def test_a_call_attribute_of_an_outside_class_that_is_a_value_calls_nothing(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import webob
+        r = webob.Request.blank("/")
+        r({}, None)
+        """,
+    )
+
+    assert callees(graph, "main") == ["webob.Request.blank"]
+
+
+def test_open_with_modes_that_are_not_strings_gives_every_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def f(m):
+            return open("x", m, 0).close()
+        f(1)
+        f(b"r")
+        """,
+    )
+
+    assert callees(graph, "main.f") == [
+        "<builtin>.open",
+        "io.BufferedRandom.close",
+        "io.BufferedReader.close",
+        "io.BufferedWriter.close",
+        "io.FileIO.close",
+        "io.TextIOWrapper.close",
+    ]
+
+
+def test_two_openers_at_one_call_give_the_class_of_the_mode_once(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import os
+        def pick(c):
+            return open if c else os.fdopen
+        pick(1)("p", "rb", 0).close()
+        """,
+    )
+
+    assert callees(graph, "main") == [
+        "<builtin>.open",
+        "io.FileIO.close",
+        "main.pick",
+        "os.fdopen",
+    ]
+
+
+def test_a_variable_that_no_arm_of_a_union_parameter_binds(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import first
+        def k(x):
+            return x
+        first.first([k], key=k)()
+        """,
+    )
+
+    assert callees(graph, "main") == ["first.first"]
+
+
+def test_a_returned_type_of_a_variable_that_a_parameter_binds_to_a_value(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import enum
+        class E(enum.Enum):
+            X = 1
+            def ping(self): pass
+        enum.pickle_by_enum_name(E.X, 2)[1][0].X.ping()
+        """,
+    )
+
+    assert callees(graph, "main") == ["enum.pickle_by_enum_name"]

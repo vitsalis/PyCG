@@ -1609,3 +1609,116 @@ def test_the_stub_alias_case_takes_its_edges_from_the_aliases(tmp_path):
     assert callees(graph, "mod.work") == ["mod.Job.run"]
     assert callees(without, "mod.drain") == []
     assert callees(without, "mod.work") == []
+
+
+def test_a_stub_reads_the_definitions_in_its_except_clauses(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def report(shape):
+                shape.area()
+            """,
+            "main.pyi": """
+            try:
+                from shapes import Square
+            except ImportError:
+                from shapes import Shape
+                def report(shape: Shape) -> None: ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.report") == ALL_AREAS
+
+
+def test_a_module_variable_typed_and_assigned_in_the_stub(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            current = None
+            def run():
+                current.area()
+            """,
+            "main.pyi": """
+            import shapes
+            current: shapes.Shape = ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.run") == ALL_AREAS
+
+
+def test_limit_a_name_that_a_stub_star_import_binds_names_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def report(shape):
+                shape.area()
+            """,
+            "main.pyi": """
+            from shapes import *
+            def report(shape: Shape) -> None: ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.report") == []
+
+
+def test_a_stub_attribute_chain_that_starts_at_a_call_names_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def report(shape):
+                shape.area()
+            """,
+            "main.pyi": """
+            def report(shape: make().Shape) -> None: ...
+            """,
+        },
+    )
+
+    assert callees(graph, "main.report") == []
+
+
+def test_a_class_inside_a_function_of_a_module_with_a_stub(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        {
+            "main.py": """
+            def make():
+                class Local:
+                    def run(self): pass
+                Local().run()
+            """,
+            "main.pyi": "def make() -> None: ...\n",
+        },
+    )
+
+    assert callees(graph, "main.make") == ["main.make.Local.run"]
+
+
+def test_a_stub_base_that_is_a_call_or_object_adds_nothing(tmp_path):
+    source = STUB_BASES_SOURCE + "class Called:\n    def ping(self): pass\n"
+    stub = """
+class Plain(object): ...
+class Called(make()): ...
+"""
+    with_stub = stub_base_graph(tmp_path / "with", source, stub)
+    without = stub_base_graph(tmp_path / "without", source, None)
+
+    assert with_stub == without
+
+
+def test_an_own_stub_that_cannot_be_read_is_ignored(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {"main.py": "def f(): pass\nf()\n", "main.pyi": b"\xff\xfe\x00bad"},
+    )
+
+    assert callees(graph, "main") == ["main.f"]

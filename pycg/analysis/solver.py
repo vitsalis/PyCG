@@ -35,9 +35,6 @@ class Node:
         self.fired = EMPTY
         self.constraint_groups = None
 
-    def __repr__(self):
-        return f"<Node {self.label or id(self)}>"
-
 
 class Witness(Node):
     __slots__ = ("watch",)
@@ -425,8 +422,8 @@ class Solver:
         node.successors = None
         for dst, _ in successors:
             target = _find_representative(dst)
-            if target is not node:
-                self._receive(target, self._saturated_set)
+            assert target is not node, "a node is its own successor"
+            self._receive(target, self._saturated_set)
 
     def _propagate(self, node, delta):
         successors = node.successors
@@ -437,9 +434,7 @@ class Solver:
                 else _find_representative(successors)
             )
             if target is not successors:
-                if target is node:
-                    node.successors = None
-                    return
+                assert target is not node, "a node is its own successor"
                 node.successors = target
             if target.done is self._saturated_set:
                 self._absorb(delta)
@@ -453,7 +448,8 @@ class Solver:
             target = dst if dst.representative is None else _find_representative(dst)
             if target is not dst:
                 searched = successors.pop(dst)
-                if target is node or target in successors:
+                assert target is not node, "a node is its own successor"
+                if target in successors:
                     continue
                 successors[target] = searched
             if target.done is self._saturated_set:
@@ -489,8 +485,8 @@ class Solver:
         for constraints, fired in constraint_groups:
             if constraints and fired is not done:
                 new = self._difference(done, fired)
-                if new:
-                    self._apply(list(constraints), new)
+                assert new, "a constraint fired on a set equal to the one it saw"
+                self._apply(list(constraints), new)
 
     def _apply(self, constraints, objects):
         self._applied += len(constraints) * len(objects)
@@ -569,8 +565,6 @@ class Solver:
     def _union(self, a, b):
         if not a or a is b:
             return b
-        if not b:
-            return a
         key = (id(a), id(b))
         entry = self._union_by_set_ids.get(key)
         if entry is None:
@@ -697,8 +691,8 @@ class Solver:
         for successors, extra in catch_up:
             for dst in successors:
                 target = _find_representative(dst)
-                if target is not representative:
-                    self._receive(target, extra)
+                assert target is not representative, "a node is its own successor"
+                self._receive(target, extra)
 
 
 def _received_sets(inbox):
@@ -801,9 +795,6 @@ def _successors_with_searched(node):
 class Constraint:
     __slots__ = ()
     kinds = None
-
-    def apply(self, obj):
-        raise NotImplementedError
 
     def apply_each(self, objects):
         for obj in objects:

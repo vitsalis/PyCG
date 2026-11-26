@@ -1657,3 +1657,281 @@ def test_a_module_name_that_a_path_may_leave_unbound_also_reads_the_builtin(
         "<builtin>.len",
         "main.<lambda1>",
     ]
+
+
+def test_a_module_name_bound_through_a_global_declaration_also_reads_the_builtin(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        def myopen(*args): pass
+        def setup():
+            global open
+            open = myopen
+        def use():
+            open("x")
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.open", "main.myopen"]
+
+
+def test_every_function_that_reads_a_module_builtin_name_reads_its_binding(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        def len(value): pass
+        def first():
+            len([])
+        def second():
+            len([])
+        """,
+    )
+
+    assert callees(graph, "main.first") == ["main.len"]
+    assert callees(graph, "main.second") == ["main.len"]
+
+
+def test_a_class_name_that_a_path_may_leave_unbound_reads_the_module_and_builtin(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        if sys.argv:
+            def len(value): pass
+        class C:
+            if sys.argv:
+                len = print
+            len([])
+        """,
+    )
+
+    assert callees(graph, "main") == [
+        "<builtin>.len",
+        "<builtin>.print",
+        "main.len",
+    ]
+
+
+def test_each_module_read_of_a_name_that_may_be_unbound_reads_the_builtin(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        if sys.argv:
+            def len(value): pass
+        len([])
+        len(())
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.len", "main.len"]
+
+
+def test_deleting_a_global_in_a_function_keeps_its_module_binding(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        handler = f
+        def clear():
+            global handler
+            del handler
+        def use():
+            handler()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["main.f"]
+
+
+def test_a_decorator_without_a_value_leaves_its_name_without_one(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        @None
+        def decorated():
+            g()
+        decorated()
+        """,
+    )
+
+    assert callees(graph, "main") == []
+    assert callees(graph, "main.decorated") == ["main.g"]
+
+
+def test_an_annotated_assignment_whose_call_cannot_bind_ends_the_path(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def wrong():
+            x: int = f(1)
+            g()
+        def right():
+            x: int = f()
+            g()
+        """,
+    )
+
+    assert callees(graph, "main.wrong") == []
+    assert callees(graph, "main.right") == ["main.f", "main.g"]
+
+
+def test_deleting_a_tuple_or_list_of_names_unbinds_each(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        a = f
+        b = g
+        del (a, b)
+        a()
+        b = g
+        del [b]
+        b()
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_an_elif_after_a_test_that_is_always_true_does_not_run(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        import sys
+        if True:
+            f()
+        elif sys.argv:
+            g()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.f"]
+
+
+def test_an_except_clause_whose_type_has_no_value_still_runs(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        try:
+            f()
+        except None as error:
+            g()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.f", "main.g"]
+
+
+def test_unpacking_a_value_without_objects_leaves_each_target_without_one(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        first = f
+        first, second = None
+        first()
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_a_false_constant_of_another_type_skips_the_body_of_an_if(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        if 0j:
+            f()
+        else:
+            g()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.g"]
+
+
+def test_type_checking_read_from_another_object_is_an_ordinary_attribute(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        class Config:
+            TYPE_CHECKING = True
+        class Holder:
+            config = Config
+        if Holder.config.TYPE_CHECKING:
+            f()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.f"]
+
+
+def test_a_literal_not_in_a_display_of_literals_decides_the_if(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        mode = "a"
+        if mode not in ("a", "b"):
+            f()
+        else:
+            g()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.g"]
+
+
+def test_is_between_singletons_decides_the_if(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        value = None
+        if value is None:
+            f()
+        else:
+            g()
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.f"]
+
+
+def test_a_name_rebound_after_its_class_test_keeps_its_new_value(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        class A:
+            def m(self): pass
+        class B:
+            def m(self): pass
+        def run(x):
+            if isinstance(x, A):
+                x = B()
+            else:
+                return
+            x.m()
+        run(A())
+        """,
+    )
+
+    assert callees(graph, "main.run") == ["<builtin>.isinstance", "main.B.m"]
+
+
+def test_a_break_outside_a_loop_ends_its_path(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+        def run():
+            f()
+            break
+            g()
+        """,
+    )
+
+    assert callees(graph, "main.run") == ["main.f"]

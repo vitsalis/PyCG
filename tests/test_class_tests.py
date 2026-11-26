@@ -1,6 +1,6 @@
 import textwrap
 
-from programs import callees, main_graph
+from programs import call_graph, callees, main_graph
 
 METHODS = ("inside", "after", "other", "more")
 CLASSES = "".join(
@@ -1405,4 +1405,221 @@ def test_callable_keeps_the_values_that_may_be_called(tmp_path):
         "main.Action.__call__",
         "main.Made.__init__",
         "main.task",
+    ]
+
+
+def test_tests_on_an_instance_of_a_class_with_an_exhaustive_order(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        class X1: pass
+        class Y1: pass
+        class X2: pass
+        class Y2: pass
+        class X3: pass
+        class Y3: pass
+        class X4: pass
+        class Y4: pass
+        class K:
+            def m(self): pass
+        class E(
+            K,
+            X1 if sys.argv else Y1,
+            X2 if sys.argv else Y2,
+            X3 if sys.argv else Y3,
+            X4 if sys.argv else Y4,
+        ):
+            pass
+        def not_callable(x=E()):
+            if not callable(x):
+                x.m()
+        def not_itself(x=E()):
+            if not isinstance(x, E):
+                x.m()
+        not_callable()
+        not_itself()
+        """,
+    )
+
+    assert "main.K.m" in callees(graph, "main.not_callable")
+    assert "main.K.m" not in callees(graph, "main.not_itself")
+
+
+def test_class_tests_of_names_without_a_value(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            def m(self): pass
+        def f(): pass
+        def g(): pass
+        def use(x):
+            y = None
+            if callable(y):
+                f()
+            if isinstance(y, A):
+                g()
+            cls = None
+            if isinstance(x, cls):
+                x.m()
+        use(A())
+        """,
+    )
+
+    assert callees(graph, "main.use") == [
+        "<builtin>.callable",
+        "<builtin>.isinstance",
+        "main.A.m",
+        "main.f",
+        "main.g",
+    ]
+
+
+def test_callable_of_a_module_holds_in_no_branch(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": """
+import mod
+def use():
+    m = mod
+    if callable(m):
+        m.f()
+    else:
+        m.g()
+""",
+            "mod.py": "def f(): pass\ndef g(): pass\n",
+        },
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.callable", "mod.g"]
+
+
+def test_callable_of_an_annotated_value_may_hold(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def f(): pass
+        def use(x: int):
+            if callable(x):
+                f()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.callable", "main.f"]
+
+
+def test_class_tests_against_tuples_of_unknown_length(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            def m(self): pass
+        class B:
+            def m(self): pass
+        def whole(x, classes):
+            ts = tuple(classes)
+            if isinstance(x, ts):
+                x.m()
+        def nested(x, classes):
+            if isinstance(x, (A, tuple(classes))):
+                x.m()
+        def twice(x):
+            if isinstance(x, ((A, A),)):
+                x.m()
+        for test in (whole, nested):
+            test(A(), [A])
+            test(B(), [A])
+        twice(A())
+        twice(B())
+        """,
+    )
+
+    assert callees(graph, "main.whole") == [
+        "<builtin>.isinstance",
+        "<builtin>.tuple",
+        "main.A.m",
+    ]
+    assert "main.A.m" in callees(graph, "main.nested")
+    assert callees(graph, "main.twice") == ["<builtin>.isinstance", "main.A.m"]
+
+
+def test_a_class_test_that_passes_everything_ignores_later_values(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import mystery
+        import sys
+        class A:
+            def m(self): pass
+        class B:
+            def m(self): pass
+        def opened(x, cls):
+            if isinstance(x, (cls,)):
+                x.m()
+        def negated(x, cls):
+            if not isinstance(x, (cls, int)):
+                return
+            x.m()
+        opened(A(), mystery.K)
+        opened(B(), 5)
+        negated(1, str)
+        negated(A(), sys.modules["m"].K)
+        """,
+    )
+
+    assert callees(graph, "main.opened") == [
+        "<builtin>.isinstance",
+        "main.A.m",
+        "main.B.m",
+    ]
+    assert callees(graph, "main.negated") == ["<builtin>.isinstance", "main.A.m"]
+
+
+def test_a_class_that_arrives_after_the_tested_values_decides_them(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            def m(self): pass
+        def f(): pass
+        def check(cls):
+            x = A()
+            if isinstance(x, cls):
+                x.m()
+            y = 1
+            if isinstance(y, cls):
+                f()
+        check(A)
+        check(int)
+        """,
+    )
+
+    assert callees(graph, "main.check") == [
+        "<builtin>.isinstance",
+        "main.A.m",
+        "main.f",
+    ]
+
+
+def test_a_class_test_of_a_string_pattern_is_exact(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def use(x):
+            p = "a%sb" % x
+            if not isinstance(p, str):
+                p.upper()
+        def other(x):
+            p = "a%sb" % x
+            if isinstance(p, str):
+                p.lower()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.isinstance"]
+    assert callees(graph, "main.other") == [
+        "<builtin>.isinstance",
+        "<builtin>.str.lower",
     ]

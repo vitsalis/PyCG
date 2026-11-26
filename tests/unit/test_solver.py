@@ -1366,3 +1366,58 @@ def test_a_constraint_that_holds_an_unknown_class_gives_the_saturated_value(held
     analysis.solve()
 
     assert names(dst, analysis) == ["<saturated>"]
+
+
+def test_a_follower_of_a_saturated_node_holds_the_saturated_value():
+    solver = Solver(SATURATED, cap=1)
+    source = Node("source")
+    for name in ("x", "y"):
+        solver.add_object(source, Marker(name))
+    solver.solve()
+    follower = solver.follower(source, solver.phase - 1)
+    solver.add_object(source, Marker("z"))
+    solver.solve()
+
+    assert names(follower, solver) == ["<saturated>"]
+
+
+def test_a_constraint_on_opaque_and_plain_objects_sees_the_plain_ones():
+    solver = Solver(SATURATED)
+    hidden, shown = Marker("hidden"), Marker("shown")
+    node, result = Node("node"), Node("result")
+    for obj in (hidden, shown):
+        solver.add_object(node, obj)
+    solver.solve()
+    solver.opaque = lambda obj: obj is hidden
+    recorder = Recorder(result)
+    solver.attach(node, recorder)
+
+    assert recorder.applied == [shown]
+    assert names(result, solver) == ["<saturated>"]
+
+
+def test_a_cycle_that_closes_between_rounds_merges_a_merged_node_once_more():
+    solver = Solver(SATURATED)
+    a, b, c = Node("a"), Node("b"), Node("c")
+    x = Marker("x")
+    recorder = Recorder()
+    solver.attach(a, recorder)
+    solver.add_object(a, x)
+    solver.add_edge(a, b)
+    solver.add_edge(b, a)
+    solver.add_edge(b, c)
+    closed = []
+
+    def close():
+        if closed:
+            return False
+        closed.append(True)
+        solver.add_edge(c, a)
+        return True
+
+    solver.between_rounds = close
+    solver.solve()
+
+    assert solver.work["merged"] == 2
+    assert recorder.applied == [x]
+    assert names(c, solver) == ["x"]

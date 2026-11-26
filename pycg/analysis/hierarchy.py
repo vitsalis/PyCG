@@ -207,9 +207,8 @@ class Hierarchy:
                         return True
                     if name in base.bound:
                         break
-                elif base is not None:
-                    if self.outside_member(base, name) != _OUTSIDE_GIVES_INHERITED:
-                        return True
+                elif self.outside_member(base, name) != _OUTSIDE_GIVES_INHERITED:
+                    return True
             else:
                 return True
         return False
@@ -224,7 +223,7 @@ class Hierarchy:
                         break
                 elif is_property(base):
                     break
-                elif base is not None:
+                else:
                     if self.stub_definitions(base) is None:
                         return False
                     if self.outside_overrides(
@@ -277,7 +276,7 @@ class Hierarchy:
             if isinstance(base, Class):
                 if name in base.defines:
                     return False
-            elif base is not None:
+            else:
                 found = self.outside_member(base, name)
                 if found != _OUTSIDE_GIVES_INHERITED:
                     return found == _OUTSIDE_GIVES_DEFAULT
@@ -881,7 +880,7 @@ def _defines(classes, names):
         if isinstance(base, Class):
             if any(name in base.defines for name in (*names, *marked)):
                 return True
-        elif isinstance(base, External):
+        else:
             final = FINAL_BUILTIN_METHODS.intersection(names)
             if any(_builtin_defines(base.name, name) for name in final):
                 return True
@@ -954,8 +953,7 @@ def _nominal_stub_class(path):
             return False
     for owner in _STUBS.mro(path):
         definition = _STUBS.definition(owner)
-        if definition is None or definition.kind != "class":
-            return False
+        assert definition is not None and definition.kind == "class", owner
         entry = definition.entry
         if entry.get("proto") or entry.get("tco"):
             return False
@@ -963,7 +961,7 @@ def _nominal_stub_class(path):
             return True
         if owner.partition(".")[0] in _MODULES_OF_ABCS or _STUBS.abstract(owner):
             return False
-    return True
+    raise AssertionError(f"{path} has no builtin class in its stub order")
 
 
 def _mros_of(base):

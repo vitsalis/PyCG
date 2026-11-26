@@ -496,3 +496,53 @@ def test_scopes_that_use_their_namespace_track_no_name():
     assert plain.tracked(plain.module, "x")
     patched = scopes_of("import sys\nx = 1\nsys.modules[__name__].x = 2\n")
     assert not patched.tracked(patched.module, "x")
+
+
+def test_a_global_declaration_in_the_module_shares_no_name():
+    scopes = scopes_of(
+        """
+        global x
+        x = 1
+        def f():
+            return x
+        """
+    )
+
+    assert binder(scopes, "mod.f", "x") == "mod"
+    assert "x" in scopes.module.bound
+    assert "x" not in scopes.module.shared
+
+
+def test_a_global_name_annotated_without_a_value_binds_in_the_module():
+    scopes = scopes_of(
+        """
+        def f():
+            global x
+            x: int
+        """
+    )
+
+    assert binder(scopes, "mod.f", "x") == "mod"
+    assert "x" in scopes.module.bound
+    assert "x" not in scopes.module.defined
+    assert "x" not in scope_named(scopes, "mod.f").bound
+
+
+def test_a_nonlocal_name_without_an_enclosing_function_binding_rebinds_nothing():
+    scopes = scopes_of(
+        """
+        x = 1
+        def f():
+            nonlocal x
+            x = 2
+        def outer():
+            def inner():
+                nonlocal y
+                y = 2
+        """
+    )
+
+    assert "x" not in scope_named(scopes, "mod.f").bound
+    assert "y" not in scope_named(scopes, "mod.outer.inner").bound
+    assert "x" not in scopes.module.shared
+    assert "y" not in scope_named(scopes, "mod.outer").rebound
