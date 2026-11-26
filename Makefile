@@ -49,6 +49,10 @@ need_name = $(if $(NAME),,$(error $@ needs NAME=<package of evaluation/scale/pro
 measure_scale = $(SCALE_SANDBOX) $(SCALE_MEASURE) run --checkout $(1) --name $(notdir $(2)) \
 	--package $(NAME) --out $(EVAL_OUT) --memory-mib $(SCALE_MEMORY_MIB)
 scale_record = $(1)/scale/$(NAME).record.json
+PARITY_SETS ?= micro macro
+PARITY_DUMP = $(CURDIR)/tools/parity/dump.py
+PARITY_KEYED = pycg tools/parity evaluation/micro-benchmark/snippets evaluation/common/run.py
+parity_key = python3 -I tools/parity/dump.py key --checkout $(CURDIR)
 
 define gate
 $(base_metrics)
@@ -87,7 +91,7 @@ endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
-	eval-same-graphs eval-labels eval-changes eval-scale
+	eval-same-graphs eval-labels eval-changes eval-scale parity-oracle
 
 setup:
 	uv sync --locked
@@ -192,3 +196,13 @@ eval-scale: eval-inputs
 eval-changes:
 	$(need_base)
 	python3 -I tools/check.py --base $(BASE) --detect-eval $(OUTPUTS) >> $(SUMMARY)
+
+parity-oracle: eval-inputs
+	@test -z "$$(git status --porcelain -- $(PARITY_KEYED))" \
+		|| (echo "parity-oracle: commit $(PARITY_KEYED) first" && false)
+	@out=$(EVAL_OUT)/parity-oracle-$$($(parity_key)) && mkdir -p $$out && \
+	for set in $(PARITY_SETS); do \
+		if [ -f $$out/done-$$set ]; then echo "parity-oracle: $$set is cached in $$out"; \
+		else $(SANDBOX) $(PARITY_DUMP) oracle --checkout $(CURDIR) --out $$out \
+			--set $$set --jobs $(EVAL_JOBS) && touch $$out/done-$$set || exit 1; fi; \
+	done && echo "parity-oracle: $$out"
