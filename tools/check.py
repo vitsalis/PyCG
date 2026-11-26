@@ -23,7 +23,7 @@ EVAL_PATHS, and when the diff cannot be read.
 
 ROOT = Path(__file__).resolve().parents[1]
 MICRO_TESTS = ("tests/test_micro_benchmark.py", "tests/test_benchmark_validator.py")
-PYTEST = (sys.executable, "-m", "pytest", "-q")
+PYTEST = (sys.executable, "tools/test.py", "-q")
 CHECKS = {
     "lint": ("make", "lint"),
     "engine": (*PYTEST, "tests", "-m", "not slow"),
@@ -32,11 +32,19 @@ CHECKS = {
 }
 FULL = {"lint": ("make", "lint"), "test": ("make", "test")}
 TRIGGERS = {
-    "engine": ("pycg/", "tools/", "tests/", "pyproject.toml", "uv.lock"),
-    "micro": ("evaluation/micro-benchmark/", *MICRO_TESTS),
+    "engine": (
+        "pycg/",
+        "tools/",
+        "tests/",
+        "conftest.py",
+        "pyproject.toml",
+        "uv.lock",
+    ),
+    "micro": ("evaluation/micro-benchmark/", "conftest.py", *MICRO_TESTS),
     "evaluation": (
         "evaluation/",
         "AGENTS.md",
+        "conftest.py",
         "pyproject.toml",
         "uv.lock",
     ),

@@ -93,7 +93,7 @@ setup:
 	uv sync --locked
 
 test:
-	$(RUN) pytest
+	$(RUN) python tools/test.py
 
 lint:
 	$(RUN) ruff check $(LINTED)
