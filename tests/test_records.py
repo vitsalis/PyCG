@@ -338,7 +338,9 @@ def test_the_receivers_of_an_accessor_at_a_site_share_one_record(tmp_path):
     records = list(analysis._accessor_receivers.values())
     assert sorted(len(record.receivers) for record in records) == [3, 3]
     assert {record.width for record in records} == {1, 2}
-    assert all(len(hooks.receivers) == 3 for hooks in analysis._accessor_hooks.values())
+    hooks = list(analysis._accessor_hooks.values())
+    assert len(hooks) == 1
+    assert sorted(len(receivers) for receivers in hooks[0].receivers.values()) == [3, 3]
     graph = generator.output()
     assert {"main.Shape.area", "main.Getter.__get__"} <= set(graph["main.measure"])
 
