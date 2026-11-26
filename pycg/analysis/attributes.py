@@ -72,14 +72,22 @@ class Attributes:
             accessors = self.accessors_of(None, accessor, access, kinds, len(prefix))
             accessors.add(receiver)
             return
-        key = (receiver.cls, hook)
+        entry = (accessor, access, kinds, len(prefix))
+        hooks = self._hooks_of(receiver, hook, (receiver.cls, hook))
+        if entry not in hooks.receivers and hooks.lookups_saturated():
+            hooks = self._hooks_of(receiver, hook, (receiver.cls, hook, entry))
+        hooks.add(entry, receiver)
+
+    def _hooks_of(self, receiver, hook, key):
         hooks = self._accessor_hooks.get(key)
         if hooks is None:
-            hooks = _AccessorHooks(self)
+            found = self.python_method(receiver.cls, hook)
+            looked_up = self.lookup(receiver.cls, hook, receiver)
+            hooks = _AccessorHooks(self, (found, looked_up))
             self._accessor_hooks[key] = hooks
-            self.solver.attach(self.python_method(receiver.cls, hook), hooks)
-            self.solver.attach(self.lookup(receiver.cls, hook, receiver), hooks)
-        hooks.add((accessor, access, kinds, len(prefix)), receiver)
+            self.solver.attach(found, hooks)
+            self.solver.attach(looked_up, hooks)
+        return hooks
 
     def accessors_of(self, caller, accessor, access, kinds, width):
         call = access.accessor_call(caller)
@@ -298,10 +306,18 @@ def _prefix(receiver, width):
 
 
 class _AccessorHooks(Constraint):
-    __slots__ = ("analysis", "receivers", "callers", "results_of", "saturated")
+    __slots__ = (
+        "analysis",
+        "lookups",
+        "receivers",
+        "callers",
+        "results_of",
+        "saturated",
+    )
 
-    def __init__(self, analysis):
+    def __init__(self, analysis, lookups):
         self.analysis = analysis
+        self.lookups = lookups
         self.receivers = {}
         self.callers = {}
         self.results_of = {}
@@ -313,6 +329,9 @@ class _AccessorHooks(Constraint):
     def saturate(self, solver):
         self.saturated = True
         super().saturate(solver)
+
+    def lookups_saturated(self):
+        return any(map(self.analysis.solver.is_saturated, self.lookups))
 
     def apply(self, hook):
         function = hook.function if isinstance(hook, BoundMethod) else hook
@@ -330,7 +349,7 @@ class _AccessorHooks(Constraint):
         if receivers is None:
             receivers = self.receivers[entry] = []
             result = entry[1]._result()
-            if result not in self.results_of:
+            if result is not None and result not in self.results_of:
                 self.results_of[result] = None
                 if self.saturated:
                     self.analysis.solver.add_object(
