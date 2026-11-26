@@ -1,4 +1,5 @@
 from .builtin_models import (
+    CACHED_FUNCTIONS,
     CALLS_BACK,
     CLOSURES,
     CONCRETE_CLASSES,
@@ -362,6 +363,11 @@ class Outside:
             return
         if not (receivers and self._unknown_class(receivers[0])):
             self.add_external_call_edge(external.name, call, "stub")
+            for definition in definitions:
+                wrapper = CACHED_FUNCTIONS.get(definition.path)
+                if wrapper is not None:
+                    name = f"{self.typed(wrapper).name}.__call__"
+                    self.add_external_call_edge(name, call, "stub")
         receiver = external if external.inexact else None
         if receivers and isinstance(receivers[0], Class):
             if any(d.path == SUBCLASSES for d in definitions):
