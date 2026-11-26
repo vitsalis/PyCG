@@ -881,7 +881,7 @@ def _defines(classes, names):
             if any(name in base.defines for name in (*names, *marked)):
                 return True
         else:
-            final = FINAL_BUILTIN_METHODS.intersection(names)
+            final = [name for name in names if name in FINAL_BUILTIN_METHODS]
             if any(_builtin_defines(base.name, name) for name in final):
                 return True
             if any(_outside_defines(base.name, name) for name in marked):

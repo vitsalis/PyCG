@@ -6,9 +6,7 @@ from .flow import FALSE, LITERAL_TYPES, TRUE, UNKNOWN, literals_of, truth_of, va
 from .patterns import pattern_affixes
 
 TYPING_MODULES = ("typing", "typing_extensions")
-TYPE_CHECKING_IMPORTS = frozenset(
-    f"{module}.TYPE_CHECKING" for module in TYPING_MODULES
-)
+TYPE_CHECKING_IMPORTS = tuple(f"{module}.TYPE_CHECKING" for module in TYPING_MODULES)
 
 _OPERATOR_BY_LITERAL_COMPARISON = {
     ast.Eq: operators.eq,
