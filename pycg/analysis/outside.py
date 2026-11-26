@@ -15,6 +15,7 @@ from .builtin_models import (
     OPENERS,
     REFLECTION_CALLS,
     RETURNS_ARGUMENT,
+    SPECIAL_METHOD_CALLS,
     STUB_RESULTS,
     VARIABLE_FUNCTIONS,
     VARIABLE_TYPES,
@@ -123,6 +124,7 @@ GROUP_EXCLUDED_PATHS = frozenset(
         *OPENERS,
         *CLOSURES,
         *REFLECTION_CALLS,
+        *SPECIAL_METHOD_CALLS,
     }
 )
 STRING_CONSTANT_CLASSES = {str: "builtins.str", bytes: "builtins.bytes"}
@@ -413,7 +415,8 @@ class Outside:
                 for definition in definitions:
                     if definition.kind == "function":
                         overloads += self._bound_signatures(definition, call)
-                    elif definition.kind == "class":
+                    else:
+                        assert definition.kind == "class", definition.path
                         overloads += self._constructor_signatures(definition, call)
                 self.call_protocols(base, overloads, plain=True)
             return
@@ -474,6 +477,8 @@ class Outside:
                 self.consume_library(call, consuming)
             for definition in definitions:
                 entry = REFLECTION_CALLS.get(definition.path)
+                if entry is None:
+                    entry = SPECIAL_METHOD_CALLS.get(definition.path)
                 if entry is not None:
                     self.apply_rule(entry, call, None)
 
@@ -606,7 +611,7 @@ class Outside:
         self.add_edge(self.subclasses_listed(cls), self.unknown(found))
         self.add_object(call.dst, found)
 
-    def _call_signatures(self, definition, call, receivers, external=None):
+    def _call_signatures(self, definition, call, receivers, external):
         entry = definition.entry
         skip = 1 if entry.get("d") == "classmethod" and not receivers else 0
         if skip and definition.owner is not None:
@@ -676,11 +681,11 @@ class Outside:
         )
 
     def _class_method_owner(self, definition, external):
-        if external is not None and "." in external.name:
-            holder = self.external(external.name.rpartition(".")[0])
-            found = self.stub_definitions(holder)
-            if found is None or any(d.kind == "class" for d in found):
-                return holder
+        assert "." in external.name, external
+        holder = self.external(external.name.rpartition(".")[0])
+        found = self.stub_definitions(holder)
+        if found is None or any(d.kind == "class" for d in found):
+            return holder
         public = self.stubs.public_name(definition.owner)
         return self.external(outside_name(public))
 
@@ -1030,7 +1035,8 @@ class Outside:
                 construct = ("elements", call, node)
                 elements = self.iterated(node, construct, call.caller, call.site)
                 self.add_edge(elements, dst)
-            elif how == "awaited":
+            else:
+                assert how == "awaited", how
                 call = context.call
                 self.add_await(node, dst, call.caller, call.site)
         if bindings is None:
@@ -1172,8 +1178,6 @@ def _variable_type(definition):
 def _frozen(reduced):
     if type(reduced) in (list, tuple):
         return tuple(map(_frozen, reduced))
-    if type(reduced) is dict:
-        return (dict, tuple((key, _frozen(value)) for key, value in reduced.items()))
     assert reduced is None or type(reduced) in (str, int), reduced
     return reduced
 
@@ -1190,8 +1194,6 @@ def _str_constant(obj):
 
 
 def _callable(parameter):
-    if parameter is None:
-        return False
     reduced = parameter[3]
     arms = (
         reduced[1:] if isinstance(reduced, list) and reduced[:1] == ["|"] else [reduced]

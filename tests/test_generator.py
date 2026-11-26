@@ -1069,6 +1069,53 @@ def test_output_is_the_same_for_every_hash_seed(tmp_path):
     ]
 
 
+ORDER_PROGRAM = {
+    "main.py": """
+    from typing import TYPE_CHECKING
+    if TYPE_CHECKING:
+        from pkg import shapes
+    class Bag(dict):
+        pass
+    def has(bag):
+        return "key" in bag
+    has(Bag())
+    """,
+    "pkg/__init__.py": "",
+}
+
+
+ORDER_SCRIPT = """
+import json, sys
+from pycg.analysis import semantics, stubs
+from pycg.pycg import CallGraphGenerator
+made = []
+external = semantics.Analysis.external
+def recorded_external(analysis, name, *args):
+    made.append(["external", name])
+    return external(analysis, name, *args)
+semantics.Analysis.external = recorded_external
+for method in ("find", "definition", "member", "mro"):
+    original = getattr(stubs.Stubs, method)
+    def recorded(stub_data, *args, _original=original, _name=method):
+        made.append([_name, *map(str, args)])
+        return _original(stub_data, *args)
+    setattr(stubs.Stubs, method, recorded)
+CallGraphGenerator(sys.argv[2:], sys.argv[1]).analyze()
+print(json.dumps(made))
+"""
+
+
+def test_the_analysis_makes_its_externals_and_stub_queries_in_one_order(tmp_path):
+    write(tmp_path, ORDER_PROGRAM)
+    arguments = [str(tmp_path), str(tmp_path / "main.py")]
+    orders = [run_python(ORDER_SCRIPT, arguments, seed) for seed in (0, 1, 2, 3)]
+
+    assert len(set(orders)) == 1
+    made = json.loads(orders[0])
+    assert ["external", "typing.TYPE_CHECKING"] in made
+    assert ["member", "builtins.dict", "__contains__"] in made
+
+
 def test_assignment_graph_shows_points_to_sets(tmp_path):
     source = "def f(): pass\nclass C: pass\ng = f\nc = C()\n"
     assignment = analysed(tmp_path, {"main.py": source}).output_points_to()

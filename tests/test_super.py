@@ -237,3 +237,53 @@ def test_super_without_arguments_keeps_every_receiver(tmp_path):
     assert super_values(tmp_path, source, "main.Base.run.s") == [
         "super(main.Base, main.Other@main:7:9)"
     ]
+
+
+def test_super_without_arguments_in_a_static_method_finds_no_method(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            def m(self): pass
+        class B(A):
+            @staticmethod
+            def s():
+                super().m()
+        B.s()
+        """,
+    )
+
+    assert callees(graph, "main.B.s") == ["<builtin>.super"]
+
+
+def test_super_from_a_class_that_an_exhaustive_order_lacks(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        class X1: pass
+        class Y1: pass
+        class X2: pass
+        class Y2: pass
+        class X3: pass
+        class Y3: pass
+        class X4: pass
+        class Y4: pass
+        class F:
+            def m(self): pass
+        class G(F):
+            def run(self):
+                super().m()
+        class E(
+            X1 if sys.argv else Y1,
+            X2 if sys.argv else Y2,
+            X3 if sys.argv else Y3,
+            X4 if sys.argv else Y4,
+        ):
+            pass
+        G.run(E())
+        G().run()
+        """,
+    )
+
+    assert callees(graph, "main.G.run") == ["<builtin>.super", "main.F.m"]

@@ -168,3 +168,31 @@ def test_sys_modules_with_a_literal_gives_that_outside_module(tmp_path):
     )
 
     assert callees(graph, "main.dump") == ["json.dumps"]
+
+
+def test_dunder_import_of_an_outside_submodule_gives_its_top_package(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": """
+package = __import__("os.path", globals=None)
+package.getcwd()
+""",
+        },
+    )
+
+    assert callees(graph, "main") == ["<builtin>.__import__", "os.getcwd"]
+
+
+def test_sys_modules_with_a_key_that_names_no_module_gives_no_module(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        sys.modules[b"os"].getcwd()
+        sys.modules["a-b"].run()
+        sys.modules["main.missing"].run()
+        """,
+    )
+
+    assert callees(graph, "main") == []

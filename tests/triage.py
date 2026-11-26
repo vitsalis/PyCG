@@ -641,10 +641,6 @@ CASES = {
         "language/metaclasses",
         "type(name, bases, namespace) does not create a class",
     ),
-    "new_syntax/copy_replace": (
-        "language/new-syntax",
-        "copy.replace does not call __replace__",
-    ),
     "new_syntax/int_ignores_trunc": (
         "language/new-syntax",
         "math.trunc does not call __trunc__",

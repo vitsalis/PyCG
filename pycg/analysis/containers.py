@@ -399,8 +399,7 @@ class Containers:
     def _yield_from(self, obj, function, dst):
         if isinstance(obj, Generator):
             self.add_edge(function.sent_node, obj.function.sent_node)
-            if dst is not None:
-                self.add_edge(obj.function.return_node, dst)
+            self.add_edge(obj.function.return_node, dst)
 
     def add_dict_items(self, target, source, caller, site):
         hub = self._dict_hubs.get(source)
@@ -572,8 +571,7 @@ class Containers:
             self.add_edge(elements, self.unknown(result))
             if obj.kind == "list":
                 self.add_length_hint(operation.right, operation.caller, site)
-        if operation.dst is not None:
-            self.add_object(operation.dst, result)
+        self.add_object(operation.dst, result)
 
     def copy_fields(self, source, target):
         pair = (source, target, "copy fields")
@@ -620,10 +618,12 @@ class Containers:
             key = (cls, type(obj), iteration, dst)
             sequences = self._sequences.get(key)
             if sequences is None:
-                unless = ("__iter__", *iteration.unless)
-                found = self.lookup(cls, "__getitem__", obj, None, unless)
                 sequences = _Sequences(self, iteration, dst)
                 self._sequences[key] = sequences
+            unless = ("__iter__", *iteration.unless)
+            found = self.lookup(cls, "__getitem__", obj, None, unless)
+            if found not in sequences.lookups:
+                sequences.lookups[found] = None
                 self.solver.attach(found, sequences)
             sequences.add(obj)
 
@@ -763,12 +763,13 @@ class _KeyedGroup(Constraint):
 
 
 class _Sequences(Constraint):
-    __slots__ = ("analysis", "iteration", "dst", "objects", "found")
+    __slots__ = ("analysis", "iteration", "dst", "lookups", "objects", "found")
 
     def __init__(self, analysis, iteration, dst):
         self.analysis = analysis
         self.iteration = iteration
         self.dst = dst
+        self.lookups = {}
         self.objects = []
         self.found = False
 

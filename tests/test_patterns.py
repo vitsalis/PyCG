@@ -427,3 +427,100 @@ read("x")
     assert [c for c in callees(graph, "main.read") if c.startswith("main.")] == [
         "main.f"
     ]
+
+
+def test_a_format_string_with_an_unmatched_brace_makes_no_pattern(tmp_path):
+    graph = main_graph(tmp_path, 'def run(x):\n    "a{".format(x)\n')
+
+    assert callees(graph, "main.run") == ["<builtin>.str.format"]
+
+
+def test_a_case_method_called_as_an_inherited_hook_returns_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+class Base:
+    __init_subclass__ = "name".upper
+class Derived(Base):
+    pass
+""",
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_a_pattern_reads_its_name_on_every_instance_of_a_class(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+import sys
+class C:
+    def on_a(self): pass
+def run(obj, kind):
+    getattr(obj, "on_" + kind)()
+run(C(), sys.argv[1])
+run(C(), sys.argv[1])
+""",
+    )
+
+    assert callees(graph, "main.run") == ["<builtin>.getattr", "main.C.on_a"]
+
+
+def test_a_pattern_sees_instances_and_names_that_arrive_after_its_access(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+import inspect
+import sys
+class C:
+    def on_a(self): pass
+class Holder:
+    k = C
+    s = setattr
+def f(): pass
+def g(self): pass
+def run(obj, kind):
+    getattr(obj, "on_" + kind)()
+c = C()
+run(c, sys.argv[1])
+for _, v in inspect.getmembers(Holder()):
+    run(v(), sys.argv[1])
+    v.on_a = g
+    v(c, "on_b", f)
+""",
+    )
+
+    assert callees(graph, "main.run") == [
+        "<builtin>.getattr",
+        "main.C.on_a",
+        "main.f",
+        "main.g",
+    ]
+
+
+def test_a_name_stored_after_a_pattern_reads_a_module_is_no_member_of_it(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {
+            "main.py": """
+import inspect
+import sys
+import helpers
+class C:
+    def on_a(self): pass
+class Holder:
+    s = setattr
+def f(): pass
+def run(obj, kind):
+    getattr(obj, "on_" + kind)()
+run(helpers, sys.argv[1])
+for _, v in inspect.getmembers(Holder()):
+    v(C(), "on_b", f)
+""",
+            "helpers.py": """
+def on_c(): pass
+""",
+        },
+    )
+
+    assert callees(graph, "main.run") == ["<builtin>.getattr", "helpers.on_c"]

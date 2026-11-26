@@ -112,6 +112,84 @@ pow(2, Power(), Mod())
     assert callees(graph, "main.Power.__rpow__") == ["main.Mod.__call__"]
 
 
+REPLACEABLE = """
+import copy
+class Point:
+    def __init__(self, x):
+        self.x = x
+    def __replace__(self, **changes):
+        return Point(**changes)
+    def show(self): pass
+"""
+
+
+def test_copy_replace_calls_replace_with_the_changes(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        REPLACEABLE
+        + """
+def use():
+    copy.replace(Point(1), x=2).show()
+use()
+""",
+    )
+
+    assert callees(graph, "main.use") == [
+        "copy.replace",
+        "main.Point.__init__",
+        "main.Point.__replace__",
+        "main.Point.show",
+    ]
+    assert callees(graph, "main.Point.__replace__") == ["main.Point.__init__"]
+
+
+def test_copy_replace_of_an_outside_value_gives_what_its_replace_returns(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import copy
+        import datetime
+        def use(day: datetime.date):
+            copy.replace(day, year=2000).isoformat()
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["copy.replace", "datetime.date.isoformat"]
+
+
+def test_limit_copy_replace_of_an_unpacked_argument_calls_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        REPLACEABLE
+        + """
+def use():
+    copy.replace(*[Point(1)], x=2)
+use()
+""",
+    )
+
+    assert "main.Point.__replace__" not in callees(graph, "main.use")
+
+
+def test_limit_the_replace_of_a_dataclass_is_not_made(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import copy
+        import dataclasses
+        @dataclasses.dataclass
+        class Data:
+            x: int
+            def show(self): pass
+        def use():
+            copy.replace(Data(1), x=2).show()
+        use()
+        """,
+    )
+
+    assert "main.Data.show" not in callees(graph, "main.use")
+
+
 def test_inplace_operator_falls_back_to_the_binary_one(tmp_path):
     graph = main_graph(
         tmp_path,
@@ -2162,3 +2240,170 @@ use(SeqClass)
     )
 
     assert length_hints(graph, "main.use") == ["main.SeqMeta.__len__"]
+
+
+def test_a_format_template_that_python_rejects_formats_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            def __format__(self, spec): return ""
+        "{".format(A())
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.str.format"]
+
+
+def test_an_indexed_format_field_does_not_format_the_argument_itself(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            def __format__(self, spec): return ""
+        "{0[k]}".format(A())
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.str.format"]
+
+
+def test_a_format_template_that_is_not_a_literal_still_evaluates_its_receiver(
+    tmp_path,
+):
+    graph = main_graph(
+        tmp_path,
+        """
+        def template(): return "{0}"
+        template().format(1)
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.str.format", "main.template"]
+
+
+def test_an_fstring_value_without_objects_converts_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def g(): return 1
+        s = f"{0.5}{g()}"
+        """,
+    )
+
+    assert callees(graph, "main") == ["main.g"]
+
+
+def test_an_operator_on_two_floats_calls_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def f():
+            return 1.5 * 2.0
+        f()
+        """,
+    )
+
+    assert callees(graph, "main.f") == []
+
+
+def test_new_through_an_exhaustive_order_may_give_another_instance(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        class X1: pass
+        class Y1: pass
+        class X2: pass
+        class Y2: pass
+        class X3: pass
+        class Y3: pass
+        class X4: pass
+        class Y4: pass
+        class Other:
+            def m(self): pass
+        class Factory:
+            def __new__(cls): return Other()
+        class E(
+            Factory,
+            X1 if sys.argv else Y1,
+            X2 if sys.argv else Y2,
+            X3 if sys.argv else Y3,
+            X4 if sys.argv else Y4,
+        ):
+            pass
+        E().m()
+        """,
+    )
+
+    assert "main.Other.m" in callees(graph, "main")
+
+
+def test_new_past_a_namespace_user_may_give_another_instance(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class Other:
+            def m(self): pass
+        class Factory:
+            def __new__(cls): return Other()
+        class Made(Factory):
+            locals()
+        Made().m()
+        """,
+    )
+
+    assert "main.Other.m" in callees(graph, "main")
+
+
+def test_str_of_an_instance_with_an_unknown_outside_base(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import somelib
+        class C(somelib.Base): pass
+        str(C())
+        """,
+    )
+
+    assert callees(graph, "main") == ["<builtin>.str", "somelib.Base.__init__"]
+
+
+def test_str_of_a_list_does_not_reach_into_an_iterator(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class X:
+            def __repr__(self): return "x"
+        def run():
+            str([iter([X()])])
+        run()
+        """,
+    )
+
+    assert callees(graph, "main.run") == ["<builtin>.iter", "<builtin>.str"]
+
+
+def test_an_instance_from_new_is_initialised_once_its_class_derives(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import sys
+        class X: pass
+        def c0(): return c1
+        def c1(): return c2
+        def c2(): return c3
+        def c3(): return c4
+        def c4(): return c5
+        def c5(): return c6
+        def c6(): return A
+        class A:
+            def __new__(cls): return object.__new__(B)
+            def __init__(self): pass
+        class B(X if sys.argv else c0()()()()()()()):
+            def __init__(self): pass
+        A()
+        """,
+    )
+
+    assert "main.B.__init__" in callees(graph, "main")

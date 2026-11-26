@@ -124,8 +124,6 @@ class Protocols:
             operation.comparison().arrive(obj, is_left)
         if isinstance(obj, (Instance, Class)):
             name = operation.method if is_left else operation.reflected
-            if name is None:
-                return
             call = operation.call(is_left)
             unless = ()
             if is_left and operation.inplace:
@@ -138,11 +136,10 @@ class Protocols:
                 self.call_dunder(obj, fallback, call, operation.dst, (name,))
         elif isinstance(obj, Container) and obj.kind not in CONTAINER_CLASSES:
             self.combine(obj, operation, is_left)
-        elif isinstance(obj, (Typed, Container)):
+        else:
             name = operation.method if is_left else operation.reflected
-            if name is not None:
-                origin = (operation.caller, operation.site, "operator", is_left)
-                self.typed_special(obj, name, operation.dst, origin)
+            origin = (operation.caller, operation.site, "operator", is_left)
+            self.typed_special(obj, name, operation.dst, origin)
 
     def _contains(self, obj, operation):
         if isinstance(obj, (Instance, Class)):
@@ -151,7 +148,7 @@ class Protocols:
             operation.membership().apply(obj)
             types = self._types(obj)
             self.solver.attach(types, Each(self._searched_type, operation))
-        elif isinstance(obj, (Container, Generator, External, Typed)):
+        else:
             operation.membership().apply(obj)
             self._compare_value(operation)
             if isinstance(obj, Container) and hashes_keys(obj):

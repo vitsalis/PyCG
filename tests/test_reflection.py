@@ -829,3 +829,183 @@ run(Record())
     )
 
     assert FIVE_GETTERS <= set(callees(graph, "main.run"))
+
+
+EXHAUSTIVE_BASES = """
+import sys
+class X1: pass
+class Y1: pass
+class X2: pass
+class Y2: pass
+class X3: pass
+class Y3: pass
+class X4: pass
+class Y4: pass
+"""
+
+CHOSEN = (
+    "X1 if sys.argv else Y1, X2 if sys.argv else Y2, "
+    "X3 if sys.argv else Y3, X4 if sys.argv else Y4"
+)
+
+
+def test_vars_reads_a_class_whose_metaclass_has_an_exhaustive_order(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        EXHAUSTIVE_BASES
+        + f"""
+class Meta(type, {CHOSEN}): pass
+class C(metaclass=Meta):
+    def f(self): pass
+def use():
+    vars(C)["f"](None)
+use()
+""",
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.vars", "main.C.f"]
+
+
+def test_getmembers_lists_a_class_whose_outside_base_inherits_dir(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import inspect
+        class C(int):
+            def f(self): pass
+        def use():
+            for name, value in inspect.getmembers(C()):
+                value()
+        use()
+        """,
+    )
+
+    assert "main.C.f" in callees(graph, "main.use")
+
+
+def test_subclasses_list_a_class_whose_base_arrives_later(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A: pass
+        def c1(): return c2
+        def c2(): return c3
+        def c3(): return c4
+        def c4(): return c5
+        def c5(): return c6
+        def c6(): return c7
+        def c7(): return A
+        def use():
+            for sub in A.__subclasses__():
+                sub().m()
+        use()
+        class B(c1()()()()()()()):
+            def m(self): pass
+        """,
+    )
+
+    assert callees(graph, "main.use") == ["<builtin>.type.__subclasses__", "main.B.m"]
+
+
+def test_subclasses_listed_twice_give_the_same_subclasses(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class A:
+            pass
+        class B(A):
+            def m(self): pass
+        def first():
+            A.__subclasses__()[0].m(None)
+        def second():
+            A.__subclasses__()[0].m(None)
+        """,
+    )
+
+    assert "main.B.m" in callees(graph, "main.first")
+    assert "main.B.m" in callees(graph, "main.second")
+
+
+def test_getmembers_of_a_diamond_lists_the_shared_base_once(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import inspect
+        class A:
+            def m(self): pass
+        class B(A): pass
+        class C(A): pass
+        class D(B, C): pass
+        def run():
+            for name, value in inspect.getmembers(D()):
+                value()
+        """,
+    )
+
+    assert callees(graph, "main.run") == ["inspect.getmembers", "main.A.m"]
+
+
+def test_getmembers_lists_the_members_of_a_base_that_arrives_later(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import inspect
+        class A:
+            def m(self): pass
+        class B:
+            def n(self): pass
+        class J:
+            k = B
+        class H:
+            k = J
+        def make(base):
+            class F(base):
+                pass
+            for name, value in inspect.getmembers(F()):
+                value()
+        make(A)
+        for _, v in inspect.getmembers(H()):
+            for _, w in inspect.getmembers(v()):
+                make(w)
+        """,
+    )
+
+    assert callees(graph, "main.make") == [
+        "inspect.getmembers",
+        "main.A.m",
+        "main.B.n",
+    ]
+
+
+def test_getmembers_called_as_an_inherited_hook_returns_nothing(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import inspect
+        class Base:
+            __init_subclass__ = inspect.getmembers
+        class Derived(Base):
+            pass
+        """,
+    )
+
+    assert callees(graph, "main") == []
+
+
+def test_getmembers_of_a_class_with_two_metaclasses_lists_its_members(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import inspect
+        import sys
+        class Meta(type):
+            pass
+        class A(metaclass=Meta if sys.argv else type):
+            def m(self): pass
+        def run():
+            for name, value in inspect.getmembers(A):
+                value(A())
+        """,
+    )
+
+    assert callees(graph, "main.run") == ["inspect.getmembers", "main.A.m"]

@@ -6,9 +6,7 @@ from .flow import FALSE, LITERAL_TYPES, TRUE, UNKNOWN, literals_of, truth_of, va
 from .patterns import pattern_affixes
 
 TYPING_MODULES = ("typing", "typing_extensions")
-TYPE_CHECKING_IMPORTS = frozenset(
-    f"{module}.TYPE_CHECKING" for module in TYPING_MODULES
-)
+TYPE_CHECKING_IMPORTS = tuple(f"{module}.TYPE_CHECKING" for module in TYPING_MODULES)
 
 _OPERATOR_BY_LITERAL_COMPARISON = {
     ast.Eq: operators.eq,
@@ -117,9 +115,7 @@ class Expressions:
 
     def _walk(self, node):
         for child in ast.iter_child_nodes(node):
-            if isinstance(child, ast.stmt):
-                self.statement(child)
-            elif isinstance(child, ast.expr):
+            if isinstance(child, ast.expr):
                 self.expression(child)
             else:
                 self._walk(child)
@@ -781,8 +777,7 @@ class Expressions:
         return tuple(bounds)
 
     def _subscript(self, base, index, dst, src, node, delete=False):
-        if dst is None and src is None and not delete:
-            return
+        assert dst is not None or src is not None or delete, "a subscript does nothing"
         site, caller = self._site(node), self._caller
         if isinstance(index, Bounds):
             bounds = index.bounds

@@ -83,7 +83,8 @@ class Matching:
                 if pattern.name:
                     self._bind(pattern.name, subject)
                 return TRUE
-            case ast.MatchAs():
+            case _:
+                assert isinstance(pattern, ast.MatchAs), pattern
                 truth = TRUE
                 if pattern.pattern is not None:
                     truth = self._pattern(pattern.pattern, subject, values)
@@ -121,7 +122,7 @@ class Matching:
                 key = index if star is None or index < star else index - len(patterns)
                 part = self._item(subject, key, site)
             truths.append(self._pattern(inner, part, None))
-        return _truth_of_all_parts(truths, own_test_may_fail=True)
+        return _truth_of_all_parts(truths)
 
     def _mapping_pattern(self, pattern, subject):
         site = self._site(pattern)
@@ -137,7 +138,7 @@ class Matching:
             if subject is not None:
                 self.analysis.add_dict_items(container, subject, self._caller, site)
             self._bind(pattern.rest, self.analysis.constant(container))
-        return _truth_of_all_parts(truths, own_test_may_fail=True)
+        return _truth_of_all_parts(truths)
 
     def _class_pattern(self, pattern, subject):
         cls = self.expression(pattern.cls)
@@ -160,7 +161,7 @@ class Matching:
                 attr, site = self._scope.mangle(attr), self._site(inner)
                 self.analysis.add_load(subject, attr, part, self._caller, site)
             truths.append(self._pattern(inner, part, None))
-        return _truth_of_all_parts(truths, own_test_may_fail=True)
+        return _truth_of_all_parts(truths)
 
     def _length(self, subject, site):
         if subject is not None:
@@ -200,11 +201,8 @@ class Matching:
         return attribute
 
 
-def _truth_of_all_parts(truths, own_test_may_fail):
-    truth = TRUE if all(part & TRUE for part in truths) else 0
-    if own_test_may_fail or any(part & FALSE for part in truths):
-        truth |= FALSE
-    return truth
+def _truth_of_all_parts(truths):
+    return (TRUE if all(part & TRUE for part in truths) else 0) | FALSE
 
 
 def _unreachable_state(start):

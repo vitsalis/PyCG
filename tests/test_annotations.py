@@ -1600,3 +1600,182 @@ def test_the_fields_of_a_ctypes_structure_hold_their_types(tmp_path):
         "<builtin>.int.bit_length",
         "main.Point.show",
     ]
+
+
+def test_an_import_in_an_except_clause_of_type_checking_names_a_type(tmp_path):
+    graph = call_graph(
+        tmp_path,
+        {
+            "shapes.py": "class Shape:\n    def area(self): pass\nclass Other: pass\n",
+            "main.py": """
+from typing import TYPE_CHECKING
+import shapes
+if TYPE_CHECKING:
+    try:
+        from shapes import Other
+    except ImportError:
+        from shapes import Shape
+def use(shape: "Shape"):
+    shape.area()
+""",
+        },
+    )
+
+    assert callees(graph, "main.use") == ["shapes.Shape.area"]
+
+
+def test_a_string_annotation_that_does_not_parse_names_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def run(strategy: "Strategy ("):
+    strategy(1)
+""",
+    )
+
+    assert callees(graph, "main.run") == []
+
+
+def test_an_annotation_of_class_in_a_method_names_its_class(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+class Runner:
+    def run(self): pass
+    def copy(self):
+        other: __class__ = make()
+        other.run()
+""",
+    )
+
+    assert callees(graph, "main.Runner.copy") == ["main.Runner.run"]
+
+
+def test_a_class_annotation_naming_a_class_bound_builtin_names_both(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+class Holder:
+    str = Fast
+    def use(self, text: str):
+        text.upper()
+        text(1)
+""",
+    )
+
+    assert callees(graph, "main.Holder.use") == [
+        "<builtin>.str.upper",
+        "main.Fast.__call__",
+    ]
+
+
+def test_a_subscript_without_arguments_names_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+from typing import Annotated, Type
+def run(first: Annotated[()], second: Type[()]):
+    first(1)
+    second(1)
+""",
+    )
+
+    assert callees(graph, "main.run") == []
+
+
+def test_only_ctypes_structures_with_literal_fields_hold_their_types(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        import ctypes, sys
+        class Plain:
+            pass
+        class NotStructure(Plain):
+            _fields_ = [("x", ctypes.c_int)]
+        Base = ctypes.Structure if sys.argv else ctypes.Union
+        class Either(Base):
+            _fields_ = [("x", ctypes.c_int)]
+        class Array(ctypes.Structure):
+            _fields_ = [("xs", ctypes.c_int * 4), ("y", ctypes.c_int)]
+        class Called(ctypes.Structure):
+            _fields_ = make()
+        class Short(ctypes.Structure):
+            _fields_ = [("x",)]
+        class Unnamed(ctypes.Structure):
+            _fields_ = [(name, ctypes.c_int)]
+        def use(n: NotStructure, e: Either, a: Array, c: Called, s: Short, u: Unnamed):
+            n.x.bit_length()
+            e.x.as_integer_ratio()
+            a.xs.bit_length()
+            a.y.conjugate()
+            c.x.bit_length()
+            s.x.bit_length()
+            u.x.bit_length()
+        """,
+    )
+
+    assert callees(graph, "main.use") == [
+        "<builtin>.int.as_integer_ratio",
+        "<builtin>.int.conjugate",
+    ]
+
+
+def test_a_class_decorator_that_is_no_dataclass_gives_no_field_values(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def keep(cls):
+    return cls
+@keep
+class Config:
+    strategy: Strategy
+    def run(self):
+        self.strategy(1)
+""",
+    )
+
+    assert callees(graph, "main.Config.run") == []
+
+
+def test_a_string_annotation_reads_a_member_defined_on_a_class_only(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        class C:
+            class Inner:
+                def m(self): pass
+        class Other:
+            def m(self): pass
+        class Meta(type):
+            def __getattr__(cls, name): return Other
+        class Dynamic(metaclass=Meta): pass
+        c = C()
+        def member(x: "C.Inner"): x.m()
+        def of_instance(x: "c.Inner"): x.m()
+        def of_function(x: "member.Inner"): x.m()
+        def through_getattr(x: "Dynamic.Inner"): x.m()
+        """,
+    )
+
+    assert callees(graph, "main.member") == ["main.C.Inner.m"]
+    assert callees(graph, "main.of_instance") == []
+    assert callees(graph, "main.of_function") == []
+    assert callees(graph, "main.through_getattr") == []
+
+
+def test_a_decorator_that_may_be_either_dataclass_form_holds_the_fields_once(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+import dataclasses
+import sys
+make = dataclasses.dataclass if sys.argv else dataclasses.dataclass(frozen=True)
+@make
+class Config:
+    strategy: Strategy
+    def run(self):
+        self.strategy(1)
+""",
+    )
+
+    assert callees(graph, "main.Config.run") == BOTH

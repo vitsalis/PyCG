@@ -1496,3 +1496,18 @@ def test_a_module_and_a_function_of_one_name_keep_their_sites(tmp_path):
             "module": "p",
         },
     ]
+
+
+def test_an_extension_binary_given_as_the_entry_point_is_an_extension_module(
+    tmp_path,
+):
+    found = document(tmp_path, {"ext.so": b""}, ("ext.so",))
+
+    assert found["modules"] == {"ext": {"file": "ext.so", "kind": "extension"}}
+
+
+def test_no_entry_points_give_an_empty_document(tmp_path):
+    found = analysed(tmp_path, {}, (), package=False).document()
+
+    assert found["modules"] == {}
+    assert found["calls"] == {}

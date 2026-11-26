@@ -650,3 +650,23 @@ choose(first, fallback)()
     )
 
     assert {"main.fallback", "main.first"} <= set(callees(graph, "main"))
+
+
+def test_a_function_that_reads_its_locals_returns_each_call_its_argument(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+        def f(): pass
+        def g(): pass
+        def ident(value):
+            locals()
+            return value
+        def first():
+            ident(f)()
+        def second():
+            ident(g)()
+        """,
+    )
+
+    assert callees(graph, "main.first") == ["main.f", "main.ident"]
+    assert callees(graph, "main.second") == ["main.g", "main.ident"]

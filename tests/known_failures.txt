@@ -126,7 +126,6 @@ metaclasses/instancecheck: language/metaclasses: isinstance does not call the me
 metaclasses/metaclass_call: dynamic/context: a metaclass's __call__ is not modelled: the result of one that creates the instance through type.__call__ would be every class that reaches it
 metaclasses/metaclass_registry: dynamic/context: the name and the class that each class statement passes to the metaclass's __init__ merge over the statements, so registry['Alpha'] also gets the other classes
 metaclasses/type_three_args: language/metaclasses: type(name, bases, namespace) does not create a class
-new_syntax/copy_replace: language/new-syntax: copy.replace does not call __replace__
 new_syntax/int_ignores_trunc: language/new-syntax: math.trunc does not call __trunc__
 new_syntax/json_array_hook: outside/library-calls-back: a function passed to library code is not a call: json.loads calls its array_hook
 new_syntax/partial_placeholder: outside/library-calls-back: a function passed to library code is not a call: calling a functools.partial calls its function

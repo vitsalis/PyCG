@@ -222,3 +222,115 @@ dispatch(invoke, Source())
     )
 
     assert callees(graph, "main.invoke") == ["main.f", "main.g"]
+
+
+def test_unpacking_a_value_without_objects_still_calls(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def take(*args, **kwargs): pass
+take(*None)
+take(**None)
+""",
+    )
+
+    assert callees(graph, "main") == ["main.take"]
+
+
+def test_metaclass_new_gets_the_class_statement_in_its_varargs(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+class Base:
+    @classmethod
+    def hook(cls): pass
+class Meta(type):
+    def __new__(mcs, *args):
+        args[1][0].hook()
+        return super().__new__(mcs, *args)
+class A(Base, metaclass=Meta): pass
+""",
+    )
+
+    assert "main.Base.hook" in callees(graph, "main.Meta.__new__")
+
+
+def test_unpacked_arguments_past_the_parameters_bind_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def take(a):
+    a()
+take(f, g, *(h,))
+""",
+    )
+
+    assert callees(graph, "main.take") == ["main.f"]
+
+
+def test_an_argument_after_an_unpacked_one_without_objects_binds_nothing(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def take(*args):
+    args[0]()
+take(*(f,), 1.5)
+""",
+    )
+
+    assert callees(graph, "main.take") == ["main.f"]
+
+
+def test_unpacking_a_list_binds_only_its_positions(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def take(a):
+    a()
+items = [f]
+items["a"]
+take(*items)
+""",
+    )
+
+    assert callees(graph, "main.take") == ["main.f"]
+
+
+def test_unpacking_a_dict_binds_only_its_string_keys(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def take(a):
+    a()
+take(**{1: f, "a": g})
+""",
+    )
+
+    assert callees(graph, "main.take") == ["main.g"]
+
+
+def test_a_dict_unpacked_after_the_keywords_were_bound_gives_its_keys(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+class A:
+    def run(self): pass
+    def stop(self): pass
+def take(**kwargs):
+    for name in kwargs:
+        getattr(A(), name)()
+def forward(mapping):
+    take(**mapping)
+def i1(x): return x
+def i2(x): return i1(x)
+def i3(x): return i2(x)
+forward({"run": 1})
+forward(i3(i3({"stop": 1})))
+""",
+    )
+
+    assert callees(graph, "main.take") == [
+        "<builtin>.getattr",
+        "main.A.run",
+        "main.A.stop",
+    ]
