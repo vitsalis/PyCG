@@ -1,0 +1,86 @@
+name: Inputs
+
+on:
+  pull_request:
+    paths:
+      - evaluation/container/Dockerfile.inputs
+      - evaluation/container/Dockerfile.inputs.dockerignore
+      - evaluation/container/fetch.py
+      - evaluation/macro-benchmark/projects.py
+      - evaluation/macro-benchmark/projects.toml
+      - evaluation/compose.yaml
+      - tools/inputs_key.py
+      - Makefile
+      - .github/workflows/inputs.yml
+  push:
+    branches:
+      - main
+    paths:
+      - evaluation/container/Dockerfile.inputs
+      - evaluation/container/Dockerfile.inputs.dockerignore
+      - evaluation/container/fetch.py
+      - evaluation/macro-benchmark/projects.py
+      - evaluation/macro-benchmark/projects.toml
+      - evaluation/compose.yaml
+      - tools/inputs_key.py
+      - Makefile
+      - .github/workflows/inputs.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io/vitsalis
+  IMAGES: pycg-eval-macro pycg-eval-runner
+
+jobs:
+  build:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - run: echo "inputs key $(python3 -I tools/inputs_key.py)" >> "$GITHUB_STEP_SUMMARY"
+      - run: make eval-inputs-build
+
+  publish:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'vitsalis/PyCG' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - env:
+          TOKEN: ${{ github.token }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          set -eu
+          key=$(python3 -I tools/inputs_key.py)
+          printf '%s\n' "$TOKEN" | docker login ghcr.io --username "$ACTOR" --password-stdin
+          missing=""
+          for image in $IMAGES; do
+            if docker manifest inspect "$REGISTRY/$image:$key" > /dev/null 2>&1; then
+              echo "$REGISTRY/$image:$key: published already" | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              missing="$missing $image"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            make eval-inputs-build
+            for image in $missing; do
+              docker tag "$image" "$REGISTRY/$image:$key"
+              docker push "$REGISTRY/$image:$key"
+              echo "$REGISTRY/$image:$key: pushed" | tee -a "$GITHUB_STEP_SUMMARY"
+            done
+          fi
+          docker logout ghcr.io
