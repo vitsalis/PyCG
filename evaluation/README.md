@@ -10,7 +10,7 @@ are data: PyCG reads them, and no script imports or runs them.
 
 | Command | What it does |
 |---|---|
-| `make eval [BASE=<ref>]` | Builds the inputs image (the 60 sources, fetched by their pins), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary and runs the gate (below); the graphs and `result.json` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
+| `make eval [BASE=<ref>]` | Pulls the inputs images by their key, or builds them when the pull fails (below, "The inputs image"), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary and runs the gate (below); the graphs and `result.json` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
 | `make eval-record [BASE=<ref>]` | Writes `metrics.json`: each best is the larger of the base's and the measured value (measures first if this commit has no result) |
 | `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures the engine of BASE on this checkout's benchmarks, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
 | `make eval-determinism` | Measures this commit again with `PYTHONHASHSEED=1` for the analyses and fails unless every graph is byte-identical to that of seed 0 |
@@ -102,6 +102,7 @@ floors, and cannot re-base them.
 | `micro-benchmark/` | One small program per language feature with its ground truth, and the validator that runs them (`micro-benchmark/README.md`) |
 | `macro-benchmark/` | The projects, ground truths, traces and their tools (`macro-benchmark/README.md`) |
 | `compose.yaml`, `container/Dockerfile.inputs`, `container/fetch.py` | The inputs image: the sources of the macro-benchmark, fetched when the image is built |
+| `../tools/inputs_key.py`, `../.github/workflows/inputs.yml` | The content key of the inputs images, and the CI workflow that builds them and publishes them under it |
 | `container/Dockerfile.trace`, `container/trace_entry.py`, `container/trace.sh`, `container/trace_helper.py`, `container/entry.sh` | Records the trace of one project in a container |
 | `results/trace/` | Where the `trace` service writes a new trace (git ignores its content) |
 | `tests/` | The tests of the scripts; `make test` runs them |
@@ -373,3 +374,28 @@ repository applies. An sdist is downloaded, checked against its SHA-256
 and unpacked with tarfile's `data` filter; the archive is not kept.
 Nothing fetched is run. A source that is not its pin is not written, and
 the command fails, so the build fails.
+
+`make eval-inputs`, the first step of every `make eval` target, needs no
+network when the images are published. `tools/inputs_key.py` prints the
+key of the two images that the build gives, `pycg-eval-macro` (the target
+`macro`) and `pycg-eval-runner` (the target `network`): the SHA-256 of
+every file that the build reads (`Dockerfile.inputs`, its
+`.dockerignore` and the files it copies) and of its build argument, the
+Python image of `compose.yaml`. `tests/test_inputs_key.py` fails when the
+Dockerfile copies, or its `.dockerignore` lets in, a file that the key
+does not cover. `make eval-inputs` pulls
+`ghcr.io/vitsalis/pycg-eval-macro:<key>` and
+`ghcr.io/vitsalis/pycg-eval-runner:<key>` and tags them with the local
+names; when a pull fails it builds both with `make eval-inputs-build`. It
+prints which it did, then copies the sources out of `pycg-eval-macro` in a
+container without network.
+
+The workflow `Inputs` of CI runs when a file of the key changes. On a pull
+request it builds both targets, without pushing and without the right to
+write packages, so that a broken build shows before the merge. On a push
+to `main` of this repository it builds them and pushes each image whose
+tag does not exist yet; that job alone may write packages. The fetches of
+third-party content therefore still happen only in the build of the
+inputs image, which now runs in CI; a machine without network pulls its
+result. The images are built for `linux/amd64`: on another platform the
+pull fails and `make eval-inputs` builds them.

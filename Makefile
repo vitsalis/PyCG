@@ -1,6 +1,7 @@
 RUN := uv run --locked
 LINTED := pycg tests tools evaluation
 INPUTS := evaluation/container/Dockerfile.inputs
+INPUTS_REGISTRY := ghcr.io/vitsalis
 PROJECTS := evaluation/macro-benchmark/projects
 METRICS := evaluation/metrics.json
 EVAL_OUT ?= $(or $(TMPDIR),/tmp)/pycg-evaluation
@@ -59,7 +60,7 @@ diff -rq -x runs.json -x result.json $(RESULT) $(RESULT)-seed1
 @echo "the graphs of hash seeds 0 and 1 are byte-identical"
 endef
 
-.PHONY: setup test lint check format eval-inputs eval eval-record eval-diff eval-determinism \
+.PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-compare \
 	eval-same-graphs eval-labels eval-changes
 
@@ -81,9 +82,22 @@ format:
 	$(RUN) ruff check --select I --fix $(LINTED)
 	$(RUN) ruff format $(LINTED)
 
-eval-inputs:
+eval-inputs-build:
 	docker build --target macro -t pycg-eval-macro -f $(INPUTS) .
 	docker build --target network -t pycg-eval-runner -f $(INPUTS) .
+
+eval-inputs:
+	@key=$$(python3 -I tools/inputs_key.py) && \
+	if docker pull $(INPUTS_REGISTRY)/pycg-eval-macro:$$key \
+		&& docker pull $(INPUTS_REGISTRY)/pycg-eval-runner:$$key; then \
+		docker tag $(INPUTS_REGISTRY)/pycg-eval-macro:$$key pycg-eval-macro \
+		&& docker tag $(INPUTS_REGISTRY)/pycg-eval-runner:$$key pycg-eval-runner \
+		&& echo "eval-inputs: pulled the inputs images of key $$key from $(INPUTS_REGISTRY)"; \
+	else \
+		echo "eval-inputs: no inputs images of key $$key at $(INPUTS_REGISTRY): building them" \
+		&& $(MAKE) --no-print-directory eval-inputs-build \
+		&& echo "eval-inputs: built the inputs images of key $$key"; \
+	fi
 	rm -rf $(PROJECTS)
 	mkdir $(PROJECTS)
 	mkdir -p $(EVAL_OUT)
