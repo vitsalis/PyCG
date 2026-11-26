@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+import argparse
+import hashlib
+import importlib.util
+import json
+import signal
+import sys
+from pathlib import Path
+
+SCALE = Path(__file__).resolve().parent
+EVALUATION = SCALE.parent
+OUTCOME_FINISHED = "finished"
+OUTCOME_KILLED_BY_THE_CAP = "killed by the cap"
+DESCRIPTION = """Measures a PyCG checkout on one package of the scale set
+(evaluation/README.md, "The scale set").
+
+    python3 -I evaluation/scale/measure.py run --checkout PATH --name NAME \\
+        --package rich --out OUT --memory-mib 4096
+    python3 -I evaluation/scale/measure.py compare BASE_RECORD RECORD"""
+
+
+def load(name, path):
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+run = load("evaluation_run", EVALUATION / "common" / "run.py")
+projects = load("scale_projects", SCALE / "projects.py")
+
+
+class MeasureError(Exception):
+    pass
+
+
+def outcome_of(record):
+    if record["status"] == "ok":
+        return OUTCOME_FINISHED
+    if record["status"] == "memory":
+        return OUTCOME_KILLED_BY_THE_CAP
+    if record["status"] == "crash" and record.get("exit_status") == -signal.SIGKILL:
+        return OUTCOME_KILLED_BY_THE_CAP
+    return record["status"]
+
+
+def record_path(out, name, package):
+    return run.graph_file(Path(out) / name, f"scale/{package}.record")
+
+
+def measure(checkout, name, project, out, memory_mib, timeout_seconds, python):
+    version = run.git_version(checkout)
+    if version["commit"] is None:
+        raise MeasureError(f"{checkout} is not a git checkout")
+    if version["dirty"]:
+        raise MeasureError(f"{checkout} has changes; commit them")
+    files = tuple(project.source_files())
+    if not files:
+        raise MeasureError(
+            f"{project.directory} has no Python source: run make eval-inputs"
+        )
+    tool = run.Tool(name, "new", Path(checkout).resolve(), python)
+    job = run.Job(f"scale/{project.name}", files, project.root)
+    graph = run.graph_file(Path(out) / name, job.key)
+    record = run.run_job(tool, job, graph, timeout_seconds, memory_mib)
+    finished = record["status"] == "ok"
+    result = {
+        "package": project.name,
+        "version": project.version,
+        "archive_sha256": project.sha256,
+        "tool": version,
+        "python": ".".join(map(str, run.python_version(python))),
+        "hash_seed": tool.hash_seed,
+        "memory_cap_mib": memory_mib,
+        "timeout": timeout_seconds,
+        "files": len(files),
+        "outcome": outcome_of(record),
+        "seconds": record.get("seconds"),
+        "wall_seconds": record.get("wall_seconds"),
+        "peak_rss_mib": record.get("peak_rss_mib"),
+        "graph_sha256": hashlib.sha256(graph.read_bytes()).hexdigest()
+        if finished
+        else None,
+        "run": record,
+    }
+    path = record_path(out, name, project.name)
+    path.write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
+    return result
+
+
+def shown(value):
+    return "-" if value is None else str(value)
+
+
+def change(before, now):
+    if before is None or now is None or before == 0:
+        return "-"
+    return f"{(now - before) / before:+.1%}"
+
+
+ROWS = (
+    ("commit", lambda r: r["tool"]["commit"][:10]),
+    ("outcome", lambda r: r["outcome"]),
+    ("seconds", lambda r: r["seconds"]),
+    ("wall seconds", lambda r: r["wall_seconds"]),
+    ("peak MiB", lambda r: r["peak_rss_mib"]),
+    ("graph SHA-256", lambda r: r["graph_sha256"]),
+)
+MEASURED_ROWS = ("seconds", "wall seconds", "peak MiB")
+
+
+def heading(result):
+    return (
+        f"{result['package']} {result['version']}: {result['files']} files, "
+        f"cap {result['memory_cap_mib']} MiB, Python {result['python']}"
+    )
+
+
+def report(result):
+    lines = [heading(result), "", "| | value |", "|---|---|"]
+    lines += [f"| {label} | {shown(value(result))} |" for label, value in ROWS]
+    if result["run"].get("error"):
+        lines.append(f"| error | {result['run']['error']} |")
+    return "\n".join(lines)
+
+
+def comparison(base, now):
+    if (base["package"], base["archive_sha256"]) != (
+        now["package"],
+        now["archive_sha256"],
+    ):
+        raise MeasureError("the two records are of different packages")
+    lines = [heading(now), "", "| | base | this | change |", "|---|---|---|---|"]
+    for label, value in ROWS:
+        before, after = value(base), value(now)
+        delta = change(before, after) if label in MEASURED_ROWS else ""
+        lines.append(f"| {label} | {shown(before)} | {shown(after)} | {delta} |")
+    if base["graph_sha256"] is None or now["graph_sha256"] is None:
+        lines += ["", "no two call graphs to compare: a run did not finish"]
+    elif base["graph_sha256"] == now["graph_sha256"]:
+        lines += ["", "the call graphs are byte-identical"]
+    else:
+        lines += ["", "the call graphs differ"]
+    return "\n".join(lines)
+
+
+def read_record(path):
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(
+        description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    commands = parser.add_subparsers(dest="command", required=True)
+    measuring = commands.add_parser("run", help="measure one package")
+    measuring.add_argument("--checkout", type=Path, required=True)
+    measuring.add_argument("--name", required=True, help="name of the results")
+    measuring.add_argument("--package", required=True)
+    measuring.add_argument("--out", type=Path, required=True)
+    measuring.add_argument("--memory-mib", type=int, required=True)
+    measuring.add_argument("--timeout", type=float, default=run.TIMEOUT_SECONDS_DEFAULT)
+    measuring.add_argument("--python", default=sys.executable)
+    comparing = commands.add_parser("compare", help="compare two records")
+    comparing.add_argument("base", type=Path)
+    comparing.add_argument("record", type=Path)
+    args = parser.parse_args(argv)
+    try:
+        if args.command == "compare":
+            print(comparison(read_record(args.base), read_record(args.record)))
+            return 0
+        found = projects.load_projects()
+        if args.package not in found:
+            raise MeasureError(
+                f"{args.package} is not in the scale set: {', '.join(sorted(found))}"
+            )
+        result = measure(
+            args.checkout,
+            args.name,
+            found[args.package],
+            args.out,
+            args.memory_mib,
+            args.timeout,
+            args.python,
+        )
+    except (MeasureError, ValueError, OSError) as error:
+        print(f"measure.py: {error}", file=sys.stderr)
+        return 1
+    print(report(result))
+    print(f"record: {record_path(args.out, args.name, args.package)}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

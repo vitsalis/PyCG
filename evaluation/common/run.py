@@ -127,6 +127,7 @@ def run_job(tool, job, graph_path, timeout_seconds, memory_limit_mib=None):
             return {
                 "status": "crash",
                 "error": f"exit status {child.returncode}: {tail}"[:300],
+                "exit_status": child.returncode,
                 "wall_seconds": wall,
             }
         record = json.loads(result_path.read_text(encoding="utf-8"))

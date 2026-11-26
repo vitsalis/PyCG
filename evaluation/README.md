@@ -15,6 +15,7 @@ are data: PyCG reads them, and no script imports or runs them.
 | `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures BASE on its own benchmark, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
 | `make eval-determinism` | Measures this commit again with `PYTHONHASHSEED=1` for the analyses and fails unless every graph is byte-identical to that of seed 0 |
 | `make eval-measure-pr`, `eval-measure-seed1`, `eval-measure-base BASE=<ref>`; `make eval-gate BASE=<ref>`, `eval-report`, `eval-compare BASE=<ref>`, `eval-same-graphs`, `eval-labels BASE=<ref> [LABELS=<file>]` | The pieces of the targets above, which CI runs in separate jobs: each of the first three measures one result into `EVAL_OUT` without gating; the others check results that are there. `eval-labels` (`common/labels.py`) decides the labels `metrics-changed` (a TP, FP or FN count of the micro-benchmark or of the macro-benchmark inside or outside the package differs from the base's) and `benchmark-changed` (a changed path is protected: `PROTECTED` of `labels.py` lists the paths of AGENTS.md, "Protected files") of a pull request, appends the decision to SUMMARY and writes `<label>=true|false` lines to LABELS |
+| `make eval-scale NAME=<package> [BASE=<ref>] [SCALE_MEMORY_MIB=<MiB>]` | Measures this checkout on one package of the scale set (below, "The scale set"): time, peak memory, outcome and the SHA-256 of the call graph; with BASE, measures BASE first, then this checkout, and prints the comparison |
 | `python -I evaluation/common/loop.py compare OLD NEW` | Lists the edges and micro cases that changed between two result directories, scored again now (Python 3.14 or later) |
 | `NAME=<project> docker compose -f evaluation/compose.yaml run --rm trace --compare` | Records the trace of one project again and compares it with the committed one (`macro-benchmark/README.md`, "Re-recording a trace") |
 
@@ -121,9 +122,11 @@ floors, and cannot re-base them.
 | `common/lookup.py` | The static lookup of standard-library names that `tests/test_same_function_table.py` checks the table with |
 | `micro-benchmark/` | One small program per language feature with its ground truth, and the validator that runs them (`micro-benchmark/README.md`) |
 | `macro-benchmark/` | The projects, ground truths, traces and their tools (`macro-benchmark/README.md`) |
-| `compose.yaml`, `container/Dockerfile.inputs`, `container/fetch.py` | The inputs image: the sources of the macro-benchmark, fetched when the image is built |
+| `compose.yaml`, `container/Dockerfile.inputs`, `container/fetch.py` | The inputs image: the sources of the macro-benchmark and of the scale set, fetched when the image is built |
 | `../tools/inputs_key.py`, `../.github/workflows/inputs.yml` | The content key of the inputs images, and the CI workflow that builds them and publishes them under it |
 | `container/Dockerfile.trace`, `container/trace_entry.py`, `container/trace.sh`, `container/trace_helper.py`, `container/entry.sh` | Records the trace of one project in a container |
+| `scale/projects.toml`, `scale/projects.py` | The pins of the scale set and their loader |
+| `scale/measure.py` | Measures a checkout on one package of the scale set, and compares two measurements |
 | `results/trace/` | Where the `trace` service writes a new trace (git ignores its content) |
 | `tests/` | The tests of the scripts; `make test` runs them |
 
@@ -379,6 +382,68 @@ maintenance image. A new place fails the test until it is stated, and a
 stated place that is gone fails it too. It reads the syntax trees only: it
 is a guard, not a proof.
 
+## The scale set
+
+`scale/projects.toml` pins 20 large packages on which PyCG's time and
+peak memory are measured. They are not part of the benchmark: they have no
+ground truth, are not scored and are not gated, and a change of them does
+not change the digest of the benchmark. Each is pinned by the URL and the
+SHA-256 of one archive: a wheel of PyPI or the archive of a commit that
+GitHub serves. The build of the inputs image fetches them (above, "The
+inputs image") and `make eval-inputs` copies their sources to
+`scale/projects/<name>` (git ignores it), so they are there wherever the
+inputs images are.
+
+`make eval-scale NAME=<package>` runs `scale/measure.py run` in the
+container of `make eval` (no network, the repository read-only,
+`PYTHONHASHSEED=0`), with the memory of the container capped at
+`SCALE_MEMORY_MIB` (default 4096). The analysis is one job of the runner
+(above, "The runner"): the entry points are every `.py` file of the
+package's `packages`, the package root its `root`, with the runner's
+timeout and the cap also as its memory limit. The outcome is `finished`,
+or `killed by the cap` when the runner stopped the analysis at the limit or
+the kernel killed it (`SIGKILL`) in the capped container; otherwise the
+runner's status (`timeout`, `crash`). It writes the call graph to
+`$EVAL_OUT/scale-<commit>/scale/<name>.json` and the record next to it,
+`<name>.record.json`: the package and its archive's SHA-256, the commit,
+the Python, the cap, the number of files, the outcome, the analysis time
+(`seconds`), the wall time, the peak resident set size (`peak_rss_mib`)
+and the SHA-256 of the call graph of a finished run; it prints them as a
+table. A checkout with changes is refused. With `BASE=<ref>` it first
+measures BASE, checked out in a worktree, with this checkout's
+`measure.py` and sources, then this checkout, back to back, and prints
+`scale/measure.py compare`: each value of both, the change of the times and
+the peak, and whether the two call graphs are byte-identical.
+
+The licence of each package is read from the licence files of the pinned
+archive. The platform wheels of numpy and scipy also bundle compiled
+libraries under other licences (the GCC runtime under GPL-3.0-or-later
+with the GCC runtime library exception, libquadmath under LGPL-2.1);
+those libraries are not unpacked.
+
+| Package | Version | Kind | Analysed packages | Licence |
+|---|---|---|---|---|
+| pydantic | 2.14.2 | pure wheel | `pydantic` | MIT |
+| numpy | 2.5.4 | platform wheel | `numpy` | BSD-3-Clause |
+| pandas | 3.1.0 | platform wheel | `pandas` | BSD-3-Clause |
+| fsspec | 2026.9.0 | pure wheel | `fsspec` | BSD-3-Clause |
+| rich | 15.0.0 | pure wheel | `rich` | MIT |
+| pip | 26.2.2 | pure wheel | `pip` | MIT |
+| sqlalchemy | 2.1.6 | pure wheel | `sqlalchemy` | MIT |
+| pyparsing | 3.3.3 | pure wheel | `pyparsing` | MIT |
+| scipy | 1.18.1 | platform wheel | `scipy` | BSD-3-Clause |
+| openai | 3.42.1 | pure wheel | `openai` | Apache-2.0 |
+| dask | commit 08d1856d3e | git archive | `dask` | BSD-3-Clause |
+| matplotlib | commit 58b6a0663e | git archive | `matplotlib`, `mpl_toolkits` (in `lib/`) | Matplotlib License (PSF-based) |
+| scikit-learn | commit b39ab8987b | git archive | `sklearn` | BSD-3-Clause |
+| sphinx | commit eaebbec4d1 | git archive | `sphinx` | BSD-2-Clause |
+| sympy | commit bfdb8d51c1 | git archive | `sympy` | BSD-3-Clause |
+| xarray | commit 60bc816cd1 | git archive | `xarray` | Apache-2.0 |
+| cerberus | commit 8765b31744 | git archive | `cerberus` | ISC |
+| python-future | commit af1db970b0 | git archive | `_dummy_thread`, `_markupbase`, `_thread`, `builtins`, `copyreg`, `future`, `html`, `http`, `libfuturize`, `libpasteurize`, `past`, `queue`, `reprlib`, `socketserver`, `tkinter`, `winreg`, `xmlrpc` (in `src/`) | MIT |
+| graphene | commit 52143473ef | git archive | `graphene` | MIT |
+| elasticsearch-dsl-py | commit 5874ff6bd5 | git archive | `elasticsearch_dsl` | Apache-2.0 |
+
 ## The inputs image
 
 `container/fetch.py macro DESTINATION`, a step of the build of the inputs
@@ -395,6 +460,18 @@ and unpacked with tarfile's `data` filter; the archive is not kept.
 Nothing fetched is run. A source that is not its pin is not written, and
 the command fails, so the build fails.
 
+`container/fetch.py scale DESTINATION`, in the target `scale`, writes each
+package of `scale/projects.toml` to `DESTINATION/<name>`: it downloads the
+archive, checks its SHA-256 and unpacks the regular files that are Python
+sources (`.py`) or licence and notice files (a path with a component whose
+name starts with `LICENSE`, `LICENCE`, `COPYING` or `NOTICE`, in any case),
+each with mode 0644. A wheel is unpacked as a zip; a member whose path
+leaves the archive, or that is a link, refuses the archive. A git archive
+is unpacked with tarfile's `data` filter and without its one top
+directory; links are not written. The archive is not kept. The target
+`macro` copies the result to `/inputs/scale/projects`; the image of the
+`inputs` service does not hold it, so the trace image does not get it.
+
 `make eval-inputs`, the first step of every `make eval` target, needs no
 network when the images are published. `tools/inputs_key.py` prints the
 key of the two images that the build gives, `pycg-eval-macro` (the target
@@ -408,7 +485,8 @@ does not cover. `make eval-inputs` pulls
 `ghcr.io/vitsalis/pycg-eval-runner:<key>` and tags them with the local
 names; when a pull fails it builds both with `make eval-inputs-build`. It
 prints which it did, then copies the sources out of `pycg-eval-macro` in a
-container without network.
+container without network: those of the macro-benchmark to
+`macro-benchmark/projects/`, those of the scale set to `scale/projects/`.
 
 The workflow `Inputs` of CI runs when a file of the key changes. On a pull
 request it builds both targets, without pushing and without the right to

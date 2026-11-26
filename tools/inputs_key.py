@@ -20,6 +20,8 @@ COPIED_FILES = (
     "evaluation/container/fetch.py",
     "evaluation/macro-benchmark/projects.py",
     "evaluation/macro-benchmark/projects.toml",
+    "evaluation/scale/projects.py",
+    "evaluation/scale/projects.toml",
 )
 BUILD_FILES = (DOCKERFILE, DOCKERIGNORE, *COPIED_FILES)
 COMPOSE = "evaluation/compose.yaml"

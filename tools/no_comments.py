@@ -20,6 +20,7 @@ SCANNED_DIRECTORIES = ("pycg/", "tests/", "tools/", "evaluation/")
 NOT_SCANNED_DIRECTORIES = (
     "evaluation/micro-benchmark/snippets/",
     "evaluation/macro-benchmark/projects/",
+    "evaluation/scale/projects/",
     "evaluation/macro-benchmark/selection/",
     "tests/fixtures/",
 )

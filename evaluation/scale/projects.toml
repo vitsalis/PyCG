@@ -1,0 +1,220 @@
+# The scale set: 20 large packages on which PyCG's time and peak memory are
+# measured (evaluation/README.md, "The scale set"). They are not part of the
+# benchmark: they have no ground truth and are not scored. Each is pinned at
+# the SHA-256 of one archive: the only lock. The build of the inputs image
+# (evaluation/container/Dockerfile.inputs, fetch.py scale) downloads it,
+# checks the SHA-256, and writes its Python sources and its licence and
+# notice files into /inputs/scale/projects/<name>; `make eval-inputs` copies
+# them to projects/<name> here (the package's directory).
+#
+#   version   the release of a wheel, or the commit of a git archive
+#   kind      "pure wheel" or "platform wheel" (a wheel of PyPI, unpacked),
+#             or "git archive" (the archive of a commit that GitHub serves,
+#             unpacked without its top directory)
+#   file      the archive's file name
+#   url       where the build downloads it (https)
+#   sha256    the SHA-256 of the archive; the build fails on another
+#   licence   the licence of the package, read from its own files
+#   root      directory that is put on sys.path; module names are relative
+#             to it (relative to projects/<name>)
+#   packages  package directories, the analysed source (relative to root)
+
+[pydantic]
+version = "2.14.2"
+kind = "pure wheel"
+file = "pydantic-2.14.2-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/97/01/c71a71258b58659c72504e5fd65b451f6e36e34dc931d0b237ded213c814/pydantic-2.14.2-py3-none-any.whl"
+sha256 = "7efbf7507b937931cd32a5755acb00ea1cf5ccb1d4e8067a5850d5069e382118"
+licence = "MIT"
+root = "."
+packages = ["pydantic"]
+
+[numpy]
+version = "2.5.4"
+kind = "platform wheel"
+file = "numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/43/a3/c799c62e19c337e6d3770b08e475887fb30ce8477d3c09efca6b2f0228a6/numpy-2.5.4-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+sha256 = "fbde6962867ee75b48b0ee29b2b9372ec5d617799dbaf38e82dc0596f2f7738a"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["numpy"]
+
+[pandas]
+version = "3.1.0"
+kind = "platform wheel"
+file = "pandas-3.1.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/c5/a6/dc89cdd95e12093bc813e9b814a09f1a056be3e1304edaef9bf9dbee108a/pandas-3.1.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl"
+sha256 = "9433b5dc2f26ef9d9b56daaf4d41d078bf4372c5d88c42ed5b397a6eea80de16"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["pandas"]
+
+[fsspec]
+version = "2026.9.0"
+kind = "pure wheel"
+file = "fsspec-2026.9.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/6c/c0/a98505f18594f1bce828bb159cec0fcf9860562f1a2c85913409fc8f3d9e/fsspec-2026.9.0-py3-none-any.whl"
+sha256 = "8dd6e646e99ea382bd85f97a45e6b526a442d79423a7dc673f1e2756d05fcb5f"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["fsspec"]
+
+[rich]
+version = "15.0.0"
+kind = "pure wheel"
+file = "rich-15.0.0-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl"
+sha256 = "33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb"
+licence = "MIT"
+root = "."
+packages = ["rich"]
+
+[pip]
+version = "26.2.2"
+kind = "pure wheel"
+file = "pip-26.2.2-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl"
+sha256 = "fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70"
+licence = "MIT"
+root = "."
+packages = ["pip"]
+
+[sqlalchemy]
+version = "2.1.6"
+kind = "pure wheel"
+file = "sqlalchemy-2.1.6-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/c1/69/c75534e336b06b3fd3f76de73d89736510800e60c77c58d4e4ce18389018/sqlalchemy-2.1.6-py3-none-any.whl"
+sha256 = "106878cf3795cd3d357e2e858609f9e44f20f19b2d8e48a3532bef3f90b03fbe"
+licence = "MIT"
+root = "."
+packages = ["sqlalchemy"]
+
+[pyparsing]
+version = "3.3.3"
+kind = "pure wheel"
+file = "pyparsing-3.3.3-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/38/bb/d215ee7c73b61497b28a5503f9f53523f294fcc936762b7caf90e0c1c2b5/pyparsing-3.3.3-py3-none-any.whl"
+sha256 = "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"
+licence = "MIT"
+root = "."
+packages = ["pyparsing"]
+
+[scipy]
+version = "1.18.1"
+kind = "platform wheel"
+file = "scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+url = "https://files.pythonhosted.org/packages/df/64/ff35eb9e54894cf471ff4716abd3c81eb0a0626869217ce3e6ba4ccf17d7/scipy-1.18.1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+sha256 = "f55fa87b6c612ecd6b058f167c53231b1d14e412efe361d3d6e38b3631c73218"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["scipy"]
+
+[openai]
+version = "3.42.1"
+kind = "pure wheel"
+file = "openai-3.42.1-py3-none-any.whl"
+url = "https://files.pythonhosted.org/packages/fd/11/37b847d8a057000193974eeea1bcc681355ae50d35865f2eb2b323de6153/openai-3.42.1-py3-none-any.whl"
+sha256 = "c1959518a8e26f81a3564357082cb684540be639a21fece35ac5619415a3eadc"
+licence = "Apache-2.0"
+root = "."
+packages = ["openai"]
+
+[dask]
+version = "08d1856d3e0165153f20f940a78a97648acd11a7"
+kind = "git archive"
+file = "dask-08d1856d3e0165153f20f940a78a97648acd11a7.tar.gz"
+url = "https://codeload.github.com/dask/dask/tar.gz/08d1856d3e0165153f20f940a78a97648acd11a7"
+sha256 = "168c84c989f21d7279cdc8405a397bff8a49afff5685aa7e362b7cccd28ae74a"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["dask"]
+
+[matplotlib]
+version = "58b6a0663e169df556d5eb3dfba491fadbe952f0"
+kind = "git archive"
+file = "matplotlib-58b6a0663e169df556d5eb3dfba491fadbe952f0.tar.gz"
+url = "https://codeload.github.com/matplotlib/matplotlib/tar.gz/58b6a0663e169df556d5eb3dfba491fadbe952f0"
+sha256 = "76d741c0e48bf38342d31c0a05dcea3bf3c18d9ab1abbbaf938deddfccd56227"
+licence = "Matplotlib License (PSF-based)"
+root = "lib"
+packages = ["matplotlib", "mpl_toolkits"]
+
+[scikit-learn]
+version = "b39ab8987b9538f1b416f80a26edfd97448b1aaf"
+kind = "git archive"
+file = "scikit-learn-b39ab8987b9538f1b416f80a26edfd97448b1aaf.tar.gz"
+url = "https://codeload.github.com/scikit-learn/scikit-learn/tar.gz/b39ab8987b9538f1b416f80a26edfd97448b1aaf"
+sha256 = "1771b8381f1607a517d28436797981303e2807a4779017455671dd77d7ba7d43"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["sklearn"]
+
+[sphinx]
+version = "eaebbec4d165efcb5048fc06431e3bf796c9d224"
+kind = "git archive"
+file = "sphinx-eaebbec4d165efcb5048fc06431e3bf796c9d224.tar.gz"
+url = "https://codeload.github.com/sphinx-doc/sphinx/tar.gz/eaebbec4d165efcb5048fc06431e3bf796c9d224"
+sha256 = "459543b9098887b67e995035379a340fee12e4f4eec1d3bf2d1cd6ca2fe90fff"
+licence = "BSD-2-Clause"
+root = "."
+packages = ["sphinx"]
+
+[sympy]
+version = "bfdb8d51c1064a51a9ba050c608b92ba7de9eabc"
+kind = "git archive"
+file = "sympy-bfdb8d51c1064a51a9ba050c608b92ba7de9eabc.tar.gz"
+url = "https://codeload.github.com/sympy/sympy/tar.gz/bfdb8d51c1064a51a9ba050c608b92ba7de9eabc"
+sha256 = "ef63a0f21c875d3aaaa4774132f593999b5e861c5b1df6e7300c118955d1f325"
+licence = "BSD-3-Clause"
+root = "."
+packages = ["sympy"]
+
+[xarray]
+version = "60bc816cd1f946b7d6017c6a8801e50659413e54"
+kind = "git archive"
+file = "xarray-60bc816cd1f946b7d6017c6a8801e50659413e54.tar.gz"
+url = "https://codeload.github.com/pydata/xarray/tar.gz/60bc816cd1f946b7d6017c6a8801e50659413e54"
+sha256 = "e20c24c18ae1a0e139d3e66b5d820ec9471b6193bdbf02e3180357816d863b7d"
+licence = "Apache-2.0"
+root = "."
+packages = ["xarray"]
+
+[cerberus]
+version = "8765b317442c002a84e556bd5d9677b868e6deb2"
+kind = "git archive"
+file = "cerberus-8765b317442c002a84e556bd5d9677b868e6deb2.tar.gz"
+url = "https://codeload.github.com/pyeve/cerberus/tar.gz/8765b317442c002a84e556bd5d9677b868e6deb2"
+sha256 = "4ea5cb15747e5fbd3d78091e4fd57674c04c82f0856e8921a0f7cd238649216e"
+licence = "ISC"
+root = "."
+packages = ["cerberus"]
+
+[python-future]
+version = "af1db970b0879b59e7aeb798c27a623144561cff"
+kind = "git archive"
+file = "python-future-af1db970b0879b59e7aeb798c27a623144561cff.tar.gz"
+url = "https://codeload.github.com/PythonCharmers/python-future/tar.gz/af1db970b0879b59e7aeb798c27a623144561cff"
+sha256 = "31f45734bf7f4caa0a6b646835bd4513fa71149f4e1a274064226853f9b17288"
+licence = "MIT"
+root = "src"
+packages = ["_dummy_thread", "_markupbase", "_thread", "builtins", "copyreg", "future", "html", "http", "libfuturize", "libpasteurize", "past", "queue", "reprlib", "socketserver", "tkinter", "winreg", "xmlrpc"]
+
+[graphene]
+version = "52143473efad141f6700237ecce79b22e8ff4e41"
+kind = "git archive"
+file = "graphene-52143473efad141f6700237ecce79b22e8ff4e41.tar.gz"
+url = "https://codeload.github.com/graphql-python/graphene/tar.gz/52143473efad141f6700237ecce79b22e8ff4e41"
+sha256 = "4a02df2e85f52eea5b68b95bf8ba292fcc6e5f5760d33d0e1c7b797b0965ef36"
+licence = "MIT"
+root = "."
+packages = ["graphene"]
+
+[elasticsearch-dsl-py]
+version = "5874ff6bd5a7a77086539159f041eb979b5235cc"
+kind = "git archive"
+file = "elasticsearch-dsl-py-5874ff6bd5a7a77086539159f041eb979b5235cc.tar.gz"
+url = "https://codeload.github.com/elastic/elasticsearch-dsl-py/tar.gz/5874ff6bd5a7a77086539159f041eb979b5235cc"
+sha256 = "8d3ccb608d8eb69f68ea5df0351a081f7e62c87342b398c20fe0a7fd83864373"
+licence = "Apache-2.0"
+root = "."
+packages = ["elasticsearch_dsl"]

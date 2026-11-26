@@ -104,6 +104,7 @@ def test_a_child_that_dies_without_a_result_is_a_crash(tmp_path):
     )
     assert record["status"] == "crash"
     assert record["error"].startswith("exit status 3")
+    assert record["exit_status"] == 3
 
 
 def test_the_jobs_of_a_benchmark_run_k_at_a_time_each_with_its_limits(tmp_path):

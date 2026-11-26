@@ -3,6 +3,8 @@ LINTED := pycg tests tools evaluation
 INPUTS := evaluation/container/Dockerfile.inputs
 INPUTS_REGISTRY := ghcr.io/vitsalis
 PROJECTS := evaluation/macro-benchmark/projects
+SCALE_PROJECTS := evaluation/scale/projects
+SCALE_MEMORY_MIB ?= 4096
 METRICS := evaluation/metrics.json
 EVAL_OUT ?= $(or $(TMPDIR),/tmp)/pycg-evaluation
 EVAL_JOBS ?= $(shell nproc)
@@ -17,12 +19,17 @@ BASE_COMMIT = $(shell git rev-parse --short=10 $(BASE))
 BASE_RESULT = $(EVAL_OUT)/base-$(BASE_COMMIT)-for-$(COMMIT)
 BASE_TREE = $(EVAL_OUT)/tree-$(BASE_COMMIT)
 BASE_METRICS = $(EVAL_OUT)/metrics-$(BASE_COMMIT).json
-SANDBOX = docker run --rm --network none --read-only --tmpfs /tmp \
-	--memory 6g --memory-swap 6g --cap-drop ALL \
+sandbox = docker run --rm --network none --read-only --tmpfs /tmp \
+	--memory $(1) --memory-swap $(1) --cap-drop ALL \
 	--security-opt no-new-privileges --user $$(id -u):$$(id -g) \
 	-e HOME=/tmp -e PYTHONHASHSEED=0 \
 	-v $(CURDIR):$(CURDIR):ro -v $(GIT_COMMON):$(GIT_COMMON):ro \
 	-v $(EVAL_OUT):$(EVAL_OUT) pycg-eval-runner python3 -I
+SANDBOX = $(call sandbox,6g)
+SCALE_SANDBOX = $(call sandbox,$(SCALE_MEMORY_MIB)m)
+SCALE_MEASURE = $(CURDIR)/evaluation/scale/measure.py
+SCALE_RESULT = $(EVAL_OUT)/scale-$(COMMIT)
+SCALE_BASE_RESULT = $(EVAL_OUT)/scale-base-$(BASE_COMMIT)-for-$(COMMIT)
 LOOP = $(SANDBOX) $(CURDIR)/evaluation/common/loop.py
 GATE = $(SANDBOX) $(CURDIR)/evaluation/common/gate.py
 LABELER = $(SANDBOX) $(CURDIR)/evaluation/common/labels.py
@@ -38,6 +45,10 @@ base_inputs = if [ "$$(python3 -I $(BASE_TREE)/tools/inputs_key.py)" = "$$(pytho
 	else $(MAKE) --no-print-directory -C $(BASE_TREE) eval-inputs \
 	&& $(MAKE) --no-print-directory eval-inputs; fi
 need_base = $(if $(BASE),,$(error $@ needs BASE=<git ref of the base commit>))
+need_name = $(if $(NAME),,$(error $@ needs NAME=<package of evaluation/scale/projects.toml>))
+measure_scale = $(SCALE_SANDBOX) $(SCALE_MEASURE) run --checkout $(1) --name $(notdir $(2)) \
+	--package $(NAME) --out $(EVAL_OUT) --memory-mib $(SCALE_MEMORY_MIB)
+scale_record = $(1)/scale/$(NAME).record.json
 
 define gate
 $(base_metrics)
@@ -51,6 +62,13 @@ endef
 define measure_base
 git worktree add --detach $(BASE_TREE) $(BASE)
 ($(base_inputs) && $(call measure,$(BASE_TREE),$(notdir $(BASE_RESULT)),0)) \
+	|| (git worktree remove --force $(BASE_TREE) && false)
+git worktree remove --force $(BASE_TREE)
+endef
+
+define measure_scale_base
+git worktree add --detach $(BASE_TREE) $(BASE)
+$(call measure_scale,$(BASE_TREE),$(SCALE_BASE_RESULT)) \
 	|| (git worktree remove --force $(BASE_TREE) && false)
 git worktree remove --force $(BASE_TREE)
 endef
@@ -69,7 +87,7 @@ endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
-	eval-same-graphs eval-labels eval-changes
+	eval-same-graphs eval-labels eval-changes eval-scale
 
 setup:
 	uv sync --locked
@@ -105,12 +123,13 @@ eval-inputs:
 		&& $(MAKE) --no-print-directory eval-inputs-build \
 		&& echo "eval-inputs: built the inputs images of key $$key"; \
 	fi
-	rm -rf $(PROJECTS)
-	mkdir $(PROJECTS)
+	rm -rf $(PROJECTS) $(SCALE_PROJECTS)
+	mkdir $(PROJECTS) $(SCALE_PROJECTS)
 	mkdir -p $(EVAL_OUT)
 	docker run --rm --network none --user $$(id -u):$$(id -g) \
-		-v $(CURDIR)/$(PROJECTS):/out pycg-eval-macro \
-		cp -RP /inputs/macro-benchmark/projects/. /out/
+		-v $(CURDIR)/$(PROJECTS):/out -v $(CURDIR)/$(SCALE_PROJECTS):/scale \
+		pycg-eval-macro sh -c \
+		'cp -RP /inputs/macro-benchmark/projects/. /out/ && cp -RP /inputs/scale/projects/. /scale/'
 
 eval: eval-inputs
 	$(call measure,$(CURDIR),$(notdir $(RESULT)),0)
@@ -162,6 +181,13 @@ eval-labels: eval-inputs
 	$(LABELER) $(RESULT)/result.json $(BASE_RESULT)/result.json \
 		$(EVAL_OUT)/changed-$(COMMIT).txt $(EVAL_OUT)/labels-$(COMMIT).txt >> $(SUMMARY)
 	cat $(EVAL_OUT)/labels-$(COMMIT).txt >> $(LABELS)
+
+eval-scale: eval-inputs
+	$(need_name)
+	$(if $(BASE),$(measure_scale_base))
+	$(call measure_scale,$(CURDIR),$(SCALE_RESULT))
+	$(if $(BASE),$(SCALE_SANDBOX) $(SCALE_MEASURE) compare \
+		$(call scale_record,$(SCALE_BASE_RESULT)) $(call scale_record,$(SCALE_RESULT)))
 
 eval-changes:
 	$(need_base)
