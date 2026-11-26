@@ -783,6 +783,8 @@ COUNTED = {
 }
 
 NOT_COUNTED = {
+    "_accessor_hooks",
+    "_accessor_receivers",
     "_dunder_owners",
     "_sequences",
     "_dict_hubs",

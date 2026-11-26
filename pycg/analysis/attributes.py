@@ -34,8 +34,11 @@ class Attributes:
         if not isinstance(obj, Instance):
             return False
         if isinstance(access, Load):
-            itself = Each(self._itself, obj, access.dst, results=(access.dst,))
-            self.solver.attach(self.descriptor_itself(obj.cls), itself)
+            key = ("descriptor itself", obj, access.dst)
+            if key not in self._subscriptions:
+                self._subscriptions.add(key)
+                itself = Each(self._itself, obj, access.dst, results=(access.dst,))
+                self.solver.attach(self.descriptor_itself(obj.cls), itself)
         prefix = (receiver, receiver.cls) if method == "__get__" else (receiver,)
         found = self.lookup(obj.cls, method, obj)
         self._call_accessor(found, receiver, prefix, hook, access, ANALYSED_METHODS)
@@ -66,29 +69,28 @@ class Attributes:
 
     def _call_accessor(self, accessor, receiver, prefix, hook, access, kinds=None):
         if hook is None:
-            self._accessor_from(None, accessor, prefix, access, kinds)
+            self.accessors_of(None, accessor, access, kinds, len(prefix)).add(receiver)
             return
-        python = self.python_method(receiver.cls, hook)
-        from_access = Each(
-            self._accessor_from,
-            accessor,
-            prefix,
-            access,
-            kinds,
-            results=(access._result(),),
-        )
-        self.solver.attach(python, from_access)
-        found = self.lookup(receiver.cls, hook, receiver)
-        self.solver.attach(found, from_access)
+        key = (receiver.cls, hook, accessor, access, kinds, len(prefix))
+        hooks = self._accessor_hooks.get(key)
+        if hooks is None:
+            hooks = _AccessorHooks(self, accessor, access, kinds, len(prefix))
+            self._accessor_hooks[key] = hooks
+            self.solver.attach(self.python_method(receiver.cls, hook), hooks)
+            self.solver.attach(self.lookup(receiver.cls, hook, receiver), hooks)
+        hooks.add(receiver)
 
-    def _accessor_from(self, hook, accessor, prefix, access, kinds):
+    def accessors_of(self, hook, accessor, access, kinds, width):
         function = hook.function if isinstance(hook, BoundMethod) else hook
         caller = function.name if isinstance(function, Function) else None
         call = access.accessor_call(caller)
-        accessors = Each(
-            self.call_bound, prefix, call, kinds=kinds, results=(call.dst,)
-        )
-        self.solver.attach(accessor, accessors)
+        key = (accessor, call, kinds, width)
+        accessors = self._accessor_receivers.get(key)
+        if accessors is None:
+            accessors = _Accessors(self, call, kinds, width)
+            self._accessor_receivers[key] = accessors
+            self.solver.attach(accessor, accessors)
+        return accessors
 
     def _module_getattr(self, function, module, attr, load):
         if attr in module.defines:
@@ -252,6 +254,77 @@ def _is_property_method(method):
     return isinstance(function, External) and function.name.startswith(
         f"{BUILTIN_MODULE}.property."
     )
+
+
+def _prefix(receiver, width):
+    return (receiver, receiver.cls) if width == 2 else (receiver,)
+
+
+class _AccessorHooks(Constraint):
+    __slots__ = (
+        "analysis",
+        "accessor",
+        "access",
+        "accessor_kinds",
+        "width",
+        "receivers",
+        "callers",
+    )
+
+    def __init__(self, analysis, accessor, access, kinds, width):
+        self.analysis = analysis
+        self.accessor = accessor
+        self.access = access
+        self.accessor_kinds = kinds
+        self.width = width
+        self.receivers = []
+        self.callers = {}
+
+    def results(self):
+        return (self.access._result(),)
+
+    def apply(self, hook):
+        accessors = self.analysis.accessors_of(
+            hook, self.accessor, self.access, self.accessor_kinds, self.width
+        )
+        if accessors in self.callers:
+            return
+        self.callers[accessors] = None
+        for receiver in list(self.receivers):
+            accessors.add(receiver)
+
+    def add(self, receiver):
+        self.receivers.append(receiver)
+        for accessors in list(self.callers):
+            accessors.add(receiver)
+
+
+class _Accessors(Constraint):
+    __slots__ = ("analysis", "call", "kinds", "width", "receivers", "methods")
+
+    def __init__(self, analysis, call, kinds, width):
+        self.analysis = analysis
+        self.call = call
+        self.kinds = kinds
+        self.width = width
+        self.receivers = []
+        self.methods = []
+
+    def results(self):
+        return (self.call.dst,)
+
+    def apply(self, method):
+        if self.kinds is not None and not isinstance(method, self.kinds):
+            return
+        self.methods.append(method)
+        for receiver in list(self.receivers):
+            self.analysis.call_bound(method, _prefix(receiver, self.width), self.call)
+
+    def add(self, receiver):
+        self.receivers.append(receiver)
+        prefix = _prefix(receiver, self.width)
+        for method in list(self.methods):
+            self.analysis.call_bound(method, prefix, self.call)
 
 
 class _Access(Constraint):
