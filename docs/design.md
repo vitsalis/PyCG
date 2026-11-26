@@ -2977,7 +2977,15 @@ the store to the field, as does every name of a class whose MROs are the
 exhaustive order (see *Alternative hierarchies*). The decision is made like
 a lookup (`Hierarchy.instance_dict_written` and `not_data_descriptor`): it
 waits for complete hierarchies, is made again as MROs grow, and only ever
-adds the write, so it does not depend on the order of the solve.
+adds the write, so it does not depend on the order of the solve. Each
+decision is one record (`_FieldWrites`), which keeps each write, a stored
+value and a field, once: the store of a field meets every instance that
+the member holds, and those instances share a class and so a decision.
+Once the decision allows the write, a new write is an edge at once; once
+the decision is saturated, a new write saturates the field. On pip 26.2.2,
+172 thousand stores through an instance met 2.9 million member values that
+are instances, for 168 thousand distinct writes; a record per meeting held
+3.1 million constraints at the end of the solve.
 
 The methods of `property` are also called explicitly, on the engine's
 property or on a property instance, through the instance, through

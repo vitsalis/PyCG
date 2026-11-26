@@ -126,6 +126,7 @@ class Analysis(
         self._accessor_hooks = {}
         self._accessor_receivers = {}
         self._hook_calls = {}
+        self._field_writes = {}
         self._dict_hubs = {}
         self._subscript_keys = {}
         self._watches = {}

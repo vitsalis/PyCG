@@ -186,21 +186,20 @@ class Attributes:
 
     def _store_field(self, obj, attr, src):
         field = self.field(obj, attr)
-        written = self.instance_dict_written(obj.cls, attr)
-        self.solver.attach(
-            written, Each(self._write_field, src, field, results=(field,))
-        )
+        self._write_field_once(self.instance_dict_written(obj.cls, attr), src, field)
 
-    def _write_field(self, marker, src, field):
-        self.add_edge(src, field)
+    def _write_field_once(self, written, src, field):
+        writes = self._field_writes.get(written)
+        if writes is None:
+            writes = self._field_writes[written] = _FieldWrites(self)
+            self.solver.attach(written, writes)
+        writes.add(src, field)
 
     def _store_past(self, value, src, field):
         if isinstance(value, Wrapper) and value.kind == "property":
             return
         if isinstance(value, Instance):
-            written = self.not_data_descriptor(value.cls)
-            each = Each(self._write_field, src, field, results=(field,))
-            self.solver.attach(written, each)
+            self._write_field_once(self.not_data_descriptor(value.cls), src, field)
             return
         self.add_edge(src, field)
 
@@ -357,6 +356,39 @@ class _Accessors(Constraint):
         prefix = _prefix(receiver, self.width)
         for method in list(self.methods):
             self.analysis.call_bound(method, prefix, self.call)
+
+
+class _FieldWrites(Constraint):
+    __slots__ = ("analysis", "writes", "written", "saturated")
+
+    def __init__(self, analysis):
+        self.analysis = analysis
+        self.writes = {}
+        self.written = False
+        self.saturated = False
+
+    def results(self):
+        return tuple(field for _, field in self.writes)
+
+    def saturate(self, solver):
+        self.saturated = True
+        super().saturate(solver)
+
+    def apply(self, marker):
+        if self.written:
+            return
+        self.written = True
+        for src, field in self.writes:
+            self.analysis.add_edge(src, field)
+
+    def add(self, src, field):
+        if (src, field) in self.writes:
+            return
+        self.writes[(src, field)] = None
+        if self.saturated:
+            self.analysis.solver.add_object(field, self.analysis.solver.saturated)
+        elif self.written:
+            self.analysis.add_edge(src, field)
 
 
 class _HookCalls(Constraint):
