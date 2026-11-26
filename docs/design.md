@@ -897,7 +897,12 @@ over the source dicts either way, and every source dict meets every target,
 so the result is the same; the `__hash__` and key-comparison calls of each
 site go to the keys of the sources that do not keep their hashes, as each
 pair's did. While one dict reaches the source node it is copied directly, so
-the copy once per pair above holds.
+the copy once per pair above holds. The hub is one per source node, shared
+by every site and target that update from it: each target takes it once
+per scope and site, and each site calls `__hash__` on the hub's keys once
+and compares them with the keys of its target. A source dict or a target
+that arrives after the second dict goes through the hub at once; the
+direct copies made before stay, and give what the hub gives.
 
 A program has millions of `Each` constraints and of nodes with a successor.
 An `Each` keeps its function and the function's owner, not a bound method
@@ -908,7 +913,10 @@ each pair of an object and a site (the parameters that a call supplies, the
 set of instances that the calls of a class make, an attached special-method
 call) are shared between pairs where they hold nothing of the pair: on large
 programs these records are most of the memory, millions of bindings and
-implicit calls.
+implicit calls. An implicit special-method call keeps the objects that it
+was attached for (`_dunder_owners`): the first one itself, and a set from
+the second one on, which answers whether an object is new as the set
+would.
 
 A node that no rule can read yet need not exist. A call of a modelled builtin
 or of a stubbed function binds its arguments to the parameters of each
@@ -2729,16 +2737,19 @@ looks a name up on the class of an instance, and acts only on what the
 lookup finds, is applied for that instance once the class may have the
 name (`Hierarchy.later`): the class side of a load and of a store (for a
 store, its accessor and whether a property or a descriptor that the
-lookup finds takes the store from the field), the attribute hook of an
-access, and the special method of an implicit call.
+lookup finds takes the store from the field; the field and the decision
+of the class whether the store writes it are made at the store), the
+attribute hook of an access, and the special method of an implicit call.
 The first lookup of the name through an instance of the class is the
 *witness*. Until it gets an object or an edge, each rule waits as one
 entry in a list of the class and the name, with its instance; then the
 rules of the list run, and make the lookups and constraints that they
 would have made at once, which had nothing to act on before. An entry is
-two slots of the list, the rule and the instance; the rule, with its
-arguments, is one tuple that every class waiting on it shares, and the
-rules run grouped by rule in the order in which each first waited. On
+two slots of the list (`Watch`), the rule and the instance; the rule,
+with its arguments, is one tuple that every class waiting on it shares
+(`Analysis._waiting_rules`), and the rules run grouped by rule in the
+order in which each first waited, so each runs with the receivers, and in
+the order, that a list per rule would give. On
 openai, 2.75 million entries wait at the end of the solve, a site times
 each of the 2,662 classes of instances that reach it (truth tests,
 attribute hooks), for 23,576 rules; a tuple, a bound method and a list per
@@ -2762,10 +2773,13 @@ not change.
 
 The loads that reach an instance through one lookup of a name are one
 record on that lookup (`_Deliveries`), with the instance and the hook
-(`__getattribute__`, or none through `super()`): each value that the lookup
-gets is delivered to every load of the record, and a load that joins later
-gets the values that the lookup holds at once, as a constraint attached to
-it then would, the saturated value included. A value that the lookup held
+(`__getattribute__`, or none through `super()`): a lookup node has one
+receiver, so one instance and one hook. Each value that the lookup gets
+is delivered to every load of the record, and a load that joins later
+gets the values that the lookup holds at once (`Solver.apply_now`, which
+defers past the bound of nested attachments as an attachment does), as a
+constraint attached to it then would, the saturated value included; an
+opaque value saturates every load. A value that the lookup held
 but had not yet given the record reaches the new load twice, which changes
 nothing. On xarray these were 3.4 million constraints at 2.5 GiB, one per
 instance and load site.
@@ -3015,9 +3029,13 @@ exhaustive order (see *Alternative hierarchies*). The decision is made like
 a lookup (`Hierarchy.instance_dict_written` and `not_data_descriptor`): it
 waits for complete hierarchies, is made again as MROs grow, and only ever
 adds the write, so it does not depend on the order of the solve. Each
-decision is one record (`_FieldWrites`), which keeps each write, a stored
-value and a field, once: the store of a field meets every instance that
-the member holds, and those instances share a class and so a decision.
+decision (the node of `instance_dict_written` for the class and name at
+the store, or of `not_data_descriptor` for the class of a member that is
+an instance) is one record (`_FieldWrites`), which keeps each write, a
+stored value and a field, once, and acts on the first object of its
+node, as later ones decide nothing more: the store of a field meets every
+instance that the member holds, and those instances share a class and so
+a decision.
 Once the decision allows the write, a new write is an edge at once; once
 the decision is saturated, a new write saturates the field. On pip 26.2.2,
 172 thousand stores through an instance met 2.9 million member values that
@@ -3109,12 +3127,16 @@ CPython. An outside hook (`__setattr__ = object.__setattr__`) is Python's
 own, which is not called. The instance's fields are read and written in
 every case, and an explicit `object.__setattr__(self, name, value)` is not
 a store. The calls of a hook at the sites that one instance reaches are one
-record on the instance's lookup of the hook (xarray: 3.3 million calls of
-instances and sites): each hook value that the lookup gets is called at
-every site of the record, and a site that joins later calls the values that
-the lookup holds, as a constraint attached to it then would: none once it
-holds the saturated value, and the saturated value as its result when one
-of them is opaque.
+record on the instance's lookup of the hook (`_HookCalls`; xarray: 3.3
+million calls of instances and sites): each hook value that the lookup gets
+is called at every site of the record, and a site that joins later calls
+the values that the lookup holds, as a constraint attached to it then
+would: none once it holds the saturated value, and the saturated value as
+its result when one of them is opaque. Whether the lookup holds the
+saturated value is read from its set, not from what the record was given:
+a lookup that saturated in the last propagation has not given it yet. Once
+an opaque value has reached the record, a site that joins gets the
+saturated value as its result, and calls the other values.
 
 Python's own hooks call the descriptor accessors (a property's, and
 `__get__`, `__set__` and `__delete__` of an instance's class) from the
@@ -3127,6 +3149,20 @@ caller. Python's own hook also runs where, in some MRO, no class body
 defines the hook before an outside class (decided like a lookup);
 flow-insensitively, a hook assigned to such a class later runs as well, so
 its accessor is called from both.
+
+The accessor calls of one class and hook are one record (`_AccessorHooks`),
+attached to Python's own hook of the class and to the lookup of the hook
+through the first receiver. It keeps the receivers of each accessor and
+access, and the callers that the hook values give (the hook's function, or
+the access itself): a caller that arrives calls every accessor with every
+receiver, and a receiver or an accessor that arrives is called from every
+caller seen. The value of a hook gives only its caller, which is the same
+for every instance of the class. The calls of one accessor from one caller
+are one record (`_Accessors`, by accessor, call, kinds and width), which
+binds each receiver as its own call did (the instance, or the instance and
+its class); a receiver that arrives gets every method of the accessor seen.
+Once one of the two nodes holds the saturated value, an accessor that
+arrives saturates its result.
 
 - Limit: a hook that replaces Python's (`self.__dict__[name] = value`)
   never calls the accessor, but gets the edge.
@@ -3502,7 +3538,10 @@ analysed class of the MRO defines `__iop__`. A comparison calls the method
 of each side (`__lt__`, the reflected `__gt__`) and gives what it returns,
 which need not be a bool; `!=` also calls `__eq__` where no class defines
 `__ne__` (`object.__ne__` does). A unary operator calls `__neg__`,
-`__pos__` or `__invert__`.
+`__pos__` or `__invert__`. Each operand of an operator is one constraint
+(`_Operand`) that keeps the operator, its side and one of four shared sets
+of the kinds that it acts on; the operator makes its calls, and the
+classes that it tests, when it first needs them.
 
 **Comparisons of containers.** Two containers that the analysis tracks
 compare their elements within one family, the pairs of kinds for which
@@ -3578,9 +3617,12 @@ which Python puts in a new set. The comparisons of a site are one record
 holds it. Until the first key arrives, it keeps each stored key once;
 from then on it compares each stored key but the first as it arrives, so
 it keeps only whether the first key was stored, to compare it when a
-second key arrives. On openai a `.get` site meets the keys of 653 dicts
-that hold the same instances, and a list of every arrival held 1.9 GiB
-at the end of the solve.
+second key arrives. The keys already compared are one set per
+comparison call, so a stored key that reaches the record again, from
+another container, compares nothing; an opaque key compares nothing, and
+a key does not stop being opaque. On openai a `.get` site meets the keys
+of 653 dicts that hold the same instances, and a list of every arrival
+held 1.9 GiB at the end of the solve.
 
 - Limit: keys whose hash is reused are stored keys only: Python also
   compares them, as they enter, with the keys of a set or dict that is
@@ -3848,6 +3890,17 @@ from values that the analysis does not see (`i + 1`, an argument from
 outside): the completion (Part 3) then reads every element or writes to
 `unknown`.
 
+A subscript site is one constraint on its container node (`_Subscript`)
+and, for reads and for writes, one on its key node (`_KeyedGroup`), which
+keeps the containers and keys that reach the site: a key that arrives
+meets every container seen so far, and a container every key seen, each
+pair once. Of the keys that are not a constant or a pattern only the first
+is applied to a container, since each of them reads or writes every
+element of it; a type form is no key. What the key of a site hashes and
+compares (see *Hashing*) is one lookup per key node, scope and site
+(`_subscript_keys`), which each dict that the site reaches joins: whether
+a stored key is compared depends on the key, not on the dict.
+
 - Limit: `insert`, `pop(0)` and `sort` do not shift positions.
 
 **Pattern keys.** In one sentence: a pattern key restricts a dict read
@@ -3955,7 +4008,13 @@ elements are the container's; `iter()` of any other container, an
 iterator or a generator gives the object itself. If no analysed class and no builtin class (`list`)
 of its type defines `__iter__` but one defines `__getitem__`, `iter()`
 gives an iterator whose `next()` calls `__getitem__` with an index that is
-not known (the sequence protocol), from the scope that iterates. Every
+not known (the sequence protocol), from the scope that iterates. That
+fallback is one record per class, kind of the iterated object, iteration
+and result (`_Sequences`), on one lookup of `__getitem__` through the
+first object: the rule reads only whether the lookup finds a method, and
+the objects of one kind and class find the same, so the first object's
+lookup answers for each. An object that arrives later is iterated at once,
+and an opaque one gives the result the saturated value. Every
 iteration, `iter()`, `next()` and an explicit `__next__()` of these
 iterators and of generators go through one rule. `iter(callable,
 sentinel)` gives an iterator whose `next()` calls the callable, implicitly,
@@ -4474,7 +4533,15 @@ call copies the arguments of the call that it extends, and that call may
 itself be such a copy (an instance whose `__call__` is another instance):
 copies are keyed by the call at the root of that chain, which is finite,
 not by the call that each extends, which would make a new key for each
-link.
+link. The instances of a class share one call of each special method at a
+root (`_dunder_calls`, keyed as in the table: nothing for an instance), and
+each instance that asks for it attaches its own lookup of the method to it
+once, so each instance's method is still bound to that instance. Its
+result node is the union of what each instance's call gave, joined by an
+edge to each request's result node, and what depends on the call (its
+literal arguments, whether it can bind) is read from the root, which every
+request shares. The `__new__` that calling a class runs stays one call per
+class.
 
 **No key loses an argument.** The analysis makes calls only from the
 source, at sites (where a request with other nodes is joined by edges), as
@@ -4489,9 +4556,14 @@ that it was asked with the same, so a kind of call that broke the rule
 fails the tests instead of losing values.
 
 A plain stub method (one that no model, protocol or library rule reads: a
-function of a non-builtin stub) called through bound methods of many
-receivers at one call is one call for all of them, up to the cap of
-receivers: its receiver positions are nodes that hold the receivers, and its
+function of a non-builtin stub with no rule of its own, that returns no
+argument, and that no table of `builtin_models.py` lists,
+`GROUP_EXCLUDED_PATHS`) called through bound methods of many receivers at
+one call is one call for all of them, up to the cap of receivers
+(`_BoundGroup`): a tuple of receivers goes to the group that holds it,
+else to the last group while that holds fewer than the cap, else to a new
+one; a rule that observes a group sees every tuple of it, also those added
+before it. its receiver positions are nodes that hold the receivers, and its
 binding, typed callbacks and call edges are made once. What a single
 receiver decides is still decided per receiver: the results that name the
 receiver (`*self`, `type[Self]`) are added for each receiver, whether the
@@ -4570,6 +4642,14 @@ them, so no kind of node keys another of its own kind:
 | Call back of an argument | call back and argument node |
 | Handler of a tuple of exception classes | tuple and handler node |
 | Subscription of the filter of a class test to a class expression or a position of a tuple of classes | node, filter (one per test and branch), alternative (one per value of the class expression) and position |
+| Hub of a dict update (`_DictHub`) | source node |
+| Key lookup of a subscript (`_subscript_keys`) | key node, scope and site |
+| Sequence fallback of an iteration (`_Sequences`) | class, kind of the iterated object, iteration and result node |
+| Hook calls of an instance (`_HookCalls`) | lookup node of the hook |
+| Accessor calls of a class (`_AccessorHooks`; `_Accessors`) | class and hook; accessor node, call, kinds and width |
+| Field writes of a store decision (`_FieldWrites`) | decision node |
+| Loads through a lookup (`_Deliveries`) | lookup node |
+| Group of bound calls of a plain stub method (`_BoundGroup`) | the call that it extends, the method, the number of receivers and whether the class of the first is unknown; a list of groups of at most the cap of receivers |
 
 The other rules make nodes and constraints per call and object, or per
 constraint and object, and no rule makes a constraint whose application
