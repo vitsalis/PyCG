@@ -56,6 +56,7 @@ parity_key = python3 -I tools/parity/dump.py key --checkout $(CURDIR)
 PARITY_ORACLE = $(EVAL_OUT)/parity-oracle-$(shell $(parity_key))
 PARITY_RUST = $(EVAL_OUT)/parity-rust-$(COMMIT)
 PARITY_REQUIRED = tools/parity/required.txt
+PARITY_BINARIES = $(or $(CARGO_TARGET_DIR),$(CURDIR)/target)/release
 
 define gate
 $(base_metrics)
@@ -233,5 +234,13 @@ parity:
 	cargo build --release --locked
 	rm -rf $(PARITY_RUST)
 	mkdir -p $(PARITY_RUST)/run-1 $(PARITY_RUST)/run-2
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D2.jsonl | sort | while read -r dump; do \
+		input=$$(dirname "$$dump"); \
+		for run in run-1 run-2; do \
+			mkdir -p $(PARITY_RUST)/$$run/$$input && \
+			$(PARITY_BINARIES)/pycg_dump stubs "$$dump" \
+				> $(PARITY_RUST)/$$run/$$input/D2.jsonl || exit 1; \
+		done; \
+	done
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
