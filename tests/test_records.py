@@ -188,7 +188,7 @@ def test_a_special_method_call_is_attached_once(tmp_path):
     attached = [
         (owner, call, *requests[call])
         for call, owners in analysis._dunder_owners.items()
-        for owner in owners
+        for owner in (owners if type(owners) is set else (owners,))
     ]
     names = [name for _, _, name, _ in attached]
     assert names.count("__len__") == 4 and names.count("__iter__") == 2

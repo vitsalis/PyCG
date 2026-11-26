@@ -797,13 +797,19 @@ class Analysis(
 
     def _call_dunder(self, obj, name, call, dst, unless):
         implicit = self._implicit_call(obj, name, call, dst, unless)
-        owners = self._dunder_owners.setdefault(implicit, set())
-        if obj not in owners:
+        owners = self._dunder_owners.get(implicit)
+        if owners is None:
+            self._dunder_owners[implicit] = obj
+        elif owners is obj or (type(owners) is set and obj in owners):
+            return
+        elif type(owners) is set:
             owners.add(obj)
-            method = Each(
-                self._type_method, obj, name, implicit, unless, results=(implicit.dst,)
-            )
-            self.solver.attach(self._types(obj), method)
+        else:
+            self._dunder_owners[implicit] = {owners, obj}
+        method = Each(
+            self._type_method, obj, name, implicit, unless, results=(implicit.dst,)
+        )
+        self.solver.attach(self._types(obj), method)
 
     def _types(self, obj):
         if isinstance(obj, Instance):
