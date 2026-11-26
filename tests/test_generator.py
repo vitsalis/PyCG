@@ -1137,3 +1137,45 @@ def test_removed_options_are_rejected(flag):
 
     assert result.returncode == 2
     assert "unrecognized arguments" in result.stderr
+
+
+def test_each_load_of_an_instance_gets_what_its_lookup_finds(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class Base:
+                def speak(self): return self
+                @property
+                def size(self): return self
+            class Dog(Base):
+                def speak(self):
+                    return super().speak()
+            def early(animal):
+                return animal.speak
+            def measure(animal):
+                return animal.size
+            first, second = Dog(), Dog()
+            a = early(first)
+            b = early(second)
+            a()
+            def late(animal):
+                return animal.speak
+            c = late(first)
+            d = measure(first)
+            e = measure(second)
+            """
+        },
+    )
+    graph = generator.output()
+    assert "main.Dog.speak" in graph["main"]
+    assert "main.Base.speak" in graph["main.Dog.speak"]
+    assert set(graph["main.measure"]) == {"main.Base.size"}
+    points_to = generator.output_points_to()
+    first = [name for name in points_to["main.first"] if "@main" in name]
+    second = [name for name in points_to["main.second"] if "@main" in name]
+    assert len(first) == 1 and len(second) == 1 and first != second
+    bound = {f"<bound main.Dog.speak of {dog}>" for dog in first + second}
+    assert set(points_to["main.a"]) == set(points_to["main.b"]) == bound
+    assert points_to["main.c"] == [f"<bound main.Dog.speak of {first[0]}>"]
+    assert set(points_to["main.d"]) == set(points_to["main.e"]) == {*first, *second}

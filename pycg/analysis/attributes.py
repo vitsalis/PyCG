@@ -156,7 +156,7 @@ class Attributes:
                 owner = receiver.cls if isinstance(receiver, Instance) else receiver
                 found = self.lookup(owner, attr, receiver, obj.cls, EXPLICIT)
                 if isinstance(receiver, Instance):
-                    self.solver.attach(found, _Deliver(self, receiver, load, None))
+                    self._deliver(found, receiver, load, None)
                 else:
                     each = Each(self._class_attribute, owner, load, results=(dst,))
                     self.solver.attach(found, each)
@@ -205,7 +205,18 @@ class Attributes:
 
     def _deliver_load(self, obj, load):
         found = self.lookup(obj.cls, load.attr, obj, None, EXPLICIT)
-        self.solver.attach(found, _Deliver(self, obj, load, "__getattribute__"))
+        self._deliver(found, obj, load, "__getattribute__")
+
+    def _deliver(self, found, receiver, load, hook):
+        deliveries = self._deliveries.get(found)
+        if deliveries is None:
+            deliveries = _Deliveries(self, receiver, hook)
+            self._deliveries[found] = deliveries
+            self.solver.attach(found, deliveries)
+        assert deliveries.receiver is receiver, found
+        assert deliveries.hook == hook, found
+        deliveries.loads.append(load)
+        self.solver.apply_now(found, _Deliver(self, receiver, load, hook))
 
     def _found_store(self, obj, store):
         found = self.lookup(obj.cls, store.attr, obj)
@@ -548,6 +559,32 @@ class _Deliver(Constraint):
 
     def results(self):
         return (self.load._result(),)
+
+    def captured(self):
+        return (self.receiver,)
+
+
+class _Deliveries(Constraint):
+    __slots__ = ("analysis", "receiver", "hook", "loads")
+
+    def __init__(self, analysis, receiver, hook):
+        self.analysis = analysis
+        self.receiver = receiver
+        self.hook = hook
+        self.loads = []
+
+    def apply(self, obj):
+        self.apply_each((obj,))
+
+    def apply_each(self, objects):
+        deliver, receiver, hook = self.analysis.deliver, self.receiver, self.hook
+        loads = list(self.loads)
+        for obj in objects:
+            for load in loads:
+                deliver(obj, receiver, load, hook)
+
+    def results(self):
+        return tuple(load._result() for load in self.loads)
 
     def captured(self):
         return (self.receiver,)
