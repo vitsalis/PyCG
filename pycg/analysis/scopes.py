@@ -27,8 +27,6 @@ class Scope:
         "kind",
         "node",
         "parent",
-        "owner",
-        "caller",
         "local_name",
         "name",
         "private_class",
@@ -51,8 +49,6 @@ class Scope:
         self.kind = kind
         self.node = node
         self.parent = parent
-        self.owner = parent.owner if kind == COMPREHENSION else self
-        self.caller = parent.caller if kind in (CLASS, COMPREHENSION) else self
         self.local_name = local_name
         self.name = None
         if kind == CLASS:
@@ -72,6 +68,14 @@ class Scope:
         self.imports = {}
         self.definitions = {}
         self.reads = set()
+
+    @property
+    def owner(self):
+        return self.parent.owner if self.kind == COMPREHENSION else self
+
+    @property
+    def caller(self):
+        return self.parent.caller if self.kind in (CLASS, COMPREHENSION) else self
 
     def __repr__(self):
         return f"<Scope {self.kind} {self.name}>"

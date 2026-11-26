@@ -439,15 +439,15 @@ class ModuleBuilder(
         function = self.analysis.function(
             scope.name, self.module.name, signature, defaults, scope.generator
         )
-        name = "<lambda>" if isinstance(node, ast.Lambda) else node.name
-        name_field = self.analysis.field(function, "__name__")
-        self.analysis.add_object(name_field, self.analysis.const(name))
-        function.is_async = isinstance(node, ast.AsyncFunctionDef)
         function.lineno, function.end_lineno = node.lineno, node.end_lineno
         function.col_offset, function.end_col_offset = (
             node.col_offset,
             node.end_col_offset,
         )
+        name = "<lambda>" if isinstance(node, ast.Lambda) else node.name
+        name_field = self.analysis.field(function, "__name__")
+        self.analysis.add_object(name_field, self.analysis.const(name))
+        function.is_async = isinstance(node, ast.AsyncFunctionDef)
         self.parameter_annotations(function, arguments, scope)
         for name, parameter in function.parameters.items():
             variable = parameter

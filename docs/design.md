@@ -254,6 +254,15 @@ real calls of other programs, fails that test.
 The AST is never walked again after the builder, and there is no cap on
 iterations.
 
+The analysis frees what it no longer needs by reference counting alone, so
+it runs with Python's cyclic garbage collector off (`Program.analyse`) and
+leaves the collector as it found it. A scope does not refer to itself (its
+`owner` and `caller` are derived from its parents), so a module's tree and
+scopes go as soon as its build ends; the nodes, objects and constraints
+that the builder and the solver make live until the analysis ends. The
+collector would only scan them again and again: on sympy and scipy it took
+a third and a fifth of the run and found next to no garbage.
+
 `semantics.py` holds `Analysis`, the program-wide state and the rules of
 loads, stores and calls. Its parts are modules of their own: attribute
 loads, stores and descriptors (`attributes.py`), class hierarchies,
