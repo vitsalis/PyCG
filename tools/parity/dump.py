@@ -19,7 +19,7 @@ Writes the parity dumps of the Python engine (docs/rust/PLAN.md, section 3).
         one input: D1.jsonl to D5.jsonl and D6.json in DIR
     dump.py oracle --checkout PATH --out DIR [--set micro|macro]... [--name INPUT]...
         every input of the sets for hash seeds 0 and 1, in DIR/seed-<s>/<input>/,
-        then checks that both seeds give one D6
+        then checks that both seeds give the same D1 to D6, byte for byte
     dump.py key --checkout PATH
         the key of an oracle run: the git objects of KEYED_PATHS at HEAD (the
         engine, this harness, the micro cases and the runner that lists the
@@ -855,6 +855,19 @@ def run_input(checkout, job, directory, seed):
     return done.returncode
 
 
+def differing_dumps(first, second):
+    found = []
+    for dump in DUMPS:
+        name = f"{dump}.json" if dump == "D6" else f"{dump}.jsonl"
+        left, right = first / name, second / name
+        if (
+            not (left.exists() and right.exists())
+            or left.read_bytes() != right.read_bytes()
+        ):
+            found.append(dump)
+    return found
+
+
 def oracle(checkout, out, sets, workers, names=()):
     checkout = Path(checkout).resolve()
     out = Path(out).resolve()
@@ -878,23 +891,23 @@ def oracle(checkout, out, sets, workers, names=()):
     failed = sum(1 for code in codes if code)
     different = []
     for job in jobs:
-        documents = [out / f"seed-{seed}" / job.key / "D6.json" for seed in SEEDS]
-        if all(path.exists() for path in documents):
-            first, second = (path.read_bytes() for path in documents)
-            if first != second:
-                different.append(job.key)
+        directories = [out / f"seed-{seed}" / job.key for seed in SEEDS]
+        if not any((directory / "error.txt").exists() for directory in directories):
+            dumps = differing_dumps(*directories)
+            if dumps:
+                different.append((job.key, dumps))
     peak_mib = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss / 1024
     print(
         f"parity-oracle: {len(jobs)} inputs, {failed} failed runs, "
-        f"{len(different)} with differing documents across seeds, "
+        f"{len(different)} with differing dumps across seeds, "
         f"largest run {peak_mib:.0f} MiB"
     )
     for (job, seed), code in zip(tasks, codes):
         if code:
             error = out / f"seed-{seed}" / job.key / "error.txt"
             print(f"  {job.key} (seed {seed}): {error.read_text().strip()}")
-    for key in different:
-        print(f"  {key}: the documents of seeds 0 and 1 differ")
+    for key, dumps in different:
+        print(f"  {key}: seeds 0 and 1 differ in {', '.join(dumps)}")
     return 1 if different or failed else 0
 
 
