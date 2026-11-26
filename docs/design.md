@@ -4602,15 +4602,14 @@ that a construct iterates, what an unpacked argument passes, the node that
 that it was asked with the same, so a kind of call that broke the rule
 fails the tests instead of losing values.
 
-A plain stub method (one that no model, protocol or library rule reads: a
-function of a non-builtin stub with no rule of its own, that returns no
-argument, and that no table of `builtin_models.py` lists,
+A plain stub method (a stub function with no rule of its own, that returns
+no argument, and that no table of `builtin_models.py` lists,
 `GROUP_EXCLUDED_PATHS`) called through bound methods of many receivers at
 one call is one call for all of them, up to the cap of receivers
-(`_BoundGroup`): a tuple of receivers goes to the group that holds it,
-else to the last group while that holds fewer than the cap, else to a new
-one; a rule that observes a group sees every tuple of it, also those added
-before it. its receiver positions are nodes that hold the receivers, and its
+(`_BoundGroup`): a tuple of receivers goes to the group that holds it, else
+to the last group while that holds fewer than the cap, else to a new one; a
+rule that observes a group sees every tuple of it, also those added before
+it. its receiver positions are nodes that hold the receivers, and its
 binding, typed callbacks and call edges are made once. What a single
 receiver decides is still decided per receiver: the results that name the
 receiver (`*self`, `type[Self]`) are added for each receiver, whether the
@@ -4619,9 +4618,13 @@ unknown, which is part of the key, and any other use of the call (a call of
 something else with it, a bound method or implicit call that extends it)
 goes through each receiver's own call. The parameters of the binding get the
 union of the receivers, which is what the result and the callees received
-from the calls of every receiver. A group takes at most the cap of
-receivers, so its receiver nodes never saturate, as no receiver node of one
-receiver's call did.
+from the calls of every receiver. The rules of a builtins method that read a
+parameter (a callable called back, the methods of a protocol, an iterable
+consumed) do the same for each value of the parameter's node at the same
+call site, so the node that holds the receivers gives each receiver what its
+own call's node gave it. A group takes at most the cap of receivers, so its
+receiver nodes never saturate, as no receiver node of one receiver's call
+did.
 
 **Receivers are bounded.** A bound method has one receiver: only a
 function is bound, so binding never nests. The cap of three receivers
