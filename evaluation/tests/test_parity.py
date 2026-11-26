@@ -23,6 +23,7 @@ def load(name, path):
 
 compare = load("parity_compare", PARITY / "compare.py")
 diff = load("parity_diff", PARITY / "diff.py")
+oracle = load("parity_dump", PARITY / "dump.py")
 
 PROGRAMS = {
     "classes": """
@@ -207,6 +208,20 @@ def copy_as_input(source, root, key):
     target = root / key
     shutil.copytree(source, target)
     return target
+
+
+def test_the_oracle_finds_every_dump_that_differs_between_the_seeds(dumped, tmp_path):
+    first, second = dumped["classes"]
+    seed_0 = copy_as_input(first, tmp_path, "seed-0")
+    seed_1 = copy_as_input(second, tmp_path, "seed-1")
+
+    assert oracle.differing_dumps(seed_0, seed_1) == []
+
+    with (seed_1 / "D3.jsonl").open("a", encoding="utf-8") as trace:
+        trace.write("{}\n")
+    (seed_1 / "D5.jsonl").unlink()
+
+    assert oracle.differing_dumps(seed_0, seed_1) == ["D3", "D5"]
 
 
 def test_the_same_dumps_compare_identical(dumped, tmp_path, capsys):
