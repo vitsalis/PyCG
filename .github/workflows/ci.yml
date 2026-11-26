@@ -112,6 +112,8 @@ jobs:
         run: make eval-gate BASE=HEAD^1
       - if: ${{ !cancelled() }}
         run: make eval-same-graphs
+      - if: ${{ !cancelled() && github.event_name == 'push' }}
+        run: make eval-report SUMMARY="$GITHUB_STEP_SUMMARY"
 
   label:
     needs: gate

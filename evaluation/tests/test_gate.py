@@ -154,17 +154,40 @@ def test_a_new_micro_case_or_project_truth_changes_the_digest(tmp_path):
     assert len({before, after_truth, gate.benchmark_digest(root)}) == 3
 
 
-def test_a_value_on_its_floor_passes_and_one_below_it_fails():
-    lines, failures = gate.check(result(inside=(0.69, 0.6)), metrics(), DIGEST)
+def measurement(data=None, digest=DIGEST):
+    return (result() if data is None else data), digest
+
+
+def test_a_pr_equal_to_its_base_passes():
+    lines, failures = gate.check(measurement(), measurement(), 0.01)
     assert failures == []
-    assert any(line.startswith("macro inside P") for line in lines)
-    _, failures = gate.check(result(inside=(0.6899, 0.6)), metrics(), DIGEST)
+    assert (
+        "benchmark unchanged: each floor is the base's value minus the margin" in lines
+    )
+    assert any(line.startswith("macro inside P") and "ok" in line for line in lines)
+
+
+def test_a_value_on_the_base_minus_the_margin_passes_and_one_below_it_fails():
+    _, failures = gate.check(
+        measurement(result(inside=(0.69, 0.6))), measurement(), 0.01
+    )
+    assert failures == []
+    low = measurement(result(inside=(0.6899, 0.6)))
+    _, failures = gate.check(low, measurement(), 0.01)
     assert failures == ["macro inside P is 0.6899, below its floor 0.6900"]
+
+
+def test_the_floors_come_from_the_base_and_the_margin():
+    base = measurement(result(micro=(0.95, 0.8)))
+    _, failures = gate.check(measurement(), base, 0.01)
+    assert failures == ["micro P is 0.9000, below its floor 0.9400"]
+    _, failures = gate.check(measurement(), base, 0.05)
+    assert failures == []
 
 
 def test_each_value_below_its_floor_is_named():
     low = result(micro=(0.5, 0.5), inside=(0.7, 0.6), outside=(0.1, 0.4))
-    _, failures = gate.check(low, metrics(), DIGEST)
+    _, failures = gate.check(measurement(low), measurement(), 0.01)
     assert [f.split(" is ")[0] for f in failures] == [
         "micro P",
         "micro R",
@@ -174,8 +197,31 @@ def test_each_value_below_its_floor_is_named():
 
 def test_a_failed_run_fails_the_gate():
     failed = [{"run": "macro/a", "status": "timeout"}]
-    _, failures = gate.check(result(failed=failed), metrics(), DIGEST)
+    _, failures = gate.check(measurement(result(failed=failed)), measurement(), 0.01)
     assert failures == ["the run macro/a failed: timeout"]
+
+
+def test_a_failed_run_of_the_base_does_not_fail_the_pr():
+    failed = [{"run": "macro/a", "status": "timeout"}]
+    _, failures = gate.check(measurement(), measurement(result(failed=failed)), 0.01)
+    assert failures == []
+
+
+def test_a_changed_benchmark_re_bases_the_floors():
+    lower = measurement(result(inside=(0.6, 0.5)), DIGEST)
+    lines, failures = gate.check(lower, measurement(digest=OTHER), 0.01)
+    assert failures == []
+    assert "benchmark changed: floors re-based" in lines
+    assert any(
+        line.startswith("macro inside P") and "re-based" in line for line in lines
+    )
+
+
+def test_a_failed_run_fails_the_gate_on_a_changed_benchmark():
+    failed = [{"run": "micro/args/call", "status": "error"}]
+    pr = measurement(result(failed=failed), DIGEST)
+    _, failures = gate.check(pr, measurement(digest=OTHER), 0.01)
+    assert failures == ["the run micro/args/call failed: error"]
 
 
 def test_a_value_without_edges_is_an_error():
@@ -183,125 +229,152 @@ def test_a_value_without_edges_is_an_error():
         gate.measured(result(micro=(None, 0.8)))
 
 
-def test_record_keeps_the_larger_of_the_base_and_the_measured_value():
-    base = metrics(macro_inside_P=0.75)
+def test_record_keeps_the_larger_of_the_stored_and_the_measured_value():
+    stored = metrics(macro_inside_P=0.75)
     values = gate.measured(result(micro=(0.95, 0.79)))
-    recorded = gate.recorded(base, values, DIGEST)
+    recorded = gate.recorded(stored, values, DIGEST)
     assert recorded == metrics(micro_P=0.95, macro_inside_P=0.75)
 
 
 def test_record_on_another_benchmark_takes_the_measured_values():
-    base = metrics(OTHER, macro_inside_P=0.75)
+    stored = metrics(OTHER, macro_inside_P=0.75)
     values = gate.measured(result(micro=(0.95, 0.79)))
-    recorded = gate.recorded(base, values, DIGEST)
+    recorded = gate.recorded(stored, values, DIGEST)
     assert recorded == metrics(micro_P=0.95, micro_R=0.79)
 
 
-def test_a_base_without_a_digest_is_an_invalid_state():
-    base = metrics()
-    del base["benchmark_sha256"]
-    with pytest.raises(AssertionError):
-        gate.recorded(base, gate.measured(result()), DIGEST)
-
-
 def test_metrics_without_a_digest_are_an_invalid_state():
-    floors = metrics()
-    del floors["benchmark_sha256"]
+    stored = metrics()
+    del stored["benchmark_sha256"]
     with pytest.raises(AssertionError):
-        gate.check(result(), floors, DIGEST)
+        gate.recorded(stored, gate.measured(result()), DIGEST)
 
 
-def test_floors_only_rise_on_the_same_benchmark():
-    base = metrics()
-    improved = result(micro=(0.95, 0.8))
-    lines, failures = gate.check(improved, metrics(micro_P=0.95), DIGEST, base)
+def test_the_report_names_the_values_that_rose_and_what_record_writes():
+    lines, failures = gate.report(measurement(result(micro=(0.95, 0.8))), metrics())
+    text = "\n".join(lines)
     assert failures == []
-    assert "benchmark unchanged: floors only rise" in lines
-    _, failures = gate.check(improved, metrics(), DIGEST, base)
-    assert len(failures) == 1 and "run make eval-record" in failures[0]
-    lowered = metrics(macro_inside_P=0.69)
-    _, failures = gate.check(result(inside=(0.69, 0.6)), lowered, DIGEST, base)
-    assert len(failures) == 1 and '"macro inside P": 0.7' in failures[0]
+    assert "| micro P | 0.9000 | 0.9500 | rose |" in text
+    assert "| micro R | 0.8000 | 0.8000 | kept |" in text
+    assert "A value rose" in text
+    assert gate.dumps(metrics(micro_P=0.95)).rstrip("\n") in text
 
 
-def test_floors_are_re_based_on_a_changed_benchmark():
-    base = metrics(OTHER)
-    lower = result(inside=(0.6, 0.5))
-    rebased = metrics(macro_inside_P=0.6, macro_inside_R=0.5)
-    lines, failures = gate.check(lower, rebased, DIGEST, base)
+def test_the_report_says_when_the_metrics_are_up_to_date():
+    lines, failures = gate.report(measurement(result(inside=(0.695, 0.6))), metrics())
     assert failures == []
-    assert "benchmark changed: floors re-based" in lines
-    kept = metrics(macro_inside_P=0.7, macro_inside_R=0.6)
-    _, failures = gate.check(lower, kept, DIGEST, base)
-    assert len(failures) == 3 and '"macro inside P": 0.6' in failures[-1]
+    assert "No value rose: evaluation/metrics.json is up to date." in lines
+    assert "| macro inside P | 0.7000 | 0.6950 | kept |" in lines
 
 
-def test_metrics_of_another_benchmark_fail_the_check():
-    _, failures = gate.check(result(), metrics(OTHER), DIGEST)
-    assert failures == [
-        "evaluation/metrics.json was recorded on another benchmark "
-        f"(benchmark_sha256 {OTHER}, this checkout's {DIGEST}): run make eval-record"
-    ]
-    _, failures = gate.check(result(), metrics(OTHER), DIGEST, metrics(OTHER))
-    assert len(failures) == 2
+def test_the_report_fails_on_a_value_below_its_best_minus_the_margin():
+    lines, failures = gate.report(measurement(result(inside=(0.6, 0.6))), metrics())
+    assert failures == ["macro inside P is 0.6000, below its floor 0.6900"]
+    assert "| macro inside P | 0.7000 | 0.6000 | **below its floor 0.6900** |" in lines
 
 
-def test_the_command_reads_the_digest_of_this_checkout(tmp_path, capsys):
-    path = write(tmp_path / "result.json", result())
-    floors = write(tmp_path / "metrics.json", metrics(gate.benchmark_digest()))
-    assert gate.main(["check", str(path), str(floors)]) == 0
+def test_the_report_on_a_changed_benchmark_re_bases_the_bests():
+    low = measurement(result(inside=(0.6, 0.6)))
+    lines, failures = gate.report(low, metrics(OTHER))
+    text = "\n".join(lines)
+    assert failures == []
+    assert "| macro inside P | 0.7000 | 0.6000 | re-based |" in text
+    assert "benchmark changed" in text
+    assert gate.dumps(metrics(macro_inside_P=0.6)).rstrip("\n") in text
+
+
+def test_the_report_fails_on_a_failed_run():
+    failed = [{"run": "macro/b", "status": "timeout"}]
+    _, failures = gate.report(measurement(result(failed=failed)), metrics())
+    assert failures == ["the run macro/b failed: timeout"]
+
+
+def measured_into(directory, data, digest=DIGEST):
+    directory.mkdir()
+    write(directory / "result.json", data)
+    (directory / "benchmark_sha256").write_text(digest + "\n")
+    return str(directory)
+
+
+def test_the_check_command_compares_the_pr_with_its_base(tmp_path, capsys):
+    pr = measured_into(tmp_path / "pr", result())
+    base = measured_into(tmp_path / "base", result())
+    stored = str(write(tmp_path / "metrics.json", metrics(OTHER, micro_P=0.99)))
+    assert gate.main(["check", pr, base, stored]) == 0
     assert capsys.readouterr().out.endswith("gate passed\n")
-    stale = write(tmp_path / "stale.json", metrics(OTHER, micro_P=0.99))
-    assert gate.main(["record", str(path), str(stale)]) == 0
-    assert json.loads(capsys.readouterr().out) == metrics(gate.benchmark_digest())
-
-
-def test_the_command_exits_with_1_and_names_each_failure(tmp_path, capsys):
-    path = write(tmp_path / "result.json", result(inside=(0.6, 0.6)))
-    floors = write(tmp_path / "metrics.json", metrics(gate.benchmark_digest()))
-    assert gate.main(["check", str(path), str(floors)]) == 1
+    low = measured_into(tmp_path / "low", result(inside=(0.6, 0.6)))
+    assert gate.main(["check", low, base, stored]) == 1
     out = capsys.readouterr().out
     assert "gate failed:\n  macro inside P is 0.6000, below its floor 0.6900" in out
-    assert "floors only rise: not checked (no base metrics)" in out
 
 
-def test_an_empty_base_is_a_base_without_metrics(tmp_path, capsys):
-    path = write(tmp_path / "result.json", result())
-    current = metrics(gate.benchmark_digest())
-    floors = write(tmp_path / "metrics.json", current)
+def test_the_check_command_re_bases_on_a_changed_benchmark(tmp_path, capsys):
+    pr = measured_into(tmp_path / "pr", result(inside=(0.6, 0.6)))
+    base = measured_into(tmp_path / "base", result(), OTHER)
+    stored = str(write(tmp_path / "metrics.json", metrics()))
+    assert gate.main(["check", pr, base, stored]) == 0
+    out = capsys.readouterr().out
+    assert "benchmark changed: floors re-based" in out
+    assert out.endswith("gate passed\n")
+
+
+def test_a_base_without_metrics_has_no_margin(tmp_path, capsys):
+    pr = measured_into(tmp_path / "pr", result())
+    base = measured_into(tmp_path / "base", result())
     empty = tmp_path / "base.json"
     empty.write_text("")
-    assert gate.main(["check", str(path), str(floors), "--base", str(empty)]) == 0
-    captured = capsys.readouterr()
-    assert "the base has no metrics" in captured.err
-    assert captured.out.endswith("gate passed\n")
-    assert gate.main(["record", str(path), str(floors), "--base", str(empty)]) == 0
-    assert json.loads(capsys.readouterr().out) == current
+    assert gate.main(["check", pr, base, str(empty)]) == 1
+    assert "the base has no metrics.json, so no margin" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("digest", [None, "", "A" * 64, "a" * 63])
+def test_a_result_without_a_valid_digest_is_an_error(tmp_path, capsys, digest):
+    pr = tmp_path / "pr"
+    pr.mkdir()
+    write(pr / "result.json", result())
+    if digest is not None:
+        (pr / "benchmark_sha256").write_text(digest)
+    stored = str(write(tmp_path / "metrics.json", metrics()))
+    assert gate.main(["report", str(pr), stored]) == 1
+    assert "benchmark_sha256" in capsys.readouterr().err
+
+
+def test_the_digest_command_prints_the_digest_of_a_checkout(tmp_path, capsys):
+    root = tree(tmp_path, BENCHMARK)
+    assert gate.main(["digest", str(root)]) == 0
+    assert capsys.readouterr().out == gate.benchmark_digest(root) + "\n"
 
 
 def test_record_prints_the_new_metrics(tmp_path, capsys):
-    digest = gate.benchmark_digest()
-    path = write(tmp_path / "result.json", result(outside=(0.55, 0.3)))
-    floors = write(tmp_path / "metrics.json", metrics(digest))
-    assert gate.main(["record", str(path), str(floors)]) == 0
-    expected = metrics(digest, macro_outside_P=0.55)
-    assert json.loads(capsys.readouterr().out) == expected
+    path = measured_into(tmp_path / "pr", result(outside=(0.55, 0.3)))
+    stored = str(write(tmp_path / "metrics.json", metrics()))
+    assert gate.main(["record", path, stored]) == 0
+    assert json.loads(capsys.readouterr().out) == metrics(macro_outside_P=0.55)
+
+
+def test_the_report_command_exits_with_1_below_a_floor(tmp_path, capsys):
+    path = measured_into(tmp_path / "pr", result(micro=(0.8, 0.8)))
+    stored = str(write(tmp_path / "metrics.json", metrics()))
+    assert gate.main(["report", path, stored]) == 1
+    assert "gate failed:\n  micro P is 0.8000, below its floor 0.8900" in (
+        capsys.readouterr().out
+    )
 
 
 def test_the_summary_has_the_values_the_changes_and_the_runs(tmp_path):
     changes = tmp_path / "changes.txt"
     changes.write_text("a: +TP 1  -TP 0  +FP 0  -FP 0\n")
     lines = gate.summary(
-        result(inside=(0.6, 0.6)),
-        metrics(),
-        result(inside=(0.71, 0.6)),
+        measurement(result(inside=(0.6, 0.6))),
+        measurement(result(inside=(0.71, 0.6))),
+        0.01,
         changes,
-        DIGEST,
-        metrics(),
     )
     text = "\n".join(lines)
-    assert "benchmark unchanged: floors only rise" in lines
-    assert "| macro inside P | 0.7100 | 0.6000 | 0.6900 | **fail** |" in text
+    assert (
+        "benchmark unchanged: each floor is the base's value minus the margin" in lines
+    )
+    assert "| macro inside P | 0.7100 | 0.6000 | 0.7000 | **fail** |" in text
     assert "| micro P | 0.9000 | 0.9000 | 0.8900 | pass |" in text
     assert "a: +TP 1  -TP 0  +FP 0  -FP 0" in text
     assert "| a | 1.5 | 1.5 | 40.0 | 40.0 |" in text
@@ -311,7 +384,6 @@ def test_the_summary_has_the_values_the_changes_and_the_runs(tmp_path):
 def test_the_summary_says_when_the_floors_were_re_based(tmp_path):
     changes = tmp_path / "changes.txt"
     changes.write_text("")
-    args = (result(), metrics(), result(), changes, DIGEST)
-    assert "benchmark changed: floors re-based" in gate.summary(*args, metrics(OTHER))
-    without_base = gate.summary(*args)
-    assert not any(line.startswith("benchmark") for line in without_base)
+    lines = gate.summary(measurement(), measurement(digest=OTHER), 0.01, changes)
+    assert "benchmark changed: floors re-based" in lines
+    assert "| micro P | 0.9000 | 0.9000 | - | re-based |" in lines
