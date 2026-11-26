@@ -254,6 +254,8 @@ class Recorder:
         self.analysis = None
         self.scopes_by_module = {}
         self.stub_depth = 0
+        self.witness_of_watch = {}
+        self.declared = {}
 
     def close(self):
         for writer in self.writers.values():
@@ -285,9 +287,18 @@ class Recorder:
         def new_node(node):
             name = names.new_node(node)
             if not recorder.inside_solver:
-                recorder.writers["D3"].write({"op": "node", "node": name})
+                record = {"op": "node", "node": name}
+                if node.label is not None:
+                    record["named"] = True
+                if type(node) is solver.Witness:
+                    record["witness"] = True
+                recorder.writers["D3"].write(record)
+
+        def new_witness(witness):
+            recorder.witness_of_watch[witness.watch] = names.node(witness)
 
         wrap_init(solver.Node, new_node)
+        wrap_init(solver.Witness, new_witness)
         wrap_init(solver.Constant, names.new_node)
         wrap_init(self.model.Object, names.new_object)
         wrap_init(self.model.Const, names.new_object)
@@ -458,6 +469,7 @@ class Recorder:
             ):
                 if recorder.inside_solver:
                     return _original(solver, *args)
+                recorder.declare(_name, args)
                 record = {"op": _name, "args": canon(args)}
                 if not _answers:
                     writer.write(record)
@@ -477,7 +489,7 @@ class Recorder:
         original_wake = self.solver.Watch.wake
 
         def wake(watch):
-            writer.write({"op": "wake"})
+            writer.write({"op": "wake", "node": recorder.witness_of_watch[watch]})
             with recorder.rules():
                 answer = original_wake(watch)
             writer.write({"op": "woken"})
@@ -494,9 +506,22 @@ class Recorder:
             if between is not None and not getattr(between, "recorded", False):
 
                 def between_rounds():
+                    writer.write({"op": "between_rounds"})
+                    unknown_before = recorder.unknown_classes()
                     with recorder.rules():
                         answer = between()
-                    writer.write({"op": "between_rounds", "answer": answer})
+                    unknown = [
+                        recorder.names.object(cls)
+                        for cls in recorder.unknown_classes()
+                        if cls not in unknown_before
+                    ]
+                    writer.write(
+                        {
+                            "op": "between_rounds_done",
+                            "answer": answer,
+                            "unknown": unknown,
+                        }
+                    )
                     return answer
 
                 between_rounds.recorded = True
@@ -516,6 +541,77 @@ class Recorder:
 
         Solver.solve = solve
         Solver._fire = fire
+
+    def unknown_classes(self):
+        if self.analysis is None:
+            return {}
+        return {cls: None for cls in self.analysis.classes if cls.unknown}
+
+    def declare(self, operation, args):
+        if operation in ("constant", "add_object"):
+            self.declare_object(args[-1])
+        elif operation in ("attach", "apply_now"):
+            self.declare_constraint(args[1])
+
+    def declare_object(self, obj):
+        if obj in self.declared or not isinstance(obj, self.model.Object):
+            return
+        self.declared[obj] = None
+        types = [
+            cls.__name__
+            for cls in type(obj).__mro__
+            if issubclass(cls, self.model.Object)
+        ]
+        self.writers["D3"].write(
+            {
+                "op": "object",
+                "object": self.names.object(obj),
+                "types": types,
+                "opacity": self.opacity(obj),
+            }
+        )
+
+    def opacity(self, obj):
+        model = self.model
+        if type(obj) is model.Fallback:
+            obj = obj.method
+        cls = obj.cls if type(obj) is model.Instance else obj
+        if type(cls) is model.Saturated:
+            return "saturated"
+        if type(cls) is model.Class:
+            self.declare_object(cls)
+            return self.names.object(cls)
+        return None
+
+    def declare_constraint(self, constraint):
+        if constraint in self.declared:
+            return
+        self.declared[constraint] = None
+        captured = [
+            obj for obj in constraint.captured() if isinstance(obj, self.model.Object)
+        ]
+        for obj in captured:
+            self.declare_object(obj)
+        kinds = constraint.kinds
+        if isinstance(constraint, self.solver.Each):
+            mode = "each"
+        elif any(
+            "apply_each" in vars(cls)
+            for cls in type(constraint).__mro__
+            if cls is not self.solver.Constraint
+        ):
+            mode = "batch"
+        else:
+            mode = "apply"
+        self.writers["D3"].write(
+            {
+                "op": "constraint",
+                "constraint": self.names.constraint(constraint),
+                "kinds": None if kinds is None else [k.__name__ for k in kinds],
+                "mode": mode,
+                "captured": [self.names.object(obj) for obj in captured],
+            }
+        )
 
     def note_first_rounds(self, solver):
         analysis = self.analysis
@@ -686,7 +782,7 @@ class Recorder:
             self.writers["D5"].write({"node": label, "objects": held})
 
 
-def dump_input(checkout, out, entry_points, package):
+def dump_input(checkout, out, entry_points, package, cap=None):
     sys.path.insert(0, os.path.abspath(checkout))
     sys.setrecursionlimit(max(sys.getrecursionlimit(), 10000))
     out = Path(out)
@@ -696,7 +792,11 @@ def dump_input(checkout, out, entry_points, package):
 
     recorder = Recorder(out)
     recorder.install()
-    generator = CallGraphGenerator(entry_points, package)
+    generator = (
+        CallGraphGenerator(entry_points, package)
+        if cap is None
+        else CallGraphGenerator(entry_points, package, cap)
+    )
     try:
         generator.analyze()
         recorder.finish(generator)
@@ -826,6 +926,7 @@ def main(argv=None):
     one.add_argument("--checkout", type=Path, required=True)
     one.add_argument("--out", type=Path, required=True)
     one.add_argument("--package", required=True)
+    one.add_argument("--cap", type=int, help="objects per node, for tests")
     one.add_argument("entry_points", nargs="+")
     every = commands.add_parser("oracle", help="dump every input for both seeds")
     every.add_argument("--checkout", type=Path, required=True)
@@ -839,7 +940,9 @@ def main(argv=None):
     keyed.add_argument("--checkout", type=Path, required=True)
     args = parser.parse_args(argv)
     if args.command == "input":
-        return dump_input(args.checkout, args.out, args.entry_points, args.package)
+        return dump_input(
+            args.checkout, args.out, args.entry_points, args.package, args.cap
+        )
     if args.command == "oracle":
         sets = args.set or list(SETS)
         return oracle(args.checkout, args.out, sets, args.jobs, args.name or ())
