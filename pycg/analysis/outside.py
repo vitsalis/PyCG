@@ -7,6 +7,8 @@ from .builtin_models import (
     DECORATING_CLOSURES,
     HASHED_ARGUMENTS,
     ITERATOR,
+    KEY_WRAPPERS,
+    KEYED_SEQUENCES,
     LAZY_MODES,
     LENGTH_HINTS,
     LIBRARY_ITERATION,
@@ -416,7 +418,7 @@ class Outside:
                 self.call_protocols(base, overloads, plain=True)
             return
         overloads, builtins, calling, hinting, library = [], [], [], [], []
-        consuming = []
+        consuming, keyed = [], []
         for definition in definitions:
             if definition.kind == "function":
                 found = self._call_signatures(definition, call, receivers, external)
@@ -434,6 +436,10 @@ class Outside:
                 hinting += [(LENGTH_HINTS[definition.path], each) for each in found]
             if definition.path in CALLS_BACK:
                 calling += [(CALLS_BACK[definition.path], each) for each in found]
+            if definition.path in KEYED_SEQUENCES:
+                keyed += [(KEYED_SEQUENCES[definition.path], each) for each in found]
+            if definition.path in KEY_WRAPPERS and call.dst is not None:
+                self._wrapped_key(KEY_WRAPPERS[definition.path], call, found)
             if definition.path in LIBRARY_ITERATION:
                 library.append((definition.path, found))
             elif definition.path.startswith(f"{STUB_BUILTINS}."):
@@ -458,6 +464,8 @@ class Outside:
                 self.call_protocols(base, builtins)
             if calling:
                 self.call_back_library(call, calling)
+            if keyed:
+                self.call_sequence_key(call, keyed)
             if hinting:
                 self.length_hints(call, hinting)
             for path, found in library:
@@ -496,6 +504,27 @@ class Outside:
                 node = self._parameter_node(bound, parameter)
                 if parameter[0] == name and node is not None:
                     self.add_edge(node, self._callee(back))
+
+    def _wrapped_key(self, name, call, overloads):
+        for _, _, bound in overloads:
+            if bound.given(name) and bound[name] is not None:
+                self.add_edge(bound[name], call.dst)
+
+    def call_sequence_key(self, call, keyed):
+        items = self.node()
+        for wholes, (_, _, bound) in keyed:
+            if not bound.given("key") or bound["key"] is None:
+                continue
+            if bound.given("a") and bound["a"] is not None:
+                index = self.node()
+                self.add_subscript(
+                    bound["a"], index, items, None, call.caller, call.site
+                )
+            for name in wholes:
+                if bound.given(name) and bound[name] is not None:
+                    self.add_edge(bound[name], items)
+            role = ("key", "sequence")
+            self.call_key(bound["key"], items, call.caller, call.site, role)
 
     def length_hints(self, call, hinting):
         for (name, plan, how), (parameters, _, bound) in hinting:

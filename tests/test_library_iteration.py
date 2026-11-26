@@ -887,3 +887,86 @@ def test_calls_that_share_an_origin_give_every_argument(tmp_path):
     graph = graph_of(tmp_path, SHARED_ORIGIN)
 
     assert inside(graph, "main.use") == ["main.MetaA.__iter__", "main.MetaB.__iter__"]
+
+
+def test_heapq_calls_its_key_on_the_items_where_it_takes_them(tmp_path):
+    graph = graph_of(
+        tmp_path,
+        """
+def rank(item):
+    item.ping()
+def smallest(x):
+    return heapq.nsmallest(1, x, key=rank)
+def largest(x):
+    return heapq.nlargest(1, x, rank)
+def merged(x):
+    return heapq.merge(x, key=rank)
+def use(lazy):
+    list(lazy)
+smallest(Able())
+largest(Able())
+use(merged(Able()))
+""",
+    )
+
+    assert "main.rank" in callees(graph, "main.smallest")
+    assert "main.rank" in callees(graph, "main.largest")
+    assert "main.rank" not in callees(graph, "main.merged")
+    assert "main.rank" in callees(graph, "main.use")
+    assert callees(graph, "main.rank") == ["main.Item.ping"]
+
+
+def test_bisect_calls_its_key_on_the_items_of_the_sequence(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+import bisect
+class Item:
+    def ping(self): pass
+class Needle:
+    def ping(self): pass
+def rank(item):
+    item.ping()
+def find(items):
+    return bisect.bisect_left(items, 1, key=rank), bisect.bisect(items, 1, key=rank)
+def place(items):
+    bisect.insort(items, Needle(), key=rank)
+def plain(items):
+    bisect.bisect_right(items, 1)
+find([Item()])
+place([Item()])
+plain([Item()])
+""",
+    )
+
+    assert "main.rank" in callees(graph, "main.find")
+    assert "main.rank" in callees(graph, "main.place")
+    assert "main.rank" not in callees(graph, "main.plain")
+    assert callees(graph, "main.rank") == ["main.Item.ping", "main.Needle.ping"]
+
+
+def test_a_cmp_to_key_wrapper_calls_its_function_where_keys_are_compared(tmp_path):
+    graph = main_graph(
+        tmp_path,
+        """
+import functools
+import heapq
+class Item:
+    def ping(self): pass
+def compare(a, b):
+    a.ping()
+    return 0
+KEY = functools.cmp_to_key(compare)
+def order(items):
+    return sorted(items, key=KEY), min(items, key=KEY), heapq.nsmallest(1, items, KEY)
+def wrap(item):
+    return KEY(item)
+order([Item()])
+wrap(Item())
+""",
+    )
+
+    assert "main.compare" not in callees(graph, "main")
+    assert "main.compare" in callees(graph, "main.order")
+    assert "main.compare" not in callees(graph, "main.wrap")
+    assert callees(graph, "main.compare") == ["main.Item.ping"]
