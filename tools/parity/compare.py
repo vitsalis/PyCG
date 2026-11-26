@@ -9,10 +9,11 @@ Compares the dumps of two runs (docs/rust/PLAN.md, section 3): EXPECTED is
 the oracle's directory of one seed, ACTUAL the other tool's. Each holds one
 directory per input (micro/<category>/<case>, macro/<project>, ...). An input
 fails when either side wrote error.txt or ACTUAL lacks a dump that REQUIRED
-names; it is missing when ACTUAL wrote no D6 and D6 is not required. Else D6
-is compared by SHA-256 and every required dump (D5 as sets, the others record
-by record). Prints one line per set and the first differences, and exits 1
-when an input differs or failed.
+names. Every required dump is compared (D5 as sets, the others record by
+record), and D6 by SHA-256 when ACTUAL wrote it; an input whose required
+dumps agree is missing when ACTUAL wrote no D6 and D6 is not required.
+Prints one line per set and the first differences, and exits 1 when an
+input differs or failed.
 
     python3 -I tools/parity/compare.py EXPECTED ACTUAL [--required FILE]
 """
@@ -71,16 +72,18 @@ def compare_input(expected, actual, required):
     absent = [name for name in required if not (actual / file_of(name)).exists()]
     if absent:
         return "failed", [f"{name} is required and absent" for name in absent]
+    differences = [
+        name
+        for name in required
+        if name != "D6"
+        and not same_dump(name, expected / file_of(name), actual / file_of(name))
+    ]
     if not (actual / DOCUMENT).exists():
+        if differences:
+            return "different", differences
         return "missing", ["D6 is not written yet"]
-    differences = []
     if digest(expected / DOCUMENT) != digest(actual / DOCUMENT):
-        differences.append("D6")
-    for name in required:
-        if name != "D6" and not same_dump(
-            name, expected / file_of(name), actual / file_of(name)
-        ):
-            differences.append(name)
+        differences.insert(0, "D6")
     return ("different" if differences else "identical"), differences
 
 

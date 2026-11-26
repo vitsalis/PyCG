@@ -312,6 +312,34 @@ def test_an_input_that_the_other_side_has_not_written_is_missing(
     assert "macro: 1 inputs, 0 identical, 0 different, 0 failed, 1 missing" in found
 
 
+def test_a_required_dump_is_compared_before_the_other_side_writes_a_document(
+    dumped, tmp_path, capsys
+):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    copy_as_input(first, expected, "micro/a/same")
+    planted = copy_as_input(first, actual, "micro/a/classes")
+    same = copy_as_input(first, actual, "micro/a/same")
+    for partial in (planted, same):
+        for path in partial.iterdir():
+            if path.name != "D2.jsonl":
+                path.unlink()
+    lines = (planted / "D2.jsonl").read_text(encoding="utf-8").splitlines()
+    lines[0] = lines[0].replace('"call":"', '"call":"planted_', 1)
+    (planted / "D2.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    required = tmp_path / "required.txt"
+    required.write_text("D2\n", encoding="utf-8")
+
+    status = compare.main([str(expected), str(actual), "--required", str(required)])
+    found = capsys.readouterr().out
+
+    assert status == 1
+    assert "micro: 2 inputs, 0 identical, 1 different, 0 failed, 1 missing" in found
+    assert "micro/a/classes: different: D2" in found
+
+
 @pytest.mark.parametrize("dump", ["D3", "D6"])
 def test_a_required_dump_that_the_other_side_lacks_fails(
     dumped, tmp_path, capsys, dump
@@ -407,5 +435,8 @@ def test_the_key_of_an_oracle_run_follows_every_input_of_the_run(tmp_path, chang
     assert oracle_key(tmp_path) != before
 
 
-def test_the_required_dumps_start_empty():
-    assert compare.required_dumps(PARITY / "required.txt") == []
+def test_the_required_dumps_are_dumps_that_the_oracle_writes():
+    required = compare.required_dumps(PARITY / "required.txt")
+
+    assert "D2" in required
+    assert set(required) <= {"D1", "D2", "D3", "D4", "D5", "D6"}
