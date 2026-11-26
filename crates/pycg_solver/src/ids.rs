@@ -21,3 +21,29 @@ impl SetId {
         self.0 as usize
     }
 }
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct NodeId(u32);
+
+impl NodeId {
+    pub fn new(index: usize) -> NodeId {
+        NodeId(u32::try_from(index).expect("nodes fit u32"))
+    }
+
+    pub fn index(self) -> usize {
+        self.0 as usize
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub struct WatchId(u32);
+
+impl WatchId {
+    pub fn new(index: usize) -> WatchId {
+        WatchId(u32::try_from(index).expect("watches fit u32"))
+    }
+
+    pub fn index(self) -> usize {
+        self.0 as usize
+    }
+}
