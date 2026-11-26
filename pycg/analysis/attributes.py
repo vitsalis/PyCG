@@ -171,7 +171,7 @@ class Attributes:
         self.add_edge(found, load.dst)
 
     def store(self, obj, attr, src, store):
-        if isinstance(obj, (Module, Function, Class, Instance)):
+        if isinstance(obj, (Module, Function, Class)):
             self.add_edge(src, self.field(obj, attr))
         if isinstance(obj, (Class, Instance)):
             self.stored_name(obj, attr)
@@ -180,9 +180,32 @@ class Attributes:
             self.class_attribute_stored(obj, attr)
         if isinstance(obj, Instance):
             cls = obj.cls
+            self._store_field(obj, attr, src)
             self.later(cls, attr, obj, None, (), self._found_store, store)
             hook, call = "__setattr__", store.hook_call(None)
             self.later(cls, hook, obj, None, (), self._call_hook, hook, call)
+
+    def _store_field(self, obj, attr, src):
+        field = self.field(obj, attr)
+        written = self.instance_dict_written(obj.cls, attr)
+        self.solver.attach(
+            written, Each(self._write_field, src, field, results=(field,))
+        )
+        found = self.lookup(obj.cls, attr, obj)
+        self.solver.attach(found, Each(self._store_past, src, field, results=(field,)))
+
+    def _write_field(self, marker, src, field):
+        self.add_edge(src, field)
+
+    def _store_past(self, value, src, field):
+        if isinstance(value, Wrapper) and value.kind == "property":
+            return
+        if isinstance(value, Instance):
+            written = self.not_data_descriptor(value.cls)
+            each = Each(self._write_field, src, field, results=(field,))
+            self.solver.attach(written, each)
+            return
+        self.add_edge(src, field)
 
     def _deliver_load(self, obj, load):
         found = self.lookup(obj.cls, load.attr, obj, None, EXPLICIT)

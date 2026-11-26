@@ -38,6 +38,10 @@ _UNLESS_DEFAULT_MEMBER = ("<the default>",)
 
 _UNLESS_NEW_GIVES_THE_CLASS = ("<a __new__ that gives the class>",)
 
+_UNLESS_DESCRIPTOR_DECIDES = ("<a descriptor decides>",)
+
+_UNLESS_DATA_DESCRIPTOR = ("<a data descriptor>",)
+
 _OUTSIDE_GIVES_DEFAULT, _OUTSIDE_GIVES_OVERRIDE, _OUTSIDE_GIVES_INHERITED = (
     "default",
     "override",
@@ -186,6 +190,50 @@ class Hierarchy:
                 return True
         return False
 
+    def instance_dict_written(self, cls, name):
+        return self.lookup(cls, name, None, None, _UNLESS_DESCRIPTOR_DECIDES)
+
+    def not_data_descriptor(self, cls):
+        return self.lookup(cls, "__set__", None, None, _UNLESS_DATA_DESCRIPTOR)
+
+    def _may_write_field(self, cls, name):
+        if cls.unknown or cls.exhaustive:
+            return True
+        for mro in cls.mros:
+            for base in mro:
+                if isinstance(base, Class):
+                    if name in base.slots:
+                        return True
+                    if name in base.bound:
+                        break
+                elif base is not None:
+                    if self.outside_member(base, name) != _OUTSIDE_GIVES_INHERITED:
+                        return True
+            else:
+                return True
+        return False
+
+    def _is_data_descriptor_class(self, cls):
+        if cls.unknown or cls.exhaustive:
+            return False
+        for mro in cls.mros:
+            for base in mro:
+                if isinstance(base, Class):
+                    if "__set__" in base.bound or "__delete__" in base.bound:
+                        break
+                elif is_property(base):
+                    break
+                elif base is not None:
+                    if self.stub_definitions(base) is None:
+                        return False
+                    if self.outside_overrides(
+                        base, "__set__"
+                    ) or self.outside_overrides(base, "__delete__"):
+                        break
+            else:
+                return False
+        return True
+
     def default_member(self, cls, name):
         return self.lookup(cls, name, None, None, _UNLESS_DEFAULT_MEMBER)
 
@@ -294,6 +342,14 @@ class Hierarchy:
             if self._may_give_itself(cls, attr):
                 name = f"{BUILTIN_OBJECT}.{attr}"
                 self.add_object(dst, self.external(name, 1))
+            return
+        if unless == _UNLESS_DESCRIPTOR_DECIDES:
+            if self._may_write_field(cls, attr):
+                self.add_object(dst, self.external(f"{BUILTIN_OBJECT}.__dict__", 1))
+            return
+        if unless == _UNLESS_DATA_DESCRIPTOR:
+            if not self._is_data_descriptor_class(cls):
+                self.add_object(dst, self.external(f"{BUILTIN_OBJECT}.__dict__", 1))
             return
         if unless == _UNLESS_PYTHONS_OWN_METHOD:
             if _python_may_define(cls, attr):

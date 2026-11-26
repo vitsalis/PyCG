@@ -401,6 +401,198 @@ def documents(root, entries, **options):
     return dumps(generator.document())
 
 
+STORED = """
+class Rows:
+    def index(self, value): pass
+class Pairs:
+    def index(self, value): pass
+"""
+
+
+def stored_graph(tmp_path, source):
+    return main_graph(tmp_path, STORED + textwrap.dedent(source))
+
+
+def index_callees(graph, caller):
+    return [c for c in callees(graph, caller) if c.endswith(".index")]
+
+
+def test_a_store_through_a_property_does_not_reach_a_load(tmp_path):
+    graph = stored_graph(
+        tmp_path,
+        """
+        class Table:
+            def get(self): return Rows()
+            def put(self, value): pass
+            headers = property(get, put)
+            @property
+            def fixed(self): return Rows()
+        def use(table):
+            table.headers = Pairs()
+            table.headers.index(1)
+            table.fixed = Pairs()
+            table.fixed.index(1)
+        use(Table())
+        """,
+    )
+
+    assert index_callees(graph, "main.use") == ["main.Rows.index"]
+    assert "main.Table.put" in callees(graph, "main.use")
+
+
+def test_a_store_through_a_data_descriptor_does_not_reach_a_load(tmp_path):
+    graph = stored_graph(
+        tmp_path,
+        """
+        class Field:
+            def __get__(self, obj, owner=None): return Rows()
+            def __set__(self, obj, value): pass
+        class Removable:
+            def __get__(self, obj, owner=None): return Rows()
+            def __delete__(self, obj): pass
+        class Model:
+            field = Field()
+            removable = Removable()
+        def use(model):
+            model.field = Pairs()
+            model.field.index(1)
+            model.removable = Pairs()
+            model.removable.index(1)
+        use(Model())
+        """,
+    )
+
+    assert index_callees(graph, "main.use") == ["main.Rows.index"]
+
+
+def test_a_store_of_a_name_that_no_data_descriptor_takes_reaches_a_load(tmp_path):
+    graph = stored_graph(
+        tmp_path,
+        """
+        class Lazy:
+            def __get__(self, obj, owner=None): return Rows()
+        class Model:
+            __slots__ = ("slot",)
+            lazy = Lazy()
+            annotated: int
+            def method(self): pass
+        class Plain:
+            pass
+        def lazy(model):
+            model.lazy = Pairs()
+            model.lazy.index(1)
+        def slot(model):
+            model.slot = Pairs()
+            model.slot.index(1)
+        def annotated(model):
+            model.annotated = Pairs()
+            model.annotated.index(1)
+        def method(model):
+            model.method = Pairs()
+            model.method.index(1)
+        def plain(obj):
+            obj.value = Pairs()
+            obj.value.index(1)
+        lazy(Model())
+        slot(Model())
+        annotated(Model())
+        method(Model())
+        plain(Plain())
+        """,
+    )
+
+    assert index_callees(graph, "main.lazy") == ["main.Pairs.index", "main.Rows.index"]
+    for caller in ("slot", "annotated", "method", "plain"):
+        assert index_callees(graph, f"main.{caller}") == ["main.Pairs.index"]
+
+
+def test_a_store_reaches_a_load_where_one_hierarchy_has_no_descriptor(tmp_path):
+    graph = stored_graph(
+        tmp_path,
+        """
+        import sys
+        class WithProperty:
+            @property
+            def value(self): return Rows()
+            @value.setter
+            def value(self, v): pass
+        class Without:
+            pass
+        Base = WithProperty if sys.argv else Without
+        class Model(Base):
+            pass
+        def use(model):
+            model.value = Pairs()
+            model.value.index(1)
+        use(Model())
+        """,
+    )
+
+    assert index_callees(graph, "main.use") == ["main.Pairs.index", "main.Rows.index"]
+
+
+def test_a_store_waits_for_a_base_that_a_call_gives(tmp_path):
+    graph = stored_graph(
+        tmp_path,
+        """
+        class WithProperty:
+            @property
+            def value(self): return Rows()
+            @value.setter
+            def value(self, v): pass
+        def base():
+            return WithProperty
+        def use(model):
+            model.value = Pairs()
+            model.value.index(1)
+        class Model(base()):
+            pass
+        use(Model())
+        """,
+    )
+
+    assert index_callees(graph, "main.use") == ["main.Rows.index"]
+
+
+def test_limit_a_member_whose_value_the_analysis_does_not_see_takes_the_store(
+    tmp_path,
+):
+    graph = stored_graph(
+        tmp_path,
+        """
+        def make(member):
+            class Model:
+                value = member
+            model = Model()
+            model.value = Pairs()
+            model.value.index(1)
+        """,
+    )
+
+    assert index_callees(graph, "main.make") == []
+
+
+def test_limit_a_property_stored_on_the_class_after_its_body_lets_the_store_write(
+    tmp_path,
+):
+    graph = stored_graph(
+        tmp_path,
+        """
+        class Model:
+            pass
+        def get(self): return Rows()
+        def put(self, value): pass
+        Model.value = property(get, put)
+        def use(model):
+            model.value = Pairs()
+            model.value.index(1)
+        use(Model())
+        """,
+    )
+
+    assert index_callees(graph, "main.use") == ["main.Pairs.index", "main.Rows.index"]
+
+
 CASES = [
     "outside_descriptor_subclass",
     "own_class_named_property",
@@ -415,6 +607,7 @@ CASES = [
     "property_init_unrelated",
     "property_on_metaclass",
     "property_set_returns",
+    "property_store_skips_dict",
     "property_subclass_call_form",
     "property_subclass_classmethod",
     "property_subclass_copy",
