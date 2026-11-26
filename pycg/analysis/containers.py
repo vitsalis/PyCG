@@ -617,12 +617,17 @@ class Containers:
 
     def _sequence_type(self, cls, obj, iteration, dst):
         if isinstance(cls, Class):
-            unless = ("__iter__", *iteration.unless)
-            found = self.lookup(cls, "__getitem__", obj, None, unless)
-            each = Each(self._sequence_iterator, obj, iteration, dst, results=(dst,))
-            self.solver.attach(found, each)
+            key = (cls, type(obj), iteration, dst)
+            sequences = self._sequences.get(key)
+            if sequences is None:
+                unless = ("__iter__", *iteration.unless)
+                found = self.lookup(cls, "__getitem__", obj, None, unless)
+                sequences = _Sequences(self, iteration, dst)
+                self._sequences[key] = sequences
+                self.solver.attach(found, sequences)
+            sequences.add(obj)
 
-    def _sequence_iterator(self, method, obj, iteration, dst):
+    def sequence_iterator(self, obj, iteration, dst):
         origin = (iteration.caller, iteration.site, iteration.role)
         iterator = self.container_at("iterator", origin, iteration.site, "iterate")
         self.add_object(self.iterator_source(iterator), obj)
@@ -755,6 +760,39 @@ class _KeyedGroup(Constraint):
                 return
             self.other_keys.add(container)
         self.access(key, container, self.node)
+
+
+class _Sequences(Constraint):
+    __slots__ = ("analysis", "iteration", "dst", "objects", "found")
+
+    def __init__(self, analysis, iteration, dst):
+        self.analysis = analysis
+        self.iteration = iteration
+        self.dst = dst
+        self.objects = []
+        self.found = False
+
+    def results(self):
+        return (self.dst,)
+
+    def apply(self, method):
+        if not self.found:
+            self.found = True
+            for obj in list(self.objects):
+                self._iterate(obj)
+
+    def add(self, obj):
+        self.objects.append(obj)
+        if self.found:
+            self._iterate(obj)
+
+    def _iterate(self, obj):
+        analysis = self.analysis
+        solver = analysis.solver
+        if solver.opaque and solver.opaque(obj):
+            analysis.add_object(self.dst, analysis.saturated)
+        else:
+            analysis.sequence_iterator(obj, self.iteration, self.dst)
 
 
 class _Site(Constraint):
