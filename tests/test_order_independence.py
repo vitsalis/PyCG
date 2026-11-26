@@ -2740,6 +2740,31 @@ SATURATING = {
         "swap()\nuse(a)\nuse(b)\n",
         "other.py": "from main import use, Box\nuse(Box())\n",
     },
+    "a setter called through the hook of each instance": {
+        "main.py": "def f(): pass\n"
+        + "".join(f"def g{i}(): pass\n" for i in range(3))
+        + "def sink(x):\n    x()\n"
+        "class Base:\n"
+        "    def __init__(self):\n        self.value = f\n"
+        "    def install(self):\n        Base.value = Field.data\n"
+        "    def __getattr__(self, name):\n        pass\n"
+        "class Maker:\n    def __call__(self):\n        Model()\n"
+        "def use(maker: Maker):\n    maker()\n"
+        "class Model(Base, Maker):\n"
+        "    def __call__(self):\n        super().__init__()\n"
+        "class Field:\n"
+        "    @property\n    def data(self):\n        pass\n"
+        "    @data.setter\n    def data(self, new):\n        sink(new)\n"
+        + "".join(
+            f"class A{i}:\n    def next(self):\n        return B{i}()\n"
+            f"class B{i}:\n    def next(self):\n        return C{i}()\n"
+            f"class C{i}:\n    def next(self):\n        return g{i}\n"
+            for i in range(3)
+        )
+        + "".join(f"sink(A{i}().next().next().next())\n" for i in range(3))
+        + "def run(handler):\n    handler()\n"
+        "for handler in [f, g0, g1, g2]:\n    run(handler)\n",
+    },
 }
 
 
