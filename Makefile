@@ -53,6 +53,9 @@ PARITY_SETS ?= micro macro
 PARITY_DUMP = $(CURDIR)/tools/parity/dump.py
 PARITY_KEYED = pycg tools/parity evaluation/micro-benchmark/snippets evaluation/common/run.py
 parity_key = python3 -I tools/parity/dump.py key --checkout $(CURDIR)
+PARITY_ORACLE = $(EVAL_OUT)/parity-oracle-$(shell $(parity_key))
+PARITY_RUST = $(EVAL_OUT)/parity-rust-$(COMMIT)
+PARITY_REQUIRED = tools/parity/required.txt
 
 define gate
 $(base_metrics)
@@ -84,6 +87,19 @@ $(GATE) summary $(RESULT) $(BASE_RESULT) $(BASE_METRICS) \
 	--changes $(RESULT)-changes.txt >> $(SUMMARY)
 endef
 
+define parity_compare
+python3 -I tools/parity/compare.py $(1) $(2) --required $(PARITY_REQUIRED) > $(3); \
+status=$$?; \
+{ echo '```'; cat $(3); echo '```'; } >> $(SUMMARY); \
+sed -n 's/^  \([^:]*\): different: \(.*\)$$/\1 \2/p' $(3) | while read -r input dumps; do \
+	for dump in $$(echo "$$dumps" | tr ',' ' '); do \
+		{ echo "$$input $$dump:"; echo '```'; \
+		python3 -I tools/parity/diff.py $(1) $(2) "$$input" "$$dump"; echo '```'; } >> $(SUMMARY); \
+	done; \
+done; \
+exit $$status
+endef
+
 define same_graphs
 diff -rq -x runs.json -x result.json $(RESULT) $(RESULT)-seed1
 @echo "the graphs of hash seeds 0 and 1 are byte-identical"
@@ -91,7 +107,7 @@ endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
-	eval-same-graphs eval-labels eval-changes eval-scale parity-oracle
+	eval-same-graphs eval-labels eval-changes eval-scale parity-oracle parity-key parity
 
 setup:
 	uv sync --locked
@@ -207,3 +223,15 @@ parity-oracle: eval-inputs
 		else $(SANDBOX) $(PARITY_DUMP) oracle --checkout $(CURDIR) --out $$out \
 			--set $$set --jobs $(EVAL_JOBS) && touch $$out/done-$$set || exit 1; fi; \
 	done && echo "parity-oracle: $$out"
+
+parity-key:
+	@$(parity_key)
+
+parity:
+	@test -d $(PARITY_ORACLE)/seed-0 || \
+		(echo "parity: no oracle output at $(PARITY_ORACLE): run make parity-oracle" >&2 && false)
+	cargo build --release --locked
+	rm -rf $(PARITY_RUST)
+	mkdir -p $(PARITY_RUST)/run-1 $(PARITY_RUST)/run-2
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
