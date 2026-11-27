@@ -3,6 +3,7 @@ pub mod engine;
 pub mod model;
 pub mod models;
 pub mod program;
+pub mod results;
 
 use std::ffi::OsString;
 use std::fmt;

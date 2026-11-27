@@ -445,6 +445,7 @@ struct Replay {
     engine: Engine<Recorder>,
     fields: FxHashMap<String, Vec<Value>>,
     calls: FxHashMap<String, BuilderCallId>,
+    built: Vec<String>,
 }
 
 pub fn build(arguments: &[String]) -> Option<ExitCode> {
@@ -463,10 +464,12 @@ pub fn build(arguments: &[String]) -> Option<ExitCode> {
         program.analysis.trace_mut().context = CONTEXT_SOLVE.to_string();
         program.analysis.solve();
     }));
+    let modules: Vec<String> = program.modules.keys().cloned().collect();
     let replay = Replay {
         engine: program.analysis,
         fields: FxHashMap::default(),
         calls: FxHashMap::default(),
+        built: modules,
     };
     Some(replay.write(Path::new(out), built.is_ok()))
 }
@@ -484,6 +487,7 @@ pub fn run(input: &str, out: &str) -> ExitCode {
         engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(out)),
         fields: FxHashMap::default(),
         calls: FxHashMap::default(),
+        built: Vec::new(),
     };
     let replayed = panic::catch_unwind(AssertUnwindSafe(|| {
         let record = |number: usize, line: &str| -> Value {
@@ -538,6 +542,14 @@ impl Replay {
             eprintln!("pycg-dump engine: cannot write D5.jsonl: {error}");
             return ExitCode::FAILURE;
         }
+        let mut analysis = pycg_document::dumps(&crate::document_build::analysis_value(
+            &replay.engine.results(&replay.built),
+        ));
+        analysis.push('\n');
+        if let Err(error) = fs::write(out.join("D6in.json"), analysis) {
+            eprintln!("pycg-dump engine: cannot write D6in.json: {error}");
+            return ExitCode::FAILURE;
+        }
         ExitCode::SUCCESS
     }
 
@@ -555,6 +567,10 @@ impl Replay {
                     .push(fields.clone());
             }
             if let Some(tables) = record.get("tables") {
+                let module = text(&record["module"]).to_owned();
+                if !self.built.contains(&module) {
+                    self.built.push(module);
+                }
                 if !empty_collection(&tables["literal_imports"]) {
                     not_ported("the builder table literal_imports");
                 }
@@ -566,6 +582,10 @@ impl Replay {
                 }
                 for name in set(&tables["read_namespaces"]) {
                     self.engine.tables().read_namespaces.push(text(name).into());
+                }
+                for pair in set(&tables["iterated_expressions"]) {
+                    let site: CallSite = (text(&pair[0]).into(), text(&pair[1]).into());
+                    self.engine.tables().iterated_expressions.push(site);
                 }
                 for pair in pairs(&tables["none_arguments"]) {
                     let site: CallSite = (text(&pair[0][0]).into(), text(&pair[0][1]).into());

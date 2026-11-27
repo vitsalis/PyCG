@@ -6,20 +6,19 @@ use std::process::ExitCode;
 use num_bigint::BigInt;
 use pycg_document::{
     AnalysisPart, ClassDefinition, Construct, FunctionDefinition, MroBase, ProgramPart, RolePart,
-    SiteEdge, Unresolved, build, dumps,
+    SiteEdge, Unresolved, Value as Document, build, dumps,
 };
 use serde_json::{Map, Value};
 
 const EXIT_FAILURE: u8 = 1;
 const ORACLE_BUILDER: &str = "D4.jsonl";
-const ANALYSIS_PART: &str = "D6in.json";
 const RUN: &str = "run.json";
 const DOCUMENT: &str = "D6.json";
 
-pub fn run(oracle: &str, out: &str) -> ExitCode {
+pub fn run(oracle: &str, analysis: &str, out: &str) -> ExitCode {
     let oracle = Path::new(oracle);
     let (run, analysis) = match read(&oracle.join(RUN)).and_then(|run| {
-        let analysis = read(&oracle.join(ANALYSIS_PART)).and_then(|value| analysis_part(&value))?;
+        let analysis = read(Path::new(analysis)).and_then(|value| analysis_part(&value))?;
         Ok((run, analysis))
     }) {
         Ok(found) => found,
@@ -215,19 +214,181 @@ fn site_edge(value: &Value) -> Parsed<SiteEdge> {
             construct: match construct {
                 Value::String(name) if name == "call" => Construct::Call,
                 Value::String(name) if name == "decorator" => Construct::Decorator,
-                Value::Array(parts) => Construct::Role(
-                    parts
-                        .iter()
-                        .map(|part| match part {
-                            Value::String(text) => RolePart::Text(text.clone()),
-                            _ => RolePart::Other,
-                        })
-                        .collect(),
-                ),
+                Value::Array(parts) => {
+                    Construct::Role(parts.iter().map(role_part).collect::<Parsed<_>>()?)
+                }
                 other => return Err(format!("{other} is not a construct")),
             },
             callees: strings(callees)?,
         }),
         _ => Err(format!("{value} is not a site edge")),
+    }
+}
+
+fn role_part(value: &Value) -> Parsed<RolePart> {
+    Ok(match value {
+        Value::String(text) => RolePart::Text(text.clone()),
+        Value::Bool(flag) => RolePart::Flag(*flag),
+        Value::Number(number) => RolePart::Number(
+            number
+                .as_i64()
+                .ok_or_else(|| format!("{number} is not an integer of a role"))?,
+        ),
+        Value::Array(parts) => RolePart::Parts(parts.iter().map(role_part).collect::<Parsed<_>>()?),
+        other => return Err(format!("{other} is not a part of a role")),
+    })
+}
+
+pub fn analysis_value(part: &AnalysisPart) -> Document {
+    let text = |value: &str| Document::Str(value.into());
+    let int = |value: u64| Document::Int(BigInt::from(value));
+    let object = |fields: Vec<(&str, Document)>| {
+        Document::Object(
+            fields
+                .into_iter()
+                .map(|(key, field)| (key.to_owned(), field))
+                .collect(),
+        )
+    };
+    let texts =
+        |values: &[String]| Document::Array(values.iter().map(|value| text(value)).collect());
+    let pair =
+        |(first, second): &(String, String)| Document::Array(vec![text(first), text(second)]);
+    object(vec![
+        (
+            "cap",
+            part.cap.clone().map_or(Document::Null, Document::Int),
+        ),
+        (
+            "functions",
+            Document::Array(
+                part.functions
+                    .iter()
+                    .map(|function| {
+                        object(vec![
+                            ("name", text(&function.name)),
+                            ("module", text(&function.module)),
+                            ("lineno", int(function.lineno)),
+                            ("end_lineno", int(function.end_lineno)),
+                            ("col_offset", int(function.col_offset)),
+                            ("end_col_offset", int(function.end_col_offset)),
+                        ])
+                    })
+                    .collect(),
+            ),
+        ),
+        (
+            "classes",
+            Document::Array(
+                part.classes
+                    .iter()
+                    .map(|class| {
+                        object(vec![
+                            ("name", text(&class.name)),
+                            ("module", text(&class.module)),
+                            ("index", int(class.index)),
+                            ("lineno", int(class.lineno)),
+                            ("end_lineno", int(class.end_lineno)),
+                            ("unknown", Document::Bool(class.unknown)),
+                            (
+                                "mro",
+                                Document::Array(
+                                    class
+                                        .mro
+                                        .iter()
+                                        .map(|base| {
+                                            Document::Array(vec![
+                                                Document::Bool(base.analysed),
+                                                text(&base.name),
+                                            ])
+                                        })
+                                        .collect(),
+                                ),
+                            ),
+                        ])
+                    })
+                    .collect(),
+            ),
+        ),
+        (
+            "fields",
+            Document::Object(
+                part.fields
+                    .iter()
+                    .map(|(module, attributes)| {
+                        let attributes = attributes
+                            .iter()
+                            .map(|(attribute, held)| (attribute.clone(), texts(held)))
+                            .collect();
+                        (module.clone(), Document::Object(attributes))
+                    })
+                    .collect(),
+            ),
+        ),
+        (
+            "site_edges",
+            Document::Array(
+                part.site_edges
+                    .iter()
+                    .map(|edge| {
+                        Document::Array(vec![
+                            text(&edge.caller),
+                            text(&edge.site),
+                            construct_value(&edge.construct),
+                            texts(&edge.callees),
+                        ])
+                    })
+                    .collect(),
+            ),
+        ),
+        (
+            "call_expressions",
+            Document::Array(part.call_expressions.iter().map(pair).collect()),
+        ),
+        (
+            "iterated_expressions",
+            Document::Array(part.iterated_expressions.iter().map(pair).collect()),
+        ),
+        (
+            "unresolved",
+            Document::Array(
+                part.unresolved
+                    .iter()
+                    .map(|entry| {
+                        Document::Array(vec![
+                            text(&entry.caller),
+                            text(&entry.site),
+                            text(&entry.cause),
+                        ])
+                    })
+                    .collect(),
+            ),
+        ),
+        (
+            "external_callees",
+            Document::Object(
+                part.external_callees
+                    .iter()
+                    .map(|(name, known)| (name.clone(), text(known)))
+                    .collect(),
+            ),
+        ),
+    ])
+}
+
+fn construct_value(construct: &Construct) -> Document {
+    match construct {
+        Construct::Call => Document::Str("call".into()),
+        Construct::Decorator => Document::Str("decorator".into()),
+        Construct::Role(parts) => Document::Array(parts.iter().map(role_value).collect()),
+    }
+}
+
+fn role_value(part: &RolePart) -> Document {
+    match part {
+        RolePart::Text(text) => Document::Str(text.as_str().into()),
+        RolePart::Flag(flag) => Document::Bool(*flag),
+        RolePart::Number(number) => Document::Int(BigInt::from(*number)),
+        RolePart::Parts(parts) => Document::Array(parts.iter().map(role_value).collect()),
     }
 }

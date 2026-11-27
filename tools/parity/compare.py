@@ -9,8 +9,8 @@ Compares the dumps of two runs (docs/rust/PLAN.md, section 3): EXPECTED is
 the oracle's directory of one seed, ACTUAL the other tool's. Each holds one
 directory per input (micro/<category>/<case>, macro/<project>, ...). An input
 fails when either side wrote error.txt or ACTUAL lacks a dump that REQUIRED
-names. Every required dump is compared (D5 as sets, the others record by
-record), and D6 by SHA-256 when ACTUAL wrote it; an input whose required
+names. Every required dump is compared (D5 as sets, the others byte for
+byte), and D6 by SHA-256 when ACTUAL wrote it; an input whose required
 dumps agree is missing when ACTUAL wrote no D6 and D6 is not required.
 Prints one line per set and the first differences, and exits 1 when an
 input differs or failed. An input where ACTUAL wrote error.txt and the
@@ -25,7 +25,7 @@ partial, fails.
 """
 
 REQUIRED_DEFAULT = Path(__file__).with_name("required.txt")
-DUMPS = ("D1", "D2", "D3", "D4", "D5", "D6")
+DUMPS = ("D1", "D2", "D3", "D4", "D5", "D6", "D6in")
 DOCUMENT = "D6.json"
 ERROR = "error.txt"
 PARTIAL = "D3.partial.jsonl"
@@ -69,7 +69,11 @@ def same_dump(name, expected, actual):
 
 
 def file_of(name):
-    return DOCUMENT if name == "D6" else f"{name}.jsonl"
+    if name == "D6":
+        return DOCUMENT
+    if name == "D6in":
+        return "D6in.json"
+    return f"{name}.jsonl"
 
 
 def compare_input(expected, actual, required):

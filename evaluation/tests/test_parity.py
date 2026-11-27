@@ -366,6 +366,30 @@ def test_the_same_dumps_compare_identical(dumped, tmp_path, capsys):
     assert "1 inputs, 1 identical, 0 different" in capsys.readouterr().out
 
 
+def test_a_planted_difference_in_the_document_inputs_is_found_and_explained(
+    dumped, tmp_path, capsys
+):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    planted = copy_as_input(first, actual, "micro/a/classes")
+    inputs = json.loads((planted / "D6in.json").read_text(encoding="utf-8"))
+    inputs["functions"][0]["lineno"] += 1
+    (planted / "D6in.json").write_text(
+        json.dumps(inputs, sort_keys=True, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+
+    status = compare.main([str(expected), str(actual), "--dumps", "D6in"])
+    found = capsys.readouterr().out
+    explained = diff.explain(expected, actual, "micro/a/classes", "D6in")
+
+    assert status == 1
+    assert "micro/a/classes: different: D6in" in found
+    assert explained[0] == "functions/0/lineno:"
+
+
 def test_a_planted_difference_in_a_dump_is_found_and_explained(
     dumped, tmp_path, capsys
 ):

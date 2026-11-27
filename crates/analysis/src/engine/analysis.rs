@@ -25,7 +25,7 @@ impl<T: Trace> Engine<T> {
         )
     }
 
-    fn sync(&mut self) {
+    pub(super) fn sync(&mut self) {
         let handed = std::mem::take(&mut self.state.handed);
         for object in handed {
             let fields = self

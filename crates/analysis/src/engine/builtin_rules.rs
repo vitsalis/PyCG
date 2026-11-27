@@ -1,4 +1,5 @@
 use pycg_solver::{NodeId, ObjId};
+use rustc_hash::FxHashSet;
 
 use crate::builder::calls::MethodKind;
 use crate::engine::attributes::AccessKind;
@@ -799,6 +800,28 @@ impl<T: Trace> State<T> {
 
     pub(super) fn dynamic_access(&self, id: DynamicId) -> &DynamicAccess {
         &self.dynamic_accesses[id.0 as usize]
+    }
+
+    pub(super) fn computed_name_nodes(&self, graph: &mut Graph) -> FxHashSet<NodeId> {
+        let mut computed = FxHashSet::default();
+        for access in &self.dynamic_accesses {
+            let names = graph.objects(access.name);
+            let known = !access.dynamic
+                && !names.is_empty()
+                && names.iter().all(|&name| {
+                    matches!(
+                        self.objects.get(name),
+                        Object::Const {
+                            value: Literal::Str(_),
+                            ..
+                        }
+                    )
+                });
+            if !known && let Some(dst) = access.dst {
+                computed.insert(dst);
+            }
+        }
+        computed
     }
 
     pub(super) fn complete_dynamic_accesses(&mut self, graph: &mut Graph) -> bool {
