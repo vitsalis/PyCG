@@ -13,6 +13,7 @@ struct Recorded {
     kinds: Vec<(u32, KindMask)>,
     nest: Vec<(u32, NodeId)>,
     between: u32,
+    rounds: u32,
 }
 
 impl Rules<u32> for Recorded {
@@ -53,6 +54,10 @@ impl Rules<u32> for Recorded {
 
     fn wake(&mut self, _solver: &mut Solver<u32>, watch: WatchId) {
         self.woken.push(watch);
+    }
+
+    fn firing(&mut self, _solver: &mut Solver<u32>) {
+        self.rounds += 1;
     }
 }
 
@@ -98,6 +103,7 @@ fn a_constraint_sees_each_object_once_in_rounds() {
     solver.add_object(&mut rules, node, found[1]);
     solver.solve(&mut rules);
     assert_eq!(rules.applied, [(7, vec![found[0]]), (7, vec![found[1]])]);
+    assert_eq!(rules.rounds, 2);
 }
 
 #[test]

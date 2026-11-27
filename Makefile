@@ -255,5 +255,13 @@ parity:
 				|| { echo "parity: pycg_dump stubs $$dump failed on $$input" >&2; exit 1; }; \
 		done; \
 	done
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D3.jsonl | sort | while read -r dump; do \
+		input=$$(dirname "$$dump"); \
+		for run in run-1 run-2; do \
+			out=$(PARITY_RUST)/$$run/$$input && mkdir -p $$out && \
+			if $(PARITY_BINARIES)/pycg_dump solver "$$dump" > $$out/D3.jsonl 2> $$out/replay.txt; \
+			then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
+		done; \
+	done
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)

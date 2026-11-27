@@ -21,6 +21,7 @@ pub trait Rules<C> {
     fn opaque(&self, object: ObjId) -> bool;
     fn between_rounds(&mut self, solver: &mut Solver<C>) -> bool;
     fn wake(&mut self, solver: &mut Solver<C>, watch: WatchId);
+    fn firing(&mut self, solver: &mut Solver<C>);
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
@@ -78,6 +79,7 @@ pub struct Solver<C> {
     nodes: Vec<Node<C>>,
     kinds_by_object: Vec<Option<KindMask>>,
     saturated: ObjId,
+    saturated_node: NodeId,
     saturated_set: SetId,
     cap: Option<u32>,
     worklist: VecDeque<NodeId>,
@@ -109,6 +111,7 @@ impl<C: Copy> Solver<C> {
             nodes: Vec::new(),
             kinds_by_object: Vec::new(),
             saturated,
+            saturated_node: NodeId::new(0),
             saturated_set: SetId::EMPTY,
             cap,
             worklist: VecDeque::new(),
@@ -134,6 +137,7 @@ impl<C: Copy> Solver<C> {
         };
         solver.declare(saturated, saturated_kinds);
         let node = solver.constant(saturated);
+        solver.saturated_node = node;
         solver.saturated_set = solver.nodes[node.index()].done;
         solver
     }
@@ -151,6 +155,10 @@ impl<C: Copy> Solver<C> {
 
     pub fn saturated(&self) -> ObjId {
         self.saturated
+    }
+
+    pub fn saturated_node(&self) -> NodeId {
+        self.saturated_node
     }
 
     pub fn enable_opacity(&mut self) {
@@ -672,6 +680,7 @@ impl<C: Copy> Solver<C> {
     }
 
     fn fire(&mut self, rules: &mut impl Rules<C>) {
+        rules.firing(self);
         let firing = std::mem::take(&mut self.firing_nodes);
         self.applications_in_progress += 1;
         for node in firing {
