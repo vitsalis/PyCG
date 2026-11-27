@@ -36,6 +36,20 @@ impl<T: Trace> Engine<T> {
                 }
             }
         }
+        let fresh: Vec<_> =
+            self.state.tables.none_arguments[self.state.synced_none_arguments..].to_vec();
+        self.state.synced_none_arguments = self.state.tables.none_arguments.len();
+        for ((caller, site), indices) in fresh {
+            let key = (
+                self.state.symbols.intern(&caller),
+                self.state.symbols.intern(&site),
+            );
+            self.state
+                .none_arguments
+                .entry(key)
+                .or_default()
+                .extend(indices);
+        }
         let tables = &self.state.tables;
         if !tables.literal_imports.is_empty() {
             not_ported("the builder table literal_imports");
@@ -217,14 +231,10 @@ impl<T: Trace> Analysis for Engine<T> {
             .add_method(&mut self.graph, class, name, function, kind);
     }
 
-    fn add_implicit_method(
-        &mut self,
-        _value: NodeId,
-        _field: NodeId,
-        _kind: MethodKind,
-        _site: &str,
-    ) {
-        not_ported("the builder call add_implicit_method")
+    fn add_implicit_method(&mut self, value: NodeId, field: NodeId, kind: MethodKind, site: &str) {
+        self.sync();
+        self.state
+            .add_implicit_method(&mut self.graph, value, field, kind, site);
     }
 
     fn add_class_member(&mut self, value: NodeId, field: NodeId) {

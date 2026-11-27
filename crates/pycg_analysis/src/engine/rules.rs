@@ -3,6 +3,7 @@ use pycg_solver::{KindMask, NodeId, ObjId, Rules, WatchId};
 use crate::engine::attributes::{
     ANALYSED_METHODS, AccessId, AccessorsId, DeliveriesId, HookCallsId, HooksId, WritesId,
 };
+use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
@@ -140,6 +141,32 @@ pub(crate) enum Rule {
     CallEach {
         call: CallId,
     },
+    ImplicitMethod {
+        field: NodeId,
+        kind: Sym,
+        site: Sym,
+    },
+    PropertyReceiver {
+        rule: PropertyRule,
+        dst: Option<NodeId>,
+    },
+    DerivedProperty {
+        rule: PropertyRule,
+        property: ObjId,
+        dst: Option<NodeId>,
+    },
+    BindClass {
+        method: ObjId,
+        dst: NodeId,
+    },
+    BindType {
+        method: ObjId,
+        dst: NodeId,
+    },
+    BindTo {
+        owner: ObjId,
+        dst: NodeId,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -160,6 +187,8 @@ pub(crate) enum WaitingRule {
 
 const SET_NAME_KINDS: &[Kind] = &[Kind::Instance, Kind::Class];
 const CLASS_KINDS: &[Kind] = &[Kind::Class];
+const PROPERTY_KINDS: &[Kind] = &[Kind::Wrapper, Kind::Instance];
+const OWNER_KINDS: &[Kind] = &[Kind::Class, Kind::External];
 const CALLED_BACK_KINDS: &[Kind] = &[Kind::Function, Kind::BoundMethod, Kind::Instance];
 
 impl Rule {
@@ -201,6 +230,12 @@ impl Rule {
             Rule::CallProtocol { .. } => "Each:Outside._call_protocol",
             Rule::MetaclassProtocol { .. } => "Each:Outside._metaclass_protocol",
             Rule::CallEach { .. } => "Each:Analysis.call",
+            Rule::ImplicitMethod { .. } => "Each:BuiltinRules._implicit_method",
+            Rule::PropertyReceiver { .. } => "Each:BuiltinRules._property_receiver",
+            Rule::DerivedProperty { .. } => "Each:BuiltinRules._derived_property",
+            Rule::BindClass { .. } => "Each:BuiltinRules._bind_class",
+            Rule::BindType { .. } => "Each:BuiltinRules._bind_type",
+            Rule::BindTo { .. } => "Each:Hierarchy._bind_to",
         }
     }
 
@@ -226,6 +261,9 @@ impl Rule {
             Rule::CallMetaclass { .. } => Some(CLASS_KINDS),
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
             Rule::CallProtocol { .. } => Some(SET_NAME_KINDS),
+            Rule::PropertyReceiver { .. } => Some(PROPERTY_KINDS),
+            Rule::BindClass { .. } => Some(OWNER_KINDS),
+            Rule::BindType { .. } => Some(SET_NAME_KINDS),
             Rule::ClassGet { .. }
             | Rule::Accessors {
                 analysed_only: true,
@@ -253,9 +291,14 @@ impl Rule {
             Rule::ClassAttribute { class, .. } | Rule::MetaclassProtocol { class, .. } => {
                 vec![class]
             }
-            Rule::CallBackObject { .. } | Rule::CallProtocol { .. } | Rule::CallEach { .. } => {
-                Vec::new()
-            }
+            Rule::CallBackObject { .. }
+            | Rule::CallProtocol { .. }
+            | Rule::CallEach { .. }
+            | Rule::ImplicitMethod { .. }
+            | Rule::PropertyReceiver { .. } => Vec::new(),
+            Rule::DerivedProperty { property, .. } => vec![property],
+            Rule::BindClass { method, .. } | Rule::BindType { method, .. } => vec![method],
+            Rule::BindTo { owner, .. } => vec![owner],
             Rule::ModuleGetattr { module, .. } => vec![module],
             Rule::Deliver { receiver, .. } => vec![receiver],
             Rule::Access(_)
@@ -342,6 +385,13 @@ impl<T: Trace> State<T> {
             | Rule::CallProtocol { .. } => Vec::new(),
             Rule::MetaclassProtocol { implicit: call, .. } | Rule::CallEach { call } => {
                 self.calls[call.index()].dst.into_iter().collect()
+            }
+            Rule::ImplicitMethod { field: dst, .. }
+            | Rule::BindClass { dst, .. }
+            | Rule::BindType { dst, .. }
+            | Rule::BindTo { dst, .. } => vec![dst],
+            Rule::PropertyReceiver { dst, .. } | Rule::DerivedProperty { dst, .. } => {
+                dst.into_iter().collect()
             }
             Rule::Bases { .. }
             | Rule::KeywordCandidate { .. }
@@ -430,6 +480,28 @@ impl<T: Trace> State<T> {
                 ref unless,
             } => self.metaclass_protocol(graph, object, class, name, implicit, unless.clone()),
             Rule::CallEach { call } => self.call(graph, object, call),
+            Rule::ImplicitMethod { field, kind, site } => {
+                self.implicit_method(graph, object, field, kind, site)
+            }
+            Rule::PropertyReceiver { rule, dst } => {
+                self.property_receiver(graph, object, rule, dst)
+            }
+            Rule::DerivedProperty { rule, property, .. } => {
+                self.run_property_rule(graph, property, rule)
+            }
+            Rule::BindClass { method, dst } => self.bind(graph, method, Some(object), dst, None),
+            Rule::BindType { method, dst } => self.bind_type(graph, object, method, dst),
+            Rule::BindTo { owner, dst } => {
+                let bound = if matches!(
+                    self.objects.get(object),
+                    crate::engine::objects::Object::Function(_)
+                ) {
+                    self.bound_method(graph, owner, object)
+                } else {
+                    object
+                };
+                self.add_object(graph, dst, bound);
+            }
         }
     }
 

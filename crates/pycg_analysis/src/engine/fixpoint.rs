@@ -84,17 +84,31 @@ impl<T: Trace> State<T> {
                             .unwrap_or_default();
                         for field in fields {
                             for value in self.objects_of(graph, field) {
-                                if matches!(self.objects.get(value), Object::Function(_)) {
+                                if matches!(
+                                    self.objects.get(value),
+                                    Object::Function(_) | Object::Wrapper { .. }
+                                ) {
                                     pending.push(value);
                                 }
                             }
                         }
                     }
                 }
+                Object::Wrapper { .. } => {
+                    let func = self.symbols.intern("__func__");
+                    if let Some(&field) = self
+                        .fields
+                        .get(&object)
+                        .and_then(|fields| fields.get(&func))
+                    {
+                        pending.extend(self.objects_of(graph, field));
+                    }
+                }
                 Object::Saturated
                 | Object::Module(_)
                 | Object::External(_)
                 | Object::UnknownExternal(_)
+                | Object::BuiltinMethod { .. }
                 | Object::Fallback { .. }
                 | Object::Const { .. }
                 | Object::Container(_)
@@ -151,6 +165,18 @@ impl<T: Trace> State<T> {
             return false;
         };
         let field = self.field(graph, class, name);
-        self.objects_of(graph, field).contains(&function)
+        let func = self.symbols.intern("__func__");
+        for value in self.objects_of(graph, field) {
+            if value == function {
+                return true;
+            }
+            if matches!(self.objects.get(value), Object::Wrapper { .. }) {
+                let wrapped = self.field(graph, value, func);
+                if self.objects_of(graph, wrapped).contains(&function) {
+                    return true;
+                }
+            }
+        }
+        false
     }
 }
