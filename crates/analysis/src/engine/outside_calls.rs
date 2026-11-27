@@ -255,7 +255,8 @@ impl<T: Trace> State<T> {
                 .iter()
                 .any(|definition| &*definition.path == SUBCLASSES)
         {
-            not_ported("reflection: the subclasses of a class");
+            self.subclasses(graph, receiver, call);
+            return;
         }
         let dst = self.calls[call.index()].dst;
         for definition in definitions {
