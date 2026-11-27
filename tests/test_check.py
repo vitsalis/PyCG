@@ -75,11 +75,24 @@ def test_a_change_that_can_move_the_metrics_runs_the_evaluation(path):
         "tests/known_failures.txt.orig",
         "pycg-notes.md",
         "Makefile.local",
+        "tools/parity/engine.txt",
+        "tools/parity/dump.py",
+        "crates/analysis/src/lib.rs",
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        "clippy.toml",
     ],
 )
 def test_another_change_skips_the_evaluation(path):
     needed, lines = check.detect_eval([path], "origin/main")
     assert not needed and lines[0].startswith("### Evaluation: skipped")
+
+
+def test_a_parity_change_with_one_that_can_move_the_metrics_runs_the_evaluation():
+    changed = ["tools/parity/differences.txt", "tools/check.py"]
+    needed, lines = check.detect_eval(changed, "origin/base/rust-rewrite")
+    assert needed and lines[1:] == ["- `tools/check.py`"]
 
 
 def test_an_unreadable_diff_runs_the_evaluation():
