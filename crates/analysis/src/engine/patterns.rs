@@ -5,6 +5,7 @@ use crate::engine::attributes::{AccessId, AccessKind};
 use crate::engine::builtin_rules::DynamicId;
 use crate::engine::objects::{Kind, Object};
 use crate::engine::rules::{Rule, RuleId};
+use crate::engine::semantics::CallId;
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State};
@@ -79,6 +80,18 @@ fn cased(name: &str, case: &str) -> String {
     }
 }
 
+fn is_ascii(points: &[u32]) -> bool {
+    points.iter().all(|&point| point < 0x80)
+}
+
+fn cased_points(points: &[u32], case: &str) -> Vec<u32> {
+    let text: String = points
+        .iter()
+        .map(|&point| char::from_u32(point).expect("a code point"))
+        .collect();
+    cased(&text, case).chars().map(u32::from).collect()
+}
+
 impl<T: Trace> State<T> {
     fn pattern_rule(&mut self, rule: PatternRule) -> RuleId {
         self.rule(Rule::Pattern(rule))
@@ -137,6 +150,44 @@ impl<T: Trace> State<T> {
             .states
             .insert(pattern, PatternState::default());
         pattern
+    }
+
+    pub(super) fn rule_case(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        receiver: Option<ObjId>,
+        case: &str,
+    ) {
+        let affixes = receiver.and_then(|receiver| match self.objects.get(receiver) {
+            Object::Pattern { prefix, suffix, .. } if is_ascii(prefix) && is_ascii(suffix) => {
+                Some((cased_points(prefix, case), cased_points(suffix, case)))
+            }
+            _ => None,
+        });
+        let result = match affixes {
+            Some((prefix, suffix)) => {
+                let case = self.symbols.intern(case);
+                self.pattern(graph, &prefix, &suffix, Some(case), true)
+            }
+            None => self.typed(graph, "builtins.str"),
+        };
+        let Some(dst) = self.calls[call.index()].dst else {
+            return;
+        };
+        self.add_object(graph, dst, result);
+        if receiver.is_some_and(|receiver| self.inexact(receiver)) {
+            let unknown = self.unknown_external;
+            self.add_object(graph, dst, unknown);
+        }
+    }
+
+    fn inexact(&self, object: ObjId) -> bool {
+        match self.objects.get(object) {
+            Object::Const { exact, .. } | Object::Pattern { exact, .. } => !*exact,
+            Object::Container(container) => !container.exact,
+            _ => false,
+        }
     }
 
     fn certain_operand(&self, object: ObjId) -> bool {
