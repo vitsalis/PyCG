@@ -235,6 +235,8 @@ fn numbered(counts: &mut FxHashMap<String, u32>, key: &str, separator: char) -> 
 }
 
 impl Trace for Recorder {
+    const RECORDS: bool = true;
+
     fn module(&mut self, module: Option<&str>) {
         self.context = module.unwrap_or(CONTEXT_PROGRAM).to_string();
     }

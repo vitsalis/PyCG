@@ -560,27 +560,29 @@ impl Rule {
 impl<T: Trace> State<T> {
     pub(super) fn rule(&mut self, rule: Rule) -> RuleId {
         let id = RuleId(u32::try_from(self.rules.len()).expect("fewer than 2^32 rules"));
-        let key = match rule {
-            Rule::Call(call) => {
-                format!("Call:{}", self.symbols.text(self.calls[call.index()].site))
-            }
-            Rule::Access(access) => self.access(access).kind.name().to_string(),
-            _ => rule.key().to_string(),
-        };
-        let captured = match rule {
-            Rule::Deliveries(id) => vec![self.deliveries_receiver(id)],
-            Rule::Shared(shared) => self.shared_captured(shared),
-            _ => rule.captured(),
-        };
-        self.trace.rule(
-            id,
-            &RuleInfo {
-                key: &key,
-                kinds: rule.kinds(),
-                each: rule.each(),
-                captured: &captured,
-            },
-        );
+        if T::RECORDS {
+            let key = match rule {
+                Rule::Call(call) => {
+                    format!("Call:{}", self.symbols.text(self.calls[call.index()].site))
+                }
+                Rule::Access(access) => self.access(access).kind.name().to_string(),
+                _ => rule.key().to_string(),
+            };
+            let captured = match rule {
+                Rule::Deliveries(id) => vec![self.deliveries_receiver(id)],
+                Rule::Shared(shared) => self.shared_captured(shared),
+                _ => rule.captured(),
+            };
+            self.trace.rule(
+                id,
+                &RuleInfo {
+                    key: &key,
+                    kinds: rule.kinds(),
+                    each: rule.each(),
+                    captured: &captured,
+                },
+            );
+        }
         self.rules.push(rule);
         id
     }
