@@ -73,9 +73,12 @@ impl<T: Trace> Engine<T> {
             let name = self.state.symbols.intern(&name);
             self.state.read_namespaces.insert(name);
         }
-        let tables = &self.state.tables;
-        if !tables.literal_imports.is_empty() {
-            not_ported("the builder table literal_imports");
+        let fresh: Vec<(Box<str>, NodeId)> =
+            self.state.tables.literal_imports[self.state.synced_literal_imports..].to_vec();
+        self.state.synced_literal_imports = self.state.tables.literal_imports.len();
+        for (site, module) in fresh {
+            let site = self.state.symbols.intern(&site);
+            self.state.literal_imports.insert(site, module);
         }
     }
 
