@@ -10,7 +10,7 @@ are data: PyCG reads them, and no script imports or runs them.
 
 | Command | What it does |
 |---|---|
-| `make eval` | Pulls the inputs images by their key, or builds them when the pull fails (below, "The inputs image"), copies the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary, and reports the values against the bests of `metrics.json` (below, "The gate"); the graphs, `result.json` and `benchmark_sha256` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
+| `make eval` | Pulls the inputs images by their key, or builds them when the pull fails (below, "The inputs image"), links the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary, and reports the values against the bests of `metrics.json` (below, "The gate"); the graphs, `result.json` and `benchmark_sha256` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
 | `make eval-record` | Writes `metrics.json`: each best is the larger of the stored and the measured value, or the measured value when the benchmark changed (measures first if this commit has no result) |
 | `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures BASE on its own benchmark, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
 | `make eval-determinism` | Measures this commit again with `PYTHONHASHSEED=1` for the analyses and fails unless every graph is byte-identical to that of seed 0 |
@@ -390,9 +390,9 @@ ground truth, are not scored and are not gated, and a change of them does
 not change the digest of the benchmark. Each is pinned by the URL and the
 SHA-256 of one archive: a wheel of PyPI or the archive of a commit that
 GitHub serves. The build of the inputs image fetches them (above, "The
-inputs image") and `make eval-inputs` copies their sources to
-`scale/projects/<name>` (git ignores it), so they are there wherever the
-inputs images are.
+inputs image") and `make eval-inputs` makes their sources
+`scale/projects/<name>` (a link into the shared copy; git ignores the directory), so
+they are there wherever the inputs images are.
 
 `make eval-scale NAME=<package>` runs `scale/measure.py run` in the
 container of `make eval` (no network, the repository read-only,
@@ -491,8 +491,15 @@ does not cover. `make eval-inputs` pulls
 `ghcr.io/vitsalis/pycg-eval-runner:<key>` and tags them with the local
 names; when a pull fails it builds both with `make eval-inputs-build`. It
 prints which it did, then copies the sources out of `pycg-eval-macro` in a
-container without network: those of the macro-benchmark to
-`macro-benchmark/projects/`, those of the scale set to `scale/projects/`.
+container without network, once per inputs key, to
+`$EVAL_OUT/inputs-<key>/`: those of the macro-benchmark to `macro/`, those
+of the scale set to `scale/`. The copy is made read-only and marked
+complete by a file `done`; a checkout whose key it already has copies
+nothing. `macro-benchmark/projects/` and `scale/projects/` then hold one
+symbolic link per project into the copy, so every worktree reads the one
+copy, and the containers of `make eval` reach it through the mount of
+`$EVAL_OUT`. A copy of an older key stays until it is removed (`chmod -R
+u+w` first).
 
 The workflow `Inputs` of CI runs when a file of the key changes. On a pull
 request it builds both targets, without pushing and without the right to
