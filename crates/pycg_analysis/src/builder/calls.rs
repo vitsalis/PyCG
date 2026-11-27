@@ -304,4 +304,24 @@ pub trait Analysis {
     );
     fn add_pattern_operand(&mut self, operand: Option<NodeId>, result: NodeId);
     fn pattern(&mut self, prefix: &[u32], suffix: &[u32]) -> ObjId;
+    fn site_call(&mut self, caller: &str, site: &str, role: &[&str]) -> CallId;
+    fn add_special_call(&mut self, value: NodeId, name: &str, call: CallId);
+    fn add_named_load(&mut self, obj: NodeId, name: NodeId, dst: NodeId, caller: &str, site: &str);
+    fn callable_filter(&mut self, source: NodeId, dst: NodeId, holds: bool);
+    fn class_filter(
+        &mut self,
+        source: NodeId,
+        classes: Option<NodeId>,
+        dst: NodeId,
+        as_class: bool,
+        holds: bool,
+    );
+    fn tested_classes(
+        &mut self,
+        classes: NodeId,
+        dst: NodeId,
+        as_class: bool,
+        module: ObjId,
+        site: &str,
+    );
 }
