@@ -1,7 +1,13 @@
+mod annotations;
 pub mod bindings;
 pub mod calls;
+mod comprehensions;
 pub mod expressions;
 pub mod flow;
+mod format;
+mod literals;
+mod narrowing;
+mod patterns;
 pub mod statements;
 
 use indexmap::IndexMap;
@@ -19,6 +25,7 @@ use pycg_stubs::{Entry, Stubs};
 use rustc_hash::FxHashSet;
 
 use crate::builder::calls::{Analysis, MadeFunction};
+use crate::builder::expressions::ExpressionTables;
 use crate::builder::flow::{
     Definition, FALSE, Flow, Literal, Literals, TRUE, Truth, UNBOUND, UNKNOWN,
 };
@@ -91,6 +98,7 @@ pub struct ModuleBuilder<'a, 's, A: Analysis> {
     pub(crate) import_module_names: FxHashSet<String>,
     pub star_imported_modules: Vec<String>,
     pub outside_star_imported_modules: Vec<String>,
+    pub(crate) expressions: ExpressionTables,
 }
 
 impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
@@ -126,6 +134,7 @@ impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
             import_module_names: FxHashSet::default(),
             star_imported_modules: Vec::new(),
             outside_star_imported_modules: Vec::new(),
+            expressions: ExpressionTables::default(),
         }
     }
 
