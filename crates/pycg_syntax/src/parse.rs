@@ -1,20 +1,26 @@
 use ruff_python_ast::token::{TokenKind, Tokens};
-use ruff_python_ast::{ModModule, PythonVersion};
+use ruff_python_ast::{Expr, ModModule, Operator, PythonVersion, UnaryOp};
 use ruff_python_parser::{
     LexicalErrorType, Mode, ParseErrorType, ParseOptions, Parsed, parse_unchecked,
 };
 use ruff_source_file::LineIndex;
 use ruff_text_size::{Ranged, TextSize};
 
+use crate::tree::Node;
+
 const TARGET_VERSION: PythonVersion = PythonVersion::PY314;
 const PARENTHESES_DEPTH_MAX: usize = 200;
 const INDENTATION_DEPTH_MAX: usize = 100;
+const INTERPOLATED_STRING_DEPTH_MAX: usize = 149;
+const STATEMENT_DEPTH_MAX: usize = 43_482;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SyntaxKind {
     Syntax,
     Indentation,
     Tab,
+    Memory,
+    Recursion,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -29,6 +35,8 @@ impl ParseFailure {
             SyntaxKind::Syntax => "SyntaxError",
             SyntaxKind::Indentation => "IndentationError",
             SyntaxKind::Tab => "TabError",
+            SyntaxKind::Memory => "MemoryError",
+            SyntaxKind::Recursion => "RecursionError",
         };
         match self.line {
             Some(line) => format!("{name} (line {line})"),
@@ -49,8 +57,15 @@ pub fn parse_source(source: &str) -> Result<Parsed<ModModule>, ParseFailure> {
         .try_into_module()
         .expect("a module parse gives a module");
     let lines = LineIndex::from_source_text(source);
-    if let Some(failure) = first_failure(&parsed, &lines, source) {
+    let nesting = nesting(&parsed);
+    if let Some(failure) = first_failure(&parsed, &lines, source, nesting.chain) {
         return Err(failure);
+    }
+    if nesting.depth > STATEMENT_DEPTH_MAX {
+        return Err(ParseFailure {
+            kind: SyntaxKind::Recursion,
+            line: None,
+        });
     }
     Ok(parsed)
 }
@@ -59,6 +74,7 @@ fn first_failure(
     parsed: &Parsed<ModModule>,
     lines: &LineIndex,
     source: &str,
+    chain: Option<TextSize>,
 ) -> Option<ParseFailure> {
     let line = |offset: TextSize| Some(lines.line_index(offset).get());
     let mut found: Vec<(TextSize, ParseFailure)> = Vec::new();
@@ -79,6 +95,13 @@ fn first_failure(
                 line: line(line_at),
             },
         ));
+    }
+    if let Some(start) = interpolated_string_failure(parsed.tokens()) {
+        let failure = ParseFailure {
+            kind: SyntaxKind::Syntax,
+            line: line(start),
+        };
+        found.push((start, failure));
     }
     if let Some(start) = indentation_failure(parsed.tokens()) {
         let failure = ParseFailure {
@@ -102,6 +125,13 @@ fn first_failure(
             },
         ));
     }
+    if let Some(start) = chain {
+        let failure = ParseFailure {
+            kind: SyntaxKind::Memory,
+            line: None,
+        };
+        found.push((start, failure));
+    }
     let unsupported = parsed.unsupported_syntax_errors().iter();
     if let Some(error) = unsupported.min_by_key(|error| error.range.start()) {
         let start = error.range.start();
@@ -115,6 +145,92 @@ fn first_failure(
         .into_iter()
         .min_by_key(|(start, _)| *start)
         .map(|(_, failure)| failure)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Chain {
+    Factor,
+    Not,
+    Conditional,
+    Elif,
+    Lambda,
+    Power,
+    Boolean,
+}
+
+impl Chain {
+    fn of(node: &Node<'_>) -> Option<Chain> {
+        match node {
+            Node::Elif(_) => Some(Chain::Elif),
+            Node::Expr(Expr::UnaryOp(unary)) if unary.op == UnaryOp::Not => Some(Chain::Not),
+            Node::Expr(Expr::UnaryOp(_)) => Some(Chain::Factor),
+            Node::Expr(Expr::If(_)) => Some(Chain::Conditional),
+            Node::Expr(Expr::Lambda(_)) => Some(Chain::Lambda),
+            Node::Expr(Expr::BinOp(binary)) if binary.op == Operator::Pow => Some(Chain::Power),
+            Node::Expr(Expr::BoolOp(_)) => Some(Chain::Boolean),
+            _ => None,
+        }
+    }
+
+    fn length_max(self) -> usize {
+        match self {
+            Chain::Factor => 5_966,
+            Chain::Not | Chain::Conditional => 5_967,
+            Chain::Elif => 5_962,
+            Chain::Lambda | Chain::Power => 2_983,
+            Chain::Boolean => 199,
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct Link {
+    kind: Chain,
+    length: usize,
+}
+
+struct Nesting {
+    depth: usize,
+    chain: Option<TextSize>,
+}
+
+fn nesting(parsed: &Parsed<ModModule>) -> Nesting {
+    let tokens = parsed.tokens();
+    let mut found = Nesting {
+        depth: 0,
+        chain: None,
+    };
+    let mut pending: Vec<(Node<'_>, usize, Option<Link>)> = parsed
+        .syntax()
+        .body
+        .iter()
+        .map(|statement| (Node::Stmt(statement), 1, None))
+        .collect();
+    while let Some((node, depth, outer)) = pending.pop() {
+        found.depth = found.depth.max(depth);
+        let chain = Chain::of(&node).map(|kind| match outer {
+            Some(link) if link.kind == kind => Link {
+                kind,
+                length: link.length + 1,
+            },
+            _ => Link { kind, length: 1 },
+        });
+        if let Some(link) = chain
+            && link.length > link.kind.length_max()
+        {
+            let start = node
+                .range(tokens)
+                .expect("a chained node has a position")
+                .start();
+            if found.chain.is_none_or(|earliest| start < earliest) {
+                found.chain = Some(start);
+            }
+        }
+        for child in node.children() {
+            pending.push((child, depth + 1, chain));
+        }
+    }
+    found
 }
 
 const EXPECTED_INDENTED_BLOCK: &str = "Expected an indented block";
@@ -161,6 +277,27 @@ fn bracket_failure(tokens: &Tokens) -> Option<(TextSize, TextSize, SyntaxKind)> 
     }
     open.last()
         .map(|&(_, start)| (start, start, SyntaxKind::Syntax))
+}
+
+fn interpolated_string_failure(tokens: &Tokens) -> Option<TextSize> {
+    let mut depth = 0_usize;
+    for token in tokens {
+        match token.kind() {
+            TokenKind::FStringStart | TokenKind::TStringStart => {
+                if depth >= INTERPOLATED_STRING_DEPTH_MAX {
+                    return Some(token.start());
+                }
+                depth += 1;
+            }
+            TokenKind::FStringEnd | TokenKind::TStringEnd => {
+                depth = depth
+                    .checked_sub(1)
+                    .expect("an interpolated string ends after it starts");
+            }
+            _ => {}
+        }
+    }
+    None
 }
 
 fn indentation_failure(tokens: &Tokens) -> Option<TextSize> {

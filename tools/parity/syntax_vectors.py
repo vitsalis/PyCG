@@ -21,13 +21,24 @@ Constant of each program of constants/, in that order, and for each
 program of d1/ the D1 records of its module, as tools/parity/dump.py
 writes them, in d1/<program>.jsonl, and
 names.txt, the NFKC normalisation of strings and the answer of
-str.isidentifier at the bounds of the identifier ranges. Run it with the
-Python of the oracle; the output is committed.
+str.isidentifier at the bounds of the identifier ranges, and bounds.txt,
+the outcome of reading and parsing a construct repeated on either side
+of the limits of CPython's parser. Run it with the Python of the oracle;
+the output is committed.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
 
 OUT = ROOT / "crates" / "pycg_syntax" / "tests" / "vectors"
+
+
+def nested_strings(prefixes, count):
+    text = b"x"
+    for index in range(count):
+        prefix = prefixes[index % len(prefixes) : index % len(prefixes) + 1]
+        text = prefix + b'"{' + text + b'}"'
+    return b"x = " + text + b"\n"
+
 
 READING = {
     "empty": b"",
@@ -80,6 +91,10 @@ READING = {
     "tab-then-spaces": b"if x:\n\ta\n        b\n",
     "spaces-then-tab": b"if x:\n        a\n\tb\n",
     "tabs-consistent": b"if x:\n\tif y:\n\t\ta\n\tb\n",
+    "fstrings-149": nested_strings(b"f", 149),
+    "fstrings-150": nested_strings(b"f", 150),
+    "tstrings-150": nested_strings(b"t", 150),
+    "mixed-strings-150": b"x = 1\n" + nested_strings(b"ft", 150),
     "unclosed": b"a = (\n",
     "unclosed-before-error": b"a = (\nb = 2\n",
     "unclosed-inner": b"a = [1,\n  (2,\n",
@@ -120,6 +135,9 @@ def read(data):
                 warnings.simplefilter("ignore")
                 ast.parse(source, path)
         except (SyntaxError, ValueError, RecursionError) as error:
+            return "failed", cause(error)
+        except MemoryError as error:
+            assert str(error) == PARSER_STACK_OVERFLOW, error
             return "failed", cause(error)
         return "ok", source.encode("utf-8").hex()
 
@@ -220,6 +238,37 @@ def identifier_bounds():
     return sorted(p for p in points if not 0xD800 <= p < 0xE000)
 
 
+PARSER_STACK_OVERFLOW = "Parser stack overflowed - Python source too complex to parse"
+BOUNDS = (
+    ("unary", "x = ", "-", "1", "", "\n", (5966, 5967)),
+    ("not", "x = ", "not ", "a", "", "\n", (5967, 5968)),
+    ("conditional", "x = ", "a if b else ", "c", "", "\n", (5967, 5968)),
+    ("elif", "if a:\n    pass\n", "elif a:\n    pass\n", "", "", "", (5962, 5963)),
+    ("lambda", "x = ", "lambda: ", "None", "", "\n", (2983, 2984)),
+    ("power", "x = ", "a ** ", "b", "", "\n", (2983, 2984)),
+    ("and", "x = ", "(a and ", "b", ")", "\n", (199, 200)),
+    ("attribute", "x = a", ".b", "", "", "\n", (43380, 43580)),
+    ("subscript", "x = a", "[0]", "", "", "\n", (43380, 43580)),
+    ("method-chain", "x = a", ".b()", "", "", "\n", (21690, 21790)),
+    ("sum", "x = a", " + a", "", "", "\n", (43380, 43580)),
+    ("attribute-in-def", "def f():\n    x = a", ".b", "", "", "\n", (43380, 43580)),
+)
+
+
+def bounds_lines():
+    for name, prefix, unit, middle, close, suffix, counts in BOUNDS:
+        parts = [
+            part.encode("ascii").hex() for part in (prefix, unit, middle, close, suffix)
+        ]
+        for count in counts:
+            data = (prefix + unit * count + middle + close * count + suffix).encode(
+                "ascii"
+            )
+            status, value = read(data)
+            shown = "-" if status == "ok" else value
+            yield "\t".join([name, *parts, str(count), status, shown])
+
+
 def reading_lines():
     for name, data in READING.items():
         status, value = read(data)
@@ -243,6 +292,7 @@ def main(argv):
         ("positions", positions_lines()),
         ("constants", constants_lines()),
         ("names", names_lines()),
+        ("bounds", bounds_lines()),
     )
     for name, lines in written:
         text = "".join(f"{line}\n" for line in (version, *lines))
