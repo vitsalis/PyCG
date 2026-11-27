@@ -1,4 +1,5 @@
 use indexmap::IndexMap;
+use num_bigint::{BigInt, Sign};
 use pycg_solver::{NodeId, ObjId};
 use pycg_syntax::names::identifier;
 use pycg_syntax::scopes::{ScopeId, ScopeKind};
@@ -486,7 +487,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
         }
         let function = self.function.as_ref().expect("a function");
         let signature = &function.signature;
-        let (name, returned) = if let Some((base, index)) = element_index(value) {
+        let (name, returned) = if let Some((base, index)) = element_index(value, self.source.text) {
             let name = self.mangle(&base);
             if signature.vararg.as_deref() != Some(name.as_str()) {
                 return false;
@@ -1614,20 +1615,25 @@ pub fn is_dotted_identifier(name: &str) -> bool {
     name.split('.').all(pycg_syntax::names::is_identifier)
 }
 
-fn element_index(expression: &Expr) -> Option<(String, i64)> {
+fn element_index(expression: &Expr, source: &str) -> Option<(String, BigInt)> {
     let Expr::Subscript(subscript) = expression else {
         return None;
     };
     let Expr::Name(base) = &*subscript.value else {
         return None;
     };
-    let Expr::NumberLiteral(number) = &*subscript.slice else {
+    if !matches!(&*subscript.slice, Expr::NumberLiteral(_)) {
+        return None;
+    }
+    let Some(pycg_syntax::constants::Constant::Int(index)) =
+        pycg_syntax::constants::literal(&subscript.slice, source)
+    else {
         return None;
     };
-    let ruff_python_ast::Number::Int(index) = &number.value else {
-        return None;
-    };
-    let index = i64::try_from(index.as_u64()?).ok()?;
+    assert!(
+        index.sign() != Sign::Minus,
+        "a number literal is not negative"
+    );
     Some((identifier(base.id.as_str()).into_owned(), index))
 }
 

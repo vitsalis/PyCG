@@ -441,7 +441,7 @@ impl Replay {
                 "annotations": self.annotations(&fields.annotations),
                 "passthrough": set(fields.passthrough.iter().map(|item| match item {
                     Passthrough::Name(name) => Value::from(&**name),
-                    Passthrough::Element(name, index) => json!([&**name, index]),
+                    Passthrough::Element(name, index) => json!([&**name, integer(index)]),
                 }).collect()),
             }),
             Made::Class(fields) => json!({
