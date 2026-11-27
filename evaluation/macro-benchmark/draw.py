@@ -323,7 +323,7 @@ def copy_cat_file_blobs(stream, expected, directory):
         if not header:
             raise RuntimeError(f"git cat-file: the output is too short, at {oid}")
         if header != f"{oid} blob {size}\n".encode():
-            raise RuntimeError(f"git cat-file: header {header[:80]!r} for {oid}")
+            raise RuntimeError(f"git cat-file: header {header!r} for {oid}")
         with open(Path(directory, oid), "wb") as blob:
             left = size
             while left:

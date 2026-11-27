@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import hashlib
+import io
 import os
 import re
 import shutil
@@ -21,12 +22,23 @@ GIT_MODE_EXECUTABLE = "100755"
 LICENCE_NAME_PREFIXES = ("LICENSE", "LICENCE", "COPYING", "NOTICE")
 SOURCE_SUFFIX = ".py"
 SOURCE_FILE_MODE = 0o644
+LICENCE_NOTICES = {
+    "path": {
+        "url": "https://files.pythonhosted.org/packages/dd/52/"
+        "a7bdd5ef8488977d354b7915d1e75009bebbd04f73eff14e52372d5e9435/"
+        "path-17.1.1.tar.gz",
+        "sha256": "2dfcbfec8b4d960f3469c52acf133113c2a8bf12ac7b98d629fa91af87248d42",
+        "member": "path-17.1.1/LICENSE",
+    },
+}
 USAGE = """usage: python3 -I fetch.py macro DESTINATION
        python3 -I fetch.py scale DESTINATION
 
 Fetches each project of macro-benchmark/projects.toml (macro) or of
 scale/projects.toml (scale) into DESTINATION/<name>, checked against its
-pin."""
+pin. A project whose source has no licence file is refused; LICENCE_NOTICES
+gives, by SHA-256, the release archive whose licence file a project's
+source lacks, and that file is added beside the source."""
 
 
 def _load(name, path):
@@ -60,7 +72,7 @@ def git(*args):
     command = ["git", *(part for s in settings for part in ("-c", s)), *args]
     done = subprocess.run(command, env=environment, capture_output=True)
     if done.returncode:
-        message = done.stderr.decode("utf-8", "replace").strip()[-2000:]
+        message = done.stderr.decode("utf-8", "replace").strip()
         raise FetchError(f"git failed: {message}")
     return done.stdout
 
@@ -178,10 +190,54 @@ def fetch_sdist(sdist, destination):
     return fetch_archive(sdist.url, sdist.sha256, sdist.file, unpack_sdist, destination)
 
 
-def is_kept(parts):
-    if parts[-1].endswith(SOURCE_SUFFIX):
-        return True
+def is_licence(parts):
     return any(part.upper().startswith(LICENCE_NAME_PREFIXES) for part in parts)
+
+
+def is_kept(parts):
+    return parts[-1].endswith(SOURCE_SUFFIX) or is_licence(parts)
+
+
+def add_licence_notice(notice, destination):
+    name = PurePosixPath(notice["member"]).name
+    target = Path(destination) / name
+    if target.exists():
+        raise FetchError(f"{target} is there already")
+    data = download_https(notice["url"])
+    digest = hashlib.sha256(data).hexdigest()
+    if digest != notice["sha256"]:
+        raise FetchError(f"{notice['url']} has the SHA-256 {digest}")
+    with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tar:
+        try:
+            member = tar.getmember(notice["member"])
+        except KeyError:
+            raise FetchError(f"{notice['url']} has no {notice['member']}") from None
+        if not member.isfile():
+            raise FetchError(f"{notice['url']}: {notice['member']} is not a file")
+        target.write_bytes(tar.extractfile(member).read())
+    target.chmod(SOURCE_FILE_MODE)
+    return f"added {name} of {notice['url'].rsplit('/', 1)[1]}"
+
+
+def has_licence(directory):
+    return any(
+        is_licence(path.relative_to(directory).parts)
+        for path in directory.rglob("*")
+        if path.is_file()
+    )
+
+
+def complete(destination, notice):
+    try:
+        done = "" if notice is None else "; " + add_licence_notice(notice, destination)
+        if not has_licence(Path(destination)):
+            raise FetchError(
+                f"no licence file ({', '.join(LICENCE_NAME_PREFIXES)}) in the source"
+            )
+    except BaseException:
+        shutil.rmtree(destination, ignore_errors=True)
+        raise
+    return done
 
 
 def member_parts(archive, name):
@@ -252,6 +308,7 @@ def fetch_macro(destination, config=None):
                 )
             else:
                 raise FetchError("projects.toml gives no repository and commit")
+            done += complete(Path(destination) / name, LICENCE_NOTICES.get(name))
         except (FetchError, ValueError, OSError, tarfile.TarError) as error:
             print(f"{name}: refused: {error}", file=sys.stderr)
             refused += 1
@@ -273,6 +330,7 @@ def fetch_scale(destination, config=None):
                 UNPACK_BY_KIND[project.kind],
                 Path(destination) / name,
             )
+            done += complete(Path(destination) / name, None)
         except (
             FetchError,
             ValueError,
