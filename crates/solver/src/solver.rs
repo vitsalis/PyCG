@@ -839,6 +839,25 @@ impl<C: Copy> Solver<C> {
         }
         self.sets.sweep(live);
         self.set_holders = holders;
+        let mut held = vec![false; self.sets.count()];
+        let mut hold = |set: SetId| held[set.index()] = true;
+        hold(SetId::EMPTY);
+        hold(self.saturated_set);
+        for entry in &self.nodes {
+            hold(entry.done);
+            hold(entry.fired);
+            received_sets(&entry.inbox).into_iter().for_each(&mut hold);
+            for (_, set) in entry.groups.iter().flatten() {
+                hold(*set);
+            }
+        }
+        for &(_, set) in &self.attach_deferred {
+            hold(set);
+        }
+        for &set in &self.absorbed_sets {
+            hold(set);
+        }
+        self.sets.compact(&held);
     }
 
     fn collapse_cycles(&mut self) {
