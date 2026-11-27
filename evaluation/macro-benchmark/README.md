@@ -53,6 +53,20 @@ only if it finds more than 100 missed edges or more than 20 false positives.
 The thresholds are strict; exactly 100 missed edges or 20 false positives
 do not trigger another round.
 
+## Scoring
+
+A tool's graph is scored against each ground truth as a set of (caller,
+callee) edges; precision, recall and F1 add the counts of every project
+first. "Inside" counts the edges whose callee is in the analysed
+packages, "outside" the others (builtins, the standard library, other
+packages), and "all" both, for comparison with PyCG's 2021 evaluation.
+Callers are matched as written. A callee outside the package also matches
+the function it resolves to in the project's trace (`dynamic/<name>.json`,
+`aliases`), and the names of one function of the standard library match
+each other (`../common/same_function.json`). Nothing is imported to
+score. A run that failed scores no edge: its ground-truth edges are false
+negatives.
+
 ## Layout
 
 ```

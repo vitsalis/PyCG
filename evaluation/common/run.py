@@ -23,7 +23,7 @@ OUT_DEFAULT = Path(tempfile.gettempdir()) / "pycg-evaluation"
 TIMEOUT_SECONDS_DEFAULT = 1800
 INTERPRETER_FLAGS_ISOLATED = ("-S", "-s", "-P", "-B")
 DESCRIPTION = """Runs a PyCG checkout on the micro- and macro-benchmark and keeps its
-call graphs in OUT/NAME/ (evaluation/README.md, "The runner").
+call graphs in OUT/NAME/.
 
     python -I evaluation/common/run.py --flavour original --checkout PATH --name NAME
     python -I evaluation/common/run.py --flavour new --checkout PATH --name NAME \\

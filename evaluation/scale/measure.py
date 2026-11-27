@@ -16,7 +16,7 @@ CGROUP_MEMORY_MAX = Path("/sys/fs/cgroup/memory.max")
 CGROUP_NO_LIMIT = "max"
 MIB = 1 << 20
 DESCRIPTION = """Measures a PyCG checkout on one package of the scale set
-(evaluation/README.md, "The scale set").
+(evaluation/scale/README.md).
 
     python3 -I evaluation/scale/measure.py run --checkout PATH --name NAME \\
         --package rich --out OUT --memory-mib 4096

@@ -1,512 +1,66 @@
 # Evaluation
 
-Measures PyCG on two benchmarks and scores its call graphs: the
-micro-benchmark (`micro-benchmark/` here) and the
-macro-benchmark (`macro-benchmark/` here: 60 real packages with
-hand-written ground truths). Standard library only. The analysed sources
-are data: PyCG reads them, and no script imports or runs them.
+PyCG claims that its call graphs hold the calls that a program makes, and
+few others. The evaluation checks that claim against what Python does when
+the code runs, so that every change shows whether it makes PyCG better or
+worse, and on which kind of code.
 
-## Commands
+## Why each set exists
 
-| Command | What it does |
-|---|---|
-| `make eval` | Pulls the inputs images by their key, or builds them when the pull fails (below, "The inputs image"), links the sources into `macro-benchmark/projects/`, runs `common/loop.py run` on this checkout in a container without network, prints the summary, and reports the values against the bests of `metrics.json` (below, "The gate"); the graphs, `result.json` and `benchmark_sha256` go to `$EVAL_OUT/pycg-<commit>/` (default `$TMPDIR/pycg-evaluation`) |
-| `make eval-record` | Writes `metrics.json`: each best is the larger of the stored and the measured value, or the measured value when the benchmark changed (measures first if this commit has no result) |
-| `make eval-diff BASE=<ref> [SUMMARY=<file>]` | Measures BASE on its own benchmark, runs `loop.py compare` between the two, and appends the Markdown summary (the values with their floors, the changes, the time and peak memory of each macro package) to SUMMARY (default standard output) |
-| `make eval-determinism` | Measures this commit again with `PYTHONHASHSEED=1` for the analyses and fails unless every graph is byte-identical to that of seed 0 |
-| `make eval-measure-pr`, `eval-measure-seed1`, `eval-measure-base BASE=<ref>`; `make eval-gate BASE=<ref>`, `eval-report`, `eval-compare BASE=<ref>`, `eval-same-graphs`, `eval-labels BASE=<ref> [LABELS=<file>]` | The pieces of the targets above, which CI runs in separate jobs: each of the first three measures one result into `EVAL_OUT` without gating; the others check results that are there. `eval-labels` (`common/labels.py`) decides the labels `metrics-changed` (a TP, FP or FN count of the micro-benchmark or of the macro-benchmark inside or outside the package differs from the base's) and `benchmark-changed` (a changed path is protected: `PROTECTED` of `labels.py` lists the paths of AGENTS.md, "Protected files") of a pull request, appends the decision to SUMMARY and writes `<label>=true|false` lines to LABELS |
-| `make eval-scale NAME=<package> [BASE=<ref>] [SCALE_MEMORY_MIB=<MiB>]` | Measures this checkout on one package of the scale set (below, "The scale set"): time, peak memory, outcome and the SHA-256 of the call graph; with BASE, measures BASE first, then this checkout, and prints the comparison |
-| `python -I evaluation/common/loop.py compare OLD NEW` | Lists the edges and micro cases that changed between two result directories, scored again now (Python 3.14 or later) |
-| `NAME=<project> docker compose -f evaluation/compose.yaml run --rm trace --compare` | Records the trace of one project again and compares it with the committed one (`macro-benchmark/README.md`, "Re-recording a trace") |
+- **The micro-benchmark** isolates one language feature per program. A
+  case that fails names the feature that PyCG gets wrong, which a large
+  program cannot do. It grew from the benchmark of PyCG's 2021 paper, so
+  the two analyses compare on it.
+- **The macro-benchmark** is real code, where the features mix and most
+  calls cross modules and classes. It shows how well PyCG does on the
+  packages that people analyse, both on calls inside the package and on
+  calls into code outside it.
+- **The dynamic traces** check the macro-benchmark's ground truths. A
+  hand-written ground truth can miss a call; a trace of the package's own
+  test suite records calls that really happen, so every traced call must
+  be in the ground truth.
+- **The scale set** shows whether PyCG finishes on large packages, and in
+  how much time and memory. The benchmarks' packages are small enough to
+  analyse in seconds, so they cannot show that.
 
-`loop.py run` runs the checkout on both benchmarks (`run.py`, into
-`OUT/NAME`), scores the graphs (`score.py`, into `OUT/NAME/result.json`) and
-prints a summary in raw names: the micro-benchmark (cases, exact cases,
-edge precision and recall), the macro-benchmark inside the package and
-outside it (precision, recall and F1 per project and summed), and the runs
-that failed. The micro-benchmark runs `--micro-jobs` cases at a time; the
-macro-benchmark one project at a time, as its times and memory are
-reported. `loop.py compare` reads two such directories (the same tool at
-two commits) and lists, per project of the macro-benchmark, the edges that
-became true positives, stopped being true positives, became false
-positives and stopped being false positives (raw names; `[in]` marks a
-callee inside the package), and the micro-benchmark cases that became or
-stopped being exact. A run that failed or is absent on either side is no
-measurement: its edges are neither lost nor gained. `compare` never reads
-`result.json`: it scores both graph directories again, now, with today's
-table of names of one function, and says which (its SHA-256, also under
-`scorer` in `--json`).
+## The sets
 
-`make eval` measures the commit that is checked out: a checkout with
-changes is refused. Its container has the repository read-only, no
-network, 6 GiB of memory and `PYTHONHASHSEED=0`. The micro-benchmark runs
-`EVAL_JOBS` cases at a time (default: the number of CPUs); the
-macro-benchmark one project at a time, as its times and memory are
-reported. CI measures the pull request, its second hash seed and its base
-(`BASE=HEAD^1`, the first parent of the merge commit) in three parallel
-jobs, then gates, compares, checks the two seeds and decides the labels
-in one job; a last job, the only one that may write to the pull request,
-sets or removes the labels. On a pull request these jobs run only when its
-diff touches a path that can move the metrics (`tools/check.py
---detect-eval`, `make eval-changes`); the first job of CI decides it, and
-writes the decision to the job summary. On a push they always run.
+**Micro-benchmark.** Small programs, one language feature each, grouped by
+kind of feature. Each comes with the call graph that Python gives when it
+runs.
 
-## The gate
+**Macro-benchmark.** 60 real packages at pinned releases. Each has a
+hand-written call graph of its source, built site by site from the source
+and, where the package's tests run, checked against its trace.
 
-Six values are gated: micro edge precision and recall (all edges), and
-the macro-benchmark's precision and recall inside and outside the package,
-summed over the 60 projects. Every measurement writes `benchmark_sha256`
-next to its `result.json`: the digest of the benchmark of the checkout
-measured (below).
+**Dynamic traces.** For each macro-benchmark package whose tests run, the
+calls that the package made while its own test suite ran: a lower bound
+of its call graph.
 
-CI measures a pull request on its benchmark and its base (`BASE`) on the
-base's own benchmark: `make eval-measure-base` checks the base out and
-runs the base's `loop.py` on it, with the base's macro sources (copied
-from this checkout when the two have the same inputs key, `make
-eval-inputs` of the base otherwise). `make eval-gate` (`common/gate.py
-check`) then compares the two:
+**Scale set.** 20 large packages, pinned by release or commit, on which
+the time and peak memory of an analysis are measured, and whether it
+finishes under a memory cap. They have no ground truth and are not
+scored.
 
-1. On the same benchmark (the same digest), the floor of each value is the
-   base's value minus the margin of the base's `metrics.json`. The gate
-   fails when a value is below its floor.
-2. On a changed benchmark, the values of the two measure different
-   things, so there are no floors: the gate says "benchmark changed:
-   floors re-based", and the pull request's values are the base of the
-   pull requests after it.
-3. In both, the gate fails when a run of the pull request failed.
+The directory of each set has a README with its internals.
 
-The gate never reads the pull request's own `metrics.json`. A base
-without `metrics.json` has no margin: the gate fails. `gate.py summary`
-writes the Markdown of a pull request: each value of the base and of the
-pull request with its floor, whether the benchmark changed, the changes
-that `loop.py compare` wrote, and the time and peak memory of each macro
-package. Time and memory are reported, not gated.
+## Results
 
-`metrics.json` holds, for each value, the best value that main has
-reached, the margin, and the digest of the benchmark on which the bests
-were measured. On a push, CI runs `make eval-report` (`gate.py report`,
-also the last step of `make eval`): for each value, its best and the
-measured value, whether it rose, and the `metrics.json` that `make
-eval-record` writes on that commit. It fails when a run failed or, on the
-benchmark of the bests, a value is below its best minus the margin. A
-pull request that commits only that `metrics.json` raises the bests.
+Precision is the share of PyCG's edges that are in the ground truth; recall
+is the share of the ground truth's edges that PyCG finds. On the
+macro-benchmark, "inside" counts the edges whose callee is in the analysed
+package, and "outside" the edges to builtins, the standard library and
+other packages, whose names depend on how a tool models code that it does
+not analyse. The macro-benchmark's values sum the counts over the 60
+packages.
 
-The digest is `sha256sum FILES | sha256sum`, FILES sorted by path: the
-files that a measurement reads besides the code of PyCG and of the
-evaluation (`common/gate.py`, `benchmark_files`).
+The best values that main has reached:
 
-| Files | Why |
-|---|---|
-| `macro-benchmark/projects.toml` | The projects, their pins and their analysed packages |
-| `macro-benchmark/ground-truth/<name>.json` of each project | The expected edges |
-| `macro-benchmark/dynamic/<name>.json` of each project | Its `aliases` name callees outside the package |
-| `common/same_function.json` | Names of one function, matched as one callee |
-| `micro-benchmark/snippets/*/*/`: the `.py` files, `callgraph.json`, `requires-python` | The programs, their expected graphs, and which cases run |
+| Set | Precision | Recall |
+|---|---|---|
+| Micro-benchmark, all edges | 0.9525 | 0.9493 |
+| Macro-benchmark, inside the package | 0.9262 | 0.8799 |
+| Macro-benchmark, outside the package | 0.9374 | 0.8217 |
 
-The ledgers, notes and audits of a ground truth, the test environments
-and the READMEs are not read by a measurement: a change of them keeps the
-floors, and cannot re-base them.
-
-## Layout
-
-| Path | Content |
-|---|---|
-| `common/run.py` | Runs a PyCG checkout on both benchmarks, one child process per job, under a time limit (and, for a caller that gives one, a memory limit); records the wall time and peak memory of each job |
-| `common/analyse.py` | The child process: one adapter per API flavour (`new`, and `original` for the 2021 engine, commit 046479e) |
-| `common/score.py` | Scores call graphs against the ground truths |
-| `common/loop.py` | `run`: run and score a checkout, print a summary; `compare`: what changed between two runs |
-| `common/labels.py` | The labels of a pull request: a changed TP, FP or FN count; a changed protected file |
-| `common/gate.py` | The gate: the values of a pull request against its base's, the summary of a pull request, the report against `metrics.json` and the new `metrics.json`, the digest of a benchmark |
-| `metrics.json` | The best value of each gated value, the margin, and the digest of the benchmark |
-| `common/same_function.json` | Names of one function of the standard library, which the scorer matches as one callee |
-| `common/lookup.py` | The static lookup of standard-library names that `tests/test_same_function_table.py` checks the table with |
-| `micro-benchmark/` | One small program per language feature with its ground truth, and the validator that runs them (`micro-benchmark/README.md`) |
-| `macro-benchmark/` | The projects, ground truths, traces and their tools (`macro-benchmark/README.md`) |
-| `compose.yaml`, `container/Dockerfile.inputs`, `container/fetch.py` | The inputs image: the sources of the macro-benchmark and of the scale set, fetched when the image is built |
-| `../tools/inputs_key.py`, `../.github/workflows/inputs.yml` | The content key of the inputs images, and the CI workflow that builds them and publishes them under it |
-| `container/Dockerfile.trace`, `container/trace_entry.py`, `container/trace.sh`, `container/trace_helper.py`, `container/entry.sh` | Records the trace of one project in a container |
-| `scale/projects.toml`, `scale/projects.py` | The pins of the scale set and their loader |
-| `scale/measure.py` | Measures a checkout on one package of the scale set, and compares two measurements |
-| `results/trace/` | Where the `trace` service writes a new trace (git ignores its content) |
-| `tests/` | The tests of the scripts; `make test` runs them |
-
-The scripts load each other by path: `evaluation/` is not a Python package.
-The standard library has no YAML parser, so `compose.yaml` keeps to plain
-YAML (mappings, lists of scalars, JSON lists, anchors, aliases and merge
-keys): `tests/test_compose.py` reads that much. The micro-benchmark's place
-is `macro-benchmark/projects.py`, `MICRO_BENCHMARK`.
-
-## How the scores are computed
-
-The headline is the edges whose callee is inside the analysed package.
-Edges to callees outside it (builtins, the standard library, third-party
-code) are reported apart: their names depend on how a tool models code
-that it does not analyse.
-
-- **Macro-benchmark.** Per project and summed over the 60: tool edges,
-  ground-truth edges, true and false positives, false negatives,
-  precision, recall and F1, for the edges inside the package, outside it,
-  and all. The sums add the counts, then compute precision and recall.
-- **Micro-benchmark.** Per case: complete (no false positive), sound (no
-  false negative) and exact (the graph equals the ground truth, nodes
-  included, as `tests/test_micro_benchmark.py` compares them). A case whose
-  `requires-python` is newer than the interpreter is skipped.
-- **Runs.** Each job's status (ok, crash with the error and where it
-  happened, timeout, memory), wall time and peak resident set size. A run
-  that failed scores no edge: its ground-truth edges are false negatives.
-
-### How names are matched
-
-Two modes are reported. **Raw**: the names as written, except that a
-callee outside the package that the project's trace knows
-(`macro-benchmark/dynamic/<name>.json`, `aliases`) counts as the function
-it resolves to, and a callee outside the package that is in a group of
-`common/same_function.json` counts as the group's representative. Nothing
-is imported while scoring, so the scores do not depend on the interpreter.
-`tests/test_same_function_table.py` checks, on the interpreter that runs
-it, that every group names one object of its standard library and that
-the table is in order. A name that the interpreter lacks fails the test,
-unless `FIRST_VERSION_BY_NAME_ABSENT_ON_PURPOSE` exempts it (it exempts
-none). CI runs it on Python 3.12 to 3.15, so the table holds only groups
-that are one object on every supported CPython.
-
-`common/lookup.py`, which that test uses, looks names of the standard
-library up by static inspection; the scoring does not use it, because
-what a name finds can depend on what was imported before. `resolve(name)`
-gives `("object", function)`, `("missing", last object found)` or
-`("unknown", None)`. It imports only the longest dotted prefix of the name
-that is in `ALLOWED_MODULES` (`<builtin>` is the builtins module), with
-warnings ignored: standard-library modules and submodules that do nothing
-but define names when imported. A name through any other module
-(third-party, a `__main__` entry point, `antigravity`, `this`, a GUI
-toolkit) is not looked up. An allowed module may still import others and
-initialise its own objects when it is imported. The rest of the name is
-looked up in the `__dict__` of each object: of a module (a submodule is
-never taken from it: it is there only if something imported it), of a
-class and its MRO (not its metaclass), of an instance and then its type
-(`inspect.getattr_static`). No property, descriptor or `__getattr__` runs.
-A path through a function or method (its return value) is missing: the
-attributes of a function are not callees. The function of the object
-found is the one that a call through it runs, found without calling
-anything: a static or class method is its function, a property its
-getter, a bound method its function, a method bound to an object of a
-builtin type the descriptor of that type (or itself, when the type holds
-this very builtin, as `object.__new__`); a function, a class or a
-descriptor of a builtin type is itself. Anything else (a module, an object
-that is not callable, a cached property) has no function. Any exception
-makes the name unknown.
-**Normalised**: the raw matching after the renamings of `NORMALISATIONS` in
-`common/score.py`, each of which keeps the function that an edge refers
-to. `loop.py run` prints the raw mode.
-
-### The scorer
-
-`common/score.py` scores a tool directory in the layout that `run.py`
-writes: `macro/<project>.json` and `micro/<category>/<case>.json`, each a
-call graph `{caller: [callees]}`, and optionally `<benchmark>/runs.json`
-with the status of each run. Graphs of other tools in this layout are
-scored too; without `runs.json` a missing graph counts as a failed run, and
-a run that `runs.json` records as ok but whose graph is gone is a failed
-run too (`missing graph`). Every failed run is listed with the error and
-its place from the run record when it has them. The macro-benchmark keeps
-every run record; the micro-benchmark a summary of the statuses, times and
-memory, with the runs that did not finish. The projects scored are those
-of `projects.toml` that have a ground truth; the benchmark directory is
-the directory of `projects.toml`, with `projects/`, `ground-truth/` and
-`dynamic/`.
-
-Edges are compared as sets of matched (caller, callee) pairs, and every
-tool edge is scored. "inside" are the edges whose callee is in the
-packages, by name; "outside" the others; "all" is kept for comparison with
-PyCG's 2021 evaluation. A false positive or negative is listed once, by its
-matched names, with its spellings when the names in the graph differ. The
-nodes are compared too: those of the ground truth that the tool lacks, and
-the tool's nodes in the package that the ground truth lacks.
-
-Callers are matched as written: the trace and the table apply to callees
-only. A name in the analysed packages never changes, and nor does a name
-whose representative would be in them. A name that the trace gives to two
-or more callees identifies none of them: classes that a library creates at
-run time can share one qualified name (each `type("Call", (Base,),
-{"__call__": staticmethod(f)})` is another class named `lib.Call`), and then
-`lib.Call.__call__` is a name of every `f`. Such a name is matched by
-string equality, after the table of names of one function, as any name.
-The normalised mode renames a class-body caller to the scope that runs the
-class body (the nearest enclosing function, else the module), unless the
-class name is also a module or function of the ground truth; the classes
-are read from the analysed source with `ast`, and a file that does not
-parse (Python 2 code) is skipped.
-
-As in PyCG's 2021 evaluation, a micro-benchmark graph is complete if every
-edge it reports is in the ground truth and sound if it reports every edge
-of the ground truth, all edges counted. Without a graph, complete, sound
-and exact are all false. A result records under `scorer` the SHA-256 of
-the table of names of one function, which the counts depend on, and the
-interpreter, which they do not.
-
-## The runner
-
-`common/run.py` runs a PyCG checkout on both benchmarks and keeps its call
-graphs.
-
-| Benchmark | Jobs |
-|---|---|
-| micro | Every case of `micro-benchmark/snippets`: the entry point is `main.py`, the package root the case directory. A case whose `requires-python` is newer than the interpreter is skipped |
-| macro | Every project of `macro-benchmark/projects.toml`: the entry points are all modules of the analysed source, the package root is the project's `root`. A project whose source is not there is skipped |
-
-The runner reads the jobs of every benchmark before it runs any, so that
-`projects.toml` and its pins are checked before the first run. It loads
-only `macro-benchmark/projects.py`, not the tracer, which needs Python
-3.14, so that it works on Python 3.12 and later. A checkout with changes
-(`git status --porcelain` not empty), or not under git, is refused unless
-`--allow-dirty`: the recorded commit must say which code ran. It writes
-`OUT/NAME/BENCHMARK/runs.json` (the tool, the benchmark commit and, for
-each job, its status, wall time and peak memory) and one graph per job
-that finished: `OUT/NAME/micro/<category>/<case>.json`,
-`OUT/NAME/macro/<project>.json`. `OUT` is `$TMPDIR/pycg-evaluation` by
-default, outside the repository; a graph that would be outside `OUT/NAME`
-(a project name with `..`) is refused. The JSON files have each container
-of scalars on one line: deterministic, and one edge or one case per line
-in a diff. The timeout, 1800 seconds per job by default, is the one limit
-of every run.
-
-**The child.** Each job runs in its own child interpreter, `python -S -s -P
--B common/analyse.py REQUEST.json`. `-S`: no `site` module, so no `.pth`
-file and no `sitecustomize` runs (an installed package that is the
-analysed target could); `-s`: no user site-packages; `-P`: neither the
-script directory nor the working directory on `sys.path`; `-B`: no
-bytecode in the checkout. Not `-E`: it would drop `PYTHONHASHSEED`, the
-only variable of the environment (`--hash-seed`, default 0: the original
-analysis iterates over sets, and its result depends on the hash seed).
-`analyse.py` puts the checkout first on `sys.path` itself and builds the
-generator with the adapter of the API flavour (`--flavour`). The request
-has `checkout`, `flavour`, `entry_points`, `package` (the package root),
-`graph` (where to write the call graph) and `result` (where to write the
-status). The call graph is `{caller: [callees]}`, sorted. The result is
-`{"status": "ok"}` or `{"status": "crash", "error": ..., "where": ...}`,
-with `seconds` (construction, analysis and output) and `peak_rss_mib`, the
-peak resident set size of the child: on Linux `VmHWM`, which starts again
-at exec, not `ru_maxrss`, which keeps the parent's (elsewhere `ru_maxrss`,
-in bytes on macOS). `where` is the innermost frame in the checkout,
-relative to it, else the innermost frame. A child that dies before it
-writes its result is a crash, with its exit status and the last line of
-its standard error.
-
-**Paths.** The child runs in a new temporary directory, so every path that
-it gets is made absolute, the graph's included, and a graph of an earlier
-run is removed first. Directories (the checkout, the package root, the
-directory of each entry point) are resolved as the file system does: the
-path is split first, so that `link/../a.py` is `a.py` in the parent of the
-link's target. A file keeps its name, a link included (a symbolic link
-`b.py` to `a.py` is the module `b`), and so does the interpreter, when it
-is a path and not a name looked up on `PATH` (the interpreter of a virtual
-environment is a link).
-
-**Limits.** Standard error goes to a file: a pipe that nobody reads while
-the parent watches the child could fill and block it. The child starts a
-new session, so it leads a process group of its own, which holds every
-process that it starts (unless one of them starts a session of its own).
-The parent looks at whether the child has ended with pauses that double
-from 1 ms up to 10 ms: the wall time of a run is measured to that
-resolution, and is the end that the parent saw, before the cleanup. It
-stops the child past the timeout (status `timeout`) or, for a caller that
-gives a memory limit, when a sample of the resident set size of its
-process group (the child and the processes it started), taken at once and
-then every 0.2 seconds, is over the limit (status `memory`). The size of a
-group is the sum of the resident set sizes of its processes, in MiB
-rounded to 0.1: on Linux, of the processes whose `/proc/<pid>/stat` names
-the group (the third field after the name, which ends at the last `)`: a
-name is any bytes); on macOS, of those that `proc_listpgrppids` of libproc
-lists, into a buffer of 4096 pids that doubles while it is full. Memory
-that two processes share after a fork counts in each. An ended process
-that is not yet reaped (a zombie) holds no memory: on Linux its
-`/proc/<pid>/statm` is all zeros; macOS's `proc_pid_rusage` still reports
-its last resident size, so a process with an exit time counts as ended. If
-the group, or a process of it that is there, cannot be read, the run stops
-with status `unmeasured`: an unread memory is not an empty one. The
-largest sample replaces the child's own peak when it is larger: the group
-held more than the child.
-
-**Ending a child.** The parent sees that the child has ended without
-reaping it (`waitid` with `WNOWAIT`; macOS before Python 3.13 has no
-`os.waitid`, so the runner calls the C function, whose `siginfo_t` has
-`si_code` at byte 8 and `si_pid` at byte 12, 0 while the child runs). A
-stopped child has not ended; macOS reports a stopped child too, though
-only ended ones are asked for. Until the child is reaped, its pid, which
-is the id of its process group, cannot go to another process, so the
-`SIGKILL` that the parent then sends to the group cannot reach a group
-that reuses the id. The other processes of the group are reaped by their
-new parent. The group is killed also on an exception or an interrupt of
-the parent. macOS refuses (EPERM) to signal a group that holds the ended,
-unreaped child alone, which is harmless when no member of the group is
-alive. After such a refusal the runner lists the live members of the group
-and sends each `SIGKILL`, three times (a member can start another),
-waiting up to a second each time (a killed process does not end at once),
-and lists them once more; a process that cannot be read counts as alive.
-If one is alive, the status is `cleanup failed`, with the signals sent and
-denied and the members gone and still alive, after the child had 5
-seconds to end. If the group cannot be listed, the child alone is killed:
-it is not reaped, so it is there.
-
-**Parallel jobs.** The runner runs the jobs of a benchmark `workers` at a
-time in threads and keeps the records in the order of the jobs, whatever
-the order in which they end. Each job keeps its own limits: a child is
-watched by the thread that started it. The first exception of a job, as
-soon as it comes, or an interrupt (Ctrl-C reaches the main thread only)
-starts no other job and kills the process group of every child that runs
-now; the thread of each child sees it end, kills what is left and reaps
-it. A thread counts its job as running before it checks whether to start
-it, so that the cleanup waits for it, and the cleanup kills again until no
-job runs: an interrupt can come before `submit()` returns the future of a
-job that runs.
-
-## Isolation
-
-Each analysis runs in `python -S -s -P -B evaluation/common/analyse.py`
-with the checkout first on `sys.path`, in a new temporary directory, with
-an environment of `PYTHONHASHSEED` alone. The benchmark sources are
-fetched only in the build of the inputs image, by their pins, without
-running them. A trace runs a project's tests in a container without
-network, with a read-only root and a non-root user.
-
-Git and every download run only in a container, never on the host (the
-maintainer's rule of 2026-11-14): the repository holds no submodule,
-`projects.toml` is the only lock of every source of the benchmark, and the
-maintenance commands that need the network run in the target `maintain` of
-`container/Dockerfile.inputs`. `tests/test_no_host_git.py` keeps an
-inventory of every place in `evaluation/` (but its tests, the copied
-sources and the micro-benchmark's snippets) that writes a git command line
-(a list or tuple whose first item is `"git"`) or imports a network client, each stated as git on our own
-checkout, a step of the build of the inputs image, or a step of the
-maintenance image. A new place fails the test until it is stated, and a
-stated place that is gone fails it too. It reads the syntax trees only: it
-is a guard, not a proof.
-
-## The scale set
-
-`scale/projects.toml` pins 20 large packages on which PyCG's time and
-peak memory are measured. They are not part of the benchmark: they have no
-ground truth, are not scored and are not gated, and a change of them does
-not change the digest of the benchmark. Each is pinned by the URL and the
-SHA-256 of one archive: a wheel of PyPI or the archive of a commit that
-GitHub serves. The build of the inputs image fetches them (above, "The
-inputs image") and `make eval-inputs` makes their sources
-`scale/projects/<name>` (a link into the shared copy; git ignores the directory), so
-they are there wherever the inputs images are.
-
-`make eval-scale NAME=<package>` runs `scale/measure.py run` in the
-container of `make eval` (no network, the repository read-only,
-`PYTHONHASHSEED=0`). The analysis is one job of the runner (above, "The
-runner"): the entry points are every `.py` file of the package's
-`packages`, the package root its `root`, with the runner's timeout and a
-memory limit of `SCALE_MEMORY_MIB` (default 4096), the cap. The container
-has the cap and `RUNNER_HEADROOM_MIB` (512) more, which
-`measure.py container-mib` prints, so that the runner stops the analysis
-at the cap before the kernel's limit of the container is reached, and
-`measure.py` survives to record it; `measure.py run` refuses a container
-with less headroom. The headroom covers twice the largest growth of the
-analysis between two samples of the runner, 203 MiB in 0.25 s on
-scikit-learn (numpy: 61 MiB), and the 19 MiB of `measure.py`. The outcome is `finished`, or `killed by the cap` when the
-runner stopped the analysis at the limit or the kernel killed it
-(`SIGKILL`) in the capped container; otherwise the runner's status
-(`timeout`, `crash`). It writes the call graph to
-`$EVAL_OUT/scale-<commit>/scale/<name>.json` and the record next to it,
-`<name>.record.json`: the package and its archive's SHA-256, the commit,
-the Python, the cap, the number of files, the outcome, the analysis time
-(`seconds`), the wall time, the peak resident set size (`peak_rss_mib`)
-and the SHA-256 of the call graph of a finished run; it prints them as a
-table. A checkout with changes is refused. With `BASE=<ref>` it first
-measures BASE, checked out in a worktree, with this checkout's
-`measure.py` and sources, then this checkout, back to back, and prints
-`scale/measure.py compare`: each value of both, the change of the times and
-the peak, and whether the two call graphs are byte-identical.
-
-The licence of each package is read from the licence files of the pinned
-archive. The platform wheels of numpy and scipy also bundle compiled
-libraries under other licences (the GCC runtime under GPL-3.0-or-later
-with the GCC runtime library exception, libquadmath under LGPL-2.1);
-those libraries are not unpacked.
-
-| Package | Version | Kind | Analysed packages | Licence |
-|---|---|---|---|---|
-| pydantic | 2.14.2 | pure wheel | `pydantic` | MIT |
-| numpy | 2.5.4 | platform wheel | `numpy` | BSD-3-Clause |
-| pandas | 3.1.0 | platform wheel | `pandas` | BSD-3-Clause |
-| fsspec | 2026.9.0 | pure wheel | `fsspec` | BSD-3-Clause |
-| rich | 15.0.0 | pure wheel | `rich` | MIT |
-| pip | 26.2.2 | pure wheel | `pip` | MIT |
-| sqlalchemy | 2.1.6 | pure wheel | `sqlalchemy` | MIT |
-| pyparsing | 3.3.3 | pure wheel | `pyparsing` | MIT |
-| scipy | 1.18.1 | platform wheel | `scipy` | BSD-3-Clause |
-| openai | 3.42.1 | pure wheel | `openai` | Apache-2.0 |
-| dask | commit 08d1856d3e | git archive | `dask` | BSD-3-Clause |
-| matplotlib | commit 58b6a0663e | git archive | `matplotlib`, `mpl_toolkits` (in `lib/`) | Matplotlib License (PSF-based) |
-| scikit-learn | commit b39ab8987b | git archive | `sklearn` | BSD-3-Clause |
-| sphinx | commit eaebbec4d1 | git archive | `sphinx` | BSD-2-Clause |
-| sympy | commit bfdb8d51c1 | git archive | `sympy` | BSD-3-Clause |
-| xarray | commit 60bc816cd1 | git archive | `xarray` | Apache-2.0 |
-| cerberus | commit 8765b31744 | git archive | `cerberus` | ISC |
-| python-future | commit af1db970b0 | git archive | `_dummy_thread`, `_markupbase`, `_thread`, `builtins`, `copyreg`, `future`, `html`, `http`, `libfuturize`, `libpasteurize`, `past`, `queue`, `reprlib`, `socketserver`, `tkinter`, `winreg`, `xmlrpc` (in `src/`) | MIT |
-| graphene | commit 52143473ef | git archive | `graphene` | MIT |
-| elasticsearch-dsl-py | commit 5874ff6bd5 | git archive | `elasticsearch_dsl` | Apache-2.0 |
-
-## The inputs image
-
-`container/fetch.py macro DESTINATION`, a step of the build of the inputs
-image, is the only place where git runs on third-party content. It writes
-each project of `projects.toml` to `DESTINATION/<name>`. A git source is
-fetched at its one pinned commit into a bare repository (`git fetch
---depth 1 URL COMMIT`, https only, no configuration of the user or the
-system, no hooks, no submodules, every received object checked by git) and
-written as the plain files of the commit's tree, without `.git`: the bytes
-and modes of its blobs, a link as a link, a nested submodule not fetched.
-No checkout runs, so no attribute, filter or hook of the fetched
-repository applies. An sdist is downloaded, checked against its SHA-256
-and unpacked with tarfile's `data` filter; the archive is not kept.
-Nothing fetched is run. A source that is not its pin is not written, and
-the command fails, so the build fails.
-
-`container/fetch.py scale DESTINATION`, in the target `scale`, writes each
-package of `scale/projects.toml` to `DESTINATION/<name>`: it downloads the
-archive, checks its SHA-256 and unpacks the regular files that are Python
-sources (`.py`) or licence and notice files (a path with a component whose
-name starts with `LICENSE`, `LICENCE`, `COPYING` or `NOTICE`, in any case),
-each with mode 0644. A wheel is unpacked as a zip; a member whose path
-leaves the archive, or that is a link, refuses the archive. A git archive
-is unpacked with tarfile's `data` filter and without its one top
-directory; links are not written. The archive is not kept. The target
-`macro` copies the result to `/inputs/scale/projects`; the image of the
-`inputs` service does not hold it, so the trace image does not get it.
-
-`make eval-inputs`, the first step of every `make eval` target, needs no
-network when the images are published. `tools/inputs_key.py` prints the
-key of the two images that the build gives, `pycg-eval-macro` (the target
-`macro`) and `pycg-eval-runner` (the target `network`): the SHA-256 of
-every file that the build reads (`Dockerfile.inputs`, its
-`.dockerignore` and the files it copies) and of its build argument, the
-Python image of `compose.yaml`. `tests/test_inputs_key.py` fails when the
-Dockerfile copies, or its `.dockerignore` lets in, a file that the key
-does not cover. `make eval-inputs` pulls
-`ghcr.io/vitsalis/pycg-eval-macro:<key>` and
-`ghcr.io/vitsalis/pycg-eval-runner:<key>` and tags them with the local
-names; when a pull fails it builds both with `make eval-inputs-build`. It
-prints which it did, then copies the sources out of `pycg-eval-macro` in a
-container without network, once per inputs key, to
-`$EVAL_OUT/inputs-<key>/`: those of the macro-benchmark to `macro/`, those
-of the scale set to `scale/`. The copy is made read-only and marked
-complete by a file `done`; a checkout whose key it already has copies
-nothing. `macro-benchmark/projects/` and `scale/projects/` then hold one
-symbolic link per project into the copy, so every worktree reads the one
-copy, and the containers of `make eval` reach it through the mount of
-`$EVAL_OUT`. A copy of an older key stays until it is removed (`chmod -R
-u+w` first).
-
-The workflow `Inputs` of CI runs when a file of the key changes. On a pull
-request it builds both targets, without pushing and without the right to
-write packages, so that a broken build shows before the merge. On a push
-to `main` of this repository it builds them and pushes each image whose
-tag does not exist yet; that job alone may write packages. The fetches of
-third-party content therefore still happen only in the build of the
-inputs image, which now runs in CI; a machine without network pulls its
-result. The images are built for `linux/amd64`: on another platform the
-pull fails and `make eval-inputs` builds them.
+Every change is measured against its base on these values, and none may
+fall more than 0.01 below the base's.
