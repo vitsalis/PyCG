@@ -163,9 +163,32 @@ def test_a_builder_call_names_every_argument_with_its_defaults(dumped):
     assert add_call["arguments"]["star"] == []
 
 
-def test_the_entry_modules_are_listed_for_the_replay(dumped):
-    first, _ = dumped["classes"]
-    assert (first / oracle.ENTRIES).read_text() == "main\n"
+def test_the_linking_of_the_program_is_recorded_before_solving(tmp_path):
+    program = tmp_path / "linking" / "program"
+    for relative, source in {
+        "main.py": "import pkg.sub\nfrom pkg import *\n",
+        "pkg/__init__.py": "__all__ = ['sub']\n",
+        "pkg/sub.py": "",
+    }.items():
+        (program / relative).parent.mkdir(parents=True, exist_ok=True)
+        (program / relative).write_text(source, encoding="utf-8")
+    seeds = [read(dump(tmp_path, "linking", seed) / "D4.jsonl") for seed in (0, 1)]
+    linked = [r for r in seeds[0] if r["module"] == oracle.PROGRAM]
+
+    assert linked == [r for r in seeds[1] if r["module"] == oracle.PROGRAM]
+    calls = [(r["call"], r["arguments"]) for r in linked if "call" in r]
+    assert (
+        "imports.handle_import",
+        {"name": "pkg.sub", "level": 0, "record": True},
+    ) in calls
+    modules = [arguments["name"] for call, arguments in calls if call == "module"]
+    assert modules[:3] == ["main", "pkg", "pkg.sub"]
+    assert "add_object" in {call for call, _ in calls}
+    assert seeds[0][-1] == {
+        "module": oracle.PROGRAM,
+        "object": {"object": "Module:pkg"},
+        "fields": {"defines": {"set": ["__all__", "sub"]}},
+    }
 
 
 def test_the_fields_that_the_builder_writes_end_each_module_of_the_build(dumped):

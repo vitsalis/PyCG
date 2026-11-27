@@ -70,7 +70,6 @@ SOLVER_CALLS = (
     "is_saturated",
 )
 SOLVER_ANSWERS = frozenset({"constant", "follower", "objects", "holds", "is_saturated"})
-ENTRIES = "entries.txt"
 BUILDER_IMPORT_CALLS = ("handle_import", "locate")
 BUILDER_TABLES = (
     "iterated_expressions",
@@ -81,6 +80,7 @@ BUILDER_TABLES = (
     "zero_argument_super",
 )
 BUILT_TYPES = ("Function", "Class")
+PROGRAM = "<program>"
 BUILDER_FIELDS = {
     "Module": ("defines",),
     "Function": (
@@ -114,7 +114,7 @@ class Names:
         self.model = model
         self.solver = solver
         self.semantics = semantics
-        self.context = "<program>"
+        self.context = PROGRAM
         self._node_names = {}
         self._label_counts = {}
         self._context_counts = {}
@@ -309,6 +309,17 @@ class Recorder:
         self.witness_of_watch = {}
         self.declared = {}
         self.built_objects = []
+        self.defines_before_linking = {}
+
+    @property
+    def recording(self):
+        if self.builder_depth:
+            return None
+        if self.building is not None:
+            return self.building
+        if self.names.context == PROGRAM:
+            return PROGRAM
+        return None
 
     def close(self):
         for writer in self.writers.values():
@@ -323,6 +334,7 @@ class Recorder:
         self._install_solver()
         self._install_constraints()
         self._install_builder_calls()
+        self._install_solve()
         self._guard_builder_writes()
 
     def _install_names(self):
@@ -385,7 +397,7 @@ class Recorder:
             finally:
                 recorder.write_builder_fields(program, name)
                 recorder.building = None
-                recorder.names.context = "<program>"
+                recorder.names.context = PROGRAM
                 recorder.write_module(program, name, path)
 
         def analyse_scopes(tree, module_name):
@@ -393,15 +405,42 @@ class Recorder:
             recorder.scopes_by_module.setdefault(module_name, found)
             return found
 
+        original_link_submodules = Program._link_submodules
+
+        def link_submodules(program):
+            recorder.defines_before_linking = {
+                name: set(module.defines)
+                for name, module in program.analysis.modules.items()
+            }
+            return original_link_submodules(program)
+
         Program._build = build
+        Program._link_submodules = link_submodules
         self.builder.analyse_scopes = analyse_scopes
+
+    def _install_solve(self):
+        recorder = self
         original_solve = self.semantics.Analysis.solve
 
         def solve(analysis):
+            recorder.write_linked_defines(analysis)
             recorder.names.context = "<solve>"
             return original_solve(analysis)
 
         self.semantics.Analysis.solve = solve
+
+    def write_linked_defines(self, analysis):
+        for name in sorted(analysis.modules):
+            module = analysis.modules[name]
+            if module.defines == self.defines_before_linking.get(name, set()):
+                continue
+            self.writers["D4"].write(
+                {
+                    "module": PROGRAM,
+                    "object": self.names.canon(module),
+                    "fields": {"defines": self.names.canon(module.defines)},
+                }
+            )
 
     def write_builder_fields(self, program, name):
         built, self.built_objects = self.built_objects, []
@@ -852,7 +891,8 @@ class Recorder:
                 _self=receiver,
                 **kw,
             ):
-                if recorder.building is None or recorder.builder_depth:
+                module = recorder.recording
+                if module is None:
                     recorder.builder_depth += 1
                     try:
                         return _original(analysis, *args, **kw)
@@ -867,7 +907,7 @@ class Recorder:
                 bound.apply_defaults()
                 writer.write(
                     {
-                        "module": recorder.building,
+                        "module": module,
                         "call": _name,
                         "arguments": {
                             parameter: canon(value)
@@ -878,7 +918,8 @@ class Recorder:
                     }
                 )
                 if (
-                    type(answer).__name__ in BUILT_TYPES
+                    recorder.building is not None
+                    and type(answer).__name__ in BUILT_TYPES
                     and answer not in recorder.built_objects
                 ):
                     recorder.built_objects.append(answer)
@@ -907,14 +948,15 @@ class Recorder:
                 _self=receiver,
                 **kw,
             ):
+                module = recorder.recording
                 answer = _original(imports, *args, **kw)
-                if recorder.building is None or recorder.builder_depth:
+                if module is None:
                     return answer
                 bound = _signature.bind(imports, *args, **kw)
                 bound.apply_defaults()
                 writer.write(
                     {
-                        "module": recorder.building,
+                        "module": module,
                         "call": f"imports.{_name}",
                         "arguments": {
                             parameter: canon(value)
@@ -978,8 +1020,6 @@ def dump_input(checkout, out, entry_points, package, cap=None):
     )
     try:
         generator.analyze()
-        entries = sorted(generator.program._entry_module_names)
-        (out / ENTRIES).write_text("".join(f"{name}\n" for name in entries))
         recorder.finish(generator)
         document = dumps(generator.document())
     except (Exception, SystemExit) as error:

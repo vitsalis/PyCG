@@ -21,14 +21,28 @@ MODELS_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "mode
 NESTING_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "nesting.rs"
 BUILDER_VECTORS = ROOT / "crates" / "pycg_dump" / "tests" / "vectors" / "builder"
 DUMP = ROOT / "tools" / "parity" / "dump.py"
-BUILDER_STUBS = {
-    "stubs": (
-        "from typing import Any, List\nimport os.path as p\nAlias = List[int]\n"
-        "class Base: ...\nclass C(Base[int], p.Mixin):\n    attr: 'Alias'\n"
-        "    def m(self, a: int, b: p.Thing = ...) -> None: ...\n"
-        "def g(x: C, *rest: Alias, **kw: str) -> None: ...\nh = g\n"
-        "v: List['C']\nw: str\nif flag:\n    z: Base\nelse:\n    y: 'C | None'\n"
-    ),
+BUILDER_FILES = {
+    "stubs": {
+        "main.pyi": (
+            "from typing import Any, List\nimport os.path as p\nAlias = List[int]\n"
+            "class Base: ...\nclass C(Base[int], p.Mixin):\n    attr: 'Alias'\n"
+            "    def m(self, a: int, b: p.Thing = ...) -> None: ...\n"
+            "def g(x: C, *rest: Alias, **kw: str) -> None: ...\nh = g\n"
+            "v: List['C']\nw: str\nif flag:\n    z: Base\nelse:\n    y: 'C | None'\n"
+        ),
+    },
+    "linking": {
+        "pkg/__init__.py": "__all__ = ['sub', 'x']\nx = 1\n_y = 2\n",
+        "pkg/sub.py": "def f():\n    return 1\n",
+        "pkg/_hidden.py": "from .sub import f\n",
+        "pkg/inner/__init__.py": "",
+        "pkg/inner/deep.py": "value = 3\n",
+        "chain.py": "from pkg import *\nfrom os.path import *\na = 1\n_b = 2\n",
+        "broken.py": "def (:\n",
+        "twice.py": "value = 1\n",
+        "twice/__init__.py": "value = 2\n",
+        "fast.cpython-312-x86_64-linux-gnu.so": "",
+    },
 }
 BUILDER_PROGRAMS = {
     "assignments": "x = 1\ny = x\nfirst, *rest = x\nlast = first = y\ndel x\n",
@@ -150,6 +164,11 @@ def else_ifs(count):
     return "\n".join(lines) + "\n"
 
 
+BUILDER_PROGRAMS["linking"] = (
+    "import pkg.inner.deep\nimport pkg._hidden as hidden\nfrom chain import *\n"
+    "from pkg import *\nimport broken\nimport fast\nimport missing.part\n"
+    "from . import nothing\nimport twice\n"
+)
 BUILDER_PROGRAMS["nesting"] = f"x = 1\ny = {nested_lambdas(NESTING_MAX + 1)}\nz = x\n"
 NESTING_PROGRAMS = (
     f"x = {nested_lambdas(NESTING_MAX)}\n",
@@ -733,16 +752,14 @@ def builder_vectors():
     for name, source in BUILDER_PROGRAMS.items():
         target = BUILDER_VECTORS / name
         target.mkdir(parents=True)
-        (target / "main.py").write_text(source, encoding="utf-8")
-        stub = BUILDER_STUBS.get(name)
-        if stub is not None:
-            (target / "main.pyi").write_text(stub, encoding="utf-8")
+        files = {"main.py": source, **BUILDER_FILES.get(name, {})}
         with tempfile.TemporaryDirectory() as scratch:
             program = Path(scratch) / "program"
-            program.mkdir()
-            (program / "main.py").write_text(source, encoding="utf-8")
-            if stub is not None:
-                (program / "main.pyi").write_text(stub, encoding="utf-8")
+            for directory in (target, program):
+                for relative, text in files.items():
+                    path = directory / relative
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text(text, encoding="utf-8")
             out = Path(scratch) / "out"
             subprocess.run(
                 [sys.executable, "-I", str(DUMP), "input", "--checkout", str(ROOT)]
@@ -756,7 +773,18 @@ def builder_vectors():
                 check=True,
             )
             shutil.copy(out / "D4.jsonl", target / "D4.jsonl")
-            shutil.copy(out / "entries.txt", target / "entries.txt")
+            document = json.loads((out / "D6.json").read_text(encoding="utf-8"))
+            definitions = {
+                name: definition
+                for name, definition in document["definitions"].items()
+                if definition["kind"] == "module"
+            }
+            for file, section in (
+                ("modules.json", document["modules"]),
+                ("definitions.json", definitions),
+            ):
+                text = json.dumps(section, sort_keys=True, separators=(",", ":"))
+                (target / file).write_text(text + "\n", encoding="utf-8")
 
 
 def main(argv=None):

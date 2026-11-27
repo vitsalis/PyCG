@@ -8,8 +8,9 @@ mod stubs_replay;
 
 use std::process::ExitCode;
 
-const USAGE: &str = "usage: pycg_dump stubs <D2.jsonl> | solver <D3.jsonl> | document <directory> | d1 MODULES OUT \
-    | d4 MODULES ENTRIES ORACLE_D4 OUT | engine <D4.jsonl> OUT | engine-build MODULES ENTRIES OUT";
+const USAGE: &str = "usage: pycg_dump stubs <D2.jsonl> | solver <D3.jsonl> | document <directory> \
+    | d1 MODULES OUT | d4 ORACLE_D4 OUT --package ROOT ENTRY... | engine <D4.jsonl> OUT \
+    | engine-build MODULES ENTRIES OUT";
 const EXIT_USAGE: u8 = 2;
 
 fn main() -> ExitCode {

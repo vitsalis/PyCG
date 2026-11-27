@@ -1,7 +1,7 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs::File;
 use std::io::{BufRead, BufReader, BufWriter, Lines, Write};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use indexmap::IndexMap;
@@ -9,58 +9,96 @@ use pycg_analysis::builder::calls::{
     Analysis, BuilderTables, Call, CallId, ClassFields, ClassStatement, Constant, FunctionFields,
     Key, MadeFunction, MethodKind, NewClass, Operation, Passthrough, Shape, Slice, Subscript,
 };
-use pycg_analysis::builder::{ModuleBuilder, Source};
 use pycg_analysis::model::Signature;
+use pycg_analysis::program::Program;
+use pycg_analysis::program::imports::ImportManager;
+use pycg_analysis::program::paths::relpath;
 use pycg_solver::{NodeId, ObjId};
-use pycg_syntax::parse::with_parsed_and_stub;
-use pycg_syntax::read::read_file;
-use pycg_syntax::scopes::analyse_scopes;
-use pycg_syntax::tree::Node;
-use ruff_python_ast::{ModModule, Stmt};
-use ruff_source_file::LineIndex;
 use serde_json::{Map, Value, json};
 
 const SAFE_INTEGER_BITS: u64 = 53;
 
 pub fn run(arguments: &[String]) -> Option<ExitCode> {
-    let [command, modules, entries, oracle, out] = arguments else {
+    let [command, oracle, out, flag, package, entry_points @ ..] = arguments else {
         return None;
     };
-    if command != "d4" {
+    if command != "d4" || flag != "--package" || entry_points.is_empty() {
         return None;
     }
-    let listed = std::fs::read_to_string(modules).expect("the module list is readable");
-    let entries: Vec<String> = std::fs::read_to_string(entries)
-        .expect("the entry list is readable")
-        .lines()
-        .map(str::to_owned)
-        .collect();
-    let modules: Vec<(&str, &str)> = listed
-        .lines()
-        .map(|line| line.split_once('\t').expect("a module and its file"))
-        .collect();
-    let order: BTreeMap<&str, usize> = modules
-        .iter()
-        .enumerate()
-        .map(|(index, (module, _))| (*module, index))
-        .collect();
-    let mut oracle = Oracle::open(Path::new(oracle));
-    let file = File::create(out).expect("the D4 dump can be created");
-    let mut out = BufWriter::new(file);
-    let mut label_counts = BTreeMap::new();
-    for (index, (module, path)) in modules.iter().enumerate() {
-        oracle.skip_before(index, &order);
-        let mut replay = Replay::new(module, &mut oracle, &mut out, &mut label_counts);
-        build(
-            &mut replay,
-            module,
-            Path::new(path),
-            entries.iter().any(|entry| entry == module),
-        );
-        replay.finish();
+    let cwd = std::env::current_dir().expect("a working directory");
+    let entry_points: Vec<PathBuf> = entry_points.iter().map(PathBuf::from).collect();
+    let out = Path::new(out);
+    std::fs::create_dir_all(out).expect("the output directory can be made");
+    let file = File::create(out.join("D4.jsonl")).expect("the D4 dump can be created");
+    let replay = Replay::new(Oracle::open(Path::new(oracle)), BufWriter::new(file));
+    let mut program = Program::new(&entry_points, Some(Path::new(package)), &cwd, replay);
+    program.build_modules();
+    program.analysis.write_linked_defines();
+    program
+        .analysis
+        .out
+        .flush()
+        .expect("the D4 dump is written");
+    let mut listed = String::new();
+    for (name, module) in &program.modules {
+        let real = std::fs::canonicalize(&module.file).unwrap_or_else(|_| module.file.clone());
+        let relative = relpath(&real, &cwd, &cwd);
+        listed.push_str(&format!("{name}\t{}\n", relative.display()));
     }
-    out.flush().expect("the D4 dump is written");
+    std::fs::write(out.join("modules.tsv"), listed).expect("the module list is written");
+    let modules = crate::canonical::line(&document_modules(&mut program));
+    std::fs::write(out.join("modules.json"), modules).expect("the modules are written");
+    let definitions = crate::canonical::line(&module_definitions(&program));
+    std::fs::write(out.join("definitions.json"), definitions)
+        .expect("the module definitions are written");
     Some(ExitCode::SUCCESS)
+}
+
+fn module_definitions(program: &Program<Replay>) -> Value {
+    let definitions: BTreeMap<&str, Value> = program
+        .modules
+        .iter()
+        .map(|(name, module)| {
+            let lines = module.line_count;
+            let definition =
+                json!({"kind": "module", "module": name, "lines": [lines.min(1), lines]});
+            (name.as_str(), definition)
+        })
+        .collect();
+    json!(definitions)
+}
+
+fn document_modules(program: &mut Program<Replay>) -> Value {
+    let mut modules: BTreeMap<String, Map<String, Value>> = BTreeMap::new();
+    for (name, module) in &program.modules {
+        let mut entry = Map::new();
+        entry.insert("file".into(), json!(program.relative(&module.file)));
+        entry.insert("kind".into(), json!("source"));
+        entry.insert("status".into(), json!(module.status.name()));
+        if let Some(cause) = &module.cause {
+            entry.insert("cause".into(), json!(cause));
+        }
+        modules.insert(name.clone(), entry);
+    }
+    for (name, file) in &program.extension_modules {
+        let mut entry = Map::new();
+        entry.insert("file".into(), json!(program.relative(file)));
+        entry.insert("kind".into(), json!("extension"));
+        modules.insert(name.clone(), entry);
+    }
+    for (name, entry) in &mut modules {
+        let file = program.root.join(entry["file"].as_str().expect("a file"));
+        let mut shadows: Vec<String> = program
+            .shadowed(name, &file)
+            .iter()
+            .map(|other| program.relative(other))
+            .collect();
+        shadows.sort();
+        if !shadows.is_empty() {
+            entry.insert("shadows".into(), json!(shadows));
+        }
+    }
+    json!(modules)
 }
 
 fn surrogate_escape(text: &str, at: usize) -> Option<u32> {
@@ -128,10 +166,10 @@ impl Oracle {
         }
     }
 
-    fn skip_before(&mut self, index: usize, order: &BTreeMap<&str, usize>) {
+    fn skip_finished(&mut self, finished: &BTreeSet<String>) {
         while let Some(record) = &self.next {
             let module = record["module"].as_str().expect("a module");
-            if order.get(module).is_some_and(|&position| position >= index) {
+            if !finished.contains(module) {
                 return;
             }
             self.advance();
@@ -164,81 +202,22 @@ fn unsuffixed(name: &str) -> &str {
     }
 }
 
-fn build(replay: &mut Replay<'_>, module: &str, path: &Path, is_entry: bool) {
-    let Ok(source) = read_file(path) else {
-        return;
-    };
-    let stub_path = path.with_extension("pyi");
-    let stub = (path.extension().is_some_and(|suffix| suffix == "py") && stub_path.is_file())
-        .then(|| read_file(&stub_path).ok())
-        .flatten();
-    with_parsed_and_stub(&source, stub.as_deref(), |parsed, stub_parsed| {
-        let Ok(parsed) = parsed else {
-            return;
-        };
-        let lines = LineIndex::from_source_text(&source);
-        let tokens = parsed.tokens();
-        let scopes = analyse_scopes(parsed.syntax(), module, tokens, &lines, &source);
-        let stub_lines = stub.as_deref().map(LineIndex::from_source_text);
-        let own_stub = match (stub_parsed, stub.as_deref(), stub_lines.as_ref()) {
-            (Some(Ok(stub_parsed)), Some(text), Some(stub_lines))
-                if !declares_global_or_nonlocal(stub_parsed.syntax()) =>
-            {
-                Some((
-                    stub_parsed.syntax(),
-                    Source {
-                        text,
-                        tokens: stub_parsed.tokens(),
-                        lines: stub_lines,
-                    },
-                ))
-            }
-            _ => None,
-        };
-        let object = replay.module(module);
-        replay.built = Some(object);
-        let is_package = path.file_name().is_some_and(|name| name == "__init__.py");
-        let mut builder = ModuleBuilder::new(
-            replay,
-            module,
-            object,
-            Source {
-                text: &source,
-                tokens,
-                lines: &lines,
-            },
-            &scopes,
-            is_package,
-            is_entry,
-        );
-        if let Some((tree, source)) = own_stub {
-            builder = builder.with_own_stub(tree, source);
-        }
-        builder.build(&parsed.syntax().body);
-    });
-}
-
-fn declares_global_or_nonlocal(tree: &ModModule) -> bool {
-    let mut pending: Vec<Node<'_>> = tree.body.iter().map(Node::Stmt).collect();
-    while let Some(node) = pending.pop() {
-        if matches!(node, Node::Stmt(Stmt::Global(_) | Stmt::Nonlocal(_))) {
-            return true;
-        }
-        pending.extend(node.children());
-    }
-    false
-}
-
 enum Made {
     Function(FunctionFields),
     Class(ClassFields),
 }
 
-struct Replay<'r> {
+const PROGRAM: &str = "<program>";
+
+struct Replay {
     module: String,
-    oracle: &'r mut Oracle,
-    out: &'r mut BufWriter<File>,
-    label_counts: &'r mut BTreeMap<String, usize>,
+    oracle: Oracle,
+    out: BufWriter<File>,
+    label_counts: BTreeMap<String, usize>,
+    imports: ImportManager,
+    module_objects: BTreeMap<String, ObjId>,
+    finished: BTreeSet<String>,
+    defines_before_linking: IndexMap<ObjId, BTreeSet<Box<str>>>,
     node_names: Vec<String>,
     node_labels: Vec<Option<String>>,
     node_by_name: BTreeMap<String, NodeId>,
@@ -247,24 +226,23 @@ struct Replay<'r> {
     call_names: Vec<String>,
     call_by_name: BTreeMap<String, CallId>,
     made: IndexMap<ObjId, Made>,
-    module_defines: Vec<Box<str>>,
+    module_defines: IndexMap<ObjId, Vec<Box<str>>>,
     tables: BuilderTables,
     built: Option<ObjId>,
     divergences: usize,
 }
 
-impl<'r> Replay<'r> {
-    fn new(
-        module: &str,
-        oracle: &'r mut Oracle,
-        out: &'r mut BufWriter<File>,
-        label_counts: &'r mut BTreeMap<String, usize>,
-    ) -> Replay<'r> {
+impl Replay {
+    fn new(oracle: Oracle, out: BufWriter<File>) -> Replay {
         Replay {
-            module: module.to_owned(),
+            module: PROGRAM.to_owned(),
             oracle,
             out,
-            label_counts,
+            label_counts: BTreeMap::new(),
+            imports: ImportManager::default(),
+            module_objects: BTreeMap::new(),
+            finished: BTreeSet::new(),
+            defines_before_linking: IndexMap::new(),
             node_names: Vec::new(),
             node_labels: Vec::new(),
             node_by_name: BTreeMap::new(),
@@ -273,7 +251,7 @@ impl<'r> Replay<'r> {
             call_names: Vec::new(),
             call_by_name: BTreeMap::new(),
             made: IndexMap::new(),
-            module_defines: Vec::new(),
+            module_defines: IndexMap::new(),
             tables: BuilderTables::default(),
             built: None,
             divergences: 0,
@@ -414,16 +392,42 @@ impl<'r> Replay<'r> {
         self.record(call, arguments, answer);
     }
 
-    fn finish(mut self) {
-        if self.built.is_none() {
-            return;
+    fn write_linked_defines(&mut self) {
+        let modules: Vec<ObjId> = self.module_objects.values().copied().collect();
+        for module in modules {
+            let Some(before) = self.defines_before_linking.get(&module) else {
+                continue;
+            };
+            let defines: BTreeSet<Box<str>> = self
+                .module_defines
+                .get(&module)
+                .into_iter()
+                .flatten()
+                .cloned()
+                .collect();
+            if defines == *before {
+                continue;
+            }
+            let record = json!({
+                "module": PROGRAM,
+                "object": self.object(module),
+                "fields": {"defines": set(defines.iter().map(|name| Value::from(&**name)).collect())},
+            });
+            self.write(&record);
         }
+    }
+
+    fn finish(&mut self) {
+        let Some(module) = self.built else {
+            return;
+        };
         let tables = self.tables_record();
         self.write(&tables);
-        let module = self.built.expect("a built module");
         let defines = set(self
             .module_defines
-            .iter()
+            .get(&module)
+            .into_iter()
+            .flatten()
             .map(|name| Value::from(&**name))
             .collect());
         let defined = json!({
@@ -553,7 +557,7 @@ fn arguments(entries: Vec<(&str, Value)>) -> Map<String, Value> {
         .collect()
 }
 
-impl Analysis for Replay<'_> {
+impl Analysis for Replay {
     fn container(&mut self, kind: &str, site: &str, length: Option<usize>) -> ObjId {
         let answer = self.answer("container");
         let recorded = arguments(vec![
@@ -952,7 +956,31 @@ impl Analysis for Replay<'_> {
             arguments(vec![("name", json!(name))]),
             answer.clone(),
         );
-        self.object_from(&answer)
+        let object = self.object_from(&answer);
+        self.module_objects.insert(name.to_owned(), object);
+        object
+    }
+
+    fn begin_module(&mut self, name: &str) {
+        self.module = name.to_owned();
+        self.made.clear();
+        self.tables = BuilderTables::default();
+        self.built = None;
+    }
+
+    fn end_module(&mut self, name: &str, analysed: bool) {
+        if analysed {
+            self.built = self.module_objects.get(name).copied();
+            self.finish();
+        }
+        self.finished.insert(name.to_owned());
+        self.oracle.skip_finished(&self.finished);
+        self.module = PROGRAM.to_owned();
+        self.built = None;
+    }
+
+    fn imports(&mut self) -> &mut ImportManager {
+        &mut self.imports
     }
 
     fn external(&mut self, name: &str, steps: u32, inexact: bool) -> ObjId {
@@ -1291,27 +1319,26 @@ impl Analysis for Replay<'_> {
     }
 
     fn handle_import(&mut self, name: &str, level: u32, record: bool) -> Option<String> {
-        let answer = self.answer("imports.handle_import");
+        self.answer("imports.handle_import");
+        let imported = self.imports.handle_import(name, level, record);
         let recorded = arguments(vec![
             ("name", json!(name)),
             ("level", json!(level)),
             ("record", json!(record)),
         ]);
-        self.record("imports.handle_import", recorded, answer.clone());
-        answer.as_str().map(str::to_owned)
+        self.record("imports.handle_import", recorded, json!(imported));
+        imported
     }
 
     fn locate(&mut self, name: &str) -> Option<(String, Option<String>)> {
-        let answer = self.answer("imports.locate");
+        self.answer("imports.locate");
+        let found = self.imports.locate(name);
         self.record(
             "imports.locate",
             arguments(vec![("name", json!(name))]),
-            answer.clone(),
+            json!(found),
         );
-        let found = answer.as_array()?;
-        let module = found.first()?.as_str()?.to_owned();
-        let attribute = found.get(1)?.as_str().map(str::to_owned);
-        Some((module, attribute))
+        found
     }
 
     fn type_form(&mut self, operator: &str, parts: &[Option<NodeId>], site: &str) -> ObjId {
@@ -1380,12 +1407,13 @@ impl Analysis for Replay<'_> {
     }
 
     fn module_defines(&mut self, module: ObjId) -> &mut Vec<Box<str>> {
-        assert_eq!(
-            Some(module),
-            self.built,
-            "the defines of the module being built"
-        );
-        &mut self.module_defines
+        let defines = self.module_defines.entry(module).or_default();
+        if self.module == PROGRAM {
+            self.defines_before_linking
+                .entry(module)
+                .or_insert_with(|| defines.iter().cloned().collect());
+        }
+        defines
     }
 
     fn tables(&mut self) -> &mut BuilderTables {
