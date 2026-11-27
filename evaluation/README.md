@@ -396,14 +396,20 @@ inputs images are.
 
 `make eval-scale NAME=<package>` runs `scale/measure.py run` in the
 container of `make eval` (no network, the repository read-only,
-`PYTHONHASHSEED=0`), with the memory of the container capped at
-`SCALE_MEMORY_MIB` (default 4096). The analysis is one job of the runner
-(above, "The runner"): the entry points are every `.py` file of the
-package's `packages`, the package root its `root`, with the runner's
-timeout and the cap also as its memory limit. The outcome is `finished`,
-or `killed by the cap` when the runner stopped the analysis at the limit or
-the kernel killed it (`SIGKILL`) in the capped container; otherwise the
-runner's status (`timeout`, `crash`). It writes the call graph to
+`PYTHONHASHSEED=0`). The analysis is one job of the runner (above, "The
+runner"): the entry points are every `.py` file of the package's
+`packages`, the package root its `root`, with the runner's timeout and a
+memory limit of `SCALE_MEMORY_MIB` (default 4096), the cap. The container
+has the cap and `RUNNER_HEADROOM_MIB` (512) more, which
+`measure.py container-mib` prints, so that the runner stops the analysis
+at the cap before the kernel's limit of the container is reached, and
+`measure.py` survives to record it; `measure.py run` refuses a container
+with less headroom. The headroom covers twice the largest growth of the
+analysis between two samples of the runner, 203 MiB in 0.25 s on
+scikit-learn (numpy: 61 MiB), and the 19 MiB of `measure.py`. The outcome is `finished`, or `killed by the cap` when the
+runner stopped the analysis at the limit or the kernel killed it
+(`SIGKILL`) in the capped container; otherwise the runner's status
+(`timeout`, `crash`). It writes the call graph to
 `$EVAL_OUT/scale-<commit>/scale/<name>.json` and the record next to it,
 `<name>.record.json`: the package and its archive's SHA-256, the commit,
 the Python, the cap, the number of files, the outcome, the analysis time

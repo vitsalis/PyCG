@@ -129,6 +129,7 @@ class Analysis(
         self._field_writes = {}
         self._deliveries = {}
         self._dict_hubs = {}
+        self._container_groups = {}
         self._subscript_keys = {}
         self._watches = {}
         self._waiting_rules = {}

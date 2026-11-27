@@ -26,7 +26,8 @@ sandbox = docker run --rm --network none --read-only --tmpfs /tmp \
 	-v $(CURDIR):$(CURDIR):ro -v $(GIT_COMMON):$(GIT_COMMON):ro \
 	-v $(EVAL_OUT):$(EVAL_OUT) pycg-eval-runner python3 -I
 SANDBOX = $(call sandbox,6g)
-SCALE_SANDBOX = $(call sandbox,$(SCALE_MEMORY_MIB)m)
+SCALE_CONTAINER_MIB = $(shell python3 -I evaluation/scale/measure.py container-mib $(SCALE_MEMORY_MIB))
+SCALE_SANDBOX = $(call sandbox,$(SCALE_CONTAINER_MIB)m)
 SCALE_MEASURE = $(CURDIR)/evaluation/scale/measure.py
 SCALE_RESULT = $(EVAL_OUT)/scale-$(COMMIT)
 SCALE_BASE_RESULT = $(EVAL_OUT)/scale-base-$(BASE_COMMIT)-for-$(COMMIT)

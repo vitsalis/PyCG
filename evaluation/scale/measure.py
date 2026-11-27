@@ -11,12 +11,21 @@ SCALE = Path(__file__).resolve().parent
 EVALUATION = SCALE.parent
 OUTCOME_FINISHED = "finished"
 OUTCOME_KILLED_BY_THE_CAP = "killed by the cap"
+RUNNER_HEADROOM_MIB = 512
+CGROUP_MEMORY_MAX = Path("/sys/fs/cgroup/memory.max")
+CGROUP_NO_LIMIT = "max"
+MIB = 1 << 20
 DESCRIPTION = """Measures a PyCG checkout on one package of the scale set
 (evaluation/README.md, "The scale set").
 
     python3 -I evaluation/scale/measure.py run --checkout PATH --name NAME \\
         --package rich --out OUT --memory-mib 4096
-    python3 -I evaluation/scale/measure.py compare BASE_RECORD RECORD"""
+    python3 -I evaluation/scale/measure.py compare BASE_RECORD RECORD
+    python3 -I evaluation/scale/measure.py container-mib 4096
+
+The container needs RUNNER_HEADROOM_MIB above the analysis's cap, so that
+measure.py survives the analysis being killed and records it:
+container-mib prints that size, and run refuses a smaller container."""
 
 
 def load(name, path):
@@ -48,7 +57,37 @@ def record_path(out, name, package):
     return run.graph_file(Path(out) / name, f"scale/{package}.record")
 
 
-def measure(checkout, name, project, out, memory_mib, timeout_seconds, python):
+def container_limit_mib(cgroup_memory_max):
+    try:
+        text = Path(cgroup_memory_max).read_text(encoding="ascii").strip()
+    except FileNotFoundError:
+        return None
+    return None if text == CGROUP_NO_LIMIT else int(text) // MIB
+
+
+def check_headroom(memory_mib, cgroup_memory_max):
+    limit = container_limit_mib(cgroup_memory_max)
+    if limit is not None and limit - memory_mib < RUNNER_HEADROOM_MIB:
+        raise MeasureError(
+            f"the container's memory limit of {limit} MiB leaves "
+            f"{limit - memory_mib} MiB above the cap of {memory_mib} MiB; "
+            f"measure.py needs {RUNNER_HEADROOM_MIB} MiB to record a run "
+            "that the cap kills: give the container "
+            f"{memory_mib + RUNNER_HEADROOM_MIB} MiB (container-mib)"
+        )
+
+
+def measure(
+    checkout,
+    name,
+    project,
+    out,
+    memory_mib,
+    timeout_seconds,
+    python,
+    cgroup_memory_max=CGROUP_MEMORY_MAX,
+):
+    check_headroom(memory_mib, cgroup_memory_max)
     version = run.git_version(checkout)
     if version["commit"] is None:
         raise MeasureError(f"{checkout} is not a git checkout")
@@ -164,7 +203,14 @@ def main(argv=None):
     comparing = commands.add_parser("compare", help="compare two records")
     comparing.add_argument("base", type=Path)
     comparing.add_argument("record", type=Path)
+    sizing = commands.add_parser(
+        "container-mib", help="the memory of the container for a cap"
+    )
+    sizing.add_argument("memory_mib", type=int)
     args = parser.parse_args(argv)
+    if args.command == "container-mib":
+        print(args.memory_mib + RUNNER_HEADROOM_MIB)
+        return 0
     try:
         if args.command == "compare":
             print(comparison(read_record(args.base), read_record(args.record)))

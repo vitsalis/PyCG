@@ -29,6 +29,10 @@ def _builtin_names():
 
 BUILTIN_NAMES = _builtin_names()
 
+NESTING_MAX = 247
+NESTING_STACK_FRAMES = 1000
+NESTING_LEAVES = (ast.expr_context, ast.boolop, ast.operator, ast.unaryop, ast.cmpop)
+
 IMPLICIT_METHODS = {
     "__new__": "staticmethod",
     "__init_subclass__": "classmethod",
@@ -83,20 +87,23 @@ class ModuleBuilder(
         self.analysis.add_object(name, self.analysis.const(self.module.name))
         if self.is_entry:
             self.analysis.add_object(name, self.analysis.const("__main__"))
-        try:
-            self._statements(self.tree.body)
-        finally:
-            self.names_bound_at_run_time = list(self._bound_at_end(self.scopes.module))
-            module = self.scopes.module
-            top_level = _top_level_bindings(self.tree.body)
-            for name, node in self._maybe_builtins.items():
-                if self.scopes.tracked(module, name):
-                    unbound = self._flows[module].state.get(name)[1]
-                else:
-                    unbound = name not in top_level
-                if unbound:
-                    self.analysis.add_edge(self._builtin_value(name), node)
-            self.module.defines.update(self.names_bound_at_run_time)
+        statements = self.tree.body
+        too_deep = next((s for s in statements if nesting(s) > NESTING_MAX), None)
+        if too_deep is not None:
+            statements = statements[: statements.index(too_deep)]
+        self._statements(statements)
+        self.names_bound_at_run_time = list(self._bound_at_end(self.scopes.module))
+        module = self.scopes.module
+        top_level = _top_level_bindings(self.tree.body)
+        for name, node in self._maybe_builtins.items():
+            if self.scopes.tracked(module, name):
+                unbound = self._flows[module].state.get(name)[1]
+            else:
+                unbound = name not in top_level
+            if unbound:
+                self.analysis.add_edge(self._builtin_value(name), node)
+        self.module.defines.update(self.names_bound_at_run_time)
+        return too_deep
 
     @contextmanager
     def _inside(self, scope, function):
@@ -1116,6 +1123,24 @@ def _slots(finals):
         case _:
             return []
     return [name for name in names if isinstance(name, str) and name != "__dict__"]
+
+
+def nesting(statement):
+    deepest = 0
+    pending = [(statement, 1)]
+    while pending:
+        node, depth = pending.pop()
+        deepest = max(deepest, depth)
+        for child in ast.iter_child_nodes(node):
+            if isinstance(child, NESTING_LEAVES):
+                continue
+            continues = (isinstance(node, ast.BinOp) and child is node.left) or (
+                isinstance(node, ast.If)
+                and node.orelse == [child]
+                and isinstance(child, ast.If)
+            )
+            pending.append((child, depth if continues else depth + 1))
+    return deepest
 
 
 def _top_level_bindings(statements):
