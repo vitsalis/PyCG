@@ -1,6 +1,7 @@
 import argparse
 import ast
 import os
+import struct
 import sys
 import tempfile
 import tokenize
@@ -12,8 +13,9 @@ Writes the test vectors of pycg_syntax from the Python of the oracle:
 reading.txt, the text or the failure that reading a file of given bytes
 gives (program._read, then program._parse, with program._cause), and
 positions.txt, the kind and position of every node of each program of
-programs/, in ast.walk order. Run it with the Python of the oracle; the
-output is committed.
+programs/, in ast.walk order, and constants.txt, the value of every
+Constant of each program of constants/, in that order. Run it with the
+Python of the oracle; the output is committed.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -82,6 +84,7 @@ READING = {
 }
 
 PROGRAMS = OUT / "programs"
+CONSTANTS = OUT / "constants"
 
 
 def cause(error):
@@ -120,6 +123,38 @@ def positions(source):
             )
 
 
+def value(constant):
+    if constant is ...:
+        return "Ellipsis"
+    match constant:
+        case None:
+            return "None"
+        case bool():
+            return f"Bool {constant}"
+        case int():
+            return f"Int {constant}"
+        case float():
+            return f"Float {struct.pack('>d', constant).hex()}"
+        case complex():
+            real = struct.pack(">d", constant.real).hex()
+            return f"Complex {real} {struct.pack('>d', constant.imag).hex()}"
+        case str():
+            return " ".join(["Str", *(f"{ord(c):x}" for c in constant)])
+        case bytes():
+            return f"Bytes {constant.hex()}"
+    raise AssertionError(constant)
+
+
+def constants_lines():
+    for path in sorted(CONSTANTS.glob("*.py")):
+        source = path.read_text(encoding="utf-8")
+        yield f"case {path.stem} {source.encode('utf-8').hex()}"
+        for node in ast.walk(ast.parse(source)):
+            if isinstance(node, ast.Constant):
+                yield value(node.value)
+        yield "end"
+
+
 def reading_lines():
     for name, data in READING.items():
         status, value = read(data)
@@ -138,7 +173,12 @@ def main(argv):
     parser = argparse.ArgumentParser(description=DESCRIPTION)
     parser.parse_args(argv)
     version = f"python {sys.version.split()[0]}"
-    for name, lines in (("reading", reading_lines()), ("positions", positions_lines())):
+    written = (
+        ("reading", reading_lines()),
+        ("positions", positions_lines()),
+        ("constants", constants_lines()),
+    )
+    for name, lines in written:
         text = "".join(f"{line}\n" for line in (version, *lines))
         (OUT / f"{name}.txt").write_text(text, encoding="ascii")
     return 0

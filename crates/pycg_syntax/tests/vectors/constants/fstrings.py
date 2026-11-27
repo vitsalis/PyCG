@@ -1,0 +1,5 @@
+a = f'plain{x}after', f"{x!r:>{w}}", f'{{escaped}}'
+b = f'\n\x41{x}\N{BULLET}é{{', rf'\n{x}\x41', fr'{{\d}}'
+c = 'pre' f'{x}' 'post', f'{x=}', f'{ x = !s:>3}', f'{x!a}'
+d = f'' f'{x:}', f'{x:{{}}}', f'\ud800{x}'
+e = t'tmp{x}l', t'{x:>{w}}'

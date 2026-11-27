@@ -7,13 +7,15 @@ use ruff_python_ast::{
 };
 use ruff_text_size::{Ranged, TextRange, TextSize};
 
+use crate::constants::Text;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Strings {
     Joined,
     Template,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub enum Node<'a> {
     Module(&'a ModModule),
     Stmt(&'a Stmt),
@@ -30,9 +32,9 @@ pub enum Node<'a> {
     MatchCase(&'a MatchCase),
     Pattern(&'a Pattern),
     TypeParam(&'a TypeParam),
-    StringPiece(TextRange),
-    Interpolation(&'a InterpolatedElement, Strings),
-    FormatSpec(&'a InterpolatedStringFormatSpec),
+    StringPiece(StringPiece<'a>),
+    Interpolation(&'a InterpolatedElement, Strings, bool),
+    FormatSpec(&'a InterpolatedStringFormatSpec, bool),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -62,9 +64,9 @@ impl<'a> Node<'a> {
             Node::Pattern(pattern) => pattern_kind(pattern),
             Node::TypeParam(parameter) => type_param_kind(parameter),
             Node::StringPiece(_) => "Constant",
-            Node::Interpolation(_, Strings::Joined) => "FormattedValue",
-            Node::Interpolation(_, Strings::Template) => "Interpolation",
-            Node::FormatSpec(_) => "JoinedStr",
+            Node::Interpolation(_, Strings::Joined, _) => "FormattedValue",
+            Node::Interpolation(_, Strings::Template, _) => "Interpolation",
+            Node::FormatSpec(..) => "JoinedStr",
         }
     }
 
@@ -85,15 +87,15 @@ impl<'a> Node<'a> {
             Node::ExceptHandler(handler) => Some(with_semicolon(handler.range(), tokens)),
             Node::Pattern(pattern) => Some(pattern.range()),
             Node::TypeParam(parameter) => Some(parameter.range()),
-            Node::StringPiece(range) => Some(*range),
-            Node::Interpolation(element, _) => Some(element.range()),
-            Node::FormatSpec(spec) => Some(format_spec_range(spec)),
+            Node::StringPiece(piece) => Some(piece.range),
+            Node::Interpolation(element, ..) => Some(element.range()),
+            Node::FormatSpec(spec, _) => Some(format_spec_range(spec)),
         }
     }
 
     pub fn children(&self) -> Vec<Node<'a>> {
         let mut children = Vec::new();
-        match *self {
+        match self.clone() {
             Node::Module(module) => statements(&mut children, &module.body),
             Node::Stmt(statement) => statement_children(&mut children, statement),
             Node::Elif(clauses) => elif_children(&mut children, clauses),
@@ -127,14 +129,17 @@ impl<'a> Node<'a> {
             }
             Node::Pattern(pattern) => pattern_children(&mut children, pattern),
             Node::TypeParam(parameter) => type_param_children(&mut children, parameter),
-            Node::Interpolation(element, _) => {
+            Node::Interpolation(element, _, raw) => {
                 children.push(Node::Expr(&element.expression));
                 if let Some(spec) = element.format_spec.as_deref() {
-                    children.push(Node::FormatSpec(spec));
+                    children.push(Node::FormatSpec(spec, raw));
                 }
             }
-            Node::FormatSpec(spec) => {
-                let parts = [Part::Elements(&spec.elements)];
+            Node::FormatSpec(spec, raw) => {
+                let parts = [Part::Elements {
+                    elements: &spec.elements,
+                    raw,
+                }];
                 joined_children(&mut children, &parts, Strings::Joined);
             }
         }
@@ -544,7 +549,10 @@ fn expression_children<'a>(children: &mut Vec<Node<'a>>, expression: &'a Expr) {
                 .value
                 .as_slice()
                 .iter()
-                .map(|t| Part::Elements(&t.elements))
+                .map(|t| Part::Elements {
+                    elements: &t.elements,
+                    raw: t.flags.prefix().is_raw(),
+                })
                 .collect();
             joined_children(children, &parts, Strings::Template);
         }
@@ -614,21 +622,37 @@ fn type_param_children<'a>(children: &mut Vec<Node<'a>>, parameter: &'a TypePara
 #[derive(Clone, Copy)]
 enum Part<'a> {
     Literal(&'a StringLiteral),
-    Elements(&'a InterpolatedStringElements),
+    Elements {
+        elements: &'a InterpolatedStringElements,
+        raw: bool,
+    },
 }
 
 impl<'a> Part<'a> {
     fn of_fstring(part: FStringPartRef<'a>) -> Part<'a> {
         match part {
             FStringPartRef::Literal(literal) => Part::Literal(literal),
-            FStringPartRef::FString(fstring) => Part::Elements(&fstring.elements),
+            FStringPartRef::FString(fstring) => Part::Elements {
+                elements: &fstring.elements,
+                raw: fstring.flags.prefix().is_raw(),
+            },
         }
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct StringPiece<'a> {
+    pub range: TextRange,
+    pub texts: Vec<Text<'a>>,
+}
+
 enum Piece<'a> {
-    Text { range: TextRange, empty: bool },
-    Field(&'a InterpolatedElement),
+    Text {
+        range: TextRange,
+        empty: bool,
+        text: Text<'a>,
+    },
+    Field(&'a InterpolatedElement, bool),
 }
 
 const FIELD_BRACE_LENGTH: u32 = 1;
@@ -636,17 +660,15 @@ const FIELD_BRACE_LENGTH: u32 = 1;
 fn pieces<'a>(parts: &[Part<'a>]) -> Vec<Piece<'a>> {
     let mut found = Vec::new();
     for part in parts {
-        match part {
-            Part::Literal(literal) => {
-                let range = literal.range();
-                found.push(Piece::Text {
-                    range,
-                    empty: literal.value.is_empty(),
-                });
-            }
-            Part::Elements(elements) => {
+        match *part {
+            Part::Literal(literal) => found.push(Piece::Text {
+                range: literal.range(),
+                empty: literal.value.is_empty(),
+                text: Text::Literal(literal),
+            }),
+            Part::Elements { elements, raw } => {
                 for element in elements.iter() {
-                    element_pieces(&mut found, element);
+                    element_pieces(&mut found, element, raw);
                 }
             }
         }
@@ -654,55 +676,67 @@ fn pieces<'a>(parts: &[Part<'a>]) -> Vec<Piece<'a>> {
     found
 }
 
-fn element_pieces<'a>(found: &mut Vec<Piece<'a>>, element: &'a InterpolatedStringElement) {
+fn element_pieces<'a>(
+    found: &mut Vec<Piece<'a>>,
+    element: &'a InterpolatedStringElement,
+    raw: bool,
+) {
     match element {
-        InterpolatedStringElement::Literal(literal) => {
-            let empty = literal.value.is_empty();
-            found.push(Piece::Text {
-                range: literal.range(),
-                empty,
-            });
-        }
+        InterpolatedStringElement::Literal(literal) => found.push(Piece::Text {
+            range: literal.range(),
+            empty: literal.value.is_empty(),
+            text: Text::Element {
+                element: literal,
+                raw,
+            },
+        }),
         InterpolatedStringElement::Interpolation(field) => {
             if let Some(debug) = &field.debug_text {
                 let start = field.start() + TextSize::new(FIELD_BRACE_LENGTH);
                 let length =
                     TextSize::try_from(debug.as_str().len()).expect("a debug text fits the source");
-                let range = TextRange::at(start, length);
                 found.push(Piece::Text {
-                    range,
+                    range: TextRange::at(start, length),
                     empty: debug.as_str().is_empty(),
+                    text: Text::Debug(debug),
                 });
             }
-            found.push(Piece::Field(field));
+            found.push(Piece::Field(field, raw));
         }
     }
 }
 
 fn joined_children<'a>(children: &mut Vec<Node<'a>>, parts: &[Part<'a>], strings: Strings) {
-    let mut text: Option<TextRange> = None;
+    let mut text: Option<StringPiece<'a>> = None;
     for piece in pieces(parts) {
         match piece {
             Piece::Text { empty: true, .. } => {}
             Piece::Text {
                 range,
                 empty: false,
-            } => {
-                text = Some(match text {
-                    Some(previous) => previous.cover(range),
-                    None => range,
-                });
-            }
-            Piece::Field(field) => {
-                if let Some(range) = text.take() {
-                    children.push(Node::StringPiece(range));
+                text: source,
+            } => match text.as_mut() {
+                Some(merged) => {
+                    merged.range = merged.range.cover(range);
+                    merged.texts.push(source);
                 }
-                children.push(Node::Interpolation(field, strings));
+                None => {
+                    text = Some(StringPiece {
+                        range,
+                        texts: vec![source],
+                    })
+                }
+            },
+            Piece::Field(field, raw) => {
+                if let Some(merged) = text.take() {
+                    children.push(Node::StringPiece(merged));
+                }
+                children.push(Node::Interpolation(field, strings, raw));
             }
         }
     }
-    if let Some(range) = text {
-        children.push(Node::StringPiece(range));
+    if let Some(merged) = text {
+        children.push(Node::StringPiece(merged));
     }
 }
 
