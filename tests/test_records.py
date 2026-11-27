@@ -527,3 +527,41 @@ def test_the_receivers_of_a_builtins_method_at_a_site_share_one_call(tmp_path):
         assert len(group.receivers) == 3
     assert generator.output()["main.walk"] == ["<builtin>.dict.copy"]
     assert generator.output_points_to()["main.first"] == ["dict@main:7:11"]
+
+
+def test_each_call_of_a_class_makes_and_initialises_its_own_instance(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class Plain:
+                def __init__(self): pass
+            class Made:
+                def __new__(cls): return super().__new__(cls)
+                def __init__(self): pass
+            def make(kind):
+                return kind()
+            first = make(Plain)
+            second = make(Made)
+            third = Plain()
+            fourth = Made()
+            """
+        },
+    )
+    graph = generator.output()
+    assert graph["main.make"] == [
+        "main.Made.__init__",
+        "main.Made.__new__",
+        "main.Plain.__init__",
+    ]
+    points_to = generator.output_points_to()
+    classes = {
+        name: sorted(value.split("@")[0] for value in points_to[f"main.{name}"])
+        for name in ("first", "second", "third", "fourth")
+    }
+    assert classes == {
+        "first": ["main.Made", "main.Plain"],
+        "second": ["main.Made", "main.Plain"],
+        "third": ["main.Plain"],
+        "fourth": ["main.Made"],
+    }

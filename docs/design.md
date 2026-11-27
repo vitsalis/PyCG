@@ -2868,6 +2868,17 @@ class or of a subclass (the instances of the class, joined with what
 calls and of instances, so the calls of a class share one set of its
 instances; each call sees every instance, in the same rounds, unless it
 comes after the instances of the class saturated: it then sees none.
+Likewise the calls of one class wait on its nodes (its `__new__`, whether
+Python's own runs, its instances, whether it is instantiable) as one
+record per node and rule that keeps the list of its calls
+(`Solver.share`), instead of one constraint per call (pandas: 1.5
+million calls of a class at a site, 69 classes per site on average). Each
+object that the node gets reaches every call of the record, and a call
+that joins later gets the node's objects at once, as a constraint
+attached then would (`Solver.apply_now`), the saturated value included.
+An object that the node held but had not yet given the record reaches the
+new call twice: its rules make the same instance, call and edges again,
+which changes nothing.
 
 - Where no analysed class of an MRO defines `__new__` before an outside
   base or the end, Python's own (or the base's) runs: it returns
@@ -4709,6 +4720,7 @@ them, so no kind of node keys another of its own kind:
 | Accessor calls of a class (`_AccessorHooks`; `_Accessors`) | class and hook, or class, hook and entry for an entry met after a saturation; accessor node, call, kinds and width |
 | Field writes of a store decision (`_FieldWrites`) | decision node |
 | Loads through a lookup (`_Deliveries`) | lookup node |
+| Calls of a class waiting on one of its nodes (`Solver.share`) | node, rule and the rule's arguments other than the call |
 | Group of bound calls of a plain stub method (`_BoundGroup`) | the call that it extends, the method, the number of receivers and whether the class of the first is unknown; a list of groups of at most the cap of receivers |
 
 The other rules make nodes and constraints per call and object, or per
