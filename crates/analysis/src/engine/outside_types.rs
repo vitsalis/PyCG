@@ -415,7 +415,7 @@ impl<T: Trace> State<T> {
                 self.call(graph, unknown, call);
             } else if definition.kind == DefinitionKind::Function {
                 let method = self.external(graph, &format!("{name}.__call__"), 1, false);
-                self.call_bound(graph, method, vec![typed], call);
+                self.call_bound(graph, method, &[typed], call);
             }
         }
     }

@@ -10,7 +10,7 @@ use crate::engine::objects::{Container, Function, Literal, Object};
 use crate::engine::outside::outside_name;
 use crate::engine::outside_types::TypeContext;
 use crate::engine::rules::Rule;
-use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Role, SiteKey};
+use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Receivers, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State};
@@ -228,9 +228,9 @@ impl<T: Trace> State<T> {
         call: CallId,
     ) {
         let (base, receivers, group) = match self.prefixes.get(&call) {
-            None => (call, Vec::new(), None),
-            Some((base, Prefix::Receivers(receivers))) => (*base, receivers.clone(), None),
-            Some((base, Prefix::Group(group))) => (*base, Vec::new(), Some(*group)),
+            None => (call, Receivers::NONE, None),
+            Some(&(base, Prefix::Receivers(receivers))) => (base, receivers, None),
+            Some(&(base, Prefix::Group(group))) => (base, Receivers::NONE, Some(group)),
         };
         assert!(
             group.is_none() || self.bound_in_group(external),

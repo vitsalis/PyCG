@@ -596,7 +596,7 @@ impl<T: Trace> State<T> {
         let receivers = self.accessors[accessors.0 as usize].receivers.clone();
         for receiver in receivers {
             let prefix = self.accessor_prefix(receiver, width);
-            self.call_bound(graph, method, prefix, call);
+            self.call_bound(graph, method, &prefix, call);
         }
     }
 
@@ -607,7 +607,7 @@ impl<T: Trace> State<T> {
         let methods = found.methods.clone();
         let prefix = self.accessor_prefix(receiver, width);
         for method in methods {
-            self.call_bound(graph, method, prefix.clone(), call);
+            self.call_bound(graph, method, &prefix, call);
         }
     }
 
