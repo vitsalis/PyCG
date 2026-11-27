@@ -234,6 +234,29 @@ impl Sets {
         self.sweep_at_new_objects = kept_objects.max(SWEEP_NEW_OBJECTS_MIN);
     }
 
+    pub fn count(&self) -> usize {
+        self.spans.len()
+    }
+
+    pub fn compact(&mut self, held: &[bool]) {
+        assert_eq!(held.len(), self.spans.len(), "a flag per set");
+        let mut kept = 0usize;
+        for (span, &keep) in self.spans.iter_mut().zip(held) {
+            if !keep {
+                *span = Span { start: 0, len: 0 };
+                continue;
+            }
+            let start = span.start as usize;
+            let len = span.len as usize;
+            assert!(kept <= start, "sets are stored in the order they are made");
+            self.elements.copy_within(start..start + len, kept);
+            span.start = u32::try_from(kept).expect("set elements fit u32");
+            kept += len;
+        }
+        self.elements.truncate(kept);
+        self.elements.shrink_to_fit();
+    }
+
     pub fn sweep_due(&self) -> bool {
         self.new_sets_object_count > self.sweep_at_new_objects
     }
