@@ -11,12 +11,14 @@ use crate::engine::attributes::AccessKind;
 use crate::engine::containers::{ContainerOrigin, IterationRoleId};
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Literal, Object};
+use crate::engine::outside_calls::Known;
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule, not_ported};
+use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule};
 use crate::models::RETURNED_DECORATOR;
 
 pub const RECEIVERS_PER_CALL_MAX: usize = 3;
+const LITERAL_IMPORTERS: &[&str] = &["importlib.import_module", "<builtin>.__import__"];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct CallId(u32);
@@ -273,7 +275,11 @@ impl<T: Trace> State<T> {
                 let dst = self.calls[call.index()].dst;
                 self.call_dunder(graph, object, "__call__", call, dst, Unless::Nothing);
             }
-            Object::External(_) => self.call_external(graph, object, call),
+            Object::External(_) => {
+                if !self.literal_import(graph, object, call) {
+                    self.call_external(graph, object, call);
+                }
+            }
             &Object::Wrapper { kind, .. } => {
                 if self.symbols.text(kind) == "staticmethod" {
                     let name = self.symbols.intern("__func__");
@@ -294,6 +300,25 @@ impl<T: Trace> State<T> {
             | Object::Coroutine { .. }
             | Object::Pattern { .. } => {}
         }
+    }
+
+    fn literal_import(&mut self, graph: &mut Graph, external: ObjId, call: CallId) -> bool {
+        let details = &self.calls[call.index()];
+        let Some(&module) = self.literal_imports.get(&details.site) else {
+            return false;
+        };
+        let name = self
+            .objects
+            .external(external)
+            .expect("an outside value")
+            .name;
+        if !LITERAL_IMPORTERS.contains(&self.symbols.text(name)) {
+            return false;
+        }
+        let dst = details.dst.expect("a literal import has a result");
+        self.add_external_call_edge(call, name, Known::Stub);
+        self.add_edge(graph, module, dst);
+        true
     }
 
     pub(super) fn outside_result(&mut self, graph: &mut Graph, call: CallId) {
@@ -1313,8 +1338,10 @@ impl<T: Trace> State<T> {
                 let first = self.symbols.intern(first);
                 self.objects.function(function).parameter(first)
             }
-            None if made.varargs.is_some() => not_ported("containers: a receiver in varargs"),
-            None => return,
+            None => match made.varargs {
+                Some(varargs) => self.element(graph, varargs, &Literal::Int(BigInt::ZERO)),
+                None => return,
+            },
         };
         let source = if kind == Some(MethodKind::ClassMethod) {
             self.family(graph, class)

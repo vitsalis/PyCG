@@ -1,0 +1,428 @@
+{"cap":5000,"op":"solver"}
+{"object":"Saturated:<saturated>","op":"object","opacity":"saturated","types":["Saturated","Object"]}
+{"answer":{"node":"<program>#1"},"args":[{"object":"Saturated:<saturated>"}],"op":"constant"}
+{"named":true,"node":"main.__name__","op":"node"}
+{"object":"Const:'main'","op":"object","opacity":null,"types":["Const","Object"]}
+{"args":[{"node":"main.__name__"},{"object":"Const:'main'"}],"op":"add_object"}
+{"object":"Const:'__main__'","op":"object","opacity":null,"types":["Const","Object"]}
+{"args":[{"node":"main.__name__"},{"object":"Const:'__main__'"}],"op":"add_object"}
+{"node":"main#1","op":"node"}
+{"node":"main#2","op":"node"}
+{"node":"main#3","op":"node"}
+{"object":"External:<builtin>.type","op":"object","opacity":null,"types":["External","Object"]}
+{"args":[{"node":"main#2"},{"object":"External:<builtin>.type"}],"op":"add_object"}
+{"object":"Class:main.Handler","op":"object","opacity":"Class:main.Handler","types":["Class","Object"]}
+{"args":[{"node":"main#3"},{"object":"Class:main.Handler"}],"op":"add_object"}
+{"object":"Instance:main.Handler@<object>","op":"object","opacity":"Class:main.Handler","types":["Instance","Object"]}
+{"args":[{"node":"main#1"},{"object":"Instance:main.Handler@<object>"}],"op":"add_object"}
+{"named":true,"node":"main.Handler.on_open.self","op":"node"}
+{"named":true,"node":"main.Handler.on_open.<return>","op":"node"}
+{"named":true,"node":"main.Handler.on_open.__name__","op":"node"}
+{"object":"Const:'on_open'","op":"object","opacity":null,"types":["Const","Object"]}
+{"args":[{"node":"main.Handler.on_open.__name__"},{"object":"Const:'on_open'"}],"op":"add_object"}
+{"object":"Function:main.Handler.on_open","op":"object","opacity":null,"types":["Function","Object"]}
+{"answer":{"node":"main#4"},"args":[{"object":"Function:main.Handler.on_open"}],"op":"constant"}
+{"object":"Const:'open'","op":"object","opacity":null,"types":["Const","Object"]}
+{"answer":{"node":"main#5"},"args":[{"object":"Const:'open'"}],"op":"constant"}
+{"args":[{"node":"main#5"},{"node":"main.Handler.on_open.<return>"}],"op":"add_edge"}
+{"named":true,"node":"main.Handler.ON_CLOSE.self","op":"node"}
+{"named":true,"node":"main.Handler.ON_CLOSE.<return>","op":"node"}
+{"named":true,"node":"main.Handler.ON_CLOSE.__name__","op":"node"}
+{"object":"Const:'ON_CLOSE'","op":"object","opacity":null,"types":["Const","Object"]}
+{"args":[{"node":"main.Handler.ON_CLOSE.__name__"},{"object":"Const:'ON_CLOSE'"}],"op":"add_object"}
+{"object":"Function:main.Handler.ON_CLOSE","op":"object","opacity":null,"types":["Function","Object"]}
+{"answer":{"node":"main#6"},"args":[{"object":"Function:main.Handler.ON_CLOSE"}],"op":"constant"}
+{"object":"Const:'close'","op":"object","opacity":null,"types":["Const","Object"]}
+{"answer":{"node":"main#7"},"args":[{"object":"Const:'close'"}],"op":"constant"}
+{"args":[{"node":"main#7"},{"node":"main.Handler.ON_CLOSE.<return>"}],"op":"add_edge"}
+{"named":true,"node":"main.Handler.on_open","op":"node"}
+{"captured":[],"constraint":"Each:Containers._add_inexact","kinds":null,"mode":"each","op":"constraint"}
+{"args":[{"node":"main#4"},{"constraint":"Each:Containers._add_inexact"}],"op":"attach"}
+{"constraint":"Each:Containers._add_inexact","objects":[{"object":"Function:main.Handler.on_open"}],"op":"apply"}
+{"args":[{"node":"main.Handler.on_open"},{"object":"Function:main.Handler.on_open"}],"op":"add_object"}
+{"op":"applied"}
+{"captured":["Class:main.Handler"],"constraint":"Each:Analysis._set_name","kinds":["Instance","Class"],"mode":"each","op":"constraint"}
+{"args":[{"node":"main#4"},{"constraint":"Each:Analysis._set_name"}],"op":"attach"}
+{"named":true,"node":"main.Handler.ON_CLOSE","op":"node"}
+{"captured":[],"constraint":"Each:Containers._add_inexact~2","kinds":null,"mode":"each","op":"constraint"}
+{"args":[{"node":"main#6"},{"constraint":"Each:Containers._add_inexact~2"}],"op":"attach"}
+{"constraint":"Each:Containers._add_inexact~2","objects":[{"object":"Function:main.Handler.ON_CLOSE"}],"op":"apply"}
+{"args":[{"node":"main.Handler.ON_CLOSE"},{"object":"Function:main.Handler.ON_CLOSE"}],"op":"add_object"}
+{"op":"applied"}
+{"captured":["Class:main.Handler"],"constraint":"Each:Analysis._set_name~2","kinds":["Instance","Class"],"mode":"each","op":"constraint"}
+{"args":[{"node":"main#6"},{"constraint":"Each:Analysis._set_name~2"}],"op":"attach"}
+{"node":"main#8","op":"node"}
+{"object":"External:<builtin>.object.__init_subclass__","op":"object","opacity":null,"types":["External","Object"]}
+{"args":[{"node":"main#8"},{"object":"External:<builtin>.object.__init_subclass__"}],"op":"add_object"}
+{"captured":[],"constraint":"Call:main:2:0#7:22","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#8"},{"call":"Call:main:2:0#7:22"}],"op":"attach"}
+{"captured":["Class:main.Handler"],"constraint":"Each:Analysis._call_metaclass","kinds":["Class"],"mode":"each","op":"constraint"}
+{"args":[{"node":"main#2"},{"constraint":"Each:Analysis._call_metaclass"}],"op":"attach"}
+{"answer":{"node":"main#9"},"args":[{"object":"Class:main.Handler"}],"op":"constant"}
+{"named":true,"node":"main.Handler","op":"node"}
+{"args":[{"node":"main#9"},{"node":"main.Handler"}],"op":"add_edge"}
+{"named":true,"node":"main.dispatch.handler","op":"node"}
+{"named":true,"node":"main.dispatch.event","op":"node"}
+{"named":true,"node":"main.dispatch.<return>","op":"node"}
+{"named":true,"node":"main.dispatch.__name__","op":"node"}
+{"object":"Const:'dispatch'","op":"object","opacity":null,"types":["Const","Object"]}
+{"args":[{"node":"main.dispatch.__name__"},{"object":"Const:'dispatch'"}],"op":"add_object"}
+{"object":"Function:main.dispatch","op":"object","opacity":null,"types":["Function","Object"]}
+{"answer":{"node":"main#10"},"args":[{"object":"Function:main.dispatch"}],"op":"constant"}
+{"named":true,"node":"main.dispatch","op":"node"}
+{"args":[{"node":"main#10"},{"node":"main.dispatch"}],"op":"add_edge"}
+{"object":"Const:'ON_'","op":"object","opacity":null,"types":["Const","Object"]}
+{"answer":{"node":"main#11"},"args":[{"object":"Const:'ON_'"}],"op":"constant"}
+{"node":"main#12","op":"node"}
+{"captured":[],"constraint":"_Operand","kinds":["Instance","Class","Container","Typed"],"mode":"list","op":"constraint"}
+{"args":[{"node":"main#11"},{"constraint":"_Operand"}],"op":"attach"}
+{"constraint":"_Operand","objects":[{"object":"Const:'ON_'"}],"op":"apply"}
+{"op":"applied"}
+{"captured":[],"constraint":"_Operand~2","kinds":["Instance","Class","Container","Typed"],"mode":"list","op":"constraint"}
+{"args":[{"node":"main.dispatch.event"},{"constraint":"_Operand~2"}],"op":"attach"}
+{"object":"Pattern:pattern 'ON_'*''","op":"object","opacity":null,"types":["Pattern","Object"]}
+{"answer":{"node":"main#13"},"args":[{"object":"Pattern:pattern 'ON_'*''"}],"op":"constant"}
+{"node":"main#14","op":"node"}
+{"args":[{"node":"main#12"},{"node":"main#14"}],"op":"add_edge"}
+{"args":[{"node":"main#13"},{"node":"main#14"}],"op":"add_edge"}
+{"captured":[],"constraint":"Each:Patterns._pattern_operand","kinds":null,"mode":"each","op":"constraint"}
+{"args":[{"node":"main.dispatch.event"},{"constraint":"Each:Patterns._pattern_operand"}],"op":"attach"}
+{"node":"main#15","op":"node"}
+{"captured":[],"constraint":"Load","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#14"},{"constraint":"Load"}],"op":"attach"}
+{"node":"main#16","op":"node"}
+{"captured":[],"constraint":"Call:main:11:14#11:37","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#15"},{"call":"Call:main:11:14#11:37"}],"op":"attach"}
+{"named":true,"node":"main.dispatch.lowered","op":"node"}
+{"args":[{"node":"main#16"},{"node":"main.dispatch.lowered"}],"op":"add_edge"}
+{"object":"Const:'on_'","op":"object","opacity":null,"types":["Const","Object"]}
+{"answer":{"node":"main#17"},"args":[{"object":"Const:'on_'"}],"op":"constant"}
+{"node":"main#18","op":"node"}
+{"captured":[],"constraint":"_Operand~3","kinds":["Instance","Class","Container","Typed"],"mode":"list","op":"constraint"}
+{"args":[{"node":"main#17"},{"constraint":"_Operand~3"}],"op":"attach"}
+{"constraint":"_Operand~3","objects":[{"object":"Const:'on_'"}],"op":"apply"}
+{"op":"applied"}
+{"captured":[],"constraint":"_Operand~4","kinds":["Instance","Class","Container","Typed"],"mode":"list","op":"constraint"}
+{"args":[{"node":"main.dispatch.event"},{"constraint":"_Operand~4"}],"op":"attach"}
+{"object":"Pattern:pattern 'on_'*''","op":"object","opacity":null,"types":["Pattern","Object"]}
+{"answer":{"node":"main#19"},"args":[{"object":"Pattern:pattern 'on_'*''"}],"op":"constant"}
+{"node":"main#20","op":"node"}
+{"args":[{"node":"main#18"},{"node":"main#20"}],"op":"add_edge"}
+{"args":[{"node":"main#19"},{"node":"main#20"}],"op":"add_edge"}
+{"captured":[],"constraint":"Each:Patterns._pattern_operand~2","kinds":null,"mode":"each","op":"constraint"}
+{"args":[{"node":"main.dispatch.event"},{"constraint":"Each:Patterns._pattern_operand~2"}],"op":"attach"}
+{"node":"main#21","op":"node"}
+{"captured":[],"constraint":"Load~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#20"},{"constraint":"Load~2"}],"op":"attach"}
+{"node":"main#22","op":"node"}
+{"captured":[],"constraint":"Call:main:12:13#12:36","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#21"},{"call":"Call:main:12:13#12:36"}],"op":"attach"}
+{"named":true,"node":"main.dispatch.raised","op":"node"}
+{"args":[{"node":"main#22"},{"node":"main.dispatch.raised"}],"op":"add_edge"}
+{"node":"main#23","op":"node"}
+{"named":true,"node":"main.getattr","op":"node"}
+{"args":[{"node":"main.getattr"},{"node":"main#23"}],"op":"add_edge"}
+{"object":"External:<builtin>.getattr","op":"object","opacity":null,"types":["External","Object"]}
+{"answer":{"node":"main#24"},"args":[{"object":"External:<builtin>.getattr"}],"op":"constant"}
+{"args":[{"node":"main#24"},{"node":"main#23"}],"op":"add_edge"}
+{"node":"main#25","op":"node"}
+{"captured":[],"constraint":"Call:main:13:4#13:29","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#23"},{"call":"Call:main:13:4#13:29"}],"op":"attach"}
+{"node":"main#26","op":"node"}
+{"captured":[],"constraint":"Call:main:13:4#13:31","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#25"},{"call":"Call:main:13:4#13:31"}],"op":"attach"}
+{"node":"main#27","op":"node"}
+{"captured":[],"constraint":"Call:main:14:4#14:28","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#23"},{"call":"Call:main:14:4#14:28"}],"op":"attach"}
+{"node":"main#28","op":"node"}
+{"captured":[],"constraint":"Call:main:14:4#14:30","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#27"},{"call":"Call:main:14:4#14:30"}],"op":"attach"}
+{"node":"main#29","op":"node"}
+{"captured":[],"constraint":"Call:main:17:9#17:18","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#9"},{"call":"Call:main:17:9#17:18"}],"op":"attach"}
+{"constraint":"Call:main:17:9#17:18","objects":[{"object":"Class:main.Handler"}],"op":"apply"}
+{"node":"main#30","op":"node"}
+{"object":"External:<builtin>.object.__new__","op":"object","opacity":null,"types":["External","Object"]}
+{"args":[{"node":"main#30"},{"object":"External:<builtin>.object.__new__"}],"op":"add_object"}
+{"captured":["Class:main.Handler"],"constraint":"Shared","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#30"},{"constraint":"Shared"}],"op":"attach"}
+{"node":"main#31","op":"node"}
+{"node":"main#32","op":"node"}
+{"named":true,"node":"main.Handler.__new__","op":"node"}
+{"captured":[],"constraint":"_Binds","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.__new__"},{"constraint":"_Binds"}],"op":"attach"}
+{"captured":["Class:main.Handler"],"constraint":"_Bind","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.__new__"},{"constraint":"_Bind"}],"op":"apply_now"}
+{"captured":["Class:main.Handler"],"constraint":"Shared~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#32"},{"constraint":"Shared~2"}],"op":"attach"}
+{"captured":[],"constraint":"Shared~3","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#1"},{"constraint":"Shared~3"}],"op":"attach"}
+{"op":"applied"}
+{"node":"main#33","op":"node"}
+{"captured":[],"constraint":"Call:main:17:0#17:27","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#10"},{"call":"Call:main:17:0#17:27"}],"op":"attach"}
+{"constraint":"Call:main:17:0#17:27","objects":[{"object":"Function:main.dispatch"}],"op":"apply"}
+{"args":[{"node":"main#29"},{"node":"main.dispatch.handler"}],"op":"add_edge"}
+{"args":[{"node":"main#5"},{"node":"main.dispatch.event"}],"op":"add_edge"}
+{"args":[{"node":"main.dispatch.<return>"},{"node":"main#33"}],"op":"add_edge"}
+{"op":"applied"}
+{"op":"solve"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"fire","phase":1}
+{"constraint":"Shared~3","objects":[{"object":"Instance:main.Handler@<object>"}],"op":"apply"}
+{"op":"applied"}
+{"constraint":"Call:main:2:0#7:22","objects":[{"object":"External:<builtin>.object.__init_subclass__"}],"op":"apply"}
+{"op":"applied"}
+{"constraint":"Load","objects":[{"object":"Pattern:pattern 'ON_'*''"}],"op":"apply"}
+{"object":"BuiltinMethod:<builtin>.str.lower","op":"object","opacity":null,"types":["BuiltinMethod","Object"]}
+{"args":[{"node":"main#15"},{"object":"BuiltinMethod:<builtin>.str.lower"}],"op":"add_object"}
+{"op":"applied"}
+{"constraint":"Load~2","objects":[{"object":"Pattern:pattern 'on_'*''"}],"op":"apply"}
+{"object":"BuiltinMethod:<builtin>.str.upper","op":"object","opacity":null,"types":["BuiltinMethod","Object"]}
+{"args":[{"node":"main#21"},{"object":"BuiltinMethod:<builtin>.str.upper"}],"op":"add_object"}
+{"op":"applied"}
+{"constraint":"Call:main:13:4#13:29","objects":[{"object":"External:<builtin>.getattr"}],"op":"apply"}
+{"node":"<solve>#1","op":"node"}
+{"args":[{"node":"<solve>#1"},{"node":"main#25"}],"op":"add_edge"}
+{"answer":{"node":"<solve>#2"},"args":[{"node":"main.dispatch.handler"},1],"op":"follower"}
+{"answer":{"node":"<solve>#3"},"args":[{"node":"main#16"},1],"op":"follower"}
+{"answer":[],"args":[{"node":"main#16"}],"op":"objects"}
+{"captured":[],"constraint":"Each:Patterns.load_by_pattern","kinds":["Pattern"],"mode":"each","op":"constraint"}
+{"args":[{"node":"<solve>#3"},{"constraint":"Each:Patterns.load_by_pattern"}],"op":"attach"}
+{"answer":{"node":"<solve>#4"},"args":[{"node":"main.dispatch.handler"},1],"op":"follower"}
+{"answer":{"node":"<solve>#5"},"args":[{"node":"main#16"},1],"op":"follower"}
+{"op":"applied"}
+{"constraint":"Call:main:14:4#14:28","objects":[{"object":"External:<builtin>.getattr"}],"op":"apply"}
+{"node":"<solve>#6","op":"node"}
+{"args":[{"node":"<solve>#6"},{"node":"main#27"}],"op":"add_edge"}
+{"answer":{"node":"<solve>#7"},"args":[{"node":"main.dispatch.handler"},1],"op":"follower"}
+{"answer":{"node":"<solve>#8"},"args":[{"node":"main#22"},1],"op":"follower"}
+{"answer":[],"args":[{"node":"main#22"}],"op":"objects"}
+{"captured":[],"constraint":"Each:Patterns.load_by_pattern~2","kinds":["Pattern"],"mode":"each","op":"constraint"}
+{"args":[{"node":"<solve>#8"},{"constraint":"Each:Patterns.load_by_pattern~2"}],"op":"attach"}
+{"answer":{"node":"<solve>#9"},"args":[{"node":"main.dispatch.handler"},1],"op":"follower"}
+{"answer":{"node":"<solve>#10"},"args":[{"node":"main#22"},1],"op":"follower"}
+{"op":"applied"}
+{"constraint":"Shared","objects":[{"object":"External:<builtin>.object.__new__"}],"op":"apply"}
+{"captured":[],"constraint":"Shared~4","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#3"},{"constraint":"Shared~4"}],"op":"attach"}
+{"constraint":"Shared~4","objects":[{"object":"Class:main.Handler"}],"op":"apply"}
+{"object":"Instance:main.Handler@main:17:9","op":"object","opacity":"Class:main.Handler","types":["Instance","Object"]}
+{"args":[{"node":"main#1"},{"object":"Instance:main.Handler@main:17:9"}],"op":"add_object"}
+{"args":[{"node":"main#29"},{"object":"Instance:main.Handler@main:17:9"}],"op":"add_object"}
+{"node":"<solve>#11","op":"node","witness":true}
+{"named":true,"node":"main.Handler.__init__","op":"node"}
+{"captured":[],"constraint":"_Binds~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.__init__"},{"constraint":"_Binds~2"}],"op":"attach"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Bind~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.__init__"},{"constraint":"_Bind~2"}],"op":"apply_now"}
+{"op":"applied"}
+{"op":"applied"}
+{"constraint":"_Operand~2","objects":[{"object":"Const:'open'"}],"op":"apply"}
+{"op":"applied"}
+{"constraint":"Each:Patterns._pattern_operand","objects":[{"object":"Const:'open'"}],"op":"apply"}
+{"op":"applied"}
+{"constraint":"_Operand~4","objects":[{"object":"Const:'open'"}],"op":"apply"}
+{"op":"applied"}
+{"constraint":"Each:Patterns._pattern_operand~2","objects":[{"object":"Const:'open'"}],"op":"apply"}
+{"op":"applied"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"fire","phase":2}
+{"constraint":"Call:main:11:14#11:37","objects":[{"object":"BuiltinMethod:<builtin>.str.lower"}],"op":"apply"}
+{"object":"Pattern:pattern 'on_'*'' lower","op":"object","opacity":null,"types":["Pattern","Object"]}
+{"args":[{"node":"main#16"},{"object":"Pattern:pattern 'on_'*'' lower"}],"op":"add_object"}
+{"op":"applied"}
+{"constraint":"Call:main:12:13#12:36","objects":[{"object":"BuiltinMethod:<builtin>.str.upper"}],"op":"apply"}
+{"object":"Pattern:pattern 'ON_'*'' upper","op":"object","opacity":null,"types":["Pattern","Object"]}
+{"args":[{"node":"main#22"},{"object":"Pattern:pattern 'ON_'*'' upper"}],"op":"add_object"}
+{"op":"applied"}
+{"constraint":"Shared~3","objects":[{"object":"Instance:main.Handler@main:17:9"}],"op":"apply"}
+{"op":"applied"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"fire","phase":3}
+{"constraint":"Each:Patterns.load_by_pattern","objects":[{"object":"Pattern:pattern 'on_'*'' lower"}],"op":"apply"}
+{"captured":["Pattern:pattern 'on_'*'' lower"],"constraint":"Each:Patterns._pattern_target","kinds":["Instance","Module"],"mode":"each","op":"constraint"}
+{"args":[{"node":"<solve>#2"},{"constraint":"Each:Patterns._pattern_target"}],"op":"attach"}
+{"constraint":"Each:Patterns._pattern_target","objects":[{"object":"Instance:main.Handler@main:17:9"}],"op":"apply"}
+{"captured":["Pattern:pattern 'on_'*'' lower","Class:main.Handler"],"constraint":"Each:Patterns._pattern_class_instance","kinds":null,"mode":"each","op":"constraint"}
+{"args":[{"node":"main#1"},{"constraint":"Each:Patterns._pattern_class_instance"}],"op":"attach"}
+{"constraint":"Each:Patterns._pattern_class_instance","objects":[{"object":"Instance:main.Handler@<object>"}],"op":"apply"}
+{"op":"applied"}
+{"constraint":"Each:Patterns._pattern_class_instance","objects":[{"object":"Instance:main.Handler@main:17:9"}],"op":"apply"}
+{"op":"applied"}
+{"node":"<solve>#12","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~3","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.on_open"},{"constraint":"_Binds~3"}],"op":"attach"}
+{"constraint":"_Binds~3","objects":[{"object":"Function:main.Handler.on_open"}],"op":"apply"}
+{"op":"applied"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Bind~3","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.on_open"},{"constraint":"_Bind~3"}],"op":"apply_now"}
+{"constraint":"_Bind~3","objects":[{"object":"Function:main.Handler.on_open"}],"op":"apply"}
+{"object":"BoundMethod:<bound main.Handler.on_open of main.Handler@main:17:9>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
+{"args":[{"node":"<solve>#12"},{"object":"BoundMethod:<bound main.Handler.on_open of main.Handler@main:17:9>"}],"op":"add_object"}
+{"node":"<solve>#12","op":"wake"}
+{"op":"woken"}
+{"op":"applied"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Deliveries","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"<solve>#12"},{"constraint":"_Deliveries"}],"op":"attach"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Deliver","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"<solve>#12"},{"constraint":"_Deliver"}],"op":"apply_now"}
+{"answer":{"node":"<solve>#13"},"args":[{"object":"Const:'on_open'"}],"op":"constant"}
+{"node":"<solve>#14","op":"node"}
+{"node":"<solve>#15","op":"node"}
+{"args":[{"node":"<solve>#13"},{"node":"<solve>#14"}],"op":"add_edge"}
+{"args":[{"node":"<solve>#15"},{"node":"main#25"}],"op":"add_edge"}
+{"node":"<solve>#16","op":"node","witness":true}
+{"named":true,"node":"main.Handler.__getattribute__","op":"node"}
+{"captured":[],"constraint":"_Binds~4","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.__getattribute__"},{"constraint":"_Binds~4"}],"op":"attach"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Bind~4","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.__getattribute__"},{"constraint":"_Bind~4"}],"op":"apply_now"}
+{"op":"applied"}
+{"op":"applied"}
+{"constraint":"Each:Patterns.load_by_pattern~2","objects":[{"object":"Pattern:pattern 'ON_'*'' upper"}],"op":"apply"}
+{"captured":["Pattern:pattern 'ON_'*'' upper"],"constraint":"Each:Patterns._pattern_target~2","kinds":["Instance","Module"],"mode":"each","op":"constraint"}
+{"args":[{"node":"<solve>#7"},{"constraint":"Each:Patterns._pattern_target~2"}],"op":"attach"}
+{"constraint":"Each:Patterns._pattern_target~2","objects":[{"object":"Instance:main.Handler@main:17:9"}],"op":"apply"}
+{"captured":["Pattern:pattern 'ON_'*'' upper","Class:main.Handler"],"constraint":"Each:Patterns._pattern_class_instance~2","kinds":null,"mode":"each","op":"constraint"}
+{"args":[{"node":"main#1"},{"constraint":"Each:Patterns._pattern_class_instance~2"}],"op":"attach"}
+{"constraint":"Each:Patterns._pattern_class_instance~2","objects":[{"object":"Instance:main.Handler@<object>"}],"op":"apply"}
+{"op":"applied"}
+{"constraint":"Each:Patterns._pattern_class_instance~2","objects":[{"object":"Instance:main.Handler@main:17:9"}],"op":"apply"}
+{"op":"applied"}
+{"node":"<solve>#17","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~5","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.ON_CLOSE"},{"constraint":"_Binds~5"}],"op":"attach"}
+{"constraint":"_Binds~5","objects":[{"object":"Function:main.Handler.ON_CLOSE"}],"op":"apply"}
+{"op":"applied"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Bind~5","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Handler.ON_CLOSE"},{"constraint":"_Bind~5"}],"op":"apply_now"}
+{"constraint":"_Bind~5","objects":[{"object":"Function:main.Handler.ON_CLOSE"}],"op":"apply"}
+{"object":"BoundMethod:<bound main.Handler.ON_CLOSE of main.Handler@main:17:9>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
+{"args":[{"node":"<solve>#17"},{"object":"BoundMethod:<bound main.Handler.ON_CLOSE of main.Handler@main:17:9>"}],"op":"add_object"}
+{"node":"<solve>#17","op":"wake"}
+{"op":"woken"}
+{"op":"applied"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Deliveries~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"<solve>#17"},{"constraint":"_Deliveries~2"}],"op":"attach"}
+{"captured":["Instance:main.Handler@main:17:9"],"constraint":"_Deliver~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"<solve>#17"},{"constraint":"_Deliver~2"}],"op":"apply_now"}
+{"answer":{"node":"<solve>#18"},"args":[{"object":"Const:'ON_CLOSE'"}],"op":"constant"}
+{"node":"<solve>#19","op":"node"}
+{"node":"<solve>#20","op":"node"}
+{"args":[{"node":"<solve>#18"},{"node":"<solve>#19"}],"op":"add_edge"}
+{"args":[{"node":"<solve>#20"},{"node":"main#27"}],"op":"add_edge"}
+{"op":"applied"}
+{"op":"applied"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"fire","phase":4}
+{"constraint":"_Deliveries","objects":[{"object":"BoundMethod:<bound main.Handler.on_open of main.Handler@main:17:9>"}],"op":"apply"}
+{"args":[{"node":"main#25"},{"object":"BoundMethod:<bound main.Handler.on_open of main.Handler@main:17:9>"}],"op":"add_object"}
+{"op":"applied"}
+{"constraint":"_Deliveries~2","objects":[{"object":"BoundMethod:<bound main.Handler.ON_CLOSE of main.Handler@main:17:9>"}],"op":"apply"}
+{"args":[{"node":"main#27"},{"object":"BoundMethod:<bound main.Handler.ON_CLOSE of main.Handler@main:17:9>"}],"op":"add_object"}
+{"op":"applied"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"fire","phase":5}
+{"constraint":"Call:main:13:4#13:31","objects":[{"object":"BoundMethod:<bound main.Handler.on_open of main.Handler@main:17:9>"}],"op":"apply"}
+{"args":[{"node":"main.Handler.on_open.self"},{"object":"Instance:main.Handler@main:17:9"}],"op":"add_object"}
+{"args":[{"node":"main.Handler.on_open.<return>"},{"node":"main#26"}],"op":"add_edge"}
+{"op":"applied"}
+{"constraint":"Call:main:14:4#14:30","objects":[{"object":"BoundMethod:<bound main.Handler.ON_CLOSE of main.Handler@main:17:9>"}],"op":"apply"}
+{"args":[{"node":"main.Handler.ON_CLOSE.self"},{"object":"Instance:main.Handler@main:17:9"}],"op":"add_object"}
+{"args":[{"node":"main.Handler.ON_CLOSE.<return>"},{"node":"main#28"}],"op":"add_edge"}
+{"op":"applied"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"solved","phase":6}
+{"answer":[{"object":"Instance:main.Handler@main:17:9"}],"args":[{"node":"main.Handler.on_open.self"}],"op":"objects"}
+{"answer":[{"object":"Instance:main.Handler@main:17:9"}],"args":[{"node":"main.Handler.ON_CLOSE.self"}],"op":"objects"}
+{"answer":[{"object":"Pattern:pattern 'on_'*'' lower"}],"args":[{"node":"<solve>#3"}],"op":"objects"}
+{"answer":[{"object":"Pattern:pattern 'ON_'*'' upper"}],"args":[{"node":"<solve>#8"}],"op":"objects"}
+{"answer":[{"object":"Const:'open'"}],"args":[{"node":"main.dispatch.event"}],"op":"objects"}
+{"answer":[{"object":"Const:'open'"}],"args":[{"node":"main.dispatch.event"}],"op":"objects"}
+{"node":"main.__name__","objects":["Const:'main'","Const:'__main__'"],"op":"final","saturated":false}
+{"node":"main#1","objects":["Instance:main.Handler@<object>","Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"main#2","objects":["External:<builtin>.type"],"op":"final","saturated":false}
+{"node":"main#3","objects":["Class:main.Handler"],"op":"final","saturated":false}
+{"node":"main.Handler.on_open.self","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"main.Handler.on_open.<return>","objects":["Const:'open'"],"op":"final","saturated":false}
+{"node":"main.Handler.on_open.__name__","objects":["Const:'on_open'"],"op":"final","saturated":false}
+{"node":"main.Handler.ON_CLOSE.self","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"main.Handler.ON_CLOSE.<return>","objects":["Const:'close'"],"op":"final","saturated":false}
+{"node":"main.Handler.ON_CLOSE.__name__","objects":["Const:'ON_CLOSE'"],"op":"final","saturated":false}
+{"node":"main.Handler.on_open","objects":["Function:main.Handler.on_open"],"op":"final","saturated":false}
+{"node":"main.Handler.ON_CLOSE","objects":["Function:main.Handler.ON_CLOSE"],"op":"final","saturated":false}
+{"node":"main#8","objects":["External:<builtin>.object.__init_subclass__"],"op":"final","saturated":false}
+{"node":"main.Handler","objects":["Class:main.Handler"],"op":"final","saturated":false}
+{"node":"main.dispatch.handler","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"main.dispatch.event","objects":["Const:'open'"],"op":"final","saturated":false}
+{"node":"main.dispatch.<return>","objects":[],"op":"final","saturated":false}
+{"node":"main.dispatch.__name__","objects":["Const:'dispatch'"],"op":"final","saturated":false}
+{"node":"main.dispatch","objects":["Function:main.dispatch"],"op":"final","saturated":false}
+{"node":"main#12","objects":[],"op":"final","saturated":false}
+{"node":"main#14","objects":["Pattern:pattern 'ON_'*''"],"op":"final","saturated":false}
+{"node":"main#15","objects":["BuiltinMethod:<builtin>.str.lower"],"op":"final","saturated":false}
+{"node":"main#16","objects":["Pattern:pattern 'on_'*'' lower"],"op":"final","saturated":false}
+{"node":"main.dispatch.lowered","objects":["Pattern:pattern 'on_'*'' lower"],"op":"final","saturated":false}
+{"node":"main#18","objects":[],"op":"final","saturated":false}
+{"node":"main#20","objects":["Pattern:pattern 'on_'*''"],"op":"final","saturated":false}
+{"node":"main#21","objects":["BuiltinMethod:<builtin>.str.upper"],"op":"final","saturated":false}
+{"node":"main#22","objects":["Pattern:pattern 'ON_'*'' upper"],"op":"final","saturated":false}
+{"node":"main.dispatch.raised","objects":["Pattern:pattern 'ON_'*'' upper"],"op":"final","saturated":false}
+{"node":"main#23","objects":["External:<builtin>.getattr"],"op":"final","saturated":false}
+{"node":"main.getattr","objects":[],"op":"final","saturated":false}
+{"node":"main#25","objects":["BoundMethod:<bound main.Handler.on_open of main.Handler@main:17:9>"],"op":"final","saturated":false}
+{"node":"main#26","objects":["Const:'open'"],"op":"final","saturated":false}
+{"node":"main#27","objects":["BoundMethod:<bound main.Handler.ON_CLOSE of main.Handler@main:17:9>"],"op":"final","saturated":false}
+{"node":"main#28","objects":["Const:'close'"],"op":"final","saturated":false}
+{"node":"main#29","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"main#30","objects":["External:<builtin>.object.__new__"],"op":"final","saturated":false}
+{"node":"main#31","objects":[],"op":"final","saturated":false}
+{"node":"main#32","objects":[],"op":"final","saturated":false}
+{"node":"main.Handler.__new__","objects":[],"op":"final","saturated":false}
+{"node":"main#33","objects":[],"op":"final","saturated":false}
+{"node":"<solve>#1","objects":[],"op":"final","saturated":false}
+{"node":"<solve>#2","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"<solve>#3","objects":["Pattern:pattern 'on_'*'' lower"],"op":"final","saturated":false}
+{"node":"<solve>#4","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"<solve>#5","objects":["Pattern:pattern 'on_'*'' lower"],"op":"final","saturated":false}
+{"node":"<solve>#6","objects":[],"op":"final","saturated":false}
+{"node":"<solve>#7","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"<solve>#8","objects":["Pattern:pattern 'ON_'*'' upper"],"op":"final","saturated":false}
+{"node":"<solve>#9","objects":["Instance:main.Handler@main:17:9"],"op":"final","saturated":false}
+{"node":"<solve>#10","objects":["Pattern:pattern 'ON_'*'' upper"],"op":"final","saturated":false}
+{"node":"<solve>#11","objects":[],"op":"final","saturated":false}
+{"node":"main.Handler.__init__","objects":[],"op":"final","saturated":false}
+{"node":"<solve>#12","objects":["BoundMethod:<bound main.Handler.on_open of main.Handler@main:17:9>"],"op":"final","saturated":false}
+{"node":"<solve>#14","objects":["Const:'on_open'"],"op":"final","saturated":false}
+{"node":"<solve>#15","objects":[],"op":"final","saturated":false}
+{"node":"<solve>#16","objects":[],"op":"final","saturated":false}
+{"node":"main.Handler.__getattribute__","objects":[],"op":"final","saturated":false}
+{"node":"<solve>#17","objects":["BoundMethod:<bound main.Handler.ON_CLOSE of main.Handler@main:17:9>"],"op":"final","saturated":false}
+{"node":"<solve>#19","objects":["Const:'ON_CLOSE'"],"op":"final","saturated":false}
+{"node":"<solve>#20","objects":[],"op":"final","saturated":false}
+{"objects":[],"op":"absorbed"}
+{"node":"main.Handler","object":"Class:main.Handler","op":"first","round":0}
+{"node":"main.Handler.ON_CLOSE","object":"Function:main.Handler.ON_CLOSE","op":"first","round":0}
+{"node":"main.Handler.ON_CLOSE.<return>","object":"Const:'close'","op":"first","round":0}
+{"node":"main.Handler.ON_CLOSE.__name__","object":"Const:'ON_CLOSE'","op":"first","round":0}
+{"node":"main.Handler.ON_CLOSE.self","object":"Instance:main.Handler@main:17:9","op":"first","round":5}
+{"node":"main.Handler.on_open","object":"Function:main.Handler.on_open","op":"first","round":0}
+{"node":"main.Handler.on_open.<return>","object":"Const:'open'","op":"first","round":0}
+{"node":"main.Handler.on_open.__name__","object":"Const:'on_open'","op":"first","round":0}
+{"node":"main.Handler.on_open.self","object":"Instance:main.Handler@main:17:9","op":"first","round":5}
+{"node":"main.__name__","object":"Const:'__main__'","op":"first","round":0}
+{"node":"main.__name__","object":"Const:'main'","op":"first","round":0}
+{"node":"main.dispatch","object":"Function:main.dispatch","op":"first","round":0}
+{"node":"main.dispatch.__name__","object":"Const:'dispatch'","op":"first","round":0}
+{"node":"main.dispatch.event","object":"Const:'open'","op":"first","round":0}
+{"node":"main.dispatch.handler","object":"Instance:main.Handler@main:17:9","op":"first","round":1}
+{"node":"main.dispatch.lowered","object":"Pattern:pattern 'on_'*'' lower","op":"first","round":2}
+{"node":"main.dispatch.raised","object":"Pattern:pattern 'ON_'*'' upper","op":"first","round":2}
+{"op":"work","rounds":6,"work":{"applied":40,"copied":44,"edges":21,"merged":0,"processed":46,"searched":0}}
