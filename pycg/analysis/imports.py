@@ -33,13 +33,6 @@ class ImportManager(object):
     def set_pkg(self, input_pkg):
         self.mod_dir = os.path.abspath(input_pkg)
 
-    def get_mod_dir(self):
-        return self.mod_dir
-
-    def is_internal(self, filename):
-        path = os.path.abspath(filename)
-        return os.path.commonpath([self.mod_dir, path]) == self.mod_dir
-
     def get_node(self, name):
         if name in self.import_graph:
             return self.import_graph[name]
