@@ -311,7 +311,23 @@ impl<T: Trace> State<T> {
             Object::Container(container) if container.exact => {
                 return self.inexact_container(graph, object);
             }
-            _ => return object,
+            Object::Const { exact: false, .. }
+            | Object::Generator { exact: false, .. }
+            | Object::Coroutine { exact: false, .. }
+            | Object::Container(_)
+            | Object::Saturated
+            | Object::Module(_)
+            | Object::External(_)
+            | Object::UnknownExternal(_)
+            | Object::Function(_)
+            | Object::Class(_)
+            | Object::Instance { .. }
+            | Object::BoundMethod { .. }
+            | Object::Fallback { .. }
+            | Object::Wrapper { .. }
+            | Object::Super { .. }
+            | Object::Typed { .. }
+            | Object::BuiltinMethod { .. } => return object,
         };
         if let Some(&found) = self.inexact.get(&object) {
             return found;
@@ -1553,12 +1569,22 @@ impl<T: Trace> State<T> {
             Object::Instance { .. } | Object::Class(_) => {
                 self.subscript_object(graph, object, Access::Subscript(id), key);
             }
+            Object::Typed { .. } => not_ported("containers: subscripting a typed value"),
             Object::External(_) | Object::UnknownExternal(_) => {
                 if let Some(dst) = dst {
                     self.add_object(graph, dst, object);
                 }
             }
-            _ => {}
+            Object::Saturated
+            | Object::Module(_)
+            | Object::Function(_)
+            | Object::BoundMethod { .. }
+            | Object::Fallback { .. }
+            | Object::Wrapper { .. }
+            | Object::Super { .. }
+            | Object::BuiltinMethod { .. }
+            | Object::Generator { .. }
+            | Object::Coroutine { .. } => {}
         }
     }
 
@@ -1703,7 +1729,12 @@ impl<T: Trace> State<T> {
                 }
                 self.class_subscript(graph, None, class, subscript, key);
             }
-            _ => self.class_subscript(graph, None, class, subscript, key),
+            Object::Typed { .. } => {
+                not_ported("containers: subscripting a class whose metaclass is a typed value")
+            }
+            _ => not_ported(
+                "containers: subscripting a class whose metaclass is not a class or an outside value",
+            ),
         }
     }
 
@@ -1753,7 +1784,7 @@ impl<T: Trace> State<T> {
     pub(super) fn class_getitem(&mut self, graph: &mut Graph, method: ObjId, call: CallId) {
         if !matches!(
             self.objects.get(method),
-            Object::External(_) | Object::UnknownExternal(_)
+            Object::External(_) | Object::UnknownExternal(_) | Object::Typed { .. }
         ) {
             self.call(graph, method, call);
         }
@@ -1798,13 +1829,24 @@ impl<T: Trace> State<T> {
                     self.add_edge(graph, elements, unknown);
                 }
             }
+            Object::Typed { .. } => not_ported("containers: slicing a typed value"),
             Object::External(_) | Object::UnknownExternal(_) => {
                 let dst = self.containers.slices[index_of(id.0)].dst;
                 if let Some(dst) = dst {
                     self.add_object(graph, dst, object);
                 }
             }
-            _ => {}
+            Object::Container(_)
+            | Object::Saturated
+            | Object::Module(_)
+            | Object::Function(_)
+            | Object::BoundMethod { .. }
+            | Object::Fallback { .. }
+            | Object::Wrapper { .. }
+            | Object::Super { .. }
+            | Object::BuiltinMethod { .. }
+            | Object::Generator { .. }
+            | Object::Coroutine { .. } => {}
         }
     }
 
@@ -1958,6 +2000,7 @@ impl<T: Trace> State<T> {
                 return;
             }
             Object::Instance { .. } | Object::Class(_) => {}
+            Object::Typed { .. } => not_ported("containers: iterating a typed value"),
             Object::Container(_)
             | Object::Generator { .. }
             | Object::External(_)
@@ -1965,7 +2008,15 @@ impl<T: Trace> State<T> {
                 self.add_object(graph, dst, object);
                 return;
             }
-            _ => return,
+            Object::Saturated
+            | Object::Module(_)
+            | Object::Function(_)
+            | Object::BoundMethod { .. }
+            | Object::Fallback { .. }
+            | Object::Wrapper { .. }
+            | Object::Super { .. }
+            | Object::BuiltinMethod { .. }
+            | Object::Coroutine { .. } => return,
         }
         let is_async = self.containers.iterations[index_of(iteration.0)].is_async;
         let role = self.containers.iterations[index_of(iteration.0)].role;
@@ -2127,10 +2178,20 @@ impl<T: Trace> State<T> {
                     .expect("a generator yields");
                 self.add_edge(graph, yield_node, found.dst);
             }
+            Object::Typed { .. } => not_ported("containers: the next element of a typed value"),
             Object::External(_) | Object::UnknownExternal(_) => {
                 self.add_object(graph, found.dst, object);
             }
-            _ => {}
+            Object::Saturated
+            | Object::Module(_)
+            | Object::Function(_)
+            | Object::BoundMethod { .. }
+            | Object::Fallback { .. }
+            | Object::Wrapper { .. }
+            | Object::Super { .. }
+            | Object::BuiltinMethod { .. }
+            | Object::Const { .. }
+            | Object::Coroutine { .. } => {}
         }
     }
 
