@@ -13,6 +13,7 @@ use pycg_analysis::model::Signature;
 use pycg_analysis::program::Program;
 use pycg_analysis::program::imports::ImportManager;
 use pycg_analysis::program::paths::relpath;
+use pycg_document::{ProgramPart, dumps, module_definitions, modules_section};
 use pycg_solver::{NodeId, ObjId};
 use serde_json::{Map, Value, json};
 
@@ -25,13 +26,31 @@ pub fn run(arguments: &[String]) -> Option<ExitCode> {
     if command != "d4" || flag != "--package" || entry_points.is_empty() {
         return None;
     }
-    let cwd = std::env::current_dir().expect("a working directory");
     let entry_points: Vec<PathBuf> = entry_points.iter().map(PathBuf::from).collect();
     let out = Path::new(out);
+    let mut program = discover(Path::new(oracle), out, Path::new(package), &entry_points);
+    let part = ProgramPart::from_program(&mut program);
+    let mut modules = dumps(&modules_section(&part));
+    modules.push('\n');
+    std::fs::write(out.join("modules.json"), modules).expect("the modules are written");
+    let mut definitions = dumps(&module_definitions(&part));
+    definitions.push('\n');
+    std::fs::write(out.join("definitions.json"), definitions)
+        .expect("the module definitions are written");
+    Some(ExitCode::SUCCESS)
+}
+
+pub fn discover(
+    oracle: &Path,
+    out: &Path,
+    package: &Path,
+    entry_points: &[PathBuf],
+) -> Program<Replay> {
+    let cwd = std::env::current_dir().expect("a working directory");
     std::fs::create_dir_all(out).expect("the output directory can be made");
     let file = File::create(out.join("D4.jsonl")).expect("the D4 dump can be created");
-    let replay = Replay::new(Oracle::open(Path::new(oracle)), BufWriter::new(file));
-    let mut program = Program::new(&entry_points, Some(Path::new(package)), &cwd, replay);
+    let replay = Replay::new(Oracle::open(oracle), BufWriter::new(file));
+    let mut program = Program::new(entry_points, Some(package), &cwd, replay);
     program.build_modules();
     program.analysis.write_linked_defines();
     program
@@ -46,59 +65,7 @@ pub fn run(arguments: &[String]) -> Option<ExitCode> {
         listed.push_str(&format!("{name}\t{}\n", relative.display()));
     }
     std::fs::write(out.join("modules.tsv"), listed).expect("the module list is written");
-    let modules = crate::canonical::line(&document_modules(&mut program));
-    std::fs::write(out.join("modules.json"), modules).expect("the modules are written");
-    let definitions = crate::canonical::line(&module_definitions(&program));
-    std::fs::write(out.join("definitions.json"), definitions)
-        .expect("the module definitions are written");
-    Some(ExitCode::SUCCESS)
-}
-
-fn module_definitions(program: &Program<Replay>) -> Value {
-    let definitions: BTreeMap<&str, Value> = program
-        .modules
-        .iter()
-        .map(|(name, module)| {
-            let lines = module.line_count;
-            let definition =
-                json!({"kind": "module", "module": name, "lines": [lines.min(1), lines]});
-            (name.as_str(), definition)
-        })
-        .collect();
-    json!(definitions)
-}
-
-fn document_modules(program: &mut Program<Replay>) -> Value {
-    let mut modules: BTreeMap<String, Map<String, Value>> = BTreeMap::new();
-    for (name, module) in &program.modules {
-        let mut entry = Map::new();
-        entry.insert("file".into(), json!(program.relative(&module.file)));
-        entry.insert("kind".into(), json!("source"));
-        entry.insert("status".into(), json!(module.status.name()));
-        if let Some(cause) = &module.cause {
-            entry.insert("cause".into(), json!(cause));
-        }
-        modules.insert(name.clone(), entry);
-    }
-    for (name, file) in &program.extension_modules {
-        let mut entry = Map::new();
-        entry.insert("file".into(), json!(program.relative(file)));
-        entry.insert("kind".into(), json!("extension"));
-        modules.insert(name.clone(), entry);
-    }
-    for (name, entry) in &mut modules {
-        let file = program.root.join(entry["file"].as_str().expect("a file"));
-        let mut shadows: Vec<String> = program
-            .shadowed(name, &file)
-            .iter()
-            .map(|other| program.relative(other))
-            .collect();
-        shadows.sort();
-        if !shadows.is_empty() {
-            entry.insert("shadows".into(), json!(shadows));
-        }
-    }
-    json!(modules)
+    program
 }
 
 fn surrogate_escape(text: &str, at: usize) -> Option<u32> {
@@ -209,7 +176,7 @@ enum Made {
 
 const PROGRAM: &str = "<program>";
 
-struct Replay {
+pub struct Replay {
     module: String,
     oracle: Oracle,
     out: BufWriter<File>,
