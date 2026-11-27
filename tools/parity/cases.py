@@ -5,6 +5,7 @@ import os
 import re
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -24,9 +25,14 @@ expected.json the oracle's edges, unresolved sites, the points-to sets of
 the named nodes that the test read, the warnings of the analysis, with
 {root} for the directory of the program, and each document that the test
 read, with the package name and version it was asked with.
-A test that monkeypatches an attribute (of the engine: its solver's
-order, a rule) is not converted: it is listed, since it states an
-invariant for the simulation tests, not a program's output. A test that
+A test that monkeypatches an attribute (a rule of the engine), with
+monkeypatch or monkeypatch.context(), is not converted: it is listed,
+since it states an invariant for the simulation tests, not a program's
+output. A test that patches only the solver's order is converted: each
+of its programs is analysed again in the canonical order, and that run
+is its case. Of the runs of a test that repeat a program (the same files,
+cap, package and set of entry points, as when only their order differs)
+only the first is a case. A test that
 only changes the directory or the environment is converted, its paths
 taken from the root of its program.
 A test that analyses no program in its own process (one that runs the
@@ -254,6 +260,13 @@ class Run:
         self.warnings = []
         self.files = {}
 
+    def key(self):
+        root = self.copy_root
+        package = None if self.package is None else relative(self.package, root)
+        entries = sorted(relative(entry, root) for entry in self.entry_points)
+        files = tuple(sorted(self.files.items()))
+        return files, self.generator.cap, package, tuple(entries)
+
 
 def snapshot(root):
     files = {}
@@ -285,6 +298,47 @@ def relative(path, root):
     return Path(os.path.relpath(path, root)).as_posix()
 
 
+SOLVER_ORDER = "pycg.analysis.solver.Solver.order"
+
+
+def attribute_name(target, args):
+    if isinstance(target, str):
+        return target
+    module = getattr(target, "__module__", None) or getattr(target, "__name__", "")
+    owner = getattr(target, "__qualname__", None)
+    return ".".join(part for part in (module, owner, args[0]) if part)
+
+
+def reanalysed(run, analyze):
+    from pycg.pycg import CallGraphGenerator
+
+    root = Path(tempfile.mkdtemp(prefix="pycg-case-"))
+    for path, data in run.files.items():
+        target = root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+    moved = [str(root / relative(entry, run.copy_root)) for entry in run.entry_points]
+    package = run.package
+    package = None if package is None else str(root / relative(package, run.copy_root))
+    generator = CallGraphGenerator(moved, package, run.generator.cap)
+    handler = Warnings()
+    logger = logging.getLogger(ENGINE_LOGGER)
+    logger.addHandler(handler)
+    try:
+        analyze(generator)
+    finally:
+        logger.removeHandler(handler)
+    again = Run(generator, root, moved, package)
+    again.files = run.files
+    again.callers, again.labels, again.documents = (
+        run.callers,
+        run.labels,
+        run.documents,
+    )
+    again.warnings = handler.lines
+    return again
+
+
 class Recorder:
     def __init__(self, cases, source, family, design):
         self.cases = cases
@@ -295,13 +349,23 @@ class Recorder:
         self.skipped = []
         self.unanalysed = []
         self.micro = []
+        self.deduplicated = []
         self.failed = []
 
     @pytest.hookimpl(wrapper=True)
     def pytest_runtest_call(self, item):
+        from pycg.analysis.solver import Solver
         from pycg.pycg import CallGraphGenerator
 
         runs = []
+        patched = []
+        setattr_of_monkeypatch = pytest.MonkeyPatch.setattr
+        canonical_order = Solver.__dict__["order"]
+
+        def recorded_setattr(monkeypatch, target, *args, **keywords):
+            patched.append(attribute_name(target, args))
+            return setattr_of_monkeypatch(monkeypatch, target, *args, **keywords)
+
         tmp_path = item.funcargs.get("tmp_path")
         analyze = CallGraphGenerator.analyze
         output = CallGraphGenerator.output
@@ -349,6 +413,7 @@ class Recorder:
         CallGraphGenerator.output = recorded_output
         CallGraphGenerator.output_points_to = recorded_output_points_to
         CallGraphGenerator.document = recorded_document
+        pytest.MonkeyPatch.setattr = recorded_setattr
         try:
             result = yield
         finally:
@@ -356,8 +421,9 @@ class Recorder:
             CallGraphGenerator.output = output
             CallGraphGenerator.output_points_to = output_points_to
             CallGraphGenerator.document = document
-        monkeypatch = item.funcargs.get("monkeypatch")
-        if monkeypatch is not None and monkeypatch._setattr:
+            pytest.MonkeyPatch.setattr = setattr_of_monkeypatch
+        order_only = bool(patched) and set(patched) == {SOLVER_ORDER}
+        if patched and not order_only:
             self.skipped.append(item.name)
             return result
         if not runs:
@@ -365,7 +431,19 @@ class Recorder:
         if any(Path(run.copy_root).is_relative_to(SNIPPETS) for run in runs):
             self.micro.append(item.name)
             return result
-        for index, run in enumerate(runs):
+        distinct = {}
+        for run in runs:
+            distinct.setdefault(run.key(), run)
+        if len(distinct) < len(runs):
+            self.deduplicated.append((item.name, len(runs) - len(distinct)))
+        for index, run in enumerate(distinct.values()):
+            if order_only:
+                ordered = Solver.order
+                Solver.order = canonical_order
+                try:
+                    run = reanalysed(run, analyze)
+                finally:
+                    Solver.order = ordered
             self.write(item.name, index, run, output, output_points_to, document)
         return result
 
@@ -458,6 +536,8 @@ def main(argv=None):
         print(f"not converted (monkeypatches an attribute): {source}::{name}")
     for name in recorder.micro:
         print(f"not converted (a property of the micro cases): {source}::{name}")
+    for name, dropped in recorder.deduplicated:
+        print(f"{dropped} runs of {source}::{name} repeat an earlier program: no case")
     for name in recorder.unanalysed:
         print(f"not converted (analyses no program in process): {source}::{name}")
     print(f"{len(recorder.written)} cases written to {CASES / family}")

@@ -1,0 +1,123 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 0,
+       "end": [
+        7,
+        34
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "itertools.zip_longest"
+       ],
+       "col": 4,
+       "end": [
+        7,
+        33
+       ],
+       "line": 7
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "<builtin>.next"
+       ],
+       "col": 12,
+       "end": [
+        4,
+        20
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "<builtin>.next"
+       ],
+       "col": 13,
+       "end": [
+        5,
+        21
+       ],
+       "line": 5
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       3,
+       6
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.itertools": [
+      "itertools"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.next": {
+      "known": "stub"
+     },
+     "itertools.zip_longest": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 3,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.next": [],
+  "itertools.zip_longest": [],
+  "main": [
+   "itertools.zip_longest",
+   "main.use"
+  ],
+  "main.use": [
+   "<builtin>.next"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}
