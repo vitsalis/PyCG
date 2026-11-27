@@ -1,35 +1,45 @@
 mod arguments;
+mod containers;
 mod fixpoint;
+pub mod hierarchy;
 pub mod objects;
+mod outside;
+mod rules;
 mod semantics;
 pub mod symbols;
 pub mod trace;
 
+use std::rc::Rc;
+
 use indexmap::{IndexMap, IndexSet};
-use pycg_solver::{KindMask, NodeId, ObjId, Rules, Solver, WatchId, Work};
+use pycg_solver::{NodeId, ObjId, Solver, WatchId, Work};
+use pycg_stubs::{Definition, Stubs};
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 
 use crate::model::{BUILTIN_MODULE, Signature};
-use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
-use semantics::{Call, Construct, Receivers};
+use hierarchy::{LookupAttr, Namespace, NewClass, Unless};
+use objects::{Class, Container, External, Function, Kind, Literal, Module, Object, Objects};
+pub use rules::RuleId;
+use rules::{Rule, WaitingRule};
+use semantics::{Call, Construct, Origin, Receivers, Returned, ReturnedId, SiteKey};
 pub use semantics::{CallId, NewCall};
 use symbols::{Sym, Symbols};
-use trace::{Opacity, RuleInfo, Trace};
+use trace::{Opacity, Trace};
 
-type OrderedMap<K, V> = IndexMap<K, V, FxBuildHasher>;
-type OrderedSet<K> = IndexSet<K, FxBuildHasher>;
+pub(crate) type OrderedMap<K, V> = IndexMap<K, V, FxBuildHasher>;
+pub(crate) type OrderedSet<K> = IndexSet<K, FxBuildHasher>;
 
 pub const EXTERNAL_STEPS_PAST_ROOT_MAX: u32 = 2;
 
 pub type Graph = Solver<RuleId>;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct RuleId(u32);
-
-#[derive(Clone, Copy, Debug)]
-enum Rule {
-    Call(CallId),
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MethodKind {
+    StaticMethod,
+    ClassMethod,
 }
+
+type Receiver = (NodeId, NodeId, ObjId, ObjId, Sym);
 
 pub fn not_ported(feature: &str) -> ! {
     panic!("not ported: {feature}")
@@ -64,6 +74,35 @@ struct State<T: Trace> {
     prefixes: FxHashMap<CallId, (CallId, Receivers)>,
     site_edges: OrderedMap<(Sym, Sym, Construct), OrderedSet<Sym>>,
     call_expressions: Vec<(Sym, Sym, Option<NodeId>)>,
+    classes: Vec<ObjId>,
+    stubs: Stubs,
+    stub_definitions: FxHashMap<Sym, Option<Rc<[Definition]>>>,
+    external_modules: FxHashSet<String>,
+    watches: FxHashMap<(ObjId, LookupAttr, Option<ObjId>, Unless), WatchId>,
+    waiting: FxHashMap<WatchId, Vec<(WaitingRule, ObjId)>>,
+    watch_of_witness: FxHashMap<NodeId, WatchId>,
+    metaclass_members: FxHashSet<(NodeId, Sym, NodeId)>,
+    fallback_binds: FxHashSet<(NodeId, ObjId, NodeId)>,
+    class_binds: FxHashSet<(NodeId, Option<ObjId>, NodeId)>,
+    fallback_nodes: FxHashMap<(ObjId, NodeId), NodeId>,
+    families: FxHashMap<ObjId, NodeId>,
+    namespace_nodes: FxHashMap<(ObjId, Namespace), NodeId>,
+    classes_below: FxHashMap<String, OrderedSet<ObjId>>,
+    below_nodes: FxHashMap<(String, bool), NodeId>,
+    instances: FxHashMap<(ObjId, Option<Origin>), ObjId>,
+    bound_methods: FxHashMap<(ObjId, ObjId), ObjId>,
+    fallbacks: FxHashMap<ObjId, ObjId>,
+    inexact: FxHashMap<ObjId, ObjId>,
+    new_results: FxHashMap<CallId, ReturnedId>,
+    returned: Vec<Returned>,
+    class_instances: FxHashMap<ObjId, FxHashSet<ObjId>>,
+    roots: FxHashMap<CallId, CallId>,
+    dunder_calls: FxHashMap<(Option<ObjId>, Sym, CallId, Unless), CallId>,
+    dunder_owners: FxHashMap<CallId, FxHashSet<ObjId>>,
+    site_calls: FxHashMap<SiteKey, CallId>,
+    receivers: Vec<Receiver>,
+    entry_receivers: Vec<Receiver>,
+    completed_receivers: usize,
 }
 
 impl<T: Trace> Engine<T> {
@@ -94,6 +133,35 @@ impl<T: Trace> Engine<T> {
             prefixes: FxHashMap::default(),
             site_edges: OrderedMap::default(),
             call_expressions: Vec::new(),
+            classes: Vec::new(),
+            stubs: Stubs::new(),
+            stub_definitions: FxHashMap::default(),
+            external_modules: FxHashSet::default(),
+            watches: FxHashMap::default(),
+            waiting: FxHashMap::default(),
+            watch_of_witness: FxHashMap::default(),
+            metaclass_members: FxHashSet::default(),
+            fallback_binds: FxHashSet::default(),
+            class_binds: FxHashSet::default(),
+            fallback_nodes: FxHashMap::default(),
+            families: FxHashMap::default(),
+            namespace_nodes: FxHashMap::default(),
+            classes_below: FxHashMap::default(),
+            below_nodes: FxHashMap::default(),
+            instances: FxHashMap::default(),
+            bound_methods: FxHashMap::default(),
+            fallbacks: FxHashMap::default(),
+            inexact: FxHashMap::default(),
+            new_results: FxHashMap::default(),
+            returned: Vec::new(),
+            class_instances: FxHashMap::default(),
+            roots: FxHashMap::default(),
+            dunder_calls: FxHashMap::default(),
+            dunder_owners: FxHashMap::default(),
+            site_calls: FxHashMap::default(),
+            receivers: Vec::new(),
+            entry_receivers: Vec::new(),
+            completed_receivers: 0,
         };
         state.trace.object(
             saturated,
@@ -141,6 +209,10 @@ impl<T: Trace> Engine<T> {
 
     pub fn function_mut(&mut self, function: ObjId) -> &mut Function {
         self.state.objects.function_mut(function)
+    }
+
+    pub fn class_mut(&mut self, class: ObjId) -> &mut Class {
+        self.state.objects.class_mut(class)
     }
 
     pub fn module_defines_mut(&mut self, module: ObjId) -> &mut FxHashSet<Sym> {
@@ -237,6 +309,61 @@ impl<T: Trace> Engine<T> {
         self.state.add_call(&mut self.graph, call);
     }
 
+    pub fn new_class(&mut self, class: &NewClass<'_>) -> ObjId {
+        self.state.new_class(&mut self.graph, class)
+    }
+
+    pub fn add_method(
+        &mut self,
+        class: ObjId,
+        name: &str,
+        function: ObjId,
+        kind: Option<MethodKind>,
+    ) {
+        self.state
+            .add_method(&mut self.graph, class, name, function, kind);
+    }
+
+    pub fn add_class_member(&mut self, value: NodeId, field: NodeId) {
+        self.state.add_inexact(&mut self.graph, value, field);
+    }
+
+    pub fn add_set_name(
+        &mut self,
+        value: NodeId,
+        class: ObjId,
+        name: &str,
+        caller: &str,
+        site: &str,
+    ) {
+        self.state
+            .add_set_name(&mut self.graph, value, class, name, caller, site);
+    }
+
+    pub fn add_init_subclass(
+        &mut self,
+        class: ObjId,
+        keywords: &[(Box<str>, Option<NodeId>)],
+        double_star: &[Option<NodeId>],
+        caller: &str,
+        site: &str,
+    ) {
+        self.state
+            .add_init_subclass(&mut self.graph, class, keywords, double_star, caller, site);
+    }
+
+    pub fn add_metaclass_call(&mut self, class: ObjId) {
+        self.state.add_metaclass_call(&mut self.graph, class);
+    }
+
+    pub fn imported_value(&mut self, name: &str) -> NodeId {
+        self.state.imported_value(&mut self.graph, name)
+    }
+
+    pub fn add_external_module(&mut self, name: &str) {
+        self.state.add_external_module(name);
+    }
+
     pub fn solve(&mut self) {
         self.state.solve(&mut self.graph);
     }
@@ -248,18 +375,18 @@ impl<T: Trace> State<T> {
         let id = self.objects.push(object);
         graph.declare(id, kind.mask());
         let name = self.objects.name(id, &self.symbols);
-        let opacity = match kind {
-            Kind::Saturated => Opacity::Saturated,
+        let opacity = match self.objects.get(id) {
+            Object::Saturated => Opacity::Saturated,
+            Object::Class(_) => Opacity::Class(id),
+            &Object::Instance { class, .. } => Opacity::Class(class),
+            &Object::Fallback { method } => match self.objects.get(method) {
+                &Object::Instance { class, .. } => Opacity::Class(class),
+                Object::Class(_) => Opacity::Class(method),
+                _ => Opacity::Never,
+            },
             _ => Opacity::Never,
         };
         self.trace.object(id, kind, &name, opacity);
-        id
-    }
-
-    fn new_rule(&mut self, rule: Rule, info: &RuleInfo<'_>) -> RuleId {
-        let id = RuleId(u32::try_from(self.rules.len()).expect("fewer than 2^32 rules"));
-        self.rules.push(rule);
-        self.trace.rule(id, info);
         id
     }
 
@@ -271,6 +398,29 @@ impl<T: Trace> State<T> {
         }
         self.trace.node(node, label);
         node
+    }
+
+    fn witness(&mut self, graph: &mut Graph, watch: WatchId) -> NodeId {
+        let node = graph.witness(watch);
+        self.watch_of_witness.insert(node, watch);
+        self.trace.witness(node, watch);
+        node
+    }
+
+    fn objects_of(&mut self, graph: &mut Graph, node: NodeId) -> Vec<ObjId> {
+        let objects = graph.objects(node);
+        self.trace.objects(node, &objects);
+        objects
+    }
+
+    fn holds(&mut self, graph: &mut Graph, node: NodeId, object: ObjId) -> bool {
+        let answer = graph.holds(node, object);
+        self.trace.holds(node, object, answer);
+        answer
+    }
+
+    fn object_name(&self, object: ObjId) -> String {
+        self.objects.name(object, &self.symbols)
     }
 
     fn constant(&mut self, graph: &mut Graph, object: ObjId) -> NodeId {
@@ -458,62 +608,5 @@ impl<T: Trace> State<T> {
         }
         self.functions.push(function);
         function
-    }
-}
-
-impl<T: Trace> Rules<RuleId> for State<T> {
-    fn apply(&mut self, graph: &mut Graph, rule: RuleId, objects: &[ObjId]) {
-        match self.rules[rule.0 as usize] {
-            Rule::Call(call) => {
-                self.trace.apply(rule, objects);
-                for &object in objects {
-                    self.call(graph, object, call);
-                }
-                self.trace.applied();
-            }
-        }
-    }
-
-    fn saturate(&mut self, graph: &mut Graph, rule: RuleId) {
-        self.trace.saturate(rule);
-        match self.rules[rule.0 as usize] {
-            Rule::Call(call) => {
-                if let Some(dst) = self.calls[call.index()].dst {
-                    let saturated = self.saturated;
-                    self.add_object(graph, dst, saturated);
-                }
-            }
-        }
-        self.trace.saturated();
-    }
-
-    fn kinds(&self, rule: RuleId) -> Option<KindMask> {
-        match self.rules[rule.0 as usize] {
-            Rule::Call(_) => None,
-        }
-    }
-
-    fn captures_opaque(&self, _graph: &Graph, rule: RuleId) -> bool {
-        match self.rules[rule.0 as usize] {
-            Rule::Call(_) => false,
-        }
-    }
-
-    fn opaque(&self, object: ObjId) -> bool {
-        matches!(self.objects.get(object), Object::Saturated)
-    }
-
-    fn between_rounds(&mut self, _graph: &mut Graph) -> bool {
-        self.trace.between_rounds();
-        self.trace.between_rounds_done(false, &[]);
-        false
-    }
-
-    fn wake(&mut self, _graph: &mut Graph, _watch: WatchId) {
-        not_ported("watches")
-    }
-
-    fn firing(&mut self, graph: &mut Graph) {
-        self.trace.fire(graph, &self.named_nodes);
     }
 }

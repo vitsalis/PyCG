@@ -2,10 +2,12 @@ use num_bigint::BigInt;
 use pycg_solver::{KindMask, NodeId, ObjId};
 use rustc_hash::FxHashSet;
 
+use crate::engine::hierarchy::LookupKey;
 use crate::engine::symbols::{Sym, Symbols};
+use crate::engine::{OrderedMap, OrderedSet};
 use crate::model::{
     ConstValue, Signature, bound_method_name, constant_name, container_name, coroutine_name,
-    generator_name,
+    fallback_name, generator_name, instance_name,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -167,6 +169,53 @@ impl Function {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Allocator {
+    Object,
+    Super,
+}
+
+pub struct Class {
+    pub name: Sym,
+    pub module: Sym,
+    pub defines: FxHashSet<Sym>,
+    pub bound: FxHashSet<Sym>,
+    pub slots: FxHashSet<Sym>,
+    pub bases: Vec<OrderedSet<Option<ObjId>>>,
+    pub mros: Vec<Vec<ObjId>>,
+    pub ancestors: FxHashSet<ObjId>,
+    pub exhaustive: bool,
+    pub ready: bool,
+    pub forced: bool,
+    pub index: u32,
+    pub subclasses: OrderedSet<ObjId>,
+    pub lookups: OrderedMap<LookupKey, NodeId>,
+    pub instances: NodeId,
+    pub metaclass: NodeId,
+    pub instantiable: NodeId,
+    pub keyword: Option<OrderedSet<Option<ObjId>>>,
+    pub metaclasses: OrderedSet<ObjId>,
+    pub metaclass_candidate_of: OrderedSet<ObjId>,
+    pub metaclass_users: OrderedSet<ObjId>,
+    pub protocol: bool,
+    pub abstract_methods: FxHashSet<Sym>,
+    pub uses_namespace: bool,
+    pub stored_names_outside_body: FxHashSet<Sym>,
+    pub concrete: bool,
+    pub ancestry: Vec<NodeId>,
+    pub unknown: bool,
+    pub allocator: Option<Allocator>,
+    pub lineno: Option<u32>,
+    pub end_lineno: Option<u32>,
+}
+
+impl Class {
+    pub fn set_mros(&mut self, mros: Vec<Vec<ObjId>>) {
+        self.ancestors = mros.iter().flatten().copied().collect();
+        self.mros = mros;
+    }
+}
+
 pub struct Container {
     pub kind: Sym,
     pub site: Sym,
@@ -180,7 +229,10 @@ pub enum Object {
     External(External),
     UnknownExternal(External),
     Function(Box<Function>),
+    Class(Box<Class>),
+    Instance { class: ObjId, site: Sym },
     BoundMethod { receiver: ObjId, function: ObjId },
+    Fallback { method: ObjId },
     Const { value: Literal, exact: bool },
     Container(Container),
     Generator { function: ObjId, exact: bool },
@@ -195,7 +247,10 @@ impl Object {
             Object::External(_) => Kind::External,
             Object::UnknownExternal(_) => Kind::UnknownExternal,
             Object::Function(_) => Kind::Function,
+            Object::Class(_) => Kind::Class,
+            Object::Instance { .. } => Kind::Instance,
             Object::BoundMethod { .. } => Kind::BoundMethod,
+            Object::Fallback { .. } => Kind::Fallback,
             Object::Const { .. } => Kind::Const,
             Object::Container(_) => Kind::Container,
             Object::Generator { .. } => Kind::Generator,
@@ -238,6 +293,38 @@ impl Objects {
         }
     }
 
+    pub fn class(&self, id: ObjId) -> &Class {
+        match self.get(id) {
+            Object::Class(class) => class,
+            _ => panic!("object {id:?} is not a class"),
+        }
+    }
+
+    pub fn class_mut(&mut self, id: ObjId) -> &mut Class {
+        match self.get_mut(id) {
+            Object::Class(class) => class,
+            _ => panic!("object {id:?} is not a class"),
+        }
+    }
+
+    pub fn is_class(&self, id: ObjId) -> bool {
+        matches!(self.get(id), Object::Class(_))
+    }
+
+    pub fn is_external(&self, id: ObjId) -> bool {
+        matches!(
+            self.get(id),
+            Object::External(_) | Object::UnknownExternal(_)
+        )
+    }
+
+    pub fn external(&self, id: ObjId) -> Option<&External> {
+        match self.get(id) {
+            Object::External(external) | Object::UnknownExternal(external) => Some(external),
+            _ => None,
+        }
+    }
+
     pub fn name(&self, id: ObjId, symbols: &Symbols) -> String {
         match self.get(id) {
             Object::Saturated => "<saturated>".to_string(),
@@ -246,10 +333,15 @@ impl Objects {
                 symbols.text(external.name).to_string()
             }
             Object::Function(function) => symbols.text(function.name).to_string(),
+            Object::Class(class) => symbols.text(class.name).to_string(),
+            Object::Instance { class, site } => {
+                instance_name(&self.name(*class, symbols), symbols.text(*site))
+            }
             Object::BoundMethod { receiver, function } => bound_method_name(
                 &self.name(*function, symbols),
                 &self.name(*receiver, symbols),
             ),
+            Object::Fallback { method } => fallback_name(&self.name(*method, symbols)),
             Object::Const { value, .. } => constant_name(&value.view()),
             Object::Container(container) => {
                 container_name(symbols.text(container.kind), symbols.text(container.site))

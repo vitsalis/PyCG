@@ -1,15 +1,18 @@
 use std::collections::BTreeMap;
 use std::fs;
+use std::panic::{self, AssertUnwindSafe};
 use std::path::Path;
 use std::process::ExitCode;
 
 use num_bigint::BigInt;
 use pycg_analysis::CAP_DEFAULT_OBJECTS;
-use pycg_analysis::engine::objects::{Kind, Literal, Object, Passthrough};
+use pycg_analysis::engine::hierarchy::NewClass;
+use pycg_analysis::engine::objects::{Allocator, Kind, Literal, Object, Passthrough};
+use pycg_analysis::engine::symbols::Sym;
 use pycg_analysis::engine::trace::{Opacity, RuleInfo, Trace};
-use pycg_analysis::engine::{Engine, NewCall, RuleId, not_ported};
+use pycg_analysis::engine::{Engine, MethodKind, NewCall, RuleId, not_ported};
 use pycg_analysis::model::Signature;
-use pycg_solver::{NodeId, ObjId, Solver};
+use pycg_solver::{NodeId, ObjId, Solver, WatchId};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde_json::{Value, json};
 
@@ -17,6 +20,7 @@ use crate::canonical;
 
 const CONTEXT_PROGRAM: &str = "<program>";
 const CONTEXT_SOLVE: &str = "<solve>";
+const PARTIAL_TRACE: &str = "D3.partial.jsonl";
 const IMPORT_MANAGER_CALLS: &[&str] = &["imports.handle_import", "imports.locate"];
 
 struct DeclaredObject {
@@ -51,6 +55,7 @@ pub struct Recorder {
     declared_rules: FxHashSet<RuleId>,
     first_rounds: BTreeMap<(String, String), u32>,
     round: u32,
+    witness_of_watch: FxHashMap<WatchId, NodeId>,
 }
 
 impl Recorder {
@@ -74,6 +79,7 @@ impl Recorder {
             declared_rules: FxHashSet::default(),
             first_rounds: BTreeMap::new(),
             round: 0,
+            witness_of_watch: FxHashMap::default(),
         }
     }
 
@@ -132,12 +138,17 @@ impl Recorder {
         if !self.declared_objects.insert(object) {
             return;
         }
-        let declared = &self.objects[&object];
-        let types: Vec<&str> = declared.kind.mro().iter().map(|kind| kind.name()).collect();
-        let opacity = match declared.opacity {
+        let opacity = self.objects[&object].opacity;
+        let opacity = match opacity {
             Opacity::Never => Value::Null,
             Opacity::Saturated => json!("saturated"),
+            Opacity::Class(class) => {
+                self.declare_object(class);
+                json!(self.object_name(class))
+            }
         };
+        let declared = &self.objects[&object];
+        let types: Vec<&str> = declared.kind.mro().iter().map(|kind| kind.name()).collect();
         let record = json!({
             "op": "object",
             "object": self.object_name(object),
@@ -234,6 +245,23 @@ impl Trace for Recorder {
             record["named"] = json!(true);
         }
         self.write(&record);
+    }
+
+    fn witness(&mut self, node: NodeId, watch: WatchId) {
+        let name = self.name_node(node, None);
+        self.reported.push(node);
+        self.witness_of_watch.insert(watch, node);
+        self.write(&json!({"op": "node", "node": name, "witness": true}));
+    }
+
+    fn wake(&mut self, watch: WatchId) {
+        let node = self.witness_of_watch[&watch];
+        let record = json!({"op": "wake", "node": self.node_name(node)});
+        self.write(&record);
+    }
+
+    fn woken(&mut self) {
+        self.write(&json!({"op": "woken"}));
     }
 
     fn object(&mut self, object: ObjId, kind: Kind, name: &str, opacity: Opacity) {
@@ -384,28 +412,38 @@ pub fn run(input: &str, out: &str) -> ExitCode {
             return ExitCode::FAILURE;
         }
     };
-    let records: Vec<Value> = text
-        .lines()
-        .enumerate()
-        .map(|(number, line)| {
-            serde_json::from_str(line)
-                .unwrap_or_else(|error| panic!("{input}:{}: {error}", number + 1))
-        })
-        .collect();
     let mut replay = Replay {
         engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new()),
         fields: FxHashMap::default(),
     };
-    replay.prescan(&records);
-    for (number, record) in records.iter().enumerate() {
-        if record.get("call").is_some() {
-            replay.call(number + 1, record);
-        }
-    }
-    replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
-    replay.engine.solve();
-    let (points_to, trace) = replay.finish();
     let out = Path::new(out);
+    let replayed = panic::catch_unwind(AssertUnwindSafe(|| {
+        let records: Vec<Value> = text
+            .lines()
+            .enumerate()
+            .map(|(number, line)| {
+                serde_json::from_str(line).unwrap_or_else(|error| {
+                    not_ported(&format!("the record {} of D4 as JSON: {error}", number + 1))
+                })
+            })
+            .collect();
+        replay.prescan(&records);
+        for (number, record) in records.iter().enumerate() {
+            if record.get("call").is_some() {
+                replay.call(number + 1, record);
+            }
+        }
+        replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
+        replay.engine.solve();
+    }));
+    if replayed.is_err() {
+        let partial = replay.engine.trace().lines.concat();
+        if let Err(error) = fs::write(out.join(PARTIAL_TRACE), partial) {
+            eprintln!("pycg_dump engine: cannot write {PARTIAL_TRACE}: {error}");
+        }
+        return ExitCode::FAILURE;
+    }
+    let (points_to, trace) = replay.finish();
     for (name, lines) in [("D3.jsonl", trace), ("D5.jsonl", points_to)] {
         if let Err(error) = fs::write(out.join(name), lines.concat()) {
             eprintln!(
@@ -448,6 +486,12 @@ impl Replay {
         self.engine.trace_mut().context = module.to_string();
         let call = record["call"].as_str().expect("a call name");
         if IMPORT_MANAGER_CALLS.contains(&call) {
+            if record["arguments"]["name"]
+                .as_str()
+                .is_some_and(|name| name.ends_with(".*"))
+            {
+                not_ported("the linking of star imports");
+            }
             return;
         }
         let arguments = &record["arguments"];
@@ -500,6 +544,108 @@ impl Replay {
                     arguments["generator"].as_bool().expect("generator"),
                 );
                 Some(self.object_answer(function))
+            }
+            "new_class" => {
+                let names = |value: &Value| -> Vec<Box<str>> {
+                    let entries = match value.get("set") {
+                        Some(_) => set(value).to_vec(),
+                        None => pairs(value).iter().map(|pair| pair[0].clone()).collect(),
+                    };
+                    entries.iter().map(|name| text(name).into()).collect()
+                };
+                let defines = names(&arguments["defines"]);
+                let abstract_methods = names(&arguments["abstract_methods"]);
+                let base_nodes: Vec<Option<NodeId>> = list(&arguments["base_nodes"])
+                    .iter()
+                    .map(|node| self.optional_node(node))
+                    .collect();
+                let metaclass = self.optional_node(&arguments["metaclass"]);
+                let class = self.engine.new_class(&NewClass {
+                    name: text(&arguments["name"]),
+                    module: text(&arguments["module"]),
+                    defines: &defines,
+                    base_nodes: &base_nodes,
+                    protocol: arguments["protocol"].as_bool().expect("protocol"),
+                    abstract_methods: &abstract_methods,
+                    metaclass,
+                    uses_namespace: arguments["uses_namespace"]
+                        .as_bool()
+                        .expect("uses_namespace"),
+                });
+                Some(self.object_answer(class))
+            }
+            "add_method" => {
+                let class = self.object(&arguments["cls"]);
+                let function = self.object(&arguments["function"]);
+                let kind = match arguments["kind"].as_str() {
+                    None => None,
+                    Some("staticmethod") => Some(MethodKind::StaticMethod),
+                    Some("classmethod") => Some(MethodKind::ClassMethod),
+                    Some(other) => panic!("a method kind: {other}"),
+                };
+                self.engine
+                    .add_method(class, text(&arguments["name"]), function, kind);
+                None
+            }
+            "add_class_member" => {
+                let value = self.node(&arguments["value"]);
+                let field = self.node(&arguments["field"]);
+                self.engine.add_class_member(value, field);
+                None
+            }
+            "add_set_name" => {
+                let value = self.node(&arguments["value"]);
+                let class = self.object(&arguments["cls"]);
+                self.engine.add_set_name(
+                    value,
+                    class,
+                    text(&arguments["name"]),
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_init_subclass" => {
+                let class = self.object(&arguments["cls"]);
+                let keywords: Vec<(Box<str>, Option<NodeId>)> = list(&arguments["keywords"])
+                    .iter()
+                    .map(|pair| (text(&pair[0]).into(), self.optional_node(&pair[1])))
+                    .collect();
+                let double_star: Vec<Option<NodeId>> = list(&arguments["double_star"])
+                    .iter()
+                    .map(|mapping| self.optional_node(mapping))
+                    .collect();
+                self.engine.add_init_subclass(
+                    class,
+                    &keywords,
+                    &double_star,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_metaclass_call" => {
+                let class = self.object(&arguments["cls"]);
+                self.engine.add_metaclass_call(class);
+                None
+            }
+            "imported_value" => {
+                let node = self.engine.imported_value(text(&arguments["name"]));
+                Some(self.node_answer(node))
+            }
+            "external" => {
+                let steps = u32::try_from(arguments["steps"].as_u64().expect("steps"))
+                    .expect("steps fit u32");
+                let external = self.engine.external(
+                    text(&arguments["name"]),
+                    steps,
+                    arguments["inexact"].as_bool().expect("inexact"),
+                );
+                Some(self.object_answer(external))
+            }
+            "add_external_module" => {
+                self.engine.add_external_module(text(&arguments["name"]));
+                None
             }
             "add_call" => {
                 self.add_call(arguments);
@@ -596,6 +742,33 @@ impl Replay {
                 function.col_offset = position(&fields["col_offset"]);
                 function.end_lineno = position(&fields["end_lineno"]);
                 function.end_col_offset = position(&fields["end_col_offset"]);
+            }
+            Object::Class(_) => {
+                if !fields["annotations"].is_null() {
+                    not_ported("annotations");
+                }
+                let names = |engine: &mut Engine<Recorder>, value: &Value| -> FxHashSet<Sym> {
+                    set(value)
+                        .iter()
+                        .map(|name| engine.intern(text(name)))
+                        .collect()
+                };
+                let defines = names(&mut self.engine, &fields["defines"]);
+                let bound = names(&mut self.engine, &fields["bound"]);
+                let slots = names(&mut self.engine, &fields["slots"]);
+                let allocator = match fields["allocator"].as_str() {
+                    None => None,
+                    Some("object") => Some(Allocator::Object),
+                    Some("super") => Some(Allocator::Super),
+                    Some(other) => panic!("an allocator: {other}"),
+                };
+                let class = self.engine.class_mut(object);
+                class.defines = defines;
+                class.bound = bound;
+                class.slots = slots;
+                class.allocator = allocator;
+                class.lineno = position(&fields["lineno"]);
+                class.end_lineno = position(&fields["end_lineno"]);
             }
             _ => panic!("the fields of {name}, which the builder does not write"),
         }

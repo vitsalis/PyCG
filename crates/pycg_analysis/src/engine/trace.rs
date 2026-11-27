@@ -1,4 +1,4 @@
-use pycg_solver::{NodeId, ObjId, Solver};
+use pycg_solver::{NodeId, ObjId, Solver, WatchId};
 
 use crate::engine::RuleId;
 use crate::engine::objects::Kind;
@@ -7,6 +7,7 @@ use crate::engine::objects::Kind;
 pub enum Opacity {
     Never,
     Saturated,
+    Class(ObjId),
 }
 
 pub struct RuleInfo<'a> {
@@ -19,6 +20,9 @@ pub struct RuleInfo<'a> {
 pub trait Trace {
     fn solver(&mut self, _cap: Option<u32>, _saturated: ObjId, _node: NodeId) {}
     fn node(&mut self, _node: NodeId, _label: Option<&str>) {}
+    fn witness(&mut self, _node: NodeId, _watch: WatchId) {}
+    fn wake(&mut self, _watch: WatchId) {}
+    fn woken(&mut self) {}
     fn object(&mut self, _object: ObjId, _kind: Kind, _name: &str, _opacity: Opacity) {}
     fn rule(&mut self, _rule: RuleId, _info: &RuleInfo<'_>) {}
     fn constant(&mut self, _object: ObjId, _node: NodeId) {}

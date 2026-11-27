@@ -502,10 +502,12 @@ engine <D4.jsonl> OUT`): it makes each recorded builder call, checks its
 answer against the recorded one, solves, and writes D3 and D5 of the
 engine. The fields and tables that D4 records at the end of a module are
 set when their object is made. A builder call or a rule that is not
-ported stops the replay with `not ported: <what>`. D3 and D5 must agree on
-the inputs that `tools/parity/engine.txt` lists; each pull request of
-stage 5 adds the inputs it makes agree, and the job summary counts the
-others.
+ported stops the replay with `not ported: <what>`, and the trace written
+up to there (`D3.partial.jsonl`) must begin the oracle's D3: compare.py
+counts such an input as partial, and as different when the trace leaves
+the oracle's first. D3 and D5 must agree on the inputs that
+`tools/parity/engine.txt` lists; each pull request of stage 5 adds the
+inputs it makes agree.
 
 ## The CI job
 
