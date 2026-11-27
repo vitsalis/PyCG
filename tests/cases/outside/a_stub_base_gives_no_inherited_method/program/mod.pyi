@@ -1,0 +1,3 @@
+
+from collections.abc import Iterator
+class Half(Iterator[int]): ...

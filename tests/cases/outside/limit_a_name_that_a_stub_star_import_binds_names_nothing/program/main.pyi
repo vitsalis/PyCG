@@ -1,0 +1,3 @@
+
+from shapes import *
+def report(shape: Shape) -> None: ...

@@ -73,6 +73,10 @@ FAMILIES = {
         "language",
         "Language features",
     ),
+    "tests/test_library_iteration.py": (
+        "outside",
+        "Selected standard-library operations",
+    ),
     "tests/test_literal_imports.py": (
         "language",
         "Imports",
@@ -89,6 +93,22 @@ FAMILIES = {
         "classes",
         "Attribute hooks",
     ),
+    "tests/test_outside_call_results.py": (
+        "outside",
+        "Typed outside values",
+    ),
+    "tests/test_outside_callbacks.py": (
+        "outside",
+        "Call backs",
+    ),
+    "tests/test_outside_types.py": (
+        "outside",
+        "Typed outside values",
+    ),
+    "tests/test_own_stubs.py": (
+        "outside",
+        "Declared types (idea 4)",
+    ),
     "tests/test_patterns.py": (
         "language",
         "Computed attribute names",
@@ -100,6 +120,10 @@ FAMILIES = {
     "tests/test_super.py": (
         "classes",
         "`super()`",
+    ),
+    "tests/test_third_party_stubs.py": (
+        "outside",
+        "Stub data",
     ),
     "tests/test_type_three_arguments.py": (
         "classes",

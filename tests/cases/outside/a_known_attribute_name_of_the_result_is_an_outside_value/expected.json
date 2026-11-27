@@ -1,0 +1,179 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.invoke"
+       ],
+       "col": 0,
+       "end": [
+        6,
+        13
+       ],
+       "line": 6
+      }
+     ],
+     "main.guess": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 4,
+       "end": [
+        5,
+        29
+       ],
+       "line": 5
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        5,
+        31
+       ],
+       "line": 5,
+       "unresolved": "computed name"
+      },
+      {
+       "callees": [
+        "lib.make"
+       ],
+       "col": 12,
+       "end": [
+        5,
+        22
+       ],
+       "line": 5
+      }
+     ],
+     "main.invoke": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 4,
+       "end": [
+        3,
+        29
+       ],
+       "line": 3
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        3,
+        31
+       ],
+       "line": 3,
+       "unresolved": "outside value"
+      },
+      {
+       "callees": [
+        "lib.make"
+       ],
+       "col": 12,
+       "end": [
+        3,
+        22
+       ],
+       "line": 3
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       6
+      ],
+      "module": "main"
+     },
+     "main.guess": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.invoke": {
+      "kind": "function",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.lib": [
+      "lib"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     },
+     "lib.make": {
+      "known": "name"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "lib.make": [],
+  "main": [
+   "main.invoke"
+  ],
+  "main.guess": [
+   "<builtin>.getattr",
+   "lib.make"
+  ],
+  "main.invoke": [
+   "<builtin>.getattr",
+   "lib.make"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.guess",
+   "main:5:4#5:31",
+   "computed name"
+  ],
+  [
+   "main.invoke",
+   "main:3:4#3:31",
+   "outside value"
+  ]
+ ],
+ "warnings": []
+}
