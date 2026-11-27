@@ -8,6 +8,7 @@ use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Literal, Object};
 use crate::engine::outside::outside_name;
 use crate::engine::outside_calls::{BoundId, Known};
+use crate::engine::outside_types::TypeOrigin;
 use crate::engine::protocols::{Conversion, OperatorCall};
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
@@ -150,8 +151,10 @@ impl<T: Trace> State<T> {
             ModelRule::Convert => self.rule_convert(graph, call, args, model.arguments),
             ModelRule::Pow => self.rule_pow(graph, call, args),
             ModelRule::Print => self.rule_print(graph, call, args),
+            ModelRule::SpecialMethod => {
+                self.rule_special_method(graph, call, args, model.arguments[0], model.arguments[1])
+            }
             ModelRule::Case => self.rule_case(graph, call, receiver, model.arguments[0]),
-            rule => not_ported(&format!("builtin rules: the rule {}", rule.name())),
         }
     }
 
@@ -318,6 +321,57 @@ impl<T: Trace> State<T> {
         let varargs = self.bound_varargs(args).expect("print binds its varargs");
         let values = self.every(graph, varargs);
         self.add_conversion(graph, values, Conversion::Str, caller, site, None);
+    }
+
+    fn rule_special_method(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        args: BoundId,
+        parameter: &str,
+        method: &str,
+    ) {
+        let details = &self.calls[call.index()];
+        if !details.star.is_empty() || details.args.is_empty() {
+            return;
+        }
+        let (caller, site) = (details.caller, details.site);
+        let forwarded = self.call_past_first_argument(graph, call);
+        let dst = self.result_node(graph, call);
+        let method = self.symbols.intern(method);
+        let rule = self.rule(Rule::SpecialMethodOf {
+            method,
+            forwarded,
+            dst,
+            caller,
+            site,
+        });
+        let value = self.bound_parameter(graph, args, parameter);
+        self.attach(graph, value, rule);
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(super) fn special_method_of(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        method: Sym,
+        forwarded: CallId,
+        dst: NodeId,
+        caller: Sym,
+        site: Sym,
+    ) {
+        let name = self.symbols.text(method).to_owned();
+        if matches!(self.objects.get(object), Object::Instance { .. }) {
+            self.call_dunder(graph, object, &name, forwarded, Some(dst), Unless::Nothing);
+        } else {
+            let origin = TypeOrigin::Special {
+                caller,
+                site,
+                method,
+            };
+            self.typed_special(graph, object, &name, Some(dst), origin);
+        }
     }
 
     pub(super) fn result(&mut self, graph: &mut Graph, call: CallId, object: ObjId) {
