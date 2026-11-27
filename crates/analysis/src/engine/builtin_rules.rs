@@ -144,6 +144,7 @@ impl<T: Trace> State<T> {
             ModelRule::Convert => self.rule_convert(graph, call, args, model.arguments),
             ModelRule::Pow => self.rule_pow(graph, call, args),
             ModelRule::Print => self.rule_print(graph, call, args),
+            ModelRule::Case => self.rule_case(graph, call, receiver, model.arguments[0]),
             rule => not_ported(&format!("builtin rules: the rule {}", rule.name())),
         }
     }
