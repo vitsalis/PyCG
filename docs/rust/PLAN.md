@@ -680,9 +680,10 @@ How each becomes Rust (stage 9):
    (`<test name>-2` for the second); `FAMILIES` of the script names each
    file's family and section. A test that monkeypatches an attribute is
    not converted but listed: it states an invariant, for the simulation
-   below. So are a hypothesis property, a test that analyses no program
-   in its own process, and a test that analyses micro cases, which the
-   harness runs anyway. The 43 test files that use `tests/programs.py`
+   below. So are a test that analyses no program in its own process and
+   a test that analyses micro cases, which the harness runs anyway. A
+   hypothesis property runs with seed 0, and each of its examples is a
+   case. The 43 test files that use `tests/programs.py`
    convert this way; their families (`calls`, `classes`, `containers`,
    `outside`, ...) are the directories.
 2. **Simulation.** `pycg-solver` and `pycg-analysis` take an `Order`

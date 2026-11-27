@@ -1,0 +1,228 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.deco"
+       ],
+       "col": 1,
+       "end": [
+        8,
+        5
+       ],
+       "implicit": "decorator",
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.deco"
+       ],
+       "col": 1,
+       "end": [
+        10,
+        5
+       ],
+       "implicit": "decorator",
+       "line": 10
+      }
+     ],
+     "main.deco": [
+      {
+       "callees": [
+        "functools.wraps"
+       ],
+       "col": 5,
+       "end": [
+        4,
+        23
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "functools.partial.__call__"
+       ],
+       "col": 5,
+       "end": [
+        4,
+        23
+       ],
+       "implicit": "decorator",
+       "line": 4
+      }
+     ],
+     "main.deco.wrapper": [
+      {
+       "callees": [
+        "main.g",
+        "main.h"
+       ],
+       "col": 15,
+       "end": [
+        6,
+        23
+       ],
+       "line": 6
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.deco.wrapper"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        7
+       ],
+       "line": 13
+      }
+     ]
+    },
+    "definitions": {
+     "functools": {
+      "kind": "module",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "functools"
+     },
+     "functools.wraps": {
+      "kind": "function",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "functools"
+     },
+     "functools.wraps.<lambda1>": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "functools"
+     },
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       13
+      ],
+      "module": "main"
+     },
+     "main.deco": {
+      "kind": "function",
+      "lines": [
+       3,
+       7
+      ],
+      "module": "main"
+     },
+     "main.deco.wrapper": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.g": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.h": {
+      "kind": "function",
+      "lines": [
+       11,
+       11
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       12,
+       13
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.functools": [
+      "functools"
+     ],
+     "main.g": [
+      "main.deco.wrapper"
+     ],
+     "main.h": [
+      "main.deco.wrapper"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "functools": {
+      "file": "functools.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "functools.partial.__call__": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "functools": [],
+  "functools.partial.__call__": [],
+  "functools.wraps": [],
+  "functools.wraps.<lambda1>": [],
+  "main": [
+   "main.deco"
+  ],
+  "main.deco": [
+   "functools.partial.__call__",
+   "functools.wraps"
+  ],
+  "main.deco.wrapper": [
+   "main.g",
+   "main.h"
+  ],
+  "main.g": [],
+  "main.h": [],
+  "main.use": [
+   "main.deco.wrapper"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

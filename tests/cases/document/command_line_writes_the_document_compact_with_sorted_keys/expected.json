@@ -1,0 +1,185 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main.Box.__iter__": [
+      {
+       "callees": [
+        "<builtin>.iter"
+       ],
+       "col": 15,
+       "end": [
+        7,
+        23
+       ],
+       "line": 7
+      }
+     ],
+     "main.main": [
+      {
+       "callees": [
+        "main.Box.__iter__"
+       ],
+       "col": 16,
+       "end": [
+        11,
+        21
+       ],
+       "implicit": "iteration",
+       "line": 11
+      },
+      {
+       "callees": [
+        "re.compile"
+       ],
+       "col": 8,
+       "end": [
+        12,
+        24
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "re.Pattern.match"
+       ],
+       "col": 8,
+       "end": [
+        12,
+        36
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "foo.get.bar"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        17
+       ],
+       "line": 13
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        14,
+        14
+       ],
+       "line": 14,
+       "unresolved": "no value"
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Box": {
+      "kind": "class",
+      "lines": [
+       5,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Box",
+       "<builtin>.object"
+      ]
+     },
+     "main.Box.__iter__": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.main": {
+      "kind": "function",
+      "lines": [
+       10,
+       14
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.foo": [
+      "foo"
+     ],
+     "main.re": [
+      "re"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.iter": {
+      "known": "stub"
+     },
+     "foo.get.bar": {
+      "known": "name"
+     },
+     "re.Pattern.match": {
+      "known": "stub"
+     },
+     "re.compile": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.iter": [],
+  "foo.get.bar": [],
+  "main": [],
+  "main.Box.__iter__": [
+   "<builtin>.iter"
+  ],
+  "main.main": [
+   "foo.get.bar",
+   "main.Box.__iter__",
+   "re.Pattern.match",
+   "re.compile"
+  ],
+  "re.Pattern.match": [],
+  "re.compile": []
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.main",
+   "main:14:4#14:14",
+   "no value"
+  ]
+ ],
+ "warnings": []
+}

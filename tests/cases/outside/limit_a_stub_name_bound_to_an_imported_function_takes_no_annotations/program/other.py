@@ -1,0 +1,3 @@
+
+def report(shape):
+    pass

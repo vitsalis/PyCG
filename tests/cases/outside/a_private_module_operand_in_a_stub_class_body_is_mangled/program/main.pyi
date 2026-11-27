@@ -1,0 +1,6 @@
+
+class C:
+    import __m as m
+    import __p.a
+    def use(self, x: m.T): ...
+    def use_dotted(self, x: __p.a.T): ...

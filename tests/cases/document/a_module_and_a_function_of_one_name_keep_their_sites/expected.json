@@ -1,0 +1,108 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "p.retry": [
+      {
+       "callees": [
+        "p.retry.g"
+       ],
+       "col": 0,
+       "end": [
+        2,
+        3
+       ],
+       "line": 2
+      },
+      {
+       "callees": [
+        "p.helper"
+       ],
+       "col": 4,
+       "end": [
+        3,
+        12
+       ],
+       "line": 3,
+       "module": "p"
+      }
+     ]
+    },
+    "definitions": {
+     "p": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "p"
+     },
+     "p.helper": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "p"
+     },
+     "p.retry": {
+      "kind": "module",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "p.retry"
+     },
+     "p.retry.g": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "p.retry"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "p": {
+      "file": "p/__init__.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "p.retry": {
+      "file": "p/retry.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "p": [],
+  "p.helper": [],
+  "p.retry": [
+   "p.helper",
+   "p.retry.g"
+  ],
+  "p.retry.g": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

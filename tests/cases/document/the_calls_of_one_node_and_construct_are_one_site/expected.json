@@ -1,0 +1,175 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 5,
+       "end": [
+        4,
+        13
+       ],
+       "implicit": "decorator",
+       "line": 4
+      },
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 5,
+       "end": [
+        6,
+        13
+       ],
+       "implicit": "decorator",
+       "line": 6
+      },
+      {
+       "callees": [
+        "main.C.__iter__",
+        "main.C.__next__"
+       ],
+       "col": 9,
+       "end": [
+        8,
+        12
+       ],
+       "implicit": "iteration",
+       "line": 8
+      },
+      {
+       "callees": [
+        "<builtin>.str.format"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        25
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.C.a",
+        "main.C.b"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        25
+       ],
+       "implicit": "attribute",
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       10
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.__iter__": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.C.__next__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.C.a": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.C.b": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.property": {
+      "known": "stub"
+     },
+     "<builtin>.str.format": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.property": [],
+  "<builtin>.str.format": [],
+  "main": [
+   "<builtin>.property",
+   "<builtin>.str.format",
+   "main.C.__iter__",
+   "main.C.__next__",
+   "main.C.a",
+   "main.C.b"
+  ],
+  "main.C.__iter__": [],
+  "main.C.__next__": [],
+  "main.C.a": [],
+  "main.C.b": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

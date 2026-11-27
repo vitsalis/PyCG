@@ -1062,30 +1062,42 @@ def test_a_parameter_spells_out_each_character_outside_a_name():
 
 
 UNCONVERTED_TESTS = """
+import sys
+
 from hypothesis import given, settings, strategies as st
+
+sys.path.insert(0, {tests!r})
+from programs import analysed
 
 
 def test_nothing_analysed():
     assert True
 
 
-@settings(max_examples=2, deadline=None)
-@given(st.integers())
-def test_a_property(number):
-    assert number == number
+@settings(max_examples=3, deadline=None)
+@given(st.integers(0, 9))
+def test_a_property(tmp_path_factory, number):
+    root = tmp_path_factory.mktemp("example")
+    analysed(root, {{"main.py": f"def f(): return {{number}}\\nf()\\n"}})
 """
 
 
-def test_a_property_and_a_test_without_a_program_are_listed(tmp_path):
+def test_a_property_runs_with_one_seed_and_a_test_without_a_program_is_listed(
+    tmp_path,
+):
     test_file = tmp_path / "test_unconverted.py"
-    test_file.write_text(UNCONVERTED_TESTS)
-    out = tmp_path / "cases"
-
-    recorder, passed = cases.convert(
-        out, test_file, "tests/test_unconverted.py", "demo", "D"
-    )
-
-    assert passed
-    assert recorder.properties == ["test_a_property"]
-    assert recorder.unanalysed == ["test_nothing_analysed"]
-    assert recorder.written == []
+    test_file.write_text(UNCONVERTED_TESTS.format(tests=str(ROOT / "tests")))
+    programs = []
+    for out in (tmp_path / "first", tmp_path / "second"):
+        recorder, passed = cases.convert(
+            out, test_file, "tests/test_unconverted.py", "demo", "D"
+        )
+        assert passed
+        assert recorder.unanalysed == ["test_nothing_analysed"]
+        written = sorted(out / "demo" / path.name for path in recorder.written)
+        assert [path.name for path in written][0] == "a_property"
+        programs.append(
+            [(path / "program" / "main.py").read_text() for path in written]
+        )
+    assert len(programs[0]) > 1
+    assert programs[0] == programs[1]

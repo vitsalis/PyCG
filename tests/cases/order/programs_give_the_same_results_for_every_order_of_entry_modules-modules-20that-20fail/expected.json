@@ -1,0 +1,129 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "a.f"
+       ],
+       "col": 0,
+       "end": [
+        3,
+        3
+       ],
+       "line": 3
+      }
+     ]
+    },
+    "definitions": {
+     "a": {
+      "kind": "module",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "a"
+     },
+     "a.f": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "a"
+     },
+     "broken": {
+      "kind": "module",
+      "lines": [
+       0,
+       0
+      ],
+      "module": "broken"
+     },
+     "latin": {
+      "kind": "module",
+      "lines": [
+       0,
+       0
+      ],
+      "module": "latin"
+     },
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.broken": [
+      "broken"
+     ],
+     "main.f": [
+      "a.f"
+     ],
+     "main.latin": [
+      "latin"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "a": {
+      "file": "a.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "broken": {
+      "cause": "SyntaxError (line 1)",
+      "file": "broken.py",
+      "kind": "source",
+      "status": "failed"
+     },
+     "latin": {
+      "cause": "SyntaxError",
+      "file": "latin.py",
+      "kind": "source",
+      "status": "failed"
+     },
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "a": [],
+  "a.f": [],
+  "broken": [],
+  "latin": [],
+  "main": [
+   "a.f"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": [
+  "Skipping {root}/broken.py: cannot parse it: invalid syntax (broken.py, line 1)",
+  "Skipping {root}/latin.py: cannot read it: invalid or missing encoding declaration for '{root}/latin.py'"
+ ]
+}

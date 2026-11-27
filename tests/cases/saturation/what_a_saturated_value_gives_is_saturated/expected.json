@@ -1,0 +1,240 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        16
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 4,
+       "end": [
+        22,
+        22
+       ],
+       "line": 22
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        8,
+        13
+       ],
+       "line": 8,
+       "unresolved": "saturated"
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        13,
+        23
+       ],
+       "line": 13,
+       "unresolved": "saturated"
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        14,
+        16
+       ],
+       "line": 14,
+       "unresolved": "saturated"
+      },
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        16,
+        14
+       ],
+       "line": 16,
+       "unresolved": "saturated"
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        18,
+        20
+       ],
+       "line": 18,
+       "unresolved": "saturated"
+      },
+      {
+       "callees": [
+        "main.item"
+       ],
+       "col": 4,
+       "end": [
+        19,
+        10
+       ],
+       "line": 19
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       22
+      ],
+      "module": "main"
+     },
+     "main.h0": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "main"
+     },
+     "main.h1": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.h2": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.h3": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.h4": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.item": {
+      "kind": "function",
+      "lines": [
+       20,
+       20
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       12,
+       19
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 4,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.run",
+   "main.use"
+  ],
+  "main.h0": [],
+  "main.h1": [],
+  "main.h2": [],
+  "main.h3": [],
+  "main.h4": [],
+  "main.item": [],
+  "main.run": [],
+  "main.use": [
+   "main.item"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.run",
+   "main:8:4#8:13",
+   "saturated"
+  ],
+  [
+   "main.use",
+   "main:13:4#13:23",
+   "saturated"
+  ],
+  [
+   "main.use",
+   "main:14:4#14:16",
+   "saturated"
+  ],
+  [
+   "main.use",
+   "main:16:8#16:14",
+   "saturated"
+  ],
+  [
+   "main.use",
+   "main:18:4#18:20",
+   "saturated"
+  ]
+ ],
+ "warnings": []
+}

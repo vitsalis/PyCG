@@ -1,0 +1,132 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "a.b": [
+      {
+       "callees": [
+        "json.loads"
+       ],
+       "col": 17,
+       "end": [
+        1,
+        35
+       ],
+       "line": 1
+      }
+     ],
+     "a.b.f": [
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        3,
+        11
+       ],
+       "line": 3,
+       "unresolved": "no value"
+      },
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        3,
+        11
+       ],
+       "line": 3,
+       "module": "a.b",
+       "unresolved": "outside value"
+      }
+     ]
+    },
+    "definitions": {
+     "a": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "a"
+     },
+     "a.b": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "a.b"
+     },
+     "a.b.f": {
+      "kind": "function",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "a"
+     }
+    },
+    "exports": {
+     "a.b.json": [
+      "json"
+     ],
+     "a.b.x": [
+      "<unknown>"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "a": {
+      "file": "a/__init__.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "a.b": {
+      "file": "a/b.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "json.loads": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "a": [],
+  "a.b": [
+   "json.loads"
+  ],
+  "a.b.f": [],
+  "json.loads": []
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "a.b.f",
+   "a.b:3:8#3:11",
+   "outside value"
+  ],
+  [
+   "a.b.f",
+   "a:3:8#3:11",
+   "no value"
+  ]
+ ],
+ "warnings": []
+}

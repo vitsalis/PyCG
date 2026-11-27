@@ -1,0 +1,132 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main.fetch": [
+      {
+       "callees": [
+        "untyped.get"
+       ],
+       "col": 4,
+       "end": [
+        4,
+        20
+       ],
+       "line": 4
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        4,
+        27
+       ],
+       "line": 4,
+       "unresolved": "outside value"
+      },
+      {
+       "callees": [
+        "requests.get"
+       ],
+       "col": 11,
+       "end": [
+        5,
+        28
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "requests.Response.json"
+       ],
+       "col": 11,
+       "end": [
+        5,
+        35
+       ],
+       "line": 5
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       5
+      ],
+      "module": "main"
+     },
+     "main.fetch": {
+      "kind": "function",
+      "lines": [
+       3,
+       5
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.requests": [
+      "requests"
+     ],
+     "main.untyped": [
+      "untyped"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "requests.Response.json": {
+      "known": "stub"
+     },
+     "requests.get": {
+      "known": "stub"
+     },
+     "untyped.get": {
+      "known": "name"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [],
+  "main.fetch": [
+   "requests.Response.json",
+   "requests.get",
+   "untyped.get"
+  ],
+  "requests.Response.json": [],
+  "requests.get": [],
+  "untyped.get": []
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.fetch",
+   "main:4:4#4:27",
+   "outside value"
+  ]
+ ],
+ "warnings": []
+}

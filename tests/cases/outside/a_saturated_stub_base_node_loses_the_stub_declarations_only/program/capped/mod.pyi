@@ -1,0 +1,3 @@
+
+from collections.abc import Container, Hashable, Iterator, Sized
+class Wide(Iterator[int], Sized, Hashable, Container[int]): ...

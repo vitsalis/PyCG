@@ -1,0 +1,32 @@
+{
+ "documents": [],
+ "edges": {
+  "io.TextIOWrapper.write": [],
+  "main": [],
+  "main.Writer.__init__": [
+   "pool_lib.Client"
+  ],
+  "main.Writer.emit": [
+   "io.TextIOWrapper.write",
+   "os.path.join"
+  ],
+  "main.Writer.query": [
+   "pool_lib.pool.conn.execute"
+  ],
+  "main.join": [
+   "os.path.join"
+  ],
+  "os.path.join": [],
+  "pool_lib.Client": [],
+  "pool_lib.pool.conn.execute": []
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.Writer.query",
+   "main:19:8#19:26",
+   "outside value"
+  ]
+ ],
+ "warnings": []
+}

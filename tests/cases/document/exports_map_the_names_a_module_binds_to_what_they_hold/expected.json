@@ -1,0 +1,122 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {},
+    "definitions": {
+     "pkg": {
+      "kind": "module",
+      "lines": [
+       1,
+       8
+      ],
+      "module": "pkg"
+     },
+     "pkg.mod": {
+      "kind": "module",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "pkg.mod"
+     },
+     "pkg.mod.C": {
+      "kind": "class",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "pkg.mod",
+      "mro": [
+       "pkg.mod.C",
+       "<builtin>.object"
+      ]
+     },
+     "pkg.mod.helper": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "pkg.mod"
+     },
+     "pkg.other": {
+      "kind": "module",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "pkg.other"
+     },
+     "pkg.other.helper": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "pkg.other"
+     }
+    },
+    "exports": {
+     "pkg.C": [
+      "pkg.mod.C"
+     ],
+     "pkg.either": [
+      "pkg.mod.helper",
+      "pkg.other.helper"
+     ],
+     "pkg.get": [
+      "requests.get"
+     ],
+     "pkg.run": [
+      "pkg.mod.helper"
+     ],
+     "pkg.sys": [
+      "sys"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "pkg": {
+      "file": "pkg/__init__.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "pkg.mod": {
+      "file": "pkg/mod.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "pkg.other": {
+      "file": "pkg/other.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "pkg": [],
+  "pkg.mod": [],
+  "pkg.mod.helper": [],
+  "pkg.other": [],
+  "pkg.other.helper": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

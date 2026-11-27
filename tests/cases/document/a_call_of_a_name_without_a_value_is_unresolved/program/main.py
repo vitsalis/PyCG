@@ -1,0 +1,2 @@
+def run():
+    (lambda: None)()()

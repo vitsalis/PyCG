@@ -30,10 +30,11 @@ invariant for the simulation tests, not a program's output. A test that
 only changes the directory or the environment is converted, its paths
 taken from the root of its program.
 A test that analyses no program in its own process (one that runs the
-command line) is listed too, and so are a hypothesis property, whose
-programs differ from run to run, and a test that analyses micro cases,
-which the harness runs already: it states a property of every case. The
-cases of the file are written again from scratch.
+command line) is listed too, and so is a test that analyses micro cases,
+which the harness runs already: it states a property of every case. A
+hypothesis property runs with seed 0, so its examples, each a case, are
+the same on every run. The cases of the file are written again from
+scratch.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -44,7 +45,170 @@ PROGRAM = "program"
 SKIPPED_FILES = ("__pycache__",)
 SNIPPETS = ROOT / "evaluation" / "micro-benchmark" / "snippets"
 FAMILIES = {
-    "tests/test_super.py": ("classes", "`super()`"),
+    "tests/test_abstract_classes.py": (
+        "classes",
+        "Classes that Python does not instantiate",
+    ),
+    "tests/test_annotations.py": (
+        "annotations",
+        "Annotations",
+    ),
+    "tests/test_arguments.py": (
+        "calls",
+        "Arguments",
+    ),
+    "tests/test_builtin_models.py": (
+        "builtins",
+        "Selected standard-library operations",
+    ),
+    "tests/test_call_arity.py": (
+        "calls",
+        "Calls",
+    ),
+    "tests/test_callbacks.py": (
+        "calls",
+        "Call backs",
+    ),
+    "tests/test_class_rule_limits.py": (
+        "classes",
+        "Classes and hierarchies",
+    ),
+    "tests/test_class_tests.py": (
+        "classes",
+        "Class tests",
+    ),
+    "tests/test_containers.py": (
+        "containers",
+        "Containers",
+    ),
+    "tests/test_declared_types.py": (
+        "annotations",
+        "Declared types (idea 4)",
+    ),
+    "tests/test_decorators_and_descriptors.py": (
+        "calls",
+        "Decorators and functions that return a parameter",
+    ),
+    "tests/test_defaults_and_receivers.py": (
+        "calls",
+        "Arguments",
+    ),
+    "tests/test_descriptors.py": (
+        "classes",
+        "Descriptors",
+    ),
+    "tests/test_document.py": (
+        "document",
+        "What is reported as an edge",
+    ),
+    "tests/test_flow.py": (
+        "flow",
+        "Paths, joins and loops",
+    ),
+    "tests/test_generator.py": (
+        "language",
+        "The assignment graph (idea 1)",
+    ),
+    "tests/test_iteration.py": (
+        "containers",
+        "Iteration",
+    ),
+    "tests/test_language_items.py": (
+        "language",
+        "Language features",
+    ),
+    "tests/test_library_iteration.py": (
+        "outside",
+        "Selected standard-library operations",
+    ),
+    "tests/test_literal_imports.py": (
+        "language",
+        "Imports",
+    ),
+    "tests/test_match.py": (
+        "language",
+        "`match`",
+    ),
+    "tests/test_metaclasses.py": (
+        "classes",
+        "Metaclasses",
+    ),
+    "tests/test_object_hooks.py": (
+        "classes",
+        "Attribute hooks",
+    ),
+    "tests/test_order_independence.py": (
+        "order",
+        "Order independence",
+    ),
+    "tests/test_outside_call_results.py": (
+        "outside",
+        "Typed outside values",
+    ),
+    "tests/test_outside_callbacks.py": (
+        "outside",
+        "Call backs",
+    ),
+    "tests/test_outside_types.py": (
+        "outside",
+        "Typed outside values",
+    ),
+    "tests/test_own_stubs.py": (
+        "outside",
+        "Declared types (idea 4)",
+    ),
+    "tests/test_patterns.py": (
+        "language",
+        "Computed attribute names",
+    ),
+    "tests/test_records.py": (
+        "records",
+        "The solver",
+    ),
+    "tests/test_reflection.py": (
+        "reflection",
+        "Namespaces read by reflection",
+    ),
+    "tests/test_saturation.py": (
+        "saturation",
+        "Saturation and the rounds",
+    ),
+    "tests/test_slots.py": (
+        "classes",
+        "The class statement",
+    ),
+    "tests/test_special_methods.py": (
+        "protocols",
+        "Special methods and protocols",
+    ),
+    "tests/test_super.py": (
+        "classes",
+        "`super()`",
+    ),
+    "tests/test_third_party_stubs.py": (
+        "outside",
+        "Stub data",
+    ),
+    "tests/test_type_three_arguments.py": (
+        "classes",
+        "The class statement",
+    ),
+    "tests/test_waiting_lookups.py": (
+        "waiting",
+        "Rules that wait",
+    ),
+    "tests/test_with_and_exceptions.py": (
+        "language",
+        "Exceptions, `finally` and `with`",
+    ),
+    "tests/unit/test_imports.py": (
+        "imports",
+        "Imports",
+    ),
+    "tests/unit/test_type_only_names.py": (
+        "imports",
+        "Imports",
+    ),
 }
 ENGINE_LOGGER = "pycg"
 ROOT_IN_WARNINGS = "{root}"
@@ -130,7 +294,6 @@ class Recorder:
         self.written = []
         self.skipped = []
         self.unanalysed = []
-        self.properties = []
         self.micro = []
         self.failed = []
 
@@ -138,9 +301,6 @@ class Recorder:
     def pytest_runtest_call(self, item):
         from pycg.pycg import CallGraphGenerator
 
-        if getattr(item.obj, "is_hypothesis_test", False):
-            self.properties.append(item.name)
-            return (yield)
         runs = []
         tmp_path = item.funcargs.get("tmp_path")
         analyze = CallGraphGenerator.analyze
@@ -275,7 +435,8 @@ def convert(cases, test_file, source, family, design):
     remove_cases_of(cases, source, family)
     recorder = Recorder(cases, source, family, design)
     status = pytest.main(
-        ["-q", "-p", "no:cacheprovider", str(test_file)], plugins=[recorder]
+        ["-q", "-p", "no:cacheprovider", "--hypothesis-seed=0", str(test_file)],
+        plugins=[recorder],
     )
     return recorder, status == 0 and not recorder.failed
 
@@ -297,8 +458,6 @@ def main(argv=None):
         print(f"not converted (monkeypatches an attribute): {source}::{name}")
     for name in recorder.micro:
         print(f"not converted (a property of the micro cases): {source}::{name}")
-    for name in recorder.properties:
-        print(f"not converted (a hypothesis property): {source}::{name}")
     for name in recorder.unanalysed:
         print(f"not converted (analyses no program in process): {source}::{name}")
     print(f"{len(recorder.written)} cases written to {CASES / family}")

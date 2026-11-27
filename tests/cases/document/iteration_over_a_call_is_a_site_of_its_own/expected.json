@@ -1,0 +1,126 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.make"
+       ],
+       "col": 9,
+       "end": [
+        4,
+        15
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "main.Items.__iter__"
+       ],
+       "col": 9,
+       "end": [
+        4,
+        15
+       ],
+       "implicit": "iteration",
+       "line": 4
+      }
+     ],
+     "main.Items.__iter__": [
+      {
+       "callees": [
+        "<builtin>.iter"
+       ],
+       "col": 31,
+       "end": [
+        2,
+        39
+       ],
+       "line": 2
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Items": {
+      "kind": "class",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "main",
+      "mro": [
+       "main.Items",
+       "<builtin>.object"
+      ]
+     },
+     "main.Items.__iter__": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.make": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.iter": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.iter": [],
+  "main": [
+   "main.Items.__iter__",
+   "main.make"
+  ],
+  "main.Items.__iter__": [
+   "<builtin>.iter"
+  ],
+  "main.make": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}
