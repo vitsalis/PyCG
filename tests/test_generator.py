@@ -1116,6 +1116,42 @@ def test_the_analysis_makes_its_externals_and_stub_queries_in_one_order(tmp_path
     assert ["member", "builtins.dict", "__contains__"] in made
 
 
+MODULES_PROGRAM = {
+    "main.py": "import pkg.alpha, pkg.beta, pkg.inner.gamma, delta, epsilon\n",
+    "pkg/__init__.py": "",
+    "pkg/alpha.py": "",
+    "pkg/beta.py": "",
+    "pkg/inner/__init__.py": "",
+    "pkg/inner/gamma.py": "",
+    "delta.py": "",
+    "epsilon.py": "",
+}
+
+
+MODULES_SCRIPT = """
+import json, sys
+from pycg.analysis import semantics
+from pycg.pycg import CallGraphGenerator
+made = []
+module = semantics.Analysis.module
+def recorded_module(analysis, name):
+    made.append(name)
+    return module(analysis, name)
+semantics.Analysis.module = recorded_module
+CallGraphGenerator(sys.argv[2:], sys.argv[1]).analyze()
+print(json.dumps(made))
+"""
+
+
+def test_the_analysis_makes_its_modules_in_one_order(tmp_path):
+    write(tmp_path, MODULES_PROGRAM)
+    arguments = [str(tmp_path), str(tmp_path / "main.py")]
+    orders = [run_python(MODULES_SCRIPT, arguments, seed) for seed in (0, 1, 2, 3)]
+
+    assert len(set(orders)) == 1
+    assert "pkg.inner.gamma" in json.loads(orders[0])
+
+
 def test_assignment_graph_shows_points_to_sets(tmp_path):
     source = "def f(): pass\nclass C: pass\ng = f\nc = C()\n"
     assignment = analysed(tmp_path, {"main.py": source}).output_points_to()

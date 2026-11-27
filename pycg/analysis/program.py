@@ -201,7 +201,7 @@ class Program:
         names = set(self._imports.get_import_graph())
         for name in list(names):
             names.update(self._imports.packages(name))
-        submodules = [(name, self.analysis.module(name)) for name in names]
+        submodules = [(name, self.analysis.module(name)) for name in sorted(names)]
         submodules += [
             (name, self.analysis.external(name)) for name in self.extension_modules
         ]
