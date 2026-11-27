@@ -50,15 +50,19 @@ impl<T: Trace> Engine<T> {
                 .or_default()
                 .extend(indices);
         }
+        let sites: Vec<Box<str>> = self.state.tables.zero_argument_super.clone();
+        for site in sites {
+            let site = self.state.symbols.intern(&site);
+            self.state.zero_argument_super.insert(site);
+        }
+        let names: Vec<Box<str>> = self.state.tables.read_namespaces.clone();
+        for name in names {
+            let name = self.state.symbols.intern(&name);
+            self.state.read_namespaces.insert(name);
+        }
         let tables = &self.state.tables;
         if !tables.literal_imports.is_empty() {
             not_ported("the builder table literal_imports");
-        }
-        if !tables.read_namespaces.is_empty() {
-            not_ported("the builder table read_namespaces");
-        }
-        if !tables.zero_argument_super.is_empty() {
-            not_ported("the builder table zero_argument_super");
         }
     }
 
@@ -595,15 +599,10 @@ impl<T: Trace> Analysis for Engine<T> {
         not_ported("the builder call add_special_call")
     }
 
-    fn add_named_load(
-        &mut self,
-        _obj: NodeId,
-        _name: NodeId,
-        _dst: NodeId,
-        _caller: &str,
-        _site: &str,
-    ) {
-        not_ported("the builder call add_named_load")
+    fn add_named_load(&mut self, obj: NodeId, name: NodeId, dst: NodeId, caller: &str, site: &str) {
+        self.sync();
+        self.state
+            .add_named_load(&mut self.graph, obj, name, dst, caller, site);
     }
 
     fn callable_filter(&mut self, _source: NodeId, _dst: NodeId, _holds: bool) {

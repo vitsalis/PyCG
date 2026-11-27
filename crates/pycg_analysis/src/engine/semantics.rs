@@ -55,6 +55,7 @@ pub enum Role {
     ModuleGetattr(Sym),
     Protocol(Sym),
     Property(AccessKind, Sym),
+    NamedLoad,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -179,6 +180,8 @@ impl<T: Trace> State<T> {
                 }
             }
             Object::BuiltinMethod { .. } => self.call_builtin_method(graph, object, call),
+            Object::Typed { .. } => not_ported("outside calls of typed values"),
+            Object::Super { .. } => {}
             Object::Saturated
             | Object::Module(_)
             | Object::Fallback { .. }

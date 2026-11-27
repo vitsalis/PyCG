@@ -201,6 +201,10 @@ impl<T: Trace> State<T> {
                 let inexact = !exact;
                 self.external(graph, &name, 0, inexact)
             }
+            &Object::Typed { name, .. } => {
+                let name = self.symbols.text(name).to_string();
+                self.external(graph, &name, 0, false)
+            }
             Object::Wrapper { kind, .. } => {
                 let kind = self.symbols.text(*kind).to_string();
                 let (_, name) = self.kind_class(&kind);
@@ -405,6 +409,22 @@ impl<T: Trace> State<T> {
                 }
             }
         }
+    }
+
+    pub(super) fn typed(&mut self, graph: &mut Graph, class: &str) -> ObjId {
+        if let Some(&typed) = self.typed_objects.get(class) {
+            return typed;
+        }
+        let name = outside_name(&self.stubs.public_name(class));
+        let abstract_ = self.stubs.is_abstract(class);
+        let object = Object::Typed {
+            class: self.symbols.intern(class),
+            name: self.symbols.intern(&name),
+            abstract_,
+        };
+        let typed = self.new_object(graph, object);
+        self.typed_objects.insert(class.to_string(), typed);
+        typed
     }
 
     pub(super) fn imported_value(&mut self, graph: &mut Graph, name: &str) -> NodeId {

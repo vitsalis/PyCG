@@ -89,6 +89,20 @@ impl<T: Trace> State<T> {
                 );
             }
             ModelRule::PropertyRun => self.rule_property_run(graph, call, args, model.arguments[0]),
+            ModelRule::Getattr => self.rule_getattr(graph, call, args, model.arguments[0]),
+            ModelRule::Setattr => {
+                let object = self.args(graph, args, "obj");
+                let name = self.args(graph, args, "name");
+                let value = self.args(graph, args, "value");
+                self.named_access(graph, object, name, None, Some(value), call, false);
+            }
+            ModelRule::Delattr => {
+                let object = self.args(graph, args, "obj");
+                let name = self.args(graph, args, "name");
+                self.named_access(graph, object, name, None, None, call, true);
+            }
+            ModelRule::Super => self.rule_super(graph, call, args),
+            ModelRule::Type => self.rule_type(graph, call, args),
             ModelRule::Bind => {
                 self.rule_bind(graph, call, receiver.expect("a bound wrapper"), args)
             }
@@ -536,5 +550,382 @@ impl<T: Trace> State<T> {
 
     pub(super) fn wrapper_kind_is(&self, object: ObjId, wanted: &str) -> bool {
         matches!(self.objects.get(object), &Object::Wrapper { kind, .. } if self.symbols.text(kind) == wanted)
+    }
+}
+
+pub struct DynamicAccess {
+    name: NodeId,
+    object: NodeId,
+    dst: Option<NodeId>,
+    src: Option<NodeId>,
+    call: CallId,
+    delete: bool,
+    dynamic: bool,
+    done: Vec<Sym>,
+}
+
+impl<T: Trace> State<T> {
+    fn rule_getattr(&mut self, graph: &mut Graph, call: CallId, args: BoundId, builtin: &str) {
+        let (dst, object) = if builtin == "getattr" {
+            let dst = match self.calls[call.index()].dst {
+                Some(dst) => dst,
+                None => self.node(graph, None),
+            };
+            let default = self.args(graph, args, "default");
+            self.add_edge(graph, default, dst);
+            (dst, self.args(graph, args, "object"))
+        } else {
+            let dst = self.node(graph, None);
+            (dst, self.args(graph, args, "obj"))
+        };
+        let name = self.args(graph, args, "name");
+        self.named_access(graph, object, name, Some(dst), None, call, false);
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn named_access(
+        &mut self,
+        graph: &mut Graph,
+        object: NodeId,
+        name: NodeId,
+        dst: Option<NodeId>,
+        src: Option<NodeId>,
+        call: CallId,
+        delete: bool,
+    ) {
+        let argument = self.calls[call.index()].args.get(1).copied().flatten();
+        let literal = match argument {
+            Some(node) => self.literal_name(graph, node),
+            None => None,
+        };
+        if let Some(attr) = literal {
+            let text = self.symbols.text(attr).to_string();
+            self.access_named(graph, &text, object, dst, src, call, delete);
+            return;
+        }
+        self.dynamic_accesses.push(DynamicAccess {
+            name,
+            object,
+            dst,
+            src,
+            call,
+            delete,
+            dynamic: false,
+            done: Vec::new(),
+        });
+        if src.is_none() && !delete {
+            let rule = self.rule(Rule::LoadByPattern);
+            self.attach(graph, name, rule);
+        }
+    }
+
+    fn literal_name(&mut self, graph: &mut Graph, node: NodeId) -> Option<Sym> {
+        let objects = self.objects_of(graph, node);
+        let [object] = objects[..] else {
+            return None;
+        };
+        let Object::Const {
+            value: Literal::Str(code_points),
+            ..
+        } = self.objects.get(object)
+        else {
+            return None;
+        };
+        if self.constants.get(&object) != Some(&node) {
+            return None;
+        }
+        let text: Option<String> = code_points
+            .iter()
+            .map(|&point| char::from_u32(point))
+            .collect();
+        let Some(text) = text else {
+            not_ported("an attribute name with a lone surrogate")
+        };
+        Some(self.symbols.intern(&text))
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn access_named(
+        &mut self,
+        graph: &mut Graph,
+        attr: &str,
+        object: NodeId,
+        dst: Option<NodeId>,
+        src: Option<NodeId>,
+        call: CallId,
+        delete: bool,
+    ) {
+        let details = &self.calls[call.index()];
+        let caller = self.symbols.text(details.caller).to_string();
+        let site = self.symbols.text(details.site).to_string();
+        if let Some(dst) = dst {
+            self.add_load(graph, object, attr, dst, &caller, &site);
+        }
+        if src.is_some() {
+            self.add_store(graph, object, attr, src, &caller, &site);
+        }
+        if delete {
+            self.add_delete(graph, object, attr, &caller, &site);
+        }
+    }
+
+    pub(super) fn add_named_load(
+        &mut self,
+        graph: &mut Graph,
+        object: NodeId,
+        name: NodeId,
+        dst: NodeId,
+        caller: &str,
+        site: &str,
+    ) {
+        let key = SiteKey {
+            caller: self.symbols.intern(caller),
+            site: self.symbols.intern(site),
+            role: Role::NamedLoad,
+            implicit: true,
+        };
+        let call = self.site_call(graph, key, &[], None, None);
+        self.dynamic_accesses.push(DynamicAccess {
+            name,
+            object,
+            dst: Some(dst),
+            src: None,
+            call,
+            delete: false,
+            dynamic: false,
+            done: Vec::new(),
+        });
+    }
+
+    pub(super) fn complete_dynamic_accesses(&mut self, graph: &mut Graph) -> bool {
+        let mut added = false;
+        for index in 0..self.dynamic_accesses.len() {
+            if self.dynamic_accesses[index].dynamic {
+                continue;
+            }
+            let name = self.dynamic_accesses[index].name;
+            let mut names: Vec<Sym> = Vec::new();
+            for object in self.objects_of(graph, name) {
+                if let Object::Const {
+                    value: Literal::Str(code_points),
+                    ..
+                } = self.objects.get(object)
+                {
+                    let text: Option<String> = code_points
+                        .iter()
+                        .map(|&point| char::from_u32(point))
+                        .collect();
+                    let Some(text) = text else {
+                        not_ported("an attribute name with a lone surrogate")
+                    };
+                    let sym = self.symbols.intern(&text);
+                    if !names.contains(&sym) {
+                        names.push(sym);
+                    }
+                }
+            }
+            let access = &self.dynamic_accesses[index];
+            let counted = if access.src.is_none() && !access.delete {
+                names
+                    .iter()
+                    .filter(|name| !self.namespace_names_read.contains(name))
+                    .count()
+            } else {
+                names.len()
+            };
+            if counted > crate::models::DYNAMIC_NAMES_MAX {
+                self.dynamic_accesses[index].dynamic = true;
+                continue;
+            }
+            for attr in names {
+                if self.dynamic_accesses[index].done.contains(&attr) {
+                    continue;
+                }
+                self.dynamic_accesses[index].done.push(attr);
+                let access = &self.dynamic_accesses[index];
+                let (object, dst, src, call, delete) = (
+                    access.object,
+                    access.dst,
+                    access.src,
+                    access.call,
+                    access.delete,
+                );
+                let text = self.symbols.text(attr).to_string();
+                self.access_named(graph, &text, object, dst, src, call, delete);
+                added = true;
+            }
+        }
+        added
+    }
+
+    fn rule_super(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
+        if self.calls[call.index()].dst.is_none() {
+            return;
+        }
+        let class = self.args(graph, args, "type");
+        let object = self.args(graph, args, "object_or_type");
+        let site = self.calls[call.index()].site;
+        let explicit = !self.zero_argument_super.contains(&site);
+        let rule = self.rule(Rule::SuperClass {
+            object,
+            call,
+            explicit,
+        });
+        self.attach(graph, class, rule);
+    }
+
+    pub(super) fn super_class(
+        &mut self,
+        graph: &mut Graph,
+        class: ObjId,
+        object: NodeId,
+        call: CallId,
+        explicit: bool,
+    ) {
+        let dst = self.calls[call.index()]
+            .dst
+            .expect("a super call has a result");
+        if explicit
+            && matches!(
+                self.objects.get(class),
+                Object::External(_) | Object::UnknownExternal(_)
+            )
+        {
+            let rule = self.rule(Rule::SuperAfterOutside { class, dst });
+            self.attach(graph, object, rule);
+            return;
+        }
+        if !self.objects.is_class(class) {
+            return;
+        }
+        if explicit {
+            self.super_with_arguments(graph, class, object, call);
+        } else {
+            let rule = self.rule(Rule::SuperObject { class, dst });
+            self.attach(graph, object, rule);
+        }
+    }
+
+    pub(super) fn super_after_outside(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        class: ObjId,
+        dst: NodeId,
+    ) {
+        let owner = match self.objects.get(object) {
+            &Object::Instance { class, .. } => class,
+            _ => object,
+        };
+        if let Object::Class(owner) = self.objects.get(owner)
+            && owner.mros.iter().any(|mro| mro.contains(&class))
+        {
+            let made = self.super_object(graph, class, object);
+            self.add_object(graph, dst, made);
+        }
+    }
+
+    pub(super) fn super_object_rule(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        class: ObjId,
+        dst: NodeId,
+    ) {
+        if matches!(
+            self.objects.get(object),
+            Object::Instance { .. } | Object::Class(_)
+        ) {
+            let made = self.super_object(graph, class, object);
+            self.add_object(graph, dst, made);
+        }
+    }
+
+    fn super_with_arguments(
+        &mut self,
+        graph: &mut Graph,
+        class: ObjId,
+        object: NodeId,
+        call: CallId,
+    ) {
+        if !self.super_pairs.insert((call, class)) {
+            return;
+        }
+        self.super_accepted.entry(class).or_default();
+        let dst = self.calls[call.index()]
+            .dst
+            .expect("a super call has a result");
+        let rule = self.rule(Rule::SuperGiven { class, dst });
+        self.attach(graph, object, rule);
+        let instances = self.objects.class(class).instances;
+        let family = self.family(graph, class);
+        for node in [instances, family] {
+            let rule = self.rule(Rule::SuperAcceptedBy {
+                class,
+                given: object,
+                dst,
+            });
+            self.attach(graph, node, rule);
+        }
+    }
+
+    pub(super) fn super_given(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        class: ObjId,
+        dst: NodeId,
+    ) {
+        if self.super_accepted[&class].contains(&object) {
+            let made = self.super_object(graph, class, object);
+            self.add_object(graph, dst, made);
+        }
+    }
+
+    pub(super) fn super_accepted_by(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        class: ObjId,
+        given: NodeId,
+        dst: NodeId,
+    ) {
+        self.super_accepted
+            .get_mut(&class)
+            .expect("the accepted of a super class")
+            .insert(object);
+        if self.objects_of(graph, given).contains(&object) {
+            let made = self.super_object(graph, class, object);
+            self.add_object(graph, dst, made);
+        }
+    }
+
+    fn super_object(&mut self, graph: &mut Graph, class: ObjId, receiver: ObjId) -> ObjId {
+        if let Some(&found) = self.supers.get(&(class, receiver)) {
+            return found;
+        }
+        let found = self.new_object(graph, Object::Super { class, receiver });
+        self.supers.insert((class, receiver), found);
+        found
+    }
+
+    fn rule_type(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
+        let Some(dst) = self.calls[call.index()].dst else {
+            return;
+        };
+        let typed = self.typed(graph, "builtins.type");
+        self.add_object(graph, dst, typed);
+        let details = &self.calls[call.index()];
+        let written = details.args.len() == 3
+            && details.keywords.is_empty()
+            && details.star.is_empty()
+            && details.double_star.is_empty();
+        if written {
+            self.args(graph, args, "object");
+            let bases = self.args(graph, args, "bases");
+            self.args(graph, args, "dict");
+            let rule = self.rule(Rule::TypeBases);
+            self.attach(graph, bases, rule);
+        }
     }
 }

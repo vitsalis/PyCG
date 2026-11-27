@@ -730,6 +730,39 @@ impl<T: Trace> State<T> {
                 self.load_builtin_attribute(graph, object, &type_name, attr, dst);
             }
             Object::BuiltinMethod { .. } => {}
+            &Object::Super { class, receiver } => {
+                let instance = matches!(self.objects.get(receiver), Object::Instance { .. });
+                let owner = match self.objects.get(receiver) {
+                    &Object::Instance { class, .. } => class,
+                    _ => receiver,
+                };
+                let key = LookupKey {
+                    attr: LookupAttr::Name(attr),
+                    receiver: Some(receiver),
+                    after: Some(class),
+                    unless: Unless::Explicit,
+                };
+                let found = self.lookup(graph, owner, key);
+                if instance {
+                    self.deliver_through(graph, found, receiver, load, None);
+                } else {
+                    let rule = self.rule(Rule::ClassAttribute { class: owner, load });
+                    self.attach(graph, found, rule);
+                    let rule = self.rule(Rule::SuperMetaclass { sup: object, load });
+                    let metaclass = self.objects.class(receiver).metaclass;
+                    self.attach(graph, metaclass, rule);
+                }
+            }
+            &Object::Typed { class, name, .. } => {
+                let class = self.symbols.text(class).to_string();
+                let prefix = self.symbols.text(name).to_string();
+                let text = self.symbols.text(attr).to_string();
+                if !self.stubs.member(&class, &text).is_empty() {
+                    self.stub_member(graph, object, &class, &prefix, attr, dst);
+                } else if !self.stubs.member(&class, "__getattr__").is_empty() {
+                    not_ported("outside types: the __getattr__ of a typed value");
+                }
+            }
             Object::Coroutine { .. } => {
                 let name = format!("types.CoroutineType.{}", self.symbols.text(attr));
                 let external = self.external(graph, &name, 2, false);
@@ -890,6 +923,27 @@ impl<T: Trace> State<T> {
             return;
         }
         self.add_edge(graph, src, field);
+    }
+
+    pub(super) fn super_metaclass(
+        &mut self,
+        graph: &mut Graph,
+        meta: ObjId,
+        sup: ObjId,
+        load: AccessId,
+    ) {
+        let &Object::Super { class, receiver } = self.objects.get(sup) else {
+            panic!("a super object")
+        };
+        let key = LookupKey {
+            attr: LookupAttr::Name(self.access(load).attr),
+            receiver: Some(receiver),
+            after: Some(class),
+            unless: Unless::Explicit,
+        };
+        let found = self.lookup(graph, meta, key);
+        let dst = self.access(load).dst.expect("a load has a result");
+        self.add_edge(graph, found, dst);
     }
 
     pub(super) fn deliver_load(&mut self, graph: &mut Graph, object: ObjId, load: AccessId) {
