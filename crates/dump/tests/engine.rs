@@ -45,7 +45,10 @@ fn the_engine_gives_the_trace_and_points_to_of_the_oracle_on_its_builder_calls()
             vector.display(),
             String::from_utf8_lossy(&output.stderr)
         );
-        for dump in ["D3.jsonl", "D5.jsonl"] {
+        let carried = ["D6in.json"]
+            .into_iter()
+            .filter(|dump| vector.join(dump).exists());
+        for dump in ["D3.jsonl", "D5.jsonl"].into_iter().chain(carried) {
             assert_eq!(
                 read(&out.join(dump)),
                 read(&vector.join(dump)),
