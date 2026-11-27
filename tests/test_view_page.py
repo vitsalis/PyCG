@@ -441,7 +441,7 @@ def test_module_map_marks_failed_and_extension_modules(tmp_path):
     )
     assert broken["definitions"] == 0
     deep = modules["shop.deep"]
-    assert (deep["status"], deep["cause"]) == ("partial", "RecursionError")
+    assert (deep["status"], deep["cause"]) == ("partial", "DeepNesting (line 5)")
     assert deep["definitions"] == 1
     speedups = modules["shop._speedups"]
     assert speedups["kind"] == "extension"
@@ -796,10 +796,10 @@ def test_partial_module_is_marked_incomplete(tmp_path):
         """,
         hash="#shop.deep",
     )
-    assert "partial: RecursionError" in out["card"]
+    assert "partial: DeepNesting (line 5)" in out["card"]
     assert "may call less" in out["card"]
     assert "deep" in next(text for text in out["tree"] if "partial" in text)
-    assert "partial" in out["row"] and "RecursionError" in out["row"]
+    assert "partial" in out["row"] and "DeepNesting" in out["row"]
 
 
 def test_shadowed_files_are_marked_on_the_card_tree_and_module_map(tmp_path):

@@ -220,8 +220,28 @@ real calls of other programs, fails that test.
    of the names that it follows (idea 2). The builder never reads a
    points-to set. It walks constructs that it does not model, so the calls
    inside them are found; it does not walk code that cannot run. Long
-   chains (`a + b + c + ...`, which nest on the left) are walked in a loop,
-   so they do not exhaust the Python stack.
+   chains (`a + b + c + ...`, which nest on the left, and `elif` chains)
+   are walked in a loop, so they do not exhaust the Python stack. Other
+   nesting is bounded: the builder stops before the first top-level
+   statement that nests deeper than `NESTING_MAX` (247) levels, and the
+   module is `partial`. A statement is level 1 and each child one level
+   deeper, except the left operand of a binary operation and the `elif`
+   of an `if`, which are at their parent's level; contexts and operators
+   do not count. 247 is the deepest nesting that the most stack-hungry
+   construct measured still builds from the command line at Python's
+   default recursion limit of 1,000, on CPython 3.14.10: conditional
+   expressions nested in their `else` (`a if b else a if b else ...`),
+   245 of them in an assignment. Of 22 constructs, the others either
+   build deeper (subscripts 329 levels; attributes, method chains,
+   lambdas, unary operators, `not` and `**` about 493) or are stopped
+   earlier by the parser (100 levels of indentation, 200 nested brackets,
+   150 nested f-strings). So every module that builds today at that
+   limit still builds, and where the analysis stops no longer depends on
+   the stack. So that this holds whoever calls PyCG, `Program.analyse`
+   raises the recursion limit during the analysis to the caller's stack
+   depth plus `NESTING_STACK_FRAMES` (1,000, the limit of the
+   measurement) and restores it afterwards. The deepest statement of the micro, macro and scale sets
+   (11,109 modules) is 31 levels.
 4. **Linking**. When all modules are built, make each module a field of its
    package (also the packages of an entry module that no import names,
    without analysing their source, as far as an import resolves them as
