@@ -6,6 +6,7 @@ mod fixpoint;
 pub mod hierarchy;
 pub mod objects;
 mod outside;
+mod outside_calls;
 mod rules;
 mod semantics;
 pub mod symbols;
@@ -26,6 +27,7 @@ use attributes::{
 };
 use hierarchy::{LookupAttr, Namespace, Unless};
 use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
+use outside_calls::{Bound, BoundId, Known};
 pub use rules::RuleId;
 use rules::{Rule, WaitingRule};
 pub use semantics::CallId;
@@ -129,6 +131,13 @@ struct State<T: Trace> {
     pattern_states: FxHashMap<ObjId, ()>,
     field_readers: FxHashMap<(ObjId, Sym), OrderedMap<NodeId, Vec<ObjId>>>,
     builder_fields: FxHashMap<ObjId, BuilderFields>,
+    external_callees: FxHashMap<Sym, Known>,
+    typed_callbacks: FxHashSet<(CallId, ObjId)>,
+    stub_bindings: FxHashMap<(CallId, Box<str>, usize), BoundId>,
+    bindings: Vec<Bound>,
+    callbacks: FxHashMap<Origin, CallId>,
+    callback_values: FxHashSet<(CallId, NodeId)>,
+    protocol_plans: Vec<Vec<(Sym, Unless)>>,
     handed: Vec<ObjId>,
     tables: BuilderTables,
 }
@@ -208,6 +217,13 @@ impl<T: Trace> Engine<T> {
             pattern_states: FxHashMap::default(),
             field_readers: FxHashMap::default(),
             builder_fields: FxHashMap::default(),
+            external_callees: FxHashMap::default(),
+            typed_callbacks: FxHashSet::default(),
+            stub_bindings: FxHashMap::default(),
+            bindings: Vec::new(),
+            callbacks: FxHashMap::default(),
+            callback_values: FxHashSet::default(),
+            protocol_plans: Vec::new(),
             handed: Vec::new(),
             tables: BuilderTables::default(),
         };
@@ -334,6 +350,12 @@ impl<T: Trace> State<T> {
         let objects = graph.objects(node);
         self.trace.objects(node, &objects);
         objects
+    }
+
+    fn follower(&mut self, graph: &mut Graph, source: NodeId, since: u32) -> NodeId {
+        let node = graph.follower(self, source, since);
+        self.trace.follower(source, since, node);
+        node
     }
 
     fn is_saturated(&mut self, graph: &mut Graph, node: NodeId) -> bool {
@@ -534,7 +556,7 @@ impl<T: Trace> State<T> {
                 parameters,
                 defaults: given,
                 optional,
-                return_node,
+                return_node: Some(return_node),
                 yield_node: None,
                 sent_node: None,
                 is_async: false,

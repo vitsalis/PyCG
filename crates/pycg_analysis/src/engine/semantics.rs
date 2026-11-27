@@ -36,6 +36,7 @@ pub enum Role {
     Accessor(AccessKind, Sym),
     ClassGet(Sym),
     ModuleGetattr(Sym),
+    Protocol(Sym),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -144,7 +145,7 @@ impl<T: Trace> State<T> {
                 let dst = self.calls[call.index()].dst;
                 self.call_dunder(graph, object, "__call__", call, dst, Unless::Nothing);
             }
-            Object::External(_) => not_ported("calls of outside values"),
+            Object::External(_) => self.call_external(graph, object, call),
             Object::Saturated
             | Object::Module(_)
             | Object::Fallback { .. }
@@ -163,7 +164,7 @@ impl<T: Trace> State<T> {
         false
     }
 
-    fn outside_result(&mut self, graph: &mut Graph, call: CallId) {
+    pub(super) fn outside_result(&mut self, graph: &mut Graph, call: CallId) {
         let Call {
             dst,
             decorator,
@@ -270,7 +271,7 @@ impl<T: Trace> State<T> {
             let coroutine = self.coroutine(graph, function);
             self.add_object(graph, dst, coroutine);
         } else {
-            let returned = made.return_node;
+            let returned = made.return_node.expect("an analysed function returns");
             self.add_edge(graph, returned, dst);
         }
     }
@@ -330,7 +331,7 @@ impl<T: Trace> State<T> {
         made.signature.binds(given, &keywords, &optional)
     }
 
-    fn add_call_edge(&mut self, call: CallId, callee: Sym) {
+    pub(super) fn add_call_edge(&mut self, call: CallId, callee: Sym) {
         let details = &self.calls[call.index()];
         let construct = match details.origin {
             Origin::Call(origin) if self.calls[origin.index()].decorator => Construct::Decorator,

@@ -146,7 +146,7 @@ pub struct Function {
     pub parameters: Vec<(Sym, NodeId)>,
     pub defaults: Vec<(Sym, NodeId)>,
     pub optional: Vec<Sym>,
-    pub return_node: NodeId,
+    pub return_node: Option<NodeId>,
     pub yield_node: Option<NodeId>,
     pub sent_node: Option<NodeId>,
     pub is_async: bool,

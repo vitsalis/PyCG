@@ -1,0 +1,972 @@
+use std::sync::Arc;
+
+use pycg_solver::{NodeId, ObjId};
+use pycg_stubs::{Decorator, Definition, DefinitionKind, Entry, ParameterKind, Type};
+use rustc_hash::FxHashMap;
+
+use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
+use crate::engine::objects::{Container, Function, Object};
+use crate::engine::outside::outside_name;
+use crate::engine::rules::Rule;
+use crate::engine::semantics::{Call, CallId, Role, SiteKey};
+use crate::engine::symbols::Sym;
+use crate::engine::trace::Trace;
+use crate::engine::{Graph, OrderedMap, State, not_ported};
+use crate::model::Signature;
+use crate::models::{
+    CACHED_FUNCTIONS, CALLS_BACK, CLOSURES, CONTAINER_CLASSES, HASHED_ARGUMENTS, KEY_WRAPPERS,
+    KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, NOT_CONSUMING, OPENERS, REFLECTION_CALLS,
+    RETURNS_ARGUMENT, SPECIAL_METHOD_CALLS, function_model, lookup,
+};
+
+const STUB_BUILTINS_PREFIX: &str = "builtins.";
+const OBJECT: &str = "builtins.object";
+const SUBCLASSES: &str = "builtins.type.__subclasses__";
+const METHOD_TYPE: &str = "types.MethodType";
+const ORDERING_COMPARISON_BY_BUILTIN: &[&str] = &[
+    "builtins.sorted",
+    "builtins.list.sort",
+    "builtins.min",
+    "builtins.max",
+];
+const ABSTRACT_ITERABLE_TYPES: &[&str] =
+    &["typing.Iterable", "typing.Iterator", "typing.Collection"];
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct BoundId(u32);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct PlanId(u32);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Known {
+    Stub,
+    Name,
+}
+
+#[derive(Clone, Debug)]
+pub struct Param {
+    name: Box<str>,
+    kind: ParameterKind,
+    has_default: bool,
+    annotation: Type,
+}
+
+pub enum Bound {
+    Late {
+        call: CallId,
+        signature: Signature,
+        since: u32,
+        supplied: Vec<Box<str>>,
+        nodes: FxHashMap<Box<str>, NodeId>,
+    },
+    Full {
+        function: ObjId,
+        possible: Vec<Sym>,
+    },
+}
+
+struct Overload {
+    parameters: Arc<[Param]>,
+    bound: BoundId,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+enum ArgumentKey {
+    Position(usize),
+    Named(u8, Box<str>),
+}
+
+fn positional_kind(kind: ParameterKind) -> bool {
+    matches!(
+        kind,
+        ParameterKind::PositionalOnly | ParameterKind::PositionalOrKeyword
+    )
+}
+
+fn stub_signature(parameters: &[Param]) -> Signature {
+    let positional: Vec<Box<str>> = parameters
+        .iter()
+        .filter(|parameter| positional_kind(parameter.kind))
+        .map(|parameter| parameter.name.clone())
+        .collect();
+    let positional_only = parameters
+        .iter()
+        .filter(|parameter| parameter.kind == ParameterKind::PositionalOnly)
+        .count();
+    let named = |kind: ParameterKind| {
+        parameters
+            .iter()
+            .find(|parameter| parameter.kind == kind)
+            .map(|parameter| parameter.name.clone())
+    };
+    Signature::new(
+        positional,
+        positional_only,
+        parameters
+            .iter()
+            .filter(|parameter| parameter.kind == ParameterKind::KeywordOnly)
+            .map(|parameter| parameter.name.clone())
+            .collect(),
+        named(ParameterKind::VarPositional),
+        named(ParameterKind::VarKeyword),
+    )
+}
+
+fn arms(reduced: &Type) -> Vec<&Type> {
+    match reduced {
+        Type::Union(arms) => arms.iter().collect(),
+        _ => vec![reduced],
+    }
+}
+
+fn callable(reduced: &Type) -> bool {
+    arms(reduced)
+        .into_iter()
+        .any(|arm| matches!(arm, Type::Callable { .. }))
+}
+
+fn abstract_iterable(reduced: &Type) -> bool {
+    match reduced {
+        Type::Union(arms) => arms.iter().any(abstract_iterable),
+        Type::Class(path) | Type::Generic(path, _) => ABSTRACT_ITERABLE_TYPES.contains(&&**path),
+        _ => false,
+    }
+}
+
+fn parameter_classes(reduced: &Type, classes: &mut Vec<String>) {
+    let mut pending = vec![reduced];
+    while let Some(current) = pending.pop() {
+        let class = match current {
+            Type::Union(arms) => {
+                pending.extend(arms.iter().rev());
+                continue;
+            }
+            Type::Variable {
+                bound: Some(bound),
+                constrained: false,
+                ..
+            } => {
+                pending.push(bound);
+                continue;
+            }
+            Type::Class(path) | Type::Generic(path, _) => path.to_string(),
+            Type::Ellipsis => "...".to_string(),
+            _ => continue,
+        };
+        if !classes.contains(&class) {
+            classes.push(class);
+        }
+    }
+}
+
+impl<T: Trace> State<T> {
+    pub(super) fn call_external(&mut self, graph: &mut Graph, external: ObjId, call: CallId) {
+        if let Some(definitions) = self.stub_definitions(external) {
+            self.call_outside(graph, external, &definitions, call);
+            return;
+        }
+        let name = self
+            .objects
+            .external(external)
+            .expect("an outside value")
+            .name;
+        self.add_external_call_edge(call, name, Known::Name);
+        self.outside_result(graph, call);
+    }
+
+    pub(super) fn add_external_call_edge(&mut self, call: CallId, name: Sym, known: Known) {
+        if self.calls[call.index()].implicit {
+            return;
+        }
+        self.add_call_edge(call, name);
+        if self.external_callees.get(&name) != Some(&Known::Stub) {
+            self.external_callees.insert(name, known);
+        }
+    }
+
+    fn call_outside(
+        &mut self,
+        graph: &mut Graph,
+        external: ObjId,
+        definitions: &[Definition],
+        call: CallId,
+    ) {
+        let (base, receivers) = self
+            .prefixes
+            .get(&call)
+            .cloned()
+            .unwrap_or((call, Vec::new()));
+        let found = self.objects.external(external).expect("an outside value");
+        let (name, inexact, steps) = (found.name, found.inexact, found.steps);
+        let text = self.symbols.text(name).to_string();
+        if RETURNS_ARGUMENT.iter().any(|&(model, _)| model == text) {
+            not_ported("the models of functions that return an argument");
+        }
+        if let Some(&receiver) = receivers.first()
+            && self.unknown_class(receiver)
+        {
+            not_ported("outside types: a receiver of an abstract class");
+        }
+        self.add_external_call_edge(call, name, Known::Stub);
+        for definition in definitions {
+            if lookup(CACHED_FUNCTIONS, &*definition.path).is_some() {
+                not_ported("outside types: a cached function");
+            }
+        }
+        if inexact {
+            not_ported("outside calls of an inexact receiver");
+        }
+        if let Some(&receiver) = receivers.first()
+            && self.objects.is_class(receiver)
+            && definitions
+                .iter()
+                .any(|definition| &*definition.path == SUBCLASSES)
+        {
+            not_ported("reflection: the subclasses of a class");
+        }
+        let dst = self.calls[call.index()].dst;
+        for definition in definitions {
+            if &*definition.path == METHOD_TYPE && dst.is_some() {
+                not_ported("outside calls: types.MethodType");
+            }
+            if definition.kind == DefinitionKind::Class
+                && lookup(CONTAINER_CLASSES, &*definition.path).is_some()
+            {
+                not_ported("containers: the call of a container class");
+            }
+        }
+        if self.builtin_function_rule(&text, steps) {
+            not_ported("builtin rules: the rule of a builtin function");
+        }
+        let mut builtins = Vec::new();
+        let mut consuming = Vec::new();
+        for definition in definitions {
+            let overloads = match definition.kind {
+                DefinitionKind::Function => {
+                    self.call_signatures(graph, definition, call, &receivers, external)
+                }
+                DefinitionKind::Class => {
+                    let overloads = self.constructor_signatures(graph, definition, call);
+                    if dst.is_some() {
+                        not_ported("outside types: an instance of an outside class");
+                    }
+                    overloads
+                }
+                _ => continue,
+            };
+            let path = &*definition.path;
+            let builtin = path.starts_with(STUB_BUILTINS_PREFIX);
+            if lookup(LENGTH_HINTS, path).is_some()
+                || lookup(CALLS_BACK, path).is_some()
+                || lookup(KEYED_SEQUENCES, path).is_some()
+                || (lookup(KEY_WRAPPERS, path).is_some() && dst.is_some())
+                || lookup(LIBRARY_ITERATION, path).is_some()
+            {
+                not_ported("library: the operations of an outside function");
+            }
+            for overload in overloads {
+                if builtin {
+                    consuming.push((
+                        path.to_string(),
+                        overload.parameters.clone(),
+                        overload.bound,
+                    ));
+                    builtins.push(overload);
+                }
+            }
+        }
+        let details = &self.calls[call.index()];
+        if let (Some(dst), true, Some(Some(decorated))) =
+            (details.dst, details.decorator, details.args.last())
+        {
+            let decorated = *decorated;
+            self.add_edge(graph, decorated, dst);
+        }
+        if !self.typed_callbacks.insert((call, external)) {
+            return;
+        }
+        for definition in definitions {
+            let path = &*definition.path;
+            if lookup(HASHED_ARGUMENTS, path).is_some()
+                || ORDERING_COMPARISON_BY_BUILTIN.contains(&path)
+            {
+                not_ported("protocols: the hashes and comparisons of a builtin call");
+            }
+        }
+        self.call_back_builtin(graph, base, &builtins);
+        self.call_protocols(graph, base, &builtins);
+        self.consume_library(graph, &consuming);
+        for definition in definitions {
+            let path = &*definition.path;
+            if lookup(REFLECTION_CALLS, path).is_some()
+                || lookup(SPECIAL_METHOD_CALLS, path).is_some()
+            {
+                not_ported("builtin rules: a reflection or special method call");
+            }
+        }
+    }
+
+    fn builtin_function_rule(&self, name: &str, steps: u32) -> bool {
+        let Some(rest) = name.strip_prefix("<builtin>.") else {
+            return false;
+        };
+        steps <= 1 && function_model(rest).is_some()
+    }
+
+    fn unknown_class(&self, object: ObjId) -> bool {
+        match self.objects.get(object) {
+            Object::Container(container) if self.symbols.text(container.kind).contains('.') => {
+                not_ported("containers: a container of an outside class")
+            }
+            _ => false,
+        }
+    }
+
+    fn function_entry(
+        &self,
+        definition: &Definition,
+    ) -> (Vec<Vec<Param>>, Vec<Type>, Option<Decorator>) {
+        let entry = definition
+            .entry
+            .expect("a function definition has an entry");
+        let Entry::Function(function) = self.stubs.entry(entry) else {
+            panic!("{} is not a function of the stubs", definition.path)
+        };
+        let signatures = function
+            .signatures
+            .iter()
+            .map(|signature| {
+                signature
+                    .parameters
+                    .iter()
+                    .map(|parameter| Param {
+                        name: parameter.name.clone(),
+                        kind: parameter.kind,
+                        has_default: parameter.has_default,
+                        annotation: parameter.annotation.clone(),
+                    })
+                    .collect()
+            })
+            .collect();
+        let results = function
+            .signatures
+            .iter()
+            .map(|signature| signature.result.clone())
+            .collect();
+        (signatures, results, function.decorator)
+    }
+
+    fn fitting(&self, signatures: &[Vec<Param>], skip: usize, call: CallId) -> Vec<usize> {
+        let fitting: Vec<usize> = signatures
+            .iter()
+            .enumerate()
+            .filter(|(_, parameters)| self.fits(&parameters[skip.min(parameters.len())..], call))
+            .map(|(index, _)| index)
+            .collect();
+        if fitting.is_empty() {
+            (0..signatures.len()).collect()
+        } else {
+            fitting
+        }
+    }
+
+    fn fits(&self, parameters: &[Param], call: CallId) -> bool {
+        let details = &self.calls[call.index()];
+        let positional: Vec<&Param> = parameters
+            .iter()
+            .filter(|parameter| positional_kind(parameter.kind))
+            .collect();
+        let variadic = parameters
+            .iter()
+            .any(|parameter| parameter.kind == ParameterKind::VarPositional);
+        let keywords_any = parameters
+            .iter()
+            .any(|parameter| parameter.kind == ParameterKind::VarKeyword);
+        let count = details.args.len();
+        if count > positional.len() && !variadic {
+            return false;
+        }
+        let given: Vec<&str> = details
+            .keywords
+            .iter()
+            .map(|&(name, _)| self.symbols.text(name))
+            .collect();
+        for name in &given {
+            let parameter = parameters
+                .iter()
+                .find(|parameter| &*parameter.name == *name);
+            let unnamed = parameter.is_none_or(|parameter| {
+                matches!(
+                    parameter.kind,
+                    ParameterKind::PositionalOnly
+                        | ParameterKind::VarPositional
+                        | ParameterKind::VarKeyword
+                )
+            });
+            if unnamed && !keywords_any {
+                return false;
+            }
+        }
+        if !details.star.is_empty() || !details.double_star.is_empty() {
+            return true;
+        }
+        for (index, parameter) in positional.iter().enumerate() {
+            if index >= count && !parameter.has_default && !given.contains(&&*parameter.name) {
+                return false;
+            }
+        }
+        for parameter in parameters {
+            if parameter.kind == ParameterKind::KeywordOnly
+                && !parameter.has_default
+                && !given.contains(&&*parameter.name)
+            {
+                return false;
+            }
+        }
+        true
+    }
+
+    fn call_signatures(
+        &mut self,
+        graph: &mut Graph,
+        definition: &Definition,
+        call: CallId,
+        receivers: &[ObjId],
+        external: ObjId,
+    ) -> Vec<Overload> {
+        let (signatures, results, decorator) = self.function_entry(definition);
+        let skip = usize::from(decorator == Some(Decorator::ClassMethod) && receivers.is_empty());
+        let mut receivers = receivers.to_vec();
+        if skip == 1 && definition.owner.is_some() {
+            receivers = vec![self.class_method_owner(graph, definition, external)];
+        }
+        let fitting = self.fitting(&signatures, skip, call);
+        let dst = self.calls[call.index()].dst;
+        let mut overloads = Vec::new();
+        let mut typed = Vec::new();
+        for index in fitting {
+            let parameters: Arc<[Param]> =
+                Arc::from(&signatures[index][skip.min(signatures[index].len())..]);
+            let bound = self.bind_stub(graph, call, &definition.path, index, &parameters);
+            if dst.is_some() {
+                if LIBRARY_ITERATION
+                    .iter()
+                    .any(|&(path, _)| path == &*definition.path)
+                {
+                    not_ported("library: a deferred result");
+                }
+                typed.push(results[index].clone());
+            }
+            overloads.push(Overload { parameters, bound });
+        }
+        let details = &self.calls[call.index()];
+        let unpacked = !details.star.is_empty() || !details.double_star.is_empty();
+        if !typed.is_empty() && OPENERS.contains(&&*definition.path) && !unpacked {
+            not_ported("outside calls: the file of open");
+        }
+        let closure = lookup(CLOSURES, &*definition.path).is_some();
+        for reduced in typed {
+            if closure && matches!(reduced, Type::Callable { .. }) {
+                not_ported("outside types: a closure");
+            }
+            self.add_type(graph, &reduced, dst.expect("a typed result"));
+        }
+        let creates = self
+            .fitting(&signatures, skip, call)
+            .into_iter()
+            .any(|index| results[index] == Type::SelfType);
+        if creates && receivers.is_empty() && definition.path.ends_with(".__new__") {
+            let details = &self.calls[call.index()];
+            if details.dst.is_some() && matches!(details.args.first(), Some(Some(_))) {
+                not_ported("outside calls: a new instance from __new__");
+            }
+        }
+        overloads
+    }
+
+    fn class_method_owner(
+        &mut self,
+        graph: &mut Graph,
+        definition: &Definition,
+        external: ObjId,
+    ) -> ObjId {
+        let name = self.external_name(external);
+        let (holder, _) = name.rsplit_once('.').expect("a class method has a holder");
+        let holder = self.external(graph, holder, 0, false);
+        let found = self.stub_definitions(holder);
+        if found.is_none_or(|found| found.iter().any(|d| d.kind == DefinitionKind::Class)) {
+            return holder;
+        }
+        let owner = definition.owner.clone().expect("an owner");
+        let public = outside_name(&self.stubs.public_name(&owner));
+        self.external(graph, &public, 0, false)
+    }
+
+    fn constructor_signatures(
+        &mut self,
+        graph: &mut Graph,
+        definition: &Definition,
+        call: CallId,
+    ) -> Vec<Overload> {
+        let mut overloads = Vec::new();
+        for name in ["__new__", "__init__"] {
+            let members = self.stubs.member(&definition.path, name);
+            for member in members.iter() {
+                if member.kind != DefinitionKind::Function
+                    || member.owner.as_deref() == Some(OBJECT)
+                {
+                    continue;
+                }
+                let (signatures, _, _) = self.function_entry(member);
+                for index in self.fitting(&signatures, 1, call) {
+                    let parameters: Arc<[Param]> =
+                        Arc::from(&signatures[index][1.min(signatures[index].len())..]);
+                    let bound = self.bind_stub(graph, call, &member.path, index, &parameters);
+                    overloads.push(Overload { parameters, bound });
+                }
+            }
+        }
+        overloads
+    }
+
+    fn bind_stub(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        path: &str,
+        index: usize,
+        parameters: &[Param],
+    ) -> BoundId {
+        let key = (call, Box::from(path), index);
+        if let Some(&bound) = self.stub_bindings.get(&key) {
+            return bound;
+        }
+        let signature = stub_signature(parameters);
+        let bound = self.bind_signature(graph, call, signature);
+        self.stub_bindings.insert(key, bound);
+        bound
+    }
+
+    fn bind_signature(&mut self, graph: &mut Graph, call: CallId, signature: Signature) -> BoundId {
+        let details = self.calls[call.index()].clone();
+        let count = details.args.len().min(signature.positional.len());
+        let positional: Vec<Box<str>> = signature.positional[..count].to_vec();
+        let keywords: Vec<Box<str>> = details
+            .keywords
+            .iter()
+            .map(|&(name, _)| self.symbols.text(name))
+            .filter(|name| signature.accepts_keyword(name))
+            .map(Box::from)
+            .collect();
+        let mut distinct = keywords.clone();
+        distinct.sort_unstable();
+        distinct.dedup();
+        let late = details.star.is_empty()
+            && details.double_star.is_empty()
+            && signature.vararg.is_none()
+            && signature.kwarg.is_none()
+            && !keywords.iter().any(|name| positional.contains(name))
+            && distinct.len() == keywords.len();
+        let bound = if late {
+            let mut supplied = positional;
+            supplied.extend(keywords);
+            Bound::Late {
+                call,
+                signature,
+                since: graph.phase,
+                supplied,
+                nodes: FxHashMap::default(),
+            }
+        } else {
+            let mut parameters = Vec::new();
+            for name in signature.names() {
+                let node = self.node(graph, None);
+                parameters.push((self.symbols.intern(name), node));
+            }
+            let nothing = self.symbols.intern("None");
+            let vararg = signature.vararg.is_some();
+            let kwarg = signature.kwarg.is_some();
+            let function = self.new_object(
+                graph,
+                Object::Function(Box::new(Function {
+                    name: nothing,
+                    module: nothing,
+                    signature: signature.clone(),
+                    parameters,
+                    defaults: Vec::new(),
+                    optional: Vec::new(),
+                    return_node: None,
+                    yield_node: None,
+                    sent_node: None,
+                    is_async: false,
+                    varargs: None,
+                    varkeywords: None,
+                    passthrough: Vec::new(),
+                    decorated: false,
+                    lineno: None,
+                    col_offset: None,
+                    end_lineno: None,
+                    end_col_offset: None,
+                })),
+            );
+            for (present, kind) in [(vararg, "tuple"), (kwarg, "dict")] {
+                if !present {
+                    continue;
+                }
+                let container = Container {
+                    kind: self.symbols.intern(kind),
+                    site: details.site,
+                    length: None,
+                    exact: false,
+                };
+                let container = self.new_object(graph, Object::Container(container));
+                let made = self.objects.function_mut(function);
+                if kind == "tuple" {
+                    made.varargs = Some(container);
+                } else {
+                    made.varkeywords = Some(container);
+                }
+            }
+            let supplied = self.bind_arguments(graph, function, call, None);
+            let mut possible = supplied;
+            if !details.star.is_empty() {
+                for name in
+                    &signature.positional[details.args.len().min(signature.positional.len())..]
+                {
+                    possible.push(self.symbols.intern(name));
+                }
+            }
+            if !details.double_star.is_empty() {
+                for name in signature.names() {
+                    if signature.accepts_keyword(name) {
+                        possible.push(self.symbols.intern(name));
+                    }
+                }
+            }
+            Bound::Full { function, possible }
+        };
+        let id = BoundId(u32::try_from(self.bindings.len()).expect("fewer bindings"));
+        self.bindings.push(bound);
+        id
+    }
+
+    fn bound_given(&self, bound: BoundId, name: &str) -> bool {
+        match &self.bindings[bound.0 as usize] {
+            Bound::Late { supplied, .. } => supplied.iter().any(|given| &**given == name),
+            Bound::Full { possible, .. } => possible
+                .iter()
+                .any(|&given| self.symbols.text(given) == name),
+        }
+    }
+
+    fn bound_parameter(&mut self, graph: &mut Graph, bound: BoundId, name: &str) -> NodeId {
+        match &self.bindings[bound.0 as usize] {
+            Bound::Full { function, .. } => {
+                let name = self.symbols.intern(name);
+                self.objects.function(*function).parameter(name)
+            }
+            Bound::Late { nodes, .. } => {
+                if let Some(&node) = nodes.get(name) {
+                    return node;
+                }
+                let node = self.late_parameter(graph, bound, name);
+                let Bound::Late { nodes, .. } = &mut self.bindings[bound.0 as usize] else {
+                    panic!("a late binding")
+                };
+                nodes.insert(Box::from(name), node);
+                node
+            }
+        }
+    }
+
+    fn late_parameter(&mut self, graph: &mut Graph, bound: BoundId, name: &str) -> NodeId {
+        let Bound::Late {
+            call,
+            signature,
+            since,
+            supplied,
+            ..
+        } = &self.bindings[bound.0 as usize]
+        else {
+            panic!("a late binding")
+        };
+        let (call, since) = (*call, *since);
+        assert!(signature.names().contains(&name), "{name} is a parameter");
+        let details = &self.calls[call.index()];
+        let count = details.args.len().min(signature.positional.len());
+        let source = if let Some(position) = signature.positional[..count]
+            .iter()
+            .position(|parameter| &**parameter == name)
+        {
+            details.args[position]
+        } else if supplied.iter().any(|given| &**given == name) {
+            details
+                .keywords
+                .iter()
+                .find(|&&(keyword, _)| self.symbols.text(keyword) == name)
+                .and_then(|&(_, value)| value)
+        } else {
+            None
+        };
+        match source {
+            None => self.node(graph, None),
+            Some(source) => self.follower(graph, source, since),
+        }
+    }
+
+    fn parameter_node(
+        &mut self,
+        graph: &mut Graph,
+        bound: BoundId,
+        parameter: &Param,
+    ) -> Option<NodeId> {
+        match parameter.kind {
+            ParameterKind::VarPositional | ParameterKind::VarKeyword => {
+                if matches!(self.bindings[bound.0 as usize], Bound::Late { .. }) {
+                    return None;
+                }
+                not_ported("containers: every element of an outside varargs")
+            }
+            _ => {
+                if !self.bound_given(bound, &parameter.name) {
+                    return None;
+                }
+                Some(self.bound_parameter(graph, bound, &parameter.name))
+            }
+        }
+    }
+
+    fn add_type(&mut self, graph: &mut Graph, reduced: &Type, dst: NodeId) {
+        match reduced {
+            Type::Unknown | Type::Callable { .. } => {
+                let unknown = self.unknown_external;
+                self.add_object(graph, dst, unknown);
+            }
+            Type::None => {}
+            Type::Union(arms) => {
+                for arm in arms.iter() {
+                    self.add_type(graph, arm, dst);
+                }
+            }
+            _ => not_ported("outside types: the result of an outside call"),
+        }
+    }
+
+    fn call_back_builtin(&mut self, graph: &mut Graph, call: CallId, overloads: &[Overload]) {
+        let mut values = Vec::new();
+        for overload in overloads {
+            for parameter in overload.parameters.iter() {
+                if callable(&parameter.annotation)
+                    && let Some(node) = self.parameter_node(graph, overload.bound, parameter)
+                    && !values.contains(&node)
+                {
+                    values.push(node);
+                }
+            }
+        }
+        if !values.is_empty() {
+            self.call_back(graph, call, &values);
+        }
+    }
+
+    pub(super) fn call_back(&mut self, graph: &mut Graph, call: CallId, values: &[NodeId]) {
+        let origin = self.calls[call.index()].origin;
+        let callback = match self.callbacks.get(&origin) {
+            Some(&callback) => callback,
+            None => {
+                let details = &self.calls[call.index()];
+                let made = Call {
+                    caller: details.caller,
+                    args: Vec::new(),
+                    keywords: Vec::new(),
+                    dst: None,
+                    site: details.site,
+                    origin,
+                    star: Vec::new(),
+                    double_star: Vec::new(),
+                    implicit: true,
+                    decorator: false,
+                    rule: crate::engine::RuleId::PLACEHOLDER,
+                };
+                let callback = self.new_call(made, Some(origin));
+                self.callbacks.insert(origin, callback);
+                callback
+            }
+        };
+        for &value in values {
+            if self.callback_values.insert((callback, value)) {
+                let rule = self.rule(Rule::CallBackObject { callback });
+                self.attach(graph, value, rule);
+            }
+        }
+    }
+
+    fn call_protocols(&mut self, graph: &mut Graph, call: CallId, overloads: &[Overload]) {
+        let mut by_argument: OrderedMap<ArgumentKey, (Vec<NodeId>, Vec<String>)> =
+            OrderedMap::default();
+        for overload in overloads {
+            let positions: Vec<&Param> = overload
+                .parameters
+                .iter()
+                .filter(|parameter| positional_kind(parameter.kind))
+                .collect();
+            for parameter in overload.parameters.iter() {
+                let Some(node) = self.parameter_node(graph, overload.bound, parameter) else {
+                    continue;
+                };
+                let key = match positions
+                    .iter()
+                    .position(|position| std::ptr::eq(*position, parameter))
+                {
+                    Some(index) => ArgumentKey::Position(index),
+                    None => ArgumentKey::Named(parameter.kind as u8, parameter.name.clone()),
+                };
+                let (nodes, protocols) = by_argument.entry(key).or_default();
+                if !nodes.contains(&node) {
+                    nodes.push(node);
+                }
+                parameter_classes(&parameter.annotation, protocols);
+            }
+        }
+        for (nodes, protocols) in by_argument.into_values() {
+            let mut plan: Vec<(Sym, Unless)> = Vec::new();
+            let mut earlier: Vec<Sym> = Vec::new();
+            for class in protocols {
+                let names: Vec<Sym> = self
+                    .protocol_methods(&class)
+                    .into_iter()
+                    .map(|name| self.symbols.intern(&name))
+                    .filter(|name| !earlier.contains(name))
+                    .collect();
+                for &name in &names {
+                    let unless = if earlier.is_empty() {
+                        Unless::Nothing
+                    } else {
+                        Unless::Names(earlier.clone().into_boxed_slice())
+                    };
+                    plan.push((name, unless));
+                }
+                earlier.extend(names);
+            }
+            if plan.is_empty() {
+                continue;
+            }
+            let id = PlanId(u32::try_from(self.protocol_plans.len()).expect("fewer plans"));
+            self.protocol_plans.push(plan);
+            for node in nodes {
+                let rule = self.rule(Rule::CallProtocol { plan: id, call });
+                self.attach(graph, node, rule);
+            }
+        }
+    }
+
+    fn protocol_methods(&mut self, class: &str) -> Vec<String> {
+        let Some(definition) = self.stubs.definition(class) else {
+            return Vec::new();
+        };
+        let protocol = matches!(
+            definition.entry.map(|entry| self.stubs.entry(entry)),
+            Some(Entry::Class(entry)) if entry.protocol
+        );
+        if !protocol {
+            return Vec::new();
+        }
+        let mut names = Vec::new();
+        for owner in self.stubs.mro(class).iter() {
+            if &**owner == OBJECT {
+                continue;
+            }
+            let Some(found) = self.stubs.definition(owner) else {
+                continue;
+            };
+            let Some(Entry::Class(entry)) = found.entry.map(|entry| self.stubs.entry(entry)) else {
+                continue;
+            };
+            for (name, &member) in &entry.members {
+                if matches!(self.stubs.entry(member), Entry::Function(_))
+                    && !names.iter().any(|known: &String| **known == **name)
+                {
+                    names.push(name.to_string());
+                }
+            }
+        }
+        names
+    }
+
+    pub(super) fn call_protocol(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        plan: PlanId,
+        call: CallId,
+    ) {
+        let steps = self.protocol_plans[plan.0 as usize].clone();
+        let details = &self.calls[call.index()];
+        let (caller, site) = (details.caller, details.site);
+        for (name, unless) in steps {
+            let key = SiteKey {
+                caller,
+                site,
+                role: Role::Protocol(name),
+                implicit: true,
+            };
+            let implicit = self.site_call(graph, key, &[], None, None);
+            if self.objects.is_class(object) {
+                let rule = self.rule(Rule::MetaclassProtocol {
+                    class: object,
+                    name,
+                    implicit,
+                    unless,
+                });
+                let metaclass = self.objects.class(object).metaclass;
+                self.attach(graph, metaclass, rule);
+            } else {
+                let text = self.symbols.text(name).to_string();
+                self.call_dunder(graph, object, &text, implicit, None, unless);
+            }
+        }
+    }
+
+    pub(super) fn metaclass_protocol(
+        &mut self,
+        graph: &mut Graph,
+        meta: ObjId,
+        class: ObjId,
+        name: Sym,
+        implicit: CallId,
+        unless: Unless,
+    ) {
+        if !self.objects.is_class(meta) {
+            return;
+        }
+        let key = LookupKey {
+            attr: LookupAttr::Name(name),
+            receiver: Some(class),
+            after: None,
+            unless,
+        };
+        let found = self.lookup(graph, meta, key);
+        let rule = self.rule(Rule::CallEach { call: implicit });
+        self.attach(graph, found, rule);
+    }
+
+    fn consume_library(
+        &mut self,
+        graph: &mut Graph,
+        consuming: &[(String, Arc<[Param]>, BoundId)],
+    ) {
+        for (path, parameters, bound) in consuming {
+            if NOT_CONSUMING.contains(&path.as_str()) {
+                continue;
+            }
+            for parameter in parameters.iter() {
+                if abstract_iterable(&parameter.annotation)
+                    && self.parameter_node(graph, *bound, parameter).is_some()
+                {
+                    not_ported("library: an outside call that consumes an iterable");
+                }
+            }
+        }
+    }
+}
