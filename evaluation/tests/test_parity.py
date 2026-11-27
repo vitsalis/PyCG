@@ -119,7 +119,9 @@ def test_every_record_is_canonical_json_without_addresses(dumped):
 def test_the_dumps_name_what_the_engine_did(dumped):
     first, _ = dumped["classes"]
     calls = read(first / "D4.jsonl")
-    assert {"module", "function", "new_class", "add_call"} <= {r["call"] for r in calls}
+    assert {"module", "function", "new_class", "add_call"} <= {
+        r["call"] for r in calls if "call" in r
+    }
     trace = read(first / "D3.jsonl")
     operations = {record["op"] for record in trace}
     assert {"attach", "apply", "applied", "solve", "fire", "final", "work"} <= (
@@ -131,6 +133,60 @@ def test_the_dumps_name_what_the_engine_did(dumped):
     assert any(record["node"] == "main.make.kind" for record in points_to)
     scopes = read(first / "D1.jsonl")
     assert any(record.get("scope", {}).get("name") == "main.Base" for record in scopes)
+
+
+def test_a_builder_call_names_every_argument_with_its_defaults(dumped):
+    first, _ = dumped["classes"]
+    calls = [record for record in read(first / "D4.jsonl") if "call" in record]
+    (function, *_) = [record for record in calls if record["call"] == "function"]
+    assert set(function["arguments"]) == {
+        "name",
+        "module",
+        "signature",
+        "defaults",
+        "generator",
+    }
+    assert function["arguments"]["signature"] == {
+        "signature": {
+            "positional": ["self", "value"],
+            "positional_only_count": 0,
+            "keyword_only": [],
+            "vararg": None,
+            "kwarg": None,
+        }
+    }
+    imported = next(r for r in calls if r["call"] == "imports.handle_import")
+    assert imported["arguments"] == {"name": "re", "level": 0, "record": True}
+    assert imported["answer"] is None
+    add_call = next(record for record in calls if record["call"] == "add_call")
+    assert add_call["arguments"]["applies"] is False
+    assert add_call["arguments"]["star"] == []
+
+
+def test_the_entry_modules_are_listed_for_the_replay(dumped):
+    first, _ = dumped["classes"]
+    assert (first / oracle.ENTRIES).read_text() == "main\n"
+
+
+def test_the_fields_that_the_builder_writes_end_each_module_of_the_build(dumped):
+    first, _ = dumped["classes"]
+    records = read(first / "D4.jsonl")
+    fields = {
+        record["object"]["object"]: record["fields"]
+        for record in records
+        if "fields" in record
+    }
+    assert {"Base", "Child", "make"} <= set(fields["Module:main"]["defines"]["set"])
+    size = fields["Function:main.Child.size"]
+    assert (size["lineno"], size["end_lineno"], size["decorated"]) == (10, 11, True)
+    base = fields["Class:main.Base"]
+    assert base["lineno"] == 3
+    assert {"__init__", "__setattr__"} <= set(base["defines"]["set"])
+    last = max(i for i, record in enumerate(records) if "call" in record)
+    assert all({"fields", "tables"} & set(record) for record in records[last + 1 :])
+    (tables,) = [record["tables"] for record in records if "tables" in record]
+    assert tables["iterated_expressions"]["set"]
+    assert tables["read_namespaces"] == {"set": []}
 
 
 def test_an_unread_lazy_import_is_written_by_its_position(tmp_path):

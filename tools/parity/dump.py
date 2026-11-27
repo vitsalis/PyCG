@@ -1,8 +1,10 @@
 import argparse
 import ast
+import copy
 import functools
 import hashlib
 import importlib.util
+import inspect
 import json
 import os
 import resource
@@ -68,6 +70,38 @@ SOLVER_CALLS = (
     "is_saturated",
 )
 SOLVER_ANSWERS = frozenset({"constant", "follower", "objects", "holds", "is_saturated"})
+ENTRIES = "entries.txt"
+BUILDER_IMPORT_CALLS = ("handle_import", "locate")
+BUILDER_TABLES = (
+    "iterated_expressions",
+    "literal_imports",
+    "none_arguments",
+    "none_keywords",
+    "read_namespaces",
+    "zero_argument_super",
+)
+BUILDER_FIELDS = {
+    "Module": ("defines",),
+    "Function": (
+        "decorated",
+        "lineno",
+        "col_offset",
+        "end_lineno",
+        "end_col_offset",
+        "is_async",
+        "annotations",
+        "passthrough",
+    ),
+    "Class": (
+        "lineno",
+        "end_lineno",
+        "allocator",
+        "slots",
+        "bound",
+        "defines",
+        "annotations",
+    ),
+}
 
 
 def canonical_line(record):
@@ -169,6 +203,16 @@ class Names:
             return {"call": self.other(value, f"Call:{value.site}")}
         if isinstance(value, self.solver.Constraint):
             return {"constraint": self.constraint(value)}
+        if isinstance(value, self.model.Signature):
+            return {
+                "signature": {
+                    "positional": list(value.positional),
+                    "positional_only_count": value.positional_only_count,
+                    "keyword_only": list(value.keyword_only),
+                    "vararg": value.vararg,
+                    "kwarg": value.kwarg,
+                }
+            }
         if hasattr(value, "kind") and hasattr(value, "local_name"):
             return {"scope": f"{value.kind}:{value.name}"}
         return {"value": self.other(value, type(value).__qualname__)}
@@ -229,6 +273,7 @@ class Recorder:
     def __init__(self, out, checkout):
         from pycg.analysis import (
             builder,
+            imports,
             model,
             program,
             scopes,
@@ -238,6 +283,7 @@ class Recorder:
         )
 
         self.builder = builder
+        self.imports = imports
         self.model = model
         self.program = program
         self.scopes = scopes
@@ -261,6 +307,7 @@ class Recorder:
         self.stub_depth = 0
         self.witness_of_watch = {}
         self.declared = {}
+        self.built_objects = []
 
     def close(self):
         for writer in self.writers.values():
@@ -275,6 +322,7 @@ class Recorder:
         self._install_solver()
         self._install_constraints()
         self._install_builder_calls()
+        self._guard_builder_writes()
 
     def _install_names(self):
         names = self.names
@@ -304,10 +352,15 @@ class Recorder:
         def new_witness(witness):
             recorder.witness_of_watch[witness.watch] = names.node(witness)
 
+        def new_object(obj):
+            names.new_object(obj)
+            if recorder.building is not None and type(obj).__name__ in BUILDER_FIELDS:
+                recorder.built_objects.append(obj)
+
         wrap_init(solver.Node, new_node)
         wrap_init(solver.Witness, new_witness)
         wrap_init(solver.Constant, names.new_node)
-        wrap_init(self.model.Object, names.new_object)
+        wrap_init(self.model.Object, new_object)
         wrap_init(self.model.Const, names.new_object)
         wrap_init(self.semantics.Call, names.constraint)
 
@@ -327,9 +380,14 @@ class Recorder:
             recorder.names.context = name
             recorder.building = name
             recorder.analysis = program.analysis
+            recorder.tables_before = {
+                table: copy.copy(getattr(program.analysis, table))
+                for table in BUILDER_TABLES
+            }
             try:
                 return original_build(program, name, path)
             finally:
+                recorder.write_builder_fields(program, name)
                 recorder.building = None
                 recorder.names.context = "<program>"
                 recorder.write_module(program, name, path)
@@ -348,6 +406,51 @@ class Recorder:
             return original_solve(analysis)
 
         self.semantics.Analysis.solve = solve
+
+    def write_builder_fields(self, program, name):
+        built, self.built_objects = self.built_objects, []
+        source = program.modules.get(name)
+        if source is None or source.status == "failed":
+            return
+        tables = {}
+        for table, before in self.tables_before.items():
+            now = getattr(program.analysis, table)
+            if isinstance(now, dict):
+                added = {key: value for key, value in now.items() if key not in before}
+            else:
+                added = {item for item in now if item not in before}
+            tables[table] = self.names.canon(added)
+        self.writers["D4"].write({"module": name, "tables": tables})
+        module = program.analysis.modules.get(name)
+        if module is not None and module not in built:
+            built.insert(0, module)
+        for obj in built:
+            fields = BUILDER_FIELDS[type(obj).__name__]
+            self.writers["D4"].write(
+                {
+                    "module": name,
+                    "object": self.names.canon(obj),
+                    "fields": {
+                        field: self.names.canon(getattr(obj, field)) for field in fields
+                    },
+                }
+            )
+
+    def _guard_builder_writes(self):
+        recorder = self
+        for type_name, fields in BUILDER_FIELDS.items():
+            cls = getattr(self.model, type_name)
+            original = cls.__setattr__
+
+            def guarded(obj, field, value, _original=original, _fields=fields):
+                if recorder.building is not None and not recorder.builder_depth:
+                    assert field in _fields, (
+                        f"the builder writes {type(obj).__name__}.{field}, "
+                        "which BUILDER_FIELDS does not record"
+                    )
+                _original(obj, field, value)
+
+            cls.__setattr__ = guarded
 
     def write_module(self, program, name, path):
         relative = os.path.relpath(os.path.realpath(path), self.checkout)
@@ -741,8 +844,18 @@ class Recorder:
                 if isinstance(value, FunctionType) and not method_name.startswith("__"):
                     methods[method_name] = value
         for method_name, original in methods.items():
+            signature = inspect.signature(original)
+            receiver = next(iter(signature.parameters))
 
-            def wrapped(analysis, *args, _original=original, _name=method_name, **kw):
+            def wrapped(
+                analysis,
+                *args,
+                _original=original,
+                _name=method_name,
+                _signature=signature,
+                _self=receiver,
+                **kw,
+            ):
                 if recorder.building is None or recorder.builder_depth:
                     recorder.builder_depth += 1
                     try:
@@ -754,19 +867,66 @@ class Recorder:
                     answer = _original(analysis, *args, **kw)
                 finally:
                     recorder.builder_depth -= 1
-                record = {
-                    "module": recorder.building,
-                    "call": _name,
-                    "args": canon(args),
-                    "answer": canon(answer),
-                }
-                if kw:
-                    record["keywords"] = canon(dict(sorted(kw.items())))
-                writer.write(record)
+                bound = _signature.bind(analysis, *args, **kw)
+                bound.apply_defaults()
+                writer.write(
+                    {
+                        "module": recorder.building,
+                        "call": _name,
+                        "arguments": {
+                            parameter: canon(value)
+                            for parameter, value in bound.arguments.items()
+                            if parameter != _self
+                        },
+                        "answer": canon(answer),
+                    }
+                )
                 return answer
 
             functools.update_wrapper(wrapped, original)
             setattr(Analysis, method_name, wrapped)
+        self._install_import_calls()
+
+    def _install_import_calls(self):
+        recorder = self
+        manager = self.imports.ImportManager
+        writer = self.writers["D4"]
+        canon = self.names.canon
+        for method_name in BUILDER_IMPORT_CALLS:
+            original = getattr(manager, method_name)
+            signature = inspect.signature(original)
+            receiver = next(iter(signature.parameters))
+
+            def wrapped(
+                imports,
+                *args,
+                _original=original,
+                _name=method_name,
+                _signature=signature,
+                _self=receiver,
+                **kw,
+            ):
+                answer = _original(imports, *args, **kw)
+                if recorder.building is None or recorder.builder_depth:
+                    return answer
+                bound = _signature.bind(imports, *args, **kw)
+                bound.apply_defaults()
+                writer.write(
+                    {
+                        "module": recorder.building,
+                        "call": f"imports.{_name}",
+                        "arguments": {
+                            parameter: canon(value)
+                            for parameter, value in bound.arguments.items()
+                            if parameter != _self
+                        },
+                        "answer": canon(answer),
+                    }
+                )
+                return answer
+
+            functools.update_wrapper(wrapped, original)
+            setattr(manager, method_name, wrapped)
 
     def finish(self, generator):
         self.inside_solver = True
@@ -817,6 +977,8 @@ def dump_input(checkout, out, entry_points, package, cap=None):
     )
     try:
         generator.analyze()
+        entries = sorted(generator.program._entry_module_names)
+        (out / ENTRIES).write_text("".join(f"{name}\n" for name in entries))
         recorder.finish(generator)
         document = dumps(generator.document())
     except (Exception, SystemExit) as error:

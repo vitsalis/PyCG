@@ -9,6 +9,7 @@ const READING: &str = include_str!("vectors/reading.txt");
 const POSITIONS: &str = include_str!("vectors/positions.txt");
 const CONSTANTS: &str = include_str!("vectors/constants.txt");
 const NAMES: &str = include_str!("vectors/names.txt");
+const BOUNDS: &str = include_str!("vectors/bounds.txt");
 
 fn hex(text: &str) -> Vec<u8> {
     assert_eq!(text.len() % 2, 0, "hex of whole bytes: {text}");
@@ -39,6 +40,58 @@ fn read_and_parse(bytes: &[u8]) -> (String, String) {
         }
         Err(failure) => ("failed".to_owned(), failure.cause()),
     }
+}
+
+const DEEPEST_VECTOR_STACK_BYTES: usize = 10 << 20;
+
+#[test]
+fn sources_past_the_limits_of_the_parser_fail_as_in_python() {
+    std::thread::Builder::new()
+        .stack_size(DEEPEST_VECTOR_STACK_BYTES)
+        .spawn(bound_vectors)
+        .expect("the vector thread starts")
+        .join()
+        .expect("the bound vectors hold");
+}
+
+fn bound_vectors() {
+    let mut cases = 0;
+    for line in vector_lines(BOUNDS) {
+        let fields: Vec<&str> = line.split('\t').collect();
+        let [
+            name,
+            prefix,
+            unit,
+            middle,
+            close,
+            suffix,
+            count,
+            status,
+            cause,
+        ] = fields[..]
+        else {
+            panic!("bound vector {line:?}");
+        };
+        let count: usize = count.parse().expect("a count");
+        let mut source = hex(prefix);
+        source.extend(hex(unit).repeat(count));
+        source.extend(hex(middle));
+        source.extend(hex(close).repeat(count));
+        source.extend(hex(suffix));
+        let (found_status, found_value) = read_and_parse(&source);
+        let found_cause = if found_status == "ok" {
+            "-".to_owned()
+        } else {
+            found_value
+        };
+        assert_eq!(
+            (found_status.as_str(), found_cause.as_str()),
+            (status, cause),
+            "case {name} {count}"
+        );
+        cases += 1;
+    }
+    assert!(cases > 0, "bound vectors");
 }
 
 #[test]
