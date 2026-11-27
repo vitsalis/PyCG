@@ -315,7 +315,8 @@ parity:
 		out=$(PARITY_RUST)/engine/$$input && mkdir -p $$out && \
 		if $(PARITY_BINARIES)/pycg-dump engine "$$dump" $$out 2> $$out/replay.txt; \
 		then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; \
-			echo "engine stops on $${input#./}: $$(grep -m1 -A1 'panicked at' $$out/error.txt | tail -n 1)"; fi; \
+			echo "engine stops on $${input#./}: $$(grep -m1 '^not ported: ' $$out/error.txt \
+				|| grep -m1 -A1 'panicked at' $$out/error.txt | tail -n 1)"; fi; \
 	done
 	@cd $(PARITY_RUST)/engine && find . -name D6in.json | sort | while read -r inputs; do \
 		input=$$(dirname "$$inputs"); \
@@ -342,4 +343,8 @@ parity:
 	@python3 -I tools/parity/view.py $(PARITY_ORACLE)/seed-0 $(PARITY_RUST)/view \
 		$(PARITY_BINARIES)/pycg > $(PARITY_RUST)/view.txt; \
 	status=$$?; { echo '```'; cat $(PARITY_RUST)/view.txt; echo '```'; } >> $(SUMMARY); \
+	exit $$status
+	@python3 -I tools/parity/program.py $(PARITY_ORACLE)/seed-0 \
+		$(PARITY_RUST)/program $(PARITY_BINARIES)/pycg > $(PARITY_RUST)/program.txt; \
+	status=$$?; { echo '```'; cat $(PARITY_RUST)/program.txt; echo '```'; } >> $(SUMMARY); \
 	exit $$status

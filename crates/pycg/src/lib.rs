@@ -11,7 +11,7 @@ use std::ffi::OsStr;
 
 pub use arguments::{Options, Outcome, ViewOptions, parse, view_program};
 pub use terminal::{stdout_columns, width};
-pub use text::for_stderr;
+pub use text::{code_points, for_stderr};
 pub use view::{ViewError, view};
 
 #[cfg(windows)]

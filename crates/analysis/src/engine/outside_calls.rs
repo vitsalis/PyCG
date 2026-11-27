@@ -5,6 +5,7 @@ use pycg_stubs::{Decorator, Definition, DefinitionKind, Entry, ParameterKind, Ty
 use rustc_hash::FxHashMap;
 
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
+use crate::engine::library::deferred_result;
 use crate::engine::objects::{Container, Function, Literal, Object};
 use crate::engine::outside::outside_name;
 use crate::engine::outside_types::TypeContext;
@@ -12,23 +13,23 @@ use crate::engine::rules::Rule;
 use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, OrderedMap, State, not_ported};
+use crate::engine::{Graph, OrderedMap, State};
 use crate::model::Signature;
 use crate::models::{
     CACHED_FUNCTIONS, CALLS_BACK, CLOSURES, CONTAINER_CLASSES, HASHED_ARGUMENTS, KEY_WRAPPERS,
-    KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, NOT_CONSUMING, OPENERS, REFLECTION_CALLS,
-    RETURNS_ARGUMENT, SPECIAL_METHOD_CALLS, function_model, lookup,
+    KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, OPENERS, REFLECTION_CALLS, RETURNS_ARGUMENT,
+    SPECIAL_METHOD_CALLS, function_model, lookup,
 };
 
 const STUB_BUILTINS_PREFIX: &str = "builtins.";
 const OBJECT: &str = "builtins.object";
 const SUBCLASSES: &str = "builtins.type.__subclasses__";
 const METHOD_TYPE: &str = "types.MethodType";
-const ORDERING_COMPARISON_BY_BUILTIN: &[&str] = &[
-    "builtins.sorted",
-    "builtins.list.sort",
-    "builtins.min",
-    "builtins.max",
+const ORDERING_COMPARISON_BY_BUILTIN: &[(&str, &str)] = &[
+    ("builtins.sorted", "__lt__"),
+    ("builtins.list.sort", "__lt__"),
+    ("builtins.min", "__lt__"),
+    ("builtins.max", "__gt__"),
 ];
 const ABSTRACT_ITERABLE_TYPES: &[&str] =
     &["typing.Iterable", "typing.Iterator", "typing.Collection"];
@@ -76,9 +77,10 @@ pub enum Bound {
     },
 }
 
-struct Overload {
-    parameters: Arc<[Param]>,
-    bound: BoundId,
+#[derive(Clone)]
+pub(super) struct Overload {
+    pub(super) parameters: Arc<[Param]>,
+    pub(super) bound: BoundId,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -100,7 +102,7 @@ fn group_excluded(path: &str) -> bool {
         || path == SUBCLASSES
         || lookup(CONTAINER_CLASSES, path).is_some()
         || lookup(HASHED_ARGUMENTS, path).is_some()
-        || ORDERING_COMPARISON_BY_BUILTIN.contains(&path)
+        || lookup(ORDERING_COMPARISON_BY_BUILTIN, path).is_some()
         || lookup(CALLS_BACK, path).is_some()
         || lookup(LENGTH_HINTS, path).is_some()
         || lookup(LIBRARY_ITERATION, path).is_some()
@@ -159,7 +161,7 @@ fn callable(reduced: &Type) -> bool {
         .any(|arm| matches!(arm, Type::Callable { .. }))
 }
 
-fn abstract_iterable(reduced: &Type) -> bool {
+pub(super) fn abstract_iterable(reduced: &Type) -> bool {
     match reduced {
         Type::Union(arms) => arms.iter().any(abstract_iterable),
         Type::Class(path) | Type::Generic(path, _) => ABSTRACT_ITERABLE_TYPES.contains(&&**path),
@@ -249,14 +251,15 @@ impl<T: Trace> State<T> {
         if !unknown {
             self.add_external_call_edge(call, name, Known::Stub);
             for definition in definitions {
-                if lookup(CACHED_FUNCTIONS, &*definition.path).is_some() {
-                    not_ported("outside types: a cached function");
+                if let Some(&wrapper) = lookup(CACHED_FUNCTIONS, &*definition.path) {
+                    let typed = self.typed(graph, wrapper);
+                    let name = format!("{}.__call__", self.objects.name(typed, &self.symbols));
+                    let name = self.symbols.intern(&name);
+                    self.add_external_call_edge(call, name, Known::Stub);
                 }
             }
         }
-        if inexact {
-            not_ported("outside calls of an inexact receiver");
-        }
+        let receiver = inexact.then_some(external);
         if let Some(&receiver) = receivers.first()
             && self.objects.is_class(receiver)
             && definitions
@@ -269,17 +272,17 @@ impl<T: Trace> State<T> {
         let dst = self.calls[call.index()].dst;
         for definition in definitions {
             if &*definition.path == METHOD_TYPE && dst.is_some() {
-                not_ported("outside calls: types.MethodType");
+                self.make_method(graph, call);
             }
             if definition.kind == DefinitionKind::Class
                 && let Some((_, model)) = lookup(CONTAINER_CLASSES, &*definition.path)
             {
-                self.apply_rule(graph, model, call, None);
+                self.apply_rule(graph, model, call, receiver);
                 return;
             }
         }
         if let Some(model) = builtin_function_model(&text, steps) {
-            self.apply_rule(graph, model, call, None);
+            self.apply_rule(graph, model, call, receiver);
             if self.typed_callbacks.insert((base, external)) {
                 let mut overloads = Vec::new();
                 for definition in definitions {
@@ -301,6 +304,10 @@ impl<T: Trace> State<T> {
         }
         let mut builtins = Vec::new();
         let mut consuming = Vec::new();
+        let mut calling = Vec::new();
+        let mut hinting = Vec::new();
+        let mut keyed = Vec::new();
+        let mut library = Vec::new();
         for definition in definitions {
             let overloads = match definition.kind {
                 DefinitionKind::Function => {
@@ -318,23 +325,31 @@ impl<T: Trace> State<T> {
             };
             let path = &*definition.path;
             let builtin = path.starts_with(STUB_BUILTINS_PREFIX);
-            if lookup(LENGTH_HINTS, path).is_some()
-                || lookup(CALLS_BACK, path).is_some()
-                || lookup(KEYED_SEQUENCES, path).is_some()
-                || (lookup(KEY_WRAPPERS, path).is_some() && dst.is_some())
-                || lookup(LIBRARY_ITERATION, path).is_some()
-            {
-                not_ported("library: the operations of an outside function");
+            if builtin {
+                builtins.extend(overloads.iter().cloned());
             }
-            for overload in overloads {
-                if builtin {
-                    consuming.push((
-                        path.to_string(),
-                        overload.parameters.clone(),
-                        overload.bound,
-                    ));
-                    builtins.push(overload);
-                }
+            if let Some(&hint) = lookup(LENGTH_HINTS, path) {
+                hinting.extend(overloads.iter().map(|overload| (hint, overload.clone())));
+            }
+            if let Some(&name) = lookup(CALLS_BACK, path) {
+                calling.extend(overloads.iter().map(|overload| (name, overload.clone())));
+            }
+            if let Some(&wholes) = lookup(KEYED_SEQUENCES, path) {
+                keyed.extend(overloads.iter().map(|overload| (wholes, overload.clone())));
+            }
+            if let Some(&name) = lookup(KEY_WRAPPERS, path)
+                && dst.is_some()
+            {
+                self.wrapped_key(graph, name, call, &overloads);
+            }
+            if let Some(&(path, _)) = LIBRARY_ITERATION.iter().find(|&&(known, _)| known == path) {
+                library.push((path, overloads));
+            } else if builtin {
+                consuming.extend(
+                    overloads
+                        .into_iter()
+                        .map(|overload| (Box::<str>::from(path), overload)),
+                );
             }
         }
         let details = &self.calls[call.index()];
@@ -347,17 +362,39 @@ impl<T: Trace> State<T> {
         if !self.typed_callbacks.insert((call, external)) {
             return;
         }
-        for definition in definitions {
-            let path = &*definition.path;
-            if lookup(HASHED_ARGUMENTS, path).is_some()
-                || ORDERING_COMPARISON_BY_BUILTIN.contains(&path)
-            {
-                not_ported("protocols: the hashes and comparisons of a builtin call");
-            }
+        if let Some(path) = definitions.iter().find_map(|definition| {
+            HASHED_ARGUMENTS
+                .iter()
+                .find(|&&(known, _)| known == &*definition.path)
+                .map(|&(known, _)| known)
+        }) {
+            self.hash_arguments(graph, path, call, &builtins, &receivers);
         }
-        self.call_back_builtin(graph, base, &builtins);
-        self.call_protocols(graph, base, &builtins, false);
-        self.consume_library(graph, &consuming);
+        let comparison = definitions
+            .iter()
+            .find_map(|definition| lookup(ORDERING_COMPARISON_BY_BUILTIN, &definition.path));
+        if let Some(&method) = comparison {
+            self.call_protocols(graph, base, &builtins, true);
+            self.compare_items(graph, method, call, &builtins);
+        } else {
+            self.call_back_builtin(graph, base, &builtins);
+            self.call_protocols(graph, base, &builtins, false);
+        }
+        if !calling.is_empty() {
+            self.call_back_library(graph, call, &calling);
+        }
+        if !keyed.is_empty() {
+            self.call_sequence_key(graph, call, &keyed);
+        }
+        if !hinting.is_empty() {
+            self.length_hints(graph, call, &hinting);
+        }
+        for (path, found) in &library {
+            self.library_operation(graph, call, path, found);
+        }
+        if !consuming.is_empty() {
+            self.consume_library(graph, call, &consuming);
+        }
         for definition in definitions {
             let path = &*definition.path;
             if let Some(model) =
@@ -584,13 +621,6 @@ impl<T: Trace> State<T> {
                 Arc::from(&signatures[index][skip.min(signatures[index].len())..]);
             let bound = self.bind_stub(graph, call, &definition.path, index, &parameters);
             if dst.is_some() {
-                if group.is_none()
-                    && LIBRARY_ITERATION
-                        .iter()
-                        .any(|&(path, _)| path == &*definition.path)
-                {
-                    not_ported("library: a deferred result");
-                }
                 typed.push(TypedResult {
                     reduced: results[index].clone(),
                     bound,
@@ -607,27 +637,33 @@ impl<T: Trace> State<T> {
         }
         let details = &self.calls[call.index()];
         let unpacked = !details.star.is_empty() || !details.double_star.is_empty();
-        if !typed.is_empty() && OPENERS.contains(&&*definition.path) && !unpacked {
-            not_ported("outside calls: the file of open");
-        }
-        let closure = lookup(CLOSURES, &*definition.path).is_some();
-        let origin = self.calls[call.index()].origin;
-        for result in typed {
-            if closure && matches!(result.reduced, Type::Callable { .. }) {
-                not_ported("outside types: a closure");
+        let origin = details.origin;
+        let deferred = deferred_result(&definition.path);
+        let typed_results: Vec<(Type, TypeContext)> = typed
+            .into_iter()
+            .map(|result| {
+                let context = TypeContext {
+                    receiver: receivers.first().copied(),
+                    binding: Some((result.bound, result.parameters)),
+                    deferred,
+                    ..TypeContext::of_call(call, origin)
+                };
+                (result.reduced, context)
+            })
+            .collect();
+        if !typed_results.is_empty() && OPENERS.contains(&&*definition.path) && !unpacked {
+            self.open_file(graph, call, overloads[0].bound, typed_results);
+        } else {
+            let closure = lookup(CLOSURES, &*definition.path).copied();
+            for (reduced, context) in typed_results {
+                let dst = dst.expect("a typed result");
+                if let (Some(closure), Type::Callable { result, .. }) = (closure, &reduced) {
+                    let closure = self.closure(graph, closure, result);
+                    self.add_object(graph, dst, closure);
+                } else {
+                    self.add_type(graph, &reduced, dst, &context, &[]);
+                }
             }
-            let context = TypeContext {
-                receiver: receivers.first().copied(),
-                binding: Some((result.bound, result.parameters)),
-                ..TypeContext::of_call(call, origin)
-            };
-            self.add_type(
-                graph,
-                &result.reduced,
-                dst.expect("a typed result"),
-                &context,
-                &[],
-            );
         }
         let creates = self
             .fitting(&signatures, skip, call)
@@ -636,7 +672,7 @@ impl<T: Trace> State<T> {
         if creates && receivers.is_empty() && definition.path.ends_with(".__new__") {
             let details = &self.calls[call.index()];
             if details.dst.is_some() && matches!(details.args.first(), Some(Some(_))) {
-                not_ported("outside calls: a new instance from __new__");
+                self.new_instance_of(graph, call);
             }
         }
         overloads
@@ -1006,6 +1042,7 @@ impl<T: Trace> State<T> {
                     double_star: Vec::new(),
                     implicit: true,
                     decorator: false,
+                    applies: false,
                     rule: crate::engine::RuleId::PLACEHOLDER,
                 };
                 let callback = self.new_call(made, Some(origin));
@@ -1203,24 +1240,5 @@ impl<T: Trace> State<T> {
         let found = self.lookup(graph, meta, key);
         let rule = self.rule(Rule::CallEach { call: implicit });
         self.attach(graph, found, rule);
-    }
-
-    fn consume_library(
-        &mut self,
-        graph: &mut Graph,
-        consuming: &[(String, Arc<[Param]>, BoundId)],
-    ) {
-        for (path, parameters, bound) in consuming {
-            if NOT_CONSUMING.contains(&path.as_str()) {
-                continue;
-            }
-            for parameter in parameters.iter() {
-                if abstract_iterable(&parameter.annotation)
-                    && self.parameter_node(graph, *bound, parameter).is_some()
-                {
-                    not_ported("library: an outside call that consumes an iterable");
-                }
-            }
-        }
     }
 }

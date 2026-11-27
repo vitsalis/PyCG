@@ -68,6 +68,15 @@ pub fn surrogate(byte: u8) -> u32 {
     0xdc00 + u32::from(byte)
 }
 
+pub fn code_points(bytes: &[u8]) -> Vec<u32> {
+    units(bytes)
+        .map(|unit| match unit {
+            Unit::Char(character) => u32::from(character),
+            Unit::Byte(byte) => surrogate(byte),
+        })
+        .collect()
+}
+
 pub fn repr(bytes: &[u8]) -> String {
     let single = units(bytes).any(|unit| unit == Unit::Char('\''));
     let double = units(bytes).any(|unit| unit == Unit::Char('"'));

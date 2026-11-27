@@ -13,7 +13,6 @@ use num_bigint::BigUint;
 use pycg_analysis::Cap;
 
 const PARSED_WIDTH: i64 = 78;
-const STATUS_NOT_PORTED: i32 = 1;
 
 struct Case {
     program: &'static [u8],
@@ -122,18 +121,6 @@ fn check_parsed(case: &Case, parsed: &Parsed) -> Result<(), String> {
     );
     if actual != expected {
         return Err(format!("parsed {actual:?}, the oracle {expected:?}"));
-    }
-    let mut message = program.clone();
-    message.extend_from_slice(b": the analysis is not ported yet\n");
-    let not_ported = (STATUS_NOT_PORTED, Vec::new(), pycg::for_stderr(&message));
-    let ran = run_binary(case);
-    if ran != not_ported {
-        return Err(format!(
-            "status {}, stdout {:?}, stderr {:?}",
-            ran.0,
-            shown(&ran.1),
-            shown(&ran.2)
-        ));
     }
     Ok(())
 }

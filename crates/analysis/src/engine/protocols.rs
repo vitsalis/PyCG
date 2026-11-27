@@ -7,11 +7,12 @@ use crate::engine::containers::{ContainerOrigin, IterationId};
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, Literal, Object, kinds_mask};
 use crate::engine::outside_calls::PlanId;
+use crate::engine::outside_types::TypeOrigin;
 use crate::engine::rules::{Rule, RuleId};
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, OrderedMap, State, not_ported};
+use crate::engine::{Graph, OrderedMap, State};
 use crate::models::{CONTAINER_CLASSES, LENGTH_HINT, builtin_kind};
 
 const COMPARISON_METHODS: [&str; 6] = ["__eq__", "__ne__", "__lt__", "__le__", "__gt__", "__ge__"];
@@ -166,9 +167,15 @@ struct Operator {
     hashed_value: bool,
 }
 
+#[derive(Clone, Copy)]
+enum ComparisonSite {
+    Operator(OperatorId),
+    Call { caller: Sym, site: Sym },
+}
+
 struct Comparison {
     method: Sym,
-    operator: OperatorId,
+    site: ComparisonSite,
     families: OrderedMap<Family, ([NodeId; 2], [bool; 2])>,
 }
 
@@ -196,7 +203,11 @@ pub(crate) enum ProtocolRule {
     CallEq(CallId),
     CompareProtocol {
         plan: PlanId,
-        operator: OperatorId,
+        comparison: ComparisonId,
+    },
+    Arrive {
+        comparison: ComparisonId,
+        is_left: bool,
     },
     ConvertContainer {
         reached: NodeId,
@@ -262,6 +273,7 @@ impl ProtocolRule {
             ProtocolRule::CompareMember(_) => "Each:Protocols.compare_member",
             ProtocolRule::CallEq(_) => "Each:Protocols._call_eq",
             ProtocolRule::CompareProtocol { .. } => "Each:Outside._call_protocol",
+            ProtocolRule::Arrive { .. } => "Each:_ElementComparison.arrive",
             ProtocolRule::ConvertContainer { .. } => "Each:Protocols._convert_container",
             ProtocolRule::ReachNested(_) => "Each:Protocols._reach_nested",
             ProtocolRule::PercentFormat { .. } => "Each:Protocols._percent_format",
@@ -284,9 +296,9 @@ impl ProtocolRule {
         match *self {
             ProtocolRule::Operand { kinds, .. } => Some(kinds),
             ProtocolRule::CompareProtocol { .. } => Some(RECEIVER_KINDS),
-            ProtocolRule::ConvertContainer { .. } | ProtocolRule::ReachNested(_) => {
-                Some(CONTAINER_KINDS)
-            }
+            ProtocolRule::ConvertContainer { .. }
+            | ProtocolRule::ReachNested(_)
+            | ProtocolRule::Arrive { .. } => Some(CONTAINER_KINDS),
             ProtocolRule::PercentFormat { .. } => Some(CONST_KINDS),
             ProtocolRule::Raise(_) => Some(CLASS_KINDS),
             ProtocolRule::SearchedType(_)
@@ -322,7 +334,7 @@ fn operand_kinds(membership: bool, constants: bool) -> &'static [Kind] {
     }
 }
 
-fn reflected_comparison(method: &str) -> &'static str {
+pub(super) fn reflected_comparison(method: &str) -> &'static str {
     match method {
         "__lt__" => "__gt__",
         "__gt__" => "__lt__",
@@ -376,6 +388,7 @@ impl<T: Trace> State<T> {
             | ProtocolRule::CompareMember(_)
             | ProtocolRule::CallEq(_)
             | ProtocolRule::CompareProtocol { .. }
+            | ProtocolRule::Arrive { .. }
             | ProtocolRule::PercentFormat { .. }
             | ProtocolRule::Percent { .. }
             | ProtocolRule::Raise(_) => Vec::new(),
@@ -397,11 +410,21 @@ impl<T: Trace> State<T> {
             ProtocolRule::PythonContains(operator) => self.compare_value(graph, operator),
             ProtocolRule::CompareMember(operator) => self.compare_member(graph, object, operator),
             ProtocolRule::CallEq(call) => self.call_eq(graph, object, call),
-            ProtocolRule::CompareProtocol { plan, operator } => {
-                let operator = self.operator(operator);
-                let (caller, site) = (operator.caller, operator.site);
-                self.call_protocol_at(graph, object, plan, caller, site, true);
+            ProtocolRule::CompareProtocol { plan, comparison } => {
+                let (caller, site, compare) =
+                    match self.protocols.comparisons[index_of(comparison.0)].site {
+                        ComparisonSite::Operator(operator) => {
+                            let operator = self.operator(operator);
+                            (operator.caller, operator.site, true)
+                        }
+                        ComparisonSite::Call { caller, site } => (caller, site, false),
+                    };
+                self.call_protocol_at(graph, object, plan, caller, site, compare);
             }
+            ProtocolRule::Arrive {
+                comparison,
+                is_left,
+            } => self.arrive(graph, comparison, object, is_left),
             ProtocolRule::ConvertContainer {
                 reached,
                 caller,
@@ -498,14 +521,13 @@ impl<T: Trace> State<T> {
     }
 
     fn operand(&mut self, graph: &mut Graph, object: ObjId, id: OperatorId, is_left: bool) {
-        if let Object::Const { value, .. } = self.objects.get(object) {
-            match value {
-                Literal::Str(_) | Literal::Bytes(_) => {
-                    not_ported("outside types: the operand of a str or bytes constant")
-                }
-                Literal::Int(_) => return,
-            }
-        }
+        let object = match self.objects.get(object) {
+            Object::Const { .. } => match self.string_constant_value(graph, object) {
+                Some(typed) => typed,
+                None => return,
+            },
+            _ => object,
+        };
         let method = self.symbols.text(self.operator(id).method).to_owned();
         if method == CONTAINS {
             if is_left {
@@ -546,7 +568,15 @@ impl<T: Trace> State<T> {
             Kind::Container if !is_container_class(self.container_kind(object)) => {
                 self.combine(graph, object, id, is_left)
             }
-            _ => not_ported("outside types: the special method of an outside operand"),
+            _ => {
+                let operator = self.operator(id);
+                let origin = TypeOrigin::Operator {
+                    caller: operator.caller,
+                    site: operator.site,
+                    is_left,
+                };
+                self.typed_special(graph, object, &name, Some(dst), origin);
+            }
         }
     }
 
@@ -658,11 +688,35 @@ impl<T: Trace> State<T> {
         let comparison = ComparisonId(next_id(self.protocols.comparisons.len()));
         self.protocols.comparisons.push(Comparison {
             method,
-            operator: id,
+            site: ComparisonSite::Operator(id),
             families: OrderedMap::default(),
         });
         self.operator_mut(id).comparison = Some(comparison);
         comparison
+    }
+
+    pub(super) fn compare_containers(
+        &mut self,
+        graph: &mut Graph,
+        items: NodeId,
+        method: &str,
+        caller: Sym,
+        site: Sym,
+    ) {
+        let method = self.symbols.intern(method);
+        let comparison = ComparisonId(next_id(self.protocols.comparisons.len()));
+        self.protocols.comparisons.push(Comparison {
+            method,
+            site: ComparisonSite::Call { caller, site },
+            families: OrderedMap::default(),
+        });
+        for is_left in [true, false] {
+            let rule = self.protocol_rule(ProtocolRule::Arrive {
+                comparison,
+                is_left,
+            });
+            self.attach(graph, items, rule);
+        }
     }
 
     fn compare_call(
@@ -766,8 +820,7 @@ impl<T: Trace> State<T> {
         family: Family,
     ) {
         let elements = self.node(graph, None);
-        let comparison = &self.protocols.comparisons[index_of(id.0)];
-        let (method, operator) = (comparison.method, comparison.operator);
+        let method = self.protocols.comparisons[index_of(id.0)].method;
         let mut steps = vec![(self.symbols.intern("__eq__"), Unless::Nothing)];
         let method_text = self.symbols.text(method).to_owned();
         if !EQUALITIES.contains(&method_text.as_str()) && family.is_sequence() {
@@ -776,7 +829,10 @@ impl<T: Trace> State<T> {
             steps.push((reflected, Unless::Names(Box::from([method]))));
         }
         let plan = self.new_plan(steps);
-        let rule = self.protocol_rule(ProtocolRule::CompareProtocol { plan, operator });
+        let rule = self.protocol_rule(ProtocolRule::CompareProtocol {
+            plan,
+            comparison: id,
+        });
         self.attach(graph, elements, rule);
         for node in sides {
             self.add_edge(graph, node, elements);
@@ -1168,7 +1224,12 @@ impl<T: Trace> State<T> {
             self.call_dunder(graph, object, entering, enter, dst, Unless::Nothing);
             self.call_dunder(graph, object, leaving, leave, exited, Unless::Nothing);
         } else if kind == Kind::Typed {
-            not_ported("outside types: the special method of an outside context manager")
+            let details = &self.calls[enter.index()];
+            let origin = TypeOrigin::Enter {
+                caller: details.caller,
+                site: details.site,
+            };
+            self.typed_special(graph, object, entering, dst, origin);
         } else if is_a(kind, &[Kind::External])
             && let Some(dst) = dst
         {

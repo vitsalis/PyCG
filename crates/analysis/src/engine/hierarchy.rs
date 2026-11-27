@@ -17,7 +17,7 @@ use crate::models::{DEFINES_MARKERS, TUPLE_STORAGE};
 pub const HIERARCHIES_PER_CLASS_MAX: u64 = 8;
 
 const BUILTIN_OBJECT: &str = "<builtin>.object";
-const BUILTIN_TYPE: &str = "<builtin>.type";
+pub(super) const BUILTIN_TYPE: &str = "<builtin>.type";
 const BUILTIN_PROPERTY: &str = "<builtin>.property";
 const OBJECT_PATH: &str = "builtins.object";
 const BUILTIN_STUBS: &str = "builtins.";
@@ -422,7 +422,7 @@ impl<T: Trace> State<T> {
         mros.iter().any(|mro| !self.derives_in(mro, other, false))
     }
 
-    fn nominal_outside(&mut self, external: ObjId) -> bool {
+    pub(super) fn nominal_outside(&mut self, external: ObjId) -> bool {
         let name = self.external_name(external);
         if GENERIC_CLASSES.contains(&name.as_str()) {
             return true;
@@ -1254,7 +1254,7 @@ impl<T: Trace> State<T> {
         false
     }
 
-    fn derives_from_type(&mut self, mro: &[ObjId]) -> bool {
+    pub(super) fn derives_from_type(&mut self, mro: &[ObjId]) -> bool {
         mro.iter().any(|&base| {
             self.objects.is_external(base)
                 && (self.external_name(base) == BUILTIN_TYPE

@@ -1,4 +1,5 @@
 mod analysis;
+mod annotations;
 mod arguments;
 mod attributes;
 mod builtin_containers;
@@ -6,9 +7,12 @@ mod builtin_rules;
 mod containers;
 mod fixpoint;
 pub mod hierarchy;
+mod library;
+mod narrowing;
 pub mod objects;
 mod outside;
 mod outside_calls;
+mod outside_results;
 mod outside_types;
 mod patterns;
 mod protocols;
@@ -63,8 +67,10 @@ enum BuilderFields {
     Module(Vec<Box<str>>),
 }
 
+pub struct NotPorted(pub String);
+
 pub fn not_ported(feature: &str) -> ! {
-    panic!("not ported: {feature}")
+    std::panic::panic_any(NotPorted(feature.to_owned()))
 }
 
 pub struct Engine<T: Trace> {
@@ -160,12 +166,14 @@ struct State<T: Trace> {
     callbacks: FxHashMap<Origin, CallId>,
     callback_values: FxHashSet<(CallId, NodeId)>,
     protocol_plans: Vec<Vec<(Sym, Unless)>>,
-    model_bindings: FxHashMap<(CallId, usize), BoundId>,
+    model_bindings: FxHashMap<(CallId, builtin_rules::BindingEntry), BoundId>,
     returning: FxHashMap<(Sym, bool), ObjId>,
     wrappers: FxHashMap<WrapperKey, ObjId>,
     builtin_methods: FxHashMap<(ObjId, Sym), ObjId>,
     none_arguments: FxHashMap<(Sym, Sym), Vec<u32>>,
     synced_none_arguments: usize,
+    none_keywords: FxHashMap<(Sym, Sym), Vec<Sym>>,
+    synced_none_keywords: usize,
     callees: FxHashMap<CallId, NodeId>,
     dynamic_accesses: Vec<DynamicAccess>,
     namespace_names_read: FxHashSet<Sym>,
@@ -193,6 +201,10 @@ struct State<T: Trace> {
     builder_calls: Vec<CallId>,
     patterns: patterns::Patterns,
     outside_types: outside_types::OutsideTypes,
+    annotations: annotations::Annotations,
+    outside_results: outside_results::OutsideResults,
+    library: library::Library,
+    class_tests: narrowing::ClassTests,
 }
 
 impl<T: Trace> Engine<T> {
@@ -293,6 +305,8 @@ impl<T: Trace> Engine<T> {
             builtin_methods: FxHashMap::default(),
             none_arguments: FxHashMap::default(),
             synced_none_arguments: 0,
+            none_keywords: FxHashMap::default(),
+            synced_none_keywords: 0,
             callees: FxHashMap::default(),
             dynamic_accesses: Vec::new(),
             namespace_names_read: FxHashSet::default(),
@@ -319,6 +333,10 @@ impl<T: Trace> Engine<T> {
             builder_calls: Vec::new(),
             patterns: patterns::Patterns::default(),
             outside_types: outside_types::OutsideTypes::default(),
+            annotations: annotations::Annotations::default(),
+            outside_results: outside_results::OutsideResults::default(),
+            library: library::Library::default(),
+            class_tests: narrowing::ClassTests::default(),
             tables: BuilderTables::default(),
         };
         state.trace.object(

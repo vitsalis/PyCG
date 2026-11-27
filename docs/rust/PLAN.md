@@ -491,7 +491,7 @@ raw names of `loop.py compare`.
 | Command | Does |
 |---|---|
 | `make parity-oracle` | Runs the oracle on every input for both seeds in the sandbox of `make eval` (no network, read-only checkout), writing D6 for all inputs and D1 to D5 for the micro cases and the 60 macro projects, into `$EVAL_OUT/parity-oracle-<key>` |
-| `make parity` | Builds `pycg` and `pycg-dump` (`cargo build --release --locked`), runs them on the same inputs in the same sandbox, and compares every dump that `tools/parity/required.txt` names, and every D6; renders every D6 of the oracle with `pycg-view` and with `pycg view` and compares the pages byte for byte (`tools/parity/view.py`) |
+| `make parity` | Builds `pycg` and `pycg-dump` (`cargo build --release --locked`), runs them on the same inputs in the same sandbox, and compares every dump that `tools/parity/required.txt` names, and every D6; renders every D6 of the oracle with `pycg-view` and with `pycg view` and compares the pages byte for byte (`tools/parity/view.py`); runs `pycg` on every input that `tools/parity/differences.txt` does not list for the engine, with the package root and entry points of the oracle's run and compares its document with D6 byte for byte (`tools/parity/program.py`) |
 | `make parity NAME=<input>` | The same for one micro case, macro project or scale package |
 
 The key of an oracle run is the SHA-256 of the git tree of `pycg/`, the
@@ -719,7 +719,11 @@ errors for a bad cap, the document on standard output or in the file,
 with a final newline. `pycg-view` becomes `pycg view`. The
 warnings of `program.py` (a skipped file, a path outside the root) go to
 standard error with the same text. The exit status is 0 on a document,
-2 on a usage error.
+1 when the document cannot be written, 2 on a usage error, and 3 when the
+analysis meets a part that is not ported yet, with the line `pycg: not
+ported: <what>`. A broken assertion exits with 101 and one line, `pycg:
+internal error at <file>:<line>:<column>: <message>`, the message's line
+breaks written as `\n`.
 
 ## The pip package
 

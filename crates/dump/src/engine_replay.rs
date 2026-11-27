@@ -5,12 +5,13 @@ use std::panic::{self, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use indexmap::IndexMap;
 use num_bigint::BigInt;
 use pycg_analysis::CAP_DEFAULT_OBJECTS;
 use pycg_analysis::builder::calls::CallId as BuilderCallId;
 use pycg_analysis::builder::calls::{
     Allocator, Analysis, Call, CallSite, ClassStatement, Constant, Key, MethodKind, NewClass,
-    Operation, Passthrough, Slice, Subscript,
+    Operation, Passthrough, Shape, Slice, Subscript,
 };
 use pycg_analysis::engine::objects::{Kind, Object};
 use pycg_analysis::engine::trace::{Opacity, RuleInfo, Trace};
@@ -446,6 +447,7 @@ struct Replay {
     fields: FxHashMap<String, Vec<Value>>,
     calls: FxHashMap<String, BuilderCallId>,
     built: Vec<String>,
+    annotations: FxHashMap<ObjId, Value>,
 }
 
 pub fn build(arguments: &[String]) -> Option<ExitCode> {
@@ -470,6 +472,7 @@ pub fn build(arguments: &[String]) -> Option<ExitCode> {
         fields: FxHashMap::default(),
         calls: FxHashMap::default(),
         built: modules,
+        annotations: FxHashMap::default(),
     };
     Some(replay.write(Path::new(out), built.is_ok()))
 }
@@ -488,6 +491,7 @@ pub fn run(input: &str, out: &str) -> ExitCode {
         fields: FxHashMap::default(),
         calls: FxHashMap::default(),
         built: Vec::new(),
+        annotations: FxHashMap::default(),
     };
     let replayed = panic::catch_unwind(AssertUnwindSafe(|| {
         let record = |number: usize, line: &str| -> Value {
@@ -516,6 +520,9 @@ pub fn run(input: &str, out: &str) -> ExitCode {
                 let object = replay.object(&record["object"]);
                 let name = replay.engine.trace().object_name(object).to_string();
                 replay.set_recorded_fields(object, &name, &record["fields"]);
+            } else if record.get("fields").is_some() {
+                let object = replay.object(&record["object"]);
+                replay.apply_annotations(object);
             }
         }
         replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
@@ -603,6 +610,11 @@ impl Replay {
                         })
                         .collect();
                     self.engine.tables().none_arguments.push((site, indices));
+                }
+                for pair in pairs(&tables["none_keywords"]) {
+                    let site: CallSite = (text(&pair[0][0]).into(), text(&pair[0][1]).into());
+                    let names = set(&pair[1]).iter().map(|name| text(name).into()).collect();
+                    self.engine.tables().none_keywords.push((site, names));
                 }
             }
         }
@@ -850,6 +862,10 @@ impl Replay {
                 self.add_call(arguments);
                 None
             }
+            "typed" => {
+                let typed = self.engine.typed(text(&arguments["cls"]));
+                Some(self.object_answer(typed))
+            }
             "container" => {
                 let length = arguments["length"]
                     .as_u64()
@@ -934,6 +950,40 @@ impl Replay {
                 let operand = self.optional_node(&arguments["operand"]);
                 let result = self.node(&arguments["result"]);
                 self.engine.add_pattern_operand(operand, result);
+                None
+            }
+            "callable_filter" => {
+                let source = self.node(&arguments["source"]);
+                let dst = self.node(&arguments["dst"]);
+                let holds = arguments["holds"].as_bool().expect("holds");
+                self.engine.callable_filter(source, dst, holds);
+                None
+            }
+            "class_filter" => {
+                let source = self.node(&arguments["source"]);
+                let classes = self.optional_node(&arguments["classes"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.class_filter(
+                    source,
+                    classes,
+                    dst,
+                    arguments["as_class"].as_bool().expect("as_class"),
+                    arguments["holds"].as_bool().expect("holds"),
+                );
+                None
+            }
+            "tested_classes" => {
+                let classes = self.node(&arguments["classes"]);
+                let dst = self.node(&arguments["dst"]);
+                let owner = list(&arguments["owner"]);
+                let module = self.object(&owner[0]);
+                self.engine.tested_classes(
+                    classes,
+                    dst,
+                    arguments["as_class"].as_bool().expect("as_class"),
+                    module,
+                    text(&owner[1]),
+                );
                 None
             }
             "add_truth" => {
@@ -1086,6 +1136,15 @@ impl Replay {
                 );
                 None
             }
+            "add_length_hint" => {
+                let iterable = self.node(&arguments["iterable"]);
+                self.engine.add_length_hint(
+                    iterable,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
             "entering_keys" => {
                 let source = self.node(&arguments["source"]);
                 let construct = list(&arguments["construct"]);
@@ -1121,6 +1180,85 @@ impl Replay {
                     text(&arguments["caller"]),
                     text(&arguments["site"]),
                 );
+                None
+            }
+            "type_form" => {
+                let parts: Vec<Option<NodeId>> = list(&arguments["parts"])
+                    .iter()
+                    .map(|part| self.optional_node(part))
+                    .collect();
+                let form = self.engine.type_form(
+                    text(&arguments["operator"]),
+                    &parts,
+                    text(&arguments["site"]),
+                );
+                Some(self.object_answer(form))
+            }
+            "gate_type_form" => {
+                let form = self.object(&arguments["form"]);
+                let gate = self.node(&arguments["gate"]);
+                self.engine.gate_type_form(form, gate);
+                None
+            }
+            "annotated" => {
+                let node = self.node(&arguments["node"]);
+                let dst = self.node(&arguments["dst"]);
+                let shape = match text(&arguments["shape"]) {
+                    "instance" => Shape::Instance,
+                    "element" => Shape::Element,
+                    "class" => Shape::Class,
+                    other => panic!("an annotation shape: {other}"),
+                };
+                let owner = list(&arguments["owner"]);
+                let object = self.object(&owner[0]);
+                self.engine
+                    .annotated(node, dst, shape, object, text(&owner[1]));
+                None
+            }
+            "bind_annotations" => {
+                let function = self.object(&arguments["function"]);
+                self.apply_annotations(function);
+                self.engine.bind_annotations(function);
+                None
+            }
+            "add_name_lookup" => {
+                let base = self.node(&arguments["base"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine
+                    .add_name_lookup(base, text(&arguments["attr"]), dst);
+                None
+            }
+            "add_stub_bases" => {
+                let class = self.object(&arguments["cls"]);
+                let node = self.node(&arguments["node"]);
+                self.engine.add_stub_bases(class, node);
+                None
+            }
+            "add_annotated_class" => {
+                let class = self.object(&arguments["cls"]);
+                self.apply_annotations(class);
+                let decorators: Vec<NodeId> = list(&arguments["decorators"])
+                    .iter()
+                    .map(|node| self.node(node))
+                    .collect();
+                let bases: Vec<NodeId> = list(&arguments["bases"])
+                    .iter()
+                    .map(|node| self.node(node))
+                    .collect();
+                self.engine.add_annotated_class(class, &decorators, &bases);
+                None
+            }
+            "add_structure_class" => {
+                let class = self.object(&arguments["cls"]);
+                let fields: Vec<(Box<str>, Option<NodeId>)> = pairs(&arguments["fields"])
+                    .iter()
+                    .map(|pair| (text(&pair[0]).into(), self.optional_node(&pair[1])))
+                    .collect();
+                let bases: Vec<NodeId> = list(&arguments["bases"])
+                    .iter()
+                    .map(|node| self.node(node))
+                    .collect();
+                self.engine.add_structure_class(class, &fields, &bases);
                 None
             }
             _ => not_ported(&format!("the builder call {call}")),
@@ -1194,9 +1332,7 @@ impl Replay {
                 }
             }
             Object::Function(_) => {
-                if !fields["annotations"].is_null() {
-                    not_ported("annotations");
-                }
+                self.pending_annotations(object, &fields["annotations"]);
                 let passthrough: Vec<Passthrough> = set(&fields["passthrough"])
                     .iter()
                     .map(|entry| match entry {
@@ -1218,9 +1354,7 @@ impl Replay {
                 function.end_col_offset = position(&fields["end_col_offset"]);
             }
             Object::Class(_) => {
-                if !fields["annotations"].is_null() {
-                    not_ported("annotations");
-                }
+                self.pending_annotations(object, &fields["annotations"]);
                 let names = |value: &Value| -> Vec<Box<str>> {
                     set(value).iter().map(|name| text(name).into()).collect()
                 };
@@ -1255,6 +1389,29 @@ impl Replay {
 
     fn node(&self, value: &Value) -> NodeId {
         self.engine.trace().node_named(value)
+    }
+
+    fn pending_annotations(&mut self, object: ObjId, value: &Value) {
+        if !value.is_null() {
+            self.annotations.insert(object, value.clone());
+        }
+    }
+
+    fn apply_annotations(&mut self, object: ObjId) {
+        let Some(value) = self.annotations.remove(&object) else {
+            return;
+        };
+        let annotations: IndexMap<Box<str>, NodeId> = pairs(&value)
+            .iter()
+            .map(|pair| (text(&pair[0]).into(), self.node(&pair[1])))
+            .collect();
+        match self.engine.object(object) {
+            Object::Function(_) => {
+                self.engine.function_fields(object).annotations = Some(annotations);
+            }
+            Object::Class(_) => self.engine.class_fields(object).annotations = Some(annotations),
+            _ => panic!("annotations of a function or a class"),
+        }
     }
 
     fn optional_node(&self, value: &Value) -> Option<NodeId> {

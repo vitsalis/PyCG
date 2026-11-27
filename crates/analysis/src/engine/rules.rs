@@ -1,5 +1,6 @@
 use pycg_solver::{KindMask, NodeId, ObjId, Rules, WatchId};
 
+use crate::engine::annotations::AnnotationRule;
 use crate::engine::attributes::{
     ANALYSED_METHODS, AccessId, AccessorsId, DeliveriesId, HookCallsId, HooksId, WritesId,
 };
@@ -8,8 +9,11 @@ use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::containers::ContainerRule;
 use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::{BindsId, Unless};
+use crate::engine::library::LibraryRule;
+use crate::engine::narrowing::ClassTestRule;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
+use crate::engine::outside_results::OutsideResultRule;
 use crate::engine::outside_types::OutsideRule;
 use crate::engine::patterns::PatternRule;
 use crate::engine::protocols::ProtocolRule;
@@ -285,6 +289,10 @@ pub(crate) enum Rule {
     Protocol(ProtocolRule),
     Pattern(PatternRule),
     Outside(OutsideRule),
+    Annotation(AnnotationRule),
+    OutsideResult(OutsideResultRule),
+    Library(LibraryRule),
+    ClassTest(ClassTestRule),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -343,6 +351,10 @@ impl Rule {
             Rule::Protocol(rule) => rule.key(),
             Rule::Pattern(rule) => rule.key(),
             Rule::Outside(rule) => rule.key(),
+            Rule::Annotation(rule) => rule.key(),
+            Rule::OutsideResult(rule) => rule.key(),
+            Rule::Library(rule) => rule.key(),
+            Rule::ClassTest(rule) => rule.key(),
             Rule::Access(_) => "Access",
             Rule::Deliver { .. } => "_Deliver",
             Rule::Deliveries(_) => "_Deliveries",
@@ -420,6 +432,10 @@ impl Rule {
             Rule::Container(rule) => rule.kinds(),
             Rule::Protocol(rule) => rule.kinds(),
             Rule::Pattern(rule) => rule.kinds(),
+            Rule::Annotation(rule) => rule.kinds(),
+            Rule::OutsideResult(rule) => rule.kinds(),
+            Rule::Library(rule) => rule.kinds(),
+            Rule::ClassTest(_) => None,
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. }
             | Rule::StatementMade
@@ -450,6 +466,10 @@ impl Rule {
             Rule::Protocol(ref rule) => rule.captured(),
             Rule::Pattern(ref rule) => rule.captured(),
             Rule::Outside(_) => Vec::new(),
+            Rule::Annotation(ref rule) => rule.captured(),
+            Rule::OutsideResult(ref rule) => rule.captured(),
+            Rule::Library(_) => Vec::new(),
+            Rule::ClassTest(ref rule) => rule.captured(),
             Rule::Bases { class, .. }
             | Rule::KeywordCandidate { class }
             | Rule::MemberOfMetaclass { class, .. }
@@ -560,6 +580,10 @@ impl<T: Trace> State<T> {
             Rule::Protocol(ref rule) => self.protocol_results(rule),
             Rule::Pattern(ref rule) => self.pattern_results(rule),
             Rule::Outside(ref rule) => rule.results(),
+            Rule::Annotation(ref rule) => rule.results(),
+            Rule::OutsideResult(ref rule) => rule.results(),
+            Rule::Library(ref rule) => rule.results(),
+            Rule::ClassTest(ref rule) => self.class_test_results(rule),
             Rule::Call(call)
             | Rule::PythonNew { call, .. }
             | Rule::PythonInstance { call }
@@ -826,6 +850,10 @@ impl<T: Trace> State<T> {
             Rule::Protocol(ref rule) => self.protocol_apply(graph, rule, object),
             Rule::Pattern(ref rule) => self.pattern_apply(graph, rule, object),
             Rule::Outside(ref rule) => self.outside_apply(graph, rule, object),
+            Rule::Annotation(ref rule) => self.annotation_apply(graph, rule, object),
+            Rule::OutsideResult(ref rule) => self.outside_result_apply(graph, rule, object),
+            Rule::Library(rule) => self.library_apply(graph, rule, object),
+            Rule::ClassTest(ref rule) => self.class_test_apply(graph, rule, object),
         }
     }
 

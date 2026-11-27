@@ -259,26 +259,38 @@ EVENTS = {"low": 0, "high": 0, "max": 3, "oom": 1, "oom_kill": 1}
 KILLED = {"status": "crash", "exit_status": -signal.SIGKILL}
 
 
+NOT_PORTED = {"status": "crash", "exit_status": 3}
+
+
 @pytest.mark.parametrize(
-    ("record", "after", "outcome"),
+    ("record", "flavour", "after", "outcome"),
     [
-        ({"status": "ok"}, EVENTS, "finished"),
-        ({"status": "memory"}, EVENTS, "killed by the cap"),
+        ({"status": "ok"}, "new", EVENTS, "finished"),
+        ({"status": "memory"}, "new", EVENTS, "killed by the cap"),
         (
             KILLED,
+            "new",
             EVENTS | {"oom": 2, "oom_kill": 2},
             "killed: the container ran out of memory",
         ),
-        (KILLED, EVENTS | {"oom_kill": 2}, "killed: the machine ran out of memory"),
-        (KILLED, EVENTS, "killed by SIGKILL"),
-        (KILLED, None, "killed by SIGKILL"),
-        ({"status": "crash", "exit_status": 1}, EVENTS, "crash"),
-        ({"status": "timeout"}, EVENTS, "timeout"),
+        (
+            KILLED,
+            "new",
+            EVENTS | {"oom_kill": 2},
+            "killed: the machine ran out of memory",
+        ),
+        (KILLED, "new", EVENTS, "killed by SIGKILL"),
+        (KILLED, "rust", None, "killed by SIGKILL"),
+        ({"status": "crash", "exit_status": 1}, "new", EVENTS, "crash"),
+        ({"status": "timeout"}, "new", EVENTS, "timeout"),
+        (NOT_PORTED, "rust", EVENTS, "not ported"),
+        (NOT_PORTED, "new", EVENTS, "crash"),
+        ({"status": "crash", "exit_status": 101}, "rust", EVENTS, "crash"),
     ],
 )
-def test_the_outcome_of_a_run(record, after, outcome):
+def test_the_outcome_of_a_run(record, flavour, after, outcome):
     before = None if after is None else EVENTS
-    assert measure.outcome_of(record, before, after) == outcome
+    assert measure.outcome_of(record, flavour, before, after) == outcome
 
 
 def test_the_memory_events_of_the_container_are_read(tmp_path):
@@ -349,9 +361,9 @@ def test_a_rust_stop_keeps_its_error_line_in_the_record(tmp_path):
     result = measure.measure(
         checkout, "rust", project, tmp_path / "out", 1024, 60, sys.executable, "rust"
     )
-    assert result["outcome"] == "crash"
+    assert result["outcome"] == "not ported"
     assert result["graph_sha256"] is None
-    assert result["run"]["error"] == "pycg: the analysis is not ported yet"
+    assert result["run"]["error"] == "pycg: not ported: outside attributes"
 
 
 def cgroup_limit(tmp_path, text):
