@@ -7,6 +7,7 @@ import tokenize
 import warnings
 from collections import deque
 
+from .annotations import parser_overflowed
 from .builder import NESTING_MAX, NESTING_STACK_FRAMES, ModuleBuilder
 from .imports import ImportManager, extension_name
 from .scopes import literal_assignment, mentions
@@ -310,6 +311,11 @@ def _parse(source, path):
             warnings.simplefilter("ignore")
             return ast.parse(source, path), None
     except (SyntaxError, ValueError, RecursionError) as error:
+        logger.warning("Skipping %s: cannot parse it: %s", path, error)
+        return None, _cause(error)
+    except MemoryError as error:
+        if not parser_overflowed(error):
+            raise
         logger.warning("Skipping %s: cannot parse it: %s", path, error)
         return None, _cause(error)
 
