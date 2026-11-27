@@ -1,6 +1,7 @@
 import os
 
 SHARD = os.environ.get("PYCG_TEST_SHARD")
+collect_ignore = ["tests/cases"]
 
 
 def pytest_collection_modifyitems(config, items):

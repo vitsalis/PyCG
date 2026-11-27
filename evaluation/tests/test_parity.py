@@ -35,6 +35,7 @@ diff = load("parity_diff", PARITY / "diff.py")
 oracle = load("parity_dump", PARITY / "dump.py")
 import_vectors = load("parity_import_vectors", PARITY / "import_vectors.py")
 program = load("parity_program", PARITY / "program.py")
+cases = load("parity_cases", PARITY / "cases.py")
 
 PROGRAMS = {
     "classes": """
@@ -924,3 +925,167 @@ def test_the_import_vectors_keep_each_answer_as_it_was_given(tmp_path):
         ("get_imports", ["main"], []),
         ("handle_import", ["pkg", 0], "pkg"),
     ]
+
+
+SNIPPET = ROOT / "evaluation" / "micro-benchmark" / "snippets" / "args" / "call"
+CONVERTED_TESTS = """
+import sys
+
+sys.path.insert(0, {tests!r})
+from programs import analysed, callees
+
+
+def test_two_programs(tmp_path):
+    first = analysed(tmp_path / "one", {{"main.py": "def f(): pass\\nf()\\n"}})
+    assert callees(first.output(), "main") == ["main.f"]
+    second = analysed(
+        tmp_path / "two",
+        {{
+            "main.py": "import broken\\nclass C: pass\\nc = C()\\n",
+            "broken.py": "def (\\n",
+        }},
+        cap=7,
+    )
+    assert "main.c" in second.output_points_to()
+    package = second.document("demo", "1.0")["package"]
+    assert package == {{"name": "demo", "version": "1.0"}}
+
+
+def test_nothing_to_analyse(tmp_path):
+    assert analysed(tmp_path, {{}}, (), package=False).document()["calls"] == {{}}
+
+
+def test_a_micro_case():
+    from pathlib import Path
+    from pycg.pycg import CallGraphGenerator
+
+    snippet = Path({snippet!r})
+    generator = CallGraphGenerator([str(snippet / "main.py")], str(snippet))
+    generator.analyze()
+
+
+def test_patched(tmp_path, monkeypatch):
+    import pycg.pycg
+
+    monkeypatch.setattr(pycg.pycg, "DEFAULT_CAP", 1)
+    analysed(tmp_path, {{"main.py": "pass\\n"}})
+
+
+def test_relative_paths(tmp_path, monkeypatch):
+    analysed(tmp_path, {{"pkg/main.py": "def f(): pass\\nf()\\n"}})
+    monkeypatch.chdir(tmp_path)
+    from pycg.pycg import CallGraphGenerator
+
+    generator = CallGraphGenerator(["pkg/main.py"], "pkg")
+    generator.analyze()
+"""
+
+
+def converted_tests():
+    return CONVERTED_TESTS.format(tests=str(ROOT / "tests"), snippet=str(SNIPPET))
+
+
+def test_a_test_file_becomes_one_case_per_analysed_program(tmp_path):
+    test_file = tmp_path / "test_demo.py"
+    test_file.write_text(converted_tests())
+    out = tmp_path / "cases"
+
+    recorder, passed = cases.convert(
+        out, test_file, "tests/test_demo.py", "demo", "Demo"
+    )
+
+    assert passed
+    assert recorder.skipped == ["test_patched"]
+    assert recorder.micro == ["test_a_micro_case"]
+    assert sorted(path.name for path in (out / "demo").iterdir()) == [
+        "nothing_to_analyse",
+        "relative_paths",
+        "relative_paths-2",
+        "two_programs",
+        "two_programs-2",
+    ]
+    relative = json.loads((out / "demo" / "relative_paths-2" / "case.json").read_text())
+    assert relative["entry_points"] == ["pkg/main.py"]
+    assert relative["package"] == "pkg"
+    first = json.loads((out / "demo" / "two_programs" / "case.json").read_text())
+    assert first == {
+        "cap": 5000,
+        "design": "Demo",
+        "entry_points": ["one/main.py"],
+        "focus": ["main"],
+        "package": "one",
+        "source": "tests/test_demo.py::test_two_programs",
+        "statement": "Two programs",
+    }
+    expected = json.loads((out / "demo" / "two_programs" / "expected.json").read_text())
+    assert expected["edges"] == {"main": ["main.f"], "main.f": []}
+    assert expected["documents"] == []
+    assert expected["points_to"] == {}
+    assert (out / "demo" / "two_programs" / "program" / "one" / "main.py").is_file()
+    second = out / "demo" / "two_programs-2"
+    assert json.loads((second / "case.json").read_text())["cap"] == 7
+    expected = json.loads((second / "expected.json").read_text())
+    assert list(expected["points_to"]) == ["main.c"]
+    [requested] = expected["documents"]
+    assert (requested["package_name"], requested["package_version"]) == ("demo", "1.0")
+    assert requested["document"]["package"] == {"name": "demo", "version": "1.0"}
+    empty = json.loads((out / "demo" / "nothing_to_analyse" / "case.json").read_text())
+    assert empty["entry_points"] == []
+    assert expected["warnings"] == [
+        "Skipping {root}/two/broken.py: cannot parse it: "
+        "invalid syntax (broken.py, line 1)"
+    ]
+
+
+def test_converting_again_replaces_the_cases_of_the_file(tmp_path):
+    test_file = tmp_path / "test_demo.py"
+    test_file.write_text(converted_tests())
+    out = tmp_path / "cases"
+    stale = out / "demo" / "two_programs-3"
+    stale.mkdir(parents=True)
+    (stale / "case.json").write_text(json.dumps({"source": "tests/test_demo.py::gone"}))
+    other = out / "demo" / "kept"
+    other.mkdir()
+    (other / "case.json").write_text(json.dumps({"source": "tests/test_other.py::x"}))
+
+    cases.convert(out, test_file, "tests/test_demo.py", "demo", "Demo")
+
+    assert not stale.exists()
+    assert other.exists()
+
+
+def test_a_parameter_spells_out_each_character_outside_a_name():
+    assert cases.case_name("test_f[pre_%s%(a]", 0) == "f-pre_-25s-25-28a"
+    assert cases.case_name("test_f[pre_%(a)s]", 0) == "f-pre_-25-28a-29s"
+    assert cases.case_name("test_f[A]", 1) == "f--41-2"
+    assert cases.case_name("test_plain", 0) == "plain"
+
+
+UNCONVERTED_TESTS = """
+from hypothesis import given, settings, strategies as st
+
+
+def test_nothing_analysed():
+    assert True
+
+
+@settings(max_examples=2, deadline=None)
+@given(st.integers())
+def test_a_property(number):
+    assert number == number
+"""
+
+
+def test_a_property_and_a_test_without_a_program_are_listed(tmp_path):
+    test_file = tmp_path / "test_unconverted.py"
+    test_file.write_text(UNCONVERTED_TESTS)
+    out = tmp_path / "cases"
+
+    recorder, passed = cases.convert(
+        out, test_file, "tests/test_unconverted.py", "demo", "D"
+    )
+
+    assert passed
+    assert recorder.properties == ["test_a_property"]
+    assert recorder.unanalysed == ["test_nothing_analysed"]
+    assert recorder.written == []
