@@ -7,13 +7,24 @@ use crate::builder::calls::{
     Analysis, BuilderTables, Call, ClassFields, ClassStatement, Constant, FunctionFields, Key,
     MadeFunction, MethodKind, NewClass, Operation, Passthrough, Shape, Slice, Subscript,
 };
+use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{self, Literal, Object};
+use crate::engine::protocols::{Conversion, OperatorCall};
+use crate::engine::semantics::{Role, SiteKey};
+use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{BuilderFields, Engine, containers, not_ported};
 use crate::model::Signature;
 use crate::program::imports::ImportManager;
 
 impl<T: Trace> Engine<T> {
+    fn caller_site(&mut self, caller: &str, site: &str) -> (Sym, Sym) {
+        (
+            self.state.symbols.intern(caller),
+            self.state.symbols.intern(site),
+        )
+    }
+
     fn sync(&mut self) {
         let handed = std::mem::take(&mut self.state.handed);
         for object in handed {
@@ -352,25 +363,35 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn add_with(
         &mut self,
-        _manager: NodeId,
-        _dst: Option<NodeId>,
-        _caller: &str,
-        _site: &str,
-        _is_async: bool,
+        manager: NodeId,
+        dst: Option<NodeId>,
+        caller: &str,
+        site: &str,
+        is_async: bool,
     ) {
-        not_ported("the builder call add_with")
+        self.sync();
+        let (caller, site) = self.caller_site(caller, site);
+        self.state
+            .add_with(&mut self.graph, manager, dst, caller, site, is_async);
     }
 
-    fn add_raise(&mut self, _exception: NodeId, _caller: &str, _site: &str) {
-        not_ported("the builder call add_raise")
+    fn add_raise(&mut self, exception: NodeId, caller: &str, site: &str) {
+        self.sync();
+        let (caller, site) = self.caller_site(caller, site);
+        self.state
+            .add_raise(&mut self.graph, exception, caller, site);
     }
 
-    fn add_truth(&mut self, _value: NodeId, _caller: &str, _site: &str) {
-        not_ported("the builder call add_truth")
+    fn add_truth(&mut self, value: NodeId, caller: &str, site: &str) {
+        self.sync();
+        let (caller, site) = self.caller_site(caller, site);
+        self.state.add_truth(&mut self.graph, value, caller, site);
     }
 
-    fn add_handler(&mut self, _types: Option<NodeId>, _dst: NodeId) {
-        not_ported("the builder call add_handler")
+    fn add_handler(&mut self, types: Option<NodeId>, dst: NodeId) {
+        self.sync();
+        let types = types.expect("a handler with a type");
+        self.state.add_handler(&mut self.graph, types, dst);
     }
 
     fn imports(&mut self) -> &mut ImportManager {
@@ -501,23 +522,44 @@ impl<T: Trace> Analysis for Engine<T> {
         not_ported("the builder call typed")
     }
 
-    fn add_operator(&mut self, _operation: &Operation<'_>) {
-        not_ported("the builder call add_operator")
+    fn add_operator(&mut self, operation: &Operation<'_>) {
+        self.sync();
+        let call = OperatorCall {
+            left: operation.left,
+            right: operation.right,
+            method: operation.method,
+            reflected: operation.reflected,
+            inplace: operation.inplace,
+            dst: operation.dst,
+            caller: self.state.symbols.intern(operation.caller),
+            site: self.state.symbols.intern(operation.site),
+            unary: operation.unary,
+            constants: operation.constants,
+            extra: Vec::new(),
+        };
+        self.state.add_operator(&mut self.graph, call);
     }
 
-    fn add_percent(&mut self, _fmt: NodeId, _value: NodeId, _caller: &str, _site: &str) {
-        not_ported("the builder call add_percent")
+    fn add_percent(&mut self, fmt: NodeId, value: NodeId, caller: &str, site: &str) {
+        self.sync();
+        let (caller, site) = self.caller_site(caller, site);
+        self.state
+            .add_percent(&mut self.graph, fmt, value, caller, site);
     }
 
     fn add_conversion(
         &mut self,
-        _value: NodeId,
-        _kind: &str,
-        _caller: &str,
-        _site: &str,
-        _spec: Option<NodeId>,
+        value: NodeId,
+        kind: &str,
+        caller: &str,
+        site: &str,
+        spec: Option<NodeId>,
     ) {
-        not_ported("the builder call add_conversion")
+        self.sync();
+        let (caller, site) = self.caller_site(caller, site);
+        let kind = Conversion::of(kind);
+        self.state
+            .add_conversion(&mut self.graph, value, kind, caller, site, spec);
     }
 
     fn add_hash(&mut self, key: NodeId, caller: &str, site: &str, stored: Option<NodeId>) {
@@ -617,8 +659,11 @@ impl<T: Trace> Analysis for Engine<T> {
             .add_dict_items(&mut self.graph, target, source, caller, site);
     }
 
-    fn add_await(&mut self, _value: NodeId, _dst: NodeId, _caller: &str, _site: &str) {
-        not_ported("the builder call add_await")
+    fn add_await(&mut self, value: NodeId, dst: NodeId, caller: &str, site: &str) {
+        self.sync();
+        let (caller, site) = self.caller_site(caller, site);
+        self.state
+            .add_await(&mut self.graph, value, dst, caller, site);
     }
 
     fn add_yield_from(
@@ -677,12 +722,32 @@ impl<T: Trace> Analysis for Engine<T> {
         not_ported("the builder call add_stub_bases")
     }
 
-    fn site_call(&mut self, _caller: &str, _site: &str, _role: &[&str]) -> BuilderCallId {
-        not_ported("the builder call site_call")
+    fn site_call(&mut self, caller: &str, site: &str, role: &[&str]) -> BuilderCallId {
+        self.sync();
+        let &["special", name] = role else {
+            panic!("the builder makes only special calls, not {role:?}")
+        };
+        let (caller, site) = self.caller_site(caller, site);
+        let role = Role::Special(self.state.symbols.intern(name));
+        let key = SiteKey {
+            caller,
+            site,
+            role,
+            implicit: true,
+        };
+        let call = self.state.site_call(&mut self.graph, key, &[], None, None);
+        let id = BuilderCallId(
+            u32::try_from(self.state.builder_calls.len()).expect("fewer than 2^32 calls"),
+        );
+        self.state.builder_calls.push(call);
+        id
     }
 
-    fn add_special_call(&mut self, _value: NodeId, _name: &str, _call: BuilderCallId) {
-        not_ported("the builder call add_special_call")
+    fn add_special_call(&mut self, value: NodeId, name: &str, call: BuilderCallId) {
+        self.sync();
+        let call = self.state.builder_calls[call.0 as usize];
+        self.state
+            .special_call(&mut self.graph, value, name, call, Unless::Nothing);
     }
 
     fn add_named_load(&mut self, obj: NodeId, name: NodeId, dst: NodeId, caller: &str, site: &str) {

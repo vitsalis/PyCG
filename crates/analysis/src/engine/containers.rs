@@ -9,6 +9,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Container, Kind, Literal, Object};
 use crate::engine::outside_calls::BoundId;
+use crate::engine::protocols::OperatorId;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
 use crate::engine::symbols::Sym;
@@ -65,6 +66,7 @@ pub(super) enum ContainerOrigin {
     Rest(Sym, Sym),
     Iterate(Sym, Sym, IterationRoleId),
     Iterator(ObjId),
+    Operator(OperatorId),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -359,6 +361,10 @@ impl<T: Trace> State<T> {
             Object::Container(container) => Some(container),
             _ => None,
         }
+    }
+
+    pub(super) fn container_kind(&self, container: ObjId) -> &str {
+        self.kind_text(container)
     }
 
     fn kind_text(&self, container: ObjId) -> &str {
@@ -869,7 +875,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn special_call(
+    pub(super) fn special_call(
         &mut self,
         graph: &mut Graph,
         value: NodeId,

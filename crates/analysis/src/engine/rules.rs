@@ -9,6 +9,7 @@ use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
+use crate::engine::protocols::ProtocolRule;
 use crate::engine::reflection::{DefaultAction, GetmembersId};
 use crate::engine::semantics::{CallId, ReturnedId};
 use crate::engine::symbols::Sym;
@@ -254,6 +255,7 @@ pub(crate) enum Rule {
         load: AccessId,
     },
     Container(ContainerRule),
+    Protocol(ProtocolRule),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -303,6 +305,7 @@ impl Rule {
             Rule::CallMetaclass { .. } => "Each:Analysis._call_metaclass",
             Rule::AddInexact { .. } => "Each:Containers._add_inexact",
             Rule::Container(rule) => rule.key(),
+            Rule::Protocol(rule) => rule.key(),
             Rule::Access(_) => "Access",
             Rule::Deliver { .. } => "_Deliver",
             Rule::Deliveries(_) => "_Deliveries",
@@ -353,6 +356,9 @@ impl Rule {
         if let Rule::Container(rule) = self {
             return rule.each();
         }
+        if let Rule::Protocol(rule) = self {
+            return rule.each();
+        }
         !matches!(
             self,
             Rule::Call(_)
@@ -371,6 +377,7 @@ impl Rule {
     fn kinds(&self) -> Option<&'static [Kind]> {
         match self {
             Rule::Container(rule) => rule.kinds(),
+            Rule::Protocol(rule) => rule.kinds(),
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. } => Some(CLASS_KINDS),
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
@@ -395,6 +402,7 @@ impl Rule {
     fn captured(&self) -> Vec<ObjId> {
         match *self {
             Rule::Container(ref rule) => rule.captured(),
+            Rule::Protocol(ref rule) => rule.captured(),
             Rule::Bases { class, .. }
             | Rule::KeywordCandidate { class }
             | Rule::MemberOfMetaclass { class, .. }
@@ -489,6 +497,7 @@ impl<T: Trace> State<T> {
     fn results(&self, rule: &Rule) -> Vec<NodeId> {
         match *rule {
             Rule::Container(ref rule) => self.container_results(rule),
+            Rule::Protocol(ref rule) => self.protocol_results(rule),
             Rule::Call(call)
             | Rule::PythonNew { call, .. }
             | Rule::PythonInstance { call }
@@ -726,6 +735,7 @@ impl<T: Trace> State<T> {
                 self.add_object(graph, dst, bound);
             }
             Rule::Container(ref rule) => self.container_apply(graph, rule, object),
+            Rule::Protocol(ref rule) => self.protocol_apply(graph, rule, object),
         }
     }
 

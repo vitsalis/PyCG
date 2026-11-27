@@ -1114,12 +1114,29 @@ impl<T: Trace> State<T> {
         caller: Sym,
         site: Sym,
     ) {
+        self.call_protocol_at(graph, object, plan, caller, site, false);
+    }
+
+    pub(super) fn call_protocol_at(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        plan: PlanId,
+        caller: Sym,
+        site: Sym,
+        compare: bool,
+    ) {
         let steps = self.protocol_plans[plan.0 as usize].clone();
         for (name, unless) in steps {
+            let role = if compare {
+                Role::Compare(name)
+            } else {
+                Role::Protocol(name)
+            };
             let key = SiteKey {
                 caller,
                 site,
-                role: Role::Protocol(name),
+                role,
                 implicit: true,
             };
             let implicit = self.site_call(graph, key, &[], None, None);
