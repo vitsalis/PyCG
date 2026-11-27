@@ -358,6 +358,17 @@ impl Trace for Recorder {
         self.write(&record);
     }
 
+    fn follower(&mut self, source: NodeId, since: u32, node: NodeId) {
+        self.name_node(node, None);
+        self.reported.push(node);
+        let record = json!({
+            "op": "follower",
+            "args": [self.node_value(source), since],
+            "answer": self.node_value(node),
+        });
+        self.write(&record);
+    }
+
     fn apply_now(&mut self, node: NodeId, rule: RuleId) {
         self.declare_rule(rule);
         let record = json!({

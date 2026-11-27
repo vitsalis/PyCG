@@ -200,7 +200,7 @@ impl<T: Trace> Analysis for Engine<T> {
             object,
             signature: made.signature.clone(),
             parameters,
-            return_node: made.return_node,
+            return_node: made.return_node.expect("an analysed function returns"),
             yield_node: made.yield_node,
             sent_node: made.sent_node,
         }

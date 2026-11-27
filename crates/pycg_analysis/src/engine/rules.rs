@@ -5,6 +5,7 @@ use crate::engine::attributes::{
 };
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, kinds_mask};
+use crate::engine::outside_calls::PlanId;
 use crate::engine::semantics::{CallId, ReturnedId};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::{RuleInfo, Trace};
@@ -123,6 +124,22 @@ pub(crate) enum Rule {
         object: ObjId,
         delete: AccessId,
     },
+    CallBackObject {
+        callback: CallId,
+    },
+    CallProtocol {
+        plan: PlanId,
+        call: CallId,
+    },
+    MetaclassProtocol {
+        class: ObjId,
+        name: Sym,
+        implicit: CallId,
+        unless: Unless,
+    },
+    CallEach {
+        call: CallId,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -143,6 +160,7 @@ pub(crate) enum WaitingRule {
 
 const SET_NAME_KINDS: &[Kind] = &[Kind::Instance, Kind::Class];
 const CLASS_KINDS: &[Kind] = &[Kind::Class];
+const CALLED_BACK_KINDS: &[Kind] = &[Kind::Function, Kind::BoundMethod, Kind::Instance];
 
 impl Rule {
     fn key(&self) -> &'static str {
@@ -179,6 +197,10 @@ impl Rule {
             Rule::StorePast { .. } => "Each:Attributes._store_past",
             Rule::DeliverStore { .. } => "Each:Attributes._deliver_store",
             Rule::DeliverDelete { .. } => "Each:Attributes._deliver_delete",
+            Rule::CallBackObject { .. } => "Each:Analysis._call_back_object",
+            Rule::CallProtocol { .. } => "Each:Outside._call_protocol",
+            Rule::MetaclassProtocol { .. } => "Each:Outside._metaclass_protocol",
+            Rule::CallEach { .. } => "Each:Analysis.call",
         }
     }
 
@@ -202,6 +224,8 @@ impl Rule {
         match self {
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. } => Some(CLASS_KINDS),
+            Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
+            Rule::CallProtocol { .. } => Some(SET_NAME_KINDS),
             Rule::ClassGet { .. }
             | Rule::Accessors {
                 analysed_only: true,
@@ -226,7 +250,12 @@ impl Rule {
             | Rule::Itself { object, .. }
             | Rule::DeliverStore { object, .. }
             | Rule::DeliverDelete { object, .. } => vec![object],
-            Rule::ClassAttribute { class, .. } => vec![class],
+            Rule::ClassAttribute { class, .. } | Rule::MetaclassProtocol { class, .. } => {
+                vec![class]
+            }
+            Rule::CallBackObject { .. } | Rule::CallProtocol { .. } | Rule::CallEach { .. } => {
+                Vec::new()
+            }
             Rule::ModuleGetattr { module, .. } => vec![module],
             Rule::Deliver { receiver, .. } => vec![receiver],
             Rule::Access(_)
@@ -307,7 +336,13 @@ impl<T: Trace> State<T> {
             Rule::Itself { dst, .. } => vec![dst],
             Rule::ClassGet { call } => self.calls[call.index()].dst.into_iter().collect(),
             Rule::StorePast { field, .. } => vec![field],
-            Rule::DeliverStore { .. } | Rule::DeliverDelete { .. } => Vec::new(),
+            Rule::DeliverStore { .. }
+            | Rule::DeliverDelete { .. }
+            | Rule::CallBackObject { .. }
+            | Rule::CallProtocol { .. } => Vec::new(),
+            Rule::MetaclassProtocol { implicit: call, .. } | Rule::CallEach { call } => {
+                self.calls[call.index()].dst.into_iter().collect()
+            }
             Rule::Bases { .. }
             | Rule::KeywordCandidate { .. }
             | Rule::ReturnedOfClass(_)
@@ -386,6 +421,15 @@ impl<T: Trace> State<T> {
                 object: owner,
                 delete,
             } => self.deliver_delete(graph, object, owner, delete),
+            Rule::CallBackObject { callback } => self.call(graph, object, callback),
+            Rule::CallProtocol { plan, call } => self.call_protocol(graph, object, plan, call),
+            Rule::MetaclassProtocol {
+                class,
+                name,
+                implicit,
+                ref unless,
+            } => self.metaclass_protocol(graph, object, class, name, implicit, unless.clone()),
+            Rule::CallEach { call } => self.call(graph, object, call),
         }
     }
 
