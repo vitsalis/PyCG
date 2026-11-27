@@ -224,6 +224,8 @@ impl<T: Trace> State<T> {
         }
         let watch = self.watches[&watched];
         if graph.is_waiting(watch) {
+            let (index, _) = self.waiting_rules.insert_full(rule);
+            let rule = u32::try_from(index).expect("fewer than 2^32 waiting rules");
             self.waiting
                 .entry(watch)
                 .or_default()

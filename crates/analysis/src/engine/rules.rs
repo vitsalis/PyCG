@@ -974,11 +974,12 @@ impl<T: Trace> Rules<RuleId> for State<T> {
     fn wake(&mut self, graph: &mut Graph, watch: WatchId) {
         self.trace.wake(watch);
         let waiting = self.waiting.remove(&watch).unwrap_or_default();
-        let mut receivers_by_rule: OrderedMap<WaitingRule, Vec<ObjId>> = OrderedMap::default();
+        let mut receivers_by_rule: OrderedMap<u32, Vec<ObjId>> = OrderedMap::default();
         for (rule, receiver) in waiting {
             receivers_by_rule.entry(rule).or_default().push(receiver);
         }
         for (rule, receivers) in receivers_by_rule {
+            let rule = self.waiting_rules[rule as usize].clone();
             for receiver in receivers {
                 self.run_waiting(graph, rule.clone(), receiver);
             }
