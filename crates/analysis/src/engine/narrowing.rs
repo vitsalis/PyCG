@@ -152,7 +152,7 @@ fn next_id(length: usize) -> u32 {
 
 impl<T: Trace> State<T> {
     fn class_test_rule(&mut self, rule: ClassTestRule) -> RuleId {
-        self.rule(Rule::ClassTest(rule))
+        self.rule(Rule::ClassTest(Box::new(rule)))
     }
 
     fn filter(&self, id: FilterId) -> &Filter {

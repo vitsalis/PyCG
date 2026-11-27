@@ -941,6 +941,7 @@ impl<T: Trace> State<T> {
             Object::Class(class) => class.metaclass,
             _ => panic!("a special method is called on an instance or a class"),
         };
+        let unless = self.unless_id(unless);
         let rule = self.rule(Rule::TypeMethod {
             object,
             name,

@@ -8,7 +8,7 @@ use crate::engine::builtin_rules::DynamicId;
 use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::containers::ContainerRule;
 use crate::engine::containers::IterationId;
-use crate::engine::hierarchy::{BindsId, Unless};
+use crate::engine::hierarchy::{BindsId, Unless, UnlessId};
 use crate::engine::library::LibraryRule;
 use crate::engine::narrowing::ClassTestRule;
 use crate::engine::objects::{Kind, kinds_mask};
@@ -82,7 +82,7 @@ pub(crate) enum Rule {
         object: ObjId,
         name: Sym,
         implicit: CallId,
-        unless: Unless,
+        unless: UnlessId,
     },
     SetName {
         class: ObjId,
@@ -223,7 +223,7 @@ pub(crate) enum Rule {
         class: ObjId,
         name: Sym,
         implicit: CallId,
-        unless: Unless,
+        unless: UnlessId,
     },
     CallEach {
         call: CallId,
@@ -293,13 +293,13 @@ pub(crate) enum Rule {
         load: AccessId,
     },
     Container(ContainerRule),
-    Protocol(ProtocolRule),
+    Protocol(Box<ProtocolRule>),
     Pattern(PatternRule),
-    Outside(OutsideRule),
-    Annotation(AnnotationRule),
-    OutsideResult(OutsideResultRule),
+    Outside(Box<OutsideRule>),
+    Annotation(Box<AnnotationRule>),
+    OutsideResult(Box<OutsideResultRule>),
     Library(LibraryRule),
-    ClassTest(ClassTestRule),
+    ClassTest(Box<ClassTestRule>),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -712,8 +712,11 @@ impl<T: Trace> State<T> {
                 object: owner,
                 name,
                 implicit,
-                ref unless,
-            } => self.type_method(graph, object, owner, name, implicit, unless.clone()),
+                unless,
+            } => {
+                let unless = self.unless_of(unless);
+                self.type_method(graph, object, owner, name, implicit, unless)
+            }
             Rule::SetName {
                 class,
                 name,
@@ -822,8 +825,11 @@ impl<T: Trace> State<T> {
                 class,
                 name,
                 implicit,
-                ref unless,
-            } => self.metaclass_protocol(graph, object, class, name, implicit, unless.clone()),
+                unless,
+            } => {
+                let unless = self.unless_of(unless);
+                self.metaclass_protocol(graph, object, class, name, implicit, unless)
+            }
             Rule::CallEach { call } => self.call(graph, object, call),
             Rule::ImplicitMethod { field, kind, site } => {
                 self.implicit_method(graph, object, field, kind, site)
@@ -991,3 +997,5 @@ impl<T: Trace> Rules<RuleId> for State<T> {
         self.trace.fire(graph, &self.named_nodes);
     }
 }
+
+const _: () = assert!(std::mem::size_of::<Rule>() == 24);

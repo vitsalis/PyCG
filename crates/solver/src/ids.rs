@@ -1,3 +1,5 @@
+use std::num::NonZeroU32;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct ObjId(pub u32);
 
@@ -23,15 +25,16 @@ impl SetId {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct NodeId(u32);
+pub struct NodeId(NonZeroU32);
 
 impl NodeId {
     pub fn new(index: usize) -> NodeId {
-        NodeId(u32::try_from(index).expect("nodes fit u32"))
+        let index = u32::try_from(index).expect("nodes fit u32");
+        NodeId(NonZeroU32::new(index + 1).expect("fewer than u32::MAX nodes"))
     }
 
     pub fn index(self) -> usize {
-        self.0 as usize
+        (self.0.get() - 1) as usize
     }
 }
 

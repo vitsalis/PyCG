@@ -7,7 +7,7 @@ use pycg_stubs::DefinitionKind;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::engine::arguments::{BindingId, SpreadId, Spreads};
-use crate::engine::hierarchy::Unless;
+use crate::engine::hierarchy::{Unless, UnlessId};
 use crate::engine::library::{LibraryOrigin, LibraryRole};
 use crate::engine::objects::{Container, Kind, Literal, Object};
 use crate::engine::outside_calls::BoundId;
@@ -1021,6 +1021,7 @@ impl<T: Trace> State<T> {
         unless: Unless,
     ) {
         let name = self.symbols.intern(name);
+        let unless = self.unless_id(unless);
         let rule = self.container_rule(ContainerRule::SpecialCall { name, call, unless });
         self.attach(graph, value, rule);
     }
@@ -2747,7 +2748,7 @@ pub(crate) enum ContainerRule {
     SpecialCall {
         name: Sym,
         call: CallId,
-        unless: Unless,
+        unless: UnlessId,
     },
     KeyLookupKey(KeyLookupId),
     KeyLookupStored(KeyLookupId),
@@ -2928,13 +2929,10 @@ impl<T: Trace> State<T> {
         object: ObjId,
     ) {
         match *rule {
-            ContainerRule::SpecialCall {
-                name,
-                call,
-                ref unless,
-            } => {
+            ContainerRule::SpecialCall { name, call, unless } => {
                 let name = self.symbols.text(name).to_owned();
-                self.call_dunder(graph, object, &name, call, None, unless.clone());
+                let unless = self.unless_of(unless);
+                self.call_dunder(graph, object, &name, call, None, unless);
             }
             ContainerRule::KeyLookupKey(id) => self.key_lookup_key(graph, id, object),
             ContainerRule::KeyLookupStored(id) => self.key_lookup_stored(graph, id, object),

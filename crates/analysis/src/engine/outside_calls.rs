@@ -1204,6 +1204,7 @@ impl<T: Trace> State<T> {
             };
             let implicit = self.site_call(graph, key, &[], None, None);
             if self.objects.is_class(object) {
+                let unless = self.unless_id(unless);
                 let rule = self.rule(Rule::MetaclassProtocol {
                     class: object,
                     name,
