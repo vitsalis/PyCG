@@ -187,6 +187,13 @@ def test_the_fields_that_the_builder_writes_end_each_module_of_the_build(dumped)
     (tables,) = [record["tables"] for record in records if "tables" in record]
     assert tables["iterated_expressions"]["set"]
     assert tables["read_namespaces"] == {"set": []}
+    answered = {
+        record["answer"]["object"]
+        for record in records
+        if "call" in record and isinstance(record["answer"], dict)
+        if "object" in record["answer"]
+    }
+    assert set(fields) - {"Module:main"} <= answered
 
 
 def test_an_unread_lazy_import_is_written_by_its_position(tmp_path):

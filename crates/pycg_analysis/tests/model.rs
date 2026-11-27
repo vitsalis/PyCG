@@ -43,6 +43,26 @@ fn an_int_constant_is_named_in_decimal_below_10_to_the_640_and_in_hexadecimal_fr
 }
 
 #[test]
+fn a_dotted_module_name_is_identifiers_as_python_tests_them() {
+    let mut alphabetic_wrong = 0;
+    for (name, expected) in vectors::DOTTED_IDENTIFIERS {
+        let found = pycg_analysis::builder::statements::is_dotted_identifier(name);
+        assert_eq!(found, *expected, "{name:?}");
+        let alphabetic = name.split('.').all(|part| {
+            let mut characters = part.chars();
+            characters
+                .next()
+                .is_some_and(|first| first == '_' || first.is_alphabetic())
+                && characters.all(|character| character == '_' || character.is_alphanumeric())
+        });
+        if alphabetic != *expected {
+            alphabetic_wrong += 1;
+        }
+    }
+    assert!(alphabetic_wrong > 0);
+}
+
+#[test]
 fn a_site_is_named_by_its_part_before_the_separator() {
     for (site, expected) in vectors::SITE_NAMES {
         assert_eq!(site_name(site), *expected);
