@@ -13,18 +13,22 @@ names. Every required dump is compared (D5 as sets, the others record by
 record), and D6 by SHA-256 when ACTUAL wrote it; an input whose required
 dumps agree is missing when ACTUAL wrote no D6 and D6 is not required.
 Prints one line per set and the first differences, and exits 1 when an
-input differs or failed.
+input differs or failed. --dumps names the required dumps instead of
+REQUIRED, and --inputs compares only the inputs that its file lists, one
+per line; a listed input that EXPECTED lacks fails.
 
     python3 -I tools/parity/compare.py EXPECTED ACTUAL [--required FILE]
+        [--dumps NAME...] [--inputs FILE]
 """
 
 REQUIRED_DEFAULT = Path(__file__).with_name("required.txt")
+DUMPS = ("D1", "D2", "D3", "D4", "D5", "D6")
 DOCUMENT = "D6.json"
 ERROR = "error.txt"
 SHOWN_DIFFERENCES_MAX = 10
 
 
-def required_dumps(path):
+def listed(path):
     names = []
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         name = line.strip()
@@ -87,14 +91,18 @@ def compare_input(expected, actual, required):
     return ("different" if differences else "identical"), differences
 
 
-def compare(expected_root, actual_root, required):
+def compare(expected_root, actual_root, required, inputs=None):
     expected_root, actual_root = Path(expected_root), Path(actual_root)
     sets = {}
     shown = []
-    for key in input_keys(expected_root):
-        status, differences = compare_input(
-            expected_root / key, actual_root / key, required
-        )
+    keys = input_keys(expected_root)
+    for key in keys if inputs is None else inputs:
+        if key in keys:
+            status, differences = compare_input(
+                expected_root / key, actual_root / key, required
+            )
+        else:
+            status, differences = "failed", ["the oracle has no such input"]
         counts = sets.setdefault(
             key.split("/")[0],
             {"inputs": 0, "identical": 0, "different": 0, "failed": 0, "missing": 0},
@@ -116,9 +124,12 @@ def main(argv=None):
     parser.add_argument("expected", type=Path)
     parser.add_argument("actual", type=Path)
     parser.add_argument("--required", type=Path, default=REQUIRED_DEFAULT)
+    parser.add_argument("--dumps", nargs="+", choices=DUMPS)
+    parser.add_argument("--inputs", type=Path)
     args = parser.parse_args(argv)
-    required = required_dumps(args.required)
-    sets, shown = compare(args.expected, args.actual, required)
+    required = listed(args.required) if args.dumps is None else args.dumps
+    inputs = None if args.inputs is None else listed(args.inputs)
+    sets, shown = compare(args.expected, args.actual, required, inputs)
     if not sets:
         print(f"compare: no inputs in {args.expected}")
         return 1

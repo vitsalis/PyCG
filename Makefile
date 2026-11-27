@@ -57,6 +57,7 @@ parity_key = python3 -I tools/parity/dump.py key --checkout $(CURDIR)
 PARITY_ORACLE = $(EVAL_OUT)/parity-oracle-$(shell $(parity_key))
 PARITY_RUST = $(EVAL_OUT)/parity-rust-$(COMMIT)
 PARITY_REQUIRED = tools/parity/required.txt
+PARITY_ENGINE = tools/parity/engine.txt
 PARITY_BINARIES = $(or $(CARGO_TARGET_DIR),$(CURDIR)/target)/release
 
 define gate
@@ -99,7 +100,7 @@ done
 endef
 
 define parity_compare
-python3 -I tools/parity/compare.py $(1) $(2) --required $(PARITY_REQUIRED) > $(3); \
+python3 -I tools/parity/compare.py $(1) $(2) $(or $(4),--required $(PARITY_REQUIRED)) > $(3); \
 status=$$?; \
 { echo '```'; cat $(3); echo '```'; } >> $(SUMMARY); \
 sed -n 's/^  \([^:]*\): different: \(.*\)$$/\1 \2/p' $(3) | while read -r input dumps; do \
@@ -263,5 +264,16 @@ parity:
 			then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
 		done; \
 	done
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D4.jsonl | sort | while read -r dump; do \
+		input=$$(dirname "$$dump"); \
+		out=$(PARITY_RUST)/engine/$$input && mkdir -p $$out && \
+		if $(PARITY_BINARIES)/pycg_dump engine "$$dump" $$out 2> $$out/replay.txt; \
+		then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
+	done
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
+	@python3 -I tools/parity/compare.py $(PARITY_ORACLE)/seed-0 $(PARITY_RUST)/engine \
+		--dumps D3 D5 > $(PARITY_RUST)/oracle-engine-all.txt; \
+	{ echo 'The engine on the builder calls of the oracle, on every input:'; echo '```'; \
+		grep -v '^  ' $(PARITY_RUST)/oracle-engine-all.txt; echo '```'; } >> $(SUMMARY)
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 --inputs $(PARITY_ENGINE))
