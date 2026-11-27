@@ -66,6 +66,12 @@ BUILDER_PROGRAMS = {
     "surrogates": (
         "def g(x):\n    return '{0.\\ud800}'.format(x), '\\udcff' + str(x)\n"
     ),
+    "redefinitions": (
+        "def f(a):\n    x = a\n    return x\n"
+        "def f(a, b):\n    x = b\n    a = x\n    return a\n"
+        "class C:\n    def m(self, c):\n        y = c\n        return y\n"
+        "    def m(self, c):\n        y = c\n        return y\n"
+    ),
 }
 
 
