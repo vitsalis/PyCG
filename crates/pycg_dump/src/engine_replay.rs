@@ -28,6 +28,7 @@ use crate::canonical;
 
 const CONTEXT_PROGRAM: &str = "<program>";
 const CONTEXT_SOLVE: &str = "<solve>";
+const PROGRAM: &str = "<program>";
 const PARTIAL_TRACE: &str = "D3.partial.jsonl";
 const IMPORT_MANAGER_CALLS: &[&str] = &["imports.handle_import", "imports.locate"];
 
@@ -535,6 +536,10 @@ pub fn run(input: &str, out: &str) -> ExitCode {
             let record = record(number, &read(line));
             if record.get("call").is_some() {
                 replay.call(number + 1, &record);
+            } else if record.get("fields").is_some() && record["module"] == PROGRAM {
+                let object = replay.object(&record["object"]);
+                let name = replay.engine.trace().object_name(object).to_string();
+                replay.set_recorded_fields(object, &name, &record["fields"]);
             }
         }
         replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
@@ -575,7 +580,9 @@ impl Replay {
 
     fn prescan(&mut self, record: &Value) {
         {
-            if let Some(fields) = record.get("fields") {
+            if let Some(fields) = record.get("fields")
+                && record["module"] != PROGRAM
+            {
                 let name = record["object"]["object"]
                     .as_str()
                     .expect("the fields of an object");
@@ -614,18 +621,9 @@ impl Replay {
 
     fn call(&mut self, number: usize, record: &Value) {
         let module = record["module"].as_str().expect("the module of a call");
-        if module.contains('.') {
-            not_ported("the linking of submodules");
-        }
         self.engine.trace_mut().context = module.to_string();
         let call = record["call"].as_str().expect("a call name");
         if IMPORT_MANAGER_CALLS.contains(&call) {
-            if record["arguments"]["name"]
-                .as_str()
-                .is_some_and(|name| name.ends_with(".*"))
-            {
-                not_ported("the linking of star imports");
-            }
             return;
         }
         let arguments = &record["arguments"];
