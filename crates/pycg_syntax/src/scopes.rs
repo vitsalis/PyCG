@@ -9,6 +9,7 @@ use ruff_source_file::LineIndex;
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::constants::{Constant, PyStr, literal};
+use crate::names::identifier;
 use crate::tree::{Node, position};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -386,7 +387,7 @@ fn find_unread_lazy_imports<'a>(
     }
     for alias in lazy {
         let bound = match &alias.asname {
-            Some(asname) => asname.id.as_str(),
+            Some(asname) => &*identifier(asname.id.as_str()),
             None => alias
                 .name
                 .id
@@ -420,16 +421,21 @@ fn listed_lazy_imports<'a>(module: &'a ModModule, source: &str) -> Vec<&'a Alias
                     import
                         .names
                         .iter()
-                        .filter(|a| names.contains(a.name.id.as_str())),
+                        .filter(|a| names.contains(&*identifier(a.name.id.as_str()))),
                 );
             }
             Stmt::ImportFrom(import) if import.level == 0 => {
                 let listed_module = import
                     .module
                     .as_ref()
-                    .is_some_and(|m| names.contains(m.id.as_str()));
+                    .is_some_and(|m| names.contains(&*identifier(m.id.as_str())));
                 if listed_module {
-                    lazy.extend(import.names.iter().filter(|a| a.name.id.as_str() != "*"));
+                    lazy.extend(
+                        import
+                            .names
+                            .iter()
+                            .filter(|a| &*identifier(a.name.id.as_str()) != "*"),
+                    );
                 }
             }
             _ => {}
@@ -442,7 +448,7 @@ pub fn mentions(statement: &Stmt, name: &str) -> bool {
     let mut stack = vec![Node::Stmt(statement)];
     while let Some(node) = stack.pop() {
         if let Node::Expr(Expr::Name(expression)) = &node
-            && expression.id.as_str() == name
+            && &*identifier(expression.id.as_str()) == name
         {
             return true;
         }
@@ -452,7 +458,7 @@ pub fn mentions(statement: &Stmt, name: &str) -> bool {
 }
 
 fn is_name(expression: &Expr, name: &str) -> bool {
-    matches!(expression, Expr::Name(e) if e.id.as_str() == name)
+    matches!(expression, Expr::Name(e) if &*identifier(e.id.as_str()) == name)
 }
 
 pub fn literal_assignment(statement: &Stmt, name: &str, source: &str) -> Option<Vec<String>> {
@@ -732,23 +738,17 @@ impl<'a> Collector<'a> {
         let Some(parameters) = parameters else {
             return;
         };
-        let mut names: Vec<&str> = Vec::new();
-        names.extend(
-            parameters
-                .posonlyargs
-                .iter()
-                .map(|p| p.parameter.name.id.as_str()),
-        );
-        names.extend(parameters.args.iter().map(|p| p.parameter.name.id.as_str()));
-        names.extend(
-            parameters
-                .kwonlyargs
-                .iter()
-                .map(|p| p.parameter.name.id.as_str()),
-        );
-        names.extend(parameters.vararg.iter().map(|p| p.name.id.as_str()));
-        names.extend(parameters.kwarg.iter().map(|p| p.name.id.as_str()));
-        for name in names {
+        let mut identifiers: Vec<&ruff_python_ast::Identifier> = Vec::new();
+        identifiers.extend(parameters.posonlyargs.iter().map(|p| &p.parameter.name));
+        identifiers.extend(parameters.args.iter().map(|p| &p.parameter.name));
+        identifiers.extend(parameters.kwonlyargs.iter().map(|p| &p.parameter.name));
+        identifiers.extend(parameters.vararg.iter().map(|p| &p.name));
+        identifiers.extend(parameters.kwarg.iter().map(|p| &p.name));
+        let names: Vec<String> = identifiers
+            .into_iter()
+            .map(|name| identifier(name.id.as_str()).into_owned())
+            .collect();
+        for name in &names {
             let how = Binding {
                 parameter: true,
                 ..Binding::default()
@@ -791,8 +791,8 @@ impl<'a> Collector<'a> {
                     definition,
                     ..Binding::default()
                 };
-                self.bind_here(scope, function.name.id.as_str(), false, how);
-                let name = Some(function.name.id.to_string());
+                self.bind_here(scope, &identifier(function.name.id.as_str()), false, how);
+                let name = Some(identifier(function.name.id.as_str()).into_owned());
                 let inner = self.new_scope(ScopeKind::Function, node.clone(), Some(scope), name);
                 self.bind_parameters(Some(&function.parameters), inner);
                 let mut outer: Vec<Node<'a>> = function
@@ -816,8 +816,8 @@ impl<'a> Collector<'a> {
                     definition,
                     ..Binding::default()
                 };
-                self.bind_here(scope, class.name.id.as_str(), false, how);
-                let name = Some(class.name.id.to_string());
+                self.bind_here(scope, &identifier(class.name.id.as_str()), false, how);
+                let name = Some(identifier(class.name.id.as_str()).into_owned());
                 let body = self.new_scope(ScopeKind::Class, node.clone(), Some(scope), name);
                 let mut outer: Vec<Node<'a>> = class
                     .decorator_list
@@ -863,7 +863,7 @@ impl<'a> Collector<'a> {
                 let names: Vec<String> = statement
                     .names
                     .iter()
-                    .map(|n| self.scopes[scope.0].mangle(n.id.as_str()))
+                    .map(|n| self.scopes[scope.0].mangle(&identifier(n.id.as_str())))
                     .collect();
                 self.scopes[scope.0].globals.extend(names);
             }
@@ -871,7 +871,7 @@ impl<'a> Collector<'a> {
                 let names: Vec<String> = statement
                     .names
                     .iter()
-                    .map(|n| self.scopes[scope.0].mangle(n.id.as_str()))
+                    .map(|n| self.scopes[scope.0].mangle(&identifier(n.id.as_str())))
                     .collect();
                 self.scopes[scope.0].nonlocals.extend(names);
             }
@@ -880,18 +880,19 @@ impl<'a> Collector<'a> {
                     self.explicit_lazy.extend(import.names.iter());
                 }
                 for alias in &import.names {
+                    let name = identifier(alias.name.id.as_str()).into_owned();
                     let (bound, imported) = match &alias.asname {
-                        Some(asname) => (asname.id.as_str(), alias.name.id.to_string()),
+                        Some(asname) => (identifier(asname.id.as_str()).into_owned(), name),
                         None => {
-                            let top = alias.name.id.split('.').next().expect("a first part");
-                            (top, top.to_owned())
+                            let top = name.split('.').next().expect("a first part").to_owned();
+                            (top.clone(), top)
                         }
                     };
                     let how = Binding {
                         imported: Some(imported),
                         ..Binding::default()
                     };
-                    self.bind_here(scope, bound, false, how);
+                    self.bind_here(scope, &bound, false, how);
                 }
             }
             Stmt::ImportFrom(import) => {
@@ -899,12 +900,16 @@ impl<'a> Collector<'a> {
                     self.explicit_lazy.extend(import.names.iter());
                 }
                 for alias in &import.names {
-                    if alias.name.id.as_str() == "*" {
+                    if &*identifier(alias.name.id.as_str()) == "*" {
                         self.scopes[scope.0].star_import = true;
                         continue;
                     }
                     let imported = match (&import.module, import.level) {
-                        (Some(module), 0) => Some(format!("{}.{}", module.id, alias.name.id)),
+                        (Some(module), 0) => Some(format!(
+                            "{}.{}",
+                            identifier(module.id.as_str()),
+                            identifier(alias.name.id.as_str())
+                        )),
                         _ => None,
                     };
                     let bound = alias.asname.as_ref().unwrap_or(&alias.name).id.as_str();
@@ -923,7 +928,7 @@ impl<'a> Collector<'a> {
                 if statement.value.is_none()
                     && let Expr::Name(target) = statement.target.as_ref()
                 {
-                    declare(&mut self.scopes[scope.0], target.id.as_str());
+                    declare(&mut self.scopes[scope.0], &identifier(target.id.as_str()));
                     return;
                 }
                 let mut nodes = vec![Node::Expr(&statement.target)];
@@ -932,7 +937,12 @@ impl<'a> Collector<'a> {
             }
             Stmt::TypeAlias(statement) => {
                 if let Expr::Name(name) = statement.name.as_ref() {
-                    self.bind_here(scope, name.id.as_str(), false, Binding::default());
+                    self.bind_here(
+                        scope,
+                        &identifier(name.id.as_str()),
+                        false,
+                        Binding::default(),
+                    );
                 }
             }
             _ => self.push_here(node.children(), scope),
@@ -962,7 +972,7 @@ impl<'a> Collector<'a> {
                 if let Expr::Name(function) = call.func.as_ref()
                     && let Some((name, _)) = NAMESPACE_CALLS
                         .iter()
-                        .find(|(name, _)| *name == function.id.as_str())
+                        .find(|(name, _)| *name == &*identifier(function.id.as_str()))
                 {
                     let arguments = &call.arguments;
                     let empty = arguments.args.is_empty() && arguments.keywords.is_empty();
@@ -974,12 +984,17 @@ impl<'a> Collector<'a> {
             }
             Expr::Name(name) => match name.ctx {
                 ExprContext::Load => {
-                    let mangled = self.scopes[scope.0].mangle(name.id.as_str());
+                    let mangled = self.scopes[scope.0].mangle(&identifier(name.id.as_str()));
                     self.scopes[scope.0].reads.insert(mangled);
                 }
                 ExprContext::Store | ExprContext::Del => {
                     let unbinds = name.ctx == ExprContext::Del;
-                    self.bind_here(scope, name.id.as_str(), unbinds, Binding::default());
+                    self.bind_here(
+                        scope,
+                        &identifier(name.id.as_str()),
+                        unbinds,
+                        Binding::default(),
+                    );
                 }
                 ExprContext::Invalid => unreachable!("a parsed module has no invalid context"),
             },
@@ -991,13 +1006,18 @@ impl<'a> Collector<'a> {
                     let owner = owner(&self.scopes, scope);
                     bind(
                         &mut self.scopes[owner.0],
-                        target.id.as_str(),
+                        &identifier(target.id.as_str()),
                         Binding::default(),
                     );
-                    let mangled = self.scopes[owner.0].mangle(target.id.as_str());
+                    let mangled = self.scopes[owner.0].mangle(&identifier(target.id.as_str()));
                     self.scopes[owner.0].shared.insert(mangled);
                 } else {
-                    self.bind_here(scope, target.id.as_str(), false, Binding::default());
+                    self.bind_here(
+                        scope,
+                        &identifier(target.id.as_str()),
+                        false,
+                        Binding::default(),
+                    );
                 }
                 self.push_here(vec![Node::Expr(&named.value)], scope);
             }
@@ -1054,7 +1074,12 @@ impl<'a> Collector<'a> {
 
     fn visit_handler(&mut self, handler: &'a ExceptHandlerExceptHandler, scope: ScopeId) {
         if let Some(name) = &handler.name {
-            self.bind_here(scope, name.id.as_str(), true, Binding::default());
+            self.bind_here(
+                scope,
+                &identifier(name.id.as_str()),
+                true,
+                Binding::default(),
+            );
         }
         let mut nodes: Vec<Node<'a>> = handler
             .type_
@@ -1070,7 +1095,12 @@ impl<'a> Collector<'a> {
         match pattern {
             Pattern::MatchAs(p) => {
                 if let Some(name) = &p.name {
-                    self.bind_here(scope, name.id.as_str(), false, Binding::default());
+                    self.bind_here(
+                        scope,
+                        &identifier(name.id.as_str()),
+                        false,
+                        Binding::default(),
+                    );
                 }
                 if let Some(inner) = p.pattern.as_deref() {
                     self.push_here(vec![Node::Pattern(inner)], scope);
@@ -1078,12 +1108,22 @@ impl<'a> Collector<'a> {
             }
             Pattern::MatchStar(p) => {
                 if let Some(name) = &p.name {
-                    self.bind_here(scope, name.id.as_str(), false, Binding::default());
+                    self.bind_here(
+                        scope,
+                        &identifier(name.id.as_str()),
+                        false,
+                        Binding::default(),
+                    );
                 }
             }
             Pattern::MatchMapping(p) => {
                 if let Some(rest) = &p.rest {
-                    self.bind_here(scope, rest.id.as_str(), false, Binding::default());
+                    self.bind_here(
+                        scope,
+                        &identifier(rest.id.as_str()),
+                        false,
+                        Binding::default(),
+                    );
                 }
                 let mut nodes: Vec<Node<'a>> = p.keys.iter().map(Node::Expr).collect();
                 nodes.extend(p.patterns.iter().map(Node::Pattern));
@@ -1098,7 +1138,7 @@ fn is_sys_modules_of_name(subscript: &ruff_python_ast::ExprSubscript) -> bool {
     let Expr::Attribute(attribute) = subscript.value.as_ref() else {
         return false;
     };
-    attribute.attr.id.as_str() == "modules"
+    &*identifier(attribute.attr.id.as_str()) == "modules"
         && is_name(&attribute.value, "sys")
         && is_name(&subscript.slice, "__name__")
 }

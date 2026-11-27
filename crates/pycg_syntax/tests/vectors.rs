@@ -1,4 +1,5 @@
 use pycg_syntax::constants::{Constant, literal, text_value};
+use pycg_syntax::names::{is_identifier, nfkc};
 use pycg_syntax::parse::parse_source;
 use pycg_syntax::read::read_source;
 use pycg_syntax::tree::{Node, position, walk};
@@ -7,6 +8,7 @@ use ruff_source_file::LineIndex;
 const READING: &str = include_str!("vectors/reading.txt");
 const POSITIONS: &str = include_str!("vectors/positions.txt");
 const CONSTANTS: &str = include_str!("vectors/constants.txt");
+const NAMES: &str = include_str!("vectors/names.txt");
 
 fn hex(text: &str) -> Vec<u8> {
     assert_eq!(text.len() % 2, 0, "hex of whole bytes: {text}");
@@ -156,4 +158,48 @@ fn constants_have_the_values_of_python() {
         cases += 1;
     }
     assert!(cases > 0, "constant vectors");
+}
+
+fn text_of(code_points: &str) -> String {
+    if code_points == "-" {
+        return String::new();
+    }
+    code_points
+        .split(',')
+        .map(|word| {
+            let point = u32::from_str_radix(word, 16).expect("a code point is hexadecimal");
+            char::from_u32(point).expect("a vector code point is a character")
+        })
+        .collect()
+}
+
+#[test]
+fn names_are_normalised_and_tested_as_python_does() {
+    let mut cases = 0;
+    for line in vector_lines(NAMES) {
+        let (kind, rest) = line.split_once(' ').expect("a name vector has a kind");
+        match kind {
+            "nfkc" => {
+                let (input, output) = rest.split_once(' ').expect("an input and an output");
+                assert_eq!(nfkc(&text_of(input)), text_of(output), "{line}");
+            }
+            "start" | "continue" => {
+                let (point, expected) = rest.split_once(' ').expect("a point and an answer");
+                let character = text_of(point);
+                let text = if kind == "start" {
+                    character
+                } else {
+                    format!("a{character}")
+                };
+                assert_eq!(
+                    is_identifier(&text).to_string(),
+                    expected.to_lowercase(),
+                    "{line}"
+                );
+            }
+            _ => panic!("name vector {line:?}"),
+        }
+        cases += 1;
+    }
+    assert!(cases > 0, "name vectors");
 }
