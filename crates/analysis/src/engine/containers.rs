@@ -240,7 +240,7 @@ pub(crate) struct Sequences {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Subscription {
     CopyFields(ObjId, ObjId),
-    ClassSubscript(ObjId, SubscriptId),
+    ClassSubscript(ObjId, Access),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -2048,12 +2048,9 @@ impl<T: Trace> State<T> {
             );
             if let Object::Class(class) = self.objects.get(object) {
                 let metaclass = class.metaclass;
-                let Access::Subscript(subscript) = access else {
-                    not_ported("containers: slicing a class")
-                };
                 let rule = self.container_rule(ContainerRule::MetaclassSubscript {
                     class: object,
-                    subscript,
+                    access,
                     key,
                 });
                 self.attach(graph, metaclass, rule);
@@ -2077,17 +2074,14 @@ impl<T: Trace> State<T> {
         graph: &mut Graph,
         meta: ObjId,
         class: ObjId,
-        subscript: SubscriptId,
+        access: Access,
         key: Option<NodeId>,
     ) {
         match self.objects.get(meta) {
             Object::Class(_) => {
                 let python = self.python_method(graph, meta, "__getitem__");
-                let rule = self.container_rule(ContainerRule::ClassSubscript {
-                    class,
-                    subscript,
-                    key,
-                });
+                let rule =
+                    self.container_rule(ContainerRule::ClassSubscript { class, access, key });
                 self.attach(graph, python, rule);
             }
             Object::External(_) | Object::UnknownExternal(_) => {
@@ -2102,7 +2096,7 @@ impl<T: Trace> State<T> {
                         return;
                     }
                 }
-                self.class_subscript(graph, None, class, subscript, key);
+                self.class_subscript(graph, None, class, access, key);
             }
             Object::Typed { .. } => {
                 not_ported("containers: subscripting a class whose metaclass is a typed value")
@@ -2118,25 +2112,18 @@ impl<T: Trace> State<T> {
         graph: &mut Graph,
         _python_method: Option<ObjId>,
         class: ObjId,
-        subscript: SubscriptId,
+        access: Access,
         key: Option<NodeId>,
     ) {
         if !self
             .containers
             .subscriptions
-            .insert(Subscription::ClassSubscript(class, subscript))
+            .insert(Subscription::ClassSubscript(class, access))
         {
             return;
         }
-        let call = self.access_call(
-            graph,
-            Access::Subscript(subscript),
-            "__class_getitem__",
-            &[key],
-        );
-        let dst = self.containers.subscripts[index_of(subscript.0)]
-            .dst
-            .expect("a subscript that reads");
+        let call = self.access_call(graph, access, "__class_getitem__", &[key]);
+        let dst = self.access_parts(access).0.expect("an access that reads");
         let result = self.calls[call.index()]
             .dst
             .expect("a site call has a result");
@@ -2792,12 +2779,12 @@ pub(crate) enum ContainerRule {
     },
     MetaclassSubscript {
         class: ObjId,
-        subscript: SubscriptId,
+        access: Access,
         key: Option<NodeId>,
     },
     ClassSubscript {
         class: ObjId,
-        subscript: SubscriptId,
+        access: Access,
         key: Option<NodeId>,
     },
     ClassGetitem {
@@ -2921,9 +2908,9 @@ impl<T: Trace> State<T> {
             ContainerRule::YieldFrom { dst, .. }
             | ContainerRule::GenericAlias { dst, .. }
             | ContainerRule::SequenceType { dst, .. } => vec![dst],
-            ContainerRule::MetaclassSubscript { subscript, .. }
-            | ContainerRule::ClassSubscript { subscript, .. } => {
-                containers.subscript(subscript).dst.into_iter().collect()
+            ContainerRule::MetaclassSubscript { access, .. }
+            | ContainerRule::ClassSubscript { access, .. } => {
+                self.access_parts(access).0.into_iter().collect()
             }
             ContainerRule::ClassGetitem { call } => {
                 self.calls[call.index()].dst.into_iter().collect()
@@ -2974,16 +2961,12 @@ impl<T: Trace> State<T> {
             ContainerRule::YieldFrom { function, dst } => {
                 self.yield_from(graph, object, function, dst)
             }
-            ContainerRule::MetaclassSubscript {
-                class,
-                subscript,
-                key,
-            } => self.metaclass_subscript(graph, object, class, subscript, key),
-            ContainerRule::ClassSubscript {
-                class,
-                subscript,
-                key,
-            } => self.class_subscript(graph, Some(object), class, subscript, key),
+            ContainerRule::MetaclassSubscript { class, access, key } => {
+                self.metaclass_subscript(graph, object, class, access, key)
+            }
+            ContainerRule::ClassSubscript { class, access, key } => {
+                self.class_subscript(graph, Some(object), class, access, key)
+            }
             ContainerRule::ClassGetitem { call } => self.class_getitem(graph, object, call),
             ContainerRule::GenericAlias { dst, .. } => {
                 let class = match *rule {
@@ -3019,8 +3002,8 @@ impl<T: Trace> State<T> {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
-enum Access {
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum Access {
     Subscript(SubscriptId),
     Slice(SliceId),
 }
