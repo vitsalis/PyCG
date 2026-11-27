@@ -165,6 +165,7 @@ pub(crate) struct Iteration {
     call: Option<CallId>,
     index_call: Option<CallId>,
     anext: Option<NodeId>,
+    callable_call: Option<CallId>,
 }
 
 pub(crate) struct Subscript {
@@ -364,6 +365,7 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::Typed { .. }
             | Object::BuiltinMethod { .. }
+            | Object::ReturnsArgument { .. }
             | Object::Pattern { exact: false, .. } => return object,
         };
         if let Some(&found) = self.inexact.get(&object) {
@@ -1551,6 +1553,7 @@ impl<T: Trace> State<T> {
             call: None,
             index_call: None,
             anext: None,
+            callable_call: None,
         });
         id
     }
@@ -1582,6 +1585,21 @@ impl<T: Trace> State<T> {
         );
         let call = self.site_call(graph, key, &[None], None, None);
         self.containers.iterations[index_of(id.0)].index_call = Some(call);
+        call
+    }
+
+    fn iteration_callable_call(&mut self, graph: &mut Graph, id: IterationId) -> CallId {
+        let iteration = self.containers.iterations[index_of(id.0)];
+        if let Some(call) = iteration.callable_call {
+            return call;
+        }
+        let key = self.site_key(
+            iteration.caller,
+            iteration.site,
+            Role::Callable(iteration.role),
+        );
+        let call = self.site_call(graph, key, &[], Some(iteration.dst), None);
+        self.containers.iterations[index_of(id.0)].callable_call = Some(call);
         call
     }
 
@@ -1895,6 +1913,7 @@ impl<T: Trace> State<T> {
             | Object::BuiltinMethod { .. }
             | Object::Generator { .. }
             | Object::Coroutine { .. }
+            | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => {}
         }
     }
@@ -2158,6 +2177,7 @@ impl<T: Trace> State<T> {
             | Object::BuiltinMethod { .. }
             | Object::Generator { .. }
             | Object::Coroutine { .. }
+            | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => {}
         }
     }
@@ -2329,6 +2349,7 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
             | Object::Coroutine { .. }
+            | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => return,
         }
         let is_async = self.containers.iterations[index_of(iteration.0)].is_async;
@@ -2477,7 +2498,12 @@ impl<T: Trace> State<T> {
                     let rule = self.container_rule(ContainerRule::NextItem(iteration));
                     self.attach(graph, source, rule);
                 }
-                "callable_iterator" => not_ported("containers: callable iterators"),
+                "callable_iterator" => {
+                    let source = self.keys(graph, object);
+                    let call = self.iteration_callable_call(graph, iteration);
+                    let rule = self.calls[call.index()].rule;
+                    self.attach(graph, source, rule);
+                }
                 _ => {
                     let elements = self.elements(graph, object);
                     self.add_edge(graph, elements, found.dst);
@@ -2505,6 +2531,7 @@ impl<T: Trace> State<T> {
             | Object::BuiltinMethod { .. }
             | Object::Const { .. }
             | Object::Coroutine { .. }
+            | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => {}
         }
     }

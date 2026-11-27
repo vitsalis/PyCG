@@ -201,6 +201,7 @@ impl<T: Trace> State<T> {
                 Role::SubscriptFactory => vec![text("subscript"), text("factory")],
                 Role::Iterate(id) => vec![text("iterate"), self.iteration_role(id)],
                 Role::Index(id) => vec![text("index"), self.iteration_role(id)],
+                Role::Callable(id) => vec![text("callable"), self.iteration_role(id)],
                 Role::Map(width, rest) => vec![
                     text("map"),
                     RolePart::Number(i64::from(width)),

@@ -825,7 +825,11 @@ pub static RETURNS_ARGUMENT: &[(&str, ReturnsArgument)] = &[
     ),
 ];
 
-pub const RETURNED_DECORATOR_SIGNATURE: (&str, &str) = ("(argument, /)", "argument");
+pub static RETURNED_DECORATOR: ReturnsArgument = ReturnsArgument {
+    signature: "(argument, /)",
+    argument: Some("argument"),
+    wrapper: None,
+};
 
 pub static CLOSURES: &[(&str, &str)] = &[
     (

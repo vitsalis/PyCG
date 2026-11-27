@@ -12,7 +12,7 @@ use crate::engine::objects::{Literal, Object};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule, not_ported};
-use crate::models::RETURNS_ARGUMENT;
+use crate::models::RETURNED_DECORATOR;
 
 pub const RECEIVERS_PER_CALL_MAX: usize = 3;
 
@@ -119,6 +119,7 @@ pub enum Role {
     SubscriptFactory,
     Iterate(IterationRoleId),
     Index(IterationRoleId),
+    Callable(IterationRoleId),
     Map(u32, bool),
     Filter,
     Reversed,
@@ -253,11 +254,15 @@ impl<T: Trace> State<T> {
         }
         match self.objects.get(object) {
             Object::Function(_) => {
-                if !self.returns_argument(object) {
+                if !self.returns_argument(graph, object, call) {
                     self.call_function(graph, object, call, None);
                 }
             }
             Object::UnknownExternal(_) => self.outside_result(graph, call),
+            &Object::ReturnsArgument { name, analysed } => {
+                self.model_edge(name, analysed, call);
+                self.return_argument(graph, &RETURNED_DECORATOR, name, analysed, call);
+            }
             &Object::BoundMethod { receiver, function } => {
                 self.call_bound(graph, function, vec![receiver], call);
             }
@@ -287,14 +292,6 @@ impl<T: Trace> State<T> {
             | Object::Coroutine { .. }
             | Object::Pattern { .. } => {}
         }
-    }
-
-    fn returns_argument(&self, callee: ObjId) -> bool {
-        let name = self.objects.name(callee, &self.symbols);
-        if RETURNS_ARGUMENT.iter().any(|&(model, _)| model == name) {
-            not_ported("the models of functions that return an argument");
-        }
-        false
     }
 
     pub(super) fn outside_result(&mut self, graph: &mut Graph, call: CallId) {
