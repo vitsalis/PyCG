@@ -88,8 +88,8 @@ package = arguments[arguments.index("--package") + 1]
 output = arguments[arguments.index("-o") + 1]
 behaviour = open(os.path.join(package, "BEHAVIOUR")).read().strip()
 if behaviour == "not ported":
-    print("pycg: the analysis is not ported yet", file=sys.stderr)
-    sys.exit(1)
+    print("pycg: not ported: outside attributes", file=sys.stderr)
+    sys.exit(3)
 seen = {"arguments": arguments, "environment": sorted(os.environ), "cwd": os.getcwd()}
 with open(os.path.join(package, "seen.json"), "w") as file:
     json.dump(seen, file)

@@ -63,8 +63,10 @@ enum BuilderFields {
     Module(Vec<Box<str>>),
 }
 
+pub struct NotPorted(pub String);
+
 pub fn not_ported(feature: &str) -> ! {
-    panic!("not ported: {feature}")
+    std::panic::panic_any(NotPorted(feature.to_owned()))
 }
 
 pub struct Engine<T: Trace> {

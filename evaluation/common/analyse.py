@@ -122,6 +122,7 @@ def analyse(request):
             "status": "crash",
             "error": str(error),
             "where": f"{RUST_BINARY} (exit {error.code})",
+            "exit_status": error.code,
         }
     except (Exception, SystemExit) as error:
         graph = None
