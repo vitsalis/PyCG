@@ -1,6 +1,10 @@
+mod families;
+
 use std::collections::{BTreeMap, BTreeSet};
 use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use num_bigint::BigUint;
 use pycg_analysis::{CAP_DEFAULT_OBJECTS, Cap, Order, Request, analyse};
@@ -12,6 +16,10 @@ const MAX_OBJECTS: usize = 5_000;
 const SATURATION_CAP: u32 = 3;
 const HIERARCHY_CLASSES: usize = 300;
 const TYPE_ALIASES: usize = 1_100;
+const SEED: u64 = 20_261_111;
+const RANDOM_PROGRAMS: usize = 500;
+const ORDER_SAMPLE_PROGRAMS_PER_FAMILY: usize = 100;
+const SATURATION_SAMPLE_PROGRAMS_PER_FAMILY: usize = 40;
 const GET_FEEDBACK: [&str; 2] = [
     "class_methods_fed_back_through_explicit_get_to_every_owner_kind",
     "property_subclass_fed_its_own_result_through_explicit_get",
@@ -328,4 +336,86 @@ fn a_chain_of_type_aliases_longer_than_the_stack_is_analysed() {
             "{function}"
         );
     }
+}
+
+fn random_problems(index: usize, source: &str) -> Vec<String> {
+    let directory = written(&format!("random-{index}"), source);
+    let full = analysed(&directory, Order::Canonical, default_cap());
+    let mut problems = Vec::new();
+    if full.objects >= MAX_OBJECTS {
+        problems.push(format!("{} objects", full.objects));
+    }
+    if index < families::FAMILIES * ORDER_SAMPLE_PROGRAMS_PER_FAMILY {
+        let reversed = analysed(&directory, Order::LastInFirstOut, default_cap());
+        if reversed.document != full.document {
+            problems.push("the orders differ".to_owned());
+        }
+    }
+    if index < families::FAMILIES * SATURATION_SAMPLE_PROGRAMS_PER_FAMILY {
+        let cap = || Cap::Objects(BigUint::from(SATURATION_CAP));
+        let canonical = analysed(&directory, Order::Canonical, cap());
+        let reversed = analysed(&directory, Order::LastInFirstOut, cap());
+        if canonical.document != reversed.document {
+            problems.push(format!("the orders differ at cap {SATURATION_CAP}"));
+        }
+        let full_edges = edges(&full.graph);
+        for found in [&canonical, &reversed] {
+            if found.objects >= MAX_OBJECTS {
+                problems.push(format!("{} objects at cap {SATURATION_CAP}", found.objects));
+            }
+            let added: Vec<_> = edges(&found.graph)
+                .difference(&full_edges)
+                .cloned()
+                .collect();
+            if !added.is_empty() {
+                problems.push(format!("cap {SATURATION_CAP} adds {added:?}"));
+            }
+        }
+    }
+    problems
+        .into_iter()
+        .map(|problem| format!("program {index}: {problem}\n{source}"))
+        .collect()
+}
+
+#[test]
+fn the_random_programs_differ() {
+    let programs = families::random_programs(SEED, RANDOM_PROGRAMS);
+    let distinct: BTreeSet<&String> = programs.iter().collect();
+    assert!(
+        distinct.len() * 10 > programs.len() * 9,
+        "{} of {}",
+        distinct.len(),
+        programs.len()
+    );
+}
+
+#[test]
+fn every_random_program_ends_under_the_bound_and_alike_in_either_order() {
+    let programs = families::random_programs(SEED, RANDOM_PROGRAMS);
+    let found = Mutex::new(Vec::new());
+    let next = AtomicUsize::new(0);
+    let workers = std::thread::available_parallelism().map_or(1, usize::from);
+    std::thread::scope(|scope| {
+        for _ in 0..workers {
+            scope.spawn(|| {
+                loop {
+                    let index = next.fetch_add(1, Ordering::Relaxed);
+                    let Some(source) = programs.get(index) else {
+                        break;
+                    };
+                    let problems = random_problems(index, source);
+                    found.lock().expect("no worker panicked").extend(problems);
+                }
+            });
+        }
+    });
+    let mut found = found.into_inner().expect("no worker panicked");
+    found.sort();
+    assert!(
+        found.is_empty(),
+        "{} problems:\n{}",
+        found.len(),
+        found.join("\n")
+    );
 }
