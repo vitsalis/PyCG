@@ -915,10 +915,16 @@ impl<T: Trace> State<T> {
     ) -> Option<NodeId> {
         match parameter.kind {
             ParameterKind::VarPositional | ParameterKind::VarKeyword => {
-                if matches!(self.bindings[bound.0 as usize], Bound::Late { .. }) {
+                let Bound::Full { function, .. } = self.bindings[bound.0 as usize] else {
                     return None;
-                }
-                not_ported("containers: every element of an outside varargs")
+                };
+                let made = self.objects.function(function);
+                let container = match parameter.kind {
+                    ParameterKind::VarPositional => made.varargs,
+                    ParameterKind::VarKeyword => made.varkeywords,
+                    _ => unreachable!("a variadic parameter"),
+                }?;
+                Some(self.every(graph, container))
             }
             _ => {
                 if !self.bound_given(bound, &parameter.name) {
