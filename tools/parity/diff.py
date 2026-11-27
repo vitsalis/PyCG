@@ -127,11 +127,46 @@ def explain_document(expected_path, actual_path):
     return lines or ["the documents are identical"]
 
 
+def first_difference(expected, actual, path):
+    if isinstance(expected, dict) and isinstance(actual, dict):
+        for name in sorted(set(expected) | set(actual)):
+            if expected.get(name) != actual.get(name):
+                return first_difference(
+                    expected.get(name), actual.get(name), [*path, name]
+                )
+    if isinstance(expected, list) and isinstance(actual, list):
+        for index, (left, right) in enumerate(zip(expected, actual)):
+            if left != right:
+                return first_difference(left, right, [*path, index])
+        if len(expected) != len(actual):
+            return [
+                f"{'/'.join(map(str, path))}: {len(expected)} items, "
+                f"{len(actual)} on the other side"
+            ]
+    return [
+        f"{'/'.join(map(str, path))}:",
+        f"  oracle: {json.dumps(expected)[:300]}",
+        f"  other:  {json.dumps(actual)[:300]}",
+    ]
+
+
+def explain_analysis(expected_path, actual_path):
+    expected = json.loads(Path(expected_path).read_text(encoding="utf-8"))
+    actual = json.loads(Path(actual_path).read_text(encoding="utf-8"))
+    if expected == actual:
+        if Path(expected_path).read_bytes() != Path(actual_path).read_bytes():
+            return ["same content, different bytes (encoding or key order)"]
+        return ["the analysis parts are identical"]
+    return first_difference(expected, actual, [])
+
+
 def explain(expected_root, actual_root, key, dump):
     expected_dir = Path(expected_root) / key
     actual_dir = Path(actual_root) / key
     if dump == "D6":
         return explain_document(expected_dir / "D6.json", actual_dir / "D6.json")
+    if dump == "D6in":
+        return explain_analysis(expected_dir / "D6in.json", actual_dir / "D6in.json")
     expected = records(expected_dir / f"{dump}.jsonl")
     actual_path = actual_dir / f"{dump}.jsonl"
     if dump == "D3" and not actual_path.exists():
@@ -149,7 +184,7 @@ def main(argv=None):
     parser.add_argument("expected", type=Path)
     parser.add_argument("actual", type=Path)
     parser.add_argument("input")
-    parser.add_argument("dump", choices=["D1", "D2", "D3", "D4", "D5", "D6"])
+    parser.add_argument("dump", choices=["D1", "D2", "D3", "D4", "D5", "D6", "D6in"])
     args = parser.parse_args(argv)
     for line in explain(args.expected, args.actual, args.input, args.dump):
         print(line)

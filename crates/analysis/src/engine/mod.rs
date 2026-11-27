@@ -12,6 +12,7 @@ mod outside_calls;
 mod patterns;
 mod protocols;
 mod reflection;
+mod results;
 mod rules;
 mod semantics;
 pub mod symbols;
@@ -387,6 +388,7 @@ impl<T: Trace> Engine<T> {
     }
 
     pub fn solve(&mut self) {
+        self.sync();
         self.state.solve(&mut self.graph);
     }
 }

@@ -6,9 +6,11 @@ use num_bigint::BigInt;
 mod document;
 
 pub use document::{
-    AnalysisPart, ClassDefinition, Construct, FORMAT, FunctionDefinition, MroBase, ProgramPart,
-    RolePart, SiteEdge, SourceModule, Unresolved, VERSION, build, module_definitions,
-    modules_section,
+    FORMAT, ProgramPart, SourceModule, VERSION, build, module_definitions, modules_section,
+};
+pub use pycg_analysis::results::{
+    AnalysisPart, ClassDefinition, Construct, FunctionDefinition, MroBase, RolePart, SiteEdge,
+    Unresolved,
 };
 
 #[derive(Clone, Debug, PartialEq, Eq)]

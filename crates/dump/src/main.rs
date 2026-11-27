@@ -10,7 +10,7 @@ mod stubs_replay;
 use std::process::ExitCode;
 
 const USAGE: &str = "usage: pycg-dump stubs <D2.jsonl> | solver <D3.jsonl> | document <directory> \
-    | document-build ORACLE_INPUT OUT \
+    | document-build ORACLE_INPUT ANALYSIS OUT \
     | d1 MODULES OUT | d4 ORACLE_D4 OUT --package ROOT ENTRY... | engine <D4.jsonl> OUT \
     | engine-build OUT --package ROOT ENTRY...";
 const EXIT_USAGE: u8 = 2;
@@ -22,7 +22,9 @@ fn main() -> ExitCode {
         [command, path] if command == "solver" => solver_replay::run(path),
         [command, path, out] if command == "engine" => engine_replay::run(path, out),
         [command, root] if command == "document" => document_check::run(root),
-        [command, oracle, out] if command == "document-build" => document_build::run(oracle, out),
+        [command, oracle, analysis, out] if command == "document-build" => {
+            document_build::run(oracle, analysis, out)
+        }
         _ => d1::run(&arguments)
             .or_else(|| d4::run(&arguments))
             .or_else(|| engine_replay::build(&arguments))

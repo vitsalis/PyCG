@@ -293,15 +293,24 @@ parity:
 		if $(PARITY_BINARIES)/pycg-dump engine "$$dump" $$out 2> $$out/replay.txt; \
 		then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
 	done
+	@while read -r input; do \
+		out=$(PARITY_RUST)/engine/$$input; \
+		if [ -f $$out/D6in.json ]; then \
+			$(PARITY_BINARIES)/pycg-dump document-build $(PARITY_ORACLE)/seed-0/$$input \
+				$$out/D6in.json $$out 2> $$out/build.txt \
+			|| mv $$out/build.txt $$out/error.txt; \
+		fi; \
+	done < $(PARITY_ENGINE)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine-all.txt,--dumps D3 D5)
-	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 --inputs $(PARITY_ENGINE))
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 D6in D6 --inputs $(PARITY_ENGINE))
 	@cd $(PARITY_ORACLE)/seed-0 && find . -name D6in.json | sort | while read -r inputs; do \
 		input=$$(dirname "$$inputs"); \
 		out=$(PARITY_RUST)/document/$$input && mkdir -p $$out && \
 		(cd $(CURDIR) && $(PARITY_BINARIES)/pycg-dump document-build \
-			$(PARITY_ORACLE)/seed-0/$$input $$out 2> $$out/build.txt) \
+			$(PARITY_ORACLE)/seed-0/$$input $(PARITY_ORACLE)/seed-0/$$input/D6in.json \
+			$$out 2> $$out/build.txt) \
 		|| mv $$out/build.txt $$out/error.txt; \
 	done
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/document,$(PARITY_RUST)/oracle-document.txt,--dumps D6)
