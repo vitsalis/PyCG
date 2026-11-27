@@ -18,12 +18,17 @@ DESCRIPTION = """\
 Writes the parity dumps of the Python engine (docs/rust/PLAN.md, section 3).
 
     dump.py input --checkout PATH --out DIR --package ROOT ENTRY...
-        one input: D1.jsonl to D5.jsonl, D6.json and modules.tsv in DIR;
-        modules.tsv has each module built, in build order, and its file
-        relative to the checkout, from which pycg_dump d1 writes D1
+        one input: D1.jsonl to D5.jsonl, D6.json, D6in.json, run.json and
+        modules.tsv in DIR; D6in.json holds what the document is built from
+        besides the program (the functions, classes, exports, call sites and
+        causes of the analysis), and run.json the package root and the entry
+        points, relative to the checkout, from which pycg_dump d4 discovers
+        the program and with D6in.json writes D6; modules.tsv has each
+        module built, in build order, and its file relative to the
+        checkout, from which pycg_dump d1 writes D1
     dump.py oracle --checkout PATH --out DIR [--set micro|macro]... [--name INPUT]...
         every input of the sets for hash seeds 0 and 1, in DIR/seed-<s>/<input>/,
-        then checks that both seeds give the same D1 to D6, byte for byte
+        then checks that both seeds give the same D1 to D6 and D6in, byte for byte
     dump.py key --checkout PATH
         the key of an oracle run: the git objects of KEYED_PATHS at HEAD (the
         engine, this harness, the micro cases and the runner that lists the
@@ -70,6 +75,8 @@ SOLVER_CALLS = (
     "is_saturated",
 )
 SOLVER_ANSWERS = frozenset({"constant", "follower", "objects", "holds", "is_saturated"})
+DOCUMENT_INPUTS = "D6in.json"
+RUN = "run.json"
 BUILDER_IMPORT_CALLS = ("handle_import", "locate")
 BUILDER_TABLES = (
     "iterated_expressions",
@@ -1003,6 +1010,73 @@ class Recorder:
             self.writers["D5"].write({"node": label, "objects": held})
 
 
+def document_inputs(program):
+    from pycg.analysis.model import Class, External, Function, Module
+
+    analysis = program.analysis
+    fields = {}
+    for name in program.modules:
+        module = analysis.module(name)
+        for attribute in module.defines:
+            field = analysis.field(module, attribute)
+            targets = {
+                obj.name
+                for obj in analysis.solver.objects(field)
+                if isinstance(obj, (Module, Class, Function, External))
+            }
+            fields.setdefault(name, {})[attribute] = sorted(targets)
+    return {
+        "cap": analysis.solver.cap,
+        "functions": [
+            {
+                "name": function.name,
+                "module": function.module,
+                "lineno": function.lineno,
+                "end_lineno": function.end_lineno,
+                "col_offset": function.col_offset,
+                "end_col_offset": function.end_col_offset,
+            }
+            for function in analysis.functions
+        ],
+        "classes": [
+            {
+                "name": cls.name,
+                "module": cls.module,
+                "index": cls.index,
+                "lineno": cls.lineno,
+                "end_lineno": cls.end_lineno,
+                "unknown": cls.unknown,
+                "mro": [[isinstance(base, Class), base.name] for base in cls.mro],
+            }
+            for cls in analysis.classes
+        ],
+        "fields": fields,
+        "site_edges": [
+            [caller, site, construct, sorted(callees)]
+            for (caller, site, construct), callees in analysis.site_edges.items()
+        ],
+        "call_expressions": sorted(
+            {(caller, site) for caller, site, _ in analysis.call_expressions}
+        ),
+        "iterated_expressions": sorted(analysis.iterated_expressions),
+        "unresolved": [
+            [caller, site, cause]
+            for (caller, site), cause in analysis.unresolved_calls().items()
+        ],
+        "external_callees": analysis.external_callees,
+    }
+
+
+def run_record(checkout, entry_points, package):
+    def relative(path):
+        return os.path.relpath(os.path.realpath(path), os.path.realpath(checkout))
+
+    return {
+        "package": relative(package),
+        "entry_points": [relative(path) for path in entry_points],
+    }
+
+
 def dump_input(checkout, out, entry_points, package, cap=None):
     sys.path.insert(0, os.path.abspath(checkout))
     sys.setrecursionlimit(max(sys.getrecursionlimit(), 10000))
@@ -1022,12 +1096,16 @@ def dump_input(checkout, out, entry_points, package, cap=None):
         generator.analyze()
         recorder.finish(generator)
         document = dumps(generator.document())
+        inputs = canonical_line(document_inputs(generator.program))
     except (Exception, SystemExit) as error:
         (out / "error.txt").write_text(f"{type(error).__name__}: {error}\n")
         return 1
     finally:
         recorder.close()
     (out / "D6.json").write_text(document, encoding="utf-8")
+    (out / DOCUMENT_INPUTS).write_text(inputs, encoding="utf-8")
+    run = run_record(checkout, entry_points, package)
+    (out / RUN).write_text(canonical_line(run), encoding="utf-8")
     return 0
 
 
@@ -1078,8 +1156,14 @@ def run_input(checkout, job, directory, seed):
 
 def differing_dumps(first, second):
     found = []
-    for dump in DUMPS:
-        name = f"{dump}.json" if dump == "D6" else f"{dump}.jsonl"
+    for dump in (*DUMPS, DOCUMENT_INPUTS):
+        name = (
+            dump
+            if dump == DOCUMENT_INPUTS
+            else f"{dump}.json"
+            if dump == "D6"
+            else f"{dump}.jsonl"
+        )
         left, right = first / name, second / name
         if (
             not (left.exists() and right.exists())

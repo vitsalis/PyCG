@@ -11,7 +11,15 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[2]
 PARITY = ROOT / "tools" / "parity"
-DUMPS = ("D1.jsonl", "D2.jsonl", "D3.jsonl", "D4.jsonl", "D5.jsonl", "D6.json")
+DUMPS = (
+    "D1.jsonl",
+    "D2.jsonl",
+    "D3.jsonl",
+    "D4.jsonl",
+    "D5.jsonl",
+    "D6.json",
+    "D6in.json",
+)
 
 
 def load(name, path):
@@ -105,6 +113,39 @@ def test_every_dump_is_written_and_is_the_same_for_hash_seeds_0_and_1(dumped, na
     for file_name in DUMPS:
         assert (first / file_name).stat().st_size > 0, file_name
         assert (first / file_name).read_bytes() == (second / file_name).read_bytes()
+
+
+@pytest.mark.parametrize("name", sorted(PROGRAMS))
+def test_the_document_inputs_hold_what_the_document_names(dumped, name):
+    first, _ = dumped[name]
+    document = json.loads((first / "D6.json").read_text(encoding="utf-8"))
+    inputs = json.loads((first / "D6in.json").read_text(encoding="utf-8"))
+
+    defined = {
+        name
+        for name, module in document["modules"].items()
+        if module["kind"] == "source"
+    }
+    defined |= {entry["name"] for entry in inputs["functions"]}
+    defined |= {entry["name"] for entry in inputs["classes"]}
+    assert defined == set(document["definitions"])
+    sites = {caller for caller, *_ in inputs["site_edges"]}
+    sites |= {caller for caller, *_ in inputs["unresolved"]}
+    assert sites == set(document["calls"])
+    assert inputs["cap"] == document["tool"]["cap"]
+
+
+def test_the_run_record_names_the_package_and_entry_points_from_the_checkout(
+    dumped, tmp_path
+):
+    first, _ = dumped["classes"]
+    run = json.loads((first / "run.json").read_text(encoding="utf-8"))
+    program = first.parent / "program"
+
+    assert (ROOT / run["package"]).resolve() == program.resolve()
+    assert [(ROOT / path).resolve() for path in run["entry_points"]] == [
+        (program / "main.py").resolve()
+    ]
 
 
 def test_every_record_is_canonical_json_without_addresses(dumped):
