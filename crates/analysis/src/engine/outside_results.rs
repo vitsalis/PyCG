@@ -326,3 +326,20 @@ impl<T: Trace> State<T> {
         }
     }
 }
+
+impl OutsideResults {
+    pub(crate) fn table_sizes(&self, sizes: &mut Vec<(&'static str, usize)>) {
+        let OutsideResults {
+            closures,
+            open_arguments,
+            completed_open_arguments: _,
+            unknown_modes: _,
+            open_modes,
+        } = self;
+        sizes.extend([
+            ("outside results closures", closures.len()),
+            ("outside results open_arguments", open_arguments.len()),
+            ("outside results open_modes", open_modes.len()),
+        ]);
+    }
+}

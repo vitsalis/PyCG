@@ -3026,3 +3026,47 @@ fn slice_indices(bounds: &Bounds, length: u32) -> (u32, u32) {
     let narrow = |value: BigInt| u32::try_from(value).expect("a clamped bound fits the length");
     (narrow(start), narrow(stop))
 }
+
+impl Containers {
+    pub(crate) fn table_sizes(
+        &self,
+        iterated_nodes: usize,
+        sizes: &mut Vec<(&'static str, usize)>,
+    ) {
+        let Containers {
+            containers,
+            storages: _,
+            storage_of: _,
+            nodes: _,
+            notices: _,
+            notifying: _,
+            keyed: _,
+            completed_keys: _,
+            groups: _,
+            group_of: _,
+            keyed_rules: _,
+            keyed_groups: _,
+            key_lookups: _,
+            compared_keys: _,
+            subscript_keys: _,
+            iterated,
+            iterations: _,
+            iteration_roles: _,
+            subscripts: _,
+            slices: _,
+            unpacks: _,
+            hubs: _,
+            hub_of: _,
+            dict_items: _,
+            sequences: _,
+            sequences_of: _,
+            subscriptions: _,
+            spreads,
+        } = self;
+        sizes.extend([
+            ("containers containers", containers.len()),
+            ("iterated", iterated.len() + iterated_nodes),
+        ]);
+        spreads.table_sizes(sizes);
+    }
+}

@@ -59,6 +59,15 @@ pub(crate) struct Spreads {
 }
 
 impl Spreads {
+    pub(crate) fn table_sizes(&self, sizes: &mut Vec<(&'static str, usize)>) {
+        let Spreads {
+            spreads,
+            spread_of: _,
+            bindings: _,
+        } = self;
+        sizes.push(("spreads", spreads.len()));
+    }
+
     pub(crate) fn unknown(&self, spread: SpreadId) -> NodeId {
         self.spreads[spread.0 as usize].unknown
     }

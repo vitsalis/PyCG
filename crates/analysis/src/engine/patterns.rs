@@ -524,3 +524,17 @@ pub(crate) fn pattern_name(prefix: &[u32], suffix: &[u32], case: Option<&str>) -
         Some(case) => format!("{name} {case}"),
     }
 }
+
+impl Patterns {
+    pub(crate) fn table_sizes(&self, sizes: &mut Vec<(&'static str, usize)>) {
+        let Patterns {
+            patterns,
+            states: _,
+            operands: _,
+            completed_operands: _,
+            module_names: _,
+            loads: _,
+        } = self;
+        sizes.extend([("patterns patterns", patterns.len())]);
+    }
+}
