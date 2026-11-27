@@ -12,7 +12,7 @@ use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State, not_ported};
-use crate::models::{CONTAINER_CLASSES, builtin_kind};
+use crate::models::{CONTAINER_CLASSES, LENGTH_HINT, builtin_kind};
 
 const COMPARISON_METHODS: [&str; 6] = ["__eq__", "__ne__", "__lt__", "__le__", "__gt__", "__ge__"];
 const EQUALITIES: [&str; 2] = ["__eq__", "__ne__"];
@@ -825,7 +825,7 @@ impl<T: Trace> State<T> {
             let unknown = self.unknown(graph, result);
             self.add_edge(graph, elements, unknown);
             if kind == "list" {
-                not_ported("containers: the length hint of an in-place concatenation")
+                self.add_length_hint(graph, right, caller, site, LENGTH_HINT);
             }
         }
         self.add_object(graph, dst, result);
