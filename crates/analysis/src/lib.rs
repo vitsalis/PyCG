@@ -11,6 +11,7 @@ use std::panic::{self, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
 
 use num_bigint::{BigInt, BigUint};
+pub use pycg_solver::Order;
 
 use crate::engine::trace::Untraced;
 use crate::engine::{Engine, NotPorted};
@@ -31,6 +32,7 @@ pub struct Request {
     pub entry_points: Vec<OsString>,
     pub package: Option<OsString>,
     pub cap: Cap,
+    pub order: Order,
 }
 
 pub struct Analysed {
@@ -70,7 +72,7 @@ pub fn analyse(
     };
     let entry_points: Vec<PathBuf> = request.entry_points.iter().map(PathBuf::from).collect();
     let package = request.package.as_ref().map(PathBuf::from);
-    let engine = Engine::new(cap, Untraced);
+    let engine = Engine::new(cap, request.order, Untraced);
     let mut program = Program::new(&entry_points, package.as_deref(), cwd, engine)
         .map_err(|error| Error::Paths(error.to_string()))?;
     let solved = panic::catch_unwind(AssertUnwindSafe(|| {
