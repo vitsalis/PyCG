@@ -16,7 +16,9 @@ DESCRIPTION = """\
 Writes the parity dumps of the Python engine (docs/rust/PLAN.md, section 3).
 
     dump.py input --checkout PATH --out DIR --package ROOT ENTRY...
-        one input: D1.jsonl to D5.jsonl and D6.json in DIR
+        one input: D1.jsonl to D5.jsonl, D6.json and modules.tsv in DIR;
+        modules.tsv has each module built, in build order, and its file
+        relative to the checkout, from which pycg_dump d1 writes D1
     dump.py oracle --checkout PATH --out DIR [--set micro|macro]... [--name INPUT]...
         every input of the sets for hash seeds 0 and 1, in DIR/seed-<s>/<input>/,
         then checks that both seeds give the same D1 to D6, byte for byte
@@ -30,6 +32,7 @@ The engine is not changed: this process wraps its methods while it runs.
 """
 
 DUMPS = ("D1", "D2", "D3", "D4", "D5", "D6")
+MODULES = "modules.tsv"
 SEEDS = (0, 1)
 KEYED_PATHS = (
     "pycg",
@@ -223,7 +226,7 @@ class Writer:
 
 
 class Recorder:
-    def __init__(self, out):
+    def __init__(self, out, checkout):
         from pycg.analysis import (
             builder,
             model,
@@ -253,6 +256,8 @@ class Recorder:
         self.round = 0
         self.analysis = None
         self.scopes_by_module = {}
+        self.checkout = os.path.realpath(checkout)
+        self.module_files = []
         self.stub_depth = 0
         self.witness_of_watch = {}
         self.declared = {}
@@ -260,6 +265,8 @@ class Recorder:
     def close(self):
         for writer in self.writers.values():
             writer.close()
+        lines = "".join(f"{name}\t{path}\n" for name, path in self.module_files)
+        (self.out / MODULES).write_text(lines, encoding="utf-8")
 
     def install(self):
         self._install_names()
@@ -343,6 +350,9 @@ class Recorder:
         self.semantics.Analysis.solve = solve
 
     def write_module(self, program, name, path):
+        relative = os.path.relpath(os.path.realpath(path), self.checkout)
+        assert "\t" not in relative and "\n" not in relative, relative
+        self.module_files.append((name, relative))
         module = program.modules[name]
         writer = self.writers["D1"]
         writer.write({"module": name, "status": module.status, "cause": module.cause})
@@ -790,7 +800,7 @@ def dump_input(checkout, out, entry_points, package, cap=None):
     from pycg.formats import dumps
     from pycg.pycg import CallGraphGenerator
 
-    recorder = Recorder(out)
+    recorder = Recorder(out, checkout)
     recorder.install()
     generator = (
         CallGraphGenerator(entry_points, package)

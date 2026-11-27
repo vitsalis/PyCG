@@ -3,6 +3,7 @@ import ast
 import json
 import os
 import struct
+import subprocess
 import sys
 import tempfile
 import tokenize
@@ -17,17 +18,14 @@ gives (program._read, then program._parse, with program._cause), and
 positions.txt, the kind and position of every node of each program of
 programs/, in ast.walk order, and constants.txt, the value of every
 Constant of each program of constants/, in that order, and for each
-program of scopes/ the D1 scopes dump of its scope pass (scopes.py) in
-scopes/<program>.txt, as `pycg_dump d1-scopes FILE m` writes it, and
+program of d1/ the D1 records of its module, as tools/parity/dump.py
+writes them, in d1/<program>.jsonl, and
 names.txt, the NFKC normalisation of strings and the answer of
 str.isidentifier at the bounds of the identifier ranges. Run it with the
 Python of the oracle; the output is committed.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-
-from pycg.analysis.scopes import analyse_scopes  # noqa: E402
 
 OUT = ROOT / "crates" / "pycg_syntax" / "tests" / "vectors"
 
@@ -95,8 +93,8 @@ READING = {
 
 PROGRAMS = OUT / "programs"
 CONSTANTS = OUT / "constants"
-SCOPES = OUT / "scopes"
-SCOPES_MODULE = "m"
+D1 = OUT / "d1"
+DUMP = ROOT / "tools" / "parity" / "dump.py"
 
 
 def cause(error):
@@ -167,58 +165,13 @@ def constants_lines():
         yield "end"
 
 
-def place(node):
-    return [node.lineno, node.col_offset] if hasattr(node, "lineno") else None
-
-
-def compact(value):
-    return json.dumps(value, separators=(",", ":"))
-
-
-def scope_record(scopes, scope):
-    definitions = scope.definitions
-    return {
-        "scope": scope.name,
-        "kind": scope.kind,
-        "local": scope.local_name,
-        "position": place(scope.node),
-        "generator": scope.generator,
-        "async": scope.asynchronous,
-        "bound": list(scope.bound),
-        "defined": list(scope.defined),
-        "globals": sorted(scope.globals),
-        "nonlocals": sorted(scope.nonlocals),
-        "rebound": sorted(scope.rebound),
-        "shared": sorted(scope.shared),
-        "star_import": scope.star_import,
-        "dynamic": scope.dynamic,
-        "imports": [[name, scope.imports[name]] for name in sorted(scope.imports)],
-        "definitions": [
-            [name, None if definitions[name] is None else place(definitions[name])]
-            for name in sorted(definitions)
-        ],
-        "resolved": [
-            [name, scopes.resolve(scope, name).name] for name in sorted(scope.reads)
-        ],
-    }
-
-
-def scope_lines(tree):
-    scopes = analyse_scopes(tree, SCOPES_MODULE)
-    for scope in scopes.scopes:
-        yield compact(scope_record(scopes, scope))
-    loops = sorted(
-        (place(node), [[name, unbinds] for name, unbinds in names.items()])
-        for node, names in scopes._loops.items()
-    )
-    for at, names in loops:
-        yield compact({"loop": at, "names": names})
-    unread = [
-        place(alias)
-        for alias in ast.walk(tree)
-        if isinstance(alias, ast.alias) and alias in scopes.unread_lazy
-    ]
-    yield compact({"unread_lazy": unread})
+def d1_lines(path):
+    with tempfile.TemporaryDirectory() as out:
+        command = [sys.executable, "-I", str(DUMP), "input", "--checkout", str(ROOT)]
+        command += ["--out", out, "--package", str(path.parent), str(path)]
+        subprocess.run(command, check=True)
+        records = Path(out, "D1.jsonl").read_text(encoding="utf-8").splitlines()
+    return [line for line in records if json.loads(line)["module"] == path.stem]
 
 
 NFKC_SEQUENCES = (
@@ -294,10 +247,9 @@ def main(argv):
     for name, lines in written:
         text = "".join(f"{line}\n" for line in (version, *lines))
         (OUT / f"{name}.txt").write_text(text, encoding="ascii")
-    for path in sorted(SCOPES.glob("*.py")):
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        text = "".join(f"{line}\n" for line in scope_lines(tree))
-        path.with_suffix(".txt").write_text(text, encoding="ascii")
+    for path in sorted(D1.glob("*.py")):
+        text = "".join(f"{line}\n" for line in d1_lines(path))
+        path.with_suffix(".jsonl").write_text(text, encoding="ascii")
     return 0
 
 

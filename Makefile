@@ -88,6 +88,14 @@ $(GATE) summary $(RESULT) $(BASE_RESULT) $(BASE_METRICS) \
 	--changes $(RESULT)-changes.txt >> $(SUMMARY)
 endef
 
+define parity_d1
+(cd $(1) && find . -name modules.tsv) | sort | while read -r modules; do \
+	input=$$(dirname "$$modules"); \
+	mkdir -p $(2)/$$input && \
+	$(PARITY_BINARIES)/pycg_dump d1 $(1)/$$modules $(2)/$$input/D1.jsonl || exit 1; \
+done
+endef
+
 define parity_compare
 python3 -I tools/parity/compare.py $(1) $(2) --required $(PARITY_REQUIRED) > $(3); \
 status=$$?; \
@@ -234,6 +242,8 @@ parity:
 	cargo build --release --locked
 	rm -rf $(PARITY_RUST)
 	mkdir -p $(PARITY_RUST)/run-1 $(PARITY_RUST)/run-2
+	@$(call parity_d1,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1)
+	@$(call parity_d1,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2)
 	@cd $(PARITY_ORACLE)/seed-0 && find . -name D2.jsonl | sort | while read -r dump; do \
 		input=$$(dirname "$$dump"); \
 		for run in run-1 run-2; do \

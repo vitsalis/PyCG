@@ -1,13 +1,15 @@
 use ruff_python_ast::token::{TokenKind, Tokens};
 use ruff_python_ast::{
     Alias, Arguments, Comprehension, ElifElseClause, ExceptHandler, ExceptHandlerExceptHandler,
-    Expr, ExprGenerator, FStringPartRef, InterpolatedElement, InterpolatedStringElement,
-    InterpolatedStringElements, InterpolatedStringFormatSpec, Keyword, MatchCase, ModModule,
-    Parameter, Parameters, Pattern, Stmt, StringLiteral, TypeParam, TypeParams, WithItem,
+    Expr, ExprGenerator, FStringPartRef, Identifier, InterpolatedElement,
+    InterpolatedStringElement, InterpolatedStringElements, InterpolatedStringFormatSpec, Keyword,
+    MatchCase, ModModule, Parameter, Parameters, Pattern, Stmt, StringLiteral, TypeParam,
+    TypeParams, WithItem,
 };
 use ruff_text_size::{Ranged, TextRange, TextSize};
 
 use crate::constants::Text;
+use crate::names::identifier;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Strings {
@@ -35,6 +37,12 @@ pub enum Node<'a> {
     StringPiece(StringPiece<'a>),
     Interpolation(&'a InterpolatedElement, Strings, bool),
     FormatSpec(&'a InterpolatedStringFormatSpec, bool),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Field {
+    One(String),
+    Many(Vec<String>),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -144,6 +152,65 @@ impl<'a> Node<'a> {
             }
         }
         children
+    }
+
+    pub fn identifiers(&self, tokens: &Tokens, source: &str) -> Vec<(&'static str, Field)> {
+        let mut found = Vec::new();
+        match self {
+            Node::Stmt(Stmt::FunctionDef(definition)) => one(&mut found, "name", &definition.name),
+            Node::Stmt(Stmt::ClassDef(class)) => one(&mut found, "name", &class.name),
+            Node::Stmt(Stmt::ImportFrom(import)) => {
+                optional_one(&mut found, "module", import.module.as_ref())
+            }
+            Node::Stmt(Stmt::Global(global)) => many(&mut found, "names", &global.names),
+            Node::Stmt(Stmt::Nonlocal(nonlocal)) => many(&mut found, "names", &nonlocal.names),
+            Node::Expr(Expr::Name(name)) => {
+                found.push(("id", Field::One(identifier(name.id.as_str()).into_owned())));
+            }
+            Node::Expr(Expr::Attribute(attribute)) => one(&mut found, "attr", &attribute.attr),
+            Node::Arg(parameter) => one(&mut found, "arg", &parameter.name),
+            Node::Keyword(keyword) => optional_one(&mut found, "arg", keyword.arg.as_ref()),
+            Node::Alias(alias) => {
+                one(&mut found, "name", &alias.name);
+                optional_one(&mut found, "asname", alias.asname.as_ref());
+            }
+            Node::ExceptHandler(handler) => optional_one(&mut found, "name", handler.name.as_ref()),
+            Node::Pattern(Pattern::MatchAs(pattern)) => {
+                optional_one(&mut found, "name", pattern.name.as_ref());
+            }
+            Node::Pattern(Pattern::MatchStar(pattern)) => {
+                optional_one(&mut found, "name", pattern.name.as_ref());
+            }
+            Node::Pattern(Pattern::MatchMapping(pattern)) => {
+                optional_one(&mut found, "rest", pattern.rest.as_ref());
+            }
+            Node::Pattern(Pattern::MatchClass(pattern)) => {
+                let attributes: Vec<&Identifier> = pattern
+                    .arguments
+                    .keywords
+                    .iter()
+                    .map(|keyword| &keyword.attr)
+                    .collect();
+                many(&mut found, "kwd_attrs", attributes);
+            }
+            Node::TypeParam(TypeParam::TypeVar(parameter)) => {
+                one(&mut found, "name", &parameter.name)
+            }
+            Node::TypeParam(TypeParam::TypeVarTuple(parameter)) => {
+                one(&mut found, "name", &parameter.name);
+            }
+            Node::TypeParam(TypeParam::ParamSpec(parameter)) => {
+                one(&mut found, "name", &parameter.name)
+            }
+            Node::Interpolation(element, Strings::Template, _) => {
+                found.push((
+                    "str",
+                    Field::One(interpolation_text(element, tokens, source)),
+                ));
+            }
+            _ => {}
+        }
+        found
     }
 }
 
@@ -738,6 +805,66 @@ fn joined_children<'a>(children: &mut Vec<Node<'a>>, parts: &[Part<'a>], strings
     if let Some(merged) = text {
         children.push(Node::StringPiece(merged));
     }
+}
+
+fn one(found: &mut Vec<(&'static str, Field)>, field: &'static str, name: &Identifier) {
+    found.push((field, Field::One(identifier(name.as_str()).into_owned())));
+}
+
+fn optional_one(
+    found: &mut Vec<(&'static str, Field)>,
+    field: &'static str,
+    name: Option<&Identifier>,
+) {
+    if let Some(name) = name {
+        one(found, field, name);
+    }
+}
+
+fn many<'n>(
+    found: &mut Vec<(&'static str, Field)>,
+    field: &'static str,
+    names: impl IntoIterator<Item = &'n Identifier>,
+) {
+    let names: Vec<String> = names
+        .into_iter()
+        .map(|name| identifier(name.as_str()).into_owned())
+        .collect();
+    if !names.is_empty() {
+        found.push((field, Field::Many(names)));
+    }
+}
+
+fn interpolation_text(element: &InterpolatedElement, tokens: &Tokens, source: &str) -> String {
+    let start = element.start() + TextSize::of('{');
+    let end = tokens
+        .after(element.expression.end())
+        .iter()
+        .find(|token| {
+            matches!(
+                token.kind(),
+                TokenKind::Exclamation | TokenKind::Colon | TokenKind::Rbrace
+            )
+        })
+        .expect("an interpolation ends at a conversion, a format spec or a brace")
+        .start();
+    let mut text = String::new();
+    let mut from = start;
+    for token in tokens.in_range(TextRange::new(start, end)) {
+        if token.kind() == TokenKind::Comment {
+            text.push_str(&source[TextRange::new(from, token.start())]);
+            from = token.end();
+        }
+    }
+    text.push_str(&source[TextRange::new(from, end)]);
+    if element.debug_text.is_some() {
+        let expression = text
+            .trim_end()
+            .strip_suffix('=')
+            .expect("the text of a debug interpolation ends with =");
+        return expression.to_owned();
+    }
+    text
 }
 
 pub fn walk<'a>(module: &'a ModModule) -> Vec<Node<'a>> {

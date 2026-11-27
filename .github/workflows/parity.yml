@@ -85,4 +85,5 @@ jobs:
           path: |
             ${{ env.EVAL_OUT }}/parity-oracle-${{ steps.key.outputs.key }}/seed-0/macro
             ${{ env.EVAL_OUT }}/parity-oracle-${{ steps.key.outputs.key }}/done-macro
+      - run: make eval-inputs
       - run: make parity SUMMARY="$GITHUB_STEP_SUMMARY"
