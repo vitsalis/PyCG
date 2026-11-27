@@ -304,6 +304,54 @@ def test_a_measurement_records_the_outcome_and_the_sha256_of_the_graph(tmp_path)
     assert "| outcome | finished | finished |" in text
 
 
+def cgroup_limit(tmp_path, text):
+    path = tmp_path / "memory.max"
+    path.write_text(text + "\n")
+    return path
+
+
+def test_a_run_over_the_cap_is_recorded_as_killed_by_the_cap(tmp_path):
+    checkout = committed_checkout(tmp_path)
+    project = demo_project(tmp_path)
+    (project.directory / "BEHAVIOUR").write_text("eat")
+    container = cgroup_limit(tmp_path, str((200 + measure.RUNNER_HEADROOM_MIB) << 20))
+    out = tmp_path / "out"
+
+    result = measure.measure(
+        checkout, "this", project, out, 200, 60, sys.executable, container
+    )
+
+    assert result["outcome"] == "killed by the cap"
+    assert result["run"]["status"] == "memory"
+    assert result["graph_sha256"] is None
+    record = measure.record_path(out, "this", "demo")
+    assert json.loads(record.read_text()) == result
+
+
+@pytest.mark.parametrize("limit_mib", [1024, 1024 + measure.RUNNER_HEADROOM_MIB - 1])
+def test_a_container_without_headroom_above_the_cap_is_refused(tmp_path, limit_mib):
+    container = cgroup_limit(tmp_path, str(limit_mib << 20))
+    with pytest.raises(
+        measure.MeasureError, match=f"needs {measure.RUNNER_HEADROOM_MIB} MiB"
+    ):
+        measure.measure(
+            tmp_path, "this", None, tmp_path, 1024, 60, "python3", container
+        )
+
+
+@pytest.mark.parametrize("text", ["max", None])
+def test_a_container_without_a_memory_limit_needs_no_headroom(tmp_path, text):
+    container = (
+        tmp_path / "memory.max" if text is None else cgroup_limit(tmp_path, text)
+    )
+    measure.check_headroom(1024, container)
+
+
+def test_the_container_has_the_cap_and_the_headroom_of_the_runner(capsys):
+    assert measure.main(["container-mib", "4096"]) == 0
+    assert capsys.readouterr().out == f"{4096 + measure.RUNNER_HEADROOM_MIB}\n"
+
+
 def test_a_checkout_with_changes_is_not_measured(tmp_path):
     checkout = committed_checkout(tmp_path)
     (checkout / "pycg" / "new.py").write_text("")

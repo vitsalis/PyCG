@@ -44,6 +44,9 @@ class CallGraphGenerator:
             while not os.path.exists(os.path.join(self.package, "worker.pid")):
                 time.sleep(0.05)
             time.sleep(60)
+        if behaviour == "eat":
+            memory = b"x" * (400 << 20)  # noqa: F841
+            time.sleep(60)
         if behaviour == "die":
             os._exit(3)
 
