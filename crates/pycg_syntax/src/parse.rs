@@ -13,6 +13,11 @@ const PARENTHESES_DEPTH_MAX: usize = 200;
 const INDENTATION_DEPTH_MAX: usize = 100;
 const INTERPOLATED_STRING_DEPTH_MAX: usize = 149;
 const STATEMENT_DEPTH_MAX: usize = 43_482;
+const PARSE_STACK_BASE_BYTES: usize = 8 << 20;
+#[cfg(debug_assertions)]
+const PARSE_STACK_BYTES_PER_SOURCE_BYTE: usize = 2 * 2_213;
+#[cfg(not(debug_assertions))]
+const PARSE_STACK_BYTES_PER_SOURCE_BYTE: usize = 2 * 992;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SyntaxKind {
@@ -45,7 +50,23 @@ impl ParseFailure {
     }
 }
 
-pub fn parse_source(source: &str) -> Result<Parsed<ModModule>, ParseFailure> {
+pub fn with_parsed<W, R>(source: &str, work: W) -> R
+where
+    W: FnOnce(Result<&Parsed<ModModule>, ParseFailure>) -> R + Send,
+    R: Send,
+{
+    let bytes = source
+        .len()
+        .checked_mul(PARSE_STACK_BYTES_PER_SOURCE_BYTE)
+        .and_then(|bytes| bytes.checked_add(PARSE_STACK_BASE_BYTES))
+        .expect("the stack of a source fits the address space");
+    crate::stack::on_stack(bytes, || match parse_source(source) {
+        Ok(parsed) => work(Ok(&parsed)),
+        Err(failure) => work(Err(failure)),
+    })
+}
+
+fn parse_source(source: &str) -> Result<Parsed<ModModule>, ParseFailure> {
     if source.contains('\0') {
         return Err(ParseFailure {
             kind: SyntaxKind::Syntax,

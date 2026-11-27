@@ -2,7 +2,7 @@ use std::io::Write;
 use std::path::Path;
 use std::process::ExitCode;
 
-use pycg_syntax::parse::parse_source;
+use pycg_syntax::parse::with_parsed;
 use pycg_syntax::read::read_file;
 use pycg_syntax::scopes::{ModuleScopes, ScopeId, ScopeKind, analyse_scopes};
 use pycg_syntax::tree::{Field, Node, position, walk};
@@ -152,70 +152,72 @@ fn status(module: &str, cause: Option<&str>, out: &mut impl Write) -> std::io::R
     record(module, fields, out)
 }
 
-fn d1(path: &Path, module: &str, out: &mut impl Write) -> std::io::Result<()> {
+fn d1(path: &Path, module: &str, out: &mut (impl Write + Send)) -> std::io::Result<()> {
     let source = match read_file(path) {
         Ok(source) => source,
         Err(failure) => return status(module, Some(&failure.cause()), out),
     };
-    let parsed = match parse_source(&source) {
-        Ok(parsed) => parsed,
-        Err(failure) => return status(module, Some(&failure.cause()), out),
-    };
-    status(module, None, out)?;
-    let lines = LineIndex::from_source_text(&source);
-    let tokens = parsed.tokens();
-    for node in walk(parsed.syntax()) {
-        if node.range(tokens).is_none() {
-            continue;
+    with_parsed(&source, |parsed| {
+        let parsed = match parsed {
+            Ok(parsed) => parsed,
+            Err(failure) => return status(module, Some(&failure.cause()), out),
+        };
+        status(module, None, out)?;
+        let lines = LineIndex::from_source_text(&source);
+        let tokens = parsed.tokens();
+        for node in walk(parsed.syntax()) {
+            if node.range(tokens).is_none() {
+                continue;
+            }
+            let mut fields = vec![("position", ast_position(&node, tokens, &lines))];
+            let identifiers: Vec<(&'static str, Json)> = node
+                .identifiers(tokens, &source)
+                .into_iter()
+                .map(|(field, value)| match value {
+                    Field::One(name) => (field, Json::Str(name)),
+                    Field::Many(names) => (
+                        field,
+                        Json::Array(names.into_iter().map(Json::Str).collect()),
+                    ),
+                })
+                .collect();
+            if !identifiers.is_empty() {
+                fields.push(("identifiers", Json::Object(identifiers)));
+            }
+            record(module, fields, out)?;
         }
-        let mut fields = vec![("position", ast_position(&node, tokens, &lines))];
-        let identifiers: Vec<(&'static str, Json)> = node
-            .identifiers(tokens, &source)
-            .into_iter()
-            .map(|(field, value)| match value {
-                Field::One(name) => (field, Json::Str(name)),
-                Field::Many(names) => (
-                    field,
-                    Json::Array(names.into_iter().map(Json::Str).collect()),
-                ),
-            })
-            .collect();
-        if !identifiers.is_empty() {
-            fields.push(("identifiers", Json::Object(identifiers)));
+        let analysed = analyse_scopes(parsed.syntax(), module, tokens, &lines, &source);
+        for &id in analysed.scopes() {
+            let fields = vec![("scope", scope_record(&analysed, id, tokens, &lines))];
+            record(module, fields, out)?;
         }
-        record(module, fields, out)?;
-    }
-    let analysed = analyse_scopes(parsed.syntax(), module, tokens, &lines, &source);
-    for &id in analysed.scopes() {
-        let fields = vec![("scope", scope_record(&analysed, id, tokens, &lines))];
-        record(module, fields, out)?;
-    }
-    for node in analysed.loop_nodes() {
-        let bindings = analysed
-            .loop_bindings(node)
-            .iter()
-            .map(|(name, unbinds)| Json::Array(vec![Json::text(name), Json::Bool(*unbinds)]))
-            .collect();
-        let fields = vec![
-            ("loop", ast_position(node, tokens, &lines)),
-            ("bindings", Json::dict(bindings)),
-        ];
-        record(module, fields, out)?;
-    }
-    let mut unread: Vec<(Position, Json)> = Vec::new();
-    for node in walk(parsed.syntax()) {
-        if let Node::Alias(alias) = node
-            && analysed.is_unread_lazy(alias)
-        {
-            let range = node.range(tokens).expect("an alias has a position");
-            let at = position(range, &lines);
-            let key = (at.lineno, at.col_offset, at.end_lineno, at.end_col_offset);
-            unread.push((key, ast_position(&node, tokens, &lines)));
+        for node in analysed.loop_nodes() {
+            let bindings = analysed
+                .loop_bindings(node)
+                .iter()
+                .map(|(name, unbinds)| Json::Array(vec![Json::text(name), Json::Bool(*unbinds)]))
+                .collect();
+            let fields = vec![
+                ("loop", ast_position(node, tokens, &lines)),
+                ("bindings", Json::dict(bindings)),
+            ];
+            record(module, fields, out)?;
         }
-    }
-    unread.sort_by_key(|(key, _)| *key);
-    let unread = unread.into_iter().map(|(_, at)| at).collect();
-    record(module, vec![("unread_lazy", Json::Array(unread))], out)
+        let mut unread: Vec<(Position, Json)> = Vec::new();
+        for node in walk(parsed.syntax()) {
+            if let Node::Alias(alias) = node
+                && analysed.is_unread_lazy(alias)
+            {
+                let range = node.range(tokens).expect("an alias has a position");
+                let at = position(range, &lines);
+                let key = (at.lineno, at.col_offset, at.end_lineno, at.end_col_offset);
+                unread.push((key, ast_position(&node, tokens, &lines)));
+            }
+        }
+        unread.sort_by_key(|(key, _)| *key);
+        let unread = unread.into_iter().map(|(_, at)| at).collect();
+        record(module, vec![("unread_lazy", Json::Array(unread))], out)
+    })
 }
 
 type Position = (usize, usize, usize, usize);

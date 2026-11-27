@@ -1,6 +1,6 @@
 use pycg_syntax::constants::{Constant, literal, text_value};
 use pycg_syntax::names::{is_identifier, nfkc};
-use pycg_syntax::parse::parse_source;
+use pycg_syntax::parse::with_parsed;
 use pycg_syntax::read::read_source;
 use pycg_syntax::tree::{Node, position, walk};
 use ruff_source_file::LineIndex;
@@ -33,28 +33,31 @@ fn read_and_parse(bytes: &[u8]) -> (String, String) {
         Ok(source) => source,
         Err(failure) => return ("failed".to_owned(), failure.cause()),
     };
-    match parse_source(&source) {
+    with_parsed(&source, |parsed| match parsed {
         Ok(_) => {
             let text: String = source.bytes().map(|byte| format!("{byte:02x}")).collect();
             ("ok".to_owned(), text)
         }
         Err(failure) => ("failed".to_owned(), failure.cause()),
-    }
+    })
 }
 
-const DEEPEST_VECTOR_STACK_BYTES: usize = 10 << 20;
+const LARGEST_INPUT_BYTES: usize = 2_352_211;
+
+#[test]
+fn a_flat_source_as_large_as_the_largest_input_parses() {
+    let entry = "    'key': ['value', 'other'],\n";
+    let entries = LARGEST_INPUT_BYTES / entry.len();
+    let source = format!("x = {{\n{}}}\n", entry.repeat(entries));
+    assert!(source.len() >= LARGEST_INPUT_BYTES - entry.len());
+    let statements = with_parsed(&source, |parsed| {
+        parsed.expect("a flat source parses").syntax().body.len()
+    });
+    assert_eq!(statements, 1);
+}
 
 #[test]
 fn sources_past_the_limits_of_the_parser_fail_as_in_python() {
-    std::thread::Builder::new()
-        .stack_size(DEEPEST_VECTOR_STACK_BYTES)
-        .spawn(bound_vectors)
-        .expect("the vector thread starts")
-        .join()
-        .expect("the bound vectors hold");
-}
-
-fn bound_vectors() {
     let mut cases = 0;
     for line in vector_lines(BOUNDS) {
         let fields: Vec<&str> = line.split('\t').collect();
@@ -110,21 +113,23 @@ fn reading_and_parsing_give_what_python_gives() {
 }
 
 fn dump(source: &str) -> Vec<String> {
-    let parsed = parse_source(source).expect("a position vector parses");
-    let lines = LineIndex::from_source_text(source);
-    walk(parsed.syntax())
-        .iter()
-        .filter_map(|node| {
-            let range = node.range(parsed.tokens())?;
-            let at = position(range, &lines);
-            let (line, column) = (at.lineno, at.col_offset);
-            let (end_line, end_column) = (at.end_lineno, at.end_col_offset);
-            Some(format!(
-                "{} {line} {column} {end_line} {end_column}",
-                node.kind()
-            ))
-        })
-        .collect()
+    with_parsed(source, |parsed| {
+        let parsed = parsed.expect("a position vector parses");
+        let lines = LineIndex::from_source_text(source);
+        walk(parsed.syntax())
+            .iter()
+            .filter_map(|node| {
+                let range = node.range(parsed.tokens())?;
+                let at = position(range, &lines);
+                let (line, column) = (at.lineno, at.col_offset);
+                let (end_line, end_column) = (at.end_lineno, at.end_col_offset);
+                Some(format!(
+                    "{} {line} {column} {end_line} {end_column}",
+                    node.kind()
+                ))
+            })
+            .collect()
+    })
 }
 
 #[test]
@@ -177,19 +182,21 @@ fn constant_text(constant: &Constant) -> String {
 }
 
 fn constants(source: &str) -> Vec<String> {
-    let parsed = parse_source(source).expect("a constant vector parses");
-    let mut found = Vec::new();
-    for node in walk(parsed.syntax()) {
-        let constant = match &node {
-            Node::Expr(expression) => literal(expression, source),
-            Node::StringPiece(piece) => Some(Constant::Str(text_value(&piece.texts, source))),
-            _ => None,
-        };
-        if let Some(constant) = constant {
-            found.push(constant_text(&constant));
+    with_parsed(source, |parsed| {
+        let parsed = parsed.expect("a constant vector parses");
+        let mut found = Vec::new();
+        for node in walk(parsed.syntax()) {
+            let constant = match &node {
+                Node::Expr(expression) => literal(expression, source),
+                Node::StringPiece(piece) => Some(Constant::Str(text_value(&piece.texts, source))),
+                _ => None,
+            };
+            if let Some(constant) = constant {
+                found.push(constant_text(&constant));
+            }
         }
-    }
-    found
+        found
+    })
 }
 
 #[test]
