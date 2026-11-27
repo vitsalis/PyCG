@@ -49,9 +49,17 @@ FAMILIES = {
         "classes",
         "Classes that Python does not instantiate",
     ),
+    "tests/test_annotations.py": (
+        "annotations",
+        "Annotations",
+    ),
     "tests/test_arguments.py": (
         "calls",
         "Arguments",
+    ),
+    "tests/test_builtin_models.py": (
+        "builtins",
+        "Selected standard-library operations",
     ),
     "tests/test_call_arity.py": (
         "calls",
@@ -72,6 +80,10 @@ FAMILIES = {
     "tests/test_containers.py": (
         "containers",
         "Containers",
+    ),
+    "tests/test_declared_types.py": (
+        "annotations",
+        "Declared types (idea 4)",
     ),
     "tests/test_decorators_and_descriptors.py": (
         "calls",
@@ -148,6 +160,10 @@ FAMILIES = {
     "tests/test_records.py": (
         "records",
         "The solver",
+    ),
+    "tests/test_reflection.py": (
+        "reflection",
+        "Namespaces read by reflection",
     ),
     "tests/test_slots.py": (
         "classes",
