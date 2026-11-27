@@ -6,6 +6,7 @@ import struct
 import sys
 import tempfile
 import tokenize
+import unicodedata
 import warnings
 from pathlib import Path
 
@@ -17,8 +18,10 @@ positions.txt, the kind and position of every node of each program of
 programs/, in ast.walk order, and constants.txt, the value of every
 Constant of each program of constants/, in that order, and for each
 program of scopes/ the D1 scopes dump of its scope pass (scopes.py) in
-scopes/<program>.txt, as `pycg_dump d1-scopes FILE m` writes it. Run it
-with the Python of the oracle; the output is committed.
+scopes/<program>.txt, as `pycg_dump d1-scopes FILE m` writes it, and
+names.txt, the NFKC normalisation of strings and the answer of
+str.isidentifier at the bounds of the identifier ranges. Run it with the
+Python of the oracle; the output is committed.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -218,6 +221,52 @@ def scope_lines(tree):
     yield compact({"unread_lazy": unread})
 
 
+NFKC_SEQUENCES = (
+    "e\u0301",
+    "a\u0328\u0301",
+    "a\u0301\u0328",
+    "\u1e9b\u0323",
+    "\u1100\u1161\u11a8",
+    "\uac00\u11a8",
+    "\u1100\u1161",
+    "\ufb01le",
+    "\u2126\u212b",
+    "\u0344\u0301",
+    "o\u0308\u0304\u0301",
+    "\u0b47\u0b3e",
+    "\u1fbf\u0301",
+)
+
+
+def hexes(text):
+    return ",".join(f"{ord(c):x}" for c in text) or "-"
+
+
+def names_lines():
+    single = (chr(p) for p in range(0x110000) if not 0xD800 <= p < 0xE000)
+    changed = (c for c in single if unicodedata.normalize("NFKC", c) != c)
+    for text in (*changed, *NFKC_SEQUENCES):
+        yield f"nfkc {hexes(text)} {hexes(unicodedata.normalize('NFKC', text))}"
+    for point in identifier_bounds():
+        character = chr(point)
+        yield f"start {point:x} {character.isidentifier()}"
+        yield f"continue {point:x} {('a' + character).isidentifier()}"
+
+
+def identifier_bounds():
+    points = set()
+    previous_start = previous_continue = False
+    for point in range(0x110001):
+        surrogate = 0xD800 <= point < 0xE000
+        inside = point < 0x110000 and not surrogate
+        start = inside and chr(point).isidentifier()
+        continuing = inside and ("a" + chr(point)).isidentifier()
+        if start != previous_start or continuing != previous_continue:
+            points.update(p for p in (point - 1, point) if 0 <= p < 0x110000)
+        previous_start, previous_continue = start, continuing
+    return sorted(p for p in points if not 0xD800 <= p < 0xE000)
+
+
 def reading_lines():
     for name, data in READING.items():
         status, value = read(data)
@@ -240,6 +289,7 @@ def main(argv):
         ("reading", reading_lines()),
         ("positions", positions_lines()),
         ("constants", constants_lines()),
+        ("names", names_lines()),
     )
     for name, lines in written:
         text = "".join(f"{line}\n" for line in (version, *lines))
