@@ -292,7 +292,8 @@ impl<T: Trace> State<T> {
             | Object::Container(_)
             | Object::Generator { .. }
             | Object::Coroutine { .. }
-            | Object::Pattern { .. } => {}
+            | Object::Pattern { .. }
+            | Object::TypeForm { .. } => {}
         }
     }
 

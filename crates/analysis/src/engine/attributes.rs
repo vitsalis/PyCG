@@ -756,7 +756,7 @@ impl<T: Trace> State<T> {
                 let external = self.external(graph, &name, 2, false);
                 self.add_object(graph, dst, external);
             }
-            Object::Saturated | Object::Fallback { .. } => {}
+            Object::Saturated | Object::Fallback { .. } | Object::TypeForm { .. } => {}
         }
     }
 
@@ -802,7 +802,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn stored_name(&mut self, graph: &mut Graph, object: ObjId, name: Sym) {
+    pub(super) fn stored_name(&mut self, graph: &mut Graph, object: ObjId, name: Sym) {
         let names = self.namespace_names(graph, object);
         let literal = Literal::Str(self.symbols.text(name).chars().map(u32::from).collect());
         let named = self.const_object(graph, &literal);

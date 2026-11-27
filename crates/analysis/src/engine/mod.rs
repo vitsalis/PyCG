@@ -1,4 +1,5 @@
 mod analysis;
+mod annotations;
 mod arguments;
 mod attributes;
 mod builtin_containers;
@@ -191,6 +192,7 @@ struct State<T: Trace> {
     builder_calls: Vec<CallId>,
     patterns: patterns::Patterns,
     outside_types: outside_types::OutsideTypes,
+    annotations: annotations::Annotations,
 }
 
 impl<T: Trace> Engine<T> {
@@ -315,6 +317,7 @@ impl<T: Trace> Engine<T> {
             builder_calls: Vec::new(),
             patterns: patterns::Patterns::default(),
             outside_types: outside_types::OutsideTypes::default(),
+            annotations: annotations::Annotations::default(),
             tables: BuilderTables::default(),
         };
         state.trace.object(
