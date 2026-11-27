@@ -198,7 +198,7 @@ def main(argv=None):
     measure_parser = commands.add_parser("run", help="run and score a checkout")
     measure_parser.add_argument("--checkout", type=Path, required=True)
     measure_parser.add_argument(
-        "--flavour", choices=sorted(run.analyse.GENERATOR_BY_FLAVOUR), required=True
+        "--flavour", choices=sorted(run.analyse.FLAVOURS), required=True
     )
     measure_parser.add_argument("--name", required=True)
     measure_parser.add_argument("--out", type=Path, default=run.OUT_DEFAULT)

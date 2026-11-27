@@ -38,6 +38,7 @@ measure = $(SANDBOX) $(1)/evaluation/common/loop.py run --flavour new --checkout
 	--name $(2) --hash-seed $(3) --micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT) \
 	&& $(GATE) digest $(1) > $(EVAL_OUT)/$(2)/benchmark_sha256
 measured = test -f $(RESULT)/result.json || ($(call measure,$(CURDIR),$(notdir $(RESULT)),0))
+RUST_RESULT = $(EVAL_OUT)/rust-$(COMMIT)
 base_metrics = git rev-parse --verify --quiet $(BASE)^{commit} > /dev/null \
 	&& (git show $(BASE):$(METRICS) > $(BASE_METRICS) 2> /dev/null \
 	|| : > $(BASE_METRICS))
@@ -119,7 +120,7 @@ endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
-	eval-same-graphs eval-labels eval-changes eval-scale eval-trace parity-oracle parity-key parity
+	eval-same-graphs eval-labels eval-changes eval-scale eval-trace eval-rust parity-oracle parity-key parity
 
 setup:
 	uv sync --locked
@@ -215,6 +216,14 @@ eval-compare: eval-inputs
 
 eval-same-graphs:
 	$(same_graphs)
+
+eval-rust: eval-inputs
+	CARGO_TARGET_DIR=$(CURDIR)/target cargo build --release --locked
+	$(measured)
+	$(SANDBOX) $(CURDIR)/evaluation/common/loop.py run --flavour rust --checkout $(CURDIR) \
+		--name $(notdir $(RUST_RESULT)) --hash-seed 0 --micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT)
+	diff -rq -x runs.json -x result.json -x benchmark_sha256 $(RESULT) $(RUST_RESULT)
+	@echo "the graphs of the Rust and the Python flavours are byte-identical"
 
 eval-labels: eval-inputs
 	$(need_base)
