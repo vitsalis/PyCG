@@ -7,10 +7,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from pycg.analysis import model, mro, stubs  # noqa: E402
+from pycg.analysis import builtin_models, model, mro, stubs  # noqa: E402
+from pycg.analysis.builtin_rules import _signature  # noqa: E402
 
 VECTORS_DIRECTORY = ROOT / "crates" / "pycg_stubs" / "tests" / "vectors"
 MODEL_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "model.rs"
+MODELS_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "models.rs"
 SEED = 20261126
 CASES_PER_FUNCTION = 400
 POOL_SIZE = 8
@@ -314,6 +316,229 @@ def model_vectors(generator):
     return "\n".join(lines) + "\n"
 
 
+MODEL_TABLES = ("FUNCTIONS", "SPECIAL_METHOD_CALLS", "REFLECTION_CALLS")
+STRING_MAPS = (
+    "KEY_WRAPPERS",
+    "LIBRARY_VALUES",
+    "REPEATS",
+    "DEFINES_MARKERS",
+    "CALLS_BACK",
+    "VARIABLE_TYPES",
+    "PROPERTY_ACCESSORS",
+    "CLOSURES",
+    "VARIABLE_FUNCTIONS",
+    "CONCRETE_CLASSES",
+    "STUB_RESULTS",
+    "CACHED_FUNCTIONS",
+)
+STRING_SETS = (
+    "KEYED_OPERATIONS",
+    "READS_TUPLES",
+    "NOT_CONSUMING",
+    "OPENERS",
+    "DECORATING_CLOSURES",
+)
+STRING_LIST_MAPS = ("KEYED_SEQUENCES", "WRAPPED_ATTRIBUTES_BY_TYPE")
+STRING_CONSTANTS = (
+    "GROUPER",
+    "BUFFER_EXPORTER",
+    "TUPLE_STORAGE",
+    "ITERABLE",
+    "REVERSIBLE",
+)
+MODE_ALPHABET = "rwaxbt+z"
+MODE_LENGTH_MAX = 3
+UNKNOWN_KIND = "unknown_kind"
+UNKNOWN_METHOD = "unknown_method"
+
+
+def rust_model(entry):
+    text, rule, *arguments = entry
+    return f"({rust_text(text)}, {rust_text(rule)}, {rust_texts(arguments)})"
+
+
+def rust_option_model(entry):
+    return "None" if entry is None else f"Some({rust_model(entry)})"
+
+
+def table_lines(name, item_type, items):
+    return [f"pub const {name}: &[{item_type}] = &[", *items, "];"]
+
+
+def models_tables():
+    models = builtin_models
+    model_type = "(&str, &str, &[&str])"
+    lines = []
+    for name in MODEL_TABLES:
+        items = [
+            f"    ({rust_text(key)}, {rust_model(entry)}),"
+            for key, entry in getattr(models, name).items()
+        ]
+        lines += table_lines(name, f"(&str, {model_type})", items)
+    items = [
+        f"    ({rust_text(kind)}, {rust_text(method)}, {rust_model(entry)}),"
+        for (kind, method), entry in sorted(models.METHODS.items())
+    ]
+    lines += table_lines("METHODS", f"(&str, &str, {model_type})", items)
+    items = [
+        f"    ({rust_text(key)}, {rust_text(kind)}, {rust_model(entry)}),"
+        for key, (kind, entry) in models.CONTAINER_CLASSES.items()
+    ]
+    lines += table_lines("CONTAINER_CLASSES", f"(&str, &str, {model_type})", items)
+    items = [
+        f"    ({rust_text(key)}, {rust_text(mode)}, {rust_texts(roles)}, "
+        f"{rust_text(shape)}, {rust_option(kind)}),"
+        for key, (mode, roles, shape, kind) in models.LIBRARY_ITERATION.items()
+    ]
+    lines += table_lines(
+        "LIBRARY_ITERATION", "(&str, &str, &[&str], &str, Option<&str>)", items
+    )
+    for name in STRING_MAPS:
+        items = [
+            f"    ({rust_text(key)}, {rust_text(value)}),"
+            for key, value in getattr(models, name).items()
+        ]
+        lines += table_lines(name, "(&str, &str)", items)
+    for name in STRING_SETS:
+        items = [f"    {rust_text(value)}," for value in sorted(getattr(models, name))]
+        lines += table_lines(name, "&str", items)
+    for name in STRING_LIST_MAPS:
+        items = [
+            f"    ({rust_text(key)}, {rust_texts(values)}),"
+            for key, values in getattr(models, name).items()
+        ]
+        lines += table_lines(name, "(&str, &[&str])", items)
+    items = []
+    for key, (parameter, plan, source) in models.LENGTH_HINTS.items():
+        steps = ", ".join(
+            f"({rust_text(method)}, {rust_texts(needs)})" for method, needs in plan
+        )
+        items.append(
+            f"    ({rust_text(key)}, {rust_text(parameter)}, &[{steps}], "
+            f"{rust_text(source)}),"
+        )
+    lines += table_lines(
+        "LENGTH_HINTS", "(&str, &str, &[(&str, &[&str])], &str)", items
+    )
+    items = [
+        f"    ({rust_text(key)}, {rust_text(parameter)}, {str(hashed).lower()}),"
+        for key, (parameter, hashed) in models.HASHED_ARGUMENTS.items()
+    ]
+    lines += table_lines("HASHED_ARGUMENTS", "(&str, &str, bool)", items)
+    items = []
+    for key, (text, argument, *wrapper) in models.RETURNS_ARGUMENT.items():
+        items.append(
+            f"    ({rust_text(key)}, {rust_text(text)}, {rust_option(argument)}, "
+            f"{rust_option(wrapper[0] if wrapper else None)}),"
+        )
+    lines += table_lines(
+        "RETURNS_ARGUMENT", "(&str, &str, Option<&str>, Option<&str>)", items
+    )
+    text, argument = models.RETURNED_DECORATOR_SIGNATURE
+    lines.append(
+        f"pub const RETURNED_DECORATOR_SIGNATURE: (&str, &str) = "
+        f"({rust_text(text)}, {rust_text(argument)});"
+    )
+    lines.append(f"pub const DYNAMIC_NAMES_MAX: usize = {models.DYNAMIC_NAMES_MAX};")
+    for name in STRING_CONSTANTS:
+        lines.append(f"pub const {name}: &str = {rust_text(getattr(models, name))};")
+    return lines
+
+
+def all_modes():
+    modes = [""]
+    for length in range(1, MODE_LENGTH_MAX + 1):
+        found = [""]
+        for _ in range(length):
+            found = [mode + letter for mode in found for letter in MODE_ALPHABET]
+        modes += found
+    return modes
+
+
+def models_functions():
+    models = builtin_models
+    items = [
+        f"    ({rust_text(mode)}, {str(unbuffered).lower()}, "
+        f"{rust_option(models.opened_class(mode, unbuffered))}),"
+        for mode in all_modes()
+        for unbuffered in (False, True)
+    ]
+    lines = table_lines("OPENED_CLASSES", "(&str, bool, Option<&str>)", items)
+    kinds = sorted(
+        {kind for kind, _ in models.METHODS}
+        | set(models.CONTAINER_CLASSES)
+        | {UNKNOWN_KIND}
+    )
+    methods = sorted({method for _, method in models.METHODS} | {UNKNOWN_METHOD})
+    items = [
+        f"    ({rust_text(kind)}, {rust_text(models.builtin_kind(kind))}),"
+        for kind in kinds
+    ]
+    lines += table_lines("BUILTIN_KINDS", "(&str, &str)", items)
+    items = [
+        f"    ({rust_text(kind)}, {rust_text(method)}, "
+        f"{rust_option_model(models.method_model(kind, method))}),"
+        for kind in kinds
+        for method in methods
+    ]
+    lines += table_lines(
+        "METHOD_MODELS", "(&str, &str, Option<(&str, &str, &[&str])>)", items
+    )
+    return lines
+
+
+def signature_texts():
+    models = builtin_models
+    texts = {
+        entry[0] for name in MODEL_TABLES for entry in getattr(models, name).values()
+    }
+    texts |= {entry[0] for entry in models.METHODS.values()}
+    texts |= {entry[0] for _, entry in models.CONTAINER_CLASSES.values()}
+    texts |= {entry[0] for entry in models.RETURNS_ARGUMENT.values()}
+    texts.add(models.RETURNED_DECORATOR_SIGNATURE[0])
+    return sorted(texts)
+
+
+def rust_constant(value):
+    if isinstance(value, str):
+        return f"Str({rust_text(value)})"
+    return f"Int({value})"
+
+
+def models_signatures():
+    lines = [
+        "pub type ParsedSignature = (&'static str, &'static [&'static str], usize, "
+        "&'static [&'static str], Option<&'static str>, Option<&'static str>, "
+        "&'static [(&'static str, Constant)]);",
+        "pub const SIGNATURES: &[ParsedSignature] = &[",
+    ]
+    for text in signature_texts():
+        signature, constants = _signature(text)
+        defaults = ", ".join(
+            f"({rust_text(name)}, Constant::{rust_constant(value)})"
+            for name, value in constants.items()
+        )
+        lines.append(
+            f"    ({rust_text(text)}, {rust_texts(signature.positional)}, "
+            f"{signature.positional_only_count}, {rust_texts(signature.keyword_only)}, "
+            f"{rust_option(signature.vararg)}, {rust_option(signature.kwarg)}, "
+            f"&[{defaults}]),"
+        )
+    lines.append("];")
+    return lines
+
+
+def models_vectors():
+    lines = [
+        "#[derive(Debug, PartialEq, Eq)]",
+        "pub enum Constant { Str(&'static str), Int(u64) }",
+        *models_tables(),
+        *models_functions(),
+        *models_signatures(),
+    ]
+    return "\n".join(lines) + "\n"
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Write the unit vectors of the Rust crates from the Python engine."
@@ -327,6 +552,7 @@ def main(argv=None):
     write("class_names.json", class_names_cases())
     MODEL_VECTORS.parent.mkdir(parents=True, exist_ok=True)
     MODEL_VECTORS.write_text(model_vectors(random.Random(SEED)), encoding="utf-8")
+    MODELS_VECTORS.write_text(models_vectors(), encoding="utf-8")
 
 
 if __name__ == "__main__":
