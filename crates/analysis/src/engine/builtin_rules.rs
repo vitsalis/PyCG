@@ -6,6 +6,7 @@ use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Literal, Object};
 use crate::engine::outside::outside_name;
 use crate::engine::outside_calls::BoundId;
+use crate::engine::protocols::{Conversion, OperatorCall};
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
 use crate::engine::symbols::Sym;
@@ -138,6 +139,9 @@ impl<T: Trace> State<T> {
             ModelRule::Bind => {
                 self.rule_bind(graph, call, receiver.expect("a bound wrapper"), args)
             }
+            ModelRule::Convert => self.rule_convert(graph, call, args, model.arguments),
+            ModelRule::Pow => self.rule_pow(graph, call, args),
+            ModelRule::Print => self.rule_print(graph, call, args),
             rule => not_ported(&format!("builtin rules: the rule {}", rule.name())),
         }
     }
@@ -168,6 +172,63 @@ impl<T: Trace> State<T> {
 
     fn args(&mut self, graph: &mut Graph, args: BoundId, name: &str) -> NodeId {
         self.bound_parameter(graph, args, name)
+    }
+
+    fn rule_convert(&mut self, graph: &mut Graph, call: CallId, args: BoundId, arguments: &[&str]) {
+        let (caller, site) = (
+            self.calls[call.index()].caller,
+            self.calls[call.index()].site,
+        );
+        let &[kind, parameter, ref spec @ ..] = arguments else {
+            panic!("a conversion names its kind and parameter")
+        };
+        let spec = spec
+            .first()
+            .map(|&spec| self.bound_parameter(graph, args, spec));
+        let value = self.bound_parameter(graph, args, parameter);
+        self.add_conversion(graph, value, Conversion::of(kind), caller, site, spec);
+        let typed = self.typed(graph, "builtins.str");
+        self.result(graph, call, typed);
+    }
+
+    fn rule_pow(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
+        let (caller, site) = (
+            self.calls[call.index()].caller,
+            self.calls[call.index()].site,
+        );
+        let mut extra = Vec::new();
+        if self.bound_given(args, "mod") {
+            extra.push(self.bound_parameter(graph, args, "mod"));
+        }
+        let base = self.bound_parameter(graph, args, "base");
+        let exp = self.bound_parameter(graph, args, "exp");
+        let dst = self.result_node(graph, call);
+        self.add_operator(
+            graph,
+            OperatorCall {
+                left: Some(base),
+                right: Some(exp),
+                method: "__pow__",
+                reflected: Some("__rpow__"),
+                inplace: false,
+                dst,
+                caller,
+                site,
+                unary: false,
+                constants: false,
+                extra,
+            },
+        );
+    }
+
+    fn rule_print(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
+        let (caller, site) = (
+            self.calls[call.index()].caller,
+            self.calls[call.index()].site,
+        );
+        let varargs = self.bound_varargs(args).expect("print binds its varargs");
+        let values = self.every(graph, varargs);
+        self.add_conversion(graph, values, Conversion::Str, caller, site, None);
     }
 
     pub(super) fn result(&mut self, graph: &mut Graph, call: CallId, object: ObjId) {
