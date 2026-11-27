@@ -1,9 +1,10 @@
 use indexmap::IndexMap;
 use pycg_solver::{NodeId, ObjId};
 
+use crate::builder::calls::CallId as BuilderCallId;
 use crate::builder::calls::{
     Analysis, BuilderTables, Call, ClassFields, ClassStatement, Constant, FunctionFields, Key,
-    MadeFunction, MethodKind, NewClass, Operation, Passthrough, Slice, Subscript,
+    MadeFunction, MethodKind, NewClass, Operation, Passthrough, Shape, Slice, Subscript,
 };
 use crate::engine::objects::{self, Literal, Object};
 use crate::engine::trace::Trace;
@@ -539,5 +540,85 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn pattern(&mut self, _prefix: &[u32], _suffix: &[u32]) -> ObjId {
         not_ported("the builder call pattern")
+    }
+
+    fn locate(&mut self, _name: &str) -> Option<(String, Option<String>)> {
+        not_ported("the import manager")
+    }
+
+    fn type_form(&mut self, _operator: &str, _parts: &[Option<NodeId>], _site: &str) -> ObjId {
+        not_ported("the builder call type_form")
+    }
+
+    fn gate_type_form(&mut self, _form: ObjId, _gate: NodeId) {
+        not_ported("the builder call gate_type_form")
+    }
+
+    fn annotated(
+        &mut self,
+        _node: NodeId,
+        _dst: NodeId,
+        _shape: Shape,
+        _owner: ObjId,
+        _name: &str,
+    ) {
+        not_ported("the builder call annotated")
+    }
+
+    fn bind_annotations(&mut self, _function: ObjId) {
+        not_ported("the builder call bind_annotations")
+    }
+
+    fn add_name_lookup(&mut self, _base: NodeId, _attr: &str, _dst: NodeId) {
+        not_ported("the builder call add_name_lookup")
+    }
+
+    fn add_stub_bases(&mut self, _cls: ObjId, _node: NodeId) {
+        not_ported("the builder call add_stub_bases")
+    }
+
+    fn site_call(&mut self, _caller: &str, _site: &str, _role: &[&str]) -> BuilderCallId {
+        not_ported("the builder call site_call")
+    }
+
+    fn add_special_call(&mut self, _value: NodeId, _name: &str, _call: BuilderCallId) {
+        not_ported("the builder call add_special_call")
+    }
+
+    fn add_named_load(
+        &mut self,
+        _obj: NodeId,
+        _name: NodeId,
+        _dst: NodeId,
+        _caller: &str,
+        _site: &str,
+    ) {
+        not_ported("the builder call add_named_load")
+    }
+
+    fn callable_filter(&mut self, _source: NodeId, _dst: NodeId, _holds: bool) {
+        not_ported("the builder call callable_filter")
+    }
+
+    fn class_filter(
+        &mut self,
+        _source: NodeId,
+        _classes: Option<NodeId>,
+        _dst: NodeId,
+        _as_class: bool,
+        _holds: bool,
+    ) {
+        not_ported("the builder call class_filter")
+    }
+
+    fn tested_classes(
+        &mut self,
+        _classes: NodeId,
+        _dst: NodeId,
+        _as_class: bool,
+        _module: ObjId,
+        _site: &str,
+    ) {
+        not_ported("the builder call tested_classes")
     }
 }
