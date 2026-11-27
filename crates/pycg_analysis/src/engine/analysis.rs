@@ -9,7 +9,7 @@ use crate::builder::calls::{
 };
 use crate::engine::objects::{self, Literal, Object};
 use crate::engine::trace::Trace;
-use crate::engine::{BuilderFields, Engine, not_ported};
+use crate::engine::{BuilderFields, Engine, containers, not_ported};
 use crate::model::Signature;
 use crate::program::imports::ImportManager;
 
@@ -584,10 +584,19 @@ impl<T: Trace> Analysis for Engine<T> {
     ) -> (NodeId, NodeId) {
         self.sync();
         let symbols = &mut self.state.symbols;
-        let construct = (symbols.intern(construct.0), symbols.intern(construct.1));
+        let construct = containers::KeysConstruct::Builder(
+            symbols.intern(construct.0),
+            symbols.intern(construct.1),
+        );
         let (caller, site) = (symbols.intern(caller), symbols.intern(site));
-        self.state
-            .entering_keys(&mut self.graph, source, construct, caller, site)
+        self.state.entering_keys(
+            &mut self.graph,
+            source,
+            construct,
+            caller,
+            site,
+            containers::Keeps::Hashes,
+        )
     }
 
     fn add_dict_items(&mut self, target: ObjId, source: NodeId, caller: &str, site: &str) {
