@@ -240,10 +240,11 @@ impl<T: Trace> State<T> {
         if graph.is_waiting(watch) {
             let (index, _) = self.waiting_rules.insert_full(rule);
             let rule = u32::try_from(index).expect("fewer than 2^32 waiting rules");
-            self.waiting
-                .entry(watch)
-                .or_default()
-                .push((rule, receiver));
+            let waiting = self.waiting.entry(watch).or_default();
+            if waiting.len() == waiting.capacity() {
+                waiting.reserve_exact(waiting.len() / 2 + 1);
+            }
+            waiting.push((rule, receiver));
         } else {
             self.run_waiting(graph, rule, receiver);
         }
