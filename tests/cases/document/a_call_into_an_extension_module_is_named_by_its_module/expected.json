@@ -1,0 +1,169 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "pkg.f": [
+      {
+       "callees": [
+        "pkg._speedups.run"
+       ],
+       "col": 4,
+       "end": [
+        6,
+        19
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "pkg._fast.escape"
+       ],
+       "col": 4,
+       "end": [
+        7,
+        12
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "pkg._abi.go"
+       ],
+       "col": 4,
+       "end": [
+        8,
+        17
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "pkg.both.g"
+       ],
+       "col": 4,
+       "end": [
+        9,
+        7
+       ],
+       "line": 9
+      }
+     ]
+    },
+    "definitions": {
+     "pkg": {
+      "kind": "module",
+      "lines": [
+       1,
+       9
+      ],
+      "module": "pkg"
+     },
+     "pkg.both": {
+      "kind": "module",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "pkg.both"
+     },
+     "pkg.both.g": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "pkg.both"
+     },
+     "pkg.f": {
+      "kind": "function",
+      "lines": [
+       5,
+       9
+      ],
+      "module": "pkg"
+     }
+    },
+    "exports": {
+     "pkg.escape": [
+      "pkg._fast.escape"
+     ],
+     "pkg.g": [
+      "pkg.both.g"
+     ],
+     "pkg.pkg": [
+      "pkg"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "pkg": {
+      "file": "pkg/__init__.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "pkg._abi": {
+      "file": "pkg/_abi.abi3.so",
+      "kind": "extension"
+     },
+     "pkg._fast": {
+      "file": "pkg/_fast.so",
+      "kind": "extension"
+     },
+     "pkg._speedups": {
+      "file": "pkg/_speedups.cpython-312-darwin.so",
+      "kind": "extension"
+     },
+     "pkg.both": {
+      "file": "pkg/both.py",
+      "kind": "source",
+      "shadows": [
+       "pkg/both.cpython-312-darwin.so"
+      ],
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "pkg._abi.go": {
+      "known": "extension"
+     },
+     "pkg._fast.escape": {
+      "known": "extension"
+     },
+     "pkg._speedups.run": {
+      "known": "extension"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "pkg": [],
+  "pkg._abi.go": [],
+  "pkg._fast.escape": [],
+  "pkg._speedups.run": [],
+  "pkg.both": [],
+  "pkg.both.g": [],
+  "pkg.f": [
+   "pkg._abi.go",
+   "pkg._fast.escape",
+   "pkg._speedups.run",
+   "pkg.both.g"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

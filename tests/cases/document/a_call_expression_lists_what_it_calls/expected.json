@@ -1,0 +1,105 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.input"
+       ],
+       "col": 9,
+       "end": [
+        3,
+        16
+       ],
+       "line": 3
+      },
+      {
+       "callees": [
+        "main.f",
+        "main.g"
+       ],
+       "col": 0,
+       "end": [
+        4,
+        3
+       ],
+       "line": 4
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       4
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "main"
+     },
+     "main.g": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.h": [
+      "main.f",
+      "main.g"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.input": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.input": [],
+  "main": [
+   "<builtin>.input",
+   "main.f",
+   "main.g"
+  ],
+  "main.f": [],
+  "main.g": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

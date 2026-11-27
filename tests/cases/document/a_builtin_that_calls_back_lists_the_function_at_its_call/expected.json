@@ -1,0 +1,161 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.list"
+       ],
+       "col": 0,
+       "end": [
+        5,
+        17
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "<builtin>.map",
+        "main.f"
+       ],
+       "col": 5,
+       "end": [
+        5,
+        16
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "<builtin>.sorted",
+        "main.key"
+       ],
+       "col": 0,
+       "end": [
+        6,
+        20
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "<builtin>.len",
+        "main.Sized.__len__"
+       ],
+       "col": 0,
+       "end": [
+        7,
+        12
+       ],
+       "line": 7
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "main"
+     },
+     "main.Sized": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Sized",
+       "<builtin>.object"
+      ]
+     },
+     "main.Sized.__len__": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "main"
+     },
+     "main.key": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.len": {
+      "known": "stub"
+     },
+     "<builtin>.list": {
+      "known": "stub"
+     },
+     "<builtin>.map": {
+      "known": "stub"
+     },
+     "<builtin>.sorted": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.len": [],
+  "<builtin>.list": [],
+  "<builtin>.map": [],
+  "<builtin>.sorted": [],
+  "main": [
+   "<builtin>.len",
+   "<builtin>.list",
+   "<builtin>.map",
+   "<builtin>.sorted",
+   "main.Sized.__len__",
+   "main.f",
+   "main.key"
+  ],
+  "main.Sized.__len__": [],
+  "main.f": [],
+  "main.key": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

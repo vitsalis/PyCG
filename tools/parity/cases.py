@@ -61,6 +61,10 @@ FAMILIES = {
         "classes",
         "Descriptors",
     ),
+    "tests/test_document.py": (
+        "document",
+        "What is reported as an edge",
+    ),
     "tests/test_flow.py": (
         "flow",
         "Paths, joins and loops",
