@@ -724,6 +724,59 @@ if False:
     assert calls(tmp_path, source) == []
 
 
+LAMBDAS_BEYOND_THE_PARSER_STACK = 6000
+
+
+def test_a_module_too_complex_for_the_parser_has_failed(tmp_path):
+    lambdas = "lambda: " * LAMBDAS_BEYOND_THE_PARSER_STACK
+    annotation = f'"{lambdas}None"'
+    found = document(
+        tmp_path,
+        {
+            "deep.py": f"x = {lambdas}None\n",
+            "main.py": f"import deep\ndef f(x: {annotation}): pass\nf(1)\n",
+        },
+    )
+
+    assert found["modules"] == {
+        "deep": {
+            "file": "deep.py",
+            "kind": "source",
+            "status": "failed",
+            "cause": "MemoryError",
+        },
+        "main": {"file": "main.py", "kind": "source", "status": "analysed"},
+    }
+    assert found["calls"] == {
+        "main": [{"line": 3, "col": 0, "end": [3, 4], "callees": ["main.f"]}]
+    }
+
+
+def parse_out_of_memory(text):
+    parse = ast.parse
+
+    def parsing(source, *args, **kwargs):
+        if source == text:
+            raise MemoryError()
+        return parse(source, *args, **kwargs)
+
+    return parsing
+
+
+@pytest.mark.parametrize("parsed", ["module", "annotation"])
+def test_running_out_of_memory_while_parsing_is_not_a_failed_module(
+    tmp_path, monkeypatch, parsed
+):
+    source = "def f(x: 'int'): pass\nf(1)\n"
+    write(tmp_path, {"main.py": source})
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    text = source if parsed == "module" else "int"
+    monkeypatch.setattr(ast, "parse", parse_out_of_memory(text))
+
+    with pytest.raises(MemoryError):
+        generator.analyze()
+
+
 def test_a_module_that_cannot_be_read_or_parsed_has_failed(tmp_path):
     found = document(
         tmp_path,

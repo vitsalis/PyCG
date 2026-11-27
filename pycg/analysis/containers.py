@@ -693,9 +693,7 @@ class Containers:
                 self._sequences[key] = sequences
             unless = ("__iter__", *iteration.unless)
             found = self.lookup(cls, "__getitem__", obj, None, unless)
-            if found not in sequences.lookups:
-                sequences.lookups[found] = None
-                self.solver.attach(found, sequences)
+            self.solver.attach(found, sequences)
             sequences.add(obj)
 
     def sequence_iterator(self, obj, iteration, dst):
@@ -854,13 +852,12 @@ class _KeyedGroup(Constraint):
 
 
 class _Sequences(Constraint):
-    __slots__ = ("analysis", "iteration", "dst", "lookups", "objects", "found")
+    __slots__ = ("analysis", "iteration", "dst", "objects", "found")
 
     def __init__(self, analysis, iteration, dst):
         self.analysis = analysis
         self.iteration = iteration
         self.dst = dst
-        self.lookups = {}
         self.objects = []
         self.found = False
 
