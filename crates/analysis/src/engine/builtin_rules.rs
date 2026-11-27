@@ -1,3 +1,4 @@
+use num_bigint::BigInt;
 use pycg_solver::{NodeId, ObjId};
 use rustc_hash::FxHashSet;
 
@@ -1048,12 +1049,52 @@ impl<T: Trace> State<T> {
             && details.star.is_empty()
             && details.double_star.is_empty();
         if written {
-            self.args(graph, args, "object");
-            let bases = self.args(graph, args, "bases");
-            self.args(graph, args, "dict");
-            let rule = self.rule(Rule::TypeBases);
-            self.attach(graph, bases, rule);
+            let made = [
+                self.args(graph, args, "object"),
+                self.args(graph, args, "bases"),
+                self.args(graph, args, "dict"),
+            ];
+            let rule = self.rule(Rule::TypeBases { call, made });
+            self.attach(graph, made[1], rule);
         }
+    }
+
+    pub(super) fn type_bases(
+        &mut self,
+        graph: &mut Graph,
+        bases: ObjId,
+        call: CallId,
+        made: [NodeId; 3],
+    ) {
+        let Object::Container(container) = self.objects.get(bases) else {
+            unreachable!("the bases rule takes containers")
+        };
+        if self.symbols.text(container.kind) == "tuple" && container.length == Some(1) {
+            let first = self.element(graph, bases, &Literal::Int(BigInt::ZERO));
+            let rule = self.rule(Rule::TypeBase { call, made });
+            self.attach(graph, first, rule);
+        }
+    }
+
+    pub(super) fn type_base(
+        &mut self,
+        graph: &mut Graph,
+        base: ObjId,
+        call: CallId,
+        made: [NodeId; 3],
+    ) {
+        let details = &self.calls[call.index()];
+        let key = SiteKey {
+            caller: details.caller,
+            site: details.site,
+            role: Role::TypeMetaclass,
+            implicit: true,
+        };
+        let args = made.map(Some);
+        let metaclass = self.site_call(graph, key, &args, None, None);
+        let rule = self.rule(Rule::CallTypeMetaclass { call: metaclass });
+        let found = self.objects.class(base).metaclass;
+        self.attach(graph, found, rule);
     }
 }
 

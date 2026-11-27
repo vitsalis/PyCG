@@ -63,6 +63,7 @@ pub(super) enum ContainerOrigin {
     Rule(Origin, &'static str, Option<u32>),
     Object(ObjId, &'static str),
     Inexact(ObjId),
+    ClassStatement(Sym),
     Slice(SliceId),
     Rest(Sym, Sym),
     Iterate(Sym, Sym, IterationRoleId),

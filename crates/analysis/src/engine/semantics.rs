@@ -1,13 +1,14 @@
+use num_bigint::BigInt;
 use pycg_solver::{NodeId, ObjId};
 
 use pycg_stubs::{DefinitionKind, Type};
 use rustc_hash::FxHashSet;
 
-use crate::builder::calls::Call as BuilderCall;
+use crate::builder::calls::{Call as BuilderCall, ClassStatement as BuilderClassStatement};
 use crate::engine::attributes::AccessKind;
-use crate::engine::containers::IterationRoleId;
+use crate::engine::containers::{ContainerOrigin, IterationRoleId};
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
-use crate::engine::objects::Object;
+use crate::engine::objects::{Literal, Object};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule, not_ported};
@@ -133,6 +134,7 @@ pub enum Role {
     Exit,
     Raise,
     Special(Sym),
+    TypeMetaclass,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -147,7 +149,24 @@ pub struct SiteKey {
 pub enum Origin {
     Call(CallId),
     InitSubclass(Sym),
+    ClassStatement(Sym),
+    Prepare(Sym),
     Site(SiteKey),
+}
+
+pub struct ClassStatement {
+    name: Sym,
+    bases: Vec<Option<NodeId>>,
+    namespace: Vec<(Sym, NodeId)>,
+    keywords: Vec<(Sym, Option<NodeId>)>,
+    double_star: Vec<Option<NodeId>>,
+    caller: Sym,
+    site: Sym,
+}
+
+pub enum StatementCall {
+    Waiting(ClassStatement),
+    Made { call: CallId, prepare: CallId },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -537,6 +556,8 @@ impl<T: Trace> State<T> {
             Origin::Call(origin) if self.calls[origin.index()].decorator => Construct::Decorator,
             Origin::Call(_) => Construct::Call,
             Origin::InitSubclass(_) => Construct::Named("init_subclass"),
+            Origin::ClassStatement(_) => Construct::Named("class statement"),
+            Origin::Prepare(_) => Construct::Named("prepare"),
             Origin::Site(key) => Construct::Role(key.role),
         };
         let key = (details.caller, details.site, construct);
@@ -1100,10 +1121,180 @@ impl<T: Trace> State<T> {
         self.call_dunder(graph, object, "__set_name__", call, None, Unless::Nothing);
     }
 
-    pub(super) fn add_metaclass_call(&mut self, graph: &mut Graph, class: ObjId) {
+    pub(super) fn add_metaclass_call(
+        &mut self,
+        graph: &mut Graph,
+        class: ObjId,
+        statement: &BuilderClassStatement<'_>,
+        caller: &str,
+        site: &str,
+    ) {
+        let waiting = ClassStatement {
+            name: self.symbols.intern(statement.name),
+            bases: statement.bases.to_vec(),
+            namespace: statement
+                .namespace
+                .iter()
+                .map(|(key, value)| (self.symbols.intern(key), *value))
+                .collect(),
+            keywords: statement
+                .keywords
+                .iter()
+                .map(|(name, value)| (self.symbols.intern(name), *value))
+                .collect(),
+            double_star: statement.double_star.to_vec(),
+            caller: self.symbols.intern(caller),
+            site: self.symbols.intern(site),
+        };
+        let replaced = self
+            .statement_calls
+            .insert(class, StatementCall::Waiting(waiting));
+        assert!(replaced.is_none(), "one class statement per class");
         let rule = self.rule(Rule::CallMetaclass { class });
         let metaclass = self.objects.class(class).metaclass;
         self.attach(graph, metaclass, rule);
+    }
+
+    pub(super) fn call_metaclass(&mut self, graph: &mut Graph, meta: ObjId, class: ObjId) {
+        let (call, prepare) = match self.statement_calls.remove(&class) {
+            Some(StatementCall::Waiting(statement)) => {
+                let (call, prepare) = self.statement_call(graph, &statement);
+                self.statement_calls
+                    .insert(class, StatementCall::Made { call, prepare });
+                if self.made_classes.contains(&class) {
+                    self.call_dunder(graph, class, "__init__", call, None, Unless::Nothing);
+                }
+                (call, prepare)
+            }
+            Some(StatementCall::Made { call, prepare }) => {
+                self.statement_calls
+                    .insert(class, StatementCall::Made { call, prepare });
+                (call, prepare)
+            }
+            None => unreachable!("a metaclass call has its class statement"),
+        };
+        let found = self.lookup_name(
+            graph,
+            meta,
+            "__prepare__",
+            Some(meta),
+            None,
+            Unless::Nothing,
+        );
+        let rule = self.rule(Rule::AnalysedHook { call: prepare });
+        self.attach(graph, found, rule);
+        let python = self.python_method(graph, meta, "__new__");
+        let rule = self.rule(Rule::InitStatementClass { class, call });
+        self.attach(graph, python, rule);
+        let found = self.lookup_name(graph, meta, "__new__", Some(meta), None, Unless::Nothing);
+        let rule = self.rule(Rule::StatementNew { meta, call });
+        self.attach(graph, found, rule);
+    }
+
+    fn statement_call(
+        &mut self,
+        graph: &mut Graph,
+        statement: &ClassStatement,
+    ) -> (CallId, CallId) {
+        let site = statement.site;
+        let origin = ContainerOrigin::ClassStatement(site);
+        let length = u32::try_from(statement.bases.len()).expect("fewer than 2^32 bases");
+        let members = self.container_at(graph, "tuple", origin, site, Some(length), false);
+        for (index, base) in statement.bases.iter().enumerate() {
+            if let Some(base) = *base {
+                let element = self.element(graph, members, &Literal::Int(BigInt::from(index)));
+                self.add_edge(graph, base, element);
+            }
+        }
+        let body = self.container_at(graph, "dict", origin, site, None, false);
+        for &(key, value) in &statement.namespace {
+            let key = self.string_const(graph, key);
+            let key = self.constant(graph, key);
+            self.write_keyed(graph, body, Some(key), Some(value));
+        }
+        let name = self.string_const(graph, statement.name);
+        let args = vec![
+            Some(self.constant(graph, name)),
+            Some(self.constant(graph, members)),
+            Some(self.constant(graph, body)),
+        ];
+        let details = Call {
+            caller: statement.caller,
+            args: args.clone(),
+            keywords: statement.keywords.clone(),
+            dst: None,
+            site,
+            origin: Origin::ClassStatement(site),
+            star: Vec::new(),
+            double_star: statement.double_star.clone(),
+            implicit: true,
+            decorator: false,
+            rule: RuleId::PLACEHOLDER,
+        };
+        let call = self.new_call(details, Some(Origin::ClassStatement(site)));
+        let details = Call {
+            caller: statement.caller,
+            args: args[..2].to_vec(),
+            keywords: statement.keywords.clone(),
+            dst: None,
+            site,
+            origin: Origin::Prepare(site),
+            star: Vec::new(),
+            double_star: statement.double_star.clone(),
+            implicit: true,
+            decorator: false,
+            rule: RuleId::PLACEHOLDER,
+        };
+        let prepare = self.new_call(details, Some(Origin::Prepare(site)));
+        (call, prepare)
+    }
+
+    fn string_const(&mut self, graph: &mut Graph, text: Sym) -> ObjId {
+        let literal = Literal::Str(self.symbols.text(text).chars().map(u32::from).collect());
+        self.const_object(graph, &literal)
+    }
+
+    pub(super) fn analysed_hook(&mut self, graph: &mut Graph, object: ObjId, call: CallId) {
+        if !matches!(
+            self.objects.get(object),
+            Object::External(_) | Object::UnknownExternal(_)
+        ) {
+            self.call(graph, object, call);
+        }
+    }
+
+    pub(super) fn statement_new(
+        &mut self,
+        graph: &mut Graph,
+        method: ObjId,
+        meta: ObjId,
+        call: CallId,
+    ) {
+        if matches!(
+            self.objects.get(method),
+            Object::External(_) | Object::UnknownExternal(_)
+        ) {
+            return;
+        }
+        self.call_bound(graph, method, vec![meta], call);
+        if matches!(self.objects.get(method), Object::Function(_))
+            && self.statement_news.insert(method)
+        {
+            let returned = self
+                .objects
+                .function(method)
+                .return_node
+                .expect("an analysed function returns");
+            let rule = self.rule(Rule::StatementMade);
+            self.attach(graph, returned, rule);
+        }
+    }
+
+    pub(super) fn statement_made(&mut self, graph: &mut Graph, class: ObjId) {
+        self.made_classes.insert(class);
+        if let Some(&StatementCall::Made { call, .. }) = self.statement_calls.get(&class) {
+            self.call_dunder(graph, class, "__init__", call, None, Unless::Nothing);
+        }
     }
 
     pub(super) fn add_method(

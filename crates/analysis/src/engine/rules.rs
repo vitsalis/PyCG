@@ -16,7 +16,7 @@ use crate::engine::reflection::{DefaultAction, GetmembersId};
 use crate::engine::semantics::{CallId, ReturnedId, SharedId};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::{RuleInfo, Trace};
-use crate::engine::{Graph, OrderedMap, State, not_ported};
+use crate::engine::{Graph, OrderedMap, State};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct RuleId(u32);
@@ -88,6 +88,18 @@ pub(crate) enum Rule {
     CallMetaclass {
         class: ObjId,
     },
+    AnalysedHook {
+        call: CallId,
+    },
+    InitStatementClass {
+        class: ObjId,
+        call: CallId,
+    },
+    StatementNew {
+        meta: ObjId,
+        call: CallId,
+    },
+    StatementMade,
     AddInexact {
         dst: NodeId,
     },
@@ -253,7 +265,17 @@ pub(crate) enum Rule {
         given: NodeId,
         dst: NodeId,
     },
-    TypeBases,
+    TypeBases {
+        call: CallId,
+        made: [NodeId; 3],
+    },
+    TypeBase {
+        call: CallId,
+        made: [NodeId; 3],
+    },
+    CallTypeMetaclass {
+        call: CallId,
+    },
     SuperMetaclass {
         sup: ObjId,
         load: AccessId,
@@ -310,6 +332,10 @@ impl Rule {
             Rule::TypeMethod { .. } => "Each:Analysis._type_method",
             Rule::SetName { .. } => "Each:Analysis._set_name",
             Rule::CallMetaclass { .. } => "Each:Analysis._call_metaclass",
+            Rule::AnalysedHook { .. } => "Each:Attributes._call_analysed_hook",
+            Rule::InitStatementClass { .. } => "Each:Analysis._init_statement_class",
+            Rule::StatementNew { .. } => "Each:Analysis._statement_new",
+            Rule::StatementMade => "Each:Analysis._statement_made",
             Rule::AddInexact { .. } => "Each:Containers._add_inexact",
             Rule::Container(rule) => rule.key(),
             Rule::Protocol(rule) => rule.key(),
@@ -355,7 +381,9 @@ impl Rule {
             Rule::SuperObject { .. } => "Each:BuiltinRules._super_object",
             Rule::SuperGiven { .. } => "Each:BuiltinRules._super_given",
             Rule::SuperAcceptedBy { .. } => "Each:BuiltinRules._super_accepted_by",
-            Rule::TypeBases => "Each:BuiltinRules._type_bases",
+            Rule::TypeBases { .. } => "Each:BuiltinRules._type_bases",
+            Rule::TypeBase { .. } => "Each:BuiltinRules._type_base",
+            Rule::CallTypeMetaclass { .. } => "Each:BuiltinRules._call_type_metaclass",
             Rule::SuperMetaclass { .. } => "Each:Attributes._super_metaclass",
         }
     }
@@ -390,7 +418,10 @@ impl Rule {
             Rule::Protocol(rule) => rule.kinds(),
             Rule::Pattern(rule) => rule.kinds(),
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
-            Rule::CallMetaclass { .. } => Some(CLASS_KINDS),
+            Rule::CallMetaclass { .. }
+            | Rule::StatementMade
+            | Rule::TypeBase { .. }
+            | Rule::CallTypeMetaclass { .. } => Some(CLASS_KINDS),
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
             Rule::CallProtocol { .. } => Some(SET_NAME_KINDS),
             Rule::SequenceLength { .. } => Some(CONTAINER_KINDS),
@@ -399,7 +430,7 @@ impl Rule {
             Rule::BindClass { .. } => Some(OWNER_KINDS),
             Rule::BindType { .. } | Rule::SuperGiven { .. } => Some(SET_NAME_KINDS),
             Rule::LoadByPattern(_) => Some(PATTERN_KINDS),
-            Rule::TypeBases => Some(CONTAINER_KINDS),
+            Rule::TypeBases { .. } => Some(CONTAINER_KINDS),
             Rule::SuperMetaclass { .. } => Some(CLASS_KINDS),
             Rule::ClassGet { .. }
             | Rule::Accessors {
@@ -421,7 +452,9 @@ impl Rule {
             | Rule::PythonNew { class, .. }
             | Rule::New { class, .. }
             | Rule::SetName { class, .. }
-            | Rule::CallMetaclass { class } => vec![class],
+            | Rule::CallMetaclass { class }
+            | Rule::InitStatementClass { class, .. } => vec![class],
+            Rule::StatementNew { meta, .. } => vec![meta],
             Rule::Bind { receiver, .. } => receiver.into_iter().collect(),
             Rule::Binds(_) => Vec::new(),
             Rule::Shared(_) => {
@@ -460,7 +493,13 @@ impl Rule {
             | Rule::SuperGiven { class, .. }
             | Rule::SuperAcceptedBy { class, .. } => vec![class],
             Rule::SuperMetaclass { sup, .. } => vec![sup],
-            Rule::LoadByPattern(_) | Rule::SuperClass { .. } | Rule::TypeBases => Vec::new(),
+            Rule::LoadByPattern(_)
+            | Rule::SuperClass { .. }
+            | Rule::AnalysedHook { .. }
+            | Rule::StatementMade
+            | Rule::TypeBases { .. }
+            | Rule::TypeBase { .. }
+            | Rule::CallTypeMetaclass { .. } => Vec::new(),
             Rule::ModuleGetattr { module, .. } => vec![module],
             Rule::Deliver { receiver, .. } => vec![receiver],
             Rule::Access(_)
@@ -567,7 +606,15 @@ impl<T: Trace> State<T> {
             | Rule::SuperGiven { dst, .. }
             | Rule::SuperAcceptedBy { dst, .. } => vec![dst],
             Rule::SuperMetaclass { load, .. } => self.access_result(load).into_iter().collect(),
-            Rule::LoadByPattern(_) | Rule::TypeBases | Rule::SequenceLength { .. } => Vec::new(),
+            Rule::AnalysedHook { call } => self.calls[call.index()].dst.into_iter().collect(),
+            Rule::LoadByPattern(_)
+            | Rule::SequenceLength { .. }
+            | Rule::InitStatementClass { .. }
+            | Rule::StatementNew { .. }
+            | Rule::StatementMade
+            | Rule::TypeBases { .. }
+            | Rule::TypeBase { .. }
+            | Rule::CallTypeMetaclass { .. } => Vec::new(),
             Rule::Reversed { dst, .. } | Rule::ReversedSequence { items: dst, .. } => vec![dst],
             Rule::ReverseSequence { implicit, .. } => {
                 self.calls[implicit.index()].dst.into_iter().collect()
@@ -632,7 +679,13 @@ impl<T: Trace> State<T> {
                 caller,
                 site,
             } => self.set_name(graph, object, class, name, caller, site),
-            Rule::CallMetaclass { .. } => not_ported("containers: the call of a metaclass"),
+            Rule::CallMetaclass { class } => self.call_metaclass(graph, object, class),
+            Rule::AnalysedHook { call } => self.analysed_hook(graph, object, call),
+            Rule::InitStatementClass { class, call } => {
+                self.call_dunder(graph, class, "__init__", call, None, Unless::Nothing)
+            }
+            Rule::StatementNew { meta, call } => self.statement_new(graph, object, meta, call),
+            Rule::StatementMade => self.statement_made(graph, object),
             Rule::AddInexact { dst } => {
                 let inexact = self.inexact_object(graph, object);
                 self.add_object(graph, dst, inexact);
@@ -749,7 +802,9 @@ impl<T: Trace> State<T> {
             Rule::SuperAcceptedBy { class, given, dst } => {
                 self.super_accepted_by(graph, object, class, given, dst)
             }
-            Rule::TypeBases => not_ported("containers: the bases of a call of type"),
+            Rule::TypeBases { call, made } => self.type_bases(graph, object, call, made),
+            Rule::TypeBase { call, made } => self.type_base(graph, object, call, made),
+            Rule::CallTypeMetaclass { call } => self.call(graph, object, call),
             Rule::SuperMetaclass { sup, load } => self.super_metaclass(graph, object, sup, load),
             Rule::BindTo { owner, dst } => {
                 let bound = if matches!(

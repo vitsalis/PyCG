@@ -224,6 +224,7 @@ impl<T: Trace> State<T> {
                 Role::Exit => vec![text("exit")],
                 Role::Raise => vec![text("raise")],
                 Role::Special(name) => named("special", name),
+                Role::TypeMetaclass => vec![text("type"), text("metaclass")],
             }),
         }
     }
