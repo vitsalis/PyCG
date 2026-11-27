@@ -230,6 +230,13 @@ def imported_names(statements, absolute, private_class=None):
                     stack.extend(handler.body)
 
 
+PARSER_STACK_OVERFLOW = "Parser stack overflowed - Python source too complex to parse"
+
+
+def parser_overflowed(error):
+    return str(error) == PARSER_STACK_OVERFLOW
+
+
 class AnnotationBuilder:
     def annotation(self, expression, origin=None):
         site = self._annotation_site(expression, origin)
@@ -238,6 +245,10 @@ class AnnotationBuilder:
                 try:
                     parsed = ast.parse(text.strip(), mode="eval").body
                 except (SyntaxError, ValueError, RecursionError):
+                    return None
+                except MemoryError as error:
+                    if not parser_overflowed(error):
+                        raise
                     return None
                 return self.annotation(parsed, site.partition("#")[0])
             case ast.Name() | ast.Attribute():

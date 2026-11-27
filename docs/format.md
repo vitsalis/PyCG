@@ -99,7 +99,8 @@ when no file of it does.
   Nothing is dropped silently. The cause of a failed module is the type
   of the error, with its line or byte where Python gives one
   (`SyntaxError (line 3)`, `UnicodeDecodeError (byte 17)`, `SyntaxError`,
-  `RecursionError`): not its message, so that it is the same on every
+  `RecursionError`, `MemoryError` when the source is too complex for
+  Python's parser): not its message, so that it is the same on every
   version of Python.
 
 **`definitions`** has every module, class and function (lambdas included)
