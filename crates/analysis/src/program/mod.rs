@@ -18,7 +18,9 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use crate::builder::calls::Analysis;
 use crate::builder::{ModuleBuilder, Source};
 use crate::program::imports::extension_name;
-use crate::program::paths::{abspath, basename, commonpath, dirname, relpath, splitext};
+use crate::program::paths::{
+    FLAVOUR, PathsError, abspath, basename, commonpath, dirname, relpath, split, splitext,
+};
 
 const INITIALIZER: &str = "__init__.py";
 
@@ -113,7 +115,12 @@ fn declared_all_names(body: &[Stmt], source: &str) -> Option<Vec<String>> {
 }
 
 impl<A: Analysis + Send> Program<A> {
-    pub fn new(entry_points: &[PathBuf], package: Option<&Path>, cwd: &Path, analysis: A) -> Self {
+    pub fn new(
+        entry_points: &[PathBuf],
+        package: Option<&Path>,
+        cwd: &Path,
+        analysis: A,
+    ) -> Result<Self, PathsError> {
         let entry_points: Vec<PathBuf> =
             entry_points.iter().map(|path| abspath(path, cwd)).collect();
         let root = match package {
@@ -122,7 +129,7 @@ impl<A: Analysis + Send> Program<A> {
             None => {
                 let directories: Vec<PathBuf> =
                     entry_points.iter().map(|path| dirname(path)).collect();
-                commonpath(&directories)
+                commonpath(&directories)?
             }
         };
         let mut program = Program {
@@ -142,7 +149,7 @@ impl<A: Analysis + Send> Program<A> {
         };
         let root = program.root.clone();
         program.analysis.imports().set_package(&root);
-        program
+        Ok(program)
     }
 
     pub fn shadowed(&mut self, name: &str, file: &Path) -> Vec<PathBuf> {
@@ -159,15 +166,16 @@ impl<A: Analysis + Send> Program<A> {
 
     pub fn relative(&self, path: &Path) -> String {
         relpath(path, &self.root, &self.cwd)
+            .expect("a module's file is on the drive of the root")
             .to_str()
             .expect("a module path is UTF-8")
-            .to_owned()
+            .replace(char::from(FLAVOUR.sep()), "/")
     }
 
-    pub fn build_modules(&mut self) {
+    pub fn build_modules(&mut self) -> Result<(), PathsError> {
         let mut named: IndexMap<String, IndexSet<PathBuf>> = IndexMap::new();
         for path in self.entry_points.clone() {
-            if let Some(name) = self.module_name(&path) {
+            if let Some(name) = self.module_name(&path)? {
                 named.entry(name).or_default().insert(path);
             }
         }
@@ -179,7 +187,10 @@ impl<A: Analysis + Send> Program<A> {
                 .into_iter()
                 .filter(|path| !found.contains(path))
                 .collect();
-            others.sort_by_key(|path| relpath(path, &self.root, &self.cwd));
+            others.sort_by_key(|path| {
+                relpath(path, &self.root, &self.cwd)
+                    .expect("an entry module's file is on the drive of the root")
+            });
             self.entry_only_files_by_name
                 .insert(name.clone(), others.clone());
             let first = found
@@ -187,7 +198,7 @@ impl<A: Analysis + Send> Program<A> {
                 .chain(others)
                 .next()
                 .expect("an entry module has a file");
-            if extension_name(basename(&first)).is_some() {
+            if extension_name(&basename(&first)).is_some() {
                 self.analysis
                     .imports()
                     .extension_modules
@@ -244,35 +255,36 @@ impl<A: Analysis + Send> Program<A> {
         self.extension_modules = extensions.into_iter().collect();
         self.link_submodules();
         self.link_star_imports();
+        Ok(())
     }
 
-    fn module_name(&self, path: &Path) -> Option<String> {
-        let relative = relpath(path, &self.root, &self.cwd);
+    fn module_name(&self, path: &Path) -> Result<Option<String>, PathsError> {
+        let relative = relpath(path, &self.root, &self.cwd)?;
         let relative = relative
             .to_str()
             .expect("an entry point's path is UTF-8")
             .to_owned();
-        if relative == ".." || relative.starts_with("../") {
-            return None;
+        let sep = char::from(FLAVOUR.sep());
+        if relative == ".." || relative.starts_with(&format!("..{sep}")) {
+            return Ok(None);
         }
         if relative.ends_with(".pyi") || path.is_dir() {
-            return None;
+            return Ok(None);
         }
-        let (directory, filename) = match relative.rsplit_once('/') {
-            Some((directory, filename)) => (directory, filename),
-            None => ("", relative.as_str()),
-        };
-        let stem = extension_name(std::ffi::OsStr::new(filename)).unwrap_or(splitext(filename).0);
+        let (directory, filename) = split(&relative);
+        let stem = extension_name(std::ffi::OsStr::new(&filename)).unwrap_or(splitext(&filename).0);
         let joined = if directory.is_empty() {
             stem.to_owned()
         } else {
-            format!("{directory}/{stem}")
+            format!("{directory}{sep}{stem}")
         };
-        let name = joined.replace('/', ".");
+        let name = joined.replace(sep, ".");
         if name == "__init__" {
-            return None;
+            return Ok(None);
         }
-        Some(name.strip_suffix(".__init__").unwrap_or(&name).to_owned())
+        Ok(Some(
+            name.strip_suffix(".__init__").unwrap_or(&name).to_owned(),
+        ))
     }
 
     fn build(&mut self, name: &str, path: &Path) {

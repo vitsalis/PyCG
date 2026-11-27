@@ -53,7 +53,12 @@ fn run(program: &[u8], options: Options) -> ExitCode {
     };
     let mut analysed = match pycg_analysis::analyse(&options.request, &cwd) {
         Ok(analysed) => analysed,
-        Err(error) => return report(program, error.to_string().as_bytes(), STATUS_NOT_PORTED),
+        Err(error @ pycg_analysis::Error::NotPorted(_)) => {
+            return report(program, error.to_string().as_bytes(), STATUS_NOT_PORTED);
+        }
+        Err(error @ pycg_analysis::Error::Paths(_)) => {
+            return report(program, error.to_string().as_bytes(), STATUS_FAILURE);
+        }
     };
     let part = ProgramPart::from_program(&mut analysed.program);
     let document = pycg_document::build(

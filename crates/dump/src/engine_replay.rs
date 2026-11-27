@@ -460,9 +460,12 @@ pub fn build(arguments: &[String]) -> Option<ExitCode> {
     let cwd = std::env::current_dir().expect("a working directory");
     let entry_points: Vec<PathBuf> = entry_points.iter().map(PathBuf::from).collect();
     let engine = Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(Path::new(out)));
-    let mut program = Program::new(&entry_points, Some(Path::new(package)), &cwd, engine);
+    let mut program = Program::new(&entry_points, Some(Path::new(package)), &cwd, engine)
+        .expect("the paths of an oracle input are on one drive");
     let built = panic::catch_unwind(AssertUnwindSafe(|| {
-        program.build_modules();
+        program
+            .build_modules()
+            .expect("the paths of an oracle input are on one drive");
         program.analysis.trace_mut().context = CONTEXT_SOLVE.to_string();
         program.analysis.solve();
     }));
