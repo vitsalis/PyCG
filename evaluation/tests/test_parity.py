@@ -33,6 +33,7 @@ def load(name, path):
 compare = load("parity_compare", PARITY / "compare.py")
 diff = load("parity_diff", PARITY / "diff.py")
 oracle = load("parity_dump", PARITY / "dump.py")
+import_vectors = load("parity_import_vectors", PARITY / "import_vectors.py")
 program = load("parity_program", PARITY / "program.py")
 
 PROGRAMS = {
@@ -873,4 +874,53 @@ def test_the_program_runs_on_every_input_the_engine_is_not_listed_for(tmp_path, 
         "  micro/a/broken: pycg exited with 3: pycg: not ported: a rule",
         "  micro/a/other: the documents differ",
         "  micro/a/unwritten: the oracle wrote no D6",
+    ]
+
+
+MANAGER_TESTS = """
+import pytest
+
+from pycg.analysis.imports import ImportManager, ImportManagerError
+
+
+def test_a_layout(tmp_path):
+    (tmp_path / "pkg").mkdir()
+    (tmp_path / "pkg" / "__init__.py").write_text("")
+    (tmp_path / "main.py").write_text("")
+    manager = ImportManager()
+    manager.set_pkg(str(tmp_path))
+    manager.create_node("main")
+    manager.set_filepath("main", str(tmp_path / "main.py"))
+    manager.set_current_mod("main", str(tmp_path / "main.py"))
+    imports = manager.get_imports("main")
+    assert manager.handle_import("pkg", 0) == "pkg"
+    assert imports == {"pkg"}
+
+
+def test_a_misuse():
+    with pytest.raises(ImportManagerError):
+        ImportManager().create_node("")
+"""
+
+
+def test_the_import_vectors_keep_each_answer_as_it_was_given(tmp_path):
+    test_file = tmp_path / "test_managers.py"
+    test_file.write_text(MANAGER_TESTS)
+
+    recorder, passed = import_vectors.record(test_file)
+
+    assert passed
+    assert recorder.listed == [
+        "test_a_misuse: create_node raises ImportManagerError('Invalid node name')"
+    ]
+    [session] = recorder.vectors
+    assert session["files"] == {"main.py": "", "pkg/__init__.py": ""}
+    calls = [(o["call"], o["args"], o["result"]) for o in session["operations"]]
+    assert calls == [
+        ("set_pkg", ["{root}"], None),
+        ("create_node", ["main"], None),
+        ("set_filepath", ["main", "{root}/main.py"], None),
+        ("set_current_mod", ["main", "{root}/main.py"], None),
+        ("get_imports", ["main"], []),
+        ("handle_import", ["pkg", 0], "pkg"),
     ]

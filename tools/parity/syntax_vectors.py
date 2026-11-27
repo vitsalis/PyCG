@@ -19,7 +19,9 @@ positions.txt, the kind and position of every node of each program of
 programs/, in ast.walk order, and constants.txt, the value of every
 Constant of each program of constants/, in that order, and for each
 program of d1/ the D1 records of its module, as tools/parity/dump.py
-writes them, in d1/<program>.jsonl, and
+writes them, in d1/<program>.jsonl (the programs that the tests of
+tests/unit/test_scopes.py analyse are written to d1/scopes_<n>.py
+first), and
 names.txt, the NFKC normalisation of strings and the answer of
 str.isidentifier at the bounds of the identifier ranges, and bounds.txt,
 the outcome of reading and parsing a construct repeated on either side
@@ -111,6 +113,8 @@ PROGRAMS = OUT / "programs"
 CONSTANTS = OUT / "constants"
 D1 = OUT / "d1"
 DUMP = ROOT / "tools" / "parity" / "dump.py"
+SCOPE_TESTS = ROOT / "tests" / "unit" / "test_scopes.py"
+SCOPE_PROGRAMS = "scopes_"
 
 
 def cause(error):
@@ -182,6 +186,31 @@ def constants_lines():
             if isinstance(node, ast.Constant):
                 yield value(node.value)
         yield "end"
+
+
+def scope_programs():
+    import pytest
+
+    sources = []
+    parse = ast.parse
+
+    def recorded(source, *args, **keywords):
+        caller = sys._getframe(1).f_code.co_filename
+        if isinstance(source, str) and caller == str(SCOPE_TESTS):
+            if source not in sources:
+                sources.append(source)
+        return parse(source, *args, **keywords)
+
+    ast.parse = recorded
+    try:
+        status = pytest.main(["-q", "-p", "no:cacheprovider", str(SCOPE_TESTS)])
+    finally:
+        ast.parse = parse
+    assert status == 0, f"the tests of {SCOPE_TESTS} did not pass under the oracle"
+    for path in D1.glob(f"{SCOPE_PROGRAMS}*"):
+        path.unlink()
+    for index, source in enumerate(sources):
+        (D1 / f"{SCOPE_PROGRAMS}{index}.py").write_text(source, encoding="utf-8")
 
 
 def d1_lines(path):
@@ -338,6 +367,7 @@ def main(argv):
     for name, lines in written:
         text = "".join(f"{line}\n" for line in (version, *lines))
         (OUT / f"{name}.txt").write_text(text, encoding="ascii")
+    scope_programs()
     for path in sorted(D1.glob("*.py")):
         text = "".join(f"{line}\n" for line in d1_lines(path))
         path.with_suffix(".jsonl").write_text(text, encoding="ascii")
