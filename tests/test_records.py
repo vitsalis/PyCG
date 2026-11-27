@@ -498,3 +498,32 @@ def test_a_hook_whose_class_became_unknown_is_not_called_at_a_later_site(
     ]
     assert graph["main.early"] == ["main.Late.__call__"]
     assert graph["main.late"] == []
+
+
+def test_the_receivers_of_a_builtins_method_at_a_site_share_one_call(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            class Table(dict):
+                pass
+            def walk(table):
+                for key in table:
+                    key.strip()
+                return table.copy()
+            first = walk(Table(a=1))
+            walk(Table(b=2)); walk(Table(c=3))
+            """
+        },
+    )
+    analysis = generator.program.analysis
+
+    groups = {
+        callee.name: found
+        for (_, callee, _, _), found in analysis._bound_groups.items()
+    }
+    for name in ("<builtin>.dict.__iter__", "<builtin>.dict.copy"):
+        (group,) = groups[name]
+        assert len(group.receivers) == 3
+    assert generator.output()["main.walk"] == ["<builtin>.dict.copy"]
+    assert generator.output_points_to()["main.first"] == ["dict@main:7:11"]
