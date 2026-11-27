@@ -9,7 +9,7 @@ use indexmap::{IndexMap, IndexSet};
 use pycg_solver::ObjId;
 use pycg_stubs::Stubs;
 use pycg_syntax::parse::with_parsed_and_stub;
-use pycg_syntax::read::read_file;
+use pycg_syntax::read::{ReadFailure, read_file};
 use pycg_syntax::scopes::{analyse_scopes, literal_assignment, mentions};
 use pycg_syntax::tree::Node;
 use ruff_python_ast::{ModModule, Stmt};
@@ -58,6 +58,7 @@ struct Built {
     names_bound_at_run_time: Vec<String>,
     declared: Option<Vec<String>>,
     too_deep: Option<usize>,
+    stub_failure: Option<String>,
 }
 
 pub struct Program<A: Analysis> {
@@ -77,12 +78,12 @@ pub struct Program<A: Analysis> {
     pub warnings: Vec<OsString>,
 }
 
-fn own_stub_source(path: &Path) -> Option<String> {
+fn own_stub_source(path: &Path) -> Option<Result<String, ReadFailure>> {
     let stub = path.with_extension("pyi");
     if path.extension().is_none_or(|suffix| suffix != "py") || !stub.is_file() {
         return None;
     }
-    read_file(&stub).ok()
+    Some(read_file(&stub))
 }
 
 fn declares_global_or_nonlocal(tree: &ModModule) -> bool {
@@ -345,56 +346,63 @@ impl<A: Analysis + Send> Program<A> {
         };
         let is_package = basename(path) == INITIALIZER;
         let is_entry = self.entry_module_names.contains(name);
-        let stub = own_stub_source(path);
+        let stub_read = own_stub_source(path);
+        let stub = stub_read.as_ref().and_then(|read| read.as_ref().ok());
         let analysis = &mut self.analysis;
-        let built = with_parsed_and_stub(&source, stub.as_deref(), |parsed, stub_parsed| {
-            let parsed = parsed.map_err(|failure| failure.cause())?;
-            let lines = LineIndex::from_source_text(&source);
-            let tokens = parsed.tokens();
-            let body = &parsed.syntax().body;
-            let scopes = analyse_scopes(parsed.syntax(), name, tokens, &lines, &source);
-            let stub_lines = stub.as_deref().map(LineIndex::from_source_text);
-            let own_stub = match (stub_parsed, stub.as_deref(), stub_lines.as_ref()) {
-                (Some(Ok(stub_parsed)), Some(text), Some(stub_lines))
-                    if !declares_global_or_nonlocal(stub_parsed.syntax()) =>
-                {
-                    Some((
-                        stub_parsed.syntax(),
-                        Source {
-                            text,
-                            tokens: stub_parsed.tokens(),
-                            lines: stub_lines,
-                        },
-                    ))
+        let built =
+            with_parsed_and_stub(&source, stub.map(String::as_str), |parsed, stub_parsed| {
+                let parsed = parsed.map_err(|failure| failure.cause())?;
+                let lines = LineIndex::from_source_text(&source);
+                let tokens = parsed.tokens();
+                let body = &parsed.syntax().body;
+                let scopes = analyse_scopes(parsed.syntax(), name, tokens, &lines, &source);
+                let stub_lines = stub.map(|text| LineIndex::from_source_text(text));
+                let stub_failure = match &stub_parsed {
+                    Some(Err(failure)) => Some(failure.cause()),
+                    _ => None,
+                };
+                let own_stub = match (stub_parsed, stub.map(String::as_str), stub_lines.as_ref()) {
+                    (Some(Ok(stub_parsed)), Some(text), Some(stub_lines))
+                        if !declares_global_or_nonlocal(stub_parsed.syntax()) =>
+                    {
+                        Some((
+                            stub_parsed.syntax(),
+                            Source {
+                                text,
+                                tokens: stub_parsed.tokens(),
+                                lines: stub_lines,
+                            },
+                        ))
+                    }
+                    _ => None,
+                };
+                let module = analysis.module(name);
+                let mut builder = ModuleBuilder::new(
+                    analysis,
+                    name,
+                    module,
+                    Source {
+                        text: &source,
+                        tokens,
+                        lines: &lines,
+                    },
+                    &scopes,
+                    is_package,
+                    is_entry,
+                );
+                if let Some((tree, source)) = own_stub {
+                    builder = builder.with_own_stub(tree, source);
                 }
-                _ => None,
-            };
-            let module = analysis.module(name);
-            let mut builder = ModuleBuilder::new(
-                analysis,
-                name,
-                module,
-                Source {
-                    text: &source,
-                    tokens,
-                    lines: &lines,
-                },
-                &scopes,
-                is_package,
-                is_entry,
-            );
-            if let Some((tree, source)) = own_stub {
-                builder = builder.with_own_stub(tree, source);
-            }
-            let too_deep = builder.build(body);
-            Ok(Built {
-                star_imported_modules: builder.star_imported_modules.clone(),
-                outside_star_imported_modules: builder.outside_star_imported_modules.clone(),
-                names_bound_at_run_time: builder.names_bound_at_run_time.clone(),
-                declared: declared_all_names(body, &source),
-                too_deep,
-            })
-        });
+                let too_deep = builder.build(body);
+                Ok(Built {
+                    star_imported_modules: builder.star_imported_modules.clone(),
+                    outside_star_imported_modules: builder.outside_star_imported_modules.clone(),
+                    names_bound_at_run_time: builder.names_bound_at_run_time.clone(),
+                    declared: declared_all_names(body, &source),
+                    too_deep,
+                    stub_failure,
+                })
+            });
         let built = match built {
             Ok(built) => built,
             Err(cause) => {
@@ -403,6 +411,13 @@ impl<A: Analysis + Send> Program<A> {
                 return;
             }
         };
+        let stub_path = path.with_extension("pyi");
+        if let Some(Err(failure)) = &stub_read {
+            self.skip(&stub_path, &format!("cannot read it: {}", failure.cause()));
+        }
+        if let Some(cause) = &built.stub_failure {
+            self.skip(&stub_path, &format!("cannot parse it: {cause}"));
+        }
         let (status, cause) = match built.too_deep {
             Some(line) => {
                 let nesting = format!(
