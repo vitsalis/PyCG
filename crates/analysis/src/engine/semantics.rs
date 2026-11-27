@@ -29,7 +29,35 @@ impl CallId {
     }
 }
 
-pub type Receivers = Vec<ObjId>;
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct Receivers {
+    len: u8,
+    objects: [ObjId; RECEIVERS_PER_CALL_MAX],
+}
+
+impl Receivers {
+    pub const NONE: Receivers = Receivers {
+        len: 0,
+        objects: [ObjId(0); RECEIVERS_PER_CALL_MAX],
+    };
+
+    pub fn first_of<'a>(objects: impl IntoIterator<Item = &'a ObjId>) -> Receivers {
+        let mut receivers = Receivers::NONE;
+        for &object in objects.into_iter().take(RECEIVERS_PER_CALL_MAX) {
+            receivers.objects[usize::from(receivers.len)] = object;
+            receivers.len += 1;
+        }
+        receivers
+    }
+}
+
+impl std::ops::Deref for Receivers {
+    type Target = [ObjId];
+
+    fn deref(&self) -> &[ObjId] {
+        &self.objects[..usize::from(self.len)]
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct GroupId(pub(super) u32);
@@ -295,7 +323,7 @@ impl<T: Trace> State<T> {
                 self.return_argument(graph, &RETURNED_DECORATOR, name, analysed, call);
             }
             &Object::BoundMethod { receiver, function } => {
-                self.call_bound(graph, function, vec![receiver], call);
+                self.call_bound(graph, function, &[receiver], call);
             }
             Object::Class(_) => self.instantiate(graph, object, call),
             Object::Instance { .. } => {
@@ -372,7 +400,7 @@ impl<T: Trace> State<T> {
         &mut self,
         graph: &mut Graph,
         callee: ObjId,
-        receivers: Receivers,
+        receivers: &[ObjId],
         call: CallId,
     ) {
         assert!(
@@ -380,16 +408,14 @@ impl<T: Trace> State<T> {
             "a group call is not bound again"
         );
         let (base, prefix) = self.prefix_receivers(call);
-        let mut receivers = receivers;
-        receivers.extend(prefix);
-        receivers.truncate(RECEIVERS_PER_CALL_MAX);
+        let receivers = Receivers::first_of(receivers.iter().chain(prefix.iter()));
         if matches!(self.objects.get(callee), Object::Function(_)) {
-            let rest = self.prefixed_call(graph, base, receivers[1..].to_vec());
+            let rest = self.prefixed_call(graph, base, Receivers::first_of(&receivers[1..]));
             self.call_function(graph, callee, rest, Some(receivers[0]));
             return;
         }
         if self.bound_in_group(callee) {
-            let group = self.bound_group(graph, base, callee, &receivers);
+            let group = self.bound_group(graph, base, callee, receivers);
             self.group_add(graph, group, receivers);
         } else {
             let prefixed = self.prefixed_call(graph, base, receivers);
@@ -399,8 +425,8 @@ impl<T: Trace> State<T> {
 
     pub(super) fn prefix_receivers(&self, call: CallId) -> (CallId, Receivers) {
         match self.prefixes.get(&call) {
-            None => (call, Vec::new()),
-            Some((base, Prefix::Receivers(receivers))) => (*base, receivers.clone()),
+            None => (call, Receivers::NONE),
+            Some(&(base, Prefix::Receivers(receivers))) => (base, receivers),
             Some((_, Prefix::Group(_))) => panic!("the call of a group has no receivers"),
         }
     }
@@ -410,7 +436,7 @@ impl<T: Trace> State<T> {
         graph: &mut Graph,
         base: CallId,
         callee: ObjId,
-        receivers: &[ObjId],
+        receivers: Receivers,
     ) -> GroupId {
         let unknown = self.unknown_class(receivers[0]);
         let key = (base, callee, receivers.len(), unknown);
@@ -418,7 +444,7 @@ impl<T: Trace> State<T> {
         for &group in &groups {
             if self.group_records[group.0 as usize]
                 .receivers
-                .contains(receivers)
+                .contains(&receivers)
             {
                 return group;
             }
@@ -456,7 +482,7 @@ impl<T: Trace> State<T> {
     fn group_add(&mut self, graph: &mut Graph, group: GroupId, receivers: Receivers) {
         if !self.group_records[group.0 as usize]
             .receivers
-            .insert(receivers.clone())
+            .insert(receivers)
         {
             return;
         }
@@ -500,7 +526,7 @@ impl<T: Trace> State<T> {
             Call { args, ..template },
             Some(self.calls[base.index()].origin),
         );
-        self.receiver_calls.insert((base, receivers.clone()), call);
+        self.receiver_calls.insert((base, receivers), call);
         self.prefixes
             .insert(call, (base, Prefix::Receivers(receivers)));
         call
@@ -796,7 +822,7 @@ impl<T: Trace> State<T> {
         let id = self.new_results[&call];
         let dst = self.calls[call.index()].dst.expect("the result of __new__");
         self.returned_start(graph, id, dst);
-        self.call_bound(graph, method, vec![class], call);
+        self.call_bound(graph, method, &[class], call);
     }
 
     fn returned_add_dst(&mut self, graph: &mut Graph, id: ReturnedId, dst: NodeId) {
@@ -1334,7 +1360,7 @@ impl<T: Trace> State<T> {
         ) {
             return;
         }
-        self.call_bound(graph, method, vec![meta], call);
+        self.call_bound(graph, method, &[meta], call);
         if matches!(self.objects.get(method), Object::Function(_))
             && self.statement_news.insert(method)
         {
