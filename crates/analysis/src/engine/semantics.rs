@@ -203,6 +203,7 @@ pub struct Call {
     pub double_star: Vec<Option<NodeId>>,
     pub implicit: bool,
     pub decorator: bool,
+    pub applies: bool,
     pub rule: RuleId,
 }
 
@@ -240,6 +241,7 @@ impl<T: Trace> State<T> {
             double_star: new.double_star.to_vec(),
             implicit: false,
             decorator: new.decorator,
+            applies: new.applies,
             rule: RuleId::PLACEHOLDER,
         };
         let call = self.new_call(call, None);
@@ -284,6 +286,7 @@ impl<T: Trace> State<T> {
             }
             Object::BuiltinMethod { .. } => self.call_builtin_method(graph, object, call),
             Object::Typed { .. } => self.call_typed(graph, object, call),
+            Object::Closure { .. } => self.call_closure(graph, object, call),
             Object::Super { .. } => {}
             Object::Saturated
             | Object::Module(_)
@@ -1003,6 +1006,7 @@ impl<T: Trace> State<T> {
                     double_star: Vec::new(),
                     implicit: key.implicit,
                     decorator: false,
+                    applies: false,
                     rule: RuleId::PLACEHOLDER,
                 };
                 let call = self.new_call(details, Some(Origin::Site(key)));
@@ -1059,6 +1063,7 @@ impl<T: Trace> State<T> {
             double_star: double_star.to_vec(),
             implicit: true,
             decorator: false,
+            applies: false,
             rule: RuleId::PLACEHOLDER,
         };
         let call = self.new_call(details, Some(Origin::InitSubclass(site)));
@@ -1228,6 +1233,7 @@ impl<T: Trace> State<T> {
             double_star: statement.double_star.clone(),
             implicit: true,
             decorator: false,
+            applies: false,
             rule: RuleId::PLACEHOLDER,
         };
         let call = self.new_call(details, Some(Origin::ClassStatement(site)));
@@ -1242,6 +1248,7 @@ impl<T: Trace> State<T> {
             double_star: statement.double_star.clone(),
             implicit: true,
             decorator: false,
+            applies: false,
             rule: RuleId::PLACEHOLDER,
         };
         let prepare = self.new_call(details, Some(Origin::Prepare(site)));

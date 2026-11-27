@@ -79,15 +79,12 @@ engine	D3	micro/builtins/methods_on_variables	partial	not ported: protocols: the
 engine	D3	micro/builtins/min_max_key	partial	not ported: protocols: the hashes and comparisons of a builtin call
 engine	D3	micro/builtins/sorted_key	partial	not ported: library: the operations of an outside function
 engine	D3	micro/builtins/types	partial	not ported: library: the operations of an outside function
-engine	D3	micro/classes/new_and_init	partial	not ported: outside calls: a new instance from __new__
-engine	D3	micro/classes/new_shared_by_subclasses	partial	not ported: outside calls: a new instance from __new__
-engine	D3	micro/classes/new_without_init	partial	not ported: outside calls: a new instance from __new__
 engine	D3	micro/classes/subclasses_listing	partial	not ported: library: an outside call that consumes an iterable
 engine	D3	micro/comprehensions/generator_expression	partial	not ported: library: an outside call that consumes an iterable
 engine	D3	micro/comprehensions/generator_short_circuit	partial	not ported: library: an outside call that consumes an iterable
 engine	D3	micro/context_managers/closing	partial	not ported: outside types: the special method of an outside context manager
-engine	D3	micro/context_managers/contextmanager_generator	partial	not ported: outside types: a closure
-engine	D3	micro/context_managers/contextmanager_handles_exception	partial	not ported: outside types: a closure
+engine	D3	micro/context_managers/contextmanager_generator	partial	not ported: outside types: the special method of an outside context manager
+engine	D3	micro/context_managers/contextmanager_handles_exception	partial	not ported: outside types: the special method of an outside context manager
 engine	D3	micro/context_managers/exit_stack_callbacks	partial	not ported: outside types: the special method of an outside context manager
 engine	D3	micro/control_flow/callable_guard	partial	not ported: the builder call callable_filter
 engine	D3	micro/control_flow/iscoroutine_guard	partial	not ported: the builder call class_filter
@@ -97,7 +94,6 @@ engine	D3	micro/control_flow/isinstance_guard	partial	not ported: the builder ca
 engine	D3	micro/decorators/class_based_decorator	partial	not ported: the builder call add_length_hint
 engine	D3	micro/decorators/decorated_classmethod_staticmethod	partial	not ported: the builder call add_length_hint
 engine	D3	micro/decorators/functools_wraps	partial	not ported: the builder call add_length_hint
-engine	D3	micro/decorators/lru_cache_applied_by_call	partial	not ported: outside types: a closure
 engine	D3	micro/decorators/singledispatch	partial	not ported: annotations
 engine	D3	micro/descriptors/property_calls_methods	partial	not ported: library: an outside call that consumes an iterable
 engine	D3	micro/descriptors/property_init_invalid	partial	not ported: the builder call type_form
@@ -108,9 +104,7 @@ engine	D3	micro/dynamic/dunder_import	partial	not ported: the builder table lite
 engine	D3	micro/dynamic/getattr_annotated_name	partial	not ported: annotations
 engine	D3	micro/dynamic/getattr_lowered_name	partial	not ported: builtin rules: the rule case
 engine	D3	micro/dynamic/import_module_constant	partial	not ported: the builder table literal_imports
-engine	D3	micro/exceptions/custom_str	partial	not ported: the builder call typed
 engine	D3	micro/functions/generic_function	partial	not ported: annotations
-engine	D3	micro/functions/method_type_binding	partial	not ported: outside calls: types.MethodType
 engine	D3	micro/imports/shadow_stdlib_module	partial	not ported: library: an outside call that consumes an iterable
 engine	D3	micro/lists/comprehension_val	partial	not ported: outside types: the special method of an outside operand
 engine	D3	micro/lists/nested_comprehension	partial	not ported: outside types: the special method of an outside operand
@@ -121,10 +115,8 @@ engine	D3	micro/match/class_pattern_match_args	partial	not ported: the builder c
 engine	D3	micro/match/class_pattern_property	partial	not ported: the builder call add_named_load
 engine	D3	micro/metaclasses/metaclass_call	partial	not ported: the builder call add_length_hint
 engine	D3	micro/new_syntax/copy_replace	partial	not ported: builtin rules: the rule special_method
-engine	D3	micro/operators/format_spec	partial	not ported: the builder call typed
 engine	D3	micro/operators/operator_module	partial	not ported: library: a deferred result
 engine	D3	micro/operators/sorted_max_comparisons	partial	not ported: library: the operations of an outside function
-engine	D3	micro/operators/str_repr	partial	not ported: the builder call typed
 engine	D3	micro/operators/unpacking_iter	partial	not ported: the builder call add_length_hint
 engine	D3	micro/sets/discard	partial	not ported: protocols: the hashes and comparisons of a builtin call
 engine	D3	micro/stdlib/cmp_to_key	partial	not ported: library: the operations of an outside function
@@ -146,16 +138,10 @@ engine	D3	micro/stdlib_classes/dataclass_order	partial	not ported: annotations
 engine	D3	micro/stdlib_classes/dataclass_post_init	partial	not ported: annotations
 engine	D3	micro/stdlib_classes/protocol_structural	partial	not ported: annotations
 engine	D3	micro/stdlib_classes/typing_namedtuple_methods	partial	not ported: annotations
-engine	D3	micro/strings/container_repr	partial	not ported: the builder call typed
-engine	D3	micro/strings/fstring_conversions	partial	not ported: the builder call typed
-engine	D3	micro/strings/fstring_format_spec_call	partial	not ported: the builder call typed
-engine	D3	micro/strings/fstring_lambda	partial	not ported: the builder call typed
-engine	D3	micro/strings/fstring_nested_quotes	partial	not ported: the builder call typed
-engine	D3	micro/strings/fstring_str_fallback	partial	not ported: the builder call typed
 engine	D3	micro/strings/operation_on_constant	partial	not ported: outside types: the operand of a str or bytes constant
 engine	D3	micro/strings/percent_format_variable	partial	not ported: outside types: the operand of a str or bytes constant
 engine	D3	micro/strings/percent_formatting	partial	not ported: outside types: the operand of a str or bytes constant
-engine	D3	micro/strings/str_subclass_repr	partial	not ported: the builder call typed
+engine	D3	micro/strings/str_subclass_repr	partial	not ported: outside types: the special method of an outside operand
 engine	D3	micro/type_hints/abstract_class_annotation	partial	not ported: annotations
 engine	D3	micro/type_hints/annotated_assignment_declares	partial	not ported: the builder call type_form
 engine	D3	micro/type_hints/annotated_base_at_import	partial	not ported: annotations

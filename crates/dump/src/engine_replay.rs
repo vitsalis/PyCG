@@ -844,6 +844,10 @@ impl Replay {
                 self.add_call(arguments);
                 None
             }
+            "typed" => {
+                let typed = self.engine.typed(text(&arguments["cls"]));
+                Some(self.object_answer(typed))
+            }
             "container" => {
                 let length = arguments["length"]
                     .as_u64()

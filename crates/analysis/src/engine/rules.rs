@@ -10,6 +10,7 @@ use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::{BindsId, Unless};
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
+use crate::engine::outside_results::OutsideResultRule;
 use crate::engine::outside_types::OutsideRule;
 use crate::engine::patterns::PatternRule;
 use crate::engine::protocols::ProtocolRule;
@@ -285,6 +286,7 @@ pub(crate) enum Rule {
     Protocol(ProtocolRule),
     Pattern(PatternRule),
     Outside(OutsideRule),
+    OutsideResult(OutsideResultRule),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -343,6 +345,7 @@ impl Rule {
             Rule::Protocol(rule) => rule.key(),
             Rule::Pattern(rule) => rule.key(),
             Rule::Outside(rule) => rule.key(),
+            Rule::OutsideResult(rule) => rule.key(),
             Rule::Access(_) => "Access",
             Rule::Deliver { .. } => "_Deliver",
             Rule::Deliveries(_) => "_Deliveries",
@@ -420,6 +423,7 @@ impl Rule {
             Rule::Container(rule) => rule.kinds(),
             Rule::Protocol(rule) => rule.kinds(),
             Rule::Pattern(rule) => rule.kinds(),
+            Rule::OutsideResult(rule) => rule.kinds(),
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. }
             | Rule::StatementMade
@@ -450,6 +454,7 @@ impl Rule {
             Rule::Protocol(ref rule) => rule.captured(),
             Rule::Pattern(ref rule) => rule.captured(),
             Rule::Outside(_) => Vec::new(),
+            Rule::OutsideResult(ref rule) => rule.captured(),
             Rule::Bases { class, .. }
             | Rule::KeywordCandidate { class }
             | Rule::MemberOfMetaclass { class, .. }
@@ -560,6 +565,7 @@ impl<T: Trace> State<T> {
             Rule::Protocol(ref rule) => self.protocol_results(rule),
             Rule::Pattern(ref rule) => self.pattern_results(rule),
             Rule::Outside(ref rule) => rule.results(),
+            Rule::OutsideResult(ref rule) => rule.results(),
             Rule::Call(call)
             | Rule::PythonNew { call, .. }
             | Rule::PythonInstance { call }
@@ -826,6 +832,7 @@ impl<T: Trace> State<T> {
             Rule::Protocol(ref rule) => self.protocol_apply(graph, rule, object),
             Rule::Pattern(ref rule) => self.pattern_apply(graph, rule, object),
             Rule::Outside(ref rule) => self.outside_apply(graph, rule, object),
+            Rule::OutsideResult(ref rule) => self.outside_result_apply(graph, rule, object),
         }
     }
 

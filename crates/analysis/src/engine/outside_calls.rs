@@ -249,14 +249,15 @@ impl<T: Trace> State<T> {
         if !unknown {
             self.add_external_call_edge(call, name, Known::Stub);
             for definition in definitions {
-                if lookup(CACHED_FUNCTIONS, &*definition.path).is_some() {
-                    not_ported("outside types: a cached function");
+                if let Some(&wrapper) = lookup(CACHED_FUNCTIONS, &*definition.path) {
+                    let typed = self.typed(graph, wrapper);
+                    let name = format!("{}.__call__", self.objects.name(typed, &self.symbols));
+                    let name = self.symbols.intern(&name);
+                    self.add_external_call_edge(call, name, Known::Stub);
                 }
             }
         }
-        if inexact {
-            not_ported("outside calls of an inexact receiver");
-        }
+        let receiver = inexact.then_some(external);
         if let Some(&receiver) = receivers.first()
             && self.objects.is_class(receiver)
             && definitions
@@ -269,17 +270,17 @@ impl<T: Trace> State<T> {
         let dst = self.calls[call.index()].dst;
         for definition in definitions {
             if &*definition.path == METHOD_TYPE && dst.is_some() {
-                not_ported("outside calls: types.MethodType");
+                self.make_method(graph, call);
             }
             if definition.kind == DefinitionKind::Class
                 && let Some((_, model)) = lookup(CONTAINER_CLASSES, &*definition.path)
             {
-                self.apply_rule(graph, model, call, None);
+                self.apply_rule(graph, model, call, receiver);
                 return;
             }
         }
         if let Some(model) = builtin_function_model(&text, steps) {
-            self.apply_rule(graph, model, call, None);
+            self.apply_rule(graph, model, call, receiver);
             if self.typed_callbacks.insert((base, external)) {
                 let mut overloads = Vec::new();
                 for definition in definitions {
@@ -607,27 +608,31 @@ impl<T: Trace> State<T> {
         }
         let details = &self.calls[call.index()];
         let unpacked = !details.star.is_empty() || !details.double_star.is_empty();
-        if !typed.is_empty() && OPENERS.contains(&&*definition.path) && !unpacked {
-            not_ported("outside calls: the file of open");
-        }
-        let closure = lookup(CLOSURES, &*definition.path).is_some();
-        let origin = self.calls[call.index()].origin;
-        for result in typed {
-            if closure && matches!(result.reduced, Type::Callable { .. }) {
-                not_ported("outside types: a closure");
+        let origin = details.origin;
+        let typed_results: Vec<(Type, TypeContext)> = typed
+            .into_iter()
+            .map(|result| {
+                let context = TypeContext {
+                    receiver: receivers.first().copied(),
+                    binding: Some((result.bound, result.parameters)),
+                    ..TypeContext::of_call(call, origin)
+                };
+                (result.reduced, context)
+            })
+            .collect();
+        if !typed_results.is_empty() && OPENERS.contains(&&*definition.path) && !unpacked {
+            self.open_file(graph, call, overloads[0].bound, typed_results);
+        } else {
+            let closure = lookup(CLOSURES, &*definition.path).copied();
+            for (reduced, context) in typed_results {
+                let dst = dst.expect("a typed result");
+                if let (Some(closure), Type::Callable { result, .. }) = (closure, &reduced) {
+                    let closure = self.closure(graph, closure, result);
+                    self.add_object(graph, dst, closure);
+                } else {
+                    self.add_type(graph, &reduced, dst, &context, &[]);
+                }
             }
-            let context = TypeContext {
-                receiver: receivers.first().copied(),
-                binding: Some((result.bound, result.parameters)),
-                ..TypeContext::of_call(call, origin)
-            };
-            self.add_type(
-                graph,
-                &result.reduced,
-                dst.expect("a typed result"),
-                &context,
-                &[],
-            );
         }
         let creates = self
             .fitting(&signatures, skip, call)
@@ -636,7 +641,7 @@ impl<T: Trace> State<T> {
         if creates && receivers.is_empty() && definition.path.ends_with(".__new__") {
             let details = &self.calls[call.index()];
             if details.dst.is_some() && matches!(details.args.first(), Some(Some(_))) {
-                not_ported("outside calls: a new instance from __new__");
+                self.new_instance_of(graph, call);
             }
         }
         overloads
@@ -1006,6 +1011,7 @@ impl<T: Trace> State<T> {
                     double_star: Vec::new(),
                     implicit: true,
                     decorator: false,
+                    applies: false,
                     rule: crate::engine::RuleId::PLACEHOLDER,
                 };
                 let callback = self.new_call(made, Some(origin));
