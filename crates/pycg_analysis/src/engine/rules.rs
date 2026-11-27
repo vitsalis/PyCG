@@ -4,6 +4,7 @@ use crate::engine::attributes::{
     ANALYSED_METHODS, AccessId, AccessorsId, DeliveriesId, HookCallsId, HooksId, WritesId,
 };
 use crate::engine::builtin_rules::PropertyRule;
+use crate::engine::containers::ContainerRule;
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
@@ -195,6 +196,7 @@ pub(crate) enum Rule {
         sup: ObjId,
         load: AccessId,
     },
+    Container(ContainerRule),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -242,6 +244,7 @@ impl Rule {
             Rule::SetName { .. } => "Each:Analysis._set_name",
             Rule::CallMetaclass { .. } => "Each:Analysis._call_metaclass",
             Rule::AddInexact { .. } => "Each:Containers._add_inexact",
+            Rule::Container(rule) => rule.key(),
             Rule::Access(_) => "Access",
             Rule::Deliver { .. } => "_Deliver",
             Rule::Deliveries(_) => "_Deliveries",
@@ -278,6 +281,9 @@ impl Rule {
     }
 
     fn each(&self) -> bool {
+        if let Rule::Container(rule) = self {
+            return rule.each();
+        }
         !matches!(
             self,
             Rule::Call(_)
@@ -295,6 +301,7 @@ impl Rule {
 
     fn kinds(&self) -> Option<&'static [Kind]> {
         match self {
+            Rule::Container(rule) => rule.kinds(),
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. } => Some(CLASS_KINDS),
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
@@ -316,6 +323,7 @@ impl Rule {
 
     fn captured(&self) -> Vec<ObjId> {
         match *self {
+            Rule::Container(ref rule) => rule.captured(),
             Rule::Bases { class, .. }
             | Rule::KeywordCandidate { class }
             | Rule::MemberOfMetaclass { class, .. }
@@ -397,6 +405,7 @@ impl<T: Trace> State<T> {
 
     fn results(&self, rule: &Rule) -> Vec<NodeId> {
         match *rule {
+            Rule::Container(ref rule) => self.container_results(rule),
             Rule::Call(call)
             | Rule::PythonNew { call, .. }
             | Rule::PythonInstance { call }
@@ -572,6 +581,7 @@ impl<T: Trace> State<T> {
                 };
                 self.add_object(graph, dst, bound);
             }
+            Rule::Container(ref rule) => self.container_apply(graph, rule, object),
         }
     }
 
@@ -596,6 +606,15 @@ impl<T: Trace> Rules<RuleId> for State<T> {
         if let Rule::Deliveries(id) = found {
             self.trace.apply(rule, objects);
             self.deliveries_apply(graph, id, objects);
+            self.trace.applied();
+            return;
+        }
+        if let Rule::Container(container) = &found
+            && container.batches()
+            && objects.len() > 1
+        {
+            self.trace.apply(rule, objects);
+            self.container_apply_each(graph, container, objects);
             self.trace.applied();
             return;
         }

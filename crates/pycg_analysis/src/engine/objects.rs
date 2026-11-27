@@ -211,6 +211,7 @@ impl Class {
     }
 }
 
+#[derive(Clone, Copy, Debug)]
 pub struct Container {
     pub kind: Sym,
     pub site: Sym,

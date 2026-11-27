@@ -8,8 +8,8 @@ use std::process::ExitCode;
 use num_bigint::BigInt;
 use pycg_analysis::CAP_DEFAULT_OBJECTS;
 use pycg_analysis::builder::calls::{
-    Allocator, Analysis, Call, CallSite, ClassStatement, Constant, MethodKind, NewClass,
-    Passthrough,
+    Allocator, Analysis, Call, CallSite, ClassStatement, Constant, Key, MethodKind, NewClass,
+    Passthrough, Slice, Subscript,
 };
 use pycg_analysis::builder::{ModuleBuilder, Source};
 use pycg_analysis::engine::objects::{Kind, Object};
@@ -844,6 +844,153 @@ impl Replay {
                 self.add_call(arguments);
                 None
             }
+            "container" => {
+                let length = arguments["length"]
+                    .as_u64()
+                    .map(|length| usize::try_from(length).expect("a length fits usize"));
+                let container = self.engine.container(
+                    text(&arguments["kind"]),
+                    text(&arguments["site"]),
+                    length,
+                );
+                Some(self.object_answer(container))
+            }
+            "element" => {
+                let container = self.object(&arguments["container"]);
+                let key = match &arguments["key"] {
+                    Value::String(name) => Key::Name(name.as_str().into()),
+                    value => Key::Index(value.as_i64().expect("an element index")),
+                };
+                let node = self.engine.element(container, &key);
+                Some(self.node_answer(node))
+            }
+            "unknown" | "keys" | "elements" => {
+                let container = self.object(&arguments["container"]);
+                let node = match call {
+                    "unknown" => self.engine.unknown(container),
+                    "keys" => self.engine.keys(container),
+                    _ => self.engine.elements(container),
+                };
+                Some(self.node_answer(node))
+            }
+            "write_keyed" => {
+                let container = self.object(&arguments["container"]);
+                let key = self.optional_node(&arguments["key"]);
+                let src = self.optional_node(&arguments["src"]);
+                self.engine.write_keyed(container, key, src);
+                None
+            }
+            "add_hash" => {
+                let key = self.node(&arguments["key"]);
+                let stored = self.optional_node(&arguments["stored"]);
+                self.engine.add_hash(
+                    key,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                    stored,
+                );
+                None
+            }
+            "add_subscript" => {
+                let subscript = Subscript {
+                    base: self.node(&arguments["base"]),
+                    key: self.optional_node(&arguments["key"]),
+                    dst: self.optional_node(&arguments["dst"]),
+                    src: self.optional_node(&arguments["src"]),
+                    caller: text(&arguments["caller"]),
+                    site: text(&arguments["site"]),
+                    delete: arguments["delete"].as_bool().expect("delete"),
+                };
+                self.engine.add_subscript(&subscript);
+                None
+            }
+            "add_slice" => {
+                let bounds = match &arguments["bounds"] {
+                    Value::Null => None,
+                    value => Some((bound(&list(value)[0]), bound(&list(value)[1]))),
+                };
+                let slice = Slice {
+                    base: self.node(&arguments["base"]),
+                    bounds: bounds.as_ref(),
+                    dst: self.optional_node(&arguments["dst"]),
+                    src: self.optional_node(&arguments["src"]),
+                    caller: text(&arguments["caller"]),
+                    site: text(&arguments["site"]),
+                    delete: arguments["delete"].as_bool().expect("delete"),
+                };
+                self.engine.add_slice(&slice);
+                None
+            }
+            "add_unpack" => {
+                let value = self.node(&arguments["value"]);
+                let before: Vec<NodeId> = list(&arguments["before"])
+                    .iter()
+                    .map(|node| self.node(node))
+                    .collect();
+                let after: Vec<NodeId> = list(&arguments["after"])
+                    .iter()
+                    .map(|node| self.node(node))
+                    .collect();
+                let starred = self.optional_node(&arguments["starred"]);
+                self.engine.add_unpack(
+                    value,
+                    &before,
+                    starred,
+                    &after,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_iteration" => {
+                let iterable = self.node(&arguments["iterable"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.add_iteration(
+                    iterable,
+                    dst,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                    arguments["is_async"].as_bool().expect("is_async"),
+                );
+                None
+            }
+            "entering_keys" => {
+                let source = self.node(&arguments["source"]);
+                let construct = list(&arguments["construct"]);
+                let (hashed, kept) = self.engine.entering_keys(
+                    source,
+                    (text(&construct[0]), text(&construct[1])),
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                let hashed = self.node_answer(hashed);
+                let kept = self.node_answer(kept);
+                Some(Value::Array(vec![hashed, kept]))
+            }
+            "add_dict_items" => {
+                let target = self.object(&arguments["target"]);
+                let source = self.node(&arguments["source"]);
+                self.engine.add_dict_items(
+                    target,
+                    source,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_yield_from" => {
+                let iterable = self.node(&arguments["iterable"]);
+                let function = self.object(&arguments["function"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.add_yield_from(
+                    iterable,
+                    function,
+                    dst,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
             _ => not_ported(&format!("the builder call {call}")),
         };
         let expected = &record["answer"];
@@ -1086,6 +1233,21 @@ fn text(value: &Value) -> &str {
     value
         .as_str()
         .unwrap_or_else(|| panic!("not a string: {value}"))
+}
+
+fn bound(value: &Value) -> Option<BigInt> {
+    match value {
+        Value::Null => None,
+        Value::Number(number) => Some(BigInt::from(number.as_i64().expect("an integer bound"))),
+        Value::Object(form) => Some(
+            form["int"]
+                .as_str()
+                .expect("a large integer bound")
+                .parse()
+                .expect("a decimal bound"),
+        ),
+        _ => panic!("not a bound: {value}"),
+    }
 }
 
 fn list(value: &Value) -> &[Value] {
