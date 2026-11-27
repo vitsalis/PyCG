@@ -1,6 +1,6 @@
 use pycg_solver::{NodeId, ObjId};
 
-use pycg_stubs::DefinitionKind;
+use pycg_stubs::{DefinitionKind, Type};
 use rustc_hash::FxHashSet;
 
 use crate::builder::calls::Call as BuilderCall;
@@ -9,7 +9,7 @@ use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::Object;
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, MethodKind, Rule, RuleId, State, WaitingRule, not_ported};
+use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule, not_ported};
 use crate::models::RETURNS_ARGUMENT;
 
 pub const RECEIVERS_PER_CALL_MAX: usize = 3;
@@ -24,6 +24,23 @@ impl CallId {
 }
 
 pub type Receivers = Vec<ObjId>;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct GroupId(pub(super) u32);
+
+#[derive(Clone, Debug)]
+pub enum Prefix {
+    Receivers(Receivers),
+    Group(GroupId),
+}
+
+pub struct BoundGroup {
+    pub callee: ObjId,
+    pub call: CallId,
+    pub unknown: bool,
+    receivers: OrderedSet<Receivers>,
+    observers: Vec<(CallId, Vec<Type>)>,
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct ReturnedId(u32);
@@ -130,6 +147,12 @@ impl<T: Trace> State<T> {
     }
 
     pub(super) fn call(&mut self, graph: &mut Graph, object: ObjId, call: CallId) {
+        if let Some(&group) = self.groups.get(&call) {
+            assert_eq!(
+                self.group_records[group.0 as usize].callee, object,
+                "a group calls its callee"
+            );
+        }
         match self.objects.get(object) {
             Object::Function(_) => {
                 if !self.returns_argument(object) {
@@ -189,25 +212,110 @@ impl<T: Trace> State<T> {
         receivers: Receivers,
         call: CallId,
     ) {
-        let (base, prefix) = self
-            .prefixes
-            .get(&call)
-            .cloned()
-            .unwrap_or((call, Vec::new()));
+        assert!(
+            !self.groups.contains_key(&call),
+            "a group call is not bound again"
+        );
+        let (base, prefix) = self.prefix_receivers(call);
         let mut receivers = receivers;
         receivers.extend(prefix);
         receivers.truncate(RECEIVERS_PER_CALL_MAX);
-        match self.objects.get(callee) {
-            Object::Function(_) => {
-                let rest = self.prefixed_call(graph, base, receivers[1..].to_vec());
-                self.call_function(graph, callee, rest, Some(receivers[0]));
-            }
-            Object::External(_) => not_ported("bound calls of outside values"),
-            _ => {
-                let prefixed = self.prefixed_call(graph, base, receivers);
-                self.call(graph, callee, prefixed);
+        if matches!(self.objects.get(callee), Object::Function(_)) {
+            let rest = self.prefixed_call(graph, base, receivers[1..].to_vec());
+            self.call_function(graph, callee, rest, Some(receivers[0]));
+            return;
+        }
+        if self.bound_in_group(callee) {
+            let group = self.bound_group(graph, base, callee, &receivers);
+            self.group_add(graph, group, receivers);
+        } else {
+            let prefixed = self.prefixed_call(graph, base, receivers);
+            self.call(graph, callee, prefixed);
+        }
+    }
+
+    pub(super) fn prefix_receivers(&self, call: CallId) -> (CallId, Receivers) {
+        match self.prefixes.get(&call) {
+            None => (call, Vec::new()),
+            Some((base, Prefix::Receivers(receivers))) => (*base, receivers.clone()),
+            Some((_, Prefix::Group(_))) => panic!("the call of a group has no receivers"),
+        }
+    }
+
+    fn bound_group(
+        &mut self,
+        graph: &mut Graph,
+        base: CallId,
+        callee: ObjId,
+        receivers: &[ObjId],
+    ) -> GroupId {
+        let unknown = self.unknown_class(receivers[0]);
+        let key = (base, callee, receivers.len(), unknown);
+        let groups = self.bound_groups.get(&key).cloned().unwrap_or_default();
+        for &group in &groups {
+            if self.group_records[group.0 as usize]
+                .receivers
+                .contains(receivers)
+            {
+                return group;
             }
         }
+        if let Some(&last) = groups.last() {
+            let cap = graph.cap();
+            let held = self.group_records[last.0 as usize].receivers.len();
+            if cap.is_none_or(|cap| held < cap as usize) {
+                return last;
+            }
+        }
+        let mut args: Vec<Option<NodeId>> = receivers
+            .iter()
+            .map(|_| Some(self.node(graph, None)))
+            .collect();
+        let template = self.calls[base.index()].clone();
+        args.extend(template.args.iter().copied());
+        let origin = template.origin;
+        let call = self.new_call(Call { args, ..template }, Some(origin));
+        let group = GroupId(u32::try_from(self.group_records.len()).expect("fewer groups"));
+        self.group_records.push(BoundGroup {
+            callee,
+            call,
+            unknown,
+            receivers: OrderedSet::default(),
+            observers: Vec::new(),
+        });
+        self.bound_groups.entry(key).or_default().push(group);
+        self.groups.insert(call, group);
+        self.prefixes.insert(call, (base, Prefix::Group(group)));
+        self.call(graph, callee, call);
+        group
+    }
+
+    fn group_add(&mut self, graph: &mut Graph, group: GroupId, receivers: Receivers) {
+        if !self.group_records[group.0 as usize]
+            .receivers
+            .insert(receivers.clone())
+        {
+            return;
+        }
+        let call = self.group_records[group.0 as usize].call;
+        let nodes = self.calls[call.index()].args.clone();
+        for (&receiver, node) in receivers.iter().zip(nodes) {
+            let constant = self.constant(graph, receiver);
+            self.add_edge(graph, constant, node.expect("a receiver node"));
+        }
+        let observers = self.group_records[group.0 as usize].observers.clone();
+        for (call, typed) in observers {
+            self.add_results_of(graph, call, &typed);
+        }
+    }
+
+    pub(super) fn group_observe(&mut self, group: GroupId, call: CallId, typed: Vec<Type>) {
+        let found = &mut self.group_records[group.0 as usize];
+        assert!(
+            found.receivers.is_empty(),
+            "a group is observed before it has receivers"
+        );
+        found.observers.push((call, typed));
     }
 
     fn prefixed_call(&mut self, graph: &mut Graph, base: CallId, receivers: Receivers) -> CallId {
@@ -230,7 +338,8 @@ impl<T: Trace> State<T> {
             Some(self.calls[base.index()].origin),
         );
         self.receiver_calls.insert((base, receivers.clone()), call);
-        self.prefixes.insert(call, (base, receivers));
+        self.prefixes
+            .insert(call, (base, Prefix::Receivers(receivers)));
         call
     }
 
@@ -312,7 +421,7 @@ impl<T: Trace> State<T> {
         if !details.star.is_empty() || !details.double_star.is_empty() || made.decorated {
             return true;
         }
-        let base = self.prefixes.get(&call).map_or(call, |&(base, _)| base);
+        let base = self.prefixes.get(&call).map_or(call, |(base, _)| *base);
         let root = self.roots.get(&base).copied().unwrap_or(base);
         if self.calls[root.index()].implicit {
             return true;
@@ -646,11 +755,7 @@ impl<T: Trace> State<T> {
         dst: Option<NodeId>,
         unless: Unless,
     ) -> CallId {
-        let (base, receivers) = self
-            .prefixes
-            .get(&call)
-            .cloned()
-            .unwrap_or((call, Vec::new()));
+        let (base, receivers) = self.prefix_receivers(call);
         let root = self.roots.get(&base).copied().unwrap_or(base);
         let typed = match self.objects.get(owner) {
             Object::Instance { .. } => None,
