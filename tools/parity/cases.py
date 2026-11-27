@@ -44,7 +44,42 @@ PROGRAM = "program"
 SKIPPED_FILES = ("__pycache__",)
 SNIPPETS = ROOT / "evaluation" / "micro-benchmark" / "snippets"
 FAMILIES = {
-    "tests/test_super.py": ("classes", "`super()`"),
+    "tests/test_abstract_classes.py": (
+        "classes",
+        "Classes that Python does not instantiate",
+    ),
+    "tests/test_class_rule_limits.py": (
+        "classes",
+        "Classes and hierarchies",
+    ),
+    "tests/test_class_tests.py": (
+        "classes",
+        "Class tests",
+    ),
+    "tests/test_descriptors.py": (
+        "classes",
+        "Descriptors",
+    ),
+    "tests/test_metaclasses.py": (
+        "classes",
+        "Metaclasses",
+    ),
+    "tests/test_object_hooks.py": (
+        "classes",
+        "Attribute hooks",
+    ),
+    "tests/test_slots.py": (
+        "classes",
+        "The class statement",
+    ),
+    "tests/test_super.py": (
+        "classes",
+        "`super()`",
+    ),
+    "tests/test_type_three_arguments.py": (
+        "classes",
+        "The class statement",
+    ),
 }
 ENGINE_LOGGER = "pycg"
 ROOT_IN_WARNINGS = "{root}"
