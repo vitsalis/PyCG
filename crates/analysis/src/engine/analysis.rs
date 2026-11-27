@@ -7,6 +7,7 @@ use crate::builder::calls::{
     Analysis, BuilderTables, Call, ClassFields, ClassStatement, Constant, FunctionFields, Key,
     MadeFunction, MethodKind, NewClass, Operation, Passthrough, Shape, Slice, Subscript,
 };
+use crate::engine::annotations::Owner;
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{self, Literal, Object};
 use crate::engine::protocols::{Conversion, OperatorCall};
@@ -82,10 +83,29 @@ impl<T: Trace> Engine<T> {
         }
     }
 
+    fn set_annotations(&mut self, object: ObjId, annotations: &Option<IndexMap<Box<str>, NodeId>>) {
+        let Some(annotations) = annotations else {
+            return;
+        };
+        let interned: IndexMap<Sym, NodeId> = annotations
+            .iter()
+            .map(|(name, &node)| (self.state.symbols.intern(name), node))
+            .collect();
+        self.state.annotations.of_objects.insert(object, interned);
+    }
+
+    fn current_annotations(&self, object: ObjId) -> Option<IndexMap<Box<str>, NodeId>> {
+        let found = self.state.annotations.of_objects.get(&object)?;
+        Some(
+            found
+                .iter()
+                .map(|(&name, &node)| (self.state.symbols.text(name).into(), node))
+                .collect(),
+        )
+    }
+
     fn set_function_fields(&mut self, object: ObjId, fields: &FunctionFields) {
-        if fields.annotations.is_some() {
-            not_ported("annotations");
-        }
+        self.set_annotations(object, &fields.annotations);
         let passthrough = fields
             .passthrough
             .iter()
@@ -109,9 +129,7 @@ impl<T: Trace> Engine<T> {
     }
 
     fn set_class_fields(&mut self, object: ObjId, fields: &ClassFields) {
-        if fields.annotations.is_some() {
-            not_ported("annotations");
-        }
+        self.set_annotations(object, &fields.annotations);
         let symbols = &mut self.state.symbols;
         let defines = fields
             .defines
@@ -295,15 +313,23 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn add_structure_class(
         &mut self,
-        _class: ObjId,
-        _fields: &[(Box<str>, Option<NodeId>)],
-        _bases: &[NodeId],
+        class: ObjId,
+        fields: &[(Box<str>, Option<NodeId>)],
+        bases: &[NodeId],
     ) {
-        not_ported("the builder call add_structure_class")
+        self.sync();
+        let fields: Box<[(Sym, Option<NodeId>)]> = fields
+            .iter()
+            .map(|(name, node)| (self.state.symbols.intern(name), *node))
+            .collect();
+        self.state
+            .add_structure_class(&mut self.graph, class, fields, bases);
     }
 
-    fn add_annotated_class(&mut self, _class: ObjId, _decorators: &[NodeId], _bases: &[NodeId]) {
-        not_ported("the builder call add_annotated_class")
+    fn add_annotated_class(&mut self, class: ObjId, decorators: &[NodeId], bases: &[NodeId]) {
+        self.sync();
+        self.state
+            .add_annotated_class(&mut self.graph, class, decorators, bases);
     }
 
     fn add_call(&mut self, call: &Call<'_>) {
@@ -411,6 +437,7 @@ impl<T: Trace> Analysis for Engine<T> {
     }
 
     fn function_fields(&mut self, function: ObjId) -> &mut FunctionFields {
+        let annotations = self.current_annotations(function);
         let made = self.state.objects.function(function);
         let symbols = &self.state.symbols;
         let current = FunctionFields {
@@ -420,7 +447,7 @@ impl<T: Trace> Analysis for Engine<T> {
             end_lineno: made.end_lineno,
             end_col_offset: made.end_col_offset,
             is_async: made.is_async,
-            annotations: None,
+            annotations,
             passthrough: made
                 .passthrough
                 .iter()
@@ -441,6 +468,7 @@ impl<T: Trace> Analysis for Engine<T> {
     }
 
     fn class_fields(&mut self, class: ObjId) -> &mut ClassFields {
+        let annotations = self.current_annotations(class);
         let found = self.state.objects.class(class);
         let symbols = &self.state.symbols;
         let names = |names: &rustc_hash::FxHashSet<crate::engine::symbols::Sym>| -> Vec<Box<str>> {
@@ -458,7 +486,7 @@ impl<T: Trace> Analysis for Engine<T> {
             slots: names(&found.slots),
             bound: names(&found.bound),
             defines: names(&found.defines),
-            annotations: None,
+            annotations,
         };
         match self.hand(class, BuilderFields::Class(current)) {
             BuilderFields::Class(fields) => fields,
@@ -699,35 +727,40 @@ impl<T: Trace> Analysis for Engine<T> {
             .pattern(&mut self.graph, prefix, suffix, None, true)
     }
 
-    fn type_form(&mut self, _operator: &str, _parts: &[Option<NodeId>], _site: &str) -> ObjId {
-        not_ported("the builder call type_form")
+    fn type_form(&mut self, operator: &str, parts: &[Option<NodeId>], site: &str) -> ObjId {
+        self.sync();
+        self.state.type_form(&mut self.graph, operator, parts, site)
     }
 
-    fn gate_type_form(&mut self, _form: ObjId, _gate: NodeId) {
-        not_ported("the builder call gate_type_form")
+    fn gate_type_form(&mut self, form: ObjId, gate: NodeId) {
+        self.sync();
+        self.state.gate_type_form(&mut self.graph, form, gate);
     }
 
-    fn annotated(
-        &mut self,
-        _node: NodeId,
-        _dst: NodeId,
-        _shape: Shape,
-        _owner: ObjId,
-        _name: &str,
-    ) {
-        not_ported("the builder call annotated")
+    fn annotated(&mut self, node: NodeId, dst: NodeId, shape: Shape, owner: ObjId, name: &str) {
+        self.sync();
+        let owner = Owner {
+            object: owner,
+            name: self.state.symbols.intern(name),
+        };
+        self.state
+            .annotated(&mut self.graph, Some(node), dst, shape, owner);
     }
 
-    fn bind_annotations(&mut self, _function: ObjId) {
-        not_ported("the builder call bind_annotations")
+    fn bind_annotations(&mut self, function: ObjId) {
+        self.sync();
+        self.state.bind_annotations(&mut self.graph, function);
     }
 
-    fn add_name_lookup(&mut self, _base: NodeId, _attr: &str, _dst: NodeId) {
-        not_ported("the builder call add_name_lookup")
+    fn add_name_lookup(&mut self, base: NodeId, attr: &str, dst: NodeId) {
+        self.sync();
+        let attr = self.state.symbols.intern(attr);
+        self.state.add_name_lookup(&mut self.graph, base, attr, dst);
     }
 
-    fn add_stub_bases(&mut self, _cls: ObjId, _node: NodeId) {
-        not_ported("the builder call add_stub_bases")
+    fn add_stub_bases(&mut self, cls: ObjId, node: NodeId) {
+        self.sync();
+        self.state.add_stub_bases(&mut self.graph, cls, node);
     }
 
     fn site_call(&mut self, caller: &str, site: &str, role: &[&str]) -> BuilderCallId {

@@ -131,7 +131,8 @@ impl<T: Trace> State<T> {
                 | Object::Generator { .. }
                 | Object::Coroutine { .. }
                 | Object::ReturnsArgument { .. }
-                | Object::Pattern { .. } => {}
+                | Object::Pattern { .. }
+                | Object::TypeForm { .. } => {}
             }
         }
         functions

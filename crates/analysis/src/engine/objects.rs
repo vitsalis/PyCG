@@ -279,6 +279,11 @@ pub enum Object {
         name: Sym,
         analysed: bool,
     },
+    TypeForm {
+        operator: Sym,
+        parts: Box<[Option<NodeId>]>,
+        name: Sym,
+    },
 }
 
 impl Object {
@@ -303,6 +308,7 @@ impl Object {
             Object::Coroutine { .. } => Kind::Coroutine,
             Object::Pattern { .. } => Kind::Pattern,
             Object::ReturnsArgument { .. } => Kind::ReturnsArgument,
+            Object::TypeForm { .. } => Kind::TypeForm,
         }
     }
 }
@@ -415,6 +421,7 @@ impl Objects {
                 suffix,
                 case.map(|case| symbols.text(case)),
             ),
+            Object::TypeForm { name, .. } => symbols.text(*name).to_string(),
         }
     }
 }

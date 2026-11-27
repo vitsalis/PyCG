@@ -5,6 +5,7 @@ use pycg_solver::{NodeId, ObjId};
 use pycg_stubs::{Definition, DefinitionKind, Entry, ParameterKind, Type};
 use rustc_hash::FxHashMap;
 
+use crate::engine::annotations::Owner;
 use crate::engine::containers::{ContainerOrigin, IterationRoleId};
 use crate::engine::objects::{Literal, Object};
 use crate::engine::outside::{STUB_BUILTINS, outside_name};
@@ -85,6 +86,7 @@ pub(crate) enum TypeOrigin {
         caller: Sym,
         site: Sym,
     },
+    Annotation(Owner),
 }
 
 #[derive(Clone, Debug)]
@@ -279,6 +281,10 @@ impl<T: Trace> State<T> {
         match (context.call, &context.origin) {
             (Some(call), _) => self.calls[call.index()].site,
             (None, TypeOrigin::Attribute(path)) => self.symbols.intern(path),
+            (None, &TypeOrigin::Annotation(owner)) => {
+                let text = self.owner_text(owner);
+                self.symbols.intern(&text)
+            }
             (
                 None,
                 &TypeOrigin::Iteration { site, .. }

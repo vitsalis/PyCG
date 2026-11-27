@@ -71,6 +71,7 @@ pub(super) enum ContainerOrigin {
     Iterator(ObjId),
     Operator(OperatorId),
     Stub(u32),
+    Annotation(ObjId, Sym),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -224,6 +225,7 @@ pub(crate) struct Sequences {
     pub(crate) dst: NodeId,
     objects: Vec<ObjId>,
     found: bool,
+    rule: Option<crate::engine::rules::RuleId>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -368,7 +370,8 @@ impl<T: Trace> State<T> {
             | Object::Typed { .. }
             | Object::BuiltinMethod { .. }
             | Object::ReturnsArgument { .. }
-            | Object::Pattern { exact: false, .. } => return object,
+            | Object::Pattern { exact: false, .. }
+            | Object::TypeForm { .. } => return object,
         };
         if let Some(&found) = self.inexact.get(&object) {
             return found;
@@ -1191,6 +1194,9 @@ impl<T: Trace> State<T> {
     }
 
     pub(super) fn keyed_group_apply(&mut self, graph: &mut Graph, id: KeyedGroupId, key: ObjId) {
+        if matches!(self.objects.get(key), Object::TypeForm { .. }) {
+            return;
+        }
         self.containers.keyed_groups[index_of(id.0)].keys.push(key);
         let containers = self.containers.keyed_groups[index_of(id.0)]
             .containers
@@ -1425,6 +1431,9 @@ impl<T: Trace> State<T> {
     }
 
     pub(super) fn keyed_apply(&mut self, graph: &mut Graph, id: KeyedId, key: ObjId) {
+        if matches!(self.objects.get(key), Object::TypeForm { .. }) {
+            return;
+        }
         let keyed = &mut self.containers.keyed_rules[index_of(id.0)];
         if !matches!(
             self.objects.get(key),
@@ -1906,6 +1915,7 @@ impl<T: Trace> State<T> {
                 }
             }
             Object::Saturated
+            | Object::TypeForm { .. }
             | Object::Const { .. }
             | Object::Module(_)
             | Object::Function(_)
@@ -2178,6 +2188,7 @@ impl<T: Trace> State<T> {
             }
             Object::Container(_)
             | Object::Saturated
+            | Object::TypeForm { .. }
             | Object::Const { .. }
             | Object::Module(_)
             | Object::Function(_)
@@ -2362,6 +2373,7 @@ impl<T: Trace> State<T> {
                 return;
             }
             Object::Saturated
+            | Object::TypeForm { .. }
             | Object::Const { .. }
             | Object::Module(_)
             | Object::Function(_)
@@ -2421,6 +2433,7 @@ impl<T: Trace> State<T> {
                     dst,
                     objects: Vec::new(),
                     found: false,
+                    rule: None,
                 });
                 self.containers.sequences_of.insert(key, sequences);
                 sequences
@@ -2435,7 +2448,14 @@ impl<T: Trace> State<T> {
         }
         let unless = Unless::Names(names.into_boxed_slice());
         let found = self.lookup_name(graph, class, "__getitem__", Some(object), None, unless);
-        let rule = self.container_rule(ContainerRule::Sequences(sequences));
+        let rule = match self.containers.sequences[index_of(sequences.0)].rule {
+            Some(rule) => rule,
+            None => {
+                let rule = self.container_rule(ContainerRule::Sequences(sequences));
+                self.containers.sequences[index_of(sequences.0)].rule = Some(rule);
+                rule
+            }
+        };
         self.attach(graph, found, rule);
         self.containers.sequences[index_of(sequences.0)]
             .objects
@@ -2556,6 +2576,7 @@ impl<T: Trace> State<T> {
                 self.add_object(graph, found.dst, object);
             }
             Object::Saturated
+            | Object::TypeForm { .. }
             | Object::Module(_)
             | Object::Function(_)
             | Object::BoundMethod { .. }
