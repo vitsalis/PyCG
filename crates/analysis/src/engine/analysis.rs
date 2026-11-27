@@ -377,6 +377,14 @@ impl<T: Trace> Analysis for Engine<T> {
         &mut self.state.imports
     }
 
+    fn begin_module(&mut self, name: &str) {
+        self.state.trace.module(Some(name));
+    }
+
+    fn end_module(&mut self, _name: &str, _analysed: bool) {
+        self.state.trace.module(None);
+    }
+
     fn function_fields(&mut self, function: ObjId) -> &mut FunctionFields {
         let made = self.state.objects.function(function);
         let symbols = &self.state.symbols;
