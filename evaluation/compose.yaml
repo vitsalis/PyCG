@@ -1,7 +1,7 @@
 # The services of the macro-benchmark, with Docker only.
 #
 #   docker compose -f evaluation/compose.yaml build inputs          # every pinned source
-#   NAME=jmespath docker compose -f evaluation/compose.yaml run --rm trace --compare
+#   make eval-trace NAME=jmespath    # the trace service, as your user
 #
 # The one rule of the network: every download, and every git command on
 # third-party content, runs in the build of the inputs image
