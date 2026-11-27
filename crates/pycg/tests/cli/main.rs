@@ -208,7 +208,7 @@ fn every_case_gives_what_python_gives() {
     );
 }
 
-const TEMPLATE: &str = include_str!("../../../../pycg/view/template.html");
+const TEMPLATE: &str = include_str!("../../src/template.html");
 const MARKER: &str = "@@PYCG_DOCUMENT@@";
 
 fn files_under(root: &Path) -> Vec<PathBuf> {

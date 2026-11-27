@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::path::PathBuf;
 
-const PACKAGE_INIT: &str = "../../pycg/__init__.py";
+const PACKAGE_INIT: &str = "package_init.py";
 const VERSION_ASSIGNMENT: &str = "__version__ = \"";
 
 fn main() {

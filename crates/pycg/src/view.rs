@@ -8,7 +8,7 @@ use crate::ViewOptions;
 use crate::arguments::os_string;
 use crate::json::{self, Expected, Kind, Member, Refusal, Top};
 
-const TEMPLATE: &str = include_str!("../../../pycg/view/template.html");
+const TEMPLATE: &str = include_str!("template.html");
 const MARKER: &str = "@@PYCG_DOCUMENT@@";
 const SUFFIX: &[u8] = b".html";
 const SCRIPT_SAFE_LESS_THAN: &str = "\\u003c";
