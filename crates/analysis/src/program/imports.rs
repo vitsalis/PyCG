@@ -1,6 +1,5 @@
 use std::collections::BTreeSet;
 use std::ffi::{OsStr, OsString};
-use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -283,7 +282,7 @@ impl ImportManager {
                 Some(first) if basename(first) == INITIALIZER => {
                     found.push((name, Some(first.clone())));
                 }
-                Some(first) if first.as_os_str().as_bytes().ends_with(b".py") => {
+                Some(first) if first.as_os_str().as_encoded_bytes().ends_with(b".py") => {
                     found.push((name, Some(first.clone())));
                     break;
                 }
@@ -324,7 +323,7 @@ impl ImportManager {
         let prefix = format!("{part}.");
         let mut extensions: Vec<&OsString> = entries
             .iter()
-            .filter(|entry| entry.as_bytes().starts_with(prefix.as_bytes()))
+            .filter(|entry| entry.as_encoded_bytes().starts_with(prefix.as_bytes()))
             .collect();
         extensions.sort();
         for entry in extensions {

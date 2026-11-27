@@ -1,11 +1,24 @@
 use std::ffi::{OsStr, OsString};
-use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::path::{Path, PathBuf};
 
 const SEPARATOR: u8 = b'/';
 
+#[cfg(unix)]
+fn os_str(bytes: &[u8]) -> &OsStr {
+    std::os::unix::ffi::OsStrExt::from_bytes(bytes)
+}
+
+#[cfg(not(unix))]
+fn os_str(bytes: &[u8]) -> &OsStr {
+    unsafe { OsStr::from_encoded_bytes_unchecked(bytes) }
+}
+
+fn os_string(bytes: Vec<u8>) -> OsString {
+    os_str(&bytes).to_os_string()
+}
+
 pub fn normpath(path: &Path) -> PathBuf {
-    let bytes = path.as_os_str().as_bytes();
+    let bytes = path.as_os_str().as_encoded_bytes();
     if bytes.is_empty() {
         return PathBuf::from(".");
     }
@@ -32,11 +45,11 @@ pub fn normpath(path: &Path) -> PathBuf {
     if out.is_empty() {
         out.push(b'.');
     }
-    PathBuf::from(OsString::from_vec(out))
+    PathBuf::from(os_string(out))
 }
 
 pub fn abspath(path: &Path, cwd: &Path) -> PathBuf {
-    if path.as_os_str().as_bytes().first() == Some(&SEPARATOR) {
+    if path.as_os_str().as_encoded_bytes().first() == Some(&SEPARATOR) {
         normpath(path)
     } else {
         normpath(&cwd.join(path))
@@ -44,17 +57,17 @@ pub fn abspath(path: &Path, cwd: &Path) -> PathBuf {
 }
 
 pub fn basename(path: &Path) -> &OsStr {
-    let bytes = path.as_os_str().as_bytes();
+    let bytes = path.as_os_str().as_encoded_bytes();
     let start = bytes
         .iter()
         .rposition(|&byte| byte == SEPARATOR)
         .map_or(0, |index| index + 1);
-    OsStr::from_bytes(&bytes[start..])
+    os_str(&bytes[start..])
 }
 
 fn components(path: &Path) -> Vec<&[u8]> {
     path.as_os_str()
-        .as_bytes()
+        .as_encoded_bytes()
         .split(|&byte| byte == SEPARATOR)
         .filter(|part| !part.is_empty())
         .collect()
@@ -75,11 +88,11 @@ pub fn relpath(path: &Path, start: &Path, cwd: &Path) -> PathBuf {
     if parts.is_empty() {
         return PathBuf::from(".");
     }
-    PathBuf::from(OsString::from_vec(parts.join(&SEPARATOR)))
+    PathBuf::from(os_string(parts.join(&SEPARATOR)))
 }
 
 pub fn dirname(path: &Path) -> PathBuf {
-    let bytes = path.as_os_str().as_bytes();
+    let bytes = path.as_os_str().as_encoded_bytes();
     let end = bytes
         .iter()
         .rposition(|&byte| byte == SEPARATOR)
@@ -92,7 +105,7 @@ pub fn dirname(path: &Path) -> PathBuf {
             .take_while(|&&byte| byte == SEPARATOR)
             .count();
     let head = if trimmed == 0 { head } else { &head[..trimmed] };
-    PathBuf::from(OsStr::from_bytes(head))
+    PathBuf::from(os_str(head))
 }
 
 pub fn commonpath(paths: &[PathBuf]) -> PathBuf {
@@ -110,7 +123,7 @@ pub fn commonpath(paths: &[PathBuf]) -> PathBuf {
     }
     let mut out = b"/".to_vec();
     out.extend(first[..common].join(&SEPARATOR));
-    PathBuf::from(OsString::from_vec(out))
+    PathBuf::from(os_string(out))
 }
 
 pub fn splitext(name: &str) -> (&str, &str) {
