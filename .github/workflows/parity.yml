@@ -69,6 +69,11 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: cargo test --locked
+      - run: |
+          rustup target add aarch64-apple-darwin x86_64-pc-windows-gnu x86_64-pc-windows-msvc
+          for target in aarch64-apple-darwin x86_64-pc-windows-gnu x86_64-pc-windows-msvc; do
+            cargo clippy --locked -p pycg_syntax --target "$target" -- -D warnings
+          done
       - id: key
         run: echo "key=$(make -s parity-key)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

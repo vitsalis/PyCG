@@ -14,10 +14,7 @@ const INDENTATION_DEPTH_MAX: usize = 100;
 const INTERPOLATED_STRING_DEPTH_MAX: usize = 149;
 const STATEMENT_DEPTH_MAX: usize = 43_482;
 const PARSE_STACK_BASE_BYTES: usize = 8 << 20;
-#[cfg(debug_assertions)]
 const PARSE_STACK_BYTES_PER_SOURCE_BYTE: usize = 2 * 2_213;
-#[cfg(not(debug_assertions))]
-const PARSE_STACK_BYTES_PER_SOURCE_BYTE: usize = 2 * 992;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SyntaxKind {
