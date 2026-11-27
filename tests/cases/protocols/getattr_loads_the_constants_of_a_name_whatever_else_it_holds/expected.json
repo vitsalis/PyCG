@@ -1,0 +1,50 @@
+{
+ "documents": [],
+ "edges": {
+  "<builtin>.getattr": [],
+  "<builtin>.setattr": [],
+  "ext.choose": [],
+  "main": [
+   "main.annotated",
+   "main.many",
+   "main.mixed",
+   "main.unknown"
+  ],
+  "main.C.a": [],
+  "main.C.b": [],
+  "main.C.c": [],
+  "main.C.d": [],
+  "main.C.e": [],
+  "main.annotated": [
+   "<builtin>.getattr",
+   "main.C.a"
+  ],
+  "main.many": [
+   "<builtin>.getattr",
+   "ext.choose"
+  ],
+  "main.mixed": [
+   "<builtin>.getattr",
+   "<builtin>.setattr",
+   "ext.choose",
+   "main.C.b"
+  ],
+  "main.unknown": [
+   "<builtin>.getattr"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.many",
+   "main:19:8#19:28",
+   "computed name"
+  ],
+  [
+   "main.unknown",
+   "main:16:4#16:26",
+   "computed name"
+  ]
+ ],
+ "warnings": []
+}

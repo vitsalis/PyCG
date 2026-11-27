@@ -69,6 +69,10 @@ FAMILIES = {
         "classes",
         "Class tests",
     ),
+    "tests/test_containers.py": (
+        "containers",
+        "Containers",
+    ),
     "tests/test_decorators_and_descriptors.py": (
         "calls",
         "Decorators and functions that return a parameter",
@@ -92,6 +96,10 @@ FAMILIES = {
     "tests/test_generator.py": (
         "language",
         "The assignment graph (idea 1)",
+    ),
+    "tests/test_iteration.py": (
+        "containers",
+        "Iteration",
     ),
     "tests/test_language_items.py": (
         "language",
@@ -137,9 +145,17 @@ FAMILIES = {
         "language",
         "Computed attribute names",
     ),
+    "tests/test_records.py": (
+        "records",
+        "The solver",
+    ),
     "tests/test_slots.py": (
         "classes",
         "The class statement",
+    ),
+    "tests/test_special_methods.py": (
+        "protocols",
+        "Special methods and protocols",
     ),
     "tests/test_super.py": (
         "classes",
