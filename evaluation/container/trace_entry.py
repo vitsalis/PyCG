@@ -21,8 +21,7 @@ service of evaluation/compose.yaml, writes it to /results/trace/NAME.json
 and, with --compare, compares it with the committed trace
 (evaluation/macro-benchmark/README.md, "Re-recording a trace").
 
-    NAME=jmespath docker compose -f evaluation/compose.yaml \\
-        run --rm trace [--compare]"""
+    make eval-trace NAME=jmespath"""
 
 
 def _load(name, path):

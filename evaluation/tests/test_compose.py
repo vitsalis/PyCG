@@ -133,4 +133,6 @@ def test_the_trace_service_writes_only_its_own_directory(compose):
         if not volume.endswith(":ro")
     ]
     assert writable == ["./results/trace:/results/trace"]
-    assert (EVALUATION / "results" / "trace" / ".gitkeep").is_file()
+    recipe = (REPOSITORY / "Makefile").read_text().partition("\neval-trace:")[2]
+    before_the_run = recipe.partition("run --rm trace")[0]
+    assert "\tmkdir -p evaluation/results/trace\n" in before_the_run

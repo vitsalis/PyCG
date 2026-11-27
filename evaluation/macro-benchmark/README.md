@@ -147,9 +147,8 @@ graph = (trace - rejected) + added
 - **Trace** (`dynamic/<name>.json`): the calls that the package made while
   its test suite ran (see "Traces"). This part is reproducible: the
   `trace` service records it again in a container, from the pinned source
-  and the pinned test environment, and compares the edges: `NAME=<name>
-  docker compose -f evaluation/compose.yaml run --rm trace --compare` (see
-  "Re-recording a trace").
+  and the pinned test environment, and compares the edges: `make
+  eval-trace NAME=<name>` (see "Re-recording a trace").
 - **Rejected** (`ground-truth/<name>.rejected.json`): the trace edges that
   are not edges of the package (rule A), each with its reason.
 - **Added** (`ground-truth/<name>.added.json`): the edges of the graph that
@@ -3805,17 +3804,19 @@ $C build inputs
 NAME=jmespath $C build trace
 # 3. Run its tests under the tracer, without network; compare the new
 #    trace with the committed one.
-NAME=jmespath $C run --rm trace --compare
+make eval-trace NAME=jmespath
 ```
 
-Step 3 copies the source of jmespath out of the image, runs the
-tests under the tracer, checks the new trace (its format, the project and
-the pin, exactly the distributions of the requirements file) and writes
-`evaluation/results/trace/jmespath.json` and `jmespath.installed.txt`.
-`--compare` prints the Python version, the test counts and the number of
-edges of both traces, the distributions that differ and the edges that
-only one trace has, and exits with 0 only if the edge sets are equal. The
-committed `dynamic/jmespath.json` is never changed by the service.
+Step 3 creates `evaluation/results/trace/` as your user, runs the service as
+your user (`EVAL_UID`, `EVAL_GID`), copies the source of jmespath out of the
+image, runs the tests under the tracer, checks the new trace (its format,
+the project and the pin, exactly the distributions of the requirements file)
+and writes `evaluation/results/trace/jmespath.json` and
+`jmespath.installed.txt`. When the project has a committed trace, the target
+passes `--compare`, which prints the Python version, the test counts and the
+number of edges of both traces, the distributions that differ and the edges
+that only one trace has, and exits with 0 only if the edge sets are equal.
+The committed `dynamic/jmespath.json` is never changed by the service.
 
 The service (`container/trace_entry.py`) runs without network, with a
 read-only root, no capability and a non-root user. `/repo` is this
