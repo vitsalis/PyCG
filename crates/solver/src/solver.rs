@@ -38,14 +38,16 @@ pub struct Work {
 enum Inbox {
     Empty,
     One(SetId),
-    Many(Vec<SetId>),
+    Many(Box<[SetId]>),
 }
 
 enum Successors {
     None,
     One(NodeId),
-    Many(OrderedMap<NodeId, bool>),
+    Many(Box<OrderedMap<NodeId, bool>>),
 }
+
+type Groups<C> = Vec<(Vec<C>, SetId)>;
 
 struct Node<C> {
     representative: Option<NodeId>,
@@ -54,7 +56,7 @@ struct Node<C> {
     successors: Successors,
     constraints: Vec<C>,
     fired: SetId,
-    groups: Option<Vec<(Vec<C>, SetId)>>,
+    groups: Option<Box<Groups<C>>>,
     constant: bool,
     witness: Option<WatchId>,
 }
@@ -318,7 +320,10 @@ impl<C: Copy> Solver<C> {
             entry.constraints.push(constraint);
         } else {
             let constraints = std::mem::take(&mut entry.constraints);
-            entry.groups = Some(vec![(constraints, entry.fired), (vec![constraint], seen)]);
+            entry.groups = Some(Box::new(vec![
+                (constraints, entry.fired),
+                (vec![constraint], seen),
+            ]));
             self.firing_nodes.insert(node);
         }
         self.apply_seen(rules, constraint, seen);
@@ -517,12 +522,12 @@ impl<C: Copy> Solver<C> {
                 let mut map = OrderedMap::default();
                 map.insert(*only, false);
                 map.insert(target, searched);
-                *successors = Successors::Many(map);
+                *successors = Successors::Many(Box::new(map));
             }
             Successors::None if searched => {
                 let mut map = OrderedMap::default();
                 map.insert(target, true);
-                *successors = Successors::Many(map);
+                *successors = Successors::Many(Box::new(map));
             }
             Successors::None => *successors = Successors::One(target),
         }
@@ -553,10 +558,10 @@ impl<C: Copy> Solver<C> {
                 self.worklist.push_back(node);
             }
             Inbox::One(only) if *only == objects => {}
-            Inbox::One(only) => entry.inbox = Inbox::Many(vec![*only, objects]),
+            Inbox::One(only) => entry.inbox = Inbox::Many(Box::new([*only, objects])),
             Inbox::Many(sets) => {
                 if !sets.contains(&objects) {
-                    sets.push(objects);
+                    *sets = sets.iter().copied().chain([objects]).collect();
                 }
             }
         }
@@ -574,7 +579,7 @@ impl<C: Copy> Solver<C> {
         let delta = match inbox {
             Inbox::Many(sets) => {
                 let mut fresh: Vec<SetId> = Vec::with_capacity(sets.len());
-                for set in sets {
+                for &set in sets.iter() {
                     let difference = self.sets.difference(set, done);
                     if !self.sets.is_empty(difference) {
                         fresh.push(difference);
@@ -665,7 +670,7 @@ impl<C: Copy> Solver<C> {
                 } else {
                     let mut map = OrderedMap::default();
                     map.insert(target, true);
-                    self.nodes[node.index()].successors = Successors::Many(map);
+                    self.nodes[node.index()].successors = Successors::Many(Box::new(map));
                     self.cycle_suspects.push(target);
                 }
             }
@@ -723,7 +728,7 @@ impl<C: Copy> Solver<C> {
                     .iter()
                     .flat_map(|(constraints, _)| constraints.iter().copied())
                     .collect();
-                groups
+                *groups
             }
         };
         entry.fired = done;
@@ -847,7 +852,7 @@ impl<C: Copy> Solver<C> {
             hold(entry.done);
             hold(entry.fired);
             received_sets(&entry.inbox).into_iter().for_each(&mut hold);
-            for (_, set) in entry.groups.iter().flatten() {
+            for (_, set) in entry.groups.iter().flat_map(|groups| groups.iter()) {
                 hold(*set);
             }
         }
@@ -1030,7 +1035,7 @@ impl<C: Copy> Solver<C> {
             let entry = &mut self.nodes[member.index()];
             inbox.extend(received_sets(&entry.inbox));
             if let Some(member_groups) = entry.groups.take() {
-                groups.extend(member_groups);
+                groups.extend(*member_groups);
             } else if !entry.constraints.is_empty() {
                 groups.push((std::mem::take(&mut entry.constraints), entry.fired));
             }
@@ -1070,7 +1075,7 @@ impl<C: Copy> Solver<C> {
         if groups.is_empty() {
             entry.groups = None;
         } else {
-            entry.groups = Some(groups);
+            entry.groups = Some(Box::new(groups));
             self.firing_nodes.insert(representative);
         }
         for set in inbox {
@@ -1090,7 +1095,7 @@ fn received_sets(inbox: &Inbox) -> Vec<SetId> {
     match inbox {
         Inbox::Empty => Vec::new(),
         Inbox::One(set) => vec![*set],
-        Inbox::Many(sets) => sets.clone(),
+        Inbox::Many(sets) => sets.to_vec(),
     }
 }
 

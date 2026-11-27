@@ -39,14 +39,15 @@ impl NodeId {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct WatchId(u32);
+pub struct WatchId(NonZeroU32);
 
 impl WatchId {
     pub fn new(index: usize) -> WatchId {
-        WatchId(u32::try_from(index).expect("watches fit u32"))
+        let index = u32::try_from(index).expect("watches fit u32");
+        WatchId(NonZeroU32::new(index + 1).expect("fewer than u32::MAX watches"))
     }
 
     pub fn index(self) -> usize {
-        self.0 as usize
+        (self.0.get() - 1) as usize
     }
 }
