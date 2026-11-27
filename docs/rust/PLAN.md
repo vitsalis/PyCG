@@ -717,8 +717,13 @@ harness.
 `--package-name`, `--package-version`, `-o`, `--cap N|none`, the same
 errors for a bad cap, the document on standard output or in the file,
 with a final newline. `pycg-view` becomes `pycg view`. The
-warnings of `program.py` (a skipped file, a path outside the root) go to
-standard error with the same text. The exit status is 0 on a document,
+warnings of `program.py` go to standard error, one line each, in the
+order of the analysis, with the same text: an entry point outside the
+package root, a stub, a directory, the package root as an entry point, and
+a module nested deeper than the bound. A module that cannot be read or
+parsed is warned with the same words, but the reader's or parser's cause
+of the document (`FileNotFoundError`, `SyntaxError (line 3)`) stands in
+for CPython's message (section 5, *Risks*). The exit status is 0 on a document,
 1 when the document cannot be written, 2 on a usage error, and 3 when the
 analysis meets a part that is not ported yet, with the line `pycg: not
 ported: <what>`. A broken assertion exits with 101 and one line, `pycg:
@@ -770,6 +775,7 @@ time and the peak resident set of the child as it does for Python.
 | Risk | How it shows | Bound |
 |---|---|---|
 | ruff's parser accepts or rejects other programs than CPython 3.14, or recovers from errors where CPython fails | A module `failed` in one document and analysed in the other | D1 compares the status and cause of every module of every input; a corpus of the syntax-error tests of CPython's `Lib/test/test_syntax.py` and `test_grammar.py` (data, read by a test) checks acceptance; where ruff reports an error, the Rust side fails the module as CPython would |
+| A warning for a module that cannot be read or parsed carries CPython's exception message (`[Errno 2] No such file or directory: '…'`, `invalid syntax (x.py, line 1)`) | Another standard error than Python's for such a module | The Rust side prints the same words and file with the cause that the document records; the message of CPython's tokenizer and parser is not ported, as ruff's errors are not CPython's; a case that compares such a warning stays pending with this cause |
 | The line of a `SyntaxError` differs | The cause `SyntaxError (line N)` differs | The same corpus checks lines; if a class of errors cannot be matched, the oracle's cause drops the line on `main` (a format change, decided by the maintainer) rather than the port approximating it |
 | CPython's positions differ from ruff's ranges (decorated definitions, a generator expression that is a call's only argument, parenthesised expressions, implicit concatenation, f-string parts) | Different sites, different lambda numbers | D1 compares every position the builder reads, on every module of every input, before anything else is built |
 | Identifiers that CPython normalises (NFKC) | Different names | D1 includes names; NFKC is applied with a table generated from Python's `unicodedata` by a tool script and committed as data, since no crate is pulled in for it |
