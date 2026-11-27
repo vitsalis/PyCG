@@ -1,0 +1,1 @@
+frozendict(a=sentinel('x'))

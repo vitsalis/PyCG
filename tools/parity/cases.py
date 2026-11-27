@@ -30,10 +30,11 @@ invariant for the simulation tests, not a program's output. A test that
 only changes the directory or the environment is converted, its paths
 taken from the root of its program.
 A test that analyses no program in its own process (one that runs the
-command line) is listed too, and so are a hypothesis property, whose
-programs differ from run to run, and a test that analyses micro cases,
-which the harness runs already: it states a property of every case. The
-cases of the file are written again from scratch.
+command line) is listed too, and so is a test that analyses micro cases,
+which the harness runs already: it states a property of every case. A
+hypothesis property runs with seed 0, so its examples, each a case, are
+the same on every run. The cases of the file are written again from
+scratch.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -60,6 +61,26 @@ FAMILIES = {
         "classes",
         "Descriptors",
     ),
+    "tests/test_flow.py": (
+        "flow",
+        "Paths, joins and loops",
+    ),
+    "tests/test_generator.py": (
+        "language",
+        "The assignment graph (idea 1)",
+    ),
+    "tests/test_language_items.py": (
+        "language",
+        "Language features",
+    ),
+    "tests/test_literal_imports.py": (
+        "language",
+        "Imports",
+    ),
+    "tests/test_match.py": (
+        "language",
+        "`match`",
+    ),
     "tests/test_metaclasses.py": (
         "classes",
         "Metaclasses",
@@ -67,6 +88,10 @@ FAMILIES = {
     "tests/test_object_hooks.py": (
         "classes",
         "Attribute hooks",
+    ),
+    "tests/test_patterns.py": (
+        "language",
+        "Computed attribute names",
     ),
     "tests/test_slots.py": (
         "classes",
@@ -79,6 +104,18 @@ FAMILIES = {
     "tests/test_type_three_arguments.py": (
         "classes",
         "The class statement",
+    ),
+    "tests/test_with_and_exceptions.py": (
+        "language",
+        "Exceptions, `finally` and `with`",
+    ),
+    "tests/unit/test_imports.py": (
+        "imports",
+        "Imports",
+    ),
+    "tests/unit/test_type_only_names.py": (
+        "imports",
+        "Imports",
     ),
 }
 ENGINE_LOGGER = "pycg"
@@ -165,7 +202,6 @@ class Recorder:
         self.written = []
         self.skipped = []
         self.unanalysed = []
-        self.properties = []
         self.micro = []
         self.failed = []
 
@@ -173,9 +209,6 @@ class Recorder:
     def pytest_runtest_call(self, item):
         from pycg.pycg import CallGraphGenerator
 
-        if getattr(item.obj, "is_hypothesis_test", False):
-            self.properties.append(item.name)
-            return (yield)
         runs = []
         tmp_path = item.funcargs.get("tmp_path")
         analyze = CallGraphGenerator.analyze
@@ -310,7 +343,8 @@ def convert(cases, test_file, source, family, design):
     remove_cases_of(cases, source, family)
     recorder = Recorder(cases, source, family, design)
     status = pytest.main(
-        ["-q", "-p", "no:cacheprovider", str(test_file)], plugins=[recorder]
+        ["-q", "-p", "no:cacheprovider", "--hypothesis-seed=0", str(test_file)],
+        plugins=[recorder],
     )
     return recorder, status == 0 and not recorder.failed
 
@@ -332,8 +366,6 @@ def main(argv=None):
         print(f"not converted (monkeypatches an attribute): {source}::{name}")
     for name in recorder.micro:
         print(f"not converted (a property of the micro cases): {source}::{name}")
-    for name in recorder.properties:
-        print(f"not converted (a hypothesis property): {source}::{name}")
     for name in recorder.unanalysed:
         print(f"not converted (analyses no program in process): {source}::{name}")
     print(f"{len(recorder.written)} cases written to {CASES / family}")
