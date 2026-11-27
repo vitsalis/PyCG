@@ -444,11 +444,11 @@ impl<T: Trace> State<T> {
         overloads
     }
 
-    pub(super) fn unknown_class(&self, object: ObjId) -> bool {
+    pub(super) fn unknown_class(&mut self, object: ObjId) -> bool {
         match self.objects.get(object) {
             Object::Typed { abstract_, .. } => *abstract_,
             Object::Container(container) if self.symbols.text(container.kind).contains('.') => {
-                not_ported("containers: a container of an outside class")
+                self.stubs.is_abstract(self.symbols.text(container.kind))
             }
             _ => false,
         }

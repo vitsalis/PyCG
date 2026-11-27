@@ -1338,8 +1338,10 @@ impl<T: Trace> State<T> {
                 let first = self.symbols.intern(first);
                 self.objects.function(function).parameter(first)
             }
-            None if made.varargs.is_some() => not_ported("containers: a receiver in varargs"),
-            None => return,
+            None => match made.varargs {
+                Some(varargs) => self.element(graph, varargs, &Literal::Int(BigInt::ZERO)),
+                None => return,
+            },
         };
         let source = if kind == Some(MethodKind::ClassMethod) {
             self.family(graph, class)
