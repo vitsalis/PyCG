@@ -11,8 +11,19 @@ SCALE = Path(__file__).resolve().parent
 EVALUATION = SCALE.parent
 OUTCOME_FINISHED = "finished"
 OUTCOME_KILLED_BY_THE_CAP = "killed by the cap"
+OUTCOME_CONTAINER_OUT_OF_MEMORY = "killed: the container ran out of memory"
+OUTCOME_MACHINE_OUT_OF_MEMORY = "killed: the machine ran out of memory"
+OUTCOME_KILLED = "killed by SIGKILL"
+OUTCOMES_KILLED_FROM_OUTSIDE = (
+    OUTCOME_CONTAINER_OUT_OF_MEMORY,
+    OUTCOME_MACHINE_OUT_OF_MEMORY,
+    OUTCOME_KILLED,
+)
 RUNNER_HEADROOM_MIB = 512
 CGROUP_MEMORY_MAX = Path("/sys/fs/cgroup/memory.max")
+CGROUP_MEMORY_EVENTS = Path("/sys/fs/cgroup/memory.events")
+PROC_MEMINFO = Path("/proc/meminfo")
+KIB_PER_MIB = 1 << 10
 CGROUP_NO_LIMIT = "max"
 MIB = 1 << 20
 DESCRIPTION = """Measures a PyCG checkout on one package of the scale set
@@ -43,14 +54,50 @@ class MeasureError(Exception):
     pass
 
 
-def outcome_of(record):
+def outcome_of(record, events_before, events_after):
     if record["status"] == "ok":
         return OUTCOME_FINISHED
     if record["status"] == "memory":
         return OUTCOME_KILLED_BY_THE_CAP
     if record["status"] == "crash" and record.get("exit_status") == -signal.SIGKILL:
-        return OUTCOME_KILLED_BY_THE_CAP
+        return killed_from_outside(events_before, events_after)
     return record["status"]
+
+
+def killed_from_outside(events_before, events_after):
+    if events_before is None or events_after is None:
+        return OUTCOME_KILLED
+    if events_after["oom"] > events_before["oom"]:
+        return OUTCOME_CONTAINER_OUT_OF_MEMORY
+    if events_after["oom_kill"] > events_before["oom_kill"]:
+        return OUTCOME_MACHINE_OUT_OF_MEMORY
+    return OUTCOME_KILLED
+
+
+def memory_available_mib(meminfo):
+    try:
+        text = Path(meminfo).read_text(encoding="ascii")
+    except FileNotFoundError:
+        return None
+    for line in text.splitlines():
+        fields = line.split()
+        if fields[0] == "MemAvailable:":
+            assert fields[2:] == ["kB"], line
+            return int(fields[1]) // KIB_PER_MIB
+    raise MeasureError(f"{meminfo} has no MemAvailable")
+
+
+def memory_events(path):
+    try:
+        text = Path(path).read_text(encoding="ascii")
+    except FileNotFoundError:
+        return None
+    counts = {}
+    for line in text.splitlines():
+        name, value = line.split()
+        counts[name] = int(value)
+    assert {"oom", "oom_kill"} <= counts.keys(), path
+    return counts
 
 
 def record_path(out, name, package):
@@ -86,6 +133,8 @@ def measure(
     timeout_seconds,
     python,
     cgroup_memory_max=CGROUP_MEMORY_MAX,
+    cgroup_memory_events=CGROUP_MEMORY_EVENTS,
+    meminfo=PROC_MEMINFO,
 ):
     check_headroom(memory_mib, cgroup_memory_max)
     version = run.git_version(checkout)
@@ -101,7 +150,10 @@ def measure(
     tool = run.Tool(name, "new", Path(checkout).resolve(), python)
     job = run.Job(f"scale/{project.name}", files, project.root)
     graph = run.graph_file(Path(out) / name, job.key)
+    available = memory_available_mib(meminfo)
+    events_before = memory_events(cgroup_memory_events)
     record = run.run_job(tool, job, graph, timeout_seconds, memory_mib)
+    events_after = memory_events(cgroup_memory_events)
     finished = record["status"] == "ok"
     result = {
         "package": project.name,
@@ -111,9 +163,10 @@ def measure(
         "python": ".".join(map(str, run.python_version(python))),
         "hash_seed": tool.hash_seed,
         "memory_cap_mib": memory_mib,
+        "memory_available_mib": available,
         "timeout": timeout_seconds,
         "files": len(files),
-        "outcome": outcome_of(record),
+        "outcome": outcome_of(record, events_before, events_after),
         "seconds": record.get("seconds"),
         "wall_seconds": record.get("wall_seconds"),
         "peak_rss_mib": record.get("peak_rss_mib"),
@@ -143,6 +196,7 @@ ROWS = (
     ("seconds", lambda r: r["seconds"]),
     ("wall seconds", lambda r: r["wall_seconds"]),
     ("peak MiB", lambda r: r["peak_rss_mib"]),
+    ("MiB available at the start", lambda r: r.get("memory_available_mib")),
     ("graph SHA-256", lambda r: r["graph_sha256"]),
 )
 MEASURED_ROWS = ("seconds", "wall seconds", "peak MiB")
@@ -169,6 +223,12 @@ def comparison(base, now):
         now["archive_sha256"],
     ):
         raise MeasureError("the two records are of different packages")
+    for side, result in (("base", base), ("this", now)):
+        if result["outcome"] in OUTCOMES_KILLED_FROM_OUTSIDE:
+            raise MeasureError(
+                f"the {side} run was killed ({result['outcome']}) and is not a "
+                "measurement: run it again with the container's memory free"
+            )
     lines = [heading(now), "", "| | base | this | change |", "|---|---|---|---|"]
     for label, value in ROWS:
         before, after = value(base), value(now)

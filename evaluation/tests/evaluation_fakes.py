@@ -49,6 +49,16 @@ class CallGraphGenerator:
             time.sleep(60)
         if behaviour == "die":
             os._exit(3)
+        if behaviour == "killed-by-the-machine":
+            # As the kernel's OOM killer of the machine does: the counter of
+            # the cgroup rises and the process gets SIGKILL.
+            events = os.path.join(self.package, "memory.events")
+            counts = dict(line.split() for line in open(events).read().splitlines())
+            counts["oom_kill"] = str(int(counts["oom_kill"]) + 1)
+            with open(events, "w") as file:
+                file.writelines(f"{name} {value}\\n" for name, value in counts.items())
+            time.sleep(1)
+            os.kill(os.getpid(), 9)
 
     def mark(self, name):
         # Write the id of this process to a file of the package, for the test.
