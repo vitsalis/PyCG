@@ -50,8 +50,11 @@ pub fn discover(
     std::fs::create_dir_all(out).expect("the output directory can be made");
     let file = File::create(out.join("D4.jsonl")).expect("the D4 dump can be created");
     let replay = Replay::new(Oracle::open(oracle), BufWriter::new(file));
-    let mut program = Program::new(entry_points, Some(package), &cwd, replay);
-    program.build_modules();
+    let mut program = Program::new(entry_points, Some(package), &cwd, replay)
+        .expect("the paths of an oracle input are on one drive");
+    program
+        .build_modules()
+        .expect("the paths of an oracle input are on one drive");
     program.analysis.write_linked_defines();
     program
         .analysis
@@ -61,7 +64,8 @@ pub fn discover(
     let mut listed = String::new();
     for (name, module) in &program.modules {
         let real = std::fs::canonicalize(&module.file).unwrap_or_else(|_| module.file.clone());
-        let relative = relpath(&real, &cwd, &cwd);
+        let relative = relpath(&real, &cwd, &cwd)
+            .expect("a module file is on the drive of the working directory");
         listed.push_str(&format!("{name}\t{}\n", relative.display()));
     }
     std::fs::write(out.join("modules.tsv"), listed).expect("the module list is written");

@@ -402,7 +402,7 @@ where the payload does not give it.
 | `BUILTIN_OR_FROZEN_MODULES` | a fixed list, not the running Python's | the same `static` list |
 | `_find_modules`, `_candidates`, `extension_name` | parts checked with `str.isidentifier()`; candidates package, module file, extension binaries sorted by name | Python's identifier rule (XID with the NFKC check of CPython); names sorted as Python sorts `str`, by code point, which for UTF-8 names is byte order |
 | `SourceModule`, `Program` | modules in build order, extension modules, entry module names, entry-only files, star imports inside and outside, exports in order, modules declaring `__all__` | `IndexMap`s and sets; the breadth-first build from a `VecDeque`, `_link_submodules` and `_link_star_imports` in the same order |
-| paths | `os.path.abspath`, `relpath`, `commonpath` (lexical), `isfile` and `isdir` (following links) | lexical path functions written in `pycg_analysis::program` (no crate), checks through `std::fs::metadata` |
+| paths | `os.path.abspath`, `relpath`, `commonpath`, `split`, `join` (posixpath, or ntpath on Windows), `isfile` and `isdir` (following links) | the lexical rules of posixpath and of ntpath written in `pycg_analysis::program::paths` (no crate), the platform's chosen at compile time, tested on Linux against Python 3.14's two modules (`tools/parity/paths.py`); checks through `std::fs::metadata` |
 | `gc.disable()` | performance only in Python | nothing |
 
 ## `formats/` → `pycg-document`
@@ -783,7 +783,7 @@ time and the peak resident set of the child as it does for Python.
 | File names that are not UTF-8 (Python's surrogate escapes) | A path in the document differs | Paths are handled as bytes and written as Python writes a surrogate-escaped `str` (`\udcXX` in the JSON); a case with such a file name |
 | Memory of the port is not what the census promises (the records, not the edges, dominate on some packages) | A scale target missed | Stage 7 measures each package's peak and its largest tables (`table_sizes`), back to back with the oracle; the target is per package (section 6) |
 | A dependency changes under us (ruff's crates are internal and weekly) | A build or parity break on update | Exact pins and `Cargo.lock`; an update is a pull request that must pass parity |
-| The path functions of `pycg_analysis::program` follow posixpath's lexical rules on every platform, where Python PyCG on Windows uses ntpath (drives, `\` and `/` as separators, case-insensitive comparison) | On Windows, other module names, roots or skipped files than Python's for the same package | Parity is measured on Linux only; before the first Windows release, the path functions take ntpath's lexical rules under `cfg(windows)` |
+| On Windows, Python's ntpath goes beyond its lexical rules: `abspath` is `GetFullPathNameW` (it drops trailing dots and spaces, maps device names such as `NUL`, resolves `C:x` against that drive's own directory), `normcase` lowers with `LCMapStringEx` rather than `str.lower` | On Windows, another root or module name than Python's for such a path | The Rust side takes ntpath's lexical fallback (`normpath(join(cwd, path))`) and `str.lower`; parity is measured on Linux, where these paths do not occur. Paths on two drives, where `relpath` and `commonpath` raise `ValueError`, end `pycg` with Python's message and status 1 |
 | Several agents in parallel conflict | Merge conflicts, two owners of one table | One owner per Rust module per stage (section 4); the crates follow the stages |
 
 # 6. Timing and memory targets
