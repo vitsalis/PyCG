@@ -26,7 +26,8 @@ sandbox = docker run --rm --network none --read-only --tmpfs /tmp \
 	-v $(CURDIR):$(CURDIR):ro -v $(GIT_COMMON):$(GIT_COMMON):ro \
 	-v $(EVAL_OUT):$(EVAL_OUT) pycg-eval-runner python3 -I
 SANDBOX = $(call sandbox,6g)
-SCALE_SANDBOX = $(call sandbox,$(SCALE_MEMORY_MIB)m)
+SCALE_CONTAINER_MIB = $(shell python3 -I evaluation/scale/measure.py container-mib $(SCALE_MEMORY_MIB))
+SCALE_SANDBOX = $(call sandbox,$(SCALE_CONTAINER_MIB)m)
 SCALE_MEASURE = $(CURDIR)/evaluation/scale/measure.py
 SCALE_RESULT = $(EVAL_OUT)/scale-$(COMMIT)
 SCALE_BASE_RESULT = $(EVAL_OUT)/scale-base-$(BASE_COMMIT)-for-$(COMMIT)
@@ -92,7 +93,8 @@ define parity_d1
 (cd $(1) && find . -name modules.tsv) | sort | while read -r modules; do \
 	input=$$(dirname "$$modules"); \
 	mkdir -p $(2)/$$input && \
-	$(PARITY_BINARIES)/pycg_dump d1 $(1)/$$modules $(2)/$$input/D1.jsonl || exit 1; \
+	$(PARITY_BINARIES)/pycg_dump d1 $(1)/$$modules $(2)/$$input/D1.jsonl \
+		|| { echo "parity: pycg_dump d1 $(1)/$$modules failed on $$input" >&2; exit 1; }; \
 done
 endef
 
@@ -249,7 +251,8 @@ parity:
 		for run in run-1 run-2; do \
 			mkdir -p $(PARITY_RUST)/$$run/$$input && \
 			$(PARITY_BINARIES)/pycg_dump stubs "$$dump" \
-				> $(PARITY_RUST)/$$run/$$input/D2.jsonl || exit 1; \
+				> $(PARITY_RUST)/$$run/$$input/D2.jsonl \
+				|| { echo "parity: pycg_dump stubs $$dump failed on $$input" >&2; exit 1; }; \
 		done; \
 	done
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)

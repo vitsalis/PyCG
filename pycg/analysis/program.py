@@ -2,11 +2,13 @@ import ast
 import gc
 import logging
 import os
+import sys
 import tokenize
 import warnings
 from collections import deque
 
-from .builder import ModuleBuilder
+from .annotations import parser_overflowed
+from .builder import NESTING_MAX, NESTING_STACK_FRAMES, ModuleBuilder
 from .imports import ImportManager, extension_name
 from .scopes import literal_assignment, mentions
 from .semantics import Analysis
@@ -48,9 +50,12 @@ class Program:
     def analyse(self):
         collecting = gc.isenabled()
         gc.disable()
+        limit = sys.getrecursionlimit()
+        sys.setrecursionlimit(max(limit, _stack_depth() + NESTING_STACK_FRAMES))
         try:
             self._analyse()
         finally:
+            sys.setrecursionlimit(limit)
             if collecting:
                 gc.enable()
 
@@ -153,14 +158,16 @@ class Program:
             is_entry,
             _own_stub_tree(path),
         )
-        try:
-            builder.build()
-        except RecursionError as error:
+        too_deep = builder.build()
+        if too_deep is not None:
             logger.warning(
-                "%s: code is nested too deeply; its analysis is incomplete", path
+                "%s: line %d nests deeper than %d levels; the analysis stops there",
+                path,
+                too_deep.lineno,
+                NESTING_MAX,
             )
             self.modules[name].status = "partial"
-            self.modules[name].cause = _cause(error)
+            self.modules[name].cause = f"DeepNesting (line {too_deep.lineno})"
         self._star_imported_modules_by_importer[name] = builder.star_imported_modules
         self._outside_star_imported_modules_by_importer[name] = (
             builder.outside_star_imported_modules
@@ -264,6 +271,15 @@ def _common_directory(paths):
     return os.path.commonpath([os.path.dirname(path) for path in paths])
 
 
+def _stack_depth():
+    frame = sys._getframe()
+    depth = 0
+    while frame is not None:
+        depth += 1
+        frame = frame.f_back
+    return depth
+
+
 def _own_stub_tree(path):
     base, suffix = os.path.splitext(path)
     stub = base + ".pyi"
@@ -295,6 +311,11 @@ def _parse(source, path):
             warnings.simplefilter("ignore")
             return ast.parse(source, path), None
     except (SyntaxError, ValueError, RecursionError) as error:
+        logger.warning("Skipping %s: cannot parse it: %s", path, error)
+        return None, _cause(error)
+    except MemoryError as error:
+        if not parser_overflowed(error):
+            raise
         logger.warning("Skipping %s: cannot parse it: %s", path, error)
         return None, _cause(error)
 

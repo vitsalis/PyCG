@@ -220,8 +220,28 @@ real calls of other programs, fails that test.
    of the names that it follows (idea 2). The builder never reads a
    points-to set. It walks constructs that it does not model, so the calls
    inside them are found; it does not walk code that cannot run. Long
-   chains (`a + b + c + ...`, which nest on the left) are walked in a loop,
-   so they do not exhaust the Python stack.
+   chains (`a + b + c + ...`, which nest on the left, and `elif` chains)
+   are walked in a loop, so they do not exhaust the Python stack. Other
+   nesting is bounded: the builder stops before the first top-level
+   statement that nests deeper than `NESTING_MAX` (247) levels, and the
+   module is `partial`. A statement is level 1 and each child one level
+   deeper, except the left operand of a binary operation and the `elif`
+   of an `if`, which are at their parent's level; contexts and operators
+   do not count. 247 is the deepest nesting that the most stack-hungry
+   construct measured still builds from the command line at Python's
+   default recursion limit of 1,000, on CPython 3.14.10: conditional
+   expressions nested in their `else` (`a if b else a if b else ...`),
+   245 of them in an assignment. Of 22 constructs, the others either
+   build deeper (subscripts 329 levels; attributes, method chains,
+   lambdas, unary operators, `not` and `**` about 493) or are stopped
+   earlier by the parser (100 levels of indentation, 200 nested brackets,
+   150 nested f-strings). So every module that builds today at that
+   limit still builds, and where the analysis stops no longer depends on
+   the stack. So that this holds whoever calls PyCG, `Program.analyse`
+   raises the recursion limit during the analysis to the caller's stack
+   depth plus `NESTING_STACK_FRAMES` (1,000, the limit of the
+   measurement) and restores it afterwards. The deepest statement of the micro, macro and scale sets
+   (11,109 modules) is 31 levels.
 4. **Linking**. When all modules are built, make each module a field of its
    package (also the packages of an entry module that no import names,
    without analysing their source, as far as an import resolves them as
@@ -903,6 +923,20 @@ per scope and site, and each site calls `__hash__` on the hub's keys once
 and compares them with the keys of its target. A source dict or a target
 that arrives after the second dict goes through the hub at once; the
 direct copies made before stay, and give what the hub gives.
+
+A subscript read (`x[k]`) and an unpacking (`a, b = x`) read a field of
+every container of their base node at every site: containers times keys
+times sites. On scikit-learn hundreds of sites read about 2,900 containers
+that reach their nodes together, and on numpy hundreds of sites read the
+same 650. So the containers that reach a site's node in one step of the
+solve are read as a group (`_ContainerGroup`, one per set of containers,
+whichever sites receive it): the group reads each key once into a node of
+its own, which the site's result node then gets. A key's node holds the
+union of what `read_key` gives for each container of the group, which is
+what the site's result node got from them one by one, so the result is the
+same; a node only holds more objects past the cap, and the result node
+holds at least as many, so it saturates whenever the group's node does. A
+lone container is still read directly.
 
 A program has millions of `Each` constraints and of nodes with a successor.
 An `Each` keeps its function and the function's owner, not a bound method
@@ -4017,14 +4051,17 @@ one defines `__getitem__`, `iter()` gives an iterator whose `next()` calls
 `__getitem__` with an index that is not known (the sequence protocol), from the
 scope that iterates. That fallback is one record per class, kind of the
 iterated object, iteration and result (`_Sequences`), attached to the lookup of
-`__getitem__` through each of its objects, once per lookup: the rule reads only
+`__getitem__` through each object that it is given: the rule reads only
 whether a lookup finds a method, and the objects of one kind and class find the
-same, but not in the same round. Through the first object alone, the record
-would iterate in the round in which that object's lookup fills: at once for an
-object that another iteration met earlier, a round later for one whose lookup
-is new, and which object comes first depends on the order of the solve (see
-*Saturation and the rounds*). An object that arrives later is iterated at once,
-and an opaque one gives the result the saturated value. Every iteration,
+same, but not in the same round. The record keeps no set of the lookups that it
+is attached to: an object given twice attaches it twice to its lookup, and an
+application after the first finds the record iterating and does nothing.
+Through the first object alone, the record would iterate in the round in which
+that object's lookup fills: at once for an object that another iteration met
+earlier, a round later for one whose lookup is new, and which object comes
+first depends on the order of the solve (see *Saturation and the rounds*). An
+object that arrives later is iterated at once, and an opaque one gives the
+result the saturated value. Every iteration,
 `iter()`, `next()` and an explicit `__next__()` of these iterators and of
 generators go through one rule. `iter(callable, sentinel)` gives an iterator
 whose `next()` calls the callable, implicitly, from the scope that iterates.

@@ -475,3 +475,36 @@ def test_a_dict_copied_into_another_at_many_sites_is_copied_once(tmp_path):
     (node,) = [n for n in analysis.named_nodes if n.label == "main.source"]
     (source,) = analysis.solver.objects(node)
     assert len(source.observers) == 1
+
+
+def tuples_read_at_many_sites(size):
+    lines = []
+    for i in range(size):
+        lines += [
+            f"def f{i}(): pass",
+            f"def read{i}(pair):",
+            "    first, second = pair",
+            "    return pair[0], first",
+        ]
+    items = ", ".join(f"(f{i}, {i})" for i in range(size))
+    lines += [f"for pair in [{items}]:"]
+    lines += [f"    read{i}(pair)" for i in range(size)]
+    return "\n".join(lines) + "\n"
+
+
+def tuples_read_work(tmp_path, size):
+    program = tuples_read_at_many_sites(size)
+    generator = analysed(tmp_path / str(size), {"main.py": program})
+    points_to = generator.output_points_to()
+    functions = sorted(f"main.f{i}" for i in range(size))
+    for i in (0, size - 1):
+        assert points_to[f"main.read{i}.first"] == functions
+    counts = generator.program.analysis.solver.work
+    return counts["copied"] + counts["edges"]
+
+
+def test_tuples_of_one_node_read_at_many_sites_cost_their_number(tmp_path):
+    small, medium, large = (tuples_read_work(tmp_path, size) for size in (40, 80, 160))
+
+    assert medium < 2.5 * small
+    assert large < 2.5 * medium

@@ -6,7 +6,6 @@ import re
 import subprocess
 import sys
 import tomllib
-from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -14,6 +13,7 @@ from programs import analysed, write
 from test_micro_benchmark import SNIPPETS, version_skip_reason
 
 import pycg
+from pycg.analysis.builder import NESTING_MAX, nesting
 from pycg.formats import dumps, edges
 from pycg.formats.document import IMPLICIT_CONSTRUCT_BY_ROLE
 from pycg.pycg import CallGraphGenerator
@@ -724,6 +724,59 @@ if False:
     assert calls(tmp_path, source) == []
 
 
+LAMBDAS_BEYOND_THE_PARSER_STACK = 6000
+
+
+def test_a_module_too_complex_for_the_parser_has_failed(tmp_path):
+    lambdas = "lambda: " * LAMBDAS_BEYOND_THE_PARSER_STACK
+    annotation = f'"{lambdas}None"'
+    found = document(
+        tmp_path,
+        {
+            "deep.py": f"x = {lambdas}None\n",
+            "main.py": f"import deep\ndef f(x: {annotation}): pass\nf(1)\n",
+        },
+    )
+
+    assert found["modules"] == {
+        "deep": {
+            "file": "deep.py",
+            "kind": "source",
+            "status": "failed",
+            "cause": "MemoryError",
+        },
+        "main": {"file": "main.py", "kind": "source", "status": "analysed"},
+    }
+    assert found["calls"] == {
+        "main": [{"line": 3, "col": 0, "end": [3, 4], "callees": ["main.f"]}]
+    }
+
+
+def parse_out_of_memory(text):
+    parse = ast.parse
+
+    def parsing(source, *args, **kwargs):
+        if source == text:
+            raise MemoryError()
+        return parse(source, *args, **kwargs)
+
+    return parsing
+
+
+@pytest.mark.parametrize("parsed", ["module", "annotation"])
+def test_running_out_of_memory_while_parsing_is_not_a_failed_module(
+    tmp_path, monkeypatch, parsed
+):
+    source = "def f(x: 'int'): pass\nf(1)\n"
+    write(tmp_path, {"main.py": source})
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    text = source if parsed == "module" else "int"
+    monkeypatch.setattr(ast, "parse", parse_out_of_memory(text))
+
+    with pytest.raises(MemoryError):
+        generator.analyze()
+
+
 def test_a_module_that_cannot_be_read_or_parsed_has_failed(tmp_path):
     found = document(
         tmp_path,
@@ -768,25 +821,58 @@ def test_a_module_that_cannot_be_read_or_parsed_has_failed(tmp_path):
     }
 
 
-@contextmanager
-def stack_limit(frames_beyond_caller):
-    previous = sys.getrecursionlimit()
-    sys.setrecursionlimit(len(inspect.stack(0)) + frames_beyond_caller)
-    try:
-        yield
-    finally:
-        sys.setrecursionlimit(previous)
+def nested_lambdas(depth):
+    return "lambda: " * (depth - 2) + "None"
 
 
-def test_a_module_whose_analysis_stops_early_is_partial(tmp_path):
-    lambdas_nested_beyond_the_analysis_stack = "lambda: " * 300
+def test_a_statement_at_the_nesting_bound_is_analysed(tmp_path):
+    source = f"def f(): pass\nx = {nested_lambdas(NESTING_MAX)}\nf()\n"
+    write(tmp_path, {"main.py": source})
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    generator.analyze()
+    found = generator.document()
+
+    assert found["modules"]["main"]["status"] == "analysed"
+    assert found["calls"]["main"] == [
+        {"line": 3, "col": 0, "end": [3, 3], "callees": ["main.f"]}
+    ]
+
+
+CALLER_DEPTH = 900
+
+
+def called_at_depth(frames, call):
+    if frames == 0:
+        return call()
+    return called_at_depth(frames - 1, call)
+
+
+def test_the_worst_statement_at_the_bound_is_analysed_from_a_deep_caller(tmp_path):
+    conditionals = "a if b else " * (NESTING_MAX - 2)
+    source = f"def f(): pass\nx = {conditionals}c\nf()\n"
+    assert nesting(ast.parse(source).body[1]) == NESTING_MAX
+    write(tmp_path, {"main.py": source})
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    limit = sys.getrecursionlimit()
+    called_at_depth(CALLER_DEPTH - len(inspect.stack(0)), generator.analyze)
+    found = generator.document()
+
+    assert sys.getrecursionlimit() == limit
+    assert found["modules"]["main"]["status"] == "analysed"
+    assert found["calls"]["main"] == [
+        {"line": 3, "col": 0, "end": [3, 3], "callees": ["main.f"]}
+    ]
+
+
+def test_the_analysis_stops_before_a_statement_beyond_the_nesting_bound(tmp_path):
     source = (
-        "def f(): pass\nf()\nx = " + lambdas_nested_beyond_the_analysis_stack + "None\n"
+        "def f(): pass\nf()\n"
+        f"x = {nested_lambdas(NESTING_MAX + 1)}\n"
+        "def h(): pass\nh()\n"
     )
     write(tmp_path, {"main.py": source})
     generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
-    with stack_limit(200):
-        generator.analyze()
+    generator.analyze()
     found = generator.document()
 
     assert found["modules"] == {
@@ -794,11 +880,26 @@ def test_a_module_whose_analysis_stops_early_is_partial(tmp_path):
             "file": "main.py",
             "kind": "source",
             "status": "partial",
-            "cause": "RecursionError",
+            "cause": "DeepNesting (line 3)",
         }
     }
-    assert found["definitions"]["main"]["lines"] == [1, 3]
+    assert found["definitions"]["main"]["lines"] == [1, 5]
     assert found["definitions"]["main.f"]["lines"] == [1, 1]
+    assert "main.h" not in found["definitions"]
+    assert found["calls"]["main"] == [
+        {"line": 2, "col": 0, "end": [2, 3], "callees": ["main.f"]}
+    ]
+
+
+def test_code_nested_beyond_the_python_stack_gives_a_partial_module(tmp_path):
+    lambdas = "lambda: " * sys.getrecursionlimit()
+    write(tmp_path, {"main.py": f"def f(): pass\nf()\nx = {lambdas}None\n"})
+    generator = CallGraphGenerator([str(tmp_path / "main.py")], str(tmp_path))
+    generator.analyze()
+    found = generator.document()
+
+    assert found["modules"]["main"]["status"] == "partial"
+    assert found["modules"]["main"]["cause"] == "DeepNesting (line 3)"
     assert found["calls"]["main"] == [
         {"line": 2, "col": 0, "end": [2, 3], "callees": ["main.f"]}
     ]

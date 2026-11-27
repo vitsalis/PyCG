@@ -610,6 +610,13 @@ class Recorder:
 
         self.solver.Watch.wake = wake
 
+        original_init = Solver.__init__
+
+        def init(solver, saturated, cap=None):
+            writer.write({"op": "solver", "cap": cap})
+            original_init(solver, saturated, cap)
+
+        Solver.__init__ = init
         original_solve = Solver.solve
         original_fire = Solver._fire
 
@@ -706,16 +713,7 @@ class Recorder:
         for obj in captured:
             self.declare_object(obj)
         kinds = constraint.kinds
-        if isinstance(constraint, self.solver.Each):
-            mode = "each"
-        elif any(
-            "apply_each" in vars(cls)
-            for cls in type(constraint).__mro__
-            if cls is not self.solver.Constraint
-        ):
-            mode = "batch"
-        else:
-            mode = "apply"
+        mode = "each" if isinstance(constraint, self.solver.Each) else "list"
         self.writers["D3"].write(
             {
                 "op": "constraint",
@@ -758,7 +756,10 @@ class Recorder:
 
         @functools.wraps(function)
         def applied(*args):
+            if not recorder.inside_solver:
+                return function(*args)
             obj = args[1] if constraint.owner is not None else args[0]
+            recorder.declare_constraint(constraint)
             writer.write({"op": "apply", "constraint": number, "objects": [canon(obj)]})
             with recorder.rules():
                 answer = function(*args)
@@ -786,12 +787,15 @@ class Recorder:
             for method_name in ("apply_each", "apply"):
                 if method_name not in own:
                     continue
-                if method_name == "apply" and "apply_each" in own:
+                if method_name == "apply" and cls is solver.Constraint:
                     continue
                 original = own[method_name]
 
                 def wrapped(constraint, objects, _original=original, _name=method_name):
+                    if not recorder.inside_solver:
+                        return _original(constraint, objects)
                     listed = [objects] if _name == "apply" else list(objects)
+                    recorder.declare_constraint(constraint)
                     writer.write(
                         {
                             "op": "apply",
@@ -812,6 +816,9 @@ class Recorder:
                 original = own.get("saturate", solver.Constraint.saturate)
 
                 def saturate(constraint, solver_, _original=original):
+                    if not recorder.inside_solver:
+                        return _original(constraint, solver_)
+                    recorder.declare_constraint(constraint)
                     writer.write(
                         {
                             "op": "saturate",
@@ -922,6 +929,7 @@ class Recorder:
             setattr(manager, method_name, wrapped)
 
     def finish(self, generator):
+        self.inside_solver = True
         solver = generator.program.analysis.solver
         self.note_first_rounds(solver)
         objects = solver.objects.__wrapped__

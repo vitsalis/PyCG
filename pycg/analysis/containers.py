@@ -223,19 +223,44 @@ class Containers:
         self.solver.attach(key, Each(pairing.key))
         self.solver.attach(stored, Each(pairing.stored, kinds=(Instance, Class)))
 
-    def _subscript_keyed(self, container, subscript):
-        key, dst, src = subscript.key, subscript.dst, subscript.src
-        if dst is not None:
-            if subscript.reads is None:
-                subscript.reads = _KeyedGroup(self.read_key, dst, dst)
-                self.solver.attach(key, subscript.reads)
-            subscript.reads.add(container)
-            self._keyed.append((key, container, dst, True))
+    def container_group(self, containers):
+        content = frozenset(containers)
+        group = self._container_groups.get(content)
+        if group is None:
+            group = self._container_groups[content] = _ContainerGroup(containers)
+        return group
+
+    def read_group(self, key, group, dst):
+        if isinstance(key, Const):
+            hub_key = key
+        elif isinstance(key, Pattern) and key.exact:
+            hub_key = key
+        else:
+            hub_key = None
+        hub = group.hubs.get(hub_key)
+        if hub is None:
+            hub = group.hubs[hub_key] = self.node()
+            for container in group.containers:
+                self.read_key(key, container, hub)
+        self.add_edge(hub, dst)
+
+    def _subscript_reads(self, read, subscript):
+        key, dst = subscript.key, subscript.dst
+        if subscript.reads is None:
+            subscript.reads = _KeyedGroup(self.read_key, self.read_group, dst, dst)
+            self.solver.attach(key, subscript.reads)
+        subscript.reads.add(read)
+        self._keyed.append((key, read, dst, True))
+
+    def _subscript_keyed(self, container, subscript, read=True):
+        key, src = subscript.key, subscript.src
+        if read and subscript.dst is not None:
+            self._subscript_reads(container, subscript)
         if is_dict(container):
             self.add_edge(key, self.keys(container))
         if src is not None:
             if subscript.writes is None:
-                subscript.writes = _KeyedGroup(self.write_key, src, None)
+                subscript.writes = _KeyedGroup(self.write_key, None, src, None)
                 self.solver.attach(key, subscript.writes)
             subscript.writes.add(container)
             self._keyed.append((key, container, src, False))
@@ -309,7 +334,9 @@ class Containers:
         added = False
         for key, container, node, read in self._keyed[self._completed_keys :]:
             if not self.solver.objects(key):
-                if read:
+                if type(container) is _ContainerGroup:
+                    self.read_group(None, container, node)
+                elif read:
                     self.add_edge(self.every(container), node)
                 else:
                     self.add_edge(node, self.unknown(container))
@@ -426,7 +453,28 @@ class Containers:
         else:
             iteration.apply(obj)
 
-    def apply_subscript(self, obj, subscript):
+    def apply_subscripts(self, objects, subscript):
+        if subscript.key is None or subscript.dst is None:
+            for obj in objects:
+                self.apply_subscript(obj, subscript)
+            return
+        grouped = []
+        for obj in objects:
+            if isinstance(obj, Const):
+                obj = self.string_constant_value(obj)
+                if obj is None:
+                    continue
+            if isinstance(obj, Container):
+                grouped.append(obj)
+                self.apply_subscript(obj, subscript, read=False)
+            else:
+                self.apply_subscript(obj, subscript)
+        if len(grouped) == 1:
+            self._subscript_reads(grouped[0], subscript)
+        elif grouped:
+            self._subscript_reads(self.container_group(grouped), subscript)
+
+    def apply_subscript(self, obj, subscript, read=True):
         if isinstance(obj, Const):
             obj = self.string_constant_value(obj)
             if obj is None:
@@ -436,7 +484,7 @@ class Containers:
                 self.read_keyed(obj, None, subscript.dst)
                 self.write_keyed(obj, None, subscript.src)
             else:
-                self._subscript_keyed(obj, subscript)
+                self._subscript_keyed(obj, subscript, read)
             if is_dict(obj) and subscript.key is not None:
                 self._hash_subscript_key(subscript, self.keys(obj))
             if obj.factory is not None and subscript.dst is not None:
@@ -538,6 +586,18 @@ class Containers:
         elif isinstance(obj, External) and slice_.dst is not None:
             self.add_object(slice_.dst, obj)
 
+    def apply_unpacks(self, objects, unpack):
+        sequences = []
+        for obj in objects:
+            if isinstance(obj, Container) and obj.kind in SEQUENCES:
+                sequences.append(obj)
+            else:
+                unpack.iteration().apply(obj)
+        if len(sequences) == 1:
+            self.apply_unpack(sequences[0], unpack)
+        elif sequences:
+            self._unpack_sequences(self.container_group(sequences), unpack)
+
     def apply_unpack(self, obj, unpack):
         if isinstance(obj, Container) and obj.kind in SEQUENCES:
             for index, dst in enumerate(unpack.before):
@@ -550,6 +610,17 @@ class Containers:
                 self.copy_range(obj, unpack.rest(), bounds)
         else:
             unpack.iteration().apply(obj)
+
+    def _unpack_sequences(self, group, unpack):
+        for index, dst in enumerate(unpack.before):
+            self.read_group(self.const(index), group, dst)
+        count = len(unpack.after)
+        for index, dst in enumerate(unpack.after):
+            self.read_group(self.const(index - count), group, dst)
+        if unpack.starred is not None:
+            bounds = (len(unpack.before), -count or None)
+            for obj in group.containers:
+                self.copy_range(obj, unpack.rest(), bounds)
 
     def combine(self, obj, operation, is_left):
         if obj.kind not in SEQUENCES or operation.method not in ("__add__", "__mul__"):
@@ -622,9 +693,7 @@ class Containers:
                 self._sequences[key] = sequences
             unless = ("__iter__", *iteration.unless)
             found = self.lookup(cls, "__getitem__", obj, None, unless)
-            if found not in sequences.lookups:
-                sequences.lookups[found] = None
-                self.solver.attach(found, sequences)
+            self.solver.attach(found, sequences)
             sequences.add(obj)
 
     def sequence_iterator(self, obj, iteration, dst):
@@ -728,11 +797,28 @@ class _Keyed(Constraint):
         self.access(key, self.container, self.node)
 
 
-class _KeyedGroup(Constraint):
-    __slots__ = ("access", "node", "result", "containers", "keys", "other_keys")
+class _ContainerGroup:
+    __slots__ = ("containers", "hubs")
 
-    def __init__(self, access, node, result):
+    def __init__(self, containers):
+        self.containers = tuple(containers)
+        self.hubs = {}
+
+
+class _KeyedGroup(Constraint):
+    __slots__ = (
+        "access",
+        "group_access",
+        "node",
+        "result",
+        "containers",
+        "keys",
+        "other_keys",
+    )
+
+    def __init__(self, access, group_access, node, result):
         self.access = access
+        self.group_access = group_access
         self.node = node
         self.result = result
         self.containers = []
@@ -759,17 +845,19 @@ class _KeyedGroup(Constraint):
             if container in self.other_keys:
                 return
             self.other_keys.add(container)
-        self.access(key, container, self.node)
+        if type(container) is _ContainerGroup:
+            self.group_access(key, container, self.node)
+        else:
+            self.access(key, container, self.node)
 
 
 class _Sequences(Constraint):
-    __slots__ = ("analysis", "iteration", "dst", "lookups", "objects", "found")
+    __slots__ = ("analysis", "iteration", "dst", "objects", "found")
 
     def __init__(self, analysis, iteration, dst):
         self.analysis = analysis
         self.iteration = iteration
         self.dst = dst
-        self.lookups = {}
         self.objects = []
         self.found = False
 
@@ -835,6 +923,9 @@ class _Subscript(_Access):
     def apply(self, obj):
         self.analysis.apply_subscript(obj, self)
 
+    def apply_each(self, objects):
+        self.analysis.apply_subscripts(objects, self)
+
     def results(self):
         return (self.dst,)
 
@@ -891,6 +982,9 @@ class _Unpack(_Site):
 
     def apply(self, obj):
         self.analysis.apply_unpack(obj, self)
+
+    def apply_each(self, objects):
+        self.analysis.apply_unpacks(objects, self)
 
     def results(self):
         return (*self.before, *self.after, self.starred)
