@@ -108,3 +108,29 @@ fn a_module_that_cannot_be_read_or_parsed_is_warned_with_the_rust_cause() {
         ]
     );
 }
+
+#[test]
+fn an_own_stub_that_cannot_be_read_or_parsed_is_warned_with_the_rust_cause() {
+    let files = [
+        ("pkg/broken.py", "def f():\n    pass\n"),
+        ("pkg/broken.pyi", "def (\n"),
+        ("pkg/unreadable.py", "x = 1\n"),
+        ("pkg/unreadable.pyi", "x: int\0\n"),
+        ("pkg/both.py", "def (\n"),
+        ("pkg/both.pyi", "def (\n"),
+    ];
+    let scratch = scratch("stubs", &files);
+    let found = warnings(
+        &scratch.0,
+        "pkg",
+        &["pkg/broken.py", "pkg/unreadable.py", "pkg/both.py"],
+    );
+    assert_eq!(
+        found,
+        [
+            "Skipping {root}/pkg/broken.pyi: cannot parse it: SyntaxError (line 1)",
+            "Skipping {root}/pkg/unreadable.pyi: cannot read it: SyntaxError",
+            "Skipping {root}/pkg/both.py: cannot parse it: SyntaxError (line 1)",
+        ]
+    );
+}
