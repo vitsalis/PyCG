@@ -5,6 +5,7 @@ import shutil
 import subprocess
 import sys
 import textwrap
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -510,7 +511,22 @@ def test_a_required_dump_that_the_other_side_lacks_fails(
     assert f"failed: {dump} is required and absent" in capsys.readouterr().out
 
 
-def test_only_the_listed_inputs_are_compared_on_the_named_dumps(
+def differences(tmp_path, *entries):
+    path = tmp_path / "differences.txt"
+    path.write_text("".join("\t".join(entry) + "\n" for entry in entries))
+    return ["--differences", str(path)]
+
+
+def planted(source, root, key, dump):
+    copied = copy_as_input(source, root, key)
+    lines = (copied / compare.file_of(dump)).read_text(encoding="utf-8").splitlines()
+    lines[0] = lines[0].replace('"', '"planted_', 1)
+    text = "\n".join(lines) + "\n"
+    (copied / compare.file_of(dump)).write_text(text, encoding="utf-8")
+    return copied
+
+
+def test_a_listed_difference_is_known_and_an_unlisted_one_fails(
     dumped, tmp_path, capsys
 ):
     first, _ = dumped["classes"]
@@ -518,18 +534,75 @@ def test_only_the_listed_inputs_are_compared_on_the_named_dumps(
     actual = tmp_path / "actual"
     copy_as_input(first, expected, "micro/a/classes")
     copy_as_input(first, expected, "micro/a/other")
-    agreeing = copy_as_input(first, actual, "micro/a/classes")
-    (agreeing / "D4.jsonl").write_text("{}\n", encoding="utf-8")
-    (copy_as_input(first, actual, "micro/a/other") / "error.txt").write_text("")
-    inputs = tmp_path / "inputs.txt"
-    inputs.write_text("micro/a/classes\n", encoding="utf-8")
-
-    status = compare.main(
-        [str(expected), str(actual), "--dumps", "D3", "D5", "--inputs", str(inputs)]
+    planted(first, actual, "micro/a/classes", "D4")
+    planted(first, actual, "micro/a/other", "D4")
+    listed = differences(
+        tmp_path, ("replay", "D4", "micro/a/classes", "different", "a cause")
     )
 
-    assert status == 0
-    assert "micro: 1 inputs, 1 identical, 0 different" in capsys.readouterr().out
+    status = compare.main([str(expected), str(actual), "--dumps", "D4", *listed])
+    found = capsys.readouterr().out
+
+    assert status == 1
+    assert "2 different, 0 failed, 0 missing, 0 partial, 1 listed, 1 failing" in found
+    assert "micro/a/other: different: D4" in found
+    assert "micro/a/classes" not in found.split("failing", 1)[1]
+
+
+def test_a_listed_input_that_agrees_fails_until_its_entry_is_removed(
+    dumped, tmp_path, capsys
+):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    copy_as_input(first, actual, "micro/a/classes")
+    listed = differences(
+        tmp_path, ("replay", "D4", "micro/a/classes", "different", "a cause")
+    )
+
+    status = compare.main([str(expected), str(actual), "--dumps", "D4", *listed])
+
+    assert status == 1
+    assert "micro/a/classes: listed: listed as different but agrees: remove it" in (
+        capsys.readouterr().out
+    )
+
+
+def test_a_listed_input_differs_in_exactly_its_listed_dumps(dumped, tmp_path, capsys):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    planted(first, actual, "micro/a/classes", "D4")
+    listed = differences(
+        tmp_path,
+        ("replay", "D1", "micro/a/classes", "different", "a cause"),
+        ("replay", "D4", "micro/a/classes", "different", "a cause"),
+    )
+
+    status = compare.main([str(expected), str(actual), "--dumps", "D1", "D4", *listed])
+
+    assert status == 1
+    assert "micro/a/classes: listed: D1 agrees: remove it" in capsys.readouterr().out
+
+
+def test_the_entries_of_another_run_do_not_cover_an_input(dumped, tmp_path, capsys):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    planted(first, actual, "micro/a/classes", "D3")
+    listed = differences(
+        tmp_path, ("engine", "D3", "micro/a/classes", "different", "a cause")
+    )
+
+    replay = compare.main([str(expected), str(actual), "--dumps", "D3", *listed])
+    engine = compare.main(
+        [str(expected), str(actual), "--dumps", "D3", "--run", "engine", *listed]
+    )
+
+    assert (replay, engine) == (1, 0)
 
 
 def test_a_listed_input_that_the_oracle_lacks_fails(dumped, tmp_path, capsys):
@@ -538,17 +611,60 @@ def test_a_listed_input_that_the_oracle_lacks_fails(dumped, tmp_path, capsys):
     actual = tmp_path / "actual"
     copy_as_input(first, expected, "micro/a/classes")
     copy_as_input(first, actual, "micro/a/classes")
-    inputs = tmp_path / "inputs.txt"
-    inputs.write_text("micro/a/classes\nmicro/a/renamed\n", encoding="utf-8")
-
-    status = compare.main(
-        [str(expected), str(actual), "--dumps", "D3", "--inputs", str(inputs)]
+    listed = differences(
+        tmp_path, ("replay", "D3", "micro/a/renamed", "partial", "a cause")
     )
+
+    status = compare.main([str(expected), str(actual), "--dumps", "D3", *listed])
 
     assert status == 1
-    assert "micro/a/renamed: failed: the oracle has no such input" in (
+    assert "micro/a/renamed: listed: listed, and the oracle has no such input" in (
         capsys.readouterr().out
     )
+
+
+def test_an_entry_that_the_base_lacks_fails(dumped, tmp_path, capsys):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    planted(first, actual, "micro/a/classes", "D4")
+    entry = ("replay", "D4", "micro/a/classes", "different", "a cause")
+    listed = differences(tmp_path, entry)
+    base = tmp_path / "base.txt"
+    base.write_text("# the base\n", encoding="utf-8")
+    kept = tmp_path / "kept.txt"
+    kept.write_text("\t".join([*entry[:4], "another cause"]) + "\n")
+
+    added = compare.main(
+        [str(expected), str(actual), "--dumps", "D4", *listed, "--base", str(base)]
+    )
+    found = capsys.readouterr().out
+    shrunk = compare.main(
+        [str(expected), str(actual), "--dumps", "D4", *listed, "--base", str(kept)]
+    )
+
+    assert (added, shrunk) == (1, 0)
+    assert "an entry the base lacks: replay\tD4\tmicro/a/classes" in found
+
+
+@pytest.mark.parametrize(
+    "entry",
+    [
+        ("replay", "D4", "micro/a/classes", "different"),
+        ("replay", "D7", "micro/a/classes", "different", "a cause"),
+        ("replay", "D4", "micro/a/classes", "slower", "a cause"),
+        ("replay", "D4", "micro/a/classes", "partial", "a cause"),
+        ("replay", "D4", "micro/a/classes", "different", " "),
+    ],
+)
+def test_a_malformed_entry_is_refused(dumped, tmp_path, entry):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    copy_as_input(first, expected, "micro/a/classes")
+
+    with pytest.raises(AssertionError):
+        compare.main([str(expected), str(expected), *differences(tmp_path, entry)])
 
 
 def stopped_after(source, root, key, records):
@@ -571,18 +687,15 @@ def test_a_trace_that_stops_inside_the_oracles_trace_is_partial(
     actual = tmp_path / "actual"
     copy_as_input(first, expected, "micro/a/classes")
     stopped_after(first, actual, "micro/a/classes", 40)
-    inputs = tmp_path / "inputs.txt"
-    inputs.write_text("micro/a/classes\n", encoding="utf-8")
+    entry = ("replay", "D3", "micro/a/classes", "partial", "not ported: a rule")
+    listed = differences(tmp_path, entry)
 
-    status = compare.main([str(expected), str(actual), "--dumps", "D3", "D5"])
+    unlisted = compare.main([str(expected), str(actual), "--dumps", "D3", "D5"])
+    status = compare.main([str(expected), str(actual), "--dumps", "D3", "D5", *listed])
     found = capsys.readouterr().out
-    listed = compare.main(
-        [str(expected), str(actual), "--dumps", "D3", "--inputs", str(inputs)]
-    )
 
-    assert status == 0
-    assert "0 failed, 0 missing, 1 partial" in found
-    assert listed == 1
+    assert (unlisted, status) == (1, 0)
+    assert "0 failed, 0 missing, 1 partial, 1 listed, 0 failing" in found
 
 
 def test_a_trace_that_leaves_the_oracles_trace_before_it_stops_differs(
@@ -606,12 +719,24 @@ def test_a_trace_that_leaves_the_oracles_trace_before_it_stops_differs(
     assert explained[0].startswith("first difference at record 31 ")
 
 
-def test_the_inputs_of_the_engine_are_inputs_of_the_oracle():
-    inputs = compare.listed(PARITY / "engine.txt")
+def test_the_known_differences_name_inputs_of_the_oracle():
+    path = PARITY / "differences.txt"
+    lines = [line for _, line in compare.entries(path)]
+    entries = [line.split("\t") for line in lines]
     snippets = ROOT / "evaluation" / "micro-benchmark" / "snippets"
+    projects = tomllib.loads(
+        (ROOT / "evaluation" / "macro-benchmark" / "projects.toml").read_text()
+    )
+    names = set(projects)
 
-    assert inputs == sorted(set(inputs))
-    assert all((snippets / key.removeprefix("micro/")).is_dir() for key in inputs)
+    assert lines == sorted(set(lines))
+    for run in {entry[0] for entry in entries}:
+        compare.known_differences(path, run)
+    for _, _, key, _, _ in entries:
+        kind, _, name = key.partition("/")
+        assert (kind == "micro" and (snippets / name).is_dir()) or (
+            kind == "macro" and name in names
+        ), key
 
 
 KEY_FILES = (

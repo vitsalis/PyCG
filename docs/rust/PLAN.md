@@ -501,6 +501,14 @@ oracle runs once per key, and its output is cached.
 `tools/parity/required.txt` lists the dumps that must agree; each stage
 that ends adds its own (section 4), and none is ever removed. A dump that
 the Rust side does not write yet is reported as missing, not compared.
+`tools/parity/differences.txt` lists the inputs of a run (`replay` for
+the replays, `engine` for the engine) that are known not to agree yet, one
+per line: run, dump, input, status (`different`, `partial` or `failed`)
+and cause. Every other input must agree; a listed input must keep its
+status and its differing dumps, and fails once it agrees, so a pull
+request that makes an input agree removes its line. The list only
+shrinks: given the base's list (`make parity BASE=<commit>`), an entry
+the base lacks fails, so a newly differing input fails the job.
 
 Until stages 4 and 6 join the rules to the builder and the document,
 `make parity` also drives the Rust engine from the oracle's D4 (`pycg-dump
@@ -511,9 +519,10 @@ set when their object is made. A builder call or a rule that is not
 ported stops the replay with `not ported: <what>`, and the trace written
 up to there (`D3.partial.jsonl`) must begin the oracle's D3: compare.py
 counts such an input as partial, and as different when the trace leaves
-the oracle's first. D3 and D5 must agree on the inputs that
-`tools/parity/engine.txt` lists; each pull request of stage 5 adds the
-inputs it makes agree.
+the oracle's first. D3 and D5 of the engine must agree on every input
+that `tools/parity/differences.txt` does not list for the run `engine`;
+each pull request of stage 5 removes the lines of the inputs it makes
+agree.
 
 ## The CI job
 
