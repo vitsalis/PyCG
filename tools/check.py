@@ -18,7 +18,8 @@ A diff that cannot be read runs every scoped check.
 --detect-eval decides whether CI measures a pull request: it appends
 `eval=true` or `eval=false` to OUTPUTS (the format of $GITHUB_OUTPUT) and
 prints the reason as Markdown. It is true when the change touches
-EVAL_PATHS, and when the diff cannot be read.
+EVAL_PATHS outside EVAL_EXCLUDED, and when the diff cannot be read: the
+evaluation reads nothing of tools/parity/, the Rust port's parity check.
 """
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +67,7 @@ EVAL_PATHS = (
     "Makefile",
     ".github/",
 )
+EVAL_EXCLUDED = ("tools/parity/",)
 
 
 def under(path, patterns):
@@ -115,12 +117,17 @@ def run(name, command):
 def detect_eval(changed, base):
     if changed is None:
         return True, [f"### Evaluation: runs (the diff against {base} is unreadable)"]
-    touched = [p for p in changed if under(p, EVAL_PATHS)]
+    touched = [
+        p for p in changed if under(p, EVAL_PATHS) and not under(p, EVAL_EXCLUDED)
+    ]
     if touched:
         lines = [f"### Evaluation: runs ({len(touched)} changed paths can move it)"]
         return True, lines + [f"- `{path}`" for path in touched]
     paths = ", ".join(f"`{p}`" for p in EVAL_PATHS)
-    return False, [f"### Evaluation: skipped (the diff touches none of {paths})"]
+    excluded = ", ".join(f"`{p}`" for p in EVAL_EXCLUDED)
+    return False, [
+        f"### Evaluation: skipped (the diff touches none of {paths} outside {excluded})"
+    ]
 
 
 def main(argv=None):

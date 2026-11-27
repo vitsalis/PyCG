@@ -7,9 +7,7 @@ use crate::help;
 use crate::integer::{IntError, python_int};
 use crate::text::{Unit, decimal, first_unit_length, repr, units};
 
-pub const DESCRIPTION: &str = "Write the call graph of a Python package as one JSON document.";
-pub const POSITIONAL: &str = "entry_point";
-pub const POSITIONAL_HELP: &str = "Entry points to be processed";
+const VIEW: &[u8] = b"view";
 
 const PREFIX: u8 = b'-';
 const SEPARATOR: &[u8] = b"--";
@@ -27,14 +25,55 @@ pub enum Optional {
     Cap,
 }
 
-pub const OPTIONALS: [Optional; 6] = [
-    Optional::Help,
-    Optional::Package,
-    Optional::PackageName,
-    Optional::PackageVersion,
-    Optional::Output,
-    Optional::Cap,
-];
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Command {
+    Analyse,
+    View,
+}
+
+impl Command {
+    pub fn optionals(self) -> &'static [Optional] {
+        match self {
+            Command::Analyse => &[
+                Optional::Help,
+                Optional::Package,
+                Optional::PackageName,
+                Optional::PackageVersion,
+                Optional::Output,
+                Optional::Cap,
+            ],
+            Command::View => &[Optional::Help, Optional::Output],
+        }
+    }
+
+    pub fn description(self) -> &'static str {
+        match self {
+            Command::Analyse => "Write the call graph of a Python package as one JSON document.",
+            Command::View => "Write a PyCG call graph document as one HTML page.",
+        }
+    }
+
+    pub fn positional(self) -> &'static str {
+        match self {
+            Command::Analyse => "entry_point",
+            Command::View => "document",
+        }
+    }
+
+    pub fn positional_help(self) -> &'static str {
+        match self {
+            Command::Analyse => "Entry points to be processed",
+            Command::View => "call graph document (JSON) written by pycg",
+        }
+    }
+
+    pub fn positional_repeats(self) -> bool {
+        match self {
+            Command::Analyse => true,
+            Command::View => false,
+        }
+    }
+}
 
 impl Optional {
     pub fn strings(self) -> &'static [&'static str] {
@@ -59,8 +98,11 @@ impl Optional {
         }
     }
 
-    pub fn help(self) -> String {
+    pub fn help(self, command: Command) -> String {
         match self {
+            Optional::Output if command == Command::View => {
+                "HTML file to write (default: the document's path with .html)".to_owned()
+            }
             Optional::Help => "show this help message and exit".to_owned(),
             Optional::Package => concat!(
                 "Package root: module names are relative to it and only modules ",
@@ -98,8 +140,15 @@ pub struct Options {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ViewOptions {
+    pub document: OsString,
+    pub output: Option<OsString>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Outcome {
     Run(Options),
+    View(ViewOptions),
     Help(Vec<u8>),
     Usage(Vec<u8>),
 }
@@ -122,8 +171,8 @@ struct Match<'a> {
     explicit: Option<Explicit<'a>>,
 }
 
-fn option_strings() -> impl Iterator<Item = (&'static [u8], Optional)> {
-    OPTIONALS.into_iter().flat_map(|optional| {
+fn option_strings(command: Command) -> impl Iterator<Item = (&'static [u8], Optional)> {
+    command.optionals().iter().flat_map(|&optional| {
         optional
             .strings()
             .iter()
@@ -131,8 +180,8 @@ fn option_strings() -> impl Iterator<Item = (&'static [u8], Optional)> {
     })
 }
 
-fn exact(string: &[u8]) -> Option<(&'static [u8], Optional)> {
-    option_strings().find(|(candidate, _)| *candidate == string)
+fn exact(command: Command, string: &[u8]) -> Option<(&'static [u8], Optional)> {
+    option_strings(command).find(|(candidate, _)| *candidate == string)
 }
 
 fn partition(argument: &[u8]) -> (&[u8], Option<&[u8]>) {
@@ -156,7 +205,7 @@ fn argument_error(optional: Optional, message: &[u8]) -> Stop {
     ]))
 }
 
-fn option_tuples(argument: &[u8]) -> Vec<Match<'_>> {
+fn option_tuples(command: Command, argument: &[u8]) -> Vec<Match<'_>> {
     assert!(argument.len() >= 2);
     assert_eq!(argument[0], PREFIX);
     let (prefix, value) = partition(argument);
@@ -166,7 +215,7 @@ fn option_tuples(argument: &[u8]) -> Vec<Match<'_>> {
     });
     let mut found = Vec::new();
     if argument[1] == PREFIX {
-        for (string, optional) in option_strings() {
+        for (string, optional) in option_strings(command) {
             if string.starts_with(prefix) {
                 found.push(Match {
                     optional: Some(optional),
@@ -179,7 +228,7 @@ fn option_tuples(argument: &[u8]) -> Vec<Match<'_>> {
     }
     let short_length = 1 + first_unit_length(&argument[1..]);
     let (short, short_value) = argument.split_at(short_length);
-    for (string, optional) in option_strings() {
+    for (string, optional) in option_strings(command) {
         if string == short {
             found.push(Match {
                 optional: Some(optional),
@@ -208,11 +257,11 @@ fn looks_negative(argument: &[u8]) -> bool {
     matches!(units(rest).next(), Some(Unit::Char(character)) if decimal(character).is_some())
 }
 
-fn optional_matches(argument: &[u8]) -> Option<Vec<Match<'_>>> {
+fn optional_matches(command: Command, argument: &[u8]) -> Option<Vec<Match<'_>>> {
     if argument.first() != Some(&PREFIX) {
         return None;
     }
-    if let Some((string, optional)) = exact(argument) {
+    if let Some((string, optional)) = exact(command, argument) {
         return Some(vec![Match {
             optional: Some(optional),
             string,
@@ -223,7 +272,7 @@ fn optional_matches(argument: &[u8]) -> Option<Vec<Match<'_>>> {
         return None;
     }
     if let (string, Some(value)) = partition(argument)
-        && let Some((string, optional)) = exact(string)
+        && let Some((string, optional)) = exact(command, string)
     {
         return Some(vec![Match {
             optional: Some(optional),
@@ -234,7 +283,7 @@ fn optional_matches(argument: &[u8]) -> Option<Vec<Match<'_>>> {
             }),
         }]);
     }
-    let found = option_tuples(argument);
+    let found = option_tuples(command, argument);
     if !found.is_empty() {
         return Some(found);
     }
@@ -271,17 +320,18 @@ fn parse_cap(text: &[u8]) -> Result<Cap, Vec<u8>> {
 }
 
 #[cfg(unix)]
-fn os_string(bytes: &[u8]) -> OsString {
+pub(crate) fn os_string(bytes: &[u8]) -> OsString {
     use std::os::unix::ffi::OsStrExt;
     std::ffi::OsStr::from_bytes(bytes).to_os_string()
 }
 
 #[cfg(not(unix))]
-fn os_string(bytes: &[u8]) -> OsString {
+pub(crate) fn os_string(bytes: &[u8]) -> OsString {
     unsafe { OsString::from_encoded_bytes_unchecked(bytes.to_vec()) }
 }
 
 struct Parser<'a> {
+    command: Command,
     arguments: Vec<&'a [u8]>,
     pattern: Vec<u8>,
     matches: Vec<Option<Vec<Match<'a>>>>,
@@ -296,7 +346,7 @@ struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    fn new(arguments: Vec<&'a [u8]>) -> Parser<'a> {
+    fn new(command: Command, arguments: Vec<&'a [u8]>) -> Parser<'a> {
         let mut pattern = Vec::with_capacity(arguments.len());
         let mut matches = Vec::with_capacity(arguments.len());
         let mut separated = false;
@@ -309,12 +359,13 @@ impl<'a> Parser<'a> {
                 pattern.push(PREFIX);
                 matches.push(None);
             } else {
-                let found = optional_matches(argument);
+                let found = optional_matches(command, argument);
                 pattern.push(if found.is_some() { OPTION } else { ARGUMENT });
                 matches.push(found);
             }
         }
         Parser {
+            command,
             arguments,
             pattern,
             matches,
@@ -354,13 +405,23 @@ impl<'a> Parser<'a> {
             return start;
         }
         let selected = &self.pattern[start..];
-        let count = selected
-            .iter()
-            .take_while(|kind| **kind == ARGUMENT || **kind == PREFIX)
-            .count();
-        if count == 0 && selected.first() == Some(&OPTION) {
-            return start;
-        }
+        let count = if self.command.positional_repeats() {
+            let count = selected
+                .iter()
+                .take_while(|kind| **kind == ARGUMENT || **kind == PREFIX)
+                .count();
+            if count == 0 && selected.first() == Some(&OPTION) {
+                return start;
+            }
+            count
+        } else {
+            let leading = usize::from(selected.first() == Some(&PREFIX));
+            if selected.get(leading) != Some(&ARGUMENT) {
+                return start;
+            }
+            let trailing = usize::from(selected.get(leading + 1) == Some(&PREFIX));
+            leading + 1 + trailing
+        };
         let mut values = self.arguments[start..start + count].to_vec();
         if selected[..count].contains(&PREFIX) {
             let index = values
@@ -419,7 +480,8 @@ impl<'a> Parser<'a> {
             }
             taken.push((optional, None));
             let (first, rest) = value.split_at(first_unit_length(value));
-            let Some((next_string, next)) = exact(&concatenated(&[&[PREFIX], first])) else {
+            let Some((next_string, next)) = exact(self.command, &concatenated(&[&[PREFIX], first]))
+            else {
                 unknown = Some(concatenated(&[&[PREFIX], value]));
                 break start + 1;
             };
@@ -469,6 +531,12 @@ impl<'a> Parser<'a> {
             }
         }
         let stop = self.consume_positionals(start);
+        if !self.positional_consumed {
+            return Err(Stop::Error(concatenated(&[
+                b"the following arguments are required: ",
+                self.command.positional().as_bytes(),
+            ])));
+        }
         let rest = &self.arguments[stop..];
         self.extras
             .extend(rest.iter().map(|argument| argument.to_vec()));
@@ -483,11 +551,9 @@ impl<'a> Parser<'a> {
     }
 }
 
-pub fn parse(program: &[u8], arguments: &[OsString], width: i64) -> Outcome {
-    let bytes: Vec<&[u8]> = arguments.iter().map(|a| a.as_encoded_bytes()).collect();
-    let mut parser = Parser::new(bytes);
-    match parser.run() {
-        Ok(()) => Outcome::Run(Options {
+fn outcome(parser: Parser<'_>) -> Outcome {
+    match parser.command {
+        Command::Analyse => Outcome::Run(Options {
             request: Request {
                 entry_points: parser.entry_points,
                 package: parser.package,
@@ -497,12 +563,38 @@ pub fn parse(program: &[u8], arguments: &[OsString], width: i64) -> Outcome {
             package_version: parser.package_version,
             output: parser.output,
         }),
-        Err(Stop::Help) => Outcome::Help(help::help(program, width)),
+        Command::View => {
+            let [document] =
+                <[OsString; 1]>::try_from(parser.entry_points).expect("one document consumed");
+            Outcome::View(ViewOptions {
+                document,
+                output: parser.output,
+            })
+        }
+    }
+}
+
+pub fn view_program(program: &[u8]) -> Vec<u8> {
+    concatenated(&[program, b" ", VIEW])
+}
+
+pub fn parse(program: &[u8], arguments: &[OsString], width: i64) -> Outcome {
+    let mut bytes: Vec<&[u8]> = arguments.iter().map(|a| a.as_encoded_bytes()).collect();
+    let (command, program) = if bytes.first() == Some(&VIEW) {
+        bytes.remove(0);
+        (Command::View, view_program(program))
+    } else {
+        (Command::Analyse, program.to_vec())
+    };
+    let mut parser = Parser::new(command, bytes);
+    match parser.run() {
+        Ok(()) => outcome(parser),
+        Err(Stop::Help) => Outcome::Help(help::help(command, &program, width)),
         Err(Stop::Error(message)) => {
-            let usage = help::usage(program, width);
+            let usage = help::usage(command, &program, width);
             Outcome::Usage(concatenated(&[
                 &usage,
-                program,
+                &program,
                 b": error: ",
                 &message,
                 b"\n",

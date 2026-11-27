@@ -15,6 +15,11 @@ pycg-eval-runner image (docs/rust/PLAN.md, section 5, Command line):
   runs it, with CallGraphGenerator.analyze replaced by a stop, and records
   the exit status, standard output and standard error, or, when the
   arguments reach the analysis, the parsed namespace.
+  The vectors whose first argument is view run pycg.view.main under the
+  program name followed by view, with pycg.view.read replaced by a stop.
+- crates/pycg/tests/cli/view_vectors.rs: every case of DOCUMENTS, run by
+  pycg.view.main in a directory of its own, with the exit status and the
+  file the page went to with the document block of the page.
 - crates/pycg/src/unicode.rs: the characters that str.isdecimal, int(),
   str.isspace and str.isprintable accept.
 
@@ -23,6 +28,7 @@ pycg-eval-runner image (docs/rust/PLAN.md, section 5, Command line):
 
 ROOT = Path(__file__).resolve().parents[2]
 VECTORS_PATH = ROOT / "crates" / "pycg" / "tests" / "cli" / "vectors.rs"
+VIEW_VECTORS_PATH = ROOT / "crates" / "pycg" / "tests" / "cli" / "view_vectors.rs"
 TABLES_PATH = ROOT / "crates" / "pycg" / "src" / "unicode.rs"
 ANALYSED_STATUS = 3
 CODE_POINTS = 0x110000
@@ -133,6 +139,43 @@ VECTORS = (
     (b"a\xff.py", b"--package", b"p\xe2\x82"),
     (b"--\xff",),
     (b"-h\xff",),
+    ("views", "a.py"),
+    ("a.py", "view"),
+    ("--", "view"),
+    ("view",),
+    ("view", "d.json"),
+    ("view", "-h"),
+    ("view", "--help"),
+    ("view", "-o"),
+    ("view", "--output"),
+    ("view", "-o", "x.html", "d.json"),
+    ("view", "d.json", "-o", "x.html"),
+    ("view", "d.json", "-o", "a", "-o", "b"),
+    ("view", "d.json", "e.json"),
+    ("view", "--", "-h"),
+    ("view", "--", "--", "x"),
+    ("view", "d.json", "--"),
+    ("view", "d.json", "--", "e.json"),
+    ("view", "-oout.html", "d.json"),
+    ("view", "--out=o.html", "d.json"),
+    ("view", "--o", "o.html", "d.json"),
+    ("view", "-o=", "d.json"),
+    ("view", "-o", "", "d.json"),
+    ("view", "-x"),
+    ("view", "-x", "d.json"),
+    ("view", "--package", "p", "d.json"),
+    ("view", "--cap", "5", "d.json"),
+    ("view", "-", "d.json"),
+    ("view", "-1"),
+    ("view", "-h", "-o"),
+    ("view", "d.json", "-h"),
+    ("view", "-ho"),
+    ("view", "-oh", "d.json"),
+    ("view", "--he"),
+    ("view", "--h"),
+    ("view", "view"),
+    ("view", "view", "d.json"),
+    (b"view", b"d\xff.json"),
 )
 NAMED = (
     (LONG_PROGRAM, ("--foo",)),
@@ -141,6 +184,9 @@ NAMED = (
     (b"/bin/py\xffcg", ("-h",)),
     (b"pycg\n\n\n", ("--foo",)),
     (b"", ("-h",)),
+    (LONG_PROGRAM, ("view", "--foo")),
+    (LONG_PROGRAM, ("view", "-h")),
+    (b"pycg\n\n\n", ("view", "--foo")),
 )
 SIZED = (
     None,
@@ -204,6 +250,302 @@ except Analysed:
 """
 
 
+VIEW_ORACLE = f"""\
+import argparse
+import json
+import os
+import sys
+
+sys.path.insert(0, sys.argv[1])
+sys.argv = sys.argv[2:]
+
+import pycg.view as view
+
+prog = os.path.basename(sys.argv[0]) + " view"
+parsed = []
+init = argparse.ArgumentParser.__init__
+parse_args = argparse.ArgumentParser.parse_args
+
+
+def named(parser, *arguments, **keywords):
+    keywords["prog"] = prog
+    init(parser, *arguments, **keywords)
+
+
+def record(parser, *arguments, **keywords):
+    namespace = parse_args(parser, *arguments, **keywords)
+    parsed.append(namespace)
+    return namespace
+
+
+class Analysed(Exception):
+    pass
+
+
+def read(path):
+    raise Analysed
+
+
+argparse.ArgumentParser.__init__ = named
+argparse.ArgumentParser.parse_args = record
+view.read = read
+try:
+    view.main(sys.argv[2:])
+except Analysed:
+    sys.stdout.write(json.dumps(vars(parsed[0])))
+    sys.exit({ANALYSED_STATUS})
+"""
+DOCUMENT_ORACLE = """\
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, sys.argv[1])
+
+import pycg.view as view
+
+head, tail = view.template().split(view.MARKER)
+results = []
+for case in json.load(sys.stdin):
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        inputs = {}
+        for name, data in case["files"]:
+            path = root / os.fsdecode(bytes.fromhex(name))
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(bytes.fromhex(data))
+            inputs[path] = bytes.fromhex(data)
+        os.chdir(directory)
+        hexes = case["arguments"]
+        arguments = [os.fsdecode(bytes.fromhex(argument)) for argument in hexes]
+        try:
+            view.main(arguments)
+            status = 0
+        except SystemExit as stop:
+            assert isinstance(stop.code, str), stop.code
+            status = 1
+        except ValueError as error:
+            assert "has an empty name" in str(error), error
+            status = 1
+        os.chdir("/")
+        written = []
+        for path in sorted(root.rglob("*")):
+            if path.is_file() and inputs.get(path) != path.read_bytes():
+                page = path.read_bytes().decode("utf-8")
+                assert page.startswith(head) and page.endswith(tail), path
+                block = page[len(head) : len(page) - len(tail)]
+                name = os.fsencode(path.relative_to(root))
+                written.append([name.hex(), block.encode("utf-8").hex()])
+        assert len(written) <= 1, written
+        assert (status == 0) == bool(written), (case, status, written)
+        results.append({"status": status, "written": written})
+json.dump(results, sys.stdout)
+"""
+MINIMAL = (
+    '{"calls":{},"definitions":{},"exports":{},"format":"pycg/1",'
+    '"modules":{},"outside":{},"package":{"name":null,"version":null},'
+    '"tool":{"name":"pycg","typeshed":"abc","version":"1.0.0"}}'
+)
+
+
+def document_with(**parts):
+    document = json.loads(MINIMAL)
+    document.update(parts)
+    return json.dumps(document)
+
+
+def minimal_with(old, new):
+    assert MINIMAL.count(old) == 1, old
+    return MINIMAL.replace(old, new)
+
+
+DOCUMENT_TEXTS = (
+    MINIMAL,
+    json.dumps(json.loads(MINIMAL), indent=2).replace("\n", "\r\n"),
+    minimal_with('"format"', '"\\u0066ormat"'),
+    minimal_with('"format":"pycg/1"', '"format":"pycg\\/1"'),
+    minimal_with('"format":"pycg/1"', '"format":"pycg/2","format":"pycg/1"'),
+    minimal_with('"format":"pycg/1"', '"format":"pycg/1","format":"pycg/2"'),
+    minimal_with('"calls":{}', '"calls":[],"calls":{}'),
+    minimal_with('"calls":{}', '"calls":{},"calls":[]'),
+    minimal_with('"exports":{}', '"exports":{"a":"\\ud800","b":"\\ud83d\\ude00"}'),
+    minimal_with('"exports":{}', '"exports":{"\\udc00\\ud800x":"\\ud800\\u0041"}'),
+    minimal_with('"exports":{}', '"exports":{"n":[1e400,-0,1E+5,0.5e-3,-1.25]}'),
+    minimal_with('"exports":{}', '"exports":' + "[" * 200 + "]" * 200),
+    minimal_with('"exports":{}', '"exports":{"s":"</script><!--<script>é名"}'),
+    minimal_with(
+        '"exports":{}',
+        '"exports":{"t":true,"f":false,"z":null,"e":"\\b\\f\\n\\r\\t\\"\\\\"}',
+    ),
+    minimal_with('"exports":{}', '"exports":{"x":NaN}'),
+    minimal_with('"exports":{}', '"exports":[Infinity]'),
+    minimal_with('"exports":{}', '"exports":[-Infinity]'),
+    minimal_with('"exports":{}', '"exports":[-Inf]'),
+    minimal_with('"exports":{}', '"exports":[1,]'),
+    minimal_with('"exports":{}', '"exports":{"a":1,}'),
+    minimal_with('"exports":{}', '"exports":{"a" 1}'),
+    minimal_with('"exports":{}', '"exports":{"a":1 "b":2}'),
+    minimal_with('"exports":{}', '"exports":[1 2]'),
+    minimal_with('"exports":{}', '"exports":{1:2}'),
+    minimal_with('"exports":{}', '"exports":"a\x01b"'),
+    minimal_with('"exports":{}', '"exports":"a\x7fb"'),
+    minimal_with('"exports":{}', '"exports":"\\x"'),
+    minimal_with('"exports":{}', '"exports":"\\u12g4"'),
+    minimal_with('"exports":{}', '"exports":"\\ud800\\u12g4"'),
+    minimal_with('"exports":{}', '"exports":[01]'),
+    minimal_with('"exports":{}', '"exports":[1.]'),
+    minimal_with('"exports":{}', '"exports":[1e]'),
+    minimal_with('"exports":{}', '"exports":[-]'),
+    minimal_with('"exports":{}', '"exports":[tru]'),
+    minimal_with('"exports":{}', '"exports":[nullx]'),
+    MINIMAL + " \t\r\n",
+    " \n" + MINIMAL,
+    MINIMAL + "x",
+    MINIMAL + "{}",
+    "\ufeff" + MINIMAL,
+    MINIMAL[:-1],
+    MINIMAL[:40],
+    '"unterminated',
+    "",
+    "   ",
+    "not json",
+    "[]",
+    '"pycg/1"',
+    "null",
+    "1",
+    "{}",
+    '{"node":["callee"]}',
+    minimal_with('"format":"pycg/1"', '"format":"pycg/2"'),
+    minimal_with('"format":"pycg/1"', '"format":1'),
+    minimal_with('"format":"pycg/1"', '"format":null'),
+    minimal_with('"format":"pycg/1"', '"format":["pycg/1"]'),
+    minimal_with('"format":"pycg/1"', '"format":"PYCG/1"'),
+    minimal_with('"calls":{},', ""),
+    minimal_with('"calls":{}', '"calls":[]'),
+    minimal_with('"calls":{}', '"calls":null'),
+    minimal_with('"calls":{}', '"calls":"x"'),
+    minimal_with(',"tool":{"name":"pycg","typeshed":"abc","version":"1.0.0"}', ""),
+    minimal_with('"package":{"name":null,"version":null}', '"package":1'),
+    minimal_with('"modules":{},', ""),
+    minimal_with('"definitions":{},', ""),
+    minimal_with('"exports":{},', ""),
+    minimal_with('"outside":{},', ""),
+    document_with(package={"name": "</script>", "version": "<!--"}),
+)
+DOCUMENT_BYTES = (
+    MINIMAL.encode("utf-8").replace(b'"abc"', b'"\xff"'),
+    MINIMAL.encode("utf-8").replace(b'"abc"', b'"\xed\xa0\x80"'),
+    MINIMAL.encode("utf-8").replace(b'"abc"', b'"\xc3"'),
+    MINIMAL.encode("utf-16"),
+)
+PATHS = (
+    ("d.json", ()),
+    ("d", ()),
+    (".d", ()),
+    ("d.", ()),
+    ("d..", ()),
+    ("..d", ()),
+    ("...json", ()),
+    ("d.tar.gz", ()),
+    ("d.json.", ()),
+    ("d. b", ()),
+    ("d.html", ()),
+    ("d.HTML", ()),
+    ("d.html", ("-o", "out.html")),
+    ("d.json", ("-o", "out.html")),
+    ("d.json", ("-o", "")),
+    ("d.json", ("-o", "d.json")),
+    ("sub/d.json", ()),
+    ("sub/d.json", ("-o", "sub/x.html")),
+    ("sub/d.json", ("-o", "missing/x.html")),
+    ("sub/d.json", ("-o", "sub")),
+)
+PATH_ARGUMENTS = (
+    ("./d.json",),
+    ("sub//d.json",),
+    ("sub/./d.json",),
+    ("sub/../sub/d.json",),
+    ("sub/.",),
+    ("sub",),
+    (".",),
+    ("missing.json",),
+    ("missing.json", "-o", "x.html"),
+)
+
+
+def document_cases():
+    for text in DOCUMENT_TEXTS:
+        yield [("d.json", text.encode("utf-8"))], ("d.json",)
+    for data in DOCUMENT_BYTES:
+        yield [("d.json", data)], ("d.json",)
+    for name, options in PATHS:
+        yield [(name, MINIMAL.encode("utf-8"))], (name, *options)
+    for arguments in PATH_ARGUMENTS:
+        yield [("sub/d.json", MINIMAL.encode("utf-8"))], arguments
+
+
+def run_document_oracle(cases):
+    request = [
+        {
+            "files": [[encoded(name).hex(), data.hex()] for name, data in files],
+            "arguments": [encoded(argument).hex() for argument in arguments],
+        }
+        for files, arguments in cases
+    ]
+    completed = subprocess.run(
+        [sys.executable, "-I", "-c", DOCUMENT_ORACLE, str(ROOT)],
+        input=json.dumps(request).encode("utf-8"),
+        capture_output=True,
+        check=True,
+    )
+    return json.loads(completed.stdout)
+
+
+def rust_files(files):
+    pairs = [
+        f"({rust_bytes(encoded(name))}, {rust_bytes(data)})" for name, data in files
+    ]
+    return "&[" + ", ".join(pairs) + "]"
+
+
+def rust_document_case(case, result):
+    files, arguments = case
+    if result["written"]:
+        [[name, block]] = result["written"]
+        written = (
+            f"Some(({rust_bytes(bytes.fromhex(name))}, "
+            f"{rust_bytes(bytes.fromhex(block))}))"
+        )
+    else:
+        written = "None"
+    return (
+        f"    DocumentCase {{ files: {rust_files(files)}, "
+        f"arguments: {rust_list(arguments)}, "
+        f"status: {result['status']}, written: {written} }},"
+    )
+
+
+def write_view_vectors():
+    cases = list(document_cases())
+    results = run_document_oracle(cases)
+    lines = [rust_document_case(case, result) for case, result in zip(cases, results)]
+    text = "\n".join(
+        [
+            "use super::DocumentCase;",
+            "",
+            "#[rustfmt::skip]",
+            "pub const DOCUMENT_CASES: &[DocumentCase] = &[",
+            *lines,
+            "];",
+            "",
+        ]
+    )
+    VIEW_VECTORS_PATH.write_text(text, encoding="utf-8")
+    return len(lines)
+
+
 def encoded(text):
     return text if isinstance(text, bytes) else os.fsencode(text)
 
@@ -214,7 +556,9 @@ def run_oracle(program, arguments, columns):
     environment.pop("LINES", None)
     if columns is not None:
         environment["COLUMNS"] = columns
-    command = [sys.executable, "-I", "-c", ORACLE, str(ROOT), program]
+    viewing = bool(arguments) and encoded(arguments[0]) == b"view"
+    oracle = VIEW_ORACLE if viewing else ORACLE
+    command = [sys.executable, "-I", "-c", oracle, str(ROOT), program]
     completed = subprocess.run(
         command + [encoded(argument) for argument in arguments],
         env=environment,
@@ -254,6 +598,13 @@ def rust_list(texts):
 
 
 def rust_outcome(outcome):
+    if "parsed" in outcome and "document" in outcome["parsed"]:
+        namespace = outcome["parsed"]
+        fields = [
+            f"document: {rust_bytes(encoded(namespace['document']))}",
+            f"output: {rust_text(namespace['output'])}",
+        ]
+        return "Outcome::Viewed(Viewed { " + ", ".join(fields) + " })"
     if "parsed" in outcome:
         namespace = outcome["parsed"]
         fields = [
@@ -299,7 +650,7 @@ def write_vectors():
     lines = [rust_case(*case) for case in cases()]
     text = "\n".join(
         [
-            "use super::{Case, Outcome, Parsed};",
+            "use super::{Case, Outcome, Parsed, Viewed};",
             "",
             "#[rustfmt::skip]",
             "pub const CASES: &[Case] = &[",
@@ -382,6 +733,8 @@ def main(argv=None):
     assert sys.version_info[:2] == (3, 14), sys.version
     write_tables()
     print(f"{write_vectors()} cases in {VECTORS_PATH.relative_to(ROOT)}")
+    count = write_view_vectors()
+    print(f"{count} cases in {VIEW_VECTORS_PATH.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
