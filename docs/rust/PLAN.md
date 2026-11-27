@@ -698,7 +698,21 @@ How each becomes Rust (stage 9):
    writer, `percent_spans`, `formatter_parser`, `slice.indices`, C3 and
    `linearizations`, identifier rules, the reading of encodings and the
    position layer. Their expected values are vectors that a Python script
-   writes once (`tools/parity/vectors.py`), committed as data.
+   writes once (`tools/parity/vectors.py`), committed as data. The Python
+   unit tests of these functions run under the oracle to add their own
+   inputs to the vectors: the hierarchies of `tests/unit/test_mro.py`
+   (hypothesis with seed 0) go to `linearize.json`, the programs of
+   `tests/unit/test_scopes.py` to the D1 programs of `pycg-syntax`
+   (`d1/scopes_<n>.py`, by `tools/parity/syntax_vectors.py`), and the
+   queries of `tests/unit/test_stubs.py` on the shipped data, with their
+   answers, to `crates/dump/tests/vectors/stubs.jsonl`, which
+   `pycg-dump stubs` replays. The import manager has its own vectors
+   (`tools/parity/import_vectors.py`): for each manager that a test of
+   `tests/unit/test_imports.py` makes, the files of the test and each call
+   with its answer, which `crates/analysis/tests/imports.rs` replays in the
+   same layout. The type-only names of `tests/unit/test_type_only_names.py`
+   are builder vectors whose annotations read them (`type_only_names`,
+   `dead_blocks`).
 
 What is dropped as clutter: the tests that pin internals
 (`tests/unit/test_solver.py`, the assertions of `test_records.py` on

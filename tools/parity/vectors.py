@@ -21,7 +21,24 @@ MODELS_VECTORS = ROOT / "crates" / "analysis" / "tests" / "vectors" / "models.rs
 NESTING_VECTORS = ROOT / "crates" / "analysis" / "tests" / "vectors" / "nesting.rs"
 BUILDER_VECTORS = ROOT / "crates" / "dump" / "tests" / "vectors" / "builder"
 DUMP = ROOT / "tools" / "parity" / "dump.py"
+TYPE_ONLY_MODULE = (
+    "import typing\nfrom typing import TYPE_CHECKING\nif TYPE_CHECKING:\n"
+    "    from collections.abc import Sequence as Seq\n    from .models import Model\n"
+    "    import os.path\n    import xml.etree as tree\n    if typing.TYPE_CHECKING:\n"
+    "        from json import loads\nelse:\n    from json import dumps\n"
+    "if not TYPE_CHECKING:\n    pass\nelse:\n    from .base import Base\n"
+    "class C:\n    if typing.TYPE_CHECKING:\n        from .other import Other\n"
+    "    other: Other\n"
+    "def uses(seq: Seq, model: Model, path: os.path, etree: tree, load: loads,\n"
+    "         base: Base, dump: dumps) -> None:\n    pass\n"
+)
+DEAD_BLOCKS_MODULE = (
+    "DEBUG = False\nif DEBUG:\n    import pdb\nif False:\n    import json\n"
+    "def uses(debugger: pdb, decoder: json) -> None:\n    pass\n"
+)
 BUILDER_FILES = {
+    "type_only_names": {"pkg/__init__.py": "", "pkg/mod.py": TYPE_ONLY_MODULE},
+    "dead_blocks": {"pkg/__init__.py": "", "pkg/mod.py": DEAD_BLOCKS_MODULE},
     "stubs": {
         "main.pyi": (
             "from typing import Any, List\nimport os.path as p\nAlias = List[int]\n"
@@ -144,6 +161,8 @@ BUILDER_PROGRAMS = {
         "    assert callable(x)\n"
         "    return isinstance(x, A, B), isinstance(f(x), A), r\n"
     ),
+    "type_only_names": "import pkg.mod\n",
+    "dead_blocks": "import pkg.mod\n",
 }
 
 
@@ -216,6 +235,114 @@ def linearize_cases(generator):
         mros = {base: random_mro(generator, base, pool) for base in sorted(set(bases))}
         expected = mro.linearize(cls, bases, mros.__getitem__)
         cases.append({"class": cls, "bases": bases, "mros": mros, "expected": expected})
+    return cases
+
+
+MRO_TESTS = ROOT / "tests" / "unit" / "test_mro.py"
+STUB_TESTS = ROOT / "tests" / "unit" / "test_stubs.py"
+STUB_QUERIES = ROOT / "crates" / "dump" / "tests" / "vectors" / "stubs.jsonl"
+
+
+def stub_answer(value, method=None):
+    if method == "module" and value is not None:
+        return {"names": sorted(value["names"]), "all": value.get("all")}
+    if value is None or isinstance(value, (bool, int, str)):
+        return value
+    if isinstance(value, stubs.Definition):
+        return {"kind": value.kind, "path": value.path, "owner": value.owner}
+    if isinstance(value, (list, tuple)):
+        return [stub_answer(item) for item in value]
+    if isinstance(value, (set, frozenset)):
+        items = [stub_answer(item) for item in value]
+        return sorted(items, key=lambda item: json.dumps(item, sort_keys=True))
+    raise TypeError(f"no canonical form for the stub answer {value!r}")
+
+
+def recorded_stub_queries():
+    import pytest
+
+    oracle_dump = load_dump()
+    records = []
+    shipped = set()
+    depth = [0]
+    made = stubs.Stubs.__init__
+    originals = {name: getattr(stubs.Stubs, name) for name in oracle_dump.STUB_METHODS}
+
+    def making(found, *args, **keywords):
+        made(found, *args, **keywords)
+        if not args and not keywords:
+            shipped.add(id(found))
+
+    def recording(name):
+        original = originals[name]
+
+        def call(found, *args):
+            depth[0] += 1
+            try:
+                answer = original(found, *args)
+            finally:
+                depth[0] -= 1
+            if depth[0] == 0 and id(found) in shipped:
+                record = {"call": name, "args": stub_answer(list(args))}
+                record["answer"] = stub_answer(answer, name)
+                if record not in records:
+                    records.append(record)
+            return answer
+
+        return call
+
+    stubs.Stubs.__init__ = making
+    for name in originals:
+        setattr(stubs.Stubs, name, recording(name))
+    try:
+        status = pytest.main(["-q", "-p", "no:cacheprovider", str(STUB_TESTS)])
+    finally:
+        stubs.Stubs.__init__ = made
+        for name, original in originals.items():
+            setattr(stubs.Stubs, name, original)
+    assert status == 0, f"the tests of {STUB_TESTS} did not pass under the oracle"
+    lines = [
+        json.dumps(record, sort_keys=True, separators=(",", ":")) for record in records
+    ]
+    STUB_QUERIES.write_text("".join(f"{line}\n" for line in lines), encoding="utf-8")
+
+
+def load_dump():
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("parity_dump", DUMP)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def recorded_linearize_cases():
+    import pytest
+
+    cases = []
+    linearize = mro.linearize
+
+    def recorded(cls, bases, mro_of):
+        expected = linearize(cls, bases, mro_of)
+        mros = {}
+        for base in sorted(set(bases)):
+            try:
+                mros[base] = list(mro_of(base))
+            except KeyError:
+                pass
+        case = {"class": cls, "bases": list(bases), "mros": mros, "expected": expected}
+        if case not in cases:
+            cases.append(case)
+        return expected
+
+    mro.linearize = recorded
+    try:
+        status = pytest.main(
+            ["-q", "-p", "no:cacheprovider", "--hypothesis-seed=0", str(MRO_TESTS)]
+        )
+    finally:
+        mro.linearize = linearize
+    assert status == 0, f"the tests of {MRO_TESTS} did not pass under the oracle"
     return cases
 
 
@@ -794,7 +921,7 @@ def main(argv=None):
     parser.parse_args(argv)
     VECTORS_DIRECTORY.mkdir(parents=True, exist_ok=True)
     generator = random.Random(SEED)
-    write("linearize.json", linearize_cases(generator))
+    write("linearize.json", recorded_linearize_cases() + linearize_cases(generator))
     write("linearizations.json", linearizations_cases(generator))
     write("exhaustive_order.json", exhaustive_order_cases(generator))
     write("class_names.json", class_names_cases())
@@ -803,6 +930,7 @@ def main(argv=None):
     MODELS_VECTORS.write_text(models_vectors(), encoding="utf-8")
     NESTING_VECTORS.write_text(nesting_vectors(), encoding="utf-8")
     builder_vectors()
+    recorded_stub_queries()
 
 
 if __name__ == "__main__":
