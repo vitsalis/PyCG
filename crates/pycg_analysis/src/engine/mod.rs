@@ -164,6 +164,7 @@ struct State<T: Trace> {
     typed_objects: FxHashMap<String, ObjId>,
     handed: Vec<ObjId>,
     tables: BuilderTables,
+    containers: containers::Containers,
 }
 
 impl<T: Trace> Engine<T> {
@@ -268,6 +269,7 @@ impl<T: Trace> Engine<T> {
             supers: FxHashMap::default(),
             typed_objects: FxHashMap::default(),
             handed: Vec::new(),
+            containers: containers::Containers::default(),
             tables: BuilderTables::default(),
         };
         state.trace.object(

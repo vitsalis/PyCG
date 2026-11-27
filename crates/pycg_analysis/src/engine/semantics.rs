@@ -5,6 +5,7 @@ use rustc_hash::FxHashSet;
 
 use crate::builder::calls::Call as BuilderCall;
 use crate::engine::attributes::AccessKind;
+use crate::engine::containers::IterationRoleId;
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::Object;
 use crate::engine::symbols::Sym;
@@ -56,6 +57,12 @@ pub enum Role {
     Protocol(Sym),
     Property(AccessKind, Sym),
     NamedLoad,
+    Hash,
+    HashEq,
+    Subscript(Sym),
+    SubscriptFactory,
+    Iterate(IterationRoleId),
+    Index(IterationRoleId),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -465,7 +472,7 @@ impl<T: Trace> State<T> {
         self.site_edges.entry(key).or_default().insert(callee);
     }
 
-    fn callee(&mut self, graph: &mut Graph, call: CallId) -> NodeId {
+    pub(super) fn callee(&mut self, graph: &mut Graph, call: CallId) -> NodeId {
         if let Some(&node) = self.callees.get(&call) {
             return node;
         }

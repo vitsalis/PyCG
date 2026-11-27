@@ -1,4 +1,5 @@
 use indexmap::IndexMap;
+use num_bigint::BigInt;
 use pycg_solver::{NodeId, ObjId};
 
 use crate::builder::calls::CallId as BuilderCallId;
@@ -333,14 +334,20 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn add_unpack(
         &mut self,
-        _value: NodeId,
-        _before: &[NodeId],
-        _starred: Option<NodeId>,
-        _after: &[NodeId],
-        _caller: &str,
-        _site: &str,
+        value: NodeId,
+        before: &[NodeId],
+        starred: Option<NodeId>,
+        after: &[NodeId],
+        caller: &str,
+        site: &str,
     ) {
-        not_ported("the builder call add_unpack")
+        self.sync();
+        let (caller, site) = (
+            self.state.symbols.intern(caller),
+            self.state.symbols.intern(site),
+        );
+        self.state
+            .add_unpack(&mut self.graph, value, before, starred, after, caller, site);
     }
 
     fn add_with(
@@ -446,28 +453,40 @@ impl<T: Trace> Analysis for Engine<T> {
         &mut self.state.tables
     }
 
-    fn container(&mut self, _kind: &str, _site: &str, _length: Option<usize>) -> ObjId {
-        not_ported("the builder call container")
+    fn container(&mut self, kind: &str, site: &str, length: Option<usize>) -> ObjId {
+        self.sync();
+        let length = length.map(|length| u32::try_from(length).expect("a length fits u32"));
+        self.state
+            .new_container(&mut self.graph, kind, site, length, true)
     }
 
-    fn element(&mut self, _container: ObjId, _key: &Key) -> NodeId {
-        not_ported("the builder call element")
+    fn element(&mut self, container: ObjId, key: &Key) -> NodeId {
+        self.sync();
+        let key = match key {
+            Key::Index(index) => Literal::Int(BigInt::from(*index)),
+            Key::Name(name) => Literal::Str(name.chars().map(u32::from).collect()),
+        };
+        self.state.element(&mut self.graph, container, &key)
     }
 
-    fn unknown(&mut self, _container: ObjId) -> NodeId {
-        not_ported("the builder call unknown")
+    fn unknown(&mut self, container: ObjId) -> NodeId {
+        self.sync();
+        self.state.unknown(&mut self.graph, container)
     }
 
-    fn keys(&mut self, _container: ObjId) -> NodeId {
-        not_ported("the builder call keys")
+    fn keys(&mut self, container: ObjId) -> NodeId {
+        self.sync();
+        self.state.keys(&mut self.graph, container)
     }
 
-    fn elements(&mut self, _container: ObjId) -> NodeId {
-        not_ported("the builder call elements")
+    fn elements(&mut self, container: ObjId) -> NodeId {
+        self.sync();
+        self.state.elements(&mut self.graph, container)
     }
 
-    fn write_keyed(&mut self, _container: ObjId, _key: Option<NodeId>, _src: Option<NodeId>) {
-        not_ported("the builder call write_keyed")
+    fn write_keyed(&mut self, container: ObjId, key: Option<NodeId>, src: Option<NodeId>) {
+        self.sync();
+        self.state.write_keyed(&mut self.graph, container, key, src);
     }
 
     fn typed(&mut self, _cls: &str) -> ObjId {
@@ -493,27 +512,63 @@ impl<T: Trace> Analysis for Engine<T> {
         not_ported("the builder call add_conversion")
     }
 
-    fn add_hash(&mut self, _key: NodeId, _caller: &str, _site: &str, _stored: Option<NodeId>) {
-        not_ported("the builder call add_hash")
+    fn add_hash(&mut self, key: NodeId, caller: &str, site: &str, stored: Option<NodeId>) {
+        self.sync();
+        let (caller, site) = (
+            self.state.symbols.intern(caller),
+            self.state.symbols.intern(site),
+        );
+        self.state
+            .add_hash(&mut self.graph, key, caller, site, stored);
     }
 
-    fn add_subscript(&mut self, _subscript: &Subscript<'_>) {
-        not_ported("the builder call add_subscript")
+    fn add_subscript(&mut self, subscript: &Subscript<'_>) {
+        self.sync();
+        let caller = self.state.symbols.intern(subscript.caller);
+        let site = self.state.symbols.intern(subscript.site);
+        self.state.add_subscript(
+            &mut self.graph,
+            subscript.base,
+            subscript.key,
+            subscript.dst,
+            subscript.src,
+            subscript.delete,
+            caller,
+            site,
+        );
     }
 
-    fn add_slice(&mut self, _slice: &Slice<'_>) {
-        not_ported("the builder call add_slice")
+    fn add_slice(&mut self, slice: &Slice<'_>) {
+        self.sync();
+        let caller = self.state.symbols.intern(slice.caller);
+        let site = self.state.symbols.intern(slice.site);
+        self.state.add_slice(
+            &mut self.graph,
+            slice.base,
+            slice.bounds.cloned(),
+            slice.dst,
+            slice.src,
+            slice.delete,
+            caller,
+            site,
+        );
     }
 
     fn add_iteration(
         &mut self,
-        _iterable: NodeId,
-        _dst: NodeId,
-        _caller: &str,
-        _site: &str,
-        _is_async: bool,
+        iterable: NodeId,
+        dst: NodeId,
+        caller: &str,
+        site: &str,
+        is_async: bool,
     ) {
-        not_ported("the builder call add_iteration")
+        self.sync();
+        let (caller, site) = (
+            self.state.symbols.intern(caller),
+            self.state.symbols.intern(site),
+        );
+        self.state
+            .add_iteration(&mut self.graph, iterable, dst, caller, site, is_async);
     }
 
     fn add_length_hint(&mut self, _iterable: NodeId, _caller: &str, _site: &str) {
@@ -522,16 +577,27 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn entering_keys(
         &mut self,
-        _source: NodeId,
-        _construct: (&str, &str),
-        _caller: &str,
-        _site: &str,
+        source: NodeId,
+        construct: (&str, &str),
+        caller: &str,
+        site: &str,
     ) -> (NodeId, NodeId) {
-        not_ported("the builder call entering_keys")
+        self.sync();
+        let symbols = &mut self.state.symbols;
+        let construct = (symbols.intern(construct.0), symbols.intern(construct.1));
+        let (caller, site) = (symbols.intern(caller), symbols.intern(site));
+        self.state
+            .entering_keys(&mut self.graph, source, construct, caller, site)
     }
 
-    fn add_dict_items(&mut self, _target: ObjId, _source: NodeId, _caller: &str, _site: &str) {
-        not_ported("the builder call add_dict_items")
+    fn add_dict_items(&mut self, target: ObjId, source: NodeId, caller: &str, site: &str) {
+        self.sync();
+        let (caller, site) = (
+            self.state.symbols.intern(caller),
+            self.state.symbols.intern(site),
+        );
+        self.state
+            .add_dict_items(&mut self.graph, target, source, caller, site);
     }
 
     fn add_await(&mut self, _value: NodeId, _dst: NodeId, _caller: &str, _site: &str) {
@@ -540,13 +606,19 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn add_yield_from(
         &mut self,
-        _iterable: NodeId,
-        _function: ObjId,
-        _dst: NodeId,
-        _caller: &str,
-        _site: &str,
+        iterable: NodeId,
+        function: ObjId,
+        dst: NodeId,
+        caller: &str,
+        site: &str,
     ) {
-        not_ported("the builder call add_yield_from")
+        self.sync();
+        let (caller, site) = (
+            self.state.symbols.intern(caller),
+            self.state.symbols.intern(site),
+        );
+        self.state
+            .add_yield_from(&mut self.graph, iterable, function, dst, caller, site);
     }
 
     fn add_pattern_operand(&mut self, _operand: Option<NodeId>, _result: NodeId) {
