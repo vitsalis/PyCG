@@ -100,6 +100,9 @@ pub fn node_key(node: &Node<'_>) -> NodeKey {
     NodeKey(address)
 }
 
+const SURROGATES: std::ops::RangeInclusive<u32> = 0xd800..=0xdfff;
+const UNREADABLE_NAME_SURROGATE: char = char::REPLACEMENT_CHARACTER;
+
 const NAMESPACE_CALLS: [(&str, &[NamespaceTarget]); 5] = [
     ("globals", &[NamespaceTarget::Module]),
     ("locals", &[NamespaceTarget::Caller]),
@@ -475,16 +478,25 @@ pub fn literal_assignment(statement: &Stmt, name: &str, source: &str) -> Option<
     elements
         .iter()
         .map(|element| match literal(element, source) {
-            Some(Constant::Str(text)) => Some(text_of(&text)),
+            Some(Constant::Str(text)) => Some(declared_name(&text)),
             _ => None,
         })
         .collect()
 }
 
-fn text_of(text: &PyStr) -> String {
+fn declared_name(text: &PyStr) -> String {
     text.code_points()
         .iter()
-        .map(|&point| char::from_u32(point).unwrap_or(char::REPLACEMENT_CHARACTER))
+        .map(|&point| match char::from_u32(point) {
+            Some(character) => character,
+            None => {
+                assert!(
+                    SURROGATES.contains(&point),
+                    "a code point of a str is a char or a surrogate"
+                );
+                UNREADABLE_NAME_SURROGATE
+            }
+        })
         .collect()
 }
 

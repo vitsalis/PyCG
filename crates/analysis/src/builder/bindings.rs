@@ -95,7 +95,10 @@ fn import_binding(alias: &ruff_python_ast::Alias) -> String {
         Some(asname) => identifier(asname.as_str()).into_owned(),
         None => {
             let name = identifier(alias.name.as_str());
-            name.split('.').next().unwrap_or(&name).to_owned()
+            name.split('.')
+                .next()
+                .expect("a split gives a first part")
+                .to_owned()
         }
     }
 }

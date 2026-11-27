@@ -4,7 +4,6 @@ use std::process::ExitCode;
 use crate::canonical::document;
 
 const EXIT_FAILURE: u8 = 1;
-const DIFFERENCES_LISTED: usize = 10;
 const DOCUMENT: &str = "D6.json";
 
 pub fn run(root: &str) -> ExitCode {
@@ -31,8 +30,10 @@ pub fn run(root: &str) -> ExitCode {
         documents.len() - different.len(),
         different.len()
     );
-    for (path, problem) in different.iter().take(DIFFERENCES_LISTED) {
-        let shown = path.strip_prefix(root).unwrap_or(path);
+    for (path, problem) in &different {
+        let shown = path
+            .strip_prefix(root)
+            .expect("a listed document is under the root");
         println!("  {}: {problem}", shown.display());
     }
     if different.is_empty() {

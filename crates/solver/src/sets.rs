@@ -84,10 +84,6 @@ impl Sets {
         self.object_by_number[number as usize]
     }
 
-    pub fn objects_numbered(&self) -> usize {
-        self.object_by_number.len()
-    }
-
     pub fn numbers(&self, set: SetId) -> &[u32] {
         let span = self.spans[set.index()];
         &self.elements[span.start as usize..(span.start + span.len) as usize]

@@ -7,8 +7,6 @@ use crate::ids::{NodeId, ObjId, SetId, WatchId};
 use crate::order::Order;
 use crate::sets::{KIND_SELECTION_OBJECTS_MIN, KindMask, Sets};
 
-pub const OBJECTS_PER_NODE_DEFAULT: u32 = 5000;
-
 pub const ATTACH_NESTING_MAX: u32 = 50;
 
 type OrderedMap<K, V> = IndexMap<K, V, FxBuildHasher>;

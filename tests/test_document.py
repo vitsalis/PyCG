@@ -1231,6 +1231,20 @@ from requests import get
     }
 
 
+def test_a_name_with_a_lone_surrogate_in_all_is_not_exported(tmp_path):
+    found = document(
+        tmp_path,
+        {
+            "pkg/__init__.py": "",
+            "pkg/mod.py": 'def f():\n    pass\n\n\n__all__ = ["f", "g\\udcff"]\n',
+            "main.py": "from pkg.mod import *\n\nf()\n",
+        },
+        ("main.py", "pkg/mod.py", "pkg/__init__.py"),
+    )
+
+    assert found["exports"] == {"main.f": ["pkg.mod.f"]}
+
+
 def test_a_method_of_a_third_party_library_with_a_stub_is_known_from_the_stub(
     tmp_path,
 ):
