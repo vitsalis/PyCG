@@ -1,15 +1,18 @@
 mod arguments;
 mod help;
 mod integer;
+mod json;
 mod terminal;
 mod text;
 mod unicode;
+mod view;
 
 use std::ffi::OsStr;
 
-pub use arguments::{Options, Outcome, parse};
+pub use arguments::{Options, Outcome, ViewOptions, parse, view_program};
 pub use terminal::{stdout_columns, width};
 pub use text::for_stderr;
+pub use view::{ViewError, view};
 
 #[cfg(windows)]
 const PATH_SEPARATORS: &[u8] = b"/\\";

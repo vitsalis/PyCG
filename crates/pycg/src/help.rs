@@ -1,4 +1,4 @@
-use crate::arguments::{DESCRIPTION, OPTIONALS, Optional, POSITIONAL, POSITIONAL_HELP};
+use crate::arguments::{Command, Optional};
 use crate::text::length;
 
 const USAGE_PREFIX: &[u8] = b"usage: ";
@@ -95,13 +95,22 @@ fn wrapped_usage(
     lines.join(&b'\n')
 }
 
-fn format_usage(program: &[u8], width: i64) -> Vec<u8> {
+fn format_usage(command: Command, program: &[u8], width: i64) -> Vec<u8> {
     let program = Part {
         text: program.to_vec(),
         length: length(program),
     };
-    let optionals: Vec<Part> = OPTIONALS.into_iter().map(optional_usage).collect();
-    let positionals = [Part::ascii(format!("[{POSITIONAL} ...]"))];
+    let optionals: Vec<Part> = command
+        .optionals()
+        .iter()
+        .map(|&optional| optional_usage(optional))
+        .collect();
+    let positional = command.positional();
+    let positionals = [Part::ascii(if command.positional_repeats() {
+        format!("[{positional} ...]")
+    } else {
+        positional.to_owned()
+    })];
     let optionals: Vec<&Part> = optionals.iter().collect();
     let positionals: Vec<&Part> = positionals.iter().collect();
     let all: Vec<&Part> = [&[&program], optionals.as_slice(), positionals.as_slice()].concat();
@@ -139,8 +148,8 @@ fn finish(text: Vec<u8>) -> Vec<u8> {
     out
 }
 
-pub fn usage(program: &[u8], width: i64) -> Vec<u8> {
-    finish(format_usage(program, width))
+pub fn usage(command: Command, program: &[u8], width: i64) -> Vec<u8> {
+    finish(format_usage(command, program, width))
 }
 
 fn wrap(text: &str, width: i64) -> Vec<String> {
@@ -199,7 +208,7 @@ struct Entry {
     help: String,
 }
 
-fn optional_entry(optional: Optional) -> Entry {
+fn optional_entry(command: Command, optional: Optional) -> Entry {
     let strings = optional.strings().join(", ");
     let invocation = match optional.metavar() {
         None => strings,
@@ -207,7 +216,7 @@ fn optional_entry(optional: Optional) -> Entry {
     };
     Entry {
         invocation,
-        help: optional.help(),
+        help: optional.help(command),
     }
 }
 
@@ -250,12 +259,16 @@ fn section(heading: &str, entries: &[Entry], help_position: i64, width: i64) -> 
     out
 }
 
-pub fn help(program: &[u8], width: i64) -> Vec<u8> {
+pub fn help(command: Command, program: &[u8], width: i64) -> Vec<u8> {
     let positionals = [Entry {
-        invocation: POSITIONAL.to_owned(),
-        help: POSITIONAL_HELP.to_owned(),
+        invocation: command.positional().to_owned(),
+        help: command.positional_help().to_owned(),
     }];
-    let optionals: Vec<Entry> = OPTIONALS.into_iter().map(optional_entry).collect();
+    let optionals: Vec<Entry> = command
+        .optionals()
+        .iter()
+        .map(|&optional| optional_entry(command, optional))
+        .collect();
     let invocation_max = positionals
         .iter()
         .chain(&optionals)
@@ -266,9 +279,9 @@ pub fn help(program: &[u8], width: i64) -> Vec<u8> {
     let help_position_max =
         HELP_POSITION_MAX.min((width - HELP_POSITION_MARGIN).max(2 * INDENT_STEP));
     let help_position = (action_max_length + 2).min(help_position_max);
-    let description = wrap(DESCRIPTION, width.max(TEXT_WIDTH_MIN)).join("\n");
+    let description = wrap(command.description(), width.max(TEXT_WIDTH_MIN)).join("\n");
     let text = [
-        format_usage(program, width),
+        format_usage(command, program, width),
         format!("{description}\n\n").into_bytes(),
         section("positional arguments", &positionals, help_position, width),
         section("options", &optionals, help_position, width),
