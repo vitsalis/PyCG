@@ -3,7 +3,7 @@ use std::fmt::Write as _;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-const STUB_DATA_DIRECTORY: &str = "../../pycg/analysis/stub_data";
+const STUB_DATA_DIRECTORY: &str = "stub_data";
 const THIRD_PARTY_DIRECTORY_NAME: &str = "third_party";
 const README_NAME: &str = "README.md";
 const TYPESHED_COMMIT_MARKER: &str = "at commit";
