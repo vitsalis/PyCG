@@ -952,6 +952,40 @@ impl Replay {
                 self.engine.add_pattern_operand(operand, result);
                 None
             }
+            "callable_filter" => {
+                let source = self.node(&arguments["source"]);
+                let dst = self.node(&arguments["dst"]);
+                let holds = arguments["holds"].as_bool().expect("holds");
+                self.engine.callable_filter(source, dst, holds);
+                None
+            }
+            "class_filter" => {
+                let source = self.node(&arguments["source"]);
+                let classes = self.optional_node(&arguments["classes"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.class_filter(
+                    source,
+                    classes,
+                    dst,
+                    arguments["as_class"].as_bool().expect("as_class"),
+                    arguments["holds"].as_bool().expect("holds"),
+                );
+                None
+            }
+            "tested_classes" => {
+                let classes = self.node(&arguments["classes"]);
+                let dst = self.node(&arguments["dst"]);
+                let owner = list(&arguments["owner"]);
+                let module = self.object(&owner[0]);
+                self.engine.tested_classes(
+                    classes,
+                    dst,
+                    arguments["as_class"].as_bool().expect("as_class"),
+                    module,
+                    text(&owner[1]),
+                );
+                None
+            }
             "add_truth" => {
                 let value = self.node(&arguments["value"]);
                 self.engine

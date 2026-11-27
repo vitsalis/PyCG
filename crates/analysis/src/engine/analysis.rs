@@ -821,29 +821,39 @@ impl<T: Trace> Analysis for Engine<T> {
             .add_named_load(&mut self.graph, obj, name, dst, caller, site);
     }
 
-    fn callable_filter(&mut self, _source: NodeId, _dst: NodeId, _holds: bool) {
-        not_ported("the builder call callable_filter")
+    fn callable_filter(&mut self, source: NodeId, dst: NodeId, holds: bool) {
+        self.sync();
+        self.state
+            .callable_filter(&mut self.graph, source, dst, holds);
     }
 
     fn class_filter(
         &mut self,
-        _source: NodeId,
-        _classes: Option<NodeId>,
-        _dst: NodeId,
-        _as_class: bool,
-        _holds: bool,
+        source: NodeId,
+        classes: Option<NodeId>,
+        dst: NodeId,
+        as_class: bool,
+        holds: bool,
     ) {
-        not_ported("the builder call class_filter")
+        self.sync();
+        self.state
+            .class_filter(&mut self.graph, source, classes, dst, as_class, holds);
     }
 
     fn tested_classes(
         &mut self,
-        _classes: NodeId,
-        _dst: NodeId,
-        _as_class: bool,
-        _module: ObjId,
-        _site: &str,
+        classes: NodeId,
+        dst: NodeId,
+        as_class: bool,
+        module: ObjId,
+        site: &str,
     ) {
-        not_ported("the builder call tested_classes")
+        self.sync();
+        let owner = Owner {
+            object: module,
+            name: self.state.symbols.intern(site),
+        };
+        self.state
+            .tested_classes(&mut self.graph, classes, dst, as_class, owner);
     }
 }
