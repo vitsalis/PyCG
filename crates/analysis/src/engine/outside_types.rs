@@ -97,6 +97,11 @@ pub(crate) enum TypeOrigin {
         caller: Sym,
         site: Sym,
     },
+    Special {
+        caller: Sym,
+        site: Sym,
+        method: Sym,
+    },
 }
 
 #[derive(Clone, Debug)]
@@ -301,7 +306,8 @@ impl<T: Trace> State<T> {
                 | &TypeOrigin::Subscript { site, .. }
                 | &TypeOrigin::Slice { site, .. }
                 | &TypeOrigin::Operator { site, .. }
-                | &TypeOrigin::Enter { site, .. },
+                | &TypeOrigin::Enter { site, .. }
+                | &TypeOrigin::Special { site, .. },
             ) => site,
             (None, TypeOrigin::Call(_)) => panic!("a call origin comes with its call"),
         }

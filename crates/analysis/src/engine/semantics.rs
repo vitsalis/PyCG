@@ -223,6 +223,26 @@ impl<T: Trace> State<T> {
         id
     }
 
+    pub(super) fn call_past_first_argument(&mut self, graph: &mut Graph, call: CallId) -> CallId {
+        let dst = self.node(graph, None);
+        let details = &self.calls[call.index()];
+        let forwarded = Call {
+            caller: details.caller,
+            args: details.args[1..].to_vec(),
+            keywords: details.keywords.clone(),
+            dst: Some(dst),
+            site: details.site,
+            origin: Origin::Call(CallId(0)),
+            star: Vec::new(),
+            double_star: details.double_star.clone(),
+            implicit: true,
+            decorator: false,
+            applies: false,
+            rule: RuleId::PLACEHOLDER,
+        };
+        self.new_call(forwarded, None)
+    }
+
     pub(super) fn add_call(&mut self, graph: &mut Graph, new: &BuilderCall<'_>) {
         let caller = self.symbols.intern(new.caller);
         let site = self.symbols.intern(new.site);

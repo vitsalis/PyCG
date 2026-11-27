@@ -153,6 +153,13 @@ pub(crate) enum Rule {
     CallBackObject {
         callback: CallId,
     },
+    SpecialMethodOf {
+        method: Sym,
+        forwarded: CallId,
+        dst: NodeId,
+        caller: Sym,
+        site: Sym,
+    },
     CallProtocol {
         plan: PlanId,
         caller: Sym,
@@ -319,6 +326,7 @@ const CONTAINER_KINDS: &[Kind] = &[Kind::Container];
 const OWNER_OR_INSTANCE_KINDS: &[Kind] = &[Kind::Class, Kind::Instance];
 const OWNER_KINDS: &[Kind] = &[Kind::Class, Kind::External];
 const CALLED_BACK_KINDS: &[Kind] = &[Kind::Function, Kind::BoundMethod, Kind::Instance];
+const SPECIAL_METHOD_KINDS: &[Kind] = &[Kind::Instance, Kind::Typed];
 
 impl Rule {
     fn key(&self) -> &'static str {
@@ -370,6 +378,7 @@ impl Rule {
             Rule::DeliverStore { .. } => "Each:Attributes._deliver_store",
             Rule::DeliverDelete { .. } => "Each:Attributes._deliver_delete",
             Rule::CallBackObject { .. } => "Each:Analysis._call_back_object",
+            Rule::SpecialMethodOf { .. } => "Each:BuiltinRules._special_method_of",
             Rule::CallProtocol { .. } => "Each:Outside._call_protocol",
             Rule::SequenceLength { .. } => "Each:BuiltinRules._sequence_length",
             Rule::Reversed { .. } => "Each:BuiltinRules._reversed",
@@ -442,6 +451,7 @@ impl Rule {
             | Rule::TypeBase { .. }
             | Rule::CallTypeMetaclass { .. } => Some(CLASS_KINDS),
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
+            Rule::SpecialMethodOf { .. } => Some(SPECIAL_METHOD_KINDS),
             Rule::CallProtocol { .. } => Some(SET_NAME_KINDS),
             Rule::SequenceLength { .. } => Some(CONTAINER_KINDS),
             Rule::MembersOf { .. } => Some(OWNER_OR_INSTANCE_KINDS),
@@ -493,6 +503,7 @@ impl Rule {
                 vec![class]
             }
             Rule::CallBackObject { .. }
+            | Rule::SpecialMethodOf { .. }
             | Rule::CallProtocol { .. }
             | Rule::SequenceLength { .. }
             | Rule::CallEach { .. }
@@ -615,6 +626,7 @@ impl<T: Trace> State<T> {
             Rule::Itself { dst, .. } => vec![dst],
             Rule::ClassGet { call } => self.calls[call.index()].dst.into_iter().collect(),
             Rule::StorePast { field, .. } => vec![field],
+            Rule::SpecialMethodOf { dst, .. } => vec![dst],
             Rule::DeliverStore { .. }
             | Rule::DeliverDelete { .. }
             | Rule::CallBackObject { .. }
@@ -748,6 +760,13 @@ impl<T: Trace> State<T> {
                 delete,
             } => self.deliver_delete(graph, object, owner, delete),
             Rule::CallBackObject { callback } => self.call(graph, object, callback),
+            Rule::SpecialMethodOf {
+                method,
+                forwarded,
+                dst,
+                caller,
+                site,
+            } => self.special_method_of(graph, object, method, forwarded, dst, caller, site),
             Rule::CallProtocol { plan, caller, site } => {
                 self.call_protocol(graph, object, plan, caller, site)
             }
