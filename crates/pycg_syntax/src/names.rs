@@ -196,6 +196,10 @@ fn within(ranges: &[(u32, u32)], character: char) -> bool {
     ranges.get(index).is_some_and(|&(low, _)| low <= point)
 }
 
+pub fn is_python_space(character: char) -> bool {
+    character.is_whitespace() || ('\u{1c}'..='\u{1f}').contains(&character)
+}
+
 pub fn is_identifier(text: &str) -> bool {
     let tables = tables();
     let mut characters = text.chars();

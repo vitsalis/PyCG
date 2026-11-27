@@ -1,5 +1,5 @@
 use ruff_python_ast::token::{TokenKind, Tokens};
-use ruff_python_ast::{Expr, ModModule, Operator, PythonVersion, UnaryOp};
+use ruff_python_ast::{Expr, Mod, ModModule, Operator, PythonVersion, UnaryOp};
 use ruff_python_parser::{
     LexicalErrorType, Mode, ParseErrorType, ParseOptions, Parsed, parse_unchecked,
 };
@@ -52,31 +52,94 @@ where
     W: FnOnce(Result<&Parsed<ModModule>, ParseFailure>) -> R + Send,
     R: Send,
 {
-    let bytes = source
-        .len()
-        .checked_mul(PARSE_STACK_BYTES_PER_SOURCE_BYTE)
-        .and_then(|bytes| bytes.checked_add(PARSE_STACK_BASE_BYTES))
-        .expect("the stack of a source fits the address space");
-    crate::stack::on_stack(bytes, || match parse_source(source) {
+    crate::stack::on_stack(stack_bytes(source.len()), || match parse_source(source) {
         Ok(parsed) => work(Ok(&parsed)),
         Err(failure) => work(Err(failure)),
     })
 }
 
-fn parse_source(source: &str) -> Result<Parsed<ModModule>, ParseFailure> {
+pub fn with_parsed_and_stub<W, R>(source: &str, stub: Option<&str>, work: W) -> R
+where
+    W: FnOnce(
+            Result<&Parsed<ModModule>, ParseFailure>,
+            Option<Result<&Parsed<ModModule>, ParseFailure>>,
+        ) -> R
+        + Send,
+    R: Send,
+{
+    let bytes = source
+        .len()
+        .checked_add(stub.map_or(0, str::len))
+        .expect("the sources fit the address space");
+    crate::stack::on_stack(stack_bytes(bytes), || {
+        let stub = stub.map(parse_source);
+        let stub = stub
+            .as_ref()
+            .map(|parsed| parsed.as_ref().map_err(Clone::clone));
+        match parse_source(source) {
+            Ok(parsed) => work(Ok(&parsed), stub),
+            Err(failure) => work(Err(failure), stub),
+        }
+    })
+}
+
+pub struct ParsedExpression(Parsed<Mod>);
+
+impl ParsedExpression {
+    pub fn expression(&self) -> &Expr {
+        match self.0.syntax() {
+            Mod::Expression(expression) => &expression.body,
+            Mod::Module(_) => unreachable!("an expression parse gives an expression"),
+        }
+    }
+}
+
+pub fn parse_nested_expression(source: &str) -> Result<ParsedExpression, ParseFailure> {
+    reject_null(source)?;
+    let options = ParseOptions::from(Mode::Expression).with_target_version(TARGET_VERSION);
+    let parsed = ParsedExpression(parse_unchecked(source, options));
+    let roots = vec![Node::Expr(parsed.expression())];
+    check(&parsed.0, roots, Grammar::Expression, source)?;
+    Ok(parsed)
+}
+
+fn stack_bytes(source_bytes: usize) -> usize {
+    source_bytes
+        .checked_mul(PARSE_STACK_BYTES_PER_SOURCE_BYTE)
+        .and_then(|bytes| bytes.checked_add(PARSE_STACK_BASE_BYTES))
+        .expect("the stack of a source fits the address space")
+}
+
+fn reject_null(source: &str) -> Result<(), ParseFailure> {
     if source.contains('\0') {
         return Err(ParseFailure {
             kind: SyntaxKind::Syntax,
             line: None,
         });
     }
+    Ok(())
+}
+
+fn parse_source(source: &str) -> Result<Parsed<ModModule>, ParseFailure> {
+    reject_null(source)?;
     let options = ParseOptions::from(Mode::Module).with_target_version(TARGET_VERSION);
     let parsed = parse_unchecked(source, options)
         .try_into_module()
         .expect("a module parse gives a module");
+    let roots = parsed.syntax().body.iter().map(Node::Stmt).collect();
+    check(&parsed, roots, Grammar::Module, source)?;
+    Ok(parsed)
+}
+
+fn check<T>(
+    parsed: &Parsed<T>,
+    roots: Vec<Node<'_>>,
+    grammar: Grammar,
+    source: &str,
+) -> Result<(), ParseFailure> {
     let lines = LineIndex::from_source_text(source);
-    let nesting = nesting(&parsed);
-    if let Some(failure) = first_failure(&parsed, &lines, source, nesting.chain) {
+    let nesting = nesting(parsed.tokens(), roots, grammar);
+    if let Some(failure) = first_failure(parsed, &lines, source, nesting.chain) {
         return Err(failure);
     }
     if nesting.depth > STATEMENT_DEPTH_MAX {
@@ -85,11 +148,11 @@ fn parse_source(source: &str) -> Result<Parsed<ModModule>, ParseFailure> {
             line: None,
         });
     }
-    Ok(parsed)
+    Ok(())
 }
 
-fn first_failure(
-    parsed: &Parsed<ModModule>,
+fn first_failure<T>(
+    parsed: &Parsed<T>,
     lines: &LineIndex,
     source: &str,
     chain: Option<TextSize>,
@@ -190,13 +253,17 @@ impl Chain {
         }
     }
 
-    fn length_max(self) -> usize {
-        match self {
-            Chain::Factor => 5_966,
-            Chain::Not | Chain::Conditional => 5_967,
-            Chain::Elif => 5_962,
-            Chain::Lambda | Chain::Power => 2_983,
-            Chain::Boolean => 199,
+    fn length_max(self, grammar: Grammar) -> usize {
+        match (grammar, self) {
+            (Grammar::Module, Chain::Factor) => 5_966,
+            (Grammar::Module, Chain::Not | Chain::Conditional) => 5_967,
+            (Grammar::Module, Chain::Elif) => 5_962,
+            (Grammar::Module, Chain::Lambda | Chain::Power) => 2_983,
+            (Grammar::Expression, Chain::Factor) => 5_974,
+            (Grammar::Expression, Chain::Not | Chain::Conditional) => 5_975,
+            (Grammar::Expression, Chain::Elif) => unreachable!("an expression holds no elif"),
+            (Grammar::Expression, Chain::Lambda | Chain::Power) => 2_987,
+            (_, Chain::Boolean) => 199,
         }
     }
 }
@@ -212,18 +279,19 @@ struct Nesting {
     chain: Option<TextSize>,
 }
 
-fn nesting(parsed: &Parsed<ModModule>) -> Nesting {
-    let tokens = parsed.tokens();
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Grammar {
+    Module,
+    Expression,
+}
+
+fn nesting(tokens: &Tokens, roots: Vec<Node<'_>>, grammar: Grammar) -> Nesting {
     let mut found = Nesting {
         depth: 0,
         chain: None,
     };
-    let mut pending: Vec<(Node<'_>, usize, Option<Link>)> = parsed
-        .syntax()
-        .body
-        .iter()
-        .map(|statement| (Node::Stmt(statement), 1, None))
-        .collect();
+    let mut pending: Vec<(Node<'_>, usize, Option<Link>)> =
+        roots.into_iter().map(|root| (root, 1, None)).collect();
     while let Some((node, depth, outer)) = pending.pop() {
         found.depth = found.depth.max(depth);
         let chain = Chain::of(&node).map(|kind| match outer {
@@ -234,7 +302,7 @@ fn nesting(parsed: &Parsed<ModModule>) -> Nesting {
             _ => Link { kind, length: 1 },
         });
         if let Some(link) = chain
-            && link.length > link.kind.length_max()
+            && link.length > link.kind.length_max(grammar)
         {
             let start = node
                 .range(tokens)

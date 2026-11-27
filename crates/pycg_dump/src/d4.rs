@@ -7,14 +7,16 @@ use std::process::ExitCode;
 use indexmap::IndexMap;
 use pycg_analysis::builder::calls::{
     Analysis, BuilderTables, Call, CallId, ClassFields, ClassStatement, Constant, FunctionFields,
-    Key, MadeFunction, MethodKind, NewClass, Operation, Passthrough, Slice, Subscript,
+    Key, MadeFunction, MethodKind, NewClass, Operation, Passthrough, Shape, Slice, Subscript,
 };
 use pycg_analysis::builder::{ModuleBuilder, Source};
 use pycg_analysis::model::Signature;
 use pycg_solver::{NodeId, ObjId};
-use pycg_syntax::parse::with_parsed;
+use pycg_syntax::parse::with_parsed_and_stub;
 use pycg_syntax::read::read_file;
 use pycg_syntax::scopes::analyse_scopes;
+use pycg_syntax::tree::Node;
+use ruff_python_ast::{ModModule, Stmt};
 use ruff_source_file::LineIndex;
 use serde_json::{Map, Value, json};
 
@@ -166,13 +168,33 @@ fn build(replay: &mut Replay<'_>, module: &str, path: &Path, is_entry: bool) {
     let Ok(source) = read_file(path) else {
         return;
     };
-    with_parsed(&source, |parsed| {
+    let stub_path = path.with_extension("pyi");
+    let stub = (path.extension().is_some_and(|suffix| suffix == "py") && stub_path.is_file())
+        .then(|| read_file(&stub_path).ok())
+        .flatten();
+    with_parsed_and_stub(&source, stub.as_deref(), |parsed, stub_parsed| {
         let Ok(parsed) = parsed else {
             return;
         };
         let lines = LineIndex::from_source_text(&source);
         let tokens = parsed.tokens();
         let scopes = analyse_scopes(parsed.syntax(), module, tokens, &lines, &source);
+        let stub_lines = stub.as_deref().map(LineIndex::from_source_text);
+        let own_stub = match (stub_parsed, stub.as_deref(), stub_lines.as_ref()) {
+            (Some(Ok(stub_parsed)), Some(text), Some(stub_lines))
+                if !declares_global_or_nonlocal(stub_parsed.syntax()) =>
+            {
+                Some((
+                    stub_parsed.syntax(),
+                    Source {
+                        text,
+                        tokens: stub_parsed.tokens(),
+                        lines: stub_lines,
+                    },
+                ))
+            }
+            _ => None,
+        };
         let object = replay.module(module);
         replay.built = Some(object);
         let is_package = path.file_name().is_some_and(|name| name == "__init__.py");
@@ -189,8 +211,22 @@ fn build(replay: &mut Replay<'_>, module: &str, path: &Path, is_entry: bool) {
             is_package,
             is_entry,
         );
+        if let Some((tree, source)) = own_stub {
+            builder = builder.with_own_stub(tree, source);
+        }
         builder.build(&parsed.syntax().body);
     });
+}
+
+fn declares_global_or_nonlocal(tree: &ModModule) -> bool {
+    let mut pending: Vec<Node<'_>> = tree.body.iter().map(Node::Stmt).collect();
+    while let Some(node) = pending.pop() {
+        if matches!(node, Node::Stmt(Stmt::Global(_) | Stmt::Nonlocal(_))) {
+            return true;
+        }
+        pending.extend(node.children());
+    }
+    false
 }
 
 enum Made {
@@ -1263,6 +1299,70 @@ impl Analysis for Replay<'_> {
         ]);
         self.record("imports.handle_import", recorded, answer.clone());
         answer.as_str().map(str::to_owned)
+    }
+
+    fn locate(&mut self, name: &str) -> Option<(String, Option<String>)> {
+        let answer = self.answer("imports.locate");
+        self.record(
+            "imports.locate",
+            arguments(vec![("name", json!(name))]),
+            answer.clone(),
+        );
+        let found = answer.as_array()?;
+        let module = found.first()?.as_str()?.to_owned();
+        let attribute = found.get(1)?.as_str().map(str::to_owned);
+        Some((module, attribute))
+    }
+
+    fn type_form(&mut self, operator: &str, parts: &[Option<NodeId>], site: &str) -> ObjId {
+        let answer = self.answer("type_form");
+        let recorded = arguments(vec![
+            ("operator", json!(operator)),
+            ("parts", self.optional_nodes(parts)),
+            ("site", json!(site)),
+        ]);
+        self.record("type_form", recorded, answer.clone());
+        self.object_from(&answer)
+    }
+
+    fn gate_type_form(&mut self, form: ObjId, gate: NodeId) {
+        let recorded = arguments(vec![
+            ("form", self.object(form)),
+            ("gate", self.canon_node(gate)),
+        ]);
+        self.simple("gate_type_form", recorded);
+    }
+
+    fn annotated(&mut self, node: NodeId, dst: NodeId, shape: Shape, owner: ObjId, name: &str) {
+        let recorded = arguments(vec![
+            ("node", self.canon_node(node)),
+            ("dst", self.canon_node(dst)),
+            ("shape", json!(shape.name())),
+            ("owner", json!([self.object(owner), name])),
+        ]);
+        self.simple("annotated", recorded);
+    }
+
+    fn bind_annotations(&mut self, function: ObjId) {
+        let recorded = arguments(vec![("function", self.object(function))]);
+        self.simple("bind_annotations", recorded);
+    }
+
+    fn add_name_lookup(&mut self, base: NodeId, attr: &str, dst: NodeId) {
+        let recorded = arguments(vec![
+            ("base", self.canon_node(base)),
+            ("attr", json!(attr)),
+            ("dst", self.canon_node(dst)),
+        ]);
+        self.simple("add_name_lookup", recorded);
+    }
+
+    fn add_stub_bases(&mut self, cls: ObjId, node: NodeId) {
+        let recorded = arguments(vec![
+            ("cls", self.object(cls)),
+            ("node", self.canon_node(node)),
+        ]);
+        self.simple("add_stub_bases", recorded);
     }
 
     fn function_fields(&mut self, function: ObjId) -> &mut FunctionFields {

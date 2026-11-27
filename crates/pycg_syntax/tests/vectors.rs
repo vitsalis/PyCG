@@ -1,6 +1,6 @@
 use pycg_syntax::constants::{Constant, literal, text_value};
 use pycg_syntax::names::{is_identifier, nfkc};
-use pycg_syntax::parse::with_parsed;
+use pycg_syntax::parse::{parse_nested_expression, with_parsed};
 use pycg_syntax::read::read_source;
 use pycg_syntax::tree::{Node, position, walk};
 use ruff_source_file::LineIndex;
@@ -10,6 +10,7 @@ const POSITIONS: &str = include_str!("vectors/positions.txt");
 const CONSTANTS: &str = include_str!("vectors/constants.txt");
 const NAMES: &str = include_str!("vectors/names.txt");
 const BOUNDS: &str = include_str!("vectors/bounds.txt");
+const EXPRESSION_BOUNDS: &str = include_str!("vectors/expression_bounds.txt");
 
 fn hex(text: &str) -> Vec<u8> {
     assert_eq!(text.len() % 2, 0, "hex of whole bytes: {text}");
@@ -95,6 +96,34 @@ fn sources_past_the_limits_of_the_parser_fail_as_in_python() {
         cases += 1;
     }
     assert!(cases > 0, "bound vectors");
+}
+
+#[test]
+fn expressions_past_the_limits_of_the_parser_fail_as_in_python() {
+    let mut cases = 0;
+    for line in vector_lines(EXPRESSION_BOUNDS) {
+        let fields: Vec<&str> = line.split('\t').collect();
+        let [name, unit, middle, close, count, status, cause] = fields[..] else {
+            panic!("expression bound vector {line:?}");
+        };
+        let count: usize = count.parse().expect("a count");
+        let mut text = hex(unit).repeat(count);
+        text.extend(hex(middle));
+        text.extend(hex(close).repeat(count));
+        let text = String::from_utf8(text).expect("an ascii expression");
+        let literal = format!("x = {text:?}\n");
+        let found = with_parsed(&literal, |_| match parse_nested_expression(&text) {
+            Ok(_) => ("ok".to_owned(), "-".to_owned()),
+            Err(failure) => ("failed".to_owned(), failure.cause()),
+        });
+        assert_eq!(
+            (found.0.as_str(), found.1.as_str()),
+            (status, cause),
+            "case {name} {count}"
+        );
+        cases += 1;
+    }
+    assert!(cases > 0, "expression bound vectors");
 }
 
 #[test]

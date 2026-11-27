@@ -663,6 +663,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
             .const_object(&Constant::Str(name.chars().map(u32::from).collect()));
         self.analysis.add_object(name_field, value);
         self.analysis.function_fields(made.object).is_async = is_async;
+        self.parameter_annotations(made.object, parameters, scope);
         let entries: Vec<(Box<str>, NodeId)> = made
             .parameters
             .iter()
@@ -756,6 +757,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
         let allocator = self.allocator(finals.get("__new__").copied(), statement);
         self.analysis.class_fields(object).allocator = allocator;
         self.classes.insert(scope, object);
+        self.defined_class(scope, object);
         let site = self.site(&Node::Stmt(statement));
         let namespace = self.inside(scope, None, |builder| {
             builder.statements(&class.body);
@@ -1044,6 +1046,11 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
             };
             self.condition(test);
             let truth = self.truth(test);
+            match self.type_checking_truth(&Node::Expr(test)) {
+                Some(true) => self.record_type_only(body, &[]),
+                Some(false) => self.record_type_only(&[], clauses),
+                None => {}
+            }
             let tested = self.current_flow().state;
             self.branch_reachable(tested, truth & TRUE != 0);
             self.narrow(test, true, None);
