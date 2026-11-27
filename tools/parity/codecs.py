@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 DESCRIPTION = """\
-Writes the codec data that pycg_syntax reads a source file with: the
+Writes the codec data that pycg-syntax reads a source file with: the
 aliases of encodings.aliases, each module of the encodings package that
 is a codec with how it decodes (utf-8, utf-8-sig, ascii, latin-1, a
 charmap table, or unsupported), and the decoding table of each charmap
@@ -16,7 +16,7 @@ with the Python of the oracle; the output is committed.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "crates" / "pycg_syntax" / "data" / "codecs.txt"
+OUT = ROOT / "crates" / "syntax" / "data" / "codecs.txt"
 BUILTIN = {
     "utf_8": "utf-8",
     "utf_8_sig": "utf-8-sig",

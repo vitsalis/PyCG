@@ -7,7 +7,7 @@ fn vectors() -> PathBuf {
 
 fn replay(case: &Path, scratch: &Path) -> (String, String, String) {
     let out = scratch.join("out");
-    let status = Command::new(env!("CARGO_BIN_EXE_pycg_dump"))
+    let status = Command::new(env!("CARGO_BIN_EXE_pycg-dump"))
         .current_dir(case)
         .arg("d4")
         .arg(case.join("D4.jsonl"))
@@ -16,7 +16,7 @@ fn replay(case: &Path, scratch: &Path) -> (String, String, String) {
         .arg(".")
         .arg("main.py")
         .status()
-        .expect("pycg_dump runs");
+        .expect("pycg-dump runs");
     assert!(status.success(), "{}", case.display());
     let read = |name: &str| std::fs::read_to_string(out.join(name)).expect("a replayed dump");
     (

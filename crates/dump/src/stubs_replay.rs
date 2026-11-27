@@ -10,7 +10,7 @@ pub fn run(path: &str) -> ExitCode {
     let text = match std::fs::read_to_string(path) {
         Ok(text) => text,
         Err(error) => {
-            eprintln!("pycg_dump: cannot read {path}: {error}");
+            eprintln!("pycg-dump: cannot read {path}: {error}");
             return ExitCode::from(EXIT_FAILURE);
         }
     };
@@ -20,17 +20,17 @@ pub fn run(path: &str) -> ExitCode {
         let record = match replay(&mut stubs, line) {
             Ok(record) => record,
             Err(problem) => {
-                eprintln!("pycg_dump: {path}:{}: {problem}", index + 1);
+                eprintln!("pycg-dump: {path}:{}: {problem}", index + 1);
                 return ExitCode::from(EXIT_FAILURE);
             }
         };
         if let Err(error) = write!(out, "{}", crate::canonical::line(&record)) {
-            eprintln!("pycg_dump: cannot write: {error}");
+            eprintln!("pycg-dump: cannot write: {error}");
             return ExitCode::from(EXIT_FAILURE);
         }
     }
     if let Err(error) = out.flush() {
-        eprintln!("pycg_dump: cannot write: {error}");
+        eprintln!("pycg-dump: cannot write: {error}");
         return ExitCode::from(EXIT_FAILURE);
     }
     ExitCode::SUCCESS

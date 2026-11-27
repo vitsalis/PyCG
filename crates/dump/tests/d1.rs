@@ -1,10 +1,7 @@
 use std::path::Path;
 use std::process::Command;
 
-const VECTORS: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../pycg_syntax/tests/vectors/d1"
-);
+const VECTORS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../syntax/tests/vectors/d1");
 
 #[test]
 fn the_d1_records_are_those_of_the_oracle() {
@@ -23,11 +20,11 @@ fn the_d1_records_are_those_of_the_oracle() {
     let modules = directory.join("d1-vectors.tsv");
     let dump = directory.join("d1-vectors.jsonl");
     std::fs::write(&modules, listing).expect("the module list is written");
-    let status = Command::new(env!("CARGO_BIN_EXE_pycg_dump"))
+    let status = Command::new(env!("CARGO_BIN_EXE_pycg-dump"))
         .args(["d1", path_text(&modules), path_text(&dump)])
         .status()
-        .expect("pycg_dump runs");
-    assert!(status.success(), "pycg_dump d1");
+        .expect("pycg-dump runs");
+    assert!(status.success(), "pycg-dump d1");
     let found = std::fs::read_to_string(&dump).expect("the dump is UTF-8");
     let expected: String = programs
         .iter()

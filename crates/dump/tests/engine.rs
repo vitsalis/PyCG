@@ -19,12 +19,12 @@ fn replay(vector: &Path) -> (PathBuf, Output) {
         .join("engine")
         .join(name);
     std::fs::create_dir_all(&out).expect("the output directory is made");
-    let output = Command::new(env!("CARGO_BIN_EXE_pycg_dump"))
+    let output = Command::new(env!("CARGO_BIN_EXE_pycg-dump"))
         .arg("engine")
         .arg(vector.join("D4.jsonl"))
         .arg(&out)
         .output()
-        .expect("pycg_dump runs");
+        .expect("pycg-dump runs");
     (out, output)
 }
 
@@ -97,11 +97,11 @@ fn the_builder_into_the_engine_gives_the_trace_and_points_to_of_the_oracle() {
             .expect("the module list is written");
         let entries = out.join("entries.txt");
         std::fs::write(&entries, "main\n").expect("the entry list is written");
-        let output = Command::new(env!("CARGO_BIN_EXE_pycg_dump"))
+        let output = Command::new(env!("CARGO_BIN_EXE_pycg-dump"))
             .arg("engine-build")
             .args([&modules, &entries, &out])
             .output()
-            .expect("pycg_dump runs");
+            .expect("pycg-dump runs");
         assert!(
             output.status.success(),
             "{}: {}",

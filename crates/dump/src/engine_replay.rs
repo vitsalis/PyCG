@@ -514,7 +514,7 @@ pub fn run(input: &str, out: &str) -> ExitCode {
         Ok(BufReader::new(File::open(input)?).lines())
     };
     if let Err(error) = lines() {
-        eprintln!("pycg_dump engine: cannot read {input}: {error}");
+        eprintln!("pycg-dump engine: cannot read {input}: {error}");
         return ExitCode::FAILURE;
     }
     let out = Path::new(out);
@@ -568,11 +568,11 @@ impl Replay {
             .flush()
             .expect("the trace is written");
         if let Err(error) = fs::rename(out.join(PARTIAL_TRACE), out.join("D3.jsonl")) {
-            eprintln!("pycg_dump engine: cannot name the trace D3.jsonl: {error}");
+            eprintln!("pycg-dump engine: cannot name the trace D3.jsonl: {error}");
             return ExitCode::FAILURE;
         }
         if let Err(error) = fs::write(out.join("D5.jsonl"), points_to.concat()) {
-            eprintln!("pycg_dump engine: cannot write D5.jsonl: {error}");
+            eprintln!("pycg-dump engine: cannot write D5.jsonl: {error}");
             return ExitCode::FAILURE;
         }
         ExitCode::SUCCESS

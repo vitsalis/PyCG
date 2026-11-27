@@ -11,12 +11,12 @@ pub fn run(root: &str) -> ExitCode {
     let documents = match documents(Path::new(root)) {
         Ok(documents) => documents,
         Err(error) => {
-            eprintln!("pycg_dump: cannot list {root}: {error}");
+            eprintln!("pycg-dump: cannot list {root}: {error}");
             return ExitCode::from(EXIT_FAILURE);
         }
     };
     if documents.is_empty() {
-        eprintln!("pycg_dump: no {DOCUMENT} under {root}");
+        eprintln!("pycg-dump: no {DOCUMENT} under {root}");
         return ExitCode::from(EXIT_FAILURE);
     }
     let mut different = Vec::new();

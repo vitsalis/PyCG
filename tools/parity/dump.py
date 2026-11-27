@@ -22,10 +22,10 @@ Writes the parity dumps of the Python engine (docs/rust/PLAN.md, section 3).
         modules.tsv in DIR; D6in.json holds what the document is built from
         besides the program (the functions, classes, exports, call sites and
         causes of the analysis), and run.json the package root and the entry
-        points, relative to the checkout, from which pycg_dump d4 discovers
+        points, relative to the checkout, from which pycg-dump d4 discovers
         the program and with D6in.json writes D6; modules.tsv has each
         module built, in build order, and its file relative to the
-        checkout, from which pycg_dump d1 writes D1
+        checkout, from which pycg-dump d1 writes D1
     dump.py oracle --checkout PATH --out DIR [--set micro|macro]... [--name INPUT]...
         every input of the sets for hash seeds 0 and 1, in DIR/seed-<s>/<input>/,
         then checks that both seeds give the same D1 to D6 and D6in, byte for byte

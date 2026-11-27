@@ -72,7 +72,7 @@ jobs:
       - run: |
           rustup target add aarch64-apple-darwin x86_64-pc-windows-gnu x86_64-pc-windows-msvc
           for target in aarch64-apple-darwin x86_64-pc-windows-gnu x86_64-pc-windows-msvc; do
-            cargo clippy --locked -p pycg_syntax --target "$target" -- -D warnings
+            cargo clippy --locked -p pycg-syntax --target "$target" -- -D warnings
           done
       - id: key
         run: echo "key=$(make -s parity-key)" >> "$GITHUB_OUTPUT"
