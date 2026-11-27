@@ -7,6 +7,7 @@ mod builtin_rules;
 mod containers;
 mod fixpoint;
 pub mod hierarchy;
+mod narrowing;
 pub mod objects;
 mod outside;
 mod outside_calls;
@@ -193,6 +194,7 @@ struct State<T: Trace> {
     patterns: patterns::Patterns,
     outside_types: outside_types::OutsideTypes,
     annotations: annotations::Annotations,
+    class_tests: narrowing::ClassTests,
 }
 
 impl<T: Trace> Engine<T> {
@@ -318,6 +320,7 @@ impl<T: Trace> Engine<T> {
             patterns: patterns::Patterns::default(),
             outside_types: outside_types::OutsideTypes::default(),
             annotations: annotations::Annotations::default(),
+            class_tests: narrowing::ClassTests::default(),
             tables: BuilderTables::default(),
         };
         state.trace.object(

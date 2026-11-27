@@ -69,6 +69,7 @@ impl<T: Trace> State<T> {
         self.completed_functions = self.functions.len();
         added = self.complete_keys(graph) || added;
         added = self.complete_dynamic_accesses(graph) || added;
+        added = self.complete_class_tests(graph) || added;
         if added {
             return true;
         }

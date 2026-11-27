@@ -9,6 +9,7 @@ use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::containers::ContainerRule;
 use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::{BindsId, Unless};
+use crate::engine::narrowing::ClassTestRule;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
 use crate::engine::outside_types::OutsideRule;
@@ -287,6 +288,7 @@ pub(crate) enum Rule {
     Pattern(PatternRule),
     Outside(OutsideRule),
     Annotation(AnnotationRule),
+    ClassTest(ClassTestRule),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -346,6 +348,7 @@ impl Rule {
             Rule::Pattern(rule) => rule.key(),
             Rule::Outside(rule) => rule.key(),
             Rule::Annotation(rule) => rule.key(),
+            Rule::ClassTest(rule) => rule.key(),
             Rule::Access(_) => "Access",
             Rule::Deliver { .. } => "_Deliver",
             Rule::Deliveries(_) => "_Deliveries",
@@ -424,6 +427,7 @@ impl Rule {
             Rule::Protocol(rule) => rule.kinds(),
             Rule::Pattern(rule) => rule.kinds(),
             Rule::Annotation(rule) => rule.kinds(),
+            Rule::ClassTest(_) => None,
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. }
             | Rule::StatementMade
@@ -455,6 +459,7 @@ impl Rule {
             Rule::Pattern(ref rule) => rule.captured(),
             Rule::Outside(_) => Vec::new(),
             Rule::Annotation(ref rule) => rule.captured(),
+            Rule::ClassTest(ref rule) => rule.captured(),
             Rule::Bases { class, .. }
             | Rule::KeywordCandidate { class }
             | Rule::MemberOfMetaclass { class, .. }
@@ -566,6 +571,7 @@ impl<T: Trace> State<T> {
             Rule::Pattern(ref rule) => self.pattern_results(rule),
             Rule::Outside(ref rule) => rule.results(),
             Rule::Annotation(ref rule) => rule.results(),
+            Rule::ClassTest(ref rule) => self.class_test_results(rule),
             Rule::Call(call)
             | Rule::PythonNew { call, .. }
             | Rule::PythonInstance { call }
@@ -833,6 +839,7 @@ impl<T: Trace> State<T> {
             Rule::Pattern(ref rule) => self.pattern_apply(graph, rule, object),
             Rule::Outside(ref rule) => self.outside_apply(graph, rule, object),
             Rule::Annotation(ref rule) => self.annotation_apply(graph, rule, object),
+            Rule::ClassTest(ref rule) => self.class_test_apply(graph, rule, object),
         }
     }
 
