@@ -756,12 +756,29 @@ impl Replay {
             }
             "add_metaclass_call" => {
                 let class = self.object(&arguments["cls"]);
+                let recorded = list(&arguments["statement"]);
+                let bases: Vec<Option<NodeId>> = list(&recorded[1])
+                    .iter()
+                    .map(|base| self.optional_node(base))
+                    .collect();
+                let namespace: Vec<(Box<str>, NodeId)> = list(&recorded[2])
+                    .iter()
+                    .map(|pair| (text(&pair[0]).into(), self.node(&pair[1])))
+                    .collect();
+                let keywords: Vec<(Box<str>, Option<NodeId>)> = list(&recorded[3])
+                    .iter()
+                    .map(|pair| (text(&pair[0]).into(), self.optional_node(&pair[1])))
+                    .collect();
+                let double_star: Vec<Option<NodeId>> = list(&recorded[4])
+                    .iter()
+                    .map(|mapping| self.optional_node(mapping))
+                    .collect();
                 let statement = ClassStatement {
-                    name: "",
-                    bases: &[],
-                    namespace: &[],
-                    keywords: &[],
-                    double_star: &[],
+                    name: text(&recorded[0]),
+                    bases: &bases,
+                    namespace: &namespace,
+                    keywords: &keywords,
+                    double_star: &double_star,
                 };
                 self.engine.add_metaclass_call(
                     class,

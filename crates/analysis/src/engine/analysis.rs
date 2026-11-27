@@ -281,12 +281,13 @@ impl<T: Trace> Analysis for Engine<T> {
     fn add_metaclass_call(
         &mut self,
         class: ObjId,
-        _statement: &ClassStatement<'_>,
-        _caller: &str,
-        _site: &str,
+        statement: &ClassStatement<'_>,
+        caller: &str,
+        site: &str,
     ) {
         self.sync();
-        self.state.add_metaclass_call(&mut self.graph, class);
+        self.state
+            .add_metaclass_call(&mut self.graph, class, statement, caller, site);
     }
 
     fn add_structure_class(
