@@ -282,6 +282,14 @@ parity:
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine-all.txt,--dumps D3 D5)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 --inputs $(PARITY_ENGINE))
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D6in.json | sort | while read -r inputs; do \
+		input=$$(dirname "$$inputs"); \
+		out=$(PARITY_RUST)/document/$$input && mkdir -p $$out && \
+		(cd $(CURDIR) && $(PARITY_BINARIES)/pycg_dump document-build \
+			$(PARITY_ORACLE)/seed-0/$$input $$out 2> $$out/build.txt) \
+		|| mv $$out/build.txt $$out/error.txt; \
+	done
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/document,$(PARITY_RUST)/oracle-document.txt,--dumps D6)
 	@$(PARITY_BINARIES)/pycg_dump document $(PARITY_ORACLE)/seed-0 > $(PARITY_RUST)/writer.txt; \
 	status=$$?; { echo '```'; cat $(PARITY_RUST)/writer.txt; echo '```'; } >> $(SUMMARY); \
 	exit $$status

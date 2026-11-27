@@ -3,6 +3,14 @@ use std::collections::BTreeMap;
 
 use num_bigint::BigInt;
 
+mod document;
+
+pub use document::{
+    AnalysisPart, ClassDefinition, Construct, FORMAT, FunctionDefinition, MroBase, ProgramPart,
+    RolePart, SiteEdge, SourceModule, Unresolved, VERSION, build, module_definitions,
+    modules_section,
+};
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Value {
     Null,
