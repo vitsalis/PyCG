@@ -18,7 +18,7 @@ use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State, not_ported};
 use crate::model::constant_name;
-use crate::models::builtin_kind;
+use crate::models::{LENGTH_HINT, builtin_kind};
 
 const SEQUENCES: [&str; 2] = ["list", "tuple"];
 const COLLECTIONS: [&str; 5] = ["list", "tuple", "set", "frozenset", "dict"];
@@ -2324,7 +2324,8 @@ impl<T: Trace> State<T> {
         );
         self.containers.unpacks[index_of(id.0)].iteration = Some(iteration);
         if starred.is_some() {
-            not_ported("containers: the length hint of a starred unpack")
+            let iterators = self.iteration_iterators(graph, iteration);
+            self.add_length_hint(graph, iterators, caller, site, LENGTH_HINT);
         }
         iteration
     }
