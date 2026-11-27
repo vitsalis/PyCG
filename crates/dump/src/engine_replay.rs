@@ -955,6 +955,19 @@ impl Replay {
                 self.engine.add_pattern_operand(operand, result);
                 None
             }
+            "add_named_load" => {
+                let object = self.node(&arguments["obj"]);
+                let name = self.node(&arguments["name"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.add_named_load(
+                    object,
+                    name,
+                    dst,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
             "callable_filter" => {
                 let source = self.node(&arguments["source"]);
                 let dst = self.node(&arguments["dst"]);
