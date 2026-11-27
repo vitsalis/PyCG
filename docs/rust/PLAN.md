@@ -660,7 +660,13 @@ How each becomes Rust (stage 9):
    every case and every micro case through `Program`, `Engine` and
    `pycg_document::build`, and prints for each failure the edges, sites
    and points-to names gained and lost, or the first path at which a
-   document differs. Every document that the harness builds must also be
+   document differs. `cargo test -p pycg --test cases -- <filter>...`
+   runs only the cases whose name (`<family>/<name>`, or
+   `micro/<category>/<case>`) contains one of the filters, and prints how
+   many it filtered out; as in libtest, a filter that matches nothing runs
+   no case, `--exact`, `--skip`, `--list`, `--ignored` and `--bench`
+   select as libtest does, and libtest's other options are accepted and
+   ignored. Every document that the harness builds must also be
    consistent in itself: each caller a definition, each callee a
    definition or outside, the callees of a site sorted and distinct, a
    site with no callee unresolved, the sites of a caller sorted and

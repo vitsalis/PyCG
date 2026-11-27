@@ -23,6 +23,32 @@ const MICRO_REQUIRES: &str = "requires-python";
 const KNOWN_FAILURES: &str = "tests/known_failures.txt";
 const ROOT_IN_WARNINGS: &str = "{root}";
 const CAUSED_WARNINGS: [&str; 2] = [": cannot parse it: ", ": cannot read it: "];
+const USAGE: &str = "usage: cases [OPTION...] [FILTER...]: runs the cases whose name \
+    contains a FILTER, every case without one; libtest's --exact, --skip FILTER, --list, \
+    --ignored and --bench select as libtest does, its other options are accepted and ignored";
+const LIBTEST_FLAGS: [&str; 12] = [
+    "--include-ignored",
+    "--force-run-in-process",
+    "--exclude-should-panic",
+    "--test",
+    "--nocapture",
+    "--no-capture",
+    "--quiet",
+    "-q",
+    "--show-output",
+    "--report-time",
+    "--ensure-time",
+    "--shuffle",
+];
+const LIBTEST_OPTIONS_WITH_A_VALUE: [&str; 6] = [
+    "--logfile",
+    "--test-threads",
+    "--color",
+    "--format",
+    "--shuffle-seed",
+    "-Z",
+];
+const LIBTEST_UNSTABLE_PREFIX: &str = "-Z";
 
 static PANIC: Mutex<Option<String>> = Mutex::new(None);
 
@@ -89,6 +115,36 @@ fn main() -> ExitCode {
             "{PENDING} names {name}, which is no case"
         );
     }
+    let arguments: Vec<String> = std::env::args().skip(1).collect();
+    let selection = match selection(&arguments) {
+        Ok(selection) => selection,
+        Err(problem) => {
+            println!("{problem}\n{USAGE}");
+            return ExitCode::FAILURE;
+        }
+    };
+    let all = cases.len();
+    cases.retain(|case| selection.keeps(&case.name));
+    let filtered = all - cases.len();
+    match selection.action {
+        Action::Help => {
+            println!("{USAGE}");
+            return ExitCode::SUCCESS;
+        }
+        Action::List => {
+            for case in &cases {
+                println!("{}: test", case.name);
+            }
+            return ExitCode::SUCCESS;
+        }
+        Action::Run => {}
+    }
+    let filtered_out = if selection.selects() {
+        println!("{} of {all} cases, {filtered} filtered out", cases.len());
+        format!("; {filtered} filtered out")
+    } else {
+        String::new()
+    };
     panic::set_hook(Box::new(|info| {
         let payload = info.payload();
         let message = payload
@@ -117,7 +173,7 @@ fn main() -> ExitCode {
         println!("{line}");
     }
     println!(
-        "cases: {passed} pass, {waiting} pending, {} fail, of {}",
+        "cases: {passed} pass, {waiting} pending, {} fail, of {}{filtered_out}",
         wrong.len(),
         cases.len()
     );
@@ -125,6 +181,96 @@ fn main() -> ExitCode {
         ExitCode::SUCCESS
     } else {
         ExitCode::FAILURE
+    }
+}
+
+enum Action {
+    Run,
+    List,
+    Help,
+}
+
+struct Selection {
+    action: Action,
+    filters: Vec<String>,
+    skips: Vec<String>,
+    exact: bool,
+    no_case: bool,
+}
+
+impl Selection {
+    fn matches(&self, name: &str, pattern: &str) -> bool {
+        if self.exact {
+            name == pattern
+        } else {
+            name.contains(pattern)
+        }
+    }
+
+    fn keeps(&self, name: &str) -> bool {
+        !self.no_case
+            && (self.filters.is_empty()
+                || self.filters.iter().any(|filter| self.matches(name, filter)))
+            && !self.skips.iter().any(|skip| self.matches(name, skip))
+    }
+
+    fn selects(&self) -> bool {
+        self.no_case || !self.filters.is_empty() || !self.skips.is_empty()
+    }
+}
+
+fn selection(arguments: &[String]) -> Result<Selection, String> {
+    let mut selection = Selection {
+        action: Action::Run,
+        filters: Vec::new(),
+        skips: Vec::new(),
+        exact: false,
+        no_case: false,
+    };
+    let mut rest = arguments.iter();
+    while let Some(argument) = rest.next() {
+        let (option, inline) = match argument.split_once('=') {
+            Some((option, value)) if option.starts_with("--") => (option, Some(value)),
+            _ => (argument.as_str(), None),
+        };
+        let flag = |selection: &mut Selection, set: fn(&mut Selection)| match inline {
+            None => {
+                set(selection);
+                Ok(())
+            }
+            Some(_) => Err(format!("{option} takes no value: {argument}")),
+        };
+        match option {
+            "--help" | "-h" => flag(&mut selection, |chosen| chosen.action = Action::Help)?,
+            "--list" => flag(&mut selection, |chosen| chosen.action = Action::List)?,
+            "--exact" => flag(&mut selection, |chosen| chosen.exact = true)?,
+            "--ignored" | "--bench" => flag(&mut selection, |chosen| chosen.no_case = true)?,
+            "--skip" => selection.skips.push(value(option, inline, &mut rest)?),
+            _ if LIBTEST_FLAGS.contains(&option) => flag(&mut selection, |_| {})?,
+            _ if LIBTEST_OPTIONS_WITH_A_VALUE.contains(&option) => {
+                value(option, inline, &mut rest)?;
+            }
+            _ if option.starts_with(LIBTEST_UNSTABLE_PREFIX) => {}
+            _ if option.starts_with('-') => {
+                return Err(format!("{argument} is no option of libtest"));
+            }
+            _ => selection.filters.push(argument.clone()),
+        }
+    }
+    Ok(selection)
+}
+
+fn value(
+    option: &str,
+    inline: Option<&str>,
+    rest: &mut std::slice::Iter<'_, String>,
+) -> Result<String, String> {
+    match inline {
+        Some(value) => Ok(value.to_owned()),
+        None => rest
+            .next()
+            .cloned()
+            .ok_or_else(|| format!("{option} needs a value")),
     }
 }
 
