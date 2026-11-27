@@ -8,6 +8,14 @@ use crate::engine::{Graph, State};
 
 impl<T: Trace> State<T> {
     pub(super) fn solve(&mut self, graph: &mut Graph) {
+        let mut read = FxHashSet::default();
+        for &class in &self.classes {
+            let found = self.objects.class(class);
+            if self.read_namespaces.contains(&found.name) {
+                read.extend(found.defines.iter().copied());
+            }
+        }
+        self.namespace_names_read = read;
         self.solve_round(graph);
         while self.decide_hierarchies(graph) || self.complete(graph) {
             self.solve_round(graph);
@@ -58,6 +66,7 @@ impl<T: Trace> State<T> {
             }
         }
         self.completed_functions = self.functions.len();
+        added = self.complete_dynamic_accesses(graph) || added;
         added
     }
 
@@ -109,6 +118,8 @@ impl<T: Trace> State<T> {
                 | Object::External(_)
                 | Object::UnknownExternal(_)
                 | Object::BuiltinMethod { .. }
+                | Object::Super { .. }
+                | Object::Typed { .. }
                 | Object::Fallback { .. }
                 | Object::Const { .. }
                 | Object::Container(_)

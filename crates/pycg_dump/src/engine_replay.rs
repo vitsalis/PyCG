@@ -573,10 +573,17 @@ impl Replay {
                     .push(fields.clone());
             }
             if let Some(tables) = record.get("tables") {
-                for table in ["literal_imports", "read_namespaces", "zero_argument_super"] {
-                    if !empty_collection(&tables[table]) {
-                        not_ported(&format!("the builder table {table}"));
-                    }
+                if !empty_collection(&tables["literal_imports"]) {
+                    not_ported("the builder table literal_imports");
+                }
+                for site in set(&tables["zero_argument_super"]) {
+                    self.engine
+                        .tables()
+                        .zero_argument_super
+                        .push(text(site).into());
+                }
+                for name in set(&tables["read_namespaces"]) {
+                    self.engine.tables().read_namespaces.push(text(name).into());
                 }
                 for pair in pairs(&tables["none_arguments"]) {
                     let site: CallSite = (text(&pair[0][0]).into(), text(&pair[0][1]).into());

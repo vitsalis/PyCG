@@ -8,7 +8,7 @@ use crate::engine::symbols::{Sym, Symbols};
 use crate::engine::{OrderedMap, OrderedSet};
 use crate::model::{
     ConstValue, Signature, bound_method_name, constant_name, container_name, coroutine_name,
-    fallback_name, generator_name, instance_name, wrapper_name,
+    fallback_name, generator_name, instance_name, super_name, wrapper_name,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -240,6 +240,15 @@ pub enum Object {
         kind: Sym,
         site: Sym,
     },
+    Super {
+        class: ObjId,
+        receiver: ObjId,
+    },
+    Typed {
+        class: Sym,
+        name: Sym,
+        abstract_: bool,
+    },
     BuiltinMethod {
         receiver: ObjId,
         type_name: Sym,
@@ -274,6 +283,8 @@ impl Object {
             Object::BoundMethod { .. } => Kind::BoundMethod,
             Object::Fallback { .. } => Kind::Fallback,
             Object::Wrapper { .. } => Kind::Wrapper,
+            Object::Super { .. } => Kind::Super,
+            Object::Typed { .. } => Kind::Typed,
             Object::BuiltinMethod { .. } => Kind::BuiltinMethod,
             Object::Const { .. } => Kind::Const,
             Object::Container(_) => Kind::Container,
@@ -370,6 +381,10 @@ impl Objects {
                 wrapper_name(symbols.text(*kind), symbols.text(*site))
             }
             Object::BuiltinMethod { name, .. } => symbols.text(*name).to_string(),
+            Object::Super { class, receiver } => {
+                super_name(&self.name(*class, symbols), &self.name(*receiver, symbols))
+            }
+            Object::Typed { name, .. } => symbols.text(*name).to_string(),
             Object::Const { value, .. } => constant_name(&value.view()),
             Object::Container(container) => {
                 container_name(symbols.text(container.kind), symbols.text(container.site))

@@ -424,6 +424,7 @@ impl<T: Trace> State<T> {
 
     pub(super) fn unknown_class(&self, object: ObjId) -> bool {
         match self.objects.get(object) {
+            Object::Typed { abstract_, .. } => *abstract_,
             Object::Container(container) if self.symbols.text(container.kind).contains('.') => {
                 not_ported("containers: a container of an outside class")
             }

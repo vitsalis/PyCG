@@ -26,7 +26,7 @@ use attributes::{
     Access, AccessorEntry, AccessorHooks, Accessors, AccessorsId, Deliveries, DeliveriesId,
     FieldWrites, HookCalls, HookCallsId, HooksId, WritesId,
 };
-use builtin_rules::WrapperKey;
+use builtin_rules::{DynamicAccess, WrapperKey};
 use hierarchy::{LookupAttr, Namespace, Unless};
 use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
 use outside_calls::{Bound, BoundId, Known};
@@ -152,6 +152,14 @@ struct State<T: Trace> {
     none_arguments: FxHashMap<(Sym, Sym), Vec<u32>>,
     synced_none_arguments: usize,
     callees: FxHashMap<CallId, NodeId>,
+    dynamic_accesses: Vec<DynamicAccess>,
+    namespace_names_read: FxHashSet<Sym>,
+    zero_argument_super: FxHashSet<Sym>,
+    read_namespaces: FxHashSet<Sym>,
+    super_pairs: FxHashSet<(CallId, ObjId)>,
+    super_accepted: FxHashMap<ObjId, FxHashSet<ObjId>>,
+    supers: FxHashMap<(ObjId, ObjId), ObjId>,
+    typed_objects: FxHashMap<String, ObjId>,
     handed: Vec<ObjId>,
     tables: BuilderTables,
 }
@@ -248,6 +256,14 @@ impl<T: Trace> Engine<T> {
             none_arguments: FxHashMap::default(),
             synced_none_arguments: 0,
             callees: FxHashMap::default(),
+            dynamic_accesses: Vec::new(),
+            namespace_names_read: FxHashSet::default(),
+            zero_argument_super: FxHashSet::default(),
+            read_namespaces: FxHashSet::default(),
+            super_pairs: FxHashSet::default(),
+            super_accepted: FxHashMap::default(),
+            supers: FxHashMap::default(),
+            typed_objects: FxHashMap::default(),
             handed: Vec::new(),
             tables: BuilderTables::default(),
         };

@@ -167,6 +167,34 @@ pub(crate) enum Rule {
         owner: ObjId,
         dst: NodeId,
     },
+    LoadByPattern,
+    SuperClass {
+        object: NodeId,
+        call: CallId,
+        explicit: bool,
+    },
+    SuperAfterOutside {
+        class: ObjId,
+        dst: NodeId,
+    },
+    SuperObject {
+        class: ObjId,
+        dst: NodeId,
+    },
+    SuperGiven {
+        class: ObjId,
+        dst: NodeId,
+    },
+    SuperAcceptedBy {
+        class: ObjId,
+        given: NodeId,
+        dst: NodeId,
+    },
+    TypeBases,
+    SuperMetaclass {
+        sup: ObjId,
+        load: AccessId,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -188,6 +216,8 @@ pub(crate) enum WaitingRule {
 const SET_NAME_KINDS: &[Kind] = &[Kind::Instance, Kind::Class];
 const CLASS_KINDS: &[Kind] = &[Kind::Class];
 const PROPERTY_KINDS: &[Kind] = &[Kind::Wrapper, Kind::Instance];
+const PATTERN_KINDS: &[Kind] = &[Kind::Pattern];
+const CONTAINER_KINDS: &[Kind] = &[Kind::Container];
 const OWNER_KINDS: &[Kind] = &[Kind::Class, Kind::External];
 const CALLED_BACK_KINDS: &[Kind] = &[Kind::Function, Kind::BoundMethod, Kind::Instance];
 
@@ -236,6 +266,14 @@ impl Rule {
             Rule::BindClass { .. } => "Each:BuiltinRules._bind_class",
             Rule::BindType { .. } => "Each:BuiltinRules._bind_type",
             Rule::BindTo { .. } => "Each:Hierarchy._bind_to",
+            Rule::LoadByPattern => "Each:Patterns.load_by_pattern",
+            Rule::SuperClass { .. } => "Each:BuiltinRules._super_class",
+            Rule::SuperAfterOutside { .. } => "Each:BuiltinRules._super_after_outside",
+            Rule::SuperObject { .. } => "Each:BuiltinRules._super_object",
+            Rule::SuperGiven { .. } => "Each:BuiltinRules._super_given",
+            Rule::SuperAcceptedBy { .. } => "Each:BuiltinRules._super_accepted_by",
+            Rule::TypeBases => "Each:BuiltinRules._type_bases",
+            Rule::SuperMetaclass { .. } => "Each:Attributes._super_metaclass",
         }
     }
 
@@ -263,7 +301,10 @@ impl Rule {
             Rule::CallProtocol { .. } => Some(SET_NAME_KINDS),
             Rule::PropertyReceiver { .. } => Some(PROPERTY_KINDS),
             Rule::BindClass { .. } => Some(OWNER_KINDS),
-            Rule::BindType { .. } => Some(SET_NAME_KINDS),
+            Rule::BindType { .. } | Rule::SuperGiven { .. } => Some(SET_NAME_KINDS),
+            Rule::LoadByPattern => Some(PATTERN_KINDS),
+            Rule::TypeBases => Some(CONTAINER_KINDS),
+            Rule::SuperMetaclass { .. } => Some(CLASS_KINDS),
             Rule::ClassGet { .. }
             | Rule::Accessors {
                 analysed_only: true,
@@ -299,6 +340,12 @@ impl Rule {
             Rule::DerivedProperty { property, .. } => vec![property],
             Rule::BindClass { method, .. } | Rule::BindType { method, .. } => vec![method],
             Rule::BindTo { owner, .. } => vec![owner],
+            Rule::SuperAfterOutside { class, .. }
+            | Rule::SuperObject { class, .. }
+            | Rule::SuperGiven { class, .. }
+            | Rule::SuperAcceptedBy { class, .. } => vec![class],
+            Rule::SuperMetaclass { sup, .. } => vec![sup],
+            Rule::LoadByPattern | Rule::SuperClass { .. } | Rule::TypeBases => Vec::new(),
             Rule::ModuleGetattr { module, .. } => vec![module],
             Rule::Deliver { receiver, .. } => vec![receiver],
             Rule::Access(_)
@@ -393,6 +440,13 @@ impl<T: Trace> State<T> {
             Rule::PropertyReceiver { dst, .. } | Rule::DerivedProperty { dst, .. } => {
                 dst.into_iter().collect()
             }
+            Rule::SuperClass { call, .. } => self.calls[call.index()].dst.into_iter().collect(),
+            Rule::SuperAfterOutside { dst, .. }
+            | Rule::SuperObject { dst, .. }
+            | Rule::SuperGiven { dst, .. }
+            | Rule::SuperAcceptedBy { dst, .. } => vec![dst],
+            Rule::SuperMetaclass { load, .. } => self.access_result(load).into_iter().collect(),
+            Rule::LoadByPattern | Rule::TypeBases => Vec::new(),
             Rule::Bases { .. }
             | Rule::KeywordCandidate { .. }
             | Rule::ReturnedOfClass(_)
@@ -491,6 +545,22 @@ impl<T: Trace> State<T> {
             }
             Rule::BindClass { method, dst } => self.bind(graph, method, Some(object), dst, None),
             Rule::BindType { method, dst } => self.bind_type(graph, object, method, dst),
+            Rule::LoadByPattern => not_ported("patterns: a load by a pattern name"),
+            Rule::SuperClass {
+                object: node,
+                call,
+                explicit,
+            } => self.super_class(graph, object, node, call, explicit),
+            Rule::SuperAfterOutside { class, dst } => {
+                self.super_after_outside(graph, object, class, dst)
+            }
+            Rule::SuperObject { class, dst } => self.super_object_rule(graph, object, class, dst),
+            Rule::SuperGiven { class, dst } => self.super_given(graph, object, class, dst),
+            Rule::SuperAcceptedBy { class, given, dst } => {
+                self.super_accepted_by(graph, object, class, given, dst)
+            }
+            Rule::TypeBases => not_ported("containers: the bases of a call of type"),
+            Rule::SuperMetaclass { sup, load } => self.super_metaclass(graph, object, sup, load),
             Rule::BindTo { owner, dst } => {
                 let bound = if matches!(
                     self.objects.get(object),
