@@ -6,8 +6,7 @@ algorithm, its records and hubs, and its document byte for byte. Only the
 evaluation harness (`evaluation/`, `tools/`, CI scripts) stays in Python.
 After parity, algorithmic work continues in Rust.
 
-The work lands as pull requests against `base/rust-rewrite`. This plan is
-the first; it adds no code.
+The work lands as pull requests against `base/rust-rewrite`.
 
 | Part | Content |
 |---|---|
@@ -26,8 +25,8 @@ as `make eval` runs it. It was branched from `main` at `02bf447`. An engine
 change on `main` after that reaches the port through a pull request that
 merges `main` into `base/rust-rewrite` together with the Rust change that
 reproduces it; the parity job fails on that pull request until both agree.
-Merges happen only between stages (section 4), so a stage ports a fixed
-engine.
+Such a merge is a pull request of its own, and every open Rust pull request
+rebases on it and passes again before it merges.
 
 Facts about the engine that size the port, counted on `02bf447`:
 
@@ -78,22 +77,14 @@ crates.io at least two weeks before 2026-11-26, looked up on that day.
 | Crate | Version | Used by | Why it is needed |
 |---|---|---|---|
 | `ruff_python_parser` | 0.0.22 (2026-11-12) | `pycg-syntax` | A maintained parser of current Python syntax that reports the syntax of a newer version than its target as an error of its own, error-tolerant, with UTF-8 byte ranges like CPython's `ast` offsets. Writing a parser is months of work and a second source of syntax bugs. Published by Astral as an internal crate of ruff, versioned weekly without semver: pinned exactly, updated only by a pull request that passes parity |
-| `ruff_python_ast` | 0.0.22 | `pycg-syntax` | The tree that the parser gives; the same release as the parser |
-| `ruff_text_size` | 0.0.22 | `pycg-syntax` | The `TextRange` of that tree |
-| `ruff_source_file` | 0.0.22 | `pycg-syntax` | Line index: offsets to lines, as CPython numbers them |
-| `serde` | 1.0.229 (2026-07-18) | `pycg-stubs` | Typed decoding of the stub JSON |
-| `serde_json` | 1.0.154 (2026-10-11) | `pycg-stubs` | Reads the stub data. The document is written by our own writer (section 2, `formats/`), since Python's `json.dumps` escapes every non-ASCII character |
-| `rustc-hash` | 2.1.3 (2026-07-02) | all | `FxHashMap`: a fixed hash with no random seed, fast on `u32` keys. The standard `HashMap` seeds itself at random; it is banned by `clippy::disallowed_types` |
-| `indexmap` | 2.14.2 (2026-09-05) | `pycg-analysis`, `pycg-solver` | Insertion-ordered maps and sets, for every Python `dict` whose order reaches a decision or the output (the firing nodes, the sites of a hub, `site_edges`) |
-| `smallvec` | 1.16.5 (2026-11-06) | `pycg-solver`, `pycg-analysis` | The inline form of short lists (receivers, arguments, inboxes, the successors of a node) without a heap allocation |
-| `num-bigint` | 0.4.8 (2026-07-05) | `pycg-analysis` | Python's `int` literals have no bound; their names (`ascii()`, `hex()` past 640 digits) and the values that select container fields must be exact. A value is a `BigInt` wherever the engine holds a Python `int` from the source |
-
-Development only, not linked into `pycg`:
-
-| Crate | Version | Why |
-|---|---|---|
-| `libfuzzer-sys` | 0.4.13 (2026-06-04) | The `cargo fuzz` targets of section 5 |
-| `arbitrary` | 1.5.0 (2026-10-06) | Turns fuzz bytes into the choices of the program generator |
+| `ruff_python_ast` | 0.0.22 | `pycg-syntax`, `pycg-analysis`, `pycg-dump` | The tree that the parser gives; the same release as the parser |
+| `ruff_text_size` | 0.0.22 | `pycg-syntax`, `pycg-analysis` | The `TextRange` of that tree |
+| `ruff_source_file` | 0.0.22 | `pycg-syntax`, `pycg-analysis`, `pycg-dump` | Line index: offsets to lines, as CPython numbers them |
+| `serde_json` | 1.0.154 (2026-10-11) | `pycg-stubs`, `pycg-dump`, the tests of `pycg-analysis` | Reads the stub data and the dumps. The document is written by our own writer (section 2, `formats/`), since Python's `json.dumps` escapes every non-ASCII character |
+| `rustc-hash` | 2.1.3 (2026-07-02) | `pycg-syntax`, `pycg-stubs`, `pycg-solver`, `pycg-analysis`, `pycg-dump` | `FxHashMap`: a fixed hash with no random seed, fast on `u32` keys. The standard `HashMap` seeds itself at random; it is banned by `clippy::disallowed_types` |
+| `indexmap` | 2.14.2 (2026-09-05) | `pycg-syntax`, `pycg-solver`, `pycg-analysis`, `pycg-dump` | Insertion-ordered maps and sets, for every Python `dict` whose order reaches a decision or the output (the firing nodes, the sites of a hub, `site_edges`) |
+| `num-bigint` | 0.4.8 (2026-07-05) | `pycg-syntax`, `pycg-analysis`, `pycg-document`, `pycg`, `pycg-dump` | Python's `int` literals have no bound; their names (`ascii()`, `hex()` past 640 digits) and the values that select container fields must be exact. A value is a `BigInt` wherever the engine holds a Python `int` from the source |
+| `libc` | 0.2.191 | `pycg-syntax`, on Unix only | The parse stack: `mmap` with `MAP_NORESERVE` and a guard page, and `pthread_attr_setstack` (section 5, *Risks*) |
 
 Left out, with the reason:
 
@@ -108,8 +99,13 @@ Left out, with the reason:
   large sets is a stage 7 change, written in the solver if a measurement
   asks for it, so that its union and difference are memoised like the
   others.
-- **No random-number crate**: the seeded orders of the simulation tests use
-  a 20-line SplitMix64 in the test code; the analysis reads no randomness.
+- **No random-number crate**: the seeded order of the simulation tests,
+  `Order::Shuffled` of `pycg_solver::Order`, and the program generators
+  of the fuzzing and termination tests are a SplitMix64 of a few lines;
+  the analysis reads no randomness.
+- **No fuzzing crate** (`libfuzzer-sys`, `arbitrary`): the generated
+  programs come from a seeded generator, so a failing seed is the whole
+  reproduction (section 5).
 - **No PyO3, no maturin**: no Python extension and no wheel; the pip
   package is deprecated (section 5, *The pip package*).
 
@@ -426,15 +422,16 @@ is found in the part that made it, not 40,000 edges later.
 
 | Set | Inputs | Documents |
 |---|---|---|
-| Micro | the 696 cases of `evaluation/micro-benchmark/snippets` | 696 |
+| Micro | the cases of `evaluation/micro-benchmark/snippets` that Python 3.14 runs: 688 of the 696 (the 8 that need 3.15 are left out) | 688 |
 | Macro | the 60 projects of `evaluation/macro-benchmark/projects.toml`, as `make eval` analyses them | 60 |
-| Scale | the 20 packages of `evaluation/scale/projects.toml`, as `make eval-scale` analyses them | 20 |
 
-The oracle runs each input with `PYTHONHASHSEED` 0 and 1 and must give one
-document for both (the engine's determinism rule; a difference is an oracle
-bug, reported and fixed on `main`). The Rust program has no seed: it runs
-each input twice, the second time with the entry points in reverse order,
-and must give one document for both. Then the two documents are compared.
+The 20 packages of the scale set are not inputs of the parity job: stage 7
+measures them with `make eval-scale` and `make eval-scale-rust` (section 6).
+
+The oracle runs each input with `PYTHONHASHSEED` 0 and 1 and must give the
+same dumps for both (the engine's determinism rule; a difference is an
+oracle bug, reported and fixed on `main`). The Rust side has no seed: the
+replays of D1 to D4 run twice, and each run is compared with the oracle.
 One differing byte fails the input; one failed input fails the job.
 
 The full document is compared, not the edges that `make eval` scores:
@@ -467,6 +464,7 @@ module that the builder was walking.
 | D3 solver trace | the calls into `Solver` (`node`, `constant`, `add_object`, `add_edge`, `attach` with a constraint number, `apply_now`, `follower`, `objects`, `holds`, `is_saturated`, `solve`, the `between_rounds` answers), and, for each application of a constraint to an object, the calls that it made | a subclass of `Solver` that records | the Rust solver replays the trace, with recorded applications as its constraints; the sequence of operations, then per node the final set, saturation, the absorbed set, the number of rounds, the round in which each object first arrived at each labelled node (the measure of `tests/test_waiting_lookups.py`) and the work counters |
 | D4 builder | per module, in emission order, every call that the builder makes into `Analysis` (`node`, `constant`, `function`, `new_class`, `add_edge`, `add_load`, `add_store`, `add_call`, `site_call`, the container, iteration, operator and annotation constructors, ...) with every argument by its parameter name, defaults applied, in canonical form, before solving, and its calls into the import manager (`handle_import`, `locate`) with their answers; at the end of each module, the entries the builder added to the analysis tables it writes (`iterated_expressions`, `literal_imports`, `none_arguments`, `none_keywords`, `read_namespaces`, `zero_argument_super`), then the fields it writes on the module and on each function and class made during the build (`BUILDER_FIELDS` of `dump.py`); under the module `<program>`, the same calls that `Program` makes outside the builds and before solving (the imports of the submodules a star import lists, the linking of submodules and star imports), then the `defines` of each module that the linking changed, by module name | a wrapper of those methods during `Program._build` and in `Program`'s context, a snapshot of the tables and the fields, and a guard that fails on a builder write to a field the dump does not record | exactly, per module, in order |
 | D5 points-to | `output_points_to()`: every named node and the sorted names of what it holds | the oracle's `CallGraphGenerator.output_points_to` | exactly, per input; the first check of a rule family before the call graph agrees |
+| D6in document inputs | what `formats/document.py` reads from the analysis: the functions and classes with their positions and MRO bases, the fields of each built module, the site edges with their constructs, the call and iterated expressions, the unresolved calls, the external callees and the cap | `document_inputs` of `dump.py` | exactly, per input |
 | D6 document | the document | `CallGraphGenerator.document()` written by `pycg.formats.dumps` | SHA-256, per input and seed |
 
 D1, D3 and D4 are compared in order: the builder is a translation that
@@ -490,9 +488,8 @@ raw names of `loop.py compare`.
 
 | Command | Does |
 |---|---|
-| `make parity-oracle` | Runs the oracle on every input for both seeds in the sandbox of `make eval` (no network, read-only checkout), writing D6 for all inputs and D1 to D5 for the micro cases and the 60 macro projects, into `$EVAL_OUT/parity-oracle-<key>` |
+| `make parity-oracle` | Runs the oracle on every input for both seeds in the sandbox of `make eval` (no network, read-only checkout), writing D1 to D6 and D6in for every input, into `$EVAL_OUT/parity-oracle-<key>`; `PARITY_SETS=micro` or `macro` limits it to one set |
 | `make parity` | Builds `pycg` and `pycg-dump` (`cargo build --release --locked`), runs them on the same inputs in the same sandbox, and compares every dump that `tools/parity/required.txt` names, and every D6; renders every D6 of the oracle with `pycg-view` and with `pycg view` and compares the pages byte for byte (`tools/parity/view.py`); runs `pycg` on every input that `tools/parity/differences.txt` does not list for the engine, with the package root and entry points of the oracle's run and compares its document with D6 byte for byte (`tools/parity/program.py`) |
-| `make parity NAME=<input>` | The same for one micro case, macro project or scale package |
 
 The key of an oracle run is the SHA-256 of the git tree of `pycg/`, the
 inputs key (`tools/inputs_key.py`) and the digest of the Python image: the
@@ -510,7 +507,6 @@ request that makes an input agree removes its line. The list only
 shrinks: given the base's list (`make parity BASE=<commit>`), an entry
 the base lacks fails, so a newly differing input fails the job.
 
-Until stages 4 and 6 join the rules to the builder and the document,
 `make parity` also drives the Rust engine from the oracle's D4 (`pycg-dump
 engine <D4.jsonl> OUT`): it makes each recorded builder call, checks its
 answer against the recorded one, solves, and writes D3 and D5 of the
@@ -519,10 +515,11 @@ set when their object is made. A builder call or a rule that is not
 ported stops the replay with `not ported: <what>`, and the trace written
 up to there (`D3.partial.jsonl`) must begin the oracle's D3: compare.py
 counts such an input as partial, and as different when the trace leaves
-the oracle's first. D3 and D5 of the engine must agree on every input
-that `tools/parity/differences.txt` does not list for the run `engine`;
-each pull request of stage 5 removes the lines of the inputs it makes
-agree.
+the oracle's first. D3, D5, D6in and D6 of the engine, the document
+built by `pycg-dump document-build` from the engine's D6in, must agree on
+every input that `tools/parity/differences.txt` does not list for the run
+`engine`; each pull request of stage 5 removed the lines of the inputs it
+made agree, and the list is empty.
 
 ## The CI job
 
@@ -534,26 +531,22 @@ content):
 2. Job `oracle`: computes the key; restores `$EVAL_OUT/parity-oracle-<key>`
    from the Actions cache; on a miss, pulls the inputs images
    (`make eval-inputs`) and runs `make parity-oracle`, the micro and macro
-   sets and the scale set in two parallel jobs. A pull request that does
-   not touch `pycg/` hits the cache.
-3. Job `rust`: `cargo fmt --check`, `cargo clippy --locked -- -D
-   warnings`, `cargo test --locked`, then `make parity` against the
-   oracle's output; the job summary has one line per set (inputs,
-   identical, different, failed) and the explanation of the first ten
-   differences.
+   sets in two parallel jobs. A pull request that does not touch `pycg/`
+   hits the cache.
+3. Job `rust`: `cargo fmt --check`, `cargo clippy --locked --all-targets
+   -- -D warnings`, `cargo test --locked`, then `make parity BASE=HEAD^1`
+   against the oracle's output, so that `differences.txt` only shrinks;
+   the job summary has one line per set (inputs, identical, different,
+   failed) and the explanation of the first ten differences.
 4. The pull request is green only when both jobs pass. The existing CI
    (lint, the Python tests, the gate) runs as before: the Python engine is
    unchanged until stage 10.
 
-The scale set takes the oracle more than 72 minutes of analysis on this
-sandbox for the 18 packages that finish (section 6), plus numpy, which
-runs for more than an hour; so its oracle job runs only on a cache miss,
-with no timeout. Two packages do not fit a standard runner of 16 GB:
-pandas peaks at 13.8 GiB, which leaves no margin, and sympy needs more
-than 14.5 GiB. The scale part of the oracle job therefore runs on a larger
-GitHub-hosted runner (64 GB), chosen in the stage 0 workflow; the micro
-and macro parts and the Rust job run on the standard one. The Rust side is
-expected to take a quarter of the oracle's time or less (section 6).
+Both jobs run on the standard runner. The scale set is left out of the
+job: the oracle takes more than 72 minutes of analysis on it for the 18
+packages that finish (section 6), plus numpy, which runs for more than an
+hour, and two packages do not fit a standard runner of 16 GB (pandas peaks
+at 13.8 GiB, sympy needs more than 14.5 GiB).
 
 # 4. Stages
 
@@ -577,7 +570,7 @@ directories of `evaluation/micro-benchmark/snippets`.
 | 5e Outside | `outside.py`, the rule half of `annotations.py` | 3 | identical for `external`, `stdlib`, `stdlib_classes`, `type_hints`, `imports` |
 | 6 Fixpoint and output | `Analysis.solve` and the steps at a fixpoint, `unresolved_calls`, `pycg-document` and its writer | 2 | D6 identical for all 696 micro cases and all 60 macro projects, for both seeds |
 | 7 Scale | Whatever the scale set finds; then the time and memory work of section 6 | as needed | D6 identical for the 20 scale packages, and every target of section 6 met |
-| 8 Command line and distribution | `pycg` (options of `__main__.py`), `pycg view`, the evaluation flavour `rust` in `evaluation/common/analyse.py`, the release workflow (release binaries built by CI for every platform of section 5, publication of the crates on crates.io) | 4: command line; `pycg view`; evaluation flavour; release workflow | `make eval` with the Rust flavour gives the metrics of the Python engine exactly; a release from a test tag gives an archive per platform whose `pycg` runs the micro-benchmark, and `cargo install pycg --locked` from a `cargo package` of the workspace builds the same program |
+| 8 Command line and distribution | `pycg` (options of `__main__.py`), `pycg view`, the evaluation flavour `rust` in `evaluation/common/analyse.py`, the release workflow (release binaries built by CI for every platform of section 5, a dry run of the publication of the crates on crates.io) | 4: command line; `pycg view`; evaluation flavour; release workflow | `make eval` with the Rust flavour gives the metrics of the Python engine exactly; a release from a test tag gives an archive per platform whose `pycg` runs the micro-benchmark, and `cargo install pycg --locked` from a `cargo package` of the workspace builds the same program |
 | 9 Tests in Rust | The test approach of section 5 | about 8, one per test family | Every behaviour that a Python test pins is a Rust case or property, and the Rust suite passes |
 | 10 Switch | The last release of the pip package, with the deprecation message (section 5); the first release of the Rust tool; then `make eval`, CI and the gate measure the Rust program, and the Python engine and its tests are removed | 3: the last pip release; the first Rust release; the removal | the pip release prints the message and analyses as before; `main` has no `pycg/` engine code and no Python packaging of it; the gate passes against the bests of `evaluation/metrics.json` unchanged |
 
@@ -631,8 +624,8 @@ The four kinds weighed:
 | Kind | What it gives | What it costs | Weight |
 |---|---|---|---|
 | End to end: a program and its document | States what PyCG must give; survives any rewrite of the code under it; the same form as the micro-benchmark; the oracle can write the expected document while it exists | Says nothing about the many orders and states one program does not reach | The base: every behaviour |
-| Deterministic simulation | Runs the solver and the whole analysis under many orders chosen by a seed and checks properties that must hold for every run: one document, termination, the bounds, the work bounds of `test_scaling.py`; one seed reproduces a failure | Needs the order hook and the property checkers in the code under test (behind `cfg(test)`) | The second pillar: the invariants of Part 3 of `docs/design.md` |
-| Fuzzing | Finds the programs nobody wrote: crashes, hangs, a difference between two runs, a difference from the oracle | Needs a generator of valid programs; slow, so not on every pull request | The third: robustness, and differential against the oracle until stage 10 |
+| Deterministic simulation | Runs the solver and the whole analysis under many orders chosen by a seed and checks properties that must hold for every run: one document, termination, the bounds, the work bounds of `test_scaling.py`; one seed reproduces a failure | Needs the order as a parameter of the code under test (`pycg_solver::Order`, as Python's `Solver.order`) and the property checkers | The second pillar: the invariants of Part 3 of `docs/design.md` |
+| Fuzzing | Finds the programs nobody wrote: crashes, hangs, a difference between two runs, a difference from the oracle | Needs a generator of valid programs | The third: robustness on every pull request, and once a difference from the oracle on 10,000 generated programs |
 | Unit tests | Fast and precise | Pin internals; a rewrite breaks them without a bug | Only pure functions with a specification of their own |
 
 **Recommendation: end-to-end cases as the base, deterministic simulation
@@ -692,8 +685,9 @@ How each becomes Rust (stage 9):
    harness runs anyway. The 43 test files that use `tests/programs.py`
    convert this way; their families (`calls`, `classes`, `containers`,
    `outside`, ...) are the directories.
-2. **Simulation.** `pycg-solver` and `pycg-analysis` take an `Order` (the
-   FIFO of the program, or under test LIFO, reversed and SplitMix64 with a
+2. **Simulation.** `pycg-solver` and `pycg-analysis` take an `Order`
+   (`pycg_solver::Order`: `Canonical`, the FIFO of the program;
+   `LastInFirstOut`; `Reversed`; and `Shuffled`, a SplitMix64 with a
    seed). The properties, each a test that takes a seed range and prints
    the seed that fails:
    - every case and every micro case gives one document under 5 seeded
@@ -716,13 +710,15 @@ How each becomes Rust (stage 9):
    requires: a `cfg(test)` switch that breaks the rounds, a waiting rule
    that runs late, a cache key that loses an argument; the test of the
    property asserts that the switch makes it fail.
-3. **Fuzzing.** One generator of Python programs in `pycg-analysis`'s test
-   support, ported from `tests/fuzz_programs.py` and the five families of
-   `tests/test_termination.py`, driven by a seed or, under `cargo fuzz`,
-   by `arbitrary` bytes. Properties: no panic, the solve ends within the
-   bounds, one document across two runs and two orders. Until stage 10 a
-   nightly job also compares 10,000 generated programs with the oracle
-   (D6), and every program that once failed becomes a case.
+3. **Fuzzing.** `crates/pycg/tests/fuzz/generator.rs` ports
+   `tests/fuzz_programs.py`, and `crates/pycg/tests/termination/` the
+   fixed programs and the five random families of
+   `tests/test_termination.py`, each driven by a seeded SplitMix64, so a
+   seed gives the same program in every run. Properties: no panic; one
+   document, warnings included, in two runs and under two orders; and
+   every table of `Engine::table_sizes` under its bound. A one-off
+   comparison of 10,000 generated programs with the oracle (D6) stands in
+   for a nightly job, and every program that fails becomes a case.
 4. **Unit tests**, only for: `ascii()` and `hex()` of constants, the JSON
    writer, `percent_spans`, `formatter_parser`, `slice.indices`, C3 and
    `linearizations`, identifier rules, the reading of encodings and the
@@ -790,8 +786,13 @@ that replaces the importable API. After that release the pip package gets
 no more releases; it is not removed from PyPI, so pinned installs keep
 working.
 
-The Rust tool is distributed in two ways, both made by a release workflow
-of stage 8 from a tag:
+The Rust tool is to be distributed in two ways. The release workflow
+(`.github/workflows/release.yml`) builds both from a tag and publishes
+nothing yet: the archives and their `SHA256SUMS` are workflow artefacts,
+and the crates.io publication is a dry run (`cargo publish --workspace
+--dry-run`) whose packages `tools/release/packaged.sh` installs and
+compares with the workspace's program. The first release of stage 10
+publishes them:
 
 1. **Release binaries built by CI**: one archive per platform (Linux
    x86-64 and arm64, glibc and musl; macOS x86-64 and arm64; Windows
@@ -824,7 +825,7 @@ time and the peak resident set of the child as it does for Python.
 | Identifiers that CPython normalises (NFKC) | Different names | D1 includes names; NFKC is applied with a table generated from Python's `unicodedata` by a tool script and committed as data, since no crate is pulled in for it |
 | Encodings other than UTF-8 (PEP 263 cookies) | A module that one side cannot read | The Rust reader supports UTF-8, the BOM and the single-byte codecs (Latin-1 and the `cp125x`/`iso8859-x` tables, generated from Python's codecs as data); a cookie naming another codec is a read failure with Python's cause, and D1 shows whether any input uses one |
 | Inputs beyond the limits of CPython's parser | A module `failed` with another cause, or analysed, on one side | The Rust reader has the tokenizer's exact limits (100 indents, 200 brackets, 149 nested f- and t-strings). For the parser's stack (`MemoryError`, rule depth past 6,000) it fails a statement with a chain of one construct past the count at which CPython 3.14.10 fails: 5,967 unary `-`, `+` or `~`, 5,968 `not` or conditional expressions, 5,963 `elif`, 2,984 lambdas or `**`, 200 nested `and`/`or`. For the C stack (`RecursionError`) it fails a statement deeper than 43,482 levels; CPython's own count moves by a few levels with the C stack already in use. A known divergence: a mixture of constructs, or a chain near the C-stack count, may fail on one side only. No benchmark input comes near: the deepest statement of micro, macro and scale is 31 levels. `crates/syntax/tests/vectors/bounds.txt` checks each measured flip |
-| Input nested deeper than the Rust stack holds (ruff's parser and the drop of its tree recurse) | An abort where the oracle fails the module | `pycg_syntax::parse::with_parsed` runs the parse, the caller's work on the tree and its drop on a thread whose stack is 8 MiB (the default main thread's) plus twice the most stack per source byte measured over 17 nested constructs: 2,213 bytes, in a debug build (`[*` nesting; 992 in release), for every profile. Nesting cannot exceed the source length. On Linux and macOS the stack is reserved with `mmap(MAP_NORESERVE)` and a guard page, so it costs memory only as far as it is used (a plain thread stack is accounted, and one of 8 GiB does not start on an 8 GiB machine with the default overcommit policy), and the thread is made with `pthread_attr_setstack`; on Windows `std::thread::Builder` already only reserves its stack (`STACK_SIZE_PARAM_IS_A_RESERVATION`). CI runs the Linux path and lints the workspace with clippy for `aarch64-apple-darwin`, `x86_64-pc-windows-gnu` and `x86_64-pc-windows-msvc`, without linking or running them |
+| Input nested deeper than the Rust stack holds (ruff's parser and the drop of its tree recurse) | An abort where the oracle fails the module | `pycg_syntax::parse::with_parsed` runs the parse, the caller's work on the tree and its drop on a thread whose stack is 8 MiB (the default main thread's) plus twice the most stack per source byte measured over 17 nested constructs: 2,213 bytes, in a debug build (`[*` nesting; 992 in release), for every profile. Nesting cannot exceed the source length. On Linux and macOS the stack is reserved with `mmap(MAP_NORESERVE)` and a guard page, so it costs memory only as far as it is used (a plain thread stack is accounted, and one of 8 GiB does not start on an 8 GiB machine with the default overcommit policy), and the thread is made with `pthread_attr_setstack`; on Windows `std::thread::Builder` already only reserves its stack (`STACK_SIZE_PARAM_IS_A_RESERVATION`). The parity job runs the Linux path and lints the workspace with clippy for `aarch64-apple-darwin`, `x86_64-pc-windows-gnu` and `x86_64-pc-windows-msvc`; the release workflow builds the program for every platform of the release and runs it on the micro-benchmark (`tools/release/micro.py`) |
 | `RecursionError` in the Python builder gives the status `partial`, which depends on the Python stack | A module `partial` on one side | Before stage 4, the oracle replaces this dependence by a named depth bound in the builder (a change on `main`, with its own pull request), which the Rust builder implements; if no input reaches it, the bound only needs a case |
 | A hidden order dependence in the oracle | A parity failure that moves with the order | The port keeps the oracle's order until stage 7 (section 2); a difference found later is reproduced on the oracle with `Solver.order`, fixed on `main` and merged |
 | `main` moves while the port runs | The oracle changes under a stage | Merges into `base/rust-rewrite` only between stages, each with the Rust change it needs; the oracle key of the parity job names the engine it compared |
@@ -900,9 +901,9 @@ What this measurement found, for `main` rather than for the port, and
 reported here as `AGENTS.md` asks:
 
 - numpy does not finish in an hour (6,130 MiB at the timeout), and sympy
-  does not finish within 14.5 GiB. Their oracle documents need the larger
-  runner of section 3 and no timeout; how long and how much they take
-  there is measured by the first run of the stage 0 workflow, and their
-  targets are revised from it in that pull request.
+  does not finish within 14.5 GiB. `docs/rust/scale-baseline.md` measures
+  the oracle again on a 16 GB machine with a cap of 12,288 MiB, with the
+  graph and D6 SHA-256 of every package that finishes: numpy finishes
+  there in 618.6 s at 1,987 MiB, and sympy is killed by the cap.
 - Eight packages exceed the default 4,096 MiB of `make eval-scale`, so with
   its defaults the scale set reports them as `killed by the cap`.
