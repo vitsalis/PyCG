@@ -133,6 +133,39 @@ pub struct NewClass<'a> {
     pub uses_namespace: bool,
 }
 
+pub struct Operation<'a> {
+    pub left: Option<NodeId>,
+    pub right: Option<NodeId>,
+    pub method: &'a str,
+    pub reflected: Option<&'a str>,
+    pub inplace: bool,
+    pub dst: NodeId,
+    pub caller: &'a str,
+    pub site: &'a str,
+    pub unary: bool,
+    pub constants: bool,
+}
+
+pub struct Subscript<'a> {
+    pub base: NodeId,
+    pub key: Option<NodeId>,
+    pub dst: Option<NodeId>,
+    pub src: Option<NodeId>,
+    pub caller: &'a str,
+    pub site: &'a str,
+    pub delete: bool,
+}
+
+pub struct Slice<'a> {
+    pub base: NodeId,
+    pub bounds: Option<&'a (Option<BigInt>, Option<BigInt>)>,
+    pub dst: Option<NodeId>,
+    pub src: Option<NodeId>,
+    pub caller: &'a str,
+    pub site: &'a str,
+    pub delete: bool,
+}
+
 pub trait Analysis {
     fn node(&mut self, label: Option<&str>) -> NodeId;
     fn node_label(&self, node: NodeId) -> Option<&str>;
@@ -185,6 +218,7 @@ pub trait Analysis {
 
     fn add_call(&mut self, call: &Call<'_>);
     fn add_load(&mut self, base: NodeId, attr: &str, dst: NodeId, caller: &str, site: &str);
+    fn add_load_text(&mut self, base: NodeId, attr: &[u32], dst: NodeId, caller: &str, site: &str);
     fn add_store(
         &mut self,
         base: NodeId,
@@ -221,4 +255,53 @@ pub trait Analysis {
     fn class_fields(&mut self, class: ObjId) -> &mut ClassFields;
     fn module_defines(&mut self, module: ObjId) -> &mut Vec<Box<str>>;
     fn tables(&mut self) -> &mut BuilderTables;
+
+    fn container(&mut self, kind: &str, site: &str, length: Option<usize>) -> ObjId;
+    fn element(&mut self, container: ObjId, key: &Key) -> NodeId;
+    fn unknown(&mut self, container: ObjId) -> NodeId;
+    fn keys(&mut self, container: ObjId) -> NodeId;
+    fn elements(&mut self, container: ObjId) -> NodeId;
+    fn write_keyed(&mut self, container: ObjId, key: Option<NodeId>, src: Option<NodeId>);
+    fn typed(&mut self, cls: &str) -> ObjId;
+    fn add_operator(&mut self, operation: &Operation<'_>);
+    fn add_percent(&mut self, fmt: NodeId, value: NodeId, caller: &str, site: &str);
+    fn add_conversion(
+        &mut self,
+        value: NodeId,
+        kind: &str,
+        caller: &str,
+        site: &str,
+        spec: Option<NodeId>,
+    );
+    fn add_hash(&mut self, key: NodeId, caller: &str, site: &str, stored: Option<NodeId>);
+    fn add_subscript(&mut self, subscript: &Subscript<'_>);
+    fn add_slice(&mut self, slice: &Slice<'_>);
+    fn add_iteration(
+        &mut self,
+        iterable: NodeId,
+        dst: NodeId,
+        caller: &str,
+        site: &str,
+        is_async: bool,
+    );
+    fn add_length_hint(&mut self, iterable: NodeId, caller: &str, site: &str);
+    fn entering_keys(
+        &mut self,
+        source: NodeId,
+        construct: (&str, &str),
+        caller: &str,
+        site: &str,
+    ) -> (NodeId, NodeId);
+    fn add_dict_items(&mut self, target: ObjId, source: NodeId, caller: &str, site: &str);
+    fn add_await(&mut self, value: NodeId, dst: NodeId, caller: &str, site: &str);
+    fn add_yield_from(
+        &mut self,
+        iterable: NodeId,
+        function: ObjId,
+        dst: NodeId,
+        caller: &str,
+        site: &str,
+    );
+    fn add_pattern_operand(&mut self, operand: Option<NodeId>, result: NodeId);
+    fn pattern(&mut self, prefix: &[u32], suffix: &[u32]) -> ObjId;
 }

@@ -44,6 +44,28 @@ BUILDER_PROGRAMS = {
         "import os\nimport os.path as p\nfrom os import path\n"
         "from typing import TYPE_CHECKING\nfrom . import sibling\n"
     ),
+    "expressions": (
+        "import sys\nfrom typing import TYPE_CHECKING\n"
+        "def f(a, *args, k=None, **kw):\n    return a\n"
+        "x = f(1, *[2], None, k=None, **{'z': 3})\n"
+        "y = not x and (x or -5) if x < 3 <= 4 else ~x\n"
+        "z = (lambda p: p)(x) + 2 * x % 3 - x.real\n"
+        "s = f'a{x!r:>{y}}b{z=}' + '%s-%d' % (x, y) + '{0.real} {k}'.format(x, k=y)\n"
+        "u = [x, *s], (x,), {x, *s}, {x: y, **{}}\n"
+        "v = x[1:2], x[::2], x[-1:], x[y], sys.modules['os']\n"
+        "w = (q := f(x)) is None or q in (1, 2) or q not in [3]\n"
+        "if TYPE_CHECKING:\n    pass\n"
+        "class C:\n    def m(self):\n        return super().m(), C.__dict__, vars(C)\n"
+    ),
+    "comprehensions": (
+        "def gen(items):\n    yield from items\n    sent = yield items\n"
+        "    return [i for i in items if i], {i for i in items}, "
+        "{i: j for i, j in items}, (i for i in items), sorted(i for i in items)\n"
+        "async def agen(items):\n    return [i async for i in items], await items\n"
+    ),
+    "surrogates": (
+        "def g(x):\n    return '{0.\\ud800}'.format(x), '\\udcff' + str(x)\n"
+    ),
 }
 
 

@@ -471,7 +471,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
         self.expression(value)
     }
 
-    fn returns_parameter(&mut self, value: &Expr) -> bool {
+    pub(crate) fn returns_parameter(&mut self, value: &Expr) -> bool {
         let Some(function) = &self.function else {
             return false;
         };
@@ -567,7 +567,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
             .collect();
         let name = identifier(function.name.as_str()).into_owned();
         let made = self.function_object(
-            statement,
+            &Node::Stmt(statement),
             &function.parameters,
             scope,
             &name,
@@ -615,7 +615,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
 
     pub(crate) fn function_object(
         &mut self,
-        statement: &Stmt,
+        node: &Node<'_>,
         parameters: &Parameters,
         scope: ScopeId,
         name: &str,
@@ -647,7 +647,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
         let made =
             self.analysis
                 .function(&scope_name, &module_name, &signature, &defaults, generator);
-        let at = self.position(&Node::Stmt(statement));
+        let at = self.position(node);
         {
             let fields = self.analysis.function_fields(made.object);
             fields.lineno = Some(u32::try_from(at.lineno).expect("a line fits u32"));

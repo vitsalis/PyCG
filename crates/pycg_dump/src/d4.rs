@@ -5,8 +5,8 @@ use std::process::ExitCode;
 
 use indexmap::IndexMap;
 use pycg_analysis::builder::calls::{
-    Analysis, BuilderTables, Call, ClassFields, ClassStatement, Constant, FunctionFields,
-    MadeFunction, MethodKind, NewClass, Passthrough,
+    Analysis, BuilderTables, Call, ClassFields, ClassStatement, Constant, FunctionFields, Key,
+    MadeFunction, MethodKind, NewClass, Operation, Passthrough, Slice, Subscript,
 };
 use pycg_analysis::builder::{ModuleBuilder, Source};
 use pycg_analysis::model::Signature;
@@ -53,11 +53,46 @@ pub fn run(arguments: &[String]) -> Option<ExitCode> {
     Some(ExitCode::SUCCESS)
 }
 
+fn surrogate_escape(text: &str, at: usize) -> Option<u32> {
+    let digits = text.get(at + 2..at + 6)?;
+    let unit = u32::from_str_radix(digits, 16).ok()?;
+    (text[at..].starts_with("\\u") && (0xd800..0xe000).contains(&unit)).then_some(unit)
+}
+
+fn without_lone_surrogates(line: &str) -> String {
+    let mut out = String::with_capacity(line.len());
+    let mut index = 0;
+    while let Some(offset) = line[index..].find('\\') {
+        let at = index + offset;
+        out.push_str(&line[index..at]);
+        match surrogate_escape(line, at) {
+            Some(0xd800..0xdc00)
+                if surrogate_escape(line, at + 6).is_some_and(|low| low >= 0xdc00) =>
+            {
+                out.push_str(&line[at..at + 12]);
+                index = at + 12;
+            }
+            Some(_) => {
+                out.push_str("\\ufffd");
+                index = at + 6;
+            }
+            None => {
+                let end = at + 1 + line[at + 1..].chars().next().map_or(0, char::len_utf8);
+                out.push_str(&line[at..end]);
+                index = end;
+            }
+        }
+    }
+    out.push_str(&line[index..]);
+    out
+}
+
 fn read_oracle(path: &Path) -> IndexMap<String, Vec<Value>> {
     let mut grouped: IndexMap<String, Vec<Value>> = IndexMap::new();
     let text = std::fs::read_to_string(path).unwrap_or_default();
     for line in text.lines() {
-        let record: Value = serde_json::from_str(line).expect("an oracle D4 record");
+        let record: Value =
+            serde_json::from_str(&without_lone_surrogates(line)).expect("an oracle D4 record");
         if record.get("call").is_none() {
             continue;
         }
@@ -229,6 +264,13 @@ impl Replay {
         json!({"dict": self.keywords(entries)})
     }
 
+    fn container_node(&mut self, call: &str, container: ObjId) -> NodeId {
+        let answer = self.answer(call);
+        let recorded = arguments(vec![("container", self.object(container))]);
+        self.record(call, recorded, answer.clone());
+        self.node_from(&answer, None)
+    }
+
     fn simple(&mut self, call: &str, arguments: Map<String, Value>) {
         let answer = self.answer(call);
         self.record(call, arguments, answer);
@@ -314,7 +356,7 @@ impl Replay {
             "tables": {
                 "iterated_expressions": sites(&tables.iterated_expressions),
                 "literal_imports": {"dict": tables.literal_imports.iter().map(|(site, module)| json!([&**site, self.canon_node(*module)])).collect::<Vec<_>>()},
-                "none_arguments": {"dict": tables.none_arguments.iter().map(|((caller, site), nones)| json!([[&**caller, &**site], nones])).collect::<Vec<_>>()},
+                "none_arguments": {"dict": tables.none_arguments.iter().map(|((caller, site), nones)| json!([[&**caller, &**site], set(nones.iter().map(|&index| Value::from(index)).collect())])).collect::<Vec<_>>()},
                 "none_keywords": {"dict": tables.none_keywords.iter().map(|((caller, site), names)| json!([[&**caller, &**site], names_set(names)])).collect::<Vec<_>>()},
                 "read_namespaces": names_set(&tables.read_namespaces),
                 "zero_argument_super": names_set(&tables.zero_argument_super),
@@ -342,13 +384,7 @@ fn integer(value: &num_bigint::BigInt) -> Value {
 
 fn constant(value: &Constant) -> Value {
     match value {
-        Constant::Str(code_points) => {
-            let text: String = code_points
-                .iter()
-                .map(|&point| char::from_u32(point).unwrap_or('\u{fffd}'))
-                .collect();
-            Value::from(text)
-        }
+        Constant::Str(code_points) => crate::canonical::text(code_points),
         Constant::Bytes(bytes) => {
             json!({"bytes": bytes.iter().map(|byte| format!("{byte:02x}")).collect::<String>()})
         }
@@ -380,6 +416,255 @@ fn arguments(entries: Vec<(&str, Value)>) -> Map<String, Value> {
 }
 
 impl Analysis for Replay {
+    fn container(&mut self, kind: &str, site: &str, length: Option<usize>) -> ObjId {
+        let answer = self.answer("container");
+        let recorded = arguments(vec![
+            ("kind", json!(kind)),
+            ("site", json!(site)),
+            ("length", json!(length)),
+        ]);
+        self.record("container", recorded, answer.clone());
+        self.object_from(&answer)
+    }
+
+    fn element(&mut self, container: ObjId, key: &Key) -> NodeId {
+        let answer = self.answer("element");
+        let key = match key {
+            Key::Index(index) => json!(index),
+            Key::Name(name) => json!(&**name),
+        };
+        let recorded = arguments(vec![("container", self.object(container)), ("key", key)]);
+        self.record("element", recorded, answer.clone());
+        self.node_from(&answer, None)
+    }
+
+    fn unknown(&mut self, container: ObjId) -> NodeId {
+        self.container_node("unknown", container)
+    }
+
+    fn keys(&mut self, container: ObjId) -> NodeId {
+        self.container_node("keys", container)
+    }
+
+    fn elements(&mut self, container: ObjId) -> NodeId {
+        self.container_node("elements", container)
+    }
+
+    fn write_keyed(&mut self, container: ObjId, key: Option<NodeId>, src: Option<NodeId>) {
+        let recorded = arguments(vec![
+            ("container", self.object(container)),
+            ("key", self.optional_node(key)),
+            ("src", self.optional_node(src)),
+        ]);
+        self.simple("write_keyed", recorded);
+    }
+
+    fn typed(&mut self, cls: &str) -> ObjId {
+        let answer = self.answer("typed");
+        self.record(
+            "typed",
+            arguments(vec![("cls", json!(cls))]),
+            answer.clone(),
+        );
+        self.object_from(&answer)
+    }
+
+    fn add_operator(&mut self, operation: &Operation<'_>) {
+        let recorded = arguments(vec![
+            ("left", self.optional_node(operation.left)),
+            ("right", self.optional_node(operation.right)),
+            ("method", json!(operation.method)),
+            ("reflected", json!(operation.reflected)),
+            ("inplace", json!(operation.inplace)),
+            ("dst", self.canon_node(operation.dst)),
+            ("caller", json!(operation.caller)),
+            ("site", json!(operation.site)),
+            ("unary", json!(operation.unary)),
+            ("constants", json!(operation.constants)),
+            ("extra", json!([])),
+        ]);
+        self.simple("add_operator", recorded);
+    }
+
+    fn add_percent(&mut self, fmt: NodeId, value: NodeId, caller: &str, site: &str) {
+        let recorded = arguments(vec![
+            ("fmt", self.canon_node(fmt)),
+            ("value", self.canon_node(value)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+        ]);
+        self.simple("add_percent", recorded);
+    }
+
+    fn add_conversion(
+        &mut self,
+        value: NodeId,
+        kind: &str,
+        caller: &str,
+        site: &str,
+        spec: Option<NodeId>,
+    ) {
+        let recorded = arguments(vec![
+            ("value", self.canon_node(value)),
+            ("kind", json!(kind)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+            ("spec", self.optional_node(spec)),
+        ]);
+        self.simple("add_conversion", recorded);
+    }
+
+    fn add_hash(&mut self, key: NodeId, caller: &str, site: &str, stored: Option<NodeId>) {
+        let recorded = arguments(vec![
+            ("key", self.canon_node(key)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+            ("stored", self.optional_node(stored)),
+        ]);
+        self.simple("add_hash", recorded);
+    }
+
+    fn add_subscript(&mut self, subscript: &Subscript<'_>) {
+        let recorded = arguments(vec![
+            ("base", self.canon_node(subscript.base)),
+            ("key", self.optional_node(subscript.key)),
+            ("dst", self.optional_node(subscript.dst)),
+            ("src", self.optional_node(subscript.src)),
+            ("caller", json!(subscript.caller)),
+            ("site", json!(subscript.site)),
+            ("delete", json!(subscript.delete)),
+        ]);
+        self.simple("add_subscript", recorded);
+    }
+
+    fn add_slice(&mut self, slice: &Slice<'_>) {
+        let bound =
+            |bound: &Option<num_bigint::BigInt>| bound.as_ref().map_or(Value::Null, integer);
+        let bounds = slice.bounds.map_or(Value::Null, |(lower, upper)| {
+            json!([bound(lower), bound(upper)])
+        });
+        let recorded = arguments(vec![
+            ("base", self.canon_node(slice.base)),
+            ("bounds", bounds),
+            ("dst", self.optional_node(slice.dst)),
+            ("src", self.optional_node(slice.src)),
+            ("caller", json!(slice.caller)),
+            ("site", json!(slice.site)),
+            ("delete", json!(slice.delete)),
+        ]);
+        self.simple("add_slice", recorded);
+    }
+
+    fn add_iteration(
+        &mut self,
+        iterable: NodeId,
+        dst: NodeId,
+        caller: &str,
+        site: &str,
+        is_async: bool,
+    ) {
+        let recorded = arguments(vec![
+            ("iterable", self.canon_node(iterable)),
+            ("dst", self.canon_node(dst)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+            ("is_async", json!(is_async)),
+        ]);
+        self.simple("add_iteration", recorded);
+    }
+
+    fn add_length_hint(&mut self, iterable: NodeId, caller: &str, site: &str) {
+        let recorded = arguments(vec![
+            ("iterable", self.canon_node(iterable)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+            (
+                "plan",
+                json!([["__len__", []], ["__length_hint__", ["__len__"]]]),
+            ),
+        ]);
+        self.simple("add_length_hint", recorded);
+    }
+
+    fn entering_keys(
+        &mut self,
+        source: NodeId,
+        construct: (&str, &str),
+        caller: &str,
+        site: &str,
+    ) -> (NodeId, NodeId) {
+        let answer = self.answer("entering_keys");
+        let recorded = arguments(vec![
+            ("source", self.canon_node(source)),
+            ("construct", json!([construct.0, construct.1])),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+            ("keeps", json!({"function": "keeps_hashes"})),
+        ]);
+        self.record("entering_keys", recorded, answer.clone());
+        let hashed = self.node_from(&answer[0], None);
+        let kept = self.node_from(&answer[1], None);
+        (hashed, kept)
+    }
+
+    fn add_dict_items(&mut self, target: ObjId, source: NodeId, caller: &str, site: &str) {
+        let recorded = arguments(vec![
+            ("target", self.object(target)),
+            ("source", self.canon_node(source)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+        ]);
+        self.simple("add_dict_items", recorded);
+    }
+
+    fn add_await(&mut self, value: NodeId, dst: NodeId, caller: &str, site: &str) {
+        let recorded = arguments(vec![
+            ("value", self.canon_node(value)),
+            ("dst", self.canon_node(dst)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+        ]);
+        self.simple("add_await", recorded);
+    }
+
+    fn add_yield_from(
+        &mut self,
+        iterable: NodeId,
+        function: ObjId,
+        dst: NodeId,
+        caller: &str,
+        site: &str,
+    ) {
+        let recorded = arguments(vec![
+            ("iterable", self.canon_node(iterable)),
+            ("function", self.object(function)),
+            ("dst", self.canon_node(dst)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+        ]);
+        self.simple("add_yield_from", recorded);
+    }
+
+    fn pattern(&mut self, prefix: &[u32], suffix: &[u32]) -> ObjId {
+        let answer = self.answer("pattern");
+        let recorded = arguments(vec![
+            ("prefix", constant(&Constant::Str(prefix.into()))),
+            ("suffix", constant(&Constant::Str(suffix.into()))),
+            ("case", Value::Null),
+            ("exact", json!(true)),
+        ]);
+        self.record("pattern", recorded, answer.clone());
+        self.object_from(&answer)
+    }
+
+    fn add_pattern_operand(&mut self, operand: Option<NodeId>, result: NodeId) {
+        let recorded = arguments(vec![
+            ("operand", self.optional_node(operand)),
+            ("result", self.canon_node(result)),
+        ]);
+        self.simple("add_pattern_operand", recorded);
+    }
+
     fn node(&mut self, label: Option<&str>) -> NodeId {
         let answer = self.answer("node");
         self.record(
@@ -681,6 +966,17 @@ impl Analysis for Replay {
         let recorded = arguments(vec![
             ("base", self.canon_node(base)),
             ("attr", json!(attr)),
+            ("dst", self.canon_node(dst)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+        ]);
+        self.simple("add_load", recorded);
+    }
+
+    fn add_load_text(&mut self, base: NodeId, attr: &[u32], dst: NodeId, caller: &str, site: &str) {
+        let recorded = arguments(vec![
+            ("base", self.canon_node(base)),
+            ("attr", crate::canonical::text(attr)),
             ("dst", self.canon_node(dst)),
             ("caller", json!(caller)),
             ("site", json!(site)),
