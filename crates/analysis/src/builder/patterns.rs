@@ -17,6 +17,7 @@ const LENGTH_MODIFIERS: [char; 3] = ['h', 'l', 'L'];
 const CONVERSIONS: [char; 16] = [
     's', 'r', 'a', 'd', 'i', 'o', 'u', 'x', 'X', 'e', 'E', 'f', 'F', 'g', 'G', 'c',
 ];
+const BYTES_CONVERSION: u32 = 'b' as u32;
 const WIDTH_MAX: u128 = (1 << 63) - 1;
 const PRECISION_MAX: u128 = (1 << 31) - 1;
 
@@ -33,21 +34,33 @@ fn digit(character: u32) -> Option<u128> {
         .map(u128::from)
 }
 
-pub(crate) fn percent_spans(text: &[u32]) -> Option<Vec<(usize, usize, bool)>> {
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) enum PercentField {
+    Escaped,
+    Positional { position: usize, conversion: u32 },
+    Keyed { key: Vec<u32>, conversion: u32 },
+}
+
+pub(crate) fn percent_spans(
+    text: &[u32],
+    bytes: bool,
+) -> (Vec<(usize, usize, PercentField)>, bool) {
     let mut spans = Vec::new();
     let mut index = 0;
+    let mut position = 0;
     let end = text.len();
     while let Some(offset) = text[index..].iter().position(|&c| c == PERCENT) {
         let start = index + offset;
         index = start + 1;
         if text.get(index) == Some(&PERCENT) {
             index += 1;
-            spans.push((start, index, true));
+            spans.push((start, index, PercentField::Escaped));
             continue;
         }
-        let mut keyed = false;
+        let mut key = None;
         if text.get(index) == Some(&OPEN_PARENTHESIS) {
             index += 1;
+            let opened = index;
             let mut depth = 1;
             while index < end && depth > 0 {
                 if text[index] == OPEN_PARENTHESIS {
@@ -58,9 +71,9 @@ pub(crate) fn percent_spans(text: &[u32]) -> Option<Vec<(usize, usize, bool)>> {
                 index += 1;
             }
             if depth > 0 {
-                return None;
+                return (spans, false);
             }
-            keyed = true;
+            key = Some(text[opened..index - 1].to_vec());
         }
         while index < end && is_one_of(text[index], &FLAGS) {
             index += 1;
@@ -84,36 +97,52 @@ pub(crate) fn percent_spans(text: &[u32]) -> Option<Vec<(usize, usize, bool)>> {
             {
                 value = value * 10 + digit;
                 if value > maximum {
-                    return None;
+                    return (spans, false);
                 }
                 index += 1;
             }
         }
-        if stars > 0 && keyed {
-            return None;
+        if stars > 0 && key.is_some() {
+            return (spans, false);
         }
         if index < end && is_one_of(text[index], &LENGTH_MODIFIERS) {
             index += 1;
         }
-        if index == end || !is_one_of(text[index], &CONVERSIONS) {
-            return None;
+        let accepted = index < end
+            && (is_one_of(text[index], &CONVERSIONS) || (bytes && text[index] == BYTES_CONVERSION));
+        if !accepted {
+            return (spans, false);
         }
+        position += stars;
+        let conversion = text[index];
         index += 1;
-        spans.push((start, index, false));
+        let field = match key {
+            Some(key) => PercentField::Keyed { key, conversion },
+            None => PercentField::Positional {
+                position,
+                conversion,
+            },
+        };
+        spans.push((start, index, field));
+        position += 1;
     }
-    Some(spans)
+    (spans, true)
 }
 
 fn percent_parts(text: &[u32]) -> Option<Vec<Part>> {
-    let spans = percent_spans(text)?;
-    if spans.iter().all(|&(_, _, escaped)| escaped) {
+    let (spans, accepted) = percent_spans(text, false);
+    if !accepted
+        || spans
+            .iter()
+            .all(|(_, _, field)| *field == PercentField::Escaped)
+    {
         return None;
     }
     let mut parts = Vec::new();
     let mut start = 0;
-    for (begin, end, escaped) in spans {
+    for (begin, end, field) in spans {
         parts.push(Some(text[start..begin].to_vec()));
-        parts.push(escaped.then(|| vec![PERCENT]));
+        parts.push((field == PercentField::Escaped).then(|| vec![PERCENT]));
         start = end;
     }
     parts.push(Some(text[start..].to_vec()));
@@ -279,7 +308,7 @@ mod tests {
             "%99999999999999999999d",
             "%.9999999999d",
         ] {
-            assert_eq!(percent_spans(&text(rejected)), None, "{rejected}");
+            assert!(!percent_spans(&text(rejected), false).1, "{rejected}");
         }
     }
 

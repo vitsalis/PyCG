@@ -8,7 +8,7 @@ mod format;
 mod literals;
 mod matching;
 mod narrowing;
-mod patterns;
+pub(crate) mod patterns;
 pub mod statements;
 
 use indexmap::IndexMap;
