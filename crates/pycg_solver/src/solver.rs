@@ -379,6 +379,10 @@ impl<C: Copy> Solver<C> {
             .is_some_and(|added| added.contains(&object))
     }
 
+    pub fn cap(&self) -> Option<u32> {
+        self.cap
+    }
+
     pub fn opacity_enabled(&self) -> bool {
         self.opacity
     }

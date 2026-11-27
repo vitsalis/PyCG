@@ -8,7 +8,7 @@ use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Container, Function, Object};
 use crate::engine::outside::outside_name;
 use crate::engine::rules::Rule;
-use crate::engine::semantics::{Call, CallId, Role, SiteKey};
+use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State, not_ported};
@@ -75,6 +75,21 @@ struct Overload {
 enum ArgumentKey {
     Position(usize),
     Named(u8, Box<str>),
+}
+
+fn group_excluded(path: &str) -> bool {
+    path == METHOD_TYPE
+        || path == SUBCLASSES
+        || lookup(CONTAINER_CLASSES, path).is_some()
+        || lookup(HASHED_ARGUMENTS, path).is_some()
+        || ORDERING_COMPARISON_BY_BUILTIN.contains(&path)
+        || lookup(CALLS_BACK, path).is_some()
+        || lookup(LENGTH_HINTS, path).is_some()
+        || lookup(LIBRARY_ITERATION, path).is_some()
+        || OPENERS.contains(&path)
+        || lookup(CLOSURES, path).is_some()
+        || lookup(REFLECTION_CALLS, path).is_some()
+        || lookup(SPECIAL_METHOD_CALLS, path).is_some()
 }
 
 fn positional_kind(kind: ParameterKind) -> bool {
@@ -192,26 +207,33 @@ impl<T: Trace> State<T> {
         definitions: &[Definition],
         call: CallId,
     ) {
-        let (base, receivers) = self
-            .prefixes
-            .get(&call)
-            .cloned()
-            .unwrap_or((call, Vec::new()));
+        let (base, receivers, group) = match self.prefixes.get(&call) {
+            None => (call, Vec::new(), None),
+            Some((base, Prefix::Receivers(receivers))) => (*base, receivers.clone(), None),
+            Some((base, Prefix::Group(group))) => (*base, Vec::new(), Some(*group)),
+        };
+        assert!(
+            group.is_none() || self.bound_in_group(external),
+            "a group calls an outside function"
+        );
         let found = self.objects.external(external).expect("an outside value");
         let (name, inexact, steps) = (found.name, found.inexact, found.steps);
         let text = self.symbols.text(name).to_string();
         if RETURNS_ARGUMENT.iter().any(|&(model, _)| model == text) {
             not_ported("the models of functions that return an argument");
         }
-        if let Some(&receiver) = receivers.first()
-            && self.unknown_class(receiver)
-        {
-            not_ported("outside types: a receiver of an abstract class");
-        }
-        self.add_external_call_edge(call, name, Known::Stub);
-        for definition in definitions {
-            if lookup(CACHED_FUNCTIONS, &*definition.path).is_some() {
-                not_ported("outside types: a cached function");
+        let unknown = match group {
+            Some(group) => self.group_records[group.0 as usize].unknown,
+            None => receivers
+                .first()
+                .is_some_and(|&receiver| self.unknown_class(receiver)),
+        };
+        if !unknown {
+            self.add_external_call_edge(call, name, Known::Stub);
+            for definition in definitions {
+                if lookup(CACHED_FUNCTIONS, &*definition.path).is_some() {
+                    not_ported("outside types: a cached function");
+                }
             }
         }
         if inexact {
@@ -244,7 +266,7 @@ impl<T: Trace> State<T> {
         for definition in definitions {
             let overloads = match definition.kind {
                 DefinitionKind::Function => {
-                    self.call_signatures(graph, definition, call, &receivers, external)
+                    self.call_signatures(graph, definition, call, &receivers, group, external)
                 }
                 DefinitionKind::Class => {
                     let overloads = self.constructor_signatures(graph, definition, call);
@@ -307,6 +329,45 @@ impl<T: Trace> State<T> {
         }
     }
 
+    pub(super) fn bound_in_group(&mut self, callee: ObjId) -> bool {
+        if let Some(&found) = self.grouped_externals.get(&callee) {
+            return found;
+        }
+        let found = self.find_bound_in_group(callee);
+        self.grouped_externals.insert(callee, found);
+        found
+    }
+
+    fn find_bound_in_group(&mut self, callee: ObjId) -> bool {
+        let Object::External(external) = self.objects.get(callee) else {
+            return false;
+        };
+        let steps = external.steps;
+        let name = self.symbols.text(external.name).to_string();
+        if RETURNS_ARGUMENT.iter().any(|&(model, _)| model == name)
+            || self.builtin_function_rule(&name, steps)
+        {
+            return false;
+        }
+        let Some(definitions) = self.stub_definitions(callee) else {
+            return false;
+        };
+        !definitions.is_empty()
+            && definitions.iter().all(|definition| {
+                let path = &*definition.path;
+                definition.kind == DefinitionKind::Function
+                    && !path.starts_with(STUB_BUILTINS_PREFIX)
+                    && !group_excluded(path)
+            })
+    }
+
+    pub(super) fn add_results_of(&mut self, graph: &mut Graph, call: CallId, typed: &[Type]) {
+        let dst = self.calls[call.index()].dst.expect("a typed result");
+        for reduced in typed {
+            self.add_type(graph, reduced, dst);
+        }
+    }
+
     fn builtin_function_rule(&self, name: &str, steps: u32) -> bool {
         let Some(rest) = name.strip_prefix("<builtin>.") else {
             return false;
@@ -314,7 +375,7 @@ impl<T: Trace> State<T> {
         steps <= 1 && function_model(rest).is_some()
     }
 
-    fn unknown_class(&self, object: ObjId) -> bool {
+    pub(super) fn unknown_class(&self, object: ObjId) -> bool {
         match self.objects.get(object) {
             Object::Container(container) if self.symbols.text(container.kind).contains('.') => {
                 not_ported("containers: a container of an outside class")
@@ -433,10 +494,13 @@ impl<T: Trace> State<T> {
         definition: &Definition,
         call: CallId,
         receivers: &[ObjId],
+        group: Option<GroupId>,
         external: ObjId,
     ) -> Vec<Overload> {
         let (signatures, results, decorator) = self.function_entry(definition);
-        let skip = usize::from(decorator == Some(Decorator::ClassMethod) && receivers.is_empty());
+        let skip = usize::from(
+            decorator == Some(Decorator::ClassMethod) && receivers.is_empty() && group.is_none(),
+        );
         let mut receivers = receivers.to_vec();
         if skip == 1 && definition.owner.is_some() {
             receivers = vec![self.class_method_owner(graph, definition, external)];
@@ -449,7 +513,9 @@ impl<T: Trace> State<T> {
             let parameters: Arc<[Param]> =
                 Arc::from(&signatures[index][skip.min(signatures[index].len())..]);
             let bound = self.bind_stub(graph, call, &definition.path, index, &parameters);
-            if dst.is_some() {
+            if dst.is_some() && group.is_some() {
+                typed.push(results[index].clone());
+            } else if dst.is_some() {
                 if LIBRARY_ITERATION
                     .iter()
                     .any(|&(path, _)| path == &*definition.path)
@@ -459,6 +525,12 @@ impl<T: Trace> State<T> {
                 typed.push(results[index].clone());
             }
             overloads.push(Overload { parameters, bound });
+        }
+        if let Some(group) = group {
+            if !typed.is_empty() {
+                self.group_observe(group, call, typed);
+            }
+            return overloads;
         }
         let details = &self.calls[call.index()];
         let unpacked = !details.star.is_empty() || !details.double_star.is_empty();

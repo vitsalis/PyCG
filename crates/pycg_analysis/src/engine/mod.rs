@@ -31,7 +31,9 @@ use outside_calls::{Bound, BoundId, Known};
 pub use rules::RuleId;
 use rules::{Rule, WaitingRule};
 pub use semantics::CallId;
-use semantics::{Call, Construct, Origin, Receivers, Returned, ReturnedId, SiteKey};
+use semantics::{
+    BoundGroup, Call, Construct, GroupId, Origin, Prefix, Receivers, Returned, ReturnedId, SiteKey,
+};
 use symbols::{Sym, Symbols};
 use trace::{Opacity, Trace};
 
@@ -81,7 +83,11 @@ struct State<T: Trace> {
     rules: Vec<Rule>,
     calls: Vec<Call>,
     receiver_calls: FxHashMap<(CallId, Receivers), CallId>,
-    prefixes: FxHashMap<CallId, (CallId, Receivers)>,
+    prefixes: FxHashMap<CallId, (CallId, Prefix)>,
+    bound_groups: FxHashMap<(CallId, ObjId, usize, bool), Vec<GroupId>>,
+    groups: FxHashMap<CallId, GroupId>,
+    group_records: Vec<BoundGroup>,
+    grouped_externals: FxHashMap<ObjId, bool>,
     site_edges: OrderedMap<(Sym, Sym, Construct), OrderedSet<Sym>>,
     call_expressions: Vec<(Sym, Sym, Option<NodeId>)>,
     classes: Vec<ObjId>,
@@ -168,6 +174,10 @@ impl<T: Trace> Engine<T> {
             calls: Vec::new(),
             receiver_calls: FxHashMap::default(),
             prefixes: FxHashMap::default(),
+            bound_groups: FxHashMap::default(),
+            groups: FxHashMap::default(),
+            group_records: Vec::new(),
+            grouped_externals: FxHashMap::default(),
             site_edges: OrderedMap::default(),
             call_expressions: Vec::new(),
             classes: Vec::new(),
