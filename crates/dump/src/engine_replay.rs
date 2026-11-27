@@ -880,6 +880,19 @@ impl Replay {
                     .add_special_call(value, text(&arguments["name"]), call);
                 None
             }
+            "pattern" => {
+                assert!(arguments["case"].is_null() && arguments["exact"] == true);
+                let prefix: Vec<u32> = text(&arguments["prefix"]).chars().map(u32::from).collect();
+                let suffix: Vec<u32> = text(&arguments["suffix"]).chars().map(u32::from).collect();
+                let object = self.engine.pattern(&prefix, &suffix);
+                Some(self.object_answer(object))
+            }
+            "add_pattern_operand" => {
+                let operand = self.optional_node(&arguments["operand"]);
+                let result = self.node(&arguments["result"]);
+                self.engine.add_pattern_operand(operand, result);
+                None
+            }
             "add_truth" => {
                 let value = self.node(&arguments["value"]);
                 self.engine

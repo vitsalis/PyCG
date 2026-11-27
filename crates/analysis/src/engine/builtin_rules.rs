@@ -572,6 +572,7 @@ impl<T: Trace> State<T> {
             Object::Const { value, .. } => {
                 crate::model::constant_type_name(&value.view()).to_string()
             }
+            Object::Pattern { .. } => "str".to_string(),
             _ => panic!("a builtin value"),
         }
     }
@@ -585,12 +586,15 @@ impl<T: Trace> State<T> {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) struct DynamicId(u32);
+
 pub struct DynamicAccess {
     name: NodeId,
-    object: NodeId,
-    dst: Option<NodeId>,
+    pub(super) object: NodeId,
+    pub(super) dst: Option<NodeId>,
     src: Option<NodeId>,
-    call: CallId,
+    pub(super) call: CallId,
     delete: bool,
     dynamic: bool,
     done: Vec<Sym>,
@@ -635,6 +639,9 @@ impl<T: Trace> State<T> {
             self.access_named(graph, &text, object, dst, src, call, delete);
             return;
         }
+        let id = DynamicId(
+            u32::try_from(self.dynamic_accesses.len()).expect("fewer than 2^32 accesses"),
+        );
         self.dynamic_accesses.push(DynamicAccess {
             name,
             object,
@@ -646,7 +653,7 @@ impl<T: Trace> State<T> {
             done: Vec::new(),
         });
         if src.is_none() && !delete {
-            let rule = self.rule(Rule::LoadByPattern);
+            let rule = self.rule(Rule::LoadByPattern(id));
             self.attach(graph, name, rule);
         }
     }
@@ -727,6 +734,10 @@ impl<T: Trace> State<T> {
             dynamic: false,
             done: Vec::new(),
         });
+    }
+
+    pub(super) fn dynamic_access(&self, id: DynamicId) -> &DynamicAccess {
+        &self.dynamic_accesses[id.0 as usize]
     }
 
     pub(super) fn complete_dynamic_accesses(&mut self, graph: &mut Graph) -> bool {

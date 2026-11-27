@@ -269,6 +269,12 @@ pub enum Object {
         function: ObjId,
         exact: bool,
     },
+    Pattern {
+        prefix: Box<[u32]>,
+        suffix: Box<[u32]>,
+        case: Option<Sym>,
+        exact: bool,
+    },
 }
 
 impl Object {
@@ -291,6 +297,7 @@ impl Object {
             Object::Container(_) => Kind::Container,
             Object::Generator { .. } => Kind::Generator,
             Object::Coroutine { .. } => Kind::Coroutine,
+            Object::Pattern { .. } => Kind::Pattern,
         }
     }
 }
@@ -392,6 +399,16 @@ impl Objects {
             }
             Object::Generator { function, .. } => generator_name(&self.name(*function, symbols)),
             Object::Coroutine { function, .. } => coroutine_name(&self.name(*function, symbols)),
+            Object::Pattern {
+                prefix,
+                suffix,
+                case,
+                ..
+            } => crate::engine::patterns::pattern_name(
+                prefix,
+                suffix,
+                case.map(|case| symbols.text(case)),
+            ),
         }
     }
 }

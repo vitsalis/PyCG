@@ -161,7 +161,7 @@ impl<T: Trace> State<T> {
         site: &str,
     ) {
         let name = self.symbols.intern(attr);
-        self.pattern_store_name(name);
+        self.pattern_store_name(graph, name);
         let access = self.new_access(AccessKind::Store, attr, None, src, caller, site);
         let rule = self.rule(Rule::Access(access));
         self.attach(graph, base, rule);
@@ -178,29 +178,6 @@ impl<T: Trace> State<T> {
         let access = self.new_access(AccessKind::Delete, attr, None, None, caller, site);
         let rule = self.rule(Rule::Access(access));
         self.attach(graph, base, rule);
-    }
-
-    fn pattern_store_name(&mut self, name: Sym) {
-        if !self.store_names.insert(name) {
-            return;
-        }
-        if !self.pattern_states.is_empty() {
-            not_ported("patterns: a stored name");
-        }
-    }
-
-    fn pattern_class_store(&mut self, class: ObjId, name: Sym) {
-        if !self
-            .class_store_names
-            .entry(class)
-            .or_default()
-            .insert(name)
-        {
-            return;
-        }
-        if !self.pattern_states.is_empty() {
-            not_ported("patterns: a name stored on a class");
-        }
     }
 
     fn named_call(&mut self, graph: &mut Graph, id: AccessId) -> CallId {
@@ -725,7 +702,8 @@ impl<T: Trace> State<T> {
             Object::Wrapper { .. }
             | Object::Container(_)
             | Object::Generator { .. }
-            | Object::Const { .. } => {
+            | Object::Const { .. }
+            | Object::Pattern { .. } => {
                 let type_name = self.object_type_name(object);
                 self.load_builtin_attribute(graph, object, &type_name, attr, dst);
             }
@@ -790,7 +768,7 @@ impl<T: Trace> State<T> {
             self.stored_name(graph, object, attr);
         }
         if kind == Kind::Class {
-            self.pattern_class_store(object, attr);
+            self.pattern_class_store(graph, object, attr);
             self.class_attribute_stored(graph, object, attr);
         }
         if let &Object::Instance { class, .. } = self.objects.get(object) {
