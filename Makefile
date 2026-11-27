@@ -124,13 +124,21 @@ eval-inputs:
 		&& $(MAKE) --no-print-directory eval-inputs-build \
 		&& echo "eval-inputs: built the inputs images of key $$key"; \
 	fi
-	rm -rf $(PROJECTS) $(SCALE_PROJECTS)
-	mkdir $(PROJECTS) $(SCALE_PROJECTS)
-	mkdir -p $(EVAL_OUT)
-	docker run --rm --network none --user $$(id -u):$$(id -g) \
-		-v $(CURDIR)/$(PROJECTS):/out -v $(CURDIR)/$(SCALE_PROJECTS):/scale \
-		pycg-eval-macro sh -c \
-		'cp -RP /inputs/macro-benchmark/projects/. /out/ && cp -RP /inputs/scale/projects/. /scale/'
+	@copy=$(EVAL_OUT)/inputs-$$(python3 -I tools/inputs_key.py) && \
+	if [ -f $$copy/done ]; then echo "eval-inputs: the sources are copied in $$copy"; \
+	else partial=$$copy.partial-$$$$ && mkdir -p $$partial/macro $$partial/scale && \
+		docker run --rm --network none --user $$(id -u):$$(id -g) \
+			-v $$partial/macro:/out -v $$partial/scale:/scale \
+			pycg-eval-macro sh -c \
+			'cp -RP /inputs/macro-benchmark/projects/. /out/ && cp -RP /inputs/scale/projects/. /scale/' && \
+		touch $$partial/done && chmod -R a-w $$partial && \
+		{ mv -T $$partial $$copy 2> /dev/null || { chmod -R u+w $$partial && rm -rf $$partial; }; } && \
+		test -f $$copy/done && echo "eval-inputs: copied the sources to $$copy"; fi && \
+	rm -rf $(PROJECTS) $(SCALE_PROJECTS) && mkdir $(PROJECTS) $(SCALE_PROJECTS) && \
+	for source in $$copy/macro/* $$copy/scale/*; do \
+		case $$source in $$copy/macro/*) into=$(PROJECTS);; *) into=$(SCALE_PROJECTS);; esac; \
+		ln -s $$source $$into/ || exit 1; \
+	done
 
 eval: eval-inputs
 	$(call measure,$(CURDIR),$(notdir $(RESULT)),0)

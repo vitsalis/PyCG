@@ -179,7 +179,9 @@ def test_the_benchmark_reads_the_sources_of_the_image_where_it_has_them(
     monkeypatch.setattr(projects, "SOURCES", tmp_path / "inputs" / "projects")
     found = projects.load_projects()
     beside = projects.BENCHMARK_DIR / "projects"
-    assert {p.directory.parent for p in found.values()} == {beside.resolve()}
+    assert {p.directory for p in found.values()} == {
+        (beside / name).resolve() for name in found
+    }
     projects.SOURCES.mkdir(parents=True)
     found = projects.load_projects()
     assert {p.directory.parent for p in found.values()} == {projects.SOURCES.resolve()}
