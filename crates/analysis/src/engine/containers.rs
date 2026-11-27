@@ -1636,12 +1636,21 @@ impl<T: Trace> State<T> {
         call
     }
 
-    fn iteration_anext(&mut self, _graph: &mut Graph, id: IterationId) -> NodeId {
+    fn iteration_anext(&mut self, graph: &mut Graph, id: IterationId) -> NodeId {
         let iteration = self.containers.iterations[index_of(id.0)];
         if let Some(anext) = iteration.anext {
             return anext;
         }
-        not_ported("containers: asynchronous iteration (add_await)")
+        let anext = self.node(graph, None);
+        self.containers.iterations[index_of(id.0)].anext = Some(anext);
+        self.add_await(
+            graph,
+            anext,
+            iteration.dst,
+            iteration.caller,
+            iteration.site,
+        );
+        anext
     }
 
     fn iteration_iterators(&mut self, graph: &mut Graph, id: IterationId) -> NodeId {
