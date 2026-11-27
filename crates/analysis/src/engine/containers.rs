@@ -10,7 +10,7 @@ use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Container, Kind, Literal, Object};
 use crate::engine::outside_calls::BoundId;
 use crate::engine::rules::Rule;
-use crate::engine::semantics::{CallId, Role, SiteKey};
+use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State, not_ported};
@@ -57,7 +57,8 @@ fn next_id(length: usize) -> u32 {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum ContainerOrigin {
+pub(super) enum ContainerOrigin {
+    Rule(Origin, &'static str, Option<u32>),
     Inexact(ObjId),
     Slice(SliceId),
     Rest(Sym, Sym),
@@ -69,7 +70,6 @@ enum ContainerOrigin {
 pub(crate) enum KeysConstruct {
     Builder(Sym, Sym),
     Bound(BoundId),
-    Arguments(CallId, Sym),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -365,7 +365,15 @@ impl<T: Trace> State<T> {
         self.symbols.text(found.kind)
     }
 
-    fn is_dict(&self, container: ObjId) -> bool {
+    pub(super) fn hashes_keys(&self, container: ObjId) -> bool {
+        HASHED.contains(&builtin_kind(self.kind_text(container)))
+    }
+
+    pub(super) fn container_factory(&self, container: ObjId) -> Option<NodeId> {
+        self.container_nodes(container).factory
+    }
+
+    pub(super) fn is_dict(&self, container: ObjId) -> bool {
         builtin_kind(self.kind_text(container)) == "dict"
     }
 
@@ -420,7 +428,7 @@ impl<T: Trace> State<T> {
         self.new_object(graph, Object::Container(container))
     }
 
-    fn container_at(
+    pub(super) fn container_at(
         &mut self,
         graph: &mut Graph,
         kind: &str,
@@ -1216,7 +1224,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn read_keyed(
+    pub(super) fn read_keyed(
         &mut self,
         graph: &mut Graph,
         container: ObjId,
@@ -1321,7 +1329,7 @@ impl<T: Trace> State<T> {
         added
     }
 
-    fn copy_range(
+    pub(super) fn copy_range(
         &mut self,
         graph: &mut Graph,
         source: ObjId,
@@ -1350,7 +1358,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn copy_items(&mut self, graph: &mut Graph, source: ObjId, target: ObjId) {
+    pub(super) fn copy_items(&mut self, graph: &mut Graph, source: ObjId, target: ObjId) {
         self.copy_fields(graph, source, target);
         let from = self.keys(graph, source);
         let to = self.keys(graph, target);

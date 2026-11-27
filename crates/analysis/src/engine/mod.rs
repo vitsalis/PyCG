@@ -1,6 +1,7 @@
 mod analysis;
 mod arguments;
 mod attributes;
+mod builtin_containers;
 mod builtin_rules;
 mod containers;
 mod fixpoint;
@@ -27,6 +28,7 @@ use attributes::{
     Access, AccessorEntry, AccessorHooks, Accessors, AccessorsId, Deliveries, DeliveriesId,
     FieldWrites, HookCalls, HookCallsId, HooksId, WritesId,
 };
+use builtin_containers::Iterated;
 use builtin_rules::{DynamicAccess, WrapperKey};
 use hierarchy::{LookupAttr, Namespace, Unless};
 use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
@@ -162,6 +164,10 @@ struct State<T: Trace> {
     super_accepted: FxHashMap<ObjId, FxHashSet<ObjId>>,
     supers: FxHashMap<(ObjId, ObjId), ObjId>,
     typed_objects: FxHashMap<String, ObjId>,
+    iterated_nodes: FxHashMap<Iterated, (NodeId, NodeId)>,
+    length_hints: FxHashSet<(Sym, Sym, NodeId, usize)>,
+    length_plans: FxHashMap<usize, outside_calls::PlanId>,
+    reverse_sequences: FxHashSet<(ObjId, NodeId, CallId)>,
     handed: Vec<ObjId>,
     tables: BuilderTables,
     containers: containers::Containers,
@@ -268,6 +274,10 @@ impl<T: Trace> Engine<T> {
             super_accepted: FxHashMap::default(),
             supers: FxHashMap::default(),
             typed_objects: FxHashMap::default(),
+            iterated_nodes: FxHashMap::default(),
+            length_hints: FxHashSet::default(),
+            length_plans: FxHashMap::default(),
+            reverse_sequences: FxHashSet::default(),
             handed: Vec::new(),
             containers: containers::Containers::default(),
             tables: BuilderTables::default(),

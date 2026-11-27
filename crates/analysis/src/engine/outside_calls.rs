@@ -63,6 +63,7 @@ pub enum Bound {
     },
     Full {
         function: ObjId,
+        supplied: Vec<Sym>,
         possible: Vec<Sym>,
     },
 }
@@ -766,7 +767,7 @@ impl<T: Trace> State<T> {
                 }
             }
             let supplied = self.bind_arguments(graph, function, call, None);
-            let mut possible = supplied;
+            let mut possible = supplied.clone();
             if !details.star.is_empty() {
                 for name in
                     &signature.positional[details.args.len().min(signature.positional.len())..]
@@ -781,10 +782,55 @@ impl<T: Trace> State<T> {
                     }
                 }
             }
-            Bound::Full { function, possible }
+            Bound::Full {
+                function,
+                supplied,
+                possible,
+            }
         };
         let id = BoundId(u32::try_from(self.bindings.len()).expect("fewer bindings"));
         self.bindings.push(bound);
+        id
+    }
+
+    pub(super) fn bound_surely(&self, bound: BoundId, name: &str) -> bool {
+        match &self.bindings[bound.0 as usize] {
+            Bound::Late { supplied, .. } => supplied.iter().any(|given| &**given == name),
+            Bound::Full { supplied, .. } => supplied
+                .iter()
+                .any(|&given| self.symbols.text(given) == name),
+        }
+    }
+
+    pub(super) fn bound_has(&self, bound: BoundId, name: &str) -> bool {
+        match &self.bindings[bound.0 as usize] {
+            Bound::Late { signature, .. } => signature.names().contains(&name),
+            Bound::Full { function, .. } => self
+                .objects
+                .function(*function)
+                .signature
+                .names()
+                .contains(&name),
+        }
+    }
+
+    pub(super) fn bound_varargs(&self, bound: BoundId) -> Option<ObjId> {
+        match &self.bindings[bound.0 as usize] {
+            Bound::Late { .. } => None,
+            Bound::Full { function, .. } => self.objects.function(*function).varargs,
+        }
+    }
+
+    pub(super) fn bound_varkeywords(&self, bound: BoundId) -> Option<ObjId> {
+        match &self.bindings[bound.0 as usize] {
+            Bound::Late { .. } => None,
+            Bound::Full { function, .. } => self.objects.function(*function).varkeywords,
+        }
+    }
+
+    pub(super) fn new_plan(&mut self, steps: Vec<(Sym, Unless)>) -> PlanId {
+        let id = PlanId(u32::try_from(self.protocol_plans.len()).expect("fewer plans"));
+        self.protocol_plans.push(steps);
         id
     }
 
@@ -1011,10 +1057,17 @@ impl<T: Trace> State<T> {
             if plan.is_empty() {
                 continue;
             }
-            let id = PlanId(u32::try_from(self.protocol_plans.len()).expect("fewer plans"));
-            self.protocol_plans.push(plan);
+            let id = self.new_plan(plan);
+            let (caller, site) = (
+                self.calls[call.index()].caller,
+                self.calls[call.index()].site,
+            );
             for node in nodes {
-                let rule = self.rule(Rule::CallProtocol { plan: id, call });
+                let rule = self.rule(Rule::CallProtocol {
+                    plan: id,
+                    caller,
+                    site,
+                });
                 self.attach(graph, node, rule);
             }
         }
@@ -1058,11 +1111,10 @@ impl<T: Trace> State<T> {
         graph: &mut Graph,
         object: ObjId,
         plan: PlanId,
-        call: CallId,
+        caller: Sym,
+        site: Sym,
     ) {
         let steps = self.protocol_plans[plan.0 as usize].clone();
-        let details = &self.calls[call.index()];
-        let (caller, site) = (details.caller, details.site);
         for (name, unless) in steps {
             let key = SiteKey {
                 caller,
