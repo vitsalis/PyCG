@@ -10,6 +10,15 @@ fn vectors() -> Vec<PathBuf> {
         .collect();
     found.sort();
     assert!(!found.is_empty(), "engine vectors");
+    for vector in &found {
+        for dump in ["D3.jsonl", "D4.jsonl", "D5.jsonl", "D6in.json"] {
+            assert!(
+                vector.join(dump).exists(),
+                "{} has no {dump} of the oracle",
+                vector.display()
+            );
+        }
+    }
     found
 }
 
@@ -45,7 +54,7 @@ fn the_engine_gives_the_trace_and_points_to_of_the_oracle_on_its_builder_calls()
             vector.display(),
             String::from_utf8_lossy(&output.stderr)
         );
-        for dump in ["D3.jsonl", "D5.jsonl"] {
+        for dump in ["D3.jsonl", "D5.jsonl", "D6in.json"] {
             assert_eq!(
                 read(&out.join(dump)),
                 read(&vector.join(dump)),
