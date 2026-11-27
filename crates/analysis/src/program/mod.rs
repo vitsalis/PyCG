@@ -2,6 +2,7 @@ pub mod imports;
 pub mod paths;
 
 use std::collections::VecDeque;
+use std::ffi::{OsStr, OsString};
 use std::path::{Path, PathBuf};
 
 use indexmap::{IndexMap, IndexSet};
@@ -15,6 +16,7 @@ use ruff_python_ast::{ModModule, Stmt};
 use ruff_source_file::LineIndex;
 use rustc_hash::{FxHashMap, FxHashSet};
 
+use crate::builder::bindings::NESTING_MAX;
 use crate::builder::calls::Analysis;
 use crate::builder::{ModuleBuilder, Source};
 use crate::program::imports::extension_name;
@@ -72,6 +74,7 @@ pub struct Program<A: Analysis> {
     exports_by_module: FxHashMap<String, IndexSet<String>>,
     modules_declaring_all: FxHashSet<String>,
     stubs: Stubs,
+    pub warnings: Vec<OsString>,
 }
 
 fn own_stub_source(path: &Path) -> Option<String> {
@@ -146,6 +149,7 @@ impl<A: Analysis + Send> Program<A> {
             exports_by_module: FxHashMap::default(),
             modules_declaring_all: FxHashSet::default(),
             stubs: Stubs::new(),
+            warnings: Vec::new(),
         };
         let root = program.root.clone();
         program.analysis.imports().set_package(&root);
@@ -258,7 +262,24 @@ impl<A: Analysis + Send> Program<A> {
         Ok(())
     }
 
-    fn module_name(&self, path: &Path) -> Result<Option<String>, PathsError> {
+    fn warn(&mut self, parts: &[&OsStr]) {
+        let mut warning = OsString::new();
+        for part in parts {
+            warning.push(part);
+        }
+        self.warnings.push(warning);
+    }
+
+    fn skip(&mut self, path: &Path, reason: &str) {
+        let reason = format!(": {reason}");
+        self.warn(&[
+            OsStr::new("Skipping "),
+            path.as_os_str(),
+            OsStr::new(&reason),
+        ]);
+    }
+
+    fn module_name(&mut self, path: &Path) -> Result<Option<String>, PathsError> {
         let relative = relpath(path, &self.root, &self.cwd)?;
         let relative = relative
             .to_str()
@@ -266,9 +287,21 @@ impl<A: Analysis + Send> Program<A> {
             .to_owned();
         let sep = char::from(FLAVOUR.sep());
         if relative == ".." || relative.starts_with(&format!("..{sep}")) {
+            let root = self.root.clone();
+            self.warn(&[
+                OsStr::new("Skipping "),
+                path.as_os_str(),
+                OsStr::new(": it is not under the package root "),
+                root.as_os_str(),
+            ]);
             return Ok(None);
         }
-        if relative.ends_with(".pyi") || path.is_dir() {
+        if relative.ends_with(".pyi") {
+            self.skip(path, "a stub is not source");
+            return Ok(None);
+        }
+        if path.is_dir() {
+            self.skip(path, "a directory is not a module file; give its files");
             return Ok(None);
         }
         let (directory, filename) = split(&relative);
@@ -280,6 +313,7 @@ impl<A: Analysis + Send> Program<A> {
         };
         let name = joined.replace(sep, ".");
         if name == "__init__" {
+            self.skip(path, "the package root is not a package");
             return Ok(None);
         }
         Ok(Some(
@@ -304,6 +338,7 @@ impl<A: Analysis + Send> Program<A> {
         let source = match read_file(path) {
             Ok(source) => source,
             Err(failure) => {
+                self.skip(path, &format!("cannot read it: {}", failure.cause()));
                 self.failed(name, path, failure.cause());
                 return;
             }
@@ -363,12 +398,19 @@ impl<A: Analysis + Send> Program<A> {
         let built = match built {
             Ok(built) => built,
             Err(cause) => {
+                self.skip(path, &format!("cannot parse it: {cause}"));
                 self.failed(name, path, cause);
                 return;
             }
         };
         let (status, cause) = match built.too_deep {
-            Some(line) => (Status::Partial, Some(format!("DeepNesting (line {line})"))),
+            Some(line) => {
+                let nesting = format!(
+                    ": line {line} nests deeper than {NESTING_MAX} levels; the analysis stops there"
+                );
+                self.warn(&[path.as_os_str(), OsStr::new(&nesting)]);
+                (Status::Partial, Some(format!("DeepNesting (line {line})")))
+            }
             None => (Status::Analysed, None),
         };
         self.modules.insert(

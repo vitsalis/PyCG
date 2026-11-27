@@ -5,7 +5,7 @@ pub mod models;
 pub mod program;
 pub mod results;
 
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::fmt;
 use std::panic::{self, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
@@ -53,7 +53,11 @@ impl fmt::Display for Error {
     }
 }
 
-pub fn analyse(request: &Request, cwd: &Path) -> Result<Analysed, Error> {
+pub fn analyse(
+    request: &Request,
+    cwd: &Path,
+    warn: &mut dyn FnMut(&OsStr),
+) -> Result<Analysed, Error> {
     let (cap, recorded) = match &request.cap {
         Cap::Objects(objects) => {
             assert!(objects.bits() > 0);
@@ -66,9 +70,10 @@ pub fn analyse(request: &Request, cwd: &Path) -> Result<Analysed, Error> {
     };
     let entry_points: Vec<PathBuf> = request.entry_points.iter().map(PathBuf::from).collect();
     let package = request.package.as_ref().map(PathBuf::from);
+    let engine = Engine::new(cap, Untraced);
+    let mut program = Program::new(&entry_points, package.as_deref(), cwd, engine)
+        .map_err(|error| Error::Paths(error.to_string()))?;
     let solved = panic::catch_unwind(AssertUnwindSafe(|| {
-        let engine = Engine::new(cap, Untraced);
-        let mut program = Program::new(&entry_points, package.as_deref(), cwd, engine)?;
         program.build_modules()?;
         program.analysis.solve();
         let modules: Vec<String> = program.modules.keys().cloned().collect();
@@ -77,10 +82,15 @@ pub fn analyse(request: &Request, cwd: &Path) -> Result<Analysed, Error> {
             assert_eq!(results.cap, recorded);
         }
         results.cap = recorded.clone();
-        Ok(Analysed { program, results })
+        Ok(results)
     }));
+    for warning in &program.warnings {
+        warn(warning);
+    }
     match solved {
-        Ok(analysed) => analysed.map_err(|error: PathsError| Error::Paths(error.to_string())),
+        Ok(results) => results
+            .map(|results| Analysed { program, results })
+            .map_err(|error: PathsError| Error::Paths(error.to_string())),
         Err(payload) => match payload.downcast::<NotPorted>() {
             Ok(not_ported) => Err(Error::NotPorted(not_ported.0)),
             Err(payload) => panic::resume_unwind(payload),

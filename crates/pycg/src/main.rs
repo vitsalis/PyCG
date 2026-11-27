@@ -1,4 +1,4 @@
-use std::ffi::OsString;
+use std::ffi::{OsStr, OsString};
 use std::io::Write;
 use std::panic::{self, PanicHookInfo};
 use std::process::ExitCode;
@@ -51,7 +51,11 @@ fn run(program: &[u8], options: Options) -> ExitCode {
             return report(program, message.as_bytes(), STATUS_FAILURE);
         }
     };
-    let mut analysed = match pycg_analysis::analyse(&options.request, &cwd) {
+    let mut warn = |warning: &OsStr| {
+        let line = [warning.as_encoded_bytes(), b"\n"].concat();
+        let _ = std::io::stderr().write_all(&pycg::for_stderr(&line));
+    };
+    let mut analysed = match pycg_analysis::analyse(&options.request, &cwd, &mut warn) {
         Ok(analysed) => analysed,
         Err(error @ pycg_analysis::Error::NotPorted(_)) => {
             return report(program, error.to_string().as_bytes(), STATUS_NOT_PORTED);
