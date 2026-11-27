@@ -13,9 +13,12 @@ names. Every required dump is compared (D5 as sets, the others record by
 record), and D6 by SHA-256 when ACTUAL wrote it; an input whose required
 dumps agree is missing when ACTUAL wrote no D6 and D6 is not required.
 Prints one line per set and the first differences, and exits 1 when an
-input differs or failed. --dumps names the required dumps instead of
-REQUIRED, and --inputs compares only the inputs that its file lists, one
-per line; a listed input that EXPECTED lacks fails.
+input differs or failed. An input where ACTUAL wrote error.txt and the
+partial trace D3.partial.jsonl is partial when that trace begins the
+oracle's D3, and different when it leaves it. --dumps names the required
+dumps instead of REQUIRED, and --inputs compares only the inputs that its
+file lists, one per line; a listed input that EXPECTED lacks, or that is
+partial, fails.
 
     python3 -I tools/parity/compare.py EXPECTED ACTUAL [--required FILE]
         [--dumps NAME...] [--inputs FILE]
@@ -25,6 +28,7 @@ REQUIRED_DEFAULT = Path(__file__).with_name("required.txt")
 DUMPS = ("D1", "D2", "D3", "D4", "D5", "D6")
 DOCUMENT = "D6.json"
 ERROR = "error.txt"
+PARTIAL = "D3.partial.jsonl"
 SHOWN_DIFFERENCES_MAX = 10
 
 
@@ -72,7 +76,12 @@ def compare_input(expected, actual, required):
     if (expected / ERROR).exists():
         return "failed", ["the oracle failed"]
     if (actual / ERROR).exists():
-        return "failed", ["the other tool failed"]
+        if not (actual / PARTIAL).exists():
+            return "failed", ["the other tool failed"]
+        partial = (actual / PARTIAL).read_bytes()
+        if (expected / "D3.jsonl").read_bytes().startswith(partial):
+            return "partial", ["the trace stops where the other tool stopped"]
+        return "different", ["D3"]
     absent = [name for name in required if not (actual / file_of(name)).exists()]
     if absent:
         return "failed", [f"{name} is required and absent" for name in absent]
@@ -105,12 +114,19 @@ def compare(expected_root, actual_root, required, inputs=None):
             status, differences = "failed", ["the oracle has no such input"]
         counts = sets.setdefault(
             key.split("/")[0],
-            {"inputs": 0, "identical": 0, "different": 0, "failed": 0, "missing": 0},
+            {
+                "inputs": 0,
+                "identical": 0,
+                "different": 0,
+                "failed": 0,
+                "missing": 0,
+                "partial": 0,
+            },
         )
         counts["inputs"] += 1
         counts[status] += 1
         if (
-            status not in ("identical", "missing")
+            status not in ("identical", "missing", "partial")
             and len(shown) < SHOWN_DIFFERENCES_MAX
         ):
             shown.append((key, status, differences))
@@ -137,11 +153,14 @@ def main(argv=None):
         print(
             f"{name}: {counts['inputs']} inputs, {counts['identical']} identical, "
             f"{counts['different']} different, {counts['failed']} failed, "
-            f"{counts['missing']} missing"
+            f"{counts['missing']} missing, {counts['partial']} partial"
         )
     for key, status, differences in shown:
         print(f"  {key}: {status}: {', '.join(differences)}")
-    bad = any(counts["different"] or counts["failed"] for counts in sets.values())
+    bad = any(
+        counts["different"] or counts["failed"] or (inputs and counts["partial"])
+        for counts in sets.values()
+    )
     return 1 if bad else 0
 
 

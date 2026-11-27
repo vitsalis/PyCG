@@ -272,8 +272,5 @@ parity:
 	done
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
-	@python3 -I tools/parity/compare.py $(PARITY_ORACLE)/seed-0 $(PARITY_RUST)/engine \
-		--dumps D3 D5 > $(PARITY_RUST)/oracle-engine-all.txt; \
-	{ echo 'The engine on the builder calls of the oracle, on every input:'; echo '```'; \
-		grep -v '^  ' $(PARITY_RUST)/oracle-engine-all.txt; echo '```'; } >> $(SUMMARY)
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine-all.txt,--dumps D3 D5)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 --inputs $(PARITY_ENGINE))

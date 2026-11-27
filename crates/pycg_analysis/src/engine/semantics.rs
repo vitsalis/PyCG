@@ -1,9 +1,13 @@
 use pycg_solver::{NodeId, ObjId};
 
+use pycg_stubs::DefinitionKind;
+use rustc_hash::FxHashSet;
+
+use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::Object;
 use crate::engine::symbols::Sym;
-use crate::engine::trace::{RuleInfo, Trace};
-use crate::engine::{Graph, Rule, RuleId, State, not_ported};
+use crate::engine::trace::Trace;
+use crate::engine::{Graph, MethodKind, Rule, RuleId, State, WaitingRule, not_ported};
 use crate::models::RETURNS_ARGUMENT;
 
 pub const RECEIVERS_PER_CALL_MAX: usize = 3;
@@ -20,14 +24,45 @@ impl CallId {
 pub type Receivers = Vec<ObjId>;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct ReturnedId(u32);
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum Role {
+    SetName(Sym),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct SiteKey {
+    pub caller: Sym,
+    pub site: Sym,
+    pub role: Role,
+    pub implicit: bool,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Origin {
     Call(CallId),
+    InitSubclass(Sym),
+    Site(SiteKey),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Construct {
     Call,
     Decorator,
+    Named(&'static str),
+    Role(Role),
+}
+
+pub struct Returned {
+    pub call: CallId,
+    pub class: ObjId,
+    returned: FxHashSet<ObjId>,
+    sees: bool,
+    pub dst: Option<NodeId>,
+    dsts: Vec<NodeId>,
+    held: Vec<ObjId>,
+    another: bool,
 }
 
 #[derive(Clone)]
@@ -62,17 +97,8 @@ impl<T: Trace> State<T> {
     pub(super) fn new_call(&mut self, mut call: Call, origin: Option<Origin>) -> CallId {
         let id = CallId(u32::try_from(self.calls.len()).expect("fewer than 2^32 calls"));
         call.origin = origin.unwrap_or(Origin::Call(id));
-        let key = format!("Call:{}", self.symbols.text(call.site));
-        call.rule = self.new_rule(
-            Rule::Call(id),
-            &RuleInfo {
-                key: &key,
-                kinds: None,
-                each: false,
-                captured: &[],
-            },
-        );
         self.calls.push(call);
+        self.calls[id.index()].rule = self.rule(Rule::Call(id));
         id
     }
 
@@ -101,7 +127,7 @@ impl<T: Trace> State<T> {
             double_star: new.double_star.to_vec(),
             implicit: false,
             decorator: new.decorator,
-            rule: RuleId(0),
+            rule: RuleId::PLACEHOLDER,
         };
         let call = self.new_call(call, None);
         let rule = self.calls[call.index()].rule;
@@ -119,9 +145,15 @@ impl<T: Trace> State<T> {
             &Object::BoundMethod { receiver, function } => {
                 self.call_bound(graph, function, vec![receiver], call);
             }
+            Object::Class(_) => self.instantiate(graph, object, call),
+            Object::Instance { .. } => {
+                let dst = self.calls[call.index()].dst;
+                self.call_dunder(graph, object, "__call__", call, dst, Unless::Nothing);
+            }
             Object::External(_) => not_ported("calls of outside values"),
             Object::Saturated
             | Object::Module(_)
+            | Object::Fallback { .. }
             | Object::Const { .. }
             | Object::Container(_)
             | Object::Generator { .. }
@@ -280,7 +312,8 @@ impl<T: Trace> State<T> {
             return true;
         }
         let base = self.prefixes.get(&call).map_or(call, |&(base, _)| base);
-        if self.calls[base.index()].implicit {
+        let root = self.roots.get(&base).copied().unwrap_or(base);
+        if self.calls[root.index()].implicit {
             return true;
         }
         let given = details.args.len() + usize::from(receiver.is_some());
@@ -302,8 +335,537 @@ impl<T: Trace> State<T> {
         let construct = match details.origin {
             Origin::Call(origin) if self.calls[origin.index()].decorator => Construct::Decorator,
             Origin::Call(_) => Construct::Call,
+            Origin::InitSubclass(_) => Construct::Named("init_subclass"),
+            Origin::Site(key) => Construct::Role(key.role),
         };
         let key = (details.caller, details.site, construct);
         self.site_edges.entry(key).or_default().insert(callee);
+    }
+
+    pub(super) fn instance(&mut self, graph: &mut Graph, class: ObjId, call: CallId) -> ObjId {
+        let origin = self.calls[call.index()].origin;
+        if let Some(&instance) = self.instances.get(&(class, Some(origin))) {
+            return instance;
+        }
+        let site = self.calls[call.index()].site;
+        let instance = self.new_object(graph, Object::Instance { class, site });
+        self.instances.insert((class, Some(origin)), instance);
+        let instances = self.objects.class(class).instances;
+        self.add_object(graph, instances, instance);
+        instance
+    }
+
+    pub(super) fn abstract_instance(&mut self, graph: &mut Graph, class: ObjId) -> ObjId {
+        if let Some(&instance) = self.instances.get(&(class, None)) {
+            return instance;
+        }
+        let site = self.symbols.intern("<object>");
+        let instance = self.new_object(graph, Object::Instance { class, site });
+        self.instances.insert((class, None), instance);
+        let instances = self.objects.class(class).instances;
+        self.add_object(graph, instances, instance);
+        instance
+    }
+
+    pub(super) fn bound_method(
+        &mut self,
+        graph: &mut Graph,
+        receiver: ObjId,
+        function: ObjId,
+    ) -> ObjId {
+        if let Some(&method) = self.bound_methods.get(&(receiver, function)) {
+            return method;
+        }
+        let method = self.new_object(graph, Object::BoundMethod { receiver, function });
+        self.bound_methods.insert((receiver, function), method);
+        method
+    }
+
+    pub(super) fn fallback_object(&mut self, graph: &mut Graph, method: ObjId) -> ObjId {
+        if let Some(&fallback) = self.fallbacks.get(&method) {
+            return fallback;
+        }
+        let fallback = self.new_object(graph, Object::Fallback { method });
+        self.fallbacks.insert(method, fallback);
+        fallback
+    }
+
+    fn instantiate(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
+        let default = self.python_method(graph, class, "__new__");
+        let rule = self.rule(Rule::PythonNew { class, call });
+        self.attach(graph, default, rule);
+        let new = self.implicit_call(graph, class, "__new__", call, None, Unless::Nothing);
+        if !self.new_results.contains_key(&new) {
+            self.class_instances.entry(class).or_default();
+            let id =
+                ReturnedId(u32::try_from(self.returned.len()).expect("fewer than 2^32 results"));
+            self.returned.push(Returned {
+                call,
+                class,
+                returned: FxHashSet::default(),
+                sees: false,
+                dst: None,
+                dsts: Vec::new(),
+                held: Vec::new(),
+                another: false,
+            });
+            self.new_results.insert(new, id);
+            let found =
+                self.lookup_name(graph, class, "__new__", Some(class), None, Unless::Nothing);
+            let rule = self.rule(Rule::New { class, call: new });
+            self.attach(graph, found, rule);
+            let rule = self.rule(Rule::ReturnedOfClass(id));
+            let instances = self.objects.class(class).instances;
+            self.attach(graph, instances, rule);
+        }
+        if let Some(dst) = self.calls[call.index()].dst {
+            let id = self.new_results[&new];
+            self.returned_add_dst(graph, id, dst);
+        }
+    }
+
+    pub(super) fn python_new(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
+        let rule = self.rule(Rule::PythonInstance { call });
+        let instantiable = self.objects.class(class).instantiable;
+        self.attach(graph, instantiable, rule);
+    }
+
+    pub(super) fn python_instance(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
+        let instance = self.instance(graph, class, call);
+        if let Some(dst) = self.calls[call.index()].dst {
+            self.add_object(graph, dst, instance);
+        }
+        self.call_dunder(graph, instance, "__init__", call, None, Unless::Nothing);
+    }
+
+    pub(super) fn call_new(
+        &mut self,
+        graph: &mut Graph,
+        method: ObjId,
+        class: ObjId,
+        call: CallId,
+    ) {
+        if self.objects.is_external(method) {
+            return;
+        }
+        let id = self.new_results[&call];
+        let dst = self.calls[call.index()].dst.expect("the result of __new__");
+        self.returned_start(graph, id, dst);
+        self.call_bound(graph, method, vec![class], call);
+    }
+
+    fn returned_add_dst(&mut self, graph: &mut Graph, id: ReturnedId, dst: NodeId) {
+        let returned = &mut self.returned[id.0 as usize];
+        if returned.dsts.contains(&dst) {
+            return;
+        }
+        returned.dsts.push(dst);
+        if let Some(own) = returned.dst {
+            self.add_edge(graph, own, dst);
+        }
+    }
+
+    fn returned_start(&mut self, graph: &mut Graph, id: ReturnedId, new: NodeId) {
+        if self.returned[id.0 as usize].dst.is_some() {
+            return;
+        }
+        let own = self.node(graph, None);
+        self.returned[id.0 as usize].dst = Some(own);
+        for dst in self.returned[id.0 as usize].dsts.clone() {
+            self.add_edge(graph, own, dst);
+        }
+        let rule = self.rule(Rule::ReturnedByItsNew(id));
+        self.attach(graph, new, rule);
+        let release = self.rule(Rule::ReturnedRelease(id));
+        let class = self.returned[id.0 as usize].class;
+        let another = self.lookup_name(
+            graph,
+            class,
+            "__new__",
+            None,
+            None,
+            Unless::NewGivesTheClass,
+        );
+        self.attach(graph, another, release);
+        let rule = self.rule(Rule::ReturnedByNew(id));
+        self.attach(graph, own, rule);
+    }
+
+    pub(super) fn returned_by_its_new(&mut self, graph: &mut Graph, id: ReturnedId, object: ObjId) {
+        let returned = &self.returned[id.0 as usize];
+        let other = match self.objects.get(object) {
+            &Object::Instance { class, .. } => class != returned.class,
+            _ => false,
+        };
+        if other && !returned.another {
+            self.returned[id.0 as usize].held.push(object);
+        } else {
+            let dst = returned.dst.expect("a started result");
+            self.add_object(graph, dst, object);
+        }
+    }
+
+    pub(super) fn returned_release(&mut self, graph: &mut Graph, id: ReturnedId) {
+        let returned = &mut self.returned[id.0 as usize];
+        returned.another = true;
+        let held = std::mem::take(&mut returned.held);
+        let dst = returned.dst.expect("a started result");
+        for object in held {
+            self.add_object(graph, dst, object);
+        }
+    }
+
+    pub(super) fn returned_by_new(&mut self, graph: &mut Graph, id: ReturnedId, object: ObjId) {
+        let returned = &mut self.returned[id.0 as usize];
+        returned.returned.insert(object);
+        let class = returned.class;
+        if returned.sees && self.class_instances[&class].contains(&object) {
+            self.returned_initialise(graph, id, object);
+        }
+    }
+
+    pub(super) fn returned_of_class(&mut self, graph: &mut Graph, id: ReturnedId, object: ObjId) {
+        let returned = &mut self.returned[id.0 as usize];
+        returned.sees = true;
+        let class = returned.class;
+        let seen = returned.returned.contains(&object);
+        self.class_instances
+            .get_mut(&class)
+            .expect("the instances of a class")
+            .insert(object);
+        if seen {
+            self.returned_initialise(graph, id, object);
+        }
+    }
+
+    fn returned_initialise(&mut self, graph: &mut Graph, id: ReturnedId, object: ObjId) {
+        let call = self.returned[id.0 as usize].call;
+        self.call_dunder(graph, object, "__init__", call, None, Unless::Nothing);
+    }
+
+    pub(super) fn returned_results(&self, id: ReturnedId) -> Option<NodeId> {
+        self.returned[id.0 as usize].dst
+    }
+
+    pub(super) fn call_dunder(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        name: &str,
+        call: CallId,
+        dst: Option<NodeId>,
+        unless: Unless,
+    ) {
+        let name = self.symbols.intern(name);
+        if let &Object::Instance { class, .. } = self.objects.get(object) {
+            let rule = WaitingRule::CallDunder {
+                name,
+                call,
+                dst,
+                unless: unless.clone(),
+            };
+            let key = LookupKey {
+                attr: LookupAttr::Name(name),
+                receiver: Some(object),
+                after: None,
+                unless,
+            };
+            self.later(graph, class, key, rule);
+        } else {
+            self.call_dunder_now(graph, object, name, call, dst, unless);
+        }
+    }
+
+    pub(super) fn call_dunder_now(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        name: Sym,
+        call: CallId,
+        dst: Option<NodeId>,
+        unless: Unless,
+    ) {
+        let text = self.symbols.text(name).to_string();
+        let implicit = self.implicit_call(graph, object, &text, call, dst, unless.clone());
+        let owners = self.dunder_owners.entry(implicit).or_default();
+        if !owners.insert(object) {
+            return;
+        }
+        let types = match self.objects.get(object) {
+            &Object::Instance { class, .. } => self.constant(graph, class),
+            Object::Class(class) => class.metaclass,
+            _ => panic!("a special method is called on an instance or a class"),
+        };
+        let rule = self.rule(Rule::TypeMethod {
+            object,
+            name,
+            implicit,
+            unless,
+        });
+        self.attach(graph, types, rule);
+    }
+
+    pub(super) fn type_method(
+        &mut self,
+        graph: &mut Graph,
+        class: ObjId,
+        object: ObjId,
+        name: Sym,
+        implicit: CallId,
+        unless: Unless,
+    ) {
+        let rule = self.calls[implicit.index()].rule;
+        if self.objects.is_class(class) {
+            let key = LookupKey {
+                attr: LookupAttr::Name(name),
+                receiver: Some(object),
+                after: None,
+                unless,
+            };
+            let found = self.lookup(graph, class, key);
+            self.attach(graph, found, rule);
+            return;
+        }
+        let method = self.node(graph, None);
+        let class_name = self.object_name(class);
+        for definition in self.stub_definitions(class).unwrap_or_default().iter() {
+            if definition.kind == DefinitionKind::Class {
+                self.stub_member(graph, object, &definition.path, &class_name, name, method);
+            }
+        }
+        self.attach(graph, method, rule);
+    }
+
+    fn implicit_call(
+        &mut self,
+        graph: &mut Graph,
+        owner: ObjId,
+        name: &str,
+        call: CallId,
+        dst: Option<NodeId>,
+        unless: Unless,
+    ) -> CallId {
+        let (base, receivers) = self
+            .prefixes
+            .get(&call)
+            .cloned()
+            .unwrap_or((call, Vec::new()));
+        let root = self.roots.get(&base).copied().unwrap_or(base);
+        let typed = match self.objects.get(owner) {
+            Object::Instance { .. } => None,
+            _ => Some(owner),
+        };
+        let key = (typed, self.symbols.intern(name), root, unless);
+        let template = match self.dunder_calls.get(&key) {
+            Some(&template) => template,
+            None => {
+                let node = self.node(graph, None);
+                let mut details = self.calls[base.index()].clone();
+                details.dst = Some(node);
+                let origin = details.origin;
+                let template = self.new_call(details, Some(origin));
+                self.dunder_calls.insert(key, template);
+                self.roots.insert(template, root);
+                template
+            }
+        };
+        let (found, given) = (&self.calls[template.index()], &self.calls[base.index()]);
+        assert!(
+            found.args == given.args
+                && found.keywords == given.keywords
+                && found.star == given.star
+                && found.double_star == given.double_star,
+            "a special method call keeps the arguments of its base"
+        );
+        let implicit = self.prefixed_call(graph, template, receivers);
+        if let Some(dst) = dst {
+            let own = self.calls[implicit.index()]
+                .dst
+                .expect("an implicit call has a result");
+            self.add_edge(graph, own, dst);
+        }
+        implicit
+    }
+
+    pub(super) fn site_call(
+        &mut self,
+        graph: &mut Graph,
+        key: SiteKey,
+        args: &[Option<NodeId>],
+        dst: Option<NodeId>,
+        rest: Option<NodeId>,
+    ) -> CallId {
+        let call = match self.site_calls.get(&key) {
+            Some(&call) => call,
+            None => {
+                let nodes: Vec<Option<NodeId>> =
+                    args.iter().map(|_| Some(self.node(graph, None))).collect();
+                let star = match rest {
+                    None => Vec::new(),
+                    Some(_) => vec![(None, true), (Some(self.node(graph, None)), false)],
+                };
+                let result = self.node(graph, None);
+                let details = Call {
+                    caller: key.caller,
+                    args: nodes,
+                    keywords: Vec::new(),
+                    dst: Some(result),
+                    site: key.site,
+                    origin: Origin::Site(key),
+                    star,
+                    double_star: Vec::new(),
+                    implicit: key.implicit,
+                    decorator: false,
+                    rule: RuleId::PLACEHOLDER,
+                };
+                let call = self.new_call(details, Some(Origin::Site(key)));
+                self.site_calls.insert(key, call);
+                call
+            }
+        };
+        let details = self.calls[call.index()].clone();
+        assert_eq!(args.len(), details.args.len(), "{key:?} with another arity");
+        assert_eq!(
+            rest.is_none(),
+            details.star.is_empty(),
+            "{key:?} with another arity"
+        );
+        for (value, node) in args.iter().zip(&details.args) {
+            if let (Some(value), Some(node)) = (value, node) {
+                self.add_edge(graph, *value, *node);
+            }
+        }
+        if let Some(rest) = rest {
+            let node = details.star[1].0.expect("the rest of a site call");
+            self.add_edge(graph, rest, node);
+        }
+        if let Some(dst) = dst {
+            let own = details.dst.expect("a site call has a result");
+            self.add_edge(graph, own, dst);
+        }
+        call
+    }
+
+    pub(super) fn add_init_subclass(
+        &mut self,
+        graph: &mut Graph,
+        class: ObjId,
+        keywords: &[(Box<str>, Option<NodeId>)],
+        double_star: &[Option<NodeId>],
+        caller: &str,
+        site: &str,
+    ) {
+        let caller = self.symbols.intern(caller);
+        let site = self.symbols.intern(site);
+        let keywords = keywords
+            .iter()
+            .map(|(name, value)| (self.symbols.intern(name), *value))
+            .collect();
+        let details = Call {
+            caller,
+            args: Vec::new(),
+            keywords,
+            dst: None,
+            site,
+            origin: Origin::InitSubclass(site),
+            star: Vec::new(),
+            double_star: double_star.to_vec(),
+            implicit: true,
+            decorator: false,
+            rule: RuleId::PLACEHOLDER,
+        };
+        let call = self.new_call(details, Some(Origin::InitSubclass(site)));
+        let found = self.lookup_name(
+            graph,
+            class,
+            "__init_subclass__",
+            Some(class),
+            Some(class),
+            Unless::Nothing,
+        );
+        let rule = self.calls[call.index()].rule;
+        self.attach(graph, found, rule);
+    }
+
+    pub(super) fn add_set_name(
+        &mut self,
+        graph: &mut Graph,
+        value: NodeId,
+        class: ObjId,
+        name: &str,
+        caller: &str,
+        site: &str,
+    ) {
+        let name = self.symbols.intern(name);
+        let caller = self.symbols.intern(caller);
+        let site = self.symbols.intern(site);
+        let rule = self.rule(Rule::SetName {
+            class,
+            name,
+            caller,
+            site,
+        });
+        self.attach(graph, value, rule);
+    }
+
+    pub(super) fn set_name(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        class: ObjId,
+        name: Sym,
+        caller: Sym,
+        site: Sym,
+    ) {
+        let owner = self.constant(graph, class);
+        let literal = crate::engine::objects::Literal::Str(
+            self.symbols.text(name).chars().map(u32::from).collect(),
+        );
+        let named = self.const_object(graph, &literal);
+        let named = self.constant(graph, named);
+        let key = SiteKey {
+            caller,
+            site,
+            role: Role::SetName(name),
+            implicit: true,
+        };
+        let call = self.site_call(graph, key, &[Some(owner), Some(named)], None, None);
+        self.call_dunder(graph, object, "__set_name__", call, None, Unless::Nothing);
+    }
+
+    pub(super) fn add_metaclass_call(&mut self, graph: &mut Graph, class: ObjId) {
+        let rule = self.rule(Rule::CallMetaclass { class });
+        let metaclass = self.objects.class(class).metaclass;
+        self.attach(graph, metaclass, rule);
+    }
+
+    pub(super) fn add_method(
+        &mut self,
+        graph: &mut Graph,
+        class: ObjId,
+        name: &str,
+        function: ObjId,
+        kind: Option<MethodKind>,
+    ) {
+        if kind == Some(MethodKind::StaticMethod) {
+            return;
+        }
+        let made = self.objects.function(function);
+        let receiver = match made.signature.positional.first() {
+            Some(first) => {
+                let first = self.symbols.intern(first);
+                self.objects.function(function).parameter(first)
+            }
+            None if made.varargs.is_some() => not_ported("containers: a receiver in varargs"),
+            None => return,
+        };
+        let source = if kind == Some(MethodKind::ClassMethod) {
+            self.family(graph, class)
+        } else {
+            self.objects.class(class).instances
+        };
+        let name = self.symbols.intern(name);
+        self.receivers
+            .push((receiver, source, function, class, name));
     }
 }

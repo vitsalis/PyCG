@@ -10,7 +10,8 @@ EXPECTED and ACTUAL are the roots that compare.py took, INPUT the input
 
     python3 -I tools/parity/diff.py EXPECTED ACTUAL INPUT DUMP
 
-D1 to D4 are compared in order: the first differing record, with the records
+D1 to D4 are compared in order, D3 against the partial trace
+D3.partial.jsonl when ACTUAL has no D3: the first differing record, with the records
 around it on both sides. D5 by node: the nodes that one side has, and the
 objects that one side holds. D6 by its parts: the edges, the call sites, the
 causes of unresolved sites, the definitions, modules, exports and outside
@@ -18,6 +19,7 @@ names that one side has and the other lacks, in the document's own names.
 """
 
 CONTEXT = 3
+PARTIAL = "D3.partial.jsonl"
 LISTED_MAX = 20
 
 
@@ -131,7 +133,10 @@ def explain(expected_root, actual_root, key, dump):
     if dump == "D6":
         return explain_document(expected_dir / "D6.json", actual_dir / "D6.json")
     expected = records(expected_dir / f"{dump}.jsonl")
-    actual = records(actual_dir / f"{dump}.jsonl")
+    actual_path = actual_dir / f"{dump}.jsonl"
+    if dump == "D3" and not actual_path.exists():
+        actual_path = actual_dir / PARTIAL
+    actual = records(actual_path)
     if dump == "D5":
         return explain_points_to(expected, actual)
     return explain_ordered(expected, actual)

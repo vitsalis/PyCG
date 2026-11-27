@@ -463,6 +463,61 @@ def test_a_listed_input_that_the_oracle_lacks_fails(dumped, tmp_path, capsys):
     )
 
 
+def stopped_after(source, root, key, records):
+    stopped = copy_as_input(source, root, key)
+    trace = (stopped / "D3.jsonl").read_text(encoding="utf-8").splitlines()
+    (stopped / "D3.jsonl").unlink()
+    (stopped / "D5.jsonl").unlink()
+    (stopped / "D6.json").unlink()
+    partial = "".join(f"{line}\n" for line in trace[:records])
+    (stopped / compare.PARTIAL).write_text(partial, encoding="utf-8")
+    (stopped / "error.txt").write_text("not ported: a rule\n", encoding="utf-8")
+    return stopped
+
+
+def test_a_trace_that_stops_inside_the_oracles_trace_is_partial(
+    dumped, tmp_path, capsys
+):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    stopped_after(first, actual, "micro/a/classes", 40)
+    inputs = tmp_path / "inputs.txt"
+    inputs.write_text("micro/a/classes\n", encoding="utf-8")
+
+    status = compare.main([str(expected), str(actual), "--dumps", "D3", "D5"])
+    found = capsys.readouterr().out
+    listed = compare.main(
+        [str(expected), str(actual), "--dumps", "D3", "--inputs", str(inputs)]
+    )
+
+    assert status == 0
+    assert "0 failed, 0 missing, 1 partial" in found
+    assert listed == 1
+
+
+def test_a_trace_that_leaves_the_oracles_trace_before_it_stops_differs(
+    dumped, tmp_path, capsys
+):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    stopped = stopped_after(first, actual, "micro/a/classes", 40)
+    lines = (stopped / compare.PARTIAL).read_text(encoding="utf-8").splitlines()
+    lines[30] = lines[30].replace('"op":"', '"op":"planted_', 1)
+    (stopped / compare.PARTIAL).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    status = compare.main([str(expected), str(actual), "--dumps", "D3", "D5"])
+    found = capsys.readouterr().out
+    explained = diff.explain(expected, actual, "micro/a/classes", "D3")
+
+    assert status == 1
+    assert "micro/a/classes: different: D3" in found
+    assert explained[0].startswith("first difference at record 31 ")
+
+
 def test_the_inputs_of_the_engine_are_inputs_of_the_oracle():
     inputs = compare.listed(PARITY / "engine.txt")
     snippets = ROOT / "evaluation" / "micro-benchmark" / "snippets"

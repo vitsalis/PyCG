@@ -36,7 +36,7 @@ fn read(path: &Path) -> String {
 fn the_engine_gives_the_trace_and_points_to_of_the_oracle_on_its_builder_calls() {
     for vector in vectors()
         .into_iter()
-        .filter(|vector| vector.join("D3.jsonl").exists())
+        .filter(|vector| !vector.join("not-ported.txt").exists())
     {
         let (out, output) = replay(&vector);
         assert!(
@@ -57,13 +57,19 @@ fn the_engine_gives_the_trace_and_points_to_of_the_oracle_on_its_builder_calls()
 }
 
 #[test]
-fn the_engine_names_the_rule_that_is_not_ported_yet() {
+fn the_engine_follows_the_oracle_up_to_the_rule_that_is_not_ported_yet() {
     for vector in vectors()
         .into_iter()
         .filter(|vector| vector.join("not-ported.txt").exists())
     {
-        let (_, output) = replay(&vector);
+        let (out, output) = replay(&vector);
         let expected = read(&vector.join("not-ported.txt"));
+        let partial = read(&out.join("D3.partial.jsonl"));
+        assert!(
+            read(&vector.join("D3.jsonl")).starts_with(&partial),
+            "{}: the partial trace leaves the oracle's",
+            vector.display()
+        );
         assert!(!output.status.success(), "{}", vector.display());
         assert!(
             String::from_utf8_lossy(&output.stderr).contains(expected.trim()),

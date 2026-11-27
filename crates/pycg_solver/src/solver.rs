@@ -379,6 +379,10 @@ impl<C: Copy> Solver<C> {
             .is_some_and(|added| added.contains(&object))
     }
 
+    pub fn has_absorbed(&self) -> bool {
+        !self.absorbed_sets.is_empty()
+    }
+
     pub fn absorbed(&self) -> Vec<ObjId> {
         let mut numbers: Vec<u32> = self
             .absorbed_sets
