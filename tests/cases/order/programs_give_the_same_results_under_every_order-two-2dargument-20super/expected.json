@@ -1,0 +1,242 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 11,
+       "end": [
+        8,
+        17
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 4,
+       "end": [
+        17,
+        17
+       ],
+       "line": 17
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 4,
+       "end": [
+        18,
+        17
+       ],
+       "line": 18
+      }
+     ],
+     "main.pick": [
+      {
+       "callees": [
+        "<builtin>.super"
+       ],
+       "col": 4,
+       "end": [
+        15,
+        17
+       ],
+       "line": 15
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        15,
+        23
+       ],
+       "line": 15,
+       "unresolved": "no value"
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       18
+      ],
+      "module": "main"
+     },
+     "main.Base": {
+      "kind": "class",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Base.run": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Late": {
+      "kind": "class",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Late",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Late.run": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Meta": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.Meta",
+       "<builtin>.type"
+      ]
+     },
+     "main.Meta.describe": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.Model": {
+      "kind": "class",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Model",
+       "<builtin>.object"
+      ]
+     },
+     "main.Other": {
+      "kind": "class",
+      "lines": [
+       12,
+       13
+      ],
+      "module": "main",
+      "mro": [
+       "main.Other",
+       "<builtin>.object"
+      ]
+     },
+     "main.Other.run": {
+      "kind": "function",
+      "lines": [
+       13,
+       13
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.pick": {
+      "kind": "function",
+      "lines": [
+       14,
+       15
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.x": [
+      "main.Late",
+      "main.Model"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.super": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.super": [],
+  "main": [
+   "main.base",
+   "main.pick"
+  ],
+  "main.Base.run": [],
+  "main.Late.run": [],
+  "main.Meta.describe": [],
+  "main.Other.run": [],
+  "main.base": [],
+  "main.pick": [
+   "<builtin>.super"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.pick",
+   "main:15:4#15:23",
+   "no value"
+  ]
+ ],
+ "warnings": []
+}

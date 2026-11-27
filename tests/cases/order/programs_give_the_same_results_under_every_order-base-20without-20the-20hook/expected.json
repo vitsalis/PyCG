@@ -1,0 +1,273 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.a"
+       ],
+       "col": 14,
+       "end": [
+        15,
+        17
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 5,
+       "end": [
+        17,
+        13
+       ],
+       "implicit": "decorator",
+       "line": 17
+      }
+     ],
+     "main.C.value": [
+      {
+       "callees": [
+        "main.helper"
+       ],
+       "col": 8,
+       "end": [
+        19,
+        16
+       ],
+       "line": 19
+      }
+     ],
+     "main.Hooked.__getattribute__": [
+      {
+       "callees": [
+        "main.C.value"
+       ],
+       "col": 4,
+       "end": [
+        5,
+        12
+       ],
+       "implicit": "attribute",
+       "line": 4
+      }
+     ],
+     "main.a": [
+      {
+       "callees": [
+        "main.b"
+       ],
+       "col": 16,
+       "end": [
+        8,
+        19
+       ],
+       "line": 8
+      }
+     ],
+     "main.b": [
+      {
+       "callees": [
+        "main.c"
+       ],
+       "col": 16,
+       "end": [
+        9,
+        19
+       ],
+       "line": 9
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.C.value",
+        "main.Hooked.__getattribute__"
+       ],
+       "col": 4,
+       "end": [
+        21,
+        13
+       ],
+       "implicit": "attribute",
+       "line": 21
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       21
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       16,
+       19
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "main.Hooked",
+       "main.Plain",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.value": {
+      "kind": "function",
+      "lines": [
+       18,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Holder": {
+      "kind": "class",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.Holder",
+       "<builtin>.object"
+      ]
+     },
+     "main.Hooked": {
+      "kind": "class",
+      "lines": [
+       3,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Hooked",
+       "<builtin>.object"
+      ]
+     },
+     "main.Hooked.__getattribute__": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Plain": {
+      "kind": "class",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Plain",
+       "<builtin>.object"
+      ]
+     },
+     "main.a": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.b": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.c": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.helper": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       20,
+       21
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.property": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.property": [],
+  "main": [
+   "<builtin>.property",
+   "main.a"
+  ],
+  "main.C.value": [
+   "main.helper"
+  ],
+  "main.Hooked.__getattribute__": [
+   "main.C.value"
+  ],
+  "main.a": [
+   "main.b"
+  ],
+  "main.b": [
+   "main.c"
+  ],
+  "main.c": [],
+  "main.helper": [],
+  "main.use": [
+   "main.C.value",
+   "main.Hooked.__getattribute__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

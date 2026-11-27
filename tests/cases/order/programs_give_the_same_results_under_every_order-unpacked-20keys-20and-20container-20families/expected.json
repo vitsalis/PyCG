@@ -1,0 +1,247 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.copy"
+       ],
+       "col": 0,
+       "end": [
+        16,
+        6
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "main.compare"
+       ],
+       "col": 0,
+       "end": [
+        17,
+        27
+       ],
+       "line": 17
+      },
+      {
+       "callees": [
+        "<builtin>.list.extend"
+       ],
+       "col": 0,
+       "end": [
+        18,
+        46
+       ],
+       "line": 18
+      },
+      {
+       "callees": [
+        "main.Key.__hash__"
+       ],
+       "col": 16,
+       "end": [
+        18,
+        23
+       ],
+       "implicit": "dict",
+       "line": 18
+      },
+      {
+       "callees": [
+        "main.Key.__hash__"
+       ],
+       "col": 26,
+       "end": [
+        18,
+        31
+       ],
+       "implicit": "dict",
+       "line": 18
+      },
+      {
+       "callees": [
+        "collections.deque"
+       ],
+       "col": 27,
+       "end": [
+        19,
+        53
+       ],
+       "line": 19
+      }
+     ],
+     "main.compare": [
+      {
+       "callees": [
+        "collections.deque"
+       ],
+       "col": 8,
+       "end": [
+        14,
+        30
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "<builtin>.sorted",
+        "main.Key.__eq__",
+        "main.Key.__lt__"
+       ],
+       "col": 8,
+       "end": [
+        15,
+        28
+       ],
+       "line": 15
+      }
+     ],
+     "main.copy": [
+      {
+       "callees": [
+        "main.Key.__eq__",
+        "main.Key.__hash__"
+       ],
+       "col": 8,
+       "end": [
+        10,
+        24
+       ],
+       "implicit": "dict",
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Key": {
+      "kind": "class",
+      "lines": [
+       3,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Key",
+       "<builtin>.object"
+      ]
+     },
+     "main.Key.__eq__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Key.__hash__": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Key.__lt__": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.compare": {
+      "kind": "function",
+      "lines": [
+       11,
+       15
+      ],
+      "module": "main"
+     },
+     "main.copy": {
+      "kind": "function",
+      "lines": [
+       8,
+       10
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.collections": [
+      "collections"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.list.extend": {
+      "known": "stub"
+     },
+     "<builtin>.sorted": {
+      "known": "stub"
+     },
+     "collections.deque": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.list.extend": [],
+  "<builtin>.sorted": [],
+  "collections.deque": [],
+  "main": [
+   "<builtin>.list.extend",
+   "collections.deque",
+   "main.Key.__hash__",
+   "main.compare",
+   "main.copy"
+  ],
+  "main.Key.__eq__": [],
+  "main.Key.__hash__": [],
+  "main.Key.__lt__": [],
+  "main.compare": [
+   "<builtin>.sorted",
+   "collections.deque",
+   "main.Key.__eq__",
+   "main.Key.__lt__"
+  ],
+  "main.copy": [
+   "main.Key.__eq__",
+   "main.Key.__hash__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

@@ -1,0 +1,263 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "requests.Session.__init__"
+       ],
+       "col": 5,
+       "end": [
+        9,
+        13
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.Client.fetch"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        21
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "requests.Session.get"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        19
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "requests.structures.CaseInsensitiveDict.get"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        36
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "yaml.add_constructor"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        39
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "yaml.SafeLoader"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        20
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "yaml.SafeLoader.get_single_data"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        38
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "google.protobuf.json_format.MessageToJson"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        31
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "<builtin>.str.upper"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        39
+       ],
+       "line": 14
+      }
+     ],
+     "main.Client.fetch": [
+      {
+       "callees": [
+        "requests.Session.get"
+       ],
+       "col": 15,
+       "end": [
+        7,
+        28
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "requests.Response.json"
+       ],
+       "col": 15,
+       "end": [
+        7,
+        56
+       ],
+       "line": 7
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Client": {
+      "kind": "class",
+      "lines": [
+       5,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.Client",
+       "requests.Session"
+      ]
+     },
+     "main.Client.fetch": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.Client.hook": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.json_format": [
+      "google.protobuf.json_format"
+     ],
+     "main.requests": [
+      "requests"
+     ],
+     "main.yaml": [
+      "yaml"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.str.upper": {
+      "known": "stub"
+     },
+     "google.protobuf.json_format.MessageToJson": {
+      "known": "stub"
+     },
+     "requests.Response.json": {
+      "known": "stub"
+     },
+     "requests.Session.__init__": {
+      "known": "stub"
+     },
+     "requests.Session.get": {
+      "known": "stub"
+     },
+     "requests.structures.CaseInsensitiveDict.get": {
+      "known": "stub"
+     },
+     "yaml.SafeLoader": {
+      "known": "stub"
+     },
+     "yaml.SafeLoader.get_single_data": {
+      "known": "stub"
+     },
+     "yaml.add_constructor": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.str.upper": [],
+  "google.protobuf.json_format.MessageToJson": [],
+  "main": [
+   "<builtin>.str.upper",
+   "google.protobuf.json_format.MessageToJson",
+   "main.Client.fetch",
+   "requests.Session.__init__",
+   "requests.Session.get",
+   "requests.structures.CaseInsensitiveDict.get",
+   "yaml.SafeLoader",
+   "yaml.SafeLoader.get_single_data",
+   "yaml.add_constructor"
+  ],
+  "main.Client.fetch": [
+   "requests.Response.json",
+   "requests.Session.get"
+  ],
+  "main.Client.hook": [],
+  "requests.Response.json": [],
+  "requests.Session.__init__": [],
+  "requests.Session.get": [],
+  "requests.structures.CaseInsensitiveDict.get": [],
+  "yaml.SafeLoader": [],
+  "yaml.SafeLoader.get_single_data": [],
+  "yaml.add_constructor": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

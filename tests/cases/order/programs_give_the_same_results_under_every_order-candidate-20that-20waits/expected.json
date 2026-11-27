@@ -1,0 +1,169 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.make_base"
+       ],
+       "col": 8,
+       "end": [
+        7,
+        19
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.X.f",
+        "main.Y.f"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        7
+       ],
+       "line": 13
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       13
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "main.D",
+       "main.X",
+       "main.Y",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.__getattr__": {
+      "kind": "function",
+      "lines": [
+       12,
+       12
+      ],
+      "module": "main"
+     },
+     "main.D": {
+      "kind": "class",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.D",
+       "main.X",
+       "<builtin>.object"
+      ]
+     },
+     "main.X": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.X",
+       "<builtin>.object"
+      ]
+     },
+     "main.X.f": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Y": {
+      "kind": "class",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Y",
+       "<builtin>.object"
+      ]
+     },
+     "main.Y.f": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.make_base": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.sys": [
+      "sys"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.X.f",
+   "main.Y.f",
+   "main.make_base"
+  ],
+  "main.C.__getattr__": [],
+  "main.X.f": [],
+  "main.Y.f": [],
+  "main.make_base": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

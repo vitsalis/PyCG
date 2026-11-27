@@ -1,0 +1,174 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.set"
+       ],
+       "col": 5,
+       "end": [
+        8,
+        10
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 0,
+       "end": [
+        9,
+        19
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        24
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.a",
+        "main.b",
+        "main.c"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        7
+       ],
+       "line": 12
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "<builtin>.list.extend",
+        "<builtin>.set.update"
+       ],
+       "col": 4,
+       "end": [
+        6,
+        17
+       ],
+       "line": 6
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       12
+      ],
+      "module": "main"
+     },
+     "main.a": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.b": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.c": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.f": [
+      "main.a",
+      "main.b",
+      "main.c"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.list.extend": {
+      "known": "stub"
+     },
+     "<builtin>.set": {
+      "known": "stub"
+     },
+     "<builtin>.set.update": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.list.extend": [],
+  "<builtin>.set": [],
+  "<builtin>.set.update": [],
+  "main": [
+   "<builtin>.set",
+   "main.a",
+   "main.b",
+   "main.c",
+   "main.run"
+  ],
+  "main.a": [],
+  "main.b": [],
+  "main.c": [],
+  "main.run": [
+   "<builtin>.list.extend",
+   "<builtin>.set.update"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

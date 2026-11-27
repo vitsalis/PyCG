@@ -1,0 +1,278 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 11,
+       "end": [
+        6,
+        17
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "<builtin>.classmethod"
+       ],
+       "col": 5,
+       "end": [
+        9,
+        16
+       ],
+       "implicit": "decorator",
+       "line": 9
+      }
+     ],
+     "main.Bag.__iter__": [
+      {
+       "callees": [
+        "<builtin>.iter"
+       ],
+       "col": 31,
+       "end": [
+        15,
+        39
+       ],
+       "line": 15
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.Late.close",
+        "main.Later.close"
+       ],
+       "col": 4,
+       "end": [
+        23,
+        14
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "main.Late.make"
+       ],
+       "col": 4,
+       "end": [
+        24,
+        15
+       ],
+       "line": 24
+      },
+      {
+       "callees": [
+        "main.Bag.close"
+       ],
+       "col": 4,
+       "end": [
+        25,
+        17
+       ],
+       "line": 25
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       26
+      ],
+      "module": "main"
+     },
+     "main.Bag": {
+      "kind": "class",
+      "lines": [
+       13,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Bag",
+       "collections.abc.Set"
+      ]
+     },
+     "main.Bag.__contains__": {
+      "kind": "function",
+      "lines": [
+       14,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Bag.__iter__": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Bag.__len__": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Bag.close": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Late": {
+      "kind": "class",
+      "lines": [
+       6,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Late",
+       "collections.abc.AsyncIterator"
+      ]
+     },
+     "main.Late.__anext__": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.Late.close": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Late.make": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.Later": {
+      "kind": "class",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.Later",
+       "main.Late",
+       "collections.abc.AsyncIterator"
+      ]
+     },
+     "main.Later.close": {
+      "kind": "function",
+      "lines": [
+       12,
+       12
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       18,
+       25
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.BASE": [
+      "typing.AsyncIterator"
+     ],
+     "main.collections": [
+      "collections"
+     ],
+     "main.typing": [
+      "typing"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.classmethod": {
+      "known": "stub"
+     },
+     "<builtin>.iter": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.classmethod": [],
+  "<builtin>.iter": [],
+  "main": [
+   "<builtin>.classmethod",
+   "main.base"
+  ],
+  "main.Bag.__contains__": [],
+  "main.Bag.__iter__": [
+   "<builtin>.iter"
+  ],
+  "main.Bag.__len__": [],
+  "main.Bag.close": [],
+  "main.Late.__anext__": [],
+  "main.Late.close": [],
+  "main.Late.make": [],
+  "main.Later.close": [],
+  "main.base": [],
+  "main.use": [
+   "main.Bag.close",
+   "main.Late.close",
+   "main.Late.make",
+   "main.Later.close"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

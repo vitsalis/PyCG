@@ -1,0 +1,146 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.object.__new__"
+       ],
+       "col": 15,
+       "end": [
+        8,
+        35
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.Made.__call__"
+       ],
+       "col": 4,
+       "end": [
+        9,
+        14
+       ],
+       "line": 9
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       9
+      ],
+      "module": "main"
+     },
+     "main.A": {
+      "kind": "class",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main",
+      "mro": [
+       "main.A",
+       "<builtin>.object"
+      ]
+     },
+     "main.B": {
+      "kind": "class",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.B",
+       "<builtin>.object"
+      ]
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.Made": {
+      "kind": "class",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Made",
+       "main.A",
+       "main.B",
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.Made.__call__": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.base": [
+      "main.A",
+      "main.B",
+      "main.C"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.object.__new__": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": null,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.object.__new__": [],
+  "main": [
+   "<builtin>.object.__new__",
+   "main.Made.__call__"
+  ],
+  "main.Made.__call__": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

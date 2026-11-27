@@ -1,0 +1,328 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "threading.Thread.__init__"
+       ],
+       "col": 0,
+       "end": [
+        18,
+        8
+       ],
+       "line": 18
+      },
+      {
+       "callees": [
+        "threading.Thread.start"
+       ],
+       "col": 0,
+       "end": [
+        18,
+        16
+       ],
+       "line": 18
+      },
+      {
+       "callees": [
+        "heapq.heappush"
+       ],
+       "col": 0,
+       "end": [
+        19,
+        26
+       ],
+       "line": 19
+      },
+      {
+       "callees": [
+        "logging.getLogger"
+       ],
+       "col": 0,
+       "end": [
+        20,
+        22
+       ],
+       "line": 20
+      },
+      {
+       "callees": [
+        "logging.Logger.addHandler"
+       ],
+       "col": 0,
+       "end": [
+        20,
+        44
+       ],
+       "line": 20
+      },
+      {
+       "callees": [
+        "logging.Handler.__init__"
+       ],
+       "col": 34,
+       "end": [
+        20,
+        43
+       ],
+       "line": 20
+      },
+      {
+       "callees": [
+        "contextlib.ExitStack"
+       ],
+       "col": 5,
+       "end": [
+        21,
+        27
+       ],
+       "line": 21
+      },
+      {
+       "callees": [
+        "contextlib.ExitStack.enter_context"
+       ],
+       "col": 4,
+       "end": [
+        22,
+        35
+       ],
+       "line": 22
+      }
+     ],
+     "main.Handler.emit": [
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        14,
+        27
+       ],
+       "line": 14,
+       "unresolved": "no value"
+      }
+     ],
+     "main.Worker.run": [
+      {
+       "callees": [
+        "main.Worker.step"
+       ],
+       "col": 8,
+       "end": [
+        8,
+        19
+       ],
+       "line": 8
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       22
+      ],
+      "module": "main"
+     },
+     "main.Handler": {
+      "kind": "class",
+      "lines": [
+       12,
+       14
+      ],
+      "module": "main",
+      "mro": [
+       "main.Handler",
+       "logging.Handler"
+      ]
+     },
+     "main.Handler.emit": {
+      "kind": "function",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Item": {
+      "kind": "class",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Item",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item.__lt__": {
+      "kind": "function",
+      "lines": [
+       11,
+       11
+      ],
+      "module": "main"
+     },
+     "main.Resource": {
+      "kind": "class",
+      "lines": [
+       15,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Resource",
+       "<builtin>.object"
+      ]
+     },
+     "main.Resource.__enter__": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Resource.__exit__": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Worker": {
+      "kind": "class",
+      "lines": [
+       6,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Worker",
+       "threading.Thread"
+      ]
+     },
+     "main.Worker.run": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Worker.step": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.contextlib": [
+      "contextlib"
+     ],
+     "main.heapq": [
+      "heapq"
+     ],
+     "main.logging": [
+      "logging"
+     ],
+     "main.threading": [
+      "threading"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "contextlib.ExitStack": {
+      "known": "stub"
+     },
+     "contextlib.ExitStack.enter_context": {
+      "known": "stub"
+     },
+     "heapq.heappush": {
+      "known": "stub"
+     },
+     "logging.Handler.__init__": {
+      "known": "stub"
+     },
+     "logging.Logger.addHandler": {
+      "known": "stub"
+     },
+     "logging.getLogger": {
+      "known": "stub"
+     },
+     "threading.Thread.__init__": {
+      "known": "stub"
+     },
+     "threading.Thread.start": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "contextlib.ExitStack": [],
+  "contextlib.ExitStack.enter_context": [],
+  "heapq.heappush": [],
+  "logging.Handler.__init__": [],
+  "logging.Logger.addHandler": [],
+  "logging.getLogger": [],
+  "main": [
+   "contextlib.ExitStack",
+   "contextlib.ExitStack.enter_context",
+   "heapq.heappush",
+   "logging.Handler.__init__",
+   "logging.Logger.addHandler",
+   "logging.getLogger",
+   "threading.Thread.__init__",
+   "threading.Thread.start"
+  ],
+  "main.Handler.emit": [],
+  "main.Item.__lt__": [],
+  "main.Resource.__enter__": [],
+  "main.Resource.__exit__": [],
+  "main.Worker.run": [
+   "main.Worker.step"
+  ],
+  "main.Worker.step": [],
+  "threading.Thread.__init__": [],
+  "threading.Thread.start": []
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.Handler.emit",
+   "main:14:8#14:27",
+   "no value"
+  ]
+ ],
+ "warnings": []
+}

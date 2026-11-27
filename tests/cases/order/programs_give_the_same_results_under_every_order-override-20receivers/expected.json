@@ -1,0 +1,270 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.classmethod"
+       ],
+       "col": 5,
+       "end": [
+        6,
+        16
+       ],
+       "implicit": "decorator",
+       "line": 6
+      },
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 11,
+       "end": [
+        15,
+        17
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "<builtin>.classmethod"
+       ],
+       "col": 5,
+       "end": [
+        17,
+        16
+       ],
+       "implicit": "decorator",
+       "line": 17
+      }
+     ],
+     "main.Base.make": [
+      {
+       "callees": [
+        "main.Base.step",
+        "main.Child.step"
+       ],
+       "col": 8,
+       "end": [
+        8,
+        22
+       ],
+       "line": 8
+      }
+     ],
+     "main.Base.run": [
+      {
+       "callees": [
+        "main.Base.step",
+        "main.Child.step",
+        "main.Late.step"
+       ],
+       "col": 8,
+       "end": [
+        4,
+        19
+       ],
+       "line": 4
+      }
+     ],
+     "main.Child.run": [
+      {
+       "callees": [
+        "<builtin>.super"
+       ],
+       "col": 8,
+       "end": [
+        11,
+        15
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.Base.run"
+       ],
+       "col": 8,
+       "end": [
+        11,
+        21
+       ],
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       20
+      ],
+      "module": "main"
+     },
+     "main.Base": {
+      "kind": "class",
+      "lines": [
+       2,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Base.make": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Base.run": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Base.step": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Child": {
+      "kind": "class",
+      "lines": [
+       9,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.Child",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Child.run": {
+      "kind": "function",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main"
+     },
+     "main.Child.step": {
+      "kind": "function",
+      "lines": [
+       12,
+       12
+      ],
+      "module": "main"
+     },
+     "main.Late": {
+      "kind": "class",
+      "lines": [
+       15,
+       18
+      ],
+      "module": "main",
+      "mro": [
+       "main.Late",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Late.make": {
+      "kind": "function",
+      "lines": [
+       18,
+       18
+      ],
+      "module": "main"
+     },
+     "main.Late.step": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.classmethod": {
+      "known": "stub"
+     },
+     "<builtin>.super": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.classmethod": [],
+  "<builtin>.super": [],
+  "main": [
+   "<builtin>.classmethod",
+   "main.base"
+  ],
+  "main.Base.make": [
+   "main.Base.step",
+   "main.Child.step"
+  ],
+  "main.Base.run": [
+   "main.Base.step",
+   "main.Child.step",
+   "main.Late.step"
+  ],
+  "main.Base.step": [],
+  "main.Child.run": [
+   "<builtin>.super",
+   "main.Base.run"
+  ],
+  "main.Child.step": [],
+  "main.Late.make": [],
+  "main.Late.step": [],
+  "main.base": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

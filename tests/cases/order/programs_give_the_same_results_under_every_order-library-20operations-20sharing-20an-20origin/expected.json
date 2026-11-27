@@ -1,0 +1,255 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.staticmethod"
+       ],
+       "col": 15,
+       "end": [
+        7,
+        44
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        8
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 0,
+       "end": [
+        15,
+        8
+       ],
+       "line": 15
+      }
+     ],
+     "main.MetaA.__iter__": [
+      {
+       "callees": [
+        "<builtin>.iter"
+       ],
+       "col": 30,
+       "end": [
+        3,
+        38
+       ],
+       "line": 3
+      }
+     ],
+     "main.MetaB.__iter__": [
+      {
+       "callees": [
+        "<builtin>.iter"
+       ],
+       "col": 30,
+       "end": [
+        5,
+        38
+       ],
+       "line": 5
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "<builtin>.list",
+        "main.MetaA.__iter__",
+        "main.MetaB.__iter__"
+       ],
+       "col": 11,
+       "end": [
+        13,
+        28
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "itertools.chain"
+       ],
+       "col": 16,
+       "end": [
+        13,
+        27
+       ],
+       "line": 13
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Factory": {
+      "kind": "class",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Factory",
+       "<builtin>.object"
+      ]
+     },
+     "main.MetaA": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.MetaA",
+       "<builtin>.type"
+      ]
+     },
+     "main.MetaA.__iter__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.MetaB": {
+      "kind": "class",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.MetaB",
+       "<builtin>.type"
+      ]
+     },
+     "main.MetaB.__iter__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.One": {
+      "kind": "class",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.One",
+       "<builtin>.object"
+      ]
+     },
+     "main.Two": {
+      "kind": "class",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Two",
+       "<builtin>.object"
+      ]
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       12,
+       13
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.itertools": [
+      "itertools"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.iter": {
+      "known": "stub"
+     },
+     "<builtin>.list": {
+      "known": "stub"
+     },
+     "<builtin>.staticmethod": {
+      "known": "stub"
+     },
+     "itertools.chain": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.iter": [],
+  "<builtin>.list": [],
+  "<builtin>.staticmethod": [],
+  "itertools.chain": [],
+  "main": [
+   "<builtin>.staticmethod",
+   "main.use"
+  ],
+  "main.MetaA.__iter__": [
+   "<builtin>.iter"
+  ],
+  "main.MetaB.__iter__": [
+   "<builtin>.iter"
+  ],
+  "main.use": [
+   "<builtin>.list",
+   "itertools.chain",
+   "main.MetaA.__iter__",
+   "main.MetaB.__iter__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

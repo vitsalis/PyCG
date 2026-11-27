@@ -1,0 +1,208 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.Request.__init__"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        23
+       ],
+       "line": 13
+      }
+     ],
+     "main.Request.__getattr__": [
+      {
+       "callees": [
+        "main.Request.__getattr__"
+       ],
+       "col": 15,
+       "end": [
+        8,
+        27
+       ],
+       "implicit": "attribute",
+       "line": 8
+      }
+     ],
+     "main.Request.lone": [
+      {
+       "callees": [
+        "main.Request.__getattr__"
+       ],
+       "col": 8,
+       "end": [
+        12,
+        20
+       ],
+       "implicit": "attribute",
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.App.run"
+       ],
+       "col": 8,
+       "end": [
+        12,
+        40
+       ],
+       "line": 12
+      }
+     ],
+     "main.Request.use": [
+      {
+       "callees": [
+        "main.Request.__getattr__"
+       ],
+       "col": 8,
+       "end": [
+        10,
+        19
+       ],
+       "implicit": "attribute",
+       "line": 10
+      },
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        10,
+        25
+       ],
+       "line": 10,
+       "unresolved": "no value"
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       13
+      ],
+      "module": "main"
+     },
+     "main.App": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.App",
+       "<builtin>.object"
+      ]
+     },
+     "main.App.run": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.Request": {
+      "kind": "class",
+      "lines": [
+       4,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.Request",
+       "<builtin>.object"
+      ]
+     },
+     "main.Request.__getattr__": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Request.__init__": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Request.lone": {
+      "kind": "function",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main"
+     },
+     "main.Request.use": {
+      "kind": "function",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.Request.__init__"
+  ],
+  "main.App.run": [],
+  "main.Request.__getattr__": [
+   "main.Request.__getattr__"
+  ],
+  "main.Request.__init__": [],
+  "main.Request.lone": [
+   "main.App.run",
+   "main.Request.__getattr__"
+  ],
+  "main.Request.use": [
+   "main.Request.__getattr__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.Request.use",
+   "main:10:8#10:25",
+   "no value"
+  ]
+ ],
+ "warnings": []
+}

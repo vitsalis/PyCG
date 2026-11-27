@@ -1,0 +1,98 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "os.path.split",
+        "os.path.splitroot"
+       ],
+       "col": 11,
+       "end": [
+        4,
+        29
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "<builtin>.str.upper"
+       ],
+       "col": 4,
+       "end": [
+        5,
+        16
+       ],
+       "line": 5
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       5
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.os": [
+      "os"
+     ],
+     "main.split": [
+      "os.path.split",
+      "os.path.splitroot"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.str.upper": {
+      "known": "stub"
+     },
+     "os.path.split": {
+      "known": "stub"
+     },
+     "os.path.splitroot": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.str.upper": [],
+  "main": [
+   "<builtin>.str.upper",
+   "os.path.split",
+   "os.path.splitroot"
+  ],
+  "os.path.split": [],
+  "os.path.splitroot": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

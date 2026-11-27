@@ -1,0 +1,281 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "lib.run"
+       ],
+       "col": 0,
+       "end": [
+        23,
+        14
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "main.Needle.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        26,
+        33
+       ],
+       "implicit": "operator",
+       "line": 26
+      },
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 12,
+       "end": [
+        26,
+        33
+       ],
+       "line": 26
+      },
+      {
+       "callees": [
+        "main.Bag.__contains__"
+       ],
+       "col": 0,
+       "end": [
+        27,
+        34
+       ],
+       "implicit": "operator",
+       "line": 27
+      },
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 12,
+       "end": [
+        27,
+        34
+       ],
+       "line": 27
+      },
+      {
+       "callees": [
+        "main.Needle.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        29,
+        14
+       ],
+       "implicit": "operator",
+       "line": 29
+      }
+     ],
+     "main.Needle.__eq__": [
+      {
+       "callees": [
+        "main.Item.touch"
+       ],
+       "col": 8,
+       "end": [
+        7,
+        21
+       ],
+       "line": 7
+      }
+     ],
+     "main.first": [
+      {
+       "callees": [
+        "main.Marker.__init__"
+       ],
+       "col": 11,
+       "end": [
+        22,
+        19
+       ],
+       "line": 22
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       30
+      ],
+      "module": "main"
+     },
+     "main.Bag": {
+      "kind": "class",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Bag",
+       "<builtin>.object"
+      ]
+     },
+     "main.Bag.__contains__": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.Holder": {
+      "kind": "class",
+      "lines": [
+       11,
+       13
+      ],
+      "module": "main",
+      "mro": [
+       "main.Holder",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Item",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item.touch": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Marker": {
+      "kind": "class",
+      "lines": [
+       14,
+       16
+      ],
+      "module": "main",
+      "mro": [
+       "main.Marker",
+       "<builtin>.object"
+      ]
+     },
+     "main.Marker.__init__": {
+      "kind": "function",
+      "lines": [
+       15,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Needle": {
+      "kind": "class",
+      "lines": [
+       5,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.Needle",
+       "<builtin>.object"
+      ]
+     },
+     "main.Needle.__eq__": {
+      "kind": "function",
+      "lines": [
+       6,
+       8
+      ],
+      "module": "main"
+     },
+     "main.compare": {
+      "kind": "function",
+      "lines": [
+       17,
+       19
+      ],
+      "module": "main"
+     },
+     "main.first": {
+      "kind": "function",
+      "lines": [
+       21,
+       22
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.lib": [
+      "lib"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     },
+     "lib.run": {
+      "known": "name"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "lib.run": [],
+  "main": [
+   "<builtin>.getattr",
+   "lib.run",
+   "main.Bag.__contains__",
+   "main.Needle.__eq__"
+  ],
+  "main.Bag.__contains__": [],
+  "main.Item.touch": [],
+  "main.Marker.__init__": [],
+  "main.Needle.__eq__": [
+   "main.Item.touch"
+  ],
+  "main.compare": [],
+  "main.first": [
+   "main.Marker.__init__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

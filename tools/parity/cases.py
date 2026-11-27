@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from _pytest.compat import NOTSET
 
 DESCRIPTION = """\
 Turns the Python tests of one file into the cases of tests/cases/ that the
@@ -25,16 +26,18 @@ expected.json the oracle's edges, unresolved sites, the points-to sets of
 the named nodes that the test read, the warnings of the analysis, with
 {root} for the directory of the program, and each document that the test
 read, with the package name and version it was asked with.
-A test that monkeypatches an attribute (a rule of the engine), with
-monkeypatch or monkeypatch.context(), is not converted: it is listed,
-since it states an invariant for the simulation tests, not a program's
-output. A test that patches only the solver's order is converted: each
-of its programs is analysed again in the canonical order, and that run
-is its case. Of the runs of a test that repeat a program (the same files,
-cap, package and set of entry points, as when only their order differs)
-only the first is a case. A test that
-only changes the directory or the environment is converted, its paths
-taken from the root of its program.
+A program that a test analyses while it monkeypatches an attribute (a
+rule of the engine), with monkeypatch, monkeypatch.context() or a fixture
+that uses monkeypatch, is not a case: the test is listed, since it states
+an invariant for the simulation tests, not a program's output. A program
+analysed while only the solver's order is patched, or while the analysis
+or the solver's firing is only observed (the patches of
+PATCHES_THAT_KEEP_THE_RESULT), is analysed again with every patch undone,
+and that run is its case. Of the runs of a test that repeat a program
+(the same files, cap, package and set of entry points, as when only their
+order differs) only the first is a case. A test that only changes the
+directory or the environment is converted, its paths taken from the root
+of its program.
 A test that analyses no program in its own process (one that runs the
 command line) is listed too, and so is a test that analyses micro cases,
 which the harness runs already: it states a property of every case. A
@@ -259,6 +262,7 @@ class Run:
         self.documents = set()
         self.warnings = []
         self.files = {}
+        self.patched = set()
 
     def key(self):
         root = self.copy_root
@@ -298,7 +302,11 @@ def relative(path, root):
     return Path(os.path.relpath(path, root)).as_posix()
 
 
-SOLVER_ORDER = "pycg.analysis.solver.Solver.order"
+PATCHES_THAT_KEEP_THE_RESULT = {
+    "pycg.analysis.solver.Solver.order",
+    "pycg.analysis.semantics.Analysis.__init__",
+    "pycg.analysis.solver.Solver._fire",
+}
 
 
 def attribute_name(target, args):
@@ -307,6 +315,38 @@ def attribute_name(target, args):
     module = getattr(target, "__module__", None) or getattr(target, "__name__", "")
     owner = getattr(target, "__qualname__", None)
     return ".".join(part for part in (module, owner, args[0]) if part)
+
+
+class Patch:
+    def __init__(self, name, owner, attribute, old):
+        self.name = name
+        self.owner = owner
+        self.attribute = attribute
+        self.old = old
+        self.value = vars(owner)[attribute]
+
+    def active(self):
+        return vars(self.owner).get(self.attribute, NOTSET) is self.value
+
+    def undo(self):
+        if self.old is NOTSET:
+            delattr(self.owner, self.attribute)
+        else:
+            setattr(self.owner, self.attribute, self.old)
+
+    def redo(self):
+        setattr(self.owner, self.attribute, self.value)
+
+
+def unpatched(run, patches, analyze):
+    active = [patch for patch in patches if patch.active()]
+    for patch in reversed(active):
+        patch.undo()
+    try:
+        return reanalysed(run, analyze)
+    finally:
+        for patch in active:
+            patch.redo()
 
 
 def reanalysed(run, analyze):
@@ -351,20 +391,31 @@ class Recorder:
         self.micro = []
         self.deduplicated = []
         self.failed = []
+        self.patches = []
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_runtest_protocol(self, item):
+        setattr_of_monkeypatch = pytest.MonkeyPatch.setattr
+        patches = []
+
+        def recorded_setattr(monkeypatch, target, *args, **keywords):
+            result = setattr_of_monkeypatch(monkeypatch, target, *args, **keywords)
+            owner, attribute, old = monkeypatch._setattr[-1]
+            patches.append(Patch(attribute_name(target, args), owner, attribute, old))
+            return result
+
+        self.patches = patches
+        pytest.MonkeyPatch.setattr = recorded_setattr
+        try:
+            return (yield)
+        finally:
+            pytest.MonkeyPatch.setattr = setattr_of_monkeypatch
 
     @pytest.hookimpl(wrapper=True)
     def pytest_runtest_call(self, item):
-        from pycg.analysis.solver import Solver
         from pycg.pycg import CallGraphGenerator
 
         runs = []
-        patched = []
-        setattr_of_monkeypatch = pytest.MonkeyPatch.setattr
-        canonical_order = Solver.__dict__["order"]
-
-        def recorded_setattr(monkeypatch, target, *args, **keywords):
-            patched.append(attribute_name(target, args))
-            return setattr_of_monkeypatch(monkeypatch, target, *args, **keywords)
 
         tmp_path = item.funcargs.get("tmp_path")
         analyze = CallGraphGenerator.analyze
@@ -380,6 +431,7 @@ class Recorder:
             paths = [*entry_points, *([] if package is None else [package])]
             copy_root = tmp_path or os.path.commonpath(paths)
             run = Run(generator, copy_root, entry_points, package)
+            run.patched = {patch.name for patch in self.patches if patch.active()}
             run.files = snapshot(copy_root)
             handler = Warnings()
             logger = logging.getLogger(ENGINE_LOGGER)
@@ -413,7 +465,6 @@ class Recorder:
         CallGraphGenerator.output = recorded_output
         CallGraphGenerator.output_points_to = recorded_output_points_to
         CallGraphGenerator.document = recorded_document
-        pytest.MonkeyPatch.setattr = recorded_setattr
         try:
             result = yield
         finally:
@@ -421,11 +472,12 @@ class Recorder:
             CallGraphGenerator.output = output
             CallGraphGenerator.output_points_to = output_points_to
             CallGraphGenerator.document = document
-            pytest.MonkeyPatch.setattr = setattr_of_monkeypatch
-        order_only = bool(patched) and set(patched) == {SOLVER_ORDER}
-        if patched and not order_only:
-            self.skipped.append(item.name)
+        kept = [run for run in runs if run.patched <= PATCHES_THAT_KEEP_THE_RESULT]
+        if len(kept) < len(runs):
+            self.skipped.append((item.name, len(runs) - len(kept), len(runs)))
+        if runs and not kept:
             return result
+        runs = kept
         if not runs:
             self.unanalysed.append(item.name)
         if any(Path(run.copy_root).is_relative_to(SNIPPETS) for run in runs):
@@ -437,13 +489,8 @@ class Recorder:
         if len(distinct) < len(runs):
             self.deduplicated.append((item.name, len(runs) - len(distinct)))
         for index, run in enumerate(distinct.values()):
-            if order_only:
-                ordered = Solver.order
-                Solver.order = canonical_order
-                try:
-                    run = reanalysed(run, analyze)
-                finally:
-                    Solver.order = ordered
+            if run.patched:
+                run = unpatched(run, self.patches, analyze)
             self.write(item.name, index, run, output, output_points_to, document)
         return result
 
@@ -532,8 +579,11 @@ def main(argv=None):
         parser.error(f"{source} has no family in FAMILIES")
     family, design = FAMILIES[source]
     recorder, passed = convert(CASES, ROOT / source, source, family, design)
-    for name in recorder.skipped:
-        print(f"not converted (monkeypatches an attribute): {source}::{name}")
+    for name, dropped, analysed in recorder.skipped:
+        if dropped == analysed:
+            print(f"not converted (monkeypatches an attribute): {source}::{name}")
+        else:
+            print(f"{dropped} runs of {source}::{name} patch an attribute: no case")
     for name in recorder.micro:
         print(f"not converted (a property of the micro cases): {source}::{name}")
     for name, dropped in recorder.deduplicated:

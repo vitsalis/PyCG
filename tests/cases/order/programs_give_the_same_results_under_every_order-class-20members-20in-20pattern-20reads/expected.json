@@ -1,0 +1,274 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.suffix"
+       ],
+       "col": 17,
+       "end": [
+        12,
+        25
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.read"
+       ],
+       "col": 0,
+       "end": [
+        18,
+        18
+       ],
+       "line": 18
+      },
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 0,
+       "end": [
+        25,
+        9
+       ],
+       "line": 25
+      }
+     ],
+     "main.E.__new__": [
+      {
+       "callees": [
+        "<builtin>.str.__new__"
+       ],
+       "col": 14,
+       "end": [
+        7,
+        46
+       ],
+       "line": 7
+      }
+     ],
+     "main.late": [
+      {
+       "callees": [
+        "main.hit"
+       ],
+       "col": 4,
+       "end": [
+        22,
+        33
+       ],
+       "line": 22
+      },
+      {
+       "callees": [
+        "main.hit",
+        "main.other"
+       ],
+       "col": 4,
+       "end": [
+        23,
+        23
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "main.hit",
+        "main.other"
+       ],
+       "col": 4,
+       "end": [
+        24,
+        31
+       ],
+       "line": 24
+      },
+      {
+       "callees": [
+        "<builtin>.str.lower"
+       ],
+       "col": 17,
+       "end": [
+        24,
+        28
+       ],
+       "line": 24
+      }
+     ],
+     "main.read": [
+      {
+       "callees": [
+        "main.hit"
+       ],
+       "col": 4,
+       "end": [
+        17,
+        26
+       ],
+       "line": 17
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       25
+      ],
+      "module": "main"
+     },
+     "main.E": {
+      "kind": "class",
+      "lines": [
+       5,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.E",
+       "<builtin>.str",
+       "enum.Enum"
+      ]
+     },
+     "main.E.__new__": {
+      "kind": "function",
+      "lines": [
+       6,
+       9
+      ],
+      "module": "main"
+     },
+     "main.F": {
+      "kind": "class",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.F",
+       "<builtin>.str",
+       "enum.Enum"
+      ]
+     },
+     "main.Holder": {
+      "kind": "class",
+      "lines": [
+       19,
+       20
+      ],
+      "module": "main",
+      "mro": [
+       "main.Holder",
+       "<builtin>.object"
+      ]
+     },
+     "main.hit": {
+      "kind": "function",
+      "lines": [
+       13,
+       13
+      ],
+      "module": "main"
+     },
+     "main.late": {
+      "kind": "function",
+      "lines": [
+       21,
+       24
+      ],
+      "module": "main"
+     },
+     "main.other": {
+      "kind": "function",
+      "lines": [
+       14,
+       14
+      ],
+      "module": "main"
+     },
+     "main.read": {
+      "kind": "function",
+      "lines": [
+       15,
+       17
+      ],
+      "module": "main"
+     },
+     "main.suffix": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.Enum": [
+      "enum.Enum"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.str.__new__": {
+      "known": "stub"
+     },
+     "<builtin>.str.lower": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.str.__new__": [],
+  "<builtin>.str.lower": [],
+  "main": [
+   "main.late",
+   "main.read",
+   "main.suffix"
+  ],
+  "main.E.__new__": [
+   "<builtin>.str.__new__"
+  ],
+  "main.hit": [],
+  "main.late": [
+   "<builtin>.str.lower",
+   "main.hit",
+   "main.other"
+  ],
+  "main.other": [],
+  "main.read": [
+   "main.hit"
+  ],
+  "main.suffix": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

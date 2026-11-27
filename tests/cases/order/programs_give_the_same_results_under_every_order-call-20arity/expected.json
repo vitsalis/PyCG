@@ -1,0 +1,222 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 12,
+       "end": [
+        15,
+        18
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 4,
+       "end": [
+        16,
+        19
+       ],
+       "line": 16
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "main.Empty.__init__"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        10
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.Needs.__call__"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        13
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.keyword"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        12
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.Needs.__init__",
+        "main.one"
+       ],
+       "col": 4,
+       "end": [
+        14,
+        8
+       ],
+       "line": 14
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Empty": {
+      "kind": "class",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Empty",
+       "<builtin>.object"
+      ]
+     },
+     "main.Empty.__init__": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Needs": {
+      "kind": "class",
+      "lines": [
+       2,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Needs",
+       "<builtin>.object"
+      ]
+     },
+     "main.Needs.__call__": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Needs.__init__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.keyword": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.late": {
+      "kind": "function",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main"
+     },
+     "main.one": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       11,
+       14
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.kind": [
+      "main.Empty",
+      "main.Needs",
+      "main.keyword",
+      "main.one"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.late",
+   "main.run"
+  ],
+  "main.Empty.__init__": [],
+  "main.Needs.__call__": [],
+  "main.Needs.__init__": [],
+  "main.keyword": [],
+  "main.late": [],
+  "main.one": [],
+  "main.run": [
+   "main.Empty.__init__",
+   "main.Needs.__call__",
+   "main.Needs.__init__",
+   "main.keyword",
+   "main.one"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

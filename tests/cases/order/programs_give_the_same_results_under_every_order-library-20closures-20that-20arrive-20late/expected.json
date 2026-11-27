@@ -1,0 +1,204 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.deco"
+       ],
+       "col": 1,
+       "end": [
+        5,
+        7
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "contextlib.contextmanager"
+       ],
+       "col": 1,
+       "end": [
+        5,
+        7
+       ],
+       "implicit": "decorator",
+       "line": 5
+      },
+      {
+       "callees": [
+        "functools.lru_cache"
+       ],
+       "col": 1,
+       "end": [
+        8,
+        34
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "_functools._lru_cache_wrapper.__call__",
+        "functools.lru_cache.decorating_function"
+       ],
+       "col": 1,
+       "end": [
+        8,
+        34
+       ],
+       "implicit": "decorator",
+       "line": 8
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "contextlib.contextmanager.helper",
+        "main.managed"
+       ],
+       "col": 9,
+       "end": [
+        11,
+        18
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "_functools._lru_cache_wrapper.__call__",
+        "main.cached"
+       ],
+       "col": 8,
+       "end": [
+        12,
+        17
+       ],
+       "line": 12
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       14
+      ],
+      "module": "main"
+     },
+     "main.cached": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.deco": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     },
+     "main.managed": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       10,
+       12
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.LATE": [
+      "contextlib.contextmanager"
+     ],
+     "main.cached": [
+      "<unknown>"
+     ],
+     "main.contextlib": [
+      "contextlib"
+     ],
+     "main.functools": [
+      "functools"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "_functools._lru_cache_wrapper.__call__": {
+      "known": "name"
+     },
+     "contextlib.contextmanager": {
+      "known": "stub"
+     },
+     "contextlib.contextmanager.helper": {
+      "known": "stub"
+     },
+     "functools.lru_cache": {
+      "known": "stub"
+     },
+     "functools.lru_cache.decorating_function": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "_functools._lru_cache_wrapper.__call__": [],
+  "contextlib.contextmanager": [],
+  "contextlib.contextmanager.helper": [],
+  "functools.lru_cache": [],
+  "functools.lru_cache.decorating_function": [],
+  "main": [
+   "_functools._lru_cache_wrapper.__call__",
+   "contextlib.contextmanager",
+   "functools.lru_cache",
+   "functools.lru_cache.decorating_function",
+   "main.deco"
+  ],
+  "main.cached": [],
+  "main.deco": [],
+  "main.managed": [],
+  "main.use": [
+   "_functools._lru_cache_wrapper.__call__",
+   "contextlib.contextmanager.helper",
+   "main.cached",
+   "main.managed"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

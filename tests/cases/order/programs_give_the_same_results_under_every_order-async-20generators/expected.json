@@ -1,0 +1,167 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main.use": [
+      {
+       "callees": [
+        "main.produce"
+       ],
+       "col": 14,
+       "end": [
+        7,
+        23
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.wait"
+       ],
+       "col": 32,
+       "end": [
+        7,
+        39
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.produce"
+       ],
+       "col": 73,
+       "end": [
+        7,
+        82
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "types.AsyncGeneratorType.__aiter__"
+       ],
+       "col": 23,
+       "end": [
+        8,
+        36
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.f"
+       ],
+       "col": 12,
+       "end": [
+        9,
+        15
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "types.AsyncGeneratorType.aclose"
+       ],
+       "col": 14,
+       "end": [
+        10,
+        24
+       ],
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       10
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.produce": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       6,
+       10
+      ],
+      "module": "main"
+     },
+     "main.wait": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "types.AsyncGeneratorType.__aiter__": {
+      "known": "stub"
+     },
+     "types.AsyncGeneratorType.aclose": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [],
+  "main.f": [],
+  "main.produce": [],
+  "main.use": [
+   "main.f",
+   "main.produce",
+   "main.wait",
+   "types.AsyncGeneratorType.__aiter__",
+   "types.AsyncGeneratorType.aclose"
+  ],
+  "main.wait": [],
+  "types.AsyncGeneratorType.__aiter__": [],
+  "types.AsyncGeneratorType.aclose": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}
