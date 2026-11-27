@@ -926,3 +926,17 @@ impl<T: Trace> State<T> {
         true
     }
 }
+
+impl ClassTests {
+    pub(crate) fn table_sizes(&self, sizes: &mut Vec<(&'static str, usize)>) {
+        let ClassTests {
+            filters,
+            alternatives: _,
+            subscriptions: _,
+            completed: _,
+            tested: _,
+            ancestors: _,
+        } = self;
+        sizes.extend([("class tests filters", filters.len())]);
+    }
+}

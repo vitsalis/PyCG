@@ -1155,3 +1155,20 @@ impl<T: Trace> State<T> {
         self.compare_containers(graph, compared, method, caller, site);
     }
 }
+
+impl Library {
+    pub(crate) fn table_sizes(&self, sizes: &mut Vec<(&'static str, usize)>) {
+        let Library {
+            calls: _,
+            operations,
+            sources: _,
+            lazy: _,
+            advances,
+            iterator_length_hints: _,
+        } = self;
+        sizes.extend([
+            ("library operations", operations.len()),
+            ("library advances", advances.len()),
+        ]);
+    }
+}
