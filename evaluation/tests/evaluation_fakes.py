@@ -80,11 +80,47 @@ class CallGraphGenerator:
 """
 
 
-def fake_checkout(tmp_path, original=False):
+FAKE_RUST_TOOL = """
+import json, os, sys
+
+arguments = sys.argv[1:]
+package = arguments[arguments.index("--package") + 1]
+output = arguments[arguments.index("-o") + 1]
+behaviour = open(os.path.join(package, "BEHAVIOUR")).read().strip()
+if behaviour == "not ported":
+    print("pycg: the analysis is not ported yet", file=sys.stderr)
+    sys.exit(1)
+seen = {"arguments": arguments, "environment": sorted(os.environ), "cwd": os.getcwd()}
+with open(os.path.join(package, "seen.json"), "w") as file:
+    json.dump(seen, file)
+document = {
+    "format": "pycg/1",
+    "definitions": {
+        "main": {"kind": "module", "module": "main", "lines": [1, 1]},
+        "main.a": {"kind": "function", "module": "main", "lines": [1, 1]},
+    },
+    "outside": {"os.getcwd": {"known": "stub"}},
+    "calls": {"main": [{"callees": ["os.getcwd", "main.a"]}]},
+}
+with open(output, "w") as file:
+    json.dump(document, file)
+"""
+
+
+def fake_checkout(tmp_path, original=False, rust=False):
     checkout = tmp_path / "fake-pycg"
     (checkout / "pycg").mkdir(parents=True)
     (checkout / "pycg" / "__init__.py").write_text("")
     (checkout / "pycg" / "pycg.py").write_text(FAKE_TOOL)
+    if rust:
+        formats = checkout / "pycg" / "formats"
+        formats.mkdir()
+        real_formats = EVALUATION.parent / "pycg" / "formats" / "__init__.py"
+        (formats / "__init__.py").write_text(real_formats.read_text())
+        binary = checkout / "target" / "release" / "pycg"
+        binary.parent.mkdir(parents=True)
+        binary.write_text(f"#!{sys.executable} -I\n" + FAKE_RUST_TOOL)
+        binary.chmod(0o755)
     if original:
         (checkout / "pycg" / "utils").mkdir()
         (checkout / "pycg" / "utils" / "__init__.py").write_text(
@@ -108,7 +144,9 @@ def project(tmp_path, behaviour):
 
 
 def tool(tmp_path, flavour="new"):
-    checkout = fake_checkout(tmp_path, original=flavour == "original")
+    checkout = fake_checkout(
+        tmp_path, original=flavour == "original", rust=flavour == "rust"
+    )
     return run.Tool("fake", flavour, checkout, sys.executable)
 
 

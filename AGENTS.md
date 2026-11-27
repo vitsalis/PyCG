@@ -127,6 +127,7 @@ make eval               # measure this commit on both benchmarks, report it agai
 make eval-record        # write evaluation/metrics.json from the measured values (rule 3 below)
 make eval-diff BASE=<ref>        # measure BASE too and list the edges and cases that changed
 make eval-determinism   # measure again with hash seed 1; fails unless every graph is identical
+make eval-rust          # build the Rust pycg and measure it; fails unless its graphs equal this commit's
 make eval-scale NAME=<package> [BASE=<ref>] [SCALE_MEMORY_MIB=<MiB>]
                         # time, peak memory and graph SHA-256 on one package of the scale set
 make eval-inputs        # pull (or build) the inputs images and link their sources here
