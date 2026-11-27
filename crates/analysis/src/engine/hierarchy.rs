@@ -10,7 +10,7 @@ use crate::engine::objects::{Class, Object};
 use crate::engine::outside::{OutsideGives, outside_name};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, OrderedMap, OrderedSet, Rule, State, WaitingRule, not_ported};
+use crate::engine::{Graph, OrderedMap, OrderedSet, Rule, State, WaitingRule};
 use crate::model::BUILTIN_MODULE;
 use crate::models::{DEFINES_MARKERS, TUPLE_STORAGE};
 
@@ -1228,11 +1228,8 @@ impl<T: Trace> State<T> {
         match base {
             Some(base) if self.objects.is_class(base) => {
                 self.objects.class_mut(base).subclasses.insert(class);
-                if self
-                    .namespace_nodes
-                    .contains_key(&(base, Namespace::Subclasses))
-                {
-                    not_ported("reflection: the subclasses of a class");
+                if let Some(&listed) = self.namespace_nodes.get(&(base, Namespace::Subclasses)) {
+                    self.add_object(graph, listed, class);
                 }
                 let instances = self.objects.class(class).instances;
                 let base_instances = self.objects.class(base).instances;
