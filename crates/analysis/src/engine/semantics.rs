@@ -63,6 +63,11 @@ pub enum Role {
     SubscriptFactory,
     Iterate(IterationRoleId),
     Index(IterationRoleId),
+    Map(u32, bool),
+    Filter,
+    Reversed,
+    ReversedLen,
+    ReversedItem,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -777,7 +782,7 @@ impl<T: Trace> State<T> {
         self.attach(graph, method, rule);
     }
 
-    fn implicit_call(
+    pub(super) fn implicit_call(
         &mut self,
         graph: &mut Graph,
         owner: ObjId,

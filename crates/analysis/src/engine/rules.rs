@@ -5,6 +5,7 @@ use crate::engine::attributes::{
 };
 use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::containers::ContainerRule;
+use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
@@ -131,7 +132,30 @@ pub(crate) enum Rule {
     },
     CallProtocol {
         plan: PlanId,
+        caller: Sym,
+        site: Sym,
+    },
+    SequenceLength {
+        caller: Sym,
+        site: Sym,
+    },
+    Reversed {
         call: CallId,
+        dst: NodeId,
+        result: ObjId,
+        iteration: IterationId,
+    },
+    ReversedSequence {
+        object: ObjId,
+        call: CallId,
+        result: ObjId,
+        items: NodeId,
+    },
+    ReverseSequence {
+        object: ObjId,
+        methods: NodeId,
+        implicit: CallId,
+        reversing: Option<NodeId>,
     },
     MetaclassProtocol {
         class: ObjId,
@@ -261,6 +285,10 @@ impl Rule {
             Rule::DeliverDelete { .. } => "Each:Attributes._deliver_delete",
             Rule::CallBackObject { .. } => "Each:Analysis._call_back_object",
             Rule::CallProtocol { .. } => "Each:Outside._call_protocol",
+            Rule::SequenceLength { .. } => "Each:BuiltinRules._sequence_length",
+            Rule::Reversed { .. } => "Each:BuiltinRules._reversed",
+            Rule::ReversedSequence { .. } => "Each:BuiltinRules._reversed_sequence",
+            Rule::ReverseSequence { .. } => "Each:BuiltinRules._reverse_sequence",
             Rule::MetaclassProtocol { .. } => "Each:Outside._metaclass_protocol",
             Rule::CallEach { .. } => "Each:Analysis.call",
             Rule::ImplicitMethod { .. } => "Each:BuiltinRules._implicit_method",
@@ -306,6 +334,7 @@ impl Rule {
             Rule::CallMetaclass { .. } => Some(CLASS_KINDS),
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
             Rule::CallProtocol { .. } => Some(SET_NAME_KINDS),
+            Rule::SequenceLength { .. } => Some(CONTAINER_KINDS),
             Rule::PropertyReceiver { .. } => Some(PROPERTY_KINDS),
             Rule::BindClass { .. } => Some(OWNER_KINDS),
             Rule::BindType { .. } | Rule::SuperGiven { .. } => Some(SET_NAME_KINDS),
@@ -342,12 +371,16 @@ impl Rule {
             }
             Rule::CallBackObject { .. }
             | Rule::CallProtocol { .. }
+            | Rule::SequenceLength { .. }
             | Rule::CallEach { .. }
             | Rule::ImplicitMethod { .. }
             | Rule::PropertyReceiver { .. } => Vec::new(),
             Rule::DerivedProperty { property, .. } => vec![property],
             Rule::BindClass { method, .. } | Rule::BindType { method, .. } => vec![method],
             Rule::BindTo { owner, .. } => vec![owner],
+            Rule::Reversed { result, .. } => vec![result],
+            Rule::ReversedSequence { object, result, .. } => vec![object, result],
+            Rule::ReverseSequence { object, .. } => vec![object],
             Rule::SuperAfterOutside { class, .. }
             | Rule::SuperObject { class, .. }
             | Rule::SuperGiven { class, .. }
@@ -455,7 +488,11 @@ impl<T: Trace> State<T> {
             | Rule::SuperGiven { dst, .. }
             | Rule::SuperAcceptedBy { dst, .. } => vec![dst],
             Rule::SuperMetaclass { load, .. } => self.access_result(load).into_iter().collect(),
-            Rule::LoadByPattern | Rule::TypeBases => Vec::new(),
+            Rule::LoadByPattern | Rule::TypeBases | Rule::SequenceLength { .. } => Vec::new(),
+            Rule::Reversed { dst, .. } | Rule::ReversedSequence { items: dst, .. } => vec![dst],
+            Rule::ReverseSequence { implicit, .. } => {
+                self.calls[implicit.index()].dst.into_iter().collect()
+            }
             Rule::Bases { .. }
             | Rule::KeywordCandidate { .. }
             | Rule::ReturnedOfClass(_)
@@ -535,7 +572,30 @@ impl<T: Trace> State<T> {
                 delete,
             } => self.deliver_delete(graph, object, owner, delete),
             Rule::CallBackObject { callback } => self.call(graph, object, callback),
-            Rule::CallProtocol { plan, call } => self.call_protocol(graph, object, plan, call),
+            Rule::CallProtocol { plan, caller, site } => {
+                self.call_protocol(graph, object, plan, caller, site)
+            }
+            Rule::SequenceLength { caller, site } => {
+                self.sequence_length(graph, object, caller, site)
+            }
+            Rule::Reversed {
+                call,
+                dst,
+                result,
+                iteration,
+            } => self.reversed(graph, object, call, dst, result, iteration),
+            Rule::ReversedSequence {
+                object: owner,
+                call,
+                result,
+                ..
+            } => self.reversed_sequence(graph, object, owner, call, result),
+            Rule::ReverseSequence {
+                object: owner,
+                methods,
+                implicit,
+                reversing,
+            } => self.reverse_sequence(graph, owner, methods, implicit, reversing),
             Rule::MetaclassProtocol {
                 class,
                 name,

@@ -8,8 +8,9 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Container, Kind, Literal, Object};
+use crate::engine::outside_calls::BoundId;
 use crate::engine::rules::Rule;
-use crate::engine::semantics::{CallId, Role, SiteKey};
+use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State, not_ported};
@@ -17,6 +18,7 @@ use crate::model::constant_name;
 use crate::models::builtin_kind;
 
 const SEQUENCES: [&str; 2] = ["list", "tuple"];
+const COLLECTIONS: [&str; 5] = ["list", "tuple", "set", "frozenset", "dict"];
 const HASHED: [&str; 3] = ["set", "frozenset", "dict"];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -55,11 +57,25 @@ fn next_id(length: usize) -> u32 {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum ContainerOrigin {
+pub(super) enum ContainerOrigin {
+    Rule(Origin, &'static str, Option<u32>),
     Inexact(ObjId),
     Slice(SliceId),
     Rest(Sym, Sym),
     Iterate(Sym, Sym, IterationRoleId),
+    Iterator(ObjId),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum KeysConstruct {
+    Builder(Sym, Sym),
+    Bound(BoundId),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum Keeps {
+    Hashes,
+    MappingHashes,
 }
 
 type ContainerKey = (Sym, ContainerOrigin, bool);
@@ -206,7 +222,7 @@ enum Subscription {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Iterated {
     Slice(SliceId),
-    Keys(Sym, Sym),
+    Keys(KeysConstruct),
 }
 
 #[derive(Default)]
@@ -349,7 +365,15 @@ impl<T: Trace> State<T> {
         self.symbols.text(found.kind)
     }
 
-    fn is_dict(&self, container: ObjId) -> bool {
+    pub(super) fn hashes_keys(&self, container: ObjId) -> bool {
+        HASHED.contains(&builtin_kind(self.kind_text(container)))
+    }
+
+    pub(super) fn container_factory(&self, container: ObjId) -> Option<NodeId> {
+        self.container_nodes(container).factory
+    }
+
+    pub(super) fn is_dict(&self, container: ObjId) -> bool {
         builtin_kind(self.kind_text(container)) == "dict"
     }
 
@@ -404,7 +428,7 @@ impl<T: Trace> State<T> {
         self.new_object(graph, Object::Container(container))
     }
 
-    fn container_at(
+    pub(super) fn container_at(
         &mut self,
         graph: &mut Graph,
         kind: &str,
@@ -561,6 +585,151 @@ impl<T: Trace> State<T> {
 
     fn aliased(&mut self, graph: &mut Graph, container: ObjId) -> NodeId {
         self.labelled_container_node(graph, container, "<aliased>", |nodes| &mut nodes.aliased)
+    }
+
+    pub(super) fn factory(&mut self, graph: &mut Graph, container: ObjId) -> NodeId {
+        self.labelled_container_node(graph, container, "<factory>", |nodes| &mut nodes.factory)
+    }
+
+    pub(super) fn key_store(&mut self, graph: &mut Graph, container: ObjId) -> NodeId {
+        if self.is_dict(container) {
+            self.keys(graph, container)
+        } else {
+            self.unknown(graph, container)
+        }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    pub(super) fn add_keys(
+        &mut self,
+        graph: &mut Graph,
+        target: ObjId,
+        source: NodeId,
+        construct: KeysConstruct,
+        caller: Sym,
+        site: Sym,
+        keeps: Keeps,
+    ) {
+        let (hashed, kept) = self.entering_keys(graph, source, construct, caller, site, keeps);
+        let store = self.key_store(graph, target);
+        self.add_edge(graph, hashed, store);
+        let store = self.key_store(graph, target);
+        self.add_edge(graph, kept, store);
+        let elements = self.elements(graph, target);
+        self.add_hash(graph, hashed, caller, site, Some(elements));
+    }
+
+    pub(super) fn add_next(
+        &mut self,
+        graph: &mut Graph,
+        iterator: NodeId,
+        dst: NodeId,
+        caller: Sym,
+        site: Sym,
+    ) {
+        let iteration =
+            self.new_iteration(graph, dst, caller, site, false, Unless::Nothing, "next");
+        let rule = self.container_rule(ContainerRule::NextElement(iteration));
+        self.attach(graph, iterator, rule);
+    }
+
+    pub(super) fn add_iter(
+        &mut self,
+        graph: &mut Graph,
+        iterable: NodeId,
+        dst: NodeId,
+        caller: Sym,
+        site: Sym,
+    ) {
+        let iteration =
+            self.new_iteration(graph, dst, caller, site, false, Unless::Nothing, "iter");
+        let rule = self.container_rule(ContainerRule::Iter { iteration, dst });
+        self.attach(graph, iterable, rule);
+    }
+
+    fn iter_object(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        iteration: IterationId,
+        dst: NodeId,
+    ) {
+        let mut object = object;
+        if let Some(container) = self.container_of(object)
+            && container.exact
+            && COLLECTIONS.contains(&builtin_kind(self.symbols.text(container.kind)))
+        {
+            object = self.container_iterator(graph, object);
+        }
+        self.iterator(graph, object, iteration, dst);
+    }
+
+    pub(super) fn container_iterator(&mut self, graph: &mut Graph, container: ObjId) -> ObjId {
+        let source = *self.container_of(container).expect("a container");
+        let kind = format!("{}_iterator", builtin_kind(self.symbols.text(source.kind)));
+        let kind = self.symbols.intern(&kind);
+        let key = (kind, ContainerOrigin::Iterator(container), true);
+        if let Some(&iterator) = self.containers.containers.get(&key) {
+            return iterator;
+        }
+        let unnamed = self.symbols.intern("");
+        let iterator = self.new_object(
+            graph,
+            Object::Container(Container {
+                kind,
+                site: unnamed,
+                length: None,
+                exact: true,
+            }),
+        );
+        if let Object::Container(made) = self.objects.get_mut(iterator) {
+            made.site = source.site;
+        }
+        self.containers.containers.insert(key, iterator);
+        let elements = self.elements(graph, container);
+        let unknown = self.unknown(graph, iterator);
+        self.add_edge(graph, elements, unknown);
+        iterator
+    }
+
+    pub(super) fn add_elements(
+        &mut self,
+        graph: &mut Graph,
+        target: ObjId,
+        source: NodeId,
+        caller: Sym,
+        site: Sym,
+    ) {
+        let unknown = self.unknown(graph, target);
+        let iteration = self.new_iteration(
+            graph,
+            unknown,
+            caller,
+            site,
+            false,
+            Unless::Nothing,
+            "elements",
+        );
+        let rule = self.container_rule(ContainerRule::CopyElements { target, iteration });
+        self.attach(graph, source, rule);
+    }
+
+    fn copy_elements(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        target: ObjId,
+        iteration: IterationId,
+    ) {
+        let both_sequences = self
+            .container_of(object)
+            .is_some_and(|container| is_sequence(self.symbols.text(container.kind)))
+            && is_sequence(self.kind_text(target));
+        if both_sequences {
+            self.copy_range(graph, object, target, Some((Some(BigInt::ZERO), None)));
+        } else {
+            self.iterate(graph, object, iteration);
+        }
     }
 
     pub(super) fn elements(&mut self, graph: &mut Graph, container: ObjId) -> NodeId {
@@ -1001,11 +1170,12 @@ impl<T: Trace> State<T> {
         &mut self,
         graph: &mut Graph,
         source: NodeId,
-        construct: (Sym, Sym),
+        construct: KeysConstruct,
         caller: Sym,
         site: Sym,
+        keeps: Keeps,
     ) -> (NodeId, NodeId) {
-        let key = Iterated::Keys(construct.0, construct.1);
+        let key = Iterated::Keys(construct);
         if let Some(&(iterated, hashed, kept)) = self.containers.iterated.get(&key) {
             assert_eq!(iterated, source, "{construct:?} hashes another node");
             return (hashed, kept.expect("kept keys"));
@@ -1021,7 +1191,11 @@ impl<T: Trace> State<T> {
             Unless::Nothing,
             "elements",
         );
-        let rule = self.container_rule(ContainerRule::EnterKeys { kept, iteration });
+        let rule = self.container_rule(ContainerRule::EnterKeys {
+            kept,
+            iteration,
+            keeps,
+        });
         self.attach(graph, source, rule);
         self.containers
             .iterated
@@ -1035,8 +1209,14 @@ impl<T: Trace> State<T> {
         object: ObjId,
         kept: NodeId,
         iteration: IterationId,
+        keeps: Keeps,
     ) {
-        if self.container_of(object).is_some() && self.keeps_hashes(object) {
+        let kept_by_container = self.container_of(object).is_some()
+            && match keeps {
+                Keeps::Hashes => self.keeps_hashes(object),
+                Keeps::MappingHashes => self.keeps_mapping_hashes(object),
+            };
+        if kept_by_container {
             let elements = self.elements(graph, object);
             self.add_edge(graph, elements, kept);
         } else {
@@ -1044,7 +1224,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn read_keyed(
+    pub(super) fn read_keyed(
         &mut self,
         graph: &mut Graph,
         container: ObjId,
@@ -1149,7 +1329,7 @@ impl<T: Trace> State<T> {
         added
     }
 
-    fn copy_range(
+    pub(super) fn copy_range(
         &mut self,
         graph: &mut Graph,
         source: ObjId,
@@ -1178,7 +1358,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn copy_items(&mut self, graph: &mut Graph, source: ObjId, target: ObjId) {
+    pub(super) fn copy_items(&mut self, graph: &mut Graph, source: ObjId, target: ObjId) {
         self.copy_fields(graph, source, target);
         let from = self.keys(graph, source);
         let to = self.keys(graph, target);
@@ -2335,6 +2515,15 @@ pub(crate) enum ContainerRule {
     EnterKeys {
         kept: NodeId,
         iteration: IterationId,
+        keeps: Keeps,
+    },
+    Iter {
+        iteration: IterationId,
+        dst: NodeId,
+    },
+    CopyElements {
+        target: ObjId,
+        iteration: IterationId,
     },
     NextElement(IterationId),
     YieldFrom {
@@ -2381,6 +2570,8 @@ impl ContainerRule {
             ContainerRule::DictItems(_) => "_DictItems",
             ContainerRule::Sequences(_) => "_Sequences",
             ContainerRule::EnterKeys { .. } => "Each:Containers._enter_keys",
+            ContainerRule::Iter { .. } => "Each:Containers._iter",
+            ContainerRule::CopyElements { .. } => "Each:Containers._copy_elements",
             ContainerRule::NextElement(_) => "Each:Containers.next_element",
             ContainerRule::YieldFrom { .. } => "Each:Containers._yield_from",
             ContainerRule::MetaclassSubscript { .. } => "Each:Containers._metaclass_subscript",
@@ -2412,6 +2603,7 @@ impl ContainerRule {
     pub(crate) fn captured(&self) -> Vec<ObjId> {
         match *self {
             ContainerRule::YieldFrom { function, .. } => vec![function],
+            ContainerRule::CopyElements { target, .. } => vec![target],
             ContainerRule::MetaclassSubscript { class, .. }
             | ContainerRule::ClassSubscript { class, .. }
             | ContainerRule::GenericAlias { class, .. } => vec![class],
@@ -2450,8 +2642,14 @@ impl<T: Trace> State<T> {
             | ContainerRule::NextElement(id)
             | ContainerRule::NextItem(id) => vec![containers.iteration(id).dst],
             ContainerRule::Sequences(id) => vec![containers.sequences(id).dst],
-            ContainerRule::EnterKeys { kept, iteration } => {
+            ContainerRule::EnterKeys {
+                kept, iteration, ..
+            } => {
                 vec![containers.iteration(iteration).dst, kept]
+            }
+            ContainerRule::Iter { dst, .. } => vec![dst],
+            ContainerRule::CopyElements { iteration, .. } => {
+                vec![containers.iteration(iteration).dst]
             }
             ContainerRule::YieldFrom { dst, .. }
             | ContainerRule::GenericAlias { dst, .. }
@@ -2491,8 +2689,16 @@ impl<T: Trace> State<T> {
             ContainerRule::Iterate(id) => self.iterate(graph, object, id),
             ContainerRule::DictItems(id) => self.apply_dict_items(graph, object, id),
             ContainerRule::Sequences(id) => self.sequences_apply(graph, id),
-            ContainerRule::EnterKeys { kept, iteration } => {
-                self.enter_keys(graph, object, kept, iteration)
+            ContainerRule::EnterKeys {
+                kept,
+                iteration,
+                keeps,
+            } => self.enter_keys(graph, object, kept, iteration, keeps),
+            ContainerRule::Iter { iteration, dst } => {
+                self.iter_object(graph, object, iteration, dst)
+            }
+            ContainerRule::CopyElements { target, iteration } => {
+                self.copy_elements(graph, object, target, iteration)
             }
             ContainerRule::NextElement(id) => self.next_element(graph, object, id),
             ContainerRule::YieldFrom { function, dst } => {

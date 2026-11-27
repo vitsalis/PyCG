@@ -103,6 +103,36 @@ impl<T: Trace> State<T> {
             }
             ModelRule::Super => self.rule_super(graph, call, args),
             ModelRule::Type => self.rule_type(graph, call, args),
+            ModelRule::Collection => {
+                self.rule_collection(graph, call, receiver, args, model.arguments[0])
+            }
+            ModelRule::Dict => {
+                let kind = model.arguments.first().copied().unwrap_or("dict");
+                let new = self.rule_dict(graph, call, receiver, args, kind, "dict");
+                self.result(graph, call, new);
+            }
+            ModelRule::Defaultdict => self.rule_defaultdict(graph, call, receiver, args),
+            ModelRule::Counter => self.rule_counter(graph, call, receiver, args),
+            ModelRule::Count => self.rule_count(graph, call, container(receiver), args),
+            ModelRule::Add => {
+                self.rule_add(graph, call, container(receiver), args, model.arguments[0])
+            }
+            ModelRule::Extend => self.rule_extend(graph, call, container(receiver), args),
+            ModelRule::AnyElement => self.rule_any_element(graph, call, container(receiver)),
+            ModelRule::Copy => self.rule_copy(graph, call, container(receiver)),
+            ModelRule::Update => self.rule_update(graph, call, container(receiver), args),
+            ModelRule::Setdefault => self.rule_setdefault(graph, call, container(receiver), args),
+            ModelRule::Get => self.rule_get(graph, call, container(receiver), args),
+            ModelRule::Lookup => self.rule_lookup(graph, call, container(receiver), args),
+            ModelRule::View => self.rule_view(graph, call, container(receiver), model.arguments[0]),
+            ModelRule::Iter => self.rule_iter(graph, call, args),
+            ModelRule::Enumerate => self.rule_enumerate(graph, call, args),
+            ModelRule::Zip => self.rule_zip(graph, call, args),
+            ModelRule::Map => self.rule_map(graph, call, args),
+            ModelRule::Filter => self.rule_filter(graph, call, args),
+            ModelRule::Next => self.rule_next(graph, call, args),
+            ModelRule::Advance => self.rule_advance(graph, call, container(receiver), args),
+            ModelRule::Reversed => self.rule_reversed(graph, call, args),
             ModelRule::Bind => {
                 self.rule_bind(graph, call, receiver.expect("a bound wrapper"), args)
             }
@@ -928,4 +958,8 @@ impl<T: Trace> State<T> {
             self.attach(graph, bases, rule);
         }
     }
+}
+
+fn container(receiver: Option<ObjId>) -> ObjId {
+    receiver.expect("a method of a container has its receiver")
 }
