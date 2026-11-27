@@ -72,7 +72,7 @@ impl<T: Trace> State<T> {
         if added {
             return true;
         }
-        self.complete_pattern_operands(graph)
+        self.complete_open_arguments(graph) || self.complete_pattern_operands(graph)
     }
 
     fn absorbed_functions(&mut self, graph: &mut Graph) -> FxHashSet<ObjId> {
@@ -125,6 +125,7 @@ impl<T: Trace> State<T> {
                 | Object::BuiltinMethod { .. }
                 | Object::Super { .. }
                 | Object::Typed { .. }
+                | Object::Closure { .. }
                 | Object::Fallback { .. }
                 | Object::Const { .. }
                 | Object::Container(_)

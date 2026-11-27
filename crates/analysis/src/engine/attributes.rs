@@ -756,7 +756,10 @@ impl<T: Trace> State<T> {
                 let external = self.external(graph, &name, 2, false);
                 self.add_object(graph, dst, external);
             }
-            Object::Saturated | Object::Fallback { .. } | Object::TypeForm { .. } => {}
+            Object::Saturated
+            | Object::Fallback { .. }
+            | Object::TypeForm { .. }
+            | Object::Closure { .. } => {}
         }
     }
 

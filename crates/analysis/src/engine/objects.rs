@@ -1,5 +1,6 @@
 use num_bigint::BigInt;
 use pycg_solver::{KindMask, NodeId, ObjId};
+use pycg_stubs::Type;
 use rustc_hash::FxHashSet;
 
 use crate::builder::calls::Allocator;
@@ -284,6 +285,10 @@ pub enum Object {
         parts: Box<[Option<NodeId>]>,
         name: Sym,
     },
+    Closure {
+        name: Sym,
+        result: Box<Type>,
+    },
 }
 
 impl Object {
@@ -309,6 +314,7 @@ impl Object {
             Object::Pattern { .. } => Kind::Pattern,
             Object::ReturnsArgument { .. } => Kind::ReturnsArgument,
             Object::TypeForm { .. } => Kind::TypeForm,
+            Object::Closure { .. } => Kind::Closure,
         }
     }
 }
@@ -422,6 +428,7 @@ impl Objects {
                 case.map(|case| symbols.text(case)),
             ),
             Object::TypeForm { name, .. } => symbols.text(*name).to_string(),
+            Object::Closure { name, .. } => symbols.text(*name).to_string(),
         }
     }
 }

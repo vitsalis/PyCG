@@ -10,6 +10,7 @@ pub mod hierarchy;
 pub mod objects;
 mod outside;
 mod outside_calls;
+mod outside_results;
 mod outside_types;
 mod patterns;
 mod protocols;
@@ -197,6 +198,7 @@ struct State<T: Trace> {
     patterns: patterns::Patterns,
     outside_types: outside_types::OutsideTypes,
     annotations: annotations::Annotations,
+    outside_results: outside_results::OutsideResults,
 }
 
 impl<T: Trace> Engine<T> {
@@ -324,6 +326,7 @@ impl<T: Trace> Engine<T> {
             patterns: patterns::Patterns::default(),
             outside_types: outside_types::OutsideTypes::default(),
             annotations: annotations::Annotations::default(),
+            outside_results: outside_results::OutsideResults::default(),
             tables: BuilderTables::default(),
         };
         state.trace.object(

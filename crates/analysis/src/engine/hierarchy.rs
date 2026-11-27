@@ -1254,7 +1254,7 @@ impl<T: Trace> State<T> {
         false
     }
 
-    fn derives_from_type(&mut self, mro: &[ObjId]) -> bool {
+    pub(super) fn derives_from_type(&mut self, mro: &[ObjId]) -> bool {
         mro.iter().any(|&base| {
             self.objects.is_external(base)
                 && (self.external_name(base) == BUILTIN_TYPE

@@ -368,6 +368,7 @@ impl<T: Trace> State<T> {
             | Object::Wrapper { .. }
             | Object::Super { .. }
             | Object::Typed { .. }
+            | Object::Closure { .. }
             | Object::BuiltinMethod { .. }
             | Object::ReturnsArgument { .. }
             | Object::Pattern { exact: false, .. }
@@ -1925,6 +1926,7 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
             | Object::Generator { .. }
+            | Object::Closure { .. }
             | Object::Coroutine { .. }
             | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => {}
@@ -2198,6 +2200,7 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
             | Object::Generator { .. }
+            | Object::Closure { .. }
             | Object::Coroutine { .. }
             | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => {}
@@ -2382,6 +2385,7 @@ impl<T: Trace> State<T> {
             | Object::Wrapper { .. }
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
+            | Object::Closure { .. }
             | Object::Coroutine { .. }
             | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => return,
@@ -2585,6 +2589,7 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
             | Object::Const { .. }
+            | Object::Closure { .. }
             | Object::Coroutine { .. }
             | Object::ReturnsArgument { .. }
             | Object::Pattern { .. } => {}
