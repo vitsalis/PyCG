@@ -438,5 +438,5 @@ def test_the_key_of_an_oracle_run_follows_every_input_of_the_run(tmp_path, chang
 def test_the_required_dumps_are_dumps_that_the_oracle_writes():
     required = compare.required_dumps(PARITY / "required.txt")
 
-    assert "D2" in required
+    assert {"D1", "D2"} <= set(required)
     assert set(required) <= {"D1", "D2", "D3", "D4", "D5", "D6"}

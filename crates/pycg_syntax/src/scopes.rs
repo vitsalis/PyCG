@@ -51,8 +51,8 @@ pub struct Scope<'a> {
     pub shared: FxHashSet<String>,
     pub star_import: bool,
     pub dynamic: bool,
-    pub imports: FxHashMap<String, Option<String>>,
-    pub definitions: FxHashMap<String, Option<NodeKey>>,
+    pub imports: IndexMap<String, Option<String>>,
+    pub definitions: IndexMap<String, Option<NodeKey>>,
     pub reads: FxHashSet<String>,
 }
 
@@ -692,8 +692,8 @@ impl<'a> Collector<'a> {
             shared: FxHashSet::default(),
             star_import: false,
             dynamic: false,
-            imports: FxHashMap::default(),
-            definitions: FxHashMap::default(),
+            imports: IndexMap::new(),
+            definitions: IndexMap::new(),
             reads: FxHashSet::default(),
         });
         id
