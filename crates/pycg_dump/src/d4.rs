@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
-use std::io::Write;
+use std::fs::File;
+use std::io::{BufRead, BufReader, BufWriter, Lines, Write};
 use std::path::Path;
 use std::process::ExitCode;
 
@@ -32,22 +33,29 @@ pub fn run(arguments: &[String]) -> Option<ExitCode> {
         .lines()
         .map(str::to_owned)
         .collect();
-    let oracle = read_oracle(Path::new(oracle));
-    let file = std::fs::File::create(out).expect("the D4 dump can be created");
-    let mut out = std::io::BufWriter::new(file);
-    for line in listed.lines() {
-        let (module, path) = line.split_once('\t').expect("a module and its file");
-        let records = oracle.get(module).cloned().unwrap_or_default();
-        let mut replay = Replay::new(module, records);
+    let modules: Vec<(&str, &str)> = listed
+        .lines()
+        .map(|line| line.split_once('\t').expect("a module and its file"))
+        .collect();
+    let order: BTreeMap<&str, usize> = modules
+        .iter()
+        .enumerate()
+        .map(|(index, (module, _))| (*module, index))
+        .collect();
+    let mut oracle = Oracle::open(Path::new(oracle));
+    let file = File::create(out).expect("the D4 dump can be created");
+    let mut out = BufWriter::new(file);
+    let mut label_counts = BTreeMap::new();
+    for (index, (module, path)) in modules.iter().enumerate() {
+        oracle.skip_before(index, &order);
+        let mut replay = Replay::new(module, &mut oracle, &mut out, &mut label_counts);
         build(
             &mut replay,
             module,
             Path::new(path),
             entries.iter().any(|entry| entry == module),
         );
-        for record in replay.finish() {
-            write!(out, "{}", crate::canonical::line(&record)).expect("the D4 dump takes a record");
-        }
+        replay.finish();
     }
     out.flush().expect("the D4 dump is written");
     Some(ExitCode::SUCCESS)
@@ -87,22 +95,74 @@ fn without_lone_surrogates(line: &str) -> String {
     out
 }
 
-fn read_oracle(path: &Path) -> IndexMap<String, Vec<Value>> {
-    let mut grouped: IndexMap<String, Vec<Value>> = IndexMap::new();
-    let text = std::fs::read_to_string(path).unwrap_or_default();
-    for line in text.lines() {
-        let record: Value =
-            serde_json::from_str(&without_lone_surrogates(line)).expect("an oracle D4 record");
-        if record.get("call").is_none() {
-            continue;
-        }
-        let module = record["module"].as_str().expect("a module").to_owned();
-        grouped.entry(module).or_default().push(record);
-    }
-    grouped
+struct Oracle {
+    lines: Option<Lines<BufReader<File>>>,
+    next: Option<Value>,
 }
 
-fn build(replay: &mut Replay, module: &str, path: &Path, is_entry: bool) {
+impl Oracle {
+    fn open(path: &Path) -> Oracle {
+        let lines = File::open(path)
+            .ok()
+            .map(|file| BufReader::new(file).lines());
+        let mut oracle = Oracle { lines, next: None };
+        oracle.advance();
+        oracle
+    }
+
+    fn advance(&mut self) {
+        self.next = None;
+        let Some(lines) = &mut self.lines else {
+            return;
+        };
+        for line in lines.by_ref() {
+            let line = line.expect("the oracle's D4 is readable");
+            let record: Value =
+                serde_json::from_str(&without_lone_surrogates(&line)).expect("an oracle D4 record");
+            if record.get("call").is_some() {
+                self.next = Some(record);
+                return;
+            }
+        }
+    }
+
+    fn skip_before(&mut self, index: usize, order: &BTreeMap<&str, usize>) {
+        while let Some(record) = &self.next {
+            let module = record["module"].as_str().expect("a module");
+            if order.get(module).is_some_and(|&position| position >= index) {
+                return;
+            }
+            self.advance();
+        }
+    }
+
+    fn take(&mut self, module: &str, call: &str) -> Option<Value> {
+        let record = self.next.as_mut()?;
+        if record["module"] != module || record["call"] != call {
+            return None;
+        }
+        let answer = record["answer"].take();
+        self.advance();
+        Some(answer)
+    }
+}
+
+fn label_count(name: &str, label: &str) -> Option<usize> {
+    let rest = name.strip_prefix(label)?;
+    if rest.is_empty() {
+        return Some(1);
+    }
+    rest.strip_prefix('~')?.parse().ok()
+}
+
+fn unsuffixed(name: &str) -> &str {
+    match name.rsplit_once('~') {
+        Some((stem, count)) if count.parse::<usize>().is_ok() => stem,
+        _ => name,
+    }
+}
+
+fn build(replay: &mut Replay<'_>, module: &str, path: &Path, is_entry: bool) {
     let Ok(source) = read_file(path) else {
         return;
     };
@@ -138,11 +198,11 @@ enum Made {
     Class(ClassFields),
 }
 
-struct Replay {
+struct Replay<'r> {
     module: String,
-    oracle: Vec<Value>,
-    cursor: usize,
-    records: Vec<Value>,
+    oracle: &'r mut Oracle,
+    out: &'r mut BufWriter<File>,
+    label_counts: &'r mut BTreeMap<String, usize>,
     node_names: Vec<String>,
     node_labels: Vec<Option<String>>,
     node_by_name: BTreeMap<String, NodeId>,
@@ -155,13 +215,18 @@ struct Replay {
     divergences: usize,
 }
 
-impl Replay {
-    fn new(module: &str, oracle: Vec<Value>) -> Replay {
+impl<'r> Replay<'r> {
+    fn new(
+        module: &str,
+        oracle: &'r mut Oracle,
+        out: &'r mut BufWriter<File>,
+        label_counts: &'r mut BTreeMap<String, usize>,
+    ) -> Replay<'r> {
         Replay {
             module: module.to_owned(),
             oracle,
-            cursor: 0,
-            records: Vec::new(),
+            out,
+            label_counts,
             node_names: Vec::new(),
             node_labels: Vec::new(),
             node_by_name: BTreeMap::new(),
@@ -176,26 +241,35 @@ impl Replay {
     }
 
     fn answer(&mut self, call: &str) -> Value {
-        let recorded = self.oracle.get(self.cursor);
-        match recorded {
-            Some(record) if record["call"] == call => {
-                self.cursor += 1;
-                record["answer"].clone()
-            }
-            _ => {
-                self.divergences += 1;
-                json!({"diverged": format!("{call}#{}", self.divergences)})
-            }
-        }
+        self.oracle.take(&self.module, call).unwrap_or_else(|| {
+            self.divergences += 1;
+            json!({"diverged": format!("{call}#{}", self.divergences)})
+        })
+    }
+
+    fn write(&mut self, record: &Value) {
+        write!(self.out, "{}", crate::canonical::line(record)).expect("the D4 dump takes a record");
     }
 
     fn record(&mut self, call: &str, arguments: Map<String, Value>, answer: Value) {
-        self.records.push(json!({
+        let record = json!({
             "module": self.module,
             "call": call,
             "arguments": Value::Object(arguments),
             "answer": answer,
-        }));
+        });
+        self.write(&record);
+    }
+
+    fn labelled_node(&mut self, label: String) -> NodeId {
+        let count = self.label_counts.entry(label.clone()).or_insert(0);
+        *count += 1;
+        let name = if *count == 1 {
+            label.clone()
+        } else {
+            format!("{label}~{count}")
+        };
+        self.named_node(name, Some(label))
     }
 
     fn named_node(&mut self, name: String, label: Option<String>) -> NodeId {
@@ -214,6 +288,12 @@ impl Replay {
             Some(name) => name.to_owned(),
             None => answer.to_string(),
         };
+        if let Some(label) = label
+            && let Some(count) = label_count(&name, label)
+        {
+            let known = self.label_counts.entry(label.to_owned()).or_insert(0);
+            *known = (*known).max(count);
+        }
         self.named_node(name, label.map(str::to_owned))
     }
 
@@ -276,34 +356,34 @@ impl Replay {
         self.record(call, arguments, answer);
     }
 
-    fn finish(mut self) -> Vec<Value> {
+    fn finish(mut self) {
         if self.built.is_none() {
-            return self.records;
+            return;
         }
         let tables = self.tables_record();
-        self.records.push(tables);
+        self.write(&tables);
         let module = self.built.expect("a built module");
         let defines = set(self
             .module_defines
             .iter()
             .map(|name| Value::from(&**name))
             .collect());
-        self.records.push(json!({
+        let defined = json!({
             "module": self.module,
             "object": self.object(module),
             "fields": {"defines": defines},
-        }));
+        });
+        self.write(&defined);
         let made: Vec<(ObjId, Value)> = self
             .made
             .iter()
             .map(|(&object, made)| (object, self.fields(made)))
             .collect();
         for (object, fields) in made {
-            self.records.push(
-                json!({"module": self.module, "object": self.object(object), "fields": fields}),
-            );
+            let record =
+                json!({"module": self.module, "object": self.object(object), "fields": fields});
+            self.write(&record);
         }
-        self.records
     }
 
     fn annotations(&self, annotations: &Option<IndexMap<Box<str>, NodeId>>) -> Value {
@@ -415,7 +495,7 @@ fn arguments(entries: Vec<(&str, Value)>) -> Map<String, Value> {
         .collect()
 }
 
-impl Analysis for Replay {
+impl Analysis for Replay<'_> {
     fn container(&mut self, kind: &str, site: &str, length: Option<usize>) -> ObjId {
         let answer = self.answer("container");
         let recorded = arguments(vec![
@@ -702,9 +782,11 @@ impl Analysis for Replay {
         self.record("field", recorded, answer.clone());
         let label = format!(
             "{}.{name}",
-            self.object_names[object.index()]
-                .split_once(':')
-                .map_or("", |(_, name)| name)
+            unsuffixed(
+                self.object_names[object.index()]
+                    .split_once(':')
+                    .map_or("", |(_, name)| name)
+            )
         );
         self.node_from(&answer, Some(&label))
     }
@@ -784,15 +866,9 @@ impl Analysis for Replay {
         let mut parameters = IndexMap::new();
         for parameter in function_signature.names() {
             let label = format!("{name}.{parameter}");
-            parameters.insert(
-                Box::from(parameter),
-                self.named_node(label.clone(), Some(label)),
-            );
+            parameters.insert(Box::from(parameter), self.labelled_node(label));
         }
-        let mut labelled = |suffix: &str| {
-            let label = format!("{name}.{suffix}");
-            self.named_node(label.clone(), Some(label))
-        };
+        let mut labelled = |suffix: &str| self.labelled_node(format!("{name}.{suffix}"));
         let return_node = labelled("<return>");
         let (yield_node, sent_node) = if generator {
             (Some(labelled("<yield>")), Some(labelled("<sent>")))
