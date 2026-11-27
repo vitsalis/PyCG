@@ -44,7 +44,50 @@ enum Inbox {
 enum Successors {
     None,
     One(NodeId),
-    Many(Box<OrderedMap<NodeId, bool>>),
+    Many(Box<Targets>),
+}
+
+#[derive(Default)]
+struct Targets {
+    order: Vec<NodeId>,
+    searched: FxHashMap<NodeId, bool>,
+}
+
+impl Targets {
+    fn contains(&self, target: NodeId) -> bool {
+        self.searched.contains_key(&target)
+    }
+
+    fn searched(&self, target: NodeId) -> bool {
+        self.searched[&target]
+    }
+
+    fn len(&self) -> usize {
+        self.order.len()
+    }
+
+    fn insert(&mut self, target: NodeId, searched: bool) {
+        if self.searched.insert(target, searched).is_none() {
+            self.order.push(target);
+        }
+    }
+
+    fn remove(&mut self, target: NodeId) -> Option<bool> {
+        let searched = self.searched.remove(&target)?;
+        let position = self
+            .order
+            .iter()
+            .position(|&listed| listed == target)
+            .expect("a target is in the order");
+        self.order.remove(position);
+        Some(searched)
+    }
+
+    fn pairs(&self) -> impl Iterator<Item = (NodeId, bool)> + '_ {
+        self.order
+            .iter()
+            .map(|&target| (target, self.searched[&target]))
+    }
 }
 
 type Groups<C> = Vec<(Vec<C>, SetId)>;
@@ -284,7 +327,7 @@ impl<C: Copy> Solver<C> {
             return;
         }
         match &self.nodes[source.index()].successors {
-            Successors::Many(successors) if successors.contains_key(&target) => return,
+            Successors::Many(successors) if successors.contains(target) => return,
             Successors::One(only) if *only == target => return,
             _ => {}
         }
@@ -514,18 +557,18 @@ impl<C: Copy> Solver<C> {
         let successors = &mut self.nodes[source.index()].successors;
         match successors {
             Successors::Many(map) => {
-                assert!(!map.contains_key(&target));
+                assert!(!map.contains(target));
                 map.insert(target, searched);
             }
             Successors::One(only) => {
                 assert_ne!(*only, target);
-                let mut map = OrderedMap::default();
+                let mut map = Targets::default();
                 map.insert(*only, false);
                 map.insert(target, searched);
                 *successors = Successors::Many(Box::new(map));
             }
             Successors::None if searched => {
-                let mut map = OrderedMap::default();
+                let mut map = Targets::default();
                 map.insert(target, true);
                 *successors = Successors::Many(Box::new(map));
             }
@@ -668,22 +711,22 @@ impl<C: Copy> Solver<C> {
                     self.nodes[node.index()].successors = Successors::One(target);
                     self.receive(target, delta);
                 } else {
-                    let mut map = OrderedMap::default();
+                    let mut map = Targets::default();
                     map.insert(target, true);
                     self.nodes[node.index()].successors = Successors::Many(Box::new(map));
                     self.cycle_suspects.push(target);
                 }
             }
             Successors::Many(mut map) => {
-                let mut listed: Vec<NodeId> = map.keys().copied().collect();
+                let mut listed: Vec<NodeId> = map.order.clone();
                 self.order.arrange(&mut listed);
                 for listed_target in listed {
                     let target = self.find(listed_target);
                     if target != listed_target {
                         let searched = map
-                            .shift_remove(&listed_target)
+                            .remove(listed_target)
                             .expect("a listed successor is in the map");
-                        if target == node || map.contains_key(&target) {
+                        if target == node || map.contains(target) {
                             continue;
                         }
                         map.insert(target, searched);
@@ -695,7 +738,7 @@ impl<C: Copy> Solver<C> {
                     }
                     if target_done != done {
                         self.receive(target, delta);
-                    } else if !map[&target] {
+                    } else if !map.searched(target) {
                         map.insert(target, true);
                         self.cycle_suspects.push(target);
                     }
@@ -880,7 +923,7 @@ impl<C: Copy> Solver<C> {
         let listed: Vec<NodeId> = match &self.nodes[node.index()].successors {
             Successors::None => Vec::new(),
             Successors::One(only) => vec![*only],
-            Successors::Many(map) => map.keys().copied().collect(),
+            Successors::Many(map) => map.order.clone(),
         };
         listed.into_iter().map(|target| self.find(target)).collect()
     }
@@ -1103,9 +1146,6 @@ fn successor_pairs(successors: &Successors) -> Vec<(NodeId, bool)> {
     match successors {
         Successors::None => Vec::new(),
         Successors::One(only) => vec![(*only, false)],
-        Successors::Many(map) => map
-            .iter()
-            .map(|(&target, &searched)| (target, searched))
-            .collect(),
+        Successors::Many(map) => map.pairs().collect(),
     }
 }
