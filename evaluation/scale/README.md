@@ -13,9 +13,10 @@ A run of one package gives:
 
 | Value | Meaning |
 |---|---|
-| outcome | `finished`, or `killed by the cap` when the analysis passed the memory cap (4 GiB unless the run sets another); otherwise the runner's status (`timeout`, `crash`) |
+| outcome | `finished`; `killed by the cap` when the analysis passed the memory cap (4 GiB unless the run sets another) and the runner stopped it; a kill from outside the runner (below); otherwise the runner's status (`timeout`, `crash`) |
 | seconds | The time of the analysis |
-| peak MiB | The peak resident set size of the analysis |
+| peak MiB | The peak resident set size of the analysis; for a run that did not finish, the largest of the runner's samples |
+| MiB available at the start | The memory that the machine had available (`MemAvailable` of `/proc/meminfo`, the machine's in a container) when the run started; a container larger than it can be killed by the machine's OOM killer |
 | graph SHA-256 | The SHA-256 of the call graph of a finished run; two runs with the same SHA-256 gave byte-identical graphs |
 
 The analysis runs under the cap, in a container with 512 MiB more, so that
@@ -23,6 +24,21 @@ the analysis is stopped at the cap and the run survives to record it. The
 headroom covers twice the largest growth of the analysis between two
 samples of its memory, 203 MiB in 0.25 s on scikit-learn (numpy: 61 MiB),
 and the memory of the measuring script.
+
+A SIGKILL that the runner did not send is not the cap. The container's
+memory cgroup counts the OOM kills of its processes (`oom_kill` of
+`memory.events`) and the times it reached its own limit (`oom`); the
+counters before and after the run name the kill:
+
+| Outcome | Counters | Cause |
+|---|---|---|
+| `killed: the container ran out of memory` | `oom` rose | The container reached its own limit, the cap and the headroom: the analysis grew faster than the runner samples it, or the runner needed more |
+| `killed: the machine ran out of memory` | only `oom_kill` rose | The kernel's OOM killer of the whole machine, which kills the largest process: the container's limit is more than the machine has free |
+| `killed by SIGKILL` | neither, or no cgroup | Another process |
+
+Such a run is not a measurement: `compare`, and so `make eval-scale`,
+refuse it and say which run to repeat on a machine with the container's
+memory free.
 
 ## Packages
 
