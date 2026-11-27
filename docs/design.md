@@ -4051,14 +4051,17 @@ one defines `__getitem__`, `iter()` gives an iterator whose `next()` calls
 `__getitem__` with an index that is not known (the sequence protocol), from the
 scope that iterates. That fallback is one record per class, kind of the
 iterated object, iteration and result (`_Sequences`), attached to the lookup of
-`__getitem__` through each of its objects, once per lookup: the rule reads only
+`__getitem__` through each object that it is given: the rule reads only
 whether a lookup finds a method, and the objects of one kind and class find the
-same, but not in the same round. Through the first object alone, the record
-would iterate in the round in which that object's lookup fills: at once for an
-object that another iteration met earlier, a round later for one whose lookup
-is new, and which object comes first depends on the order of the solve (see
-*Saturation and the rounds*). An object that arrives later is iterated at once,
-and an opaque one gives the result the saturated value. Every iteration,
+same, but not in the same round. The record keeps no set of the lookups that it
+is attached to: an object given twice attaches it twice to its lookup, and an
+application after the first finds the record iterating and does nothing.
+Through the first object alone, the record would iterate in the round in which
+that object's lookup fills: at once for an object that another iteration met
+earlier, a round later for one whose lookup is new, and which object comes
+first depends on the order of the solve (see *Saturation and the rounds*). An
+object that arrives later is iterated at once, and an opaque one gives the
+result the saturated value. Every iteration,
 `iter()`, `next()` and an explicit `__next__()` of these iterators and of
 generators go through one rule. `iter(callable, sentinel)` gives an iterator
 whose `next()` calls the callable, implicitly, from the scope that iterates.
