@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 
 COMMON = Path(__file__).resolve().parent
-DESCRIPTION = """The two steps of an optimisation iteration (evaluation/README.md,
-"Commands"): `run` measures and scores a checkout, `compare` lists what
+DESCRIPTION = """The two steps of an optimisation iteration (AGENTS.md,
+"Evaluation"): `run` measures and scores a checkout, `compare` lists what
 changed between two results.
 
     python -I evaluation/common/loop.py run --flavour new --checkout PATH --name NAME

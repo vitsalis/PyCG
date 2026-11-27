@@ -8,9 +8,8 @@
 # (container/Dockerfile.inputs); the trace image takes its project's source
 # from it at its own build. CI runs that build and publishes the images of
 # `make eval-inputs` under their content key (tools/inputs_key.py), so
-# that `make eval` pulls them instead (evaluation/README.md, "The inputs
-# image"). No service has network, and nothing runs on
-# the host. A new trace goes to evaluation/results/trace/, the only host
+# that `make eval` pulls them instead. No service has network, and nothing
+# runs on the host. A new trace goes to evaluation/results/trace/, the only host
 # path that a service writes. See evaluation/macro-benchmark/README.md
 # ("Re-recording a trace").
 #

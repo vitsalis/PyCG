@@ -25,8 +25,8 @@ USAGE = """usage: python3 -I fetch.py macro DESTINATION
        python3 -I fetch.py scale DESTINATION
 
 Fetches each project of macro-benchmark/projects.toml (macro) or of
-scale/projects.toml (scale) into DESTINATION/<name>, checked against its pin
-(evaluation/README.md, "The inputs image")."""
+scale/projects.toml (scale) into DESTINATION/<name>, checked against its
+pin."""
 
 
 def _load(name, path):
