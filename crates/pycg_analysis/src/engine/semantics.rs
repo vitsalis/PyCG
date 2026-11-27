@@ -3,6 +3,7 @@ use pycg_solver::{NodeId, ObjId};
 use pycg_stubs::DefinitionKind;
 use rustc_hash::FxHashSet;
 
+use crate::builder::calls::Call as BuilderCall;
 use crate::engine::attributes::AccessKind;
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::Object;
@@ -86,19 +87,6 @@ pub struct Call {
     pub rule: RuleId,
 }
 
-pub struct NewCall<'a> {
-    pub callee: Option<NodeId>,
-    pub caller: &'a str,
-    pub args: &'a [Option<NodeId>],
-    pub keywords: &'a [(Box<str>, Option<NodeId>)],
-    pub dst: Option<NodeId>,
-    pub site: &'a str,
-    pub star: &'a [(Option<NodeId>, bool)],
-    pub double_star: &'a [Option<NodeId>],
-    pub decorator: bool,
-    pub applies: bool,
-}
-
 impl<T: Trace> State<T> {
     pub(super) fn new_call(&mut self, mut call: Call, origin: Option<Origin>) -> CallId {
         let id = CallId(u32::try_from(self.calls.len()).expect("fewer than 2^32 calls"));
@@ -108,7 +96,7 @@ impl<T: Trace> State<T> {
         id
     }
 
-    pub(super) fn add_call(&mut self, graph: &mut Graph, new: &NewCall<'_>) {
+    pub(super) fn add_call(&mut self, graph: &mut Graph, new: &BuilderCall<'_>) {
         let caller = self.symbols.intern(new.caller);
         let site = self.symbols.intern(new.site);
         if !new.decorator {

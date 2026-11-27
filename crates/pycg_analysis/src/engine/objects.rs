@@ -2,6 +2,7 @@ use num_bigint::BigInt;
 use pycg_solver::{KindMask, NodeId, ObjId};
 use rustc_hash::FxHashSet;
 
+use crate::builder::calls::Allocator;
 use crate::engine::hierarchy::LookupKey;
 use crate::engine::symbols::{Sym, Symbols};
 use crate::engine::{OrderedMap, OrderedSet};
@@ -167,12 +168,6 @@ impl Function {
             .map(|&(_, node)| node)
             .expect("a parameter of the function")
     }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum Allocator {
-    Object,
-    Super,
 }
 
 pub struct Class {

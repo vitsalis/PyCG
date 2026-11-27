@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::rc::Rc;
+use std::sync::Arc;
 
 use rustc_hash::{FxHashMap, FxHashSet};
 
@@ -75,8 +75,8 @@ impl Definition {
     }
 }
 
-type Mro = Rc<[Box<str>]>;
-type Members = FxHashMap<Box<str>, Rc<[Definition]>>;
+type Mro = Arc<[Box<str>]>;
+type Members = FxHashMap<Box<str>, Arc<[Definition]>>;
 type PackageModules = BTreeMap<Box<str>, ModuleId>;
 
 #[derive(Default)]
@@ -89,7 +89,7 @@ pub struct Stubs {
     members_by_class_and_name: FxHashMap<Box<str>, Members>,
     mro_by_class: FxHashMap<Box<str>, Mro>,
     abstract_by_class: FxHashMap<Box<str>, bool>,
-    abstract_reach_by_class: FxHashMap<Box<str>, Rc<BTreeSet<Box<str>>>>,
+    abstract_reach_by_class: FxHashMap<Box<str>, Arc<BTreeSet<Box<str>>>>,
     abc_name_by_typing_path: Option<FxHashMap<Box<str>, Box<str>>>,
 }
 
@@ -232,7 +232,7 @@ impl Stubs {
         found
     }
 
-    pub fn attribute(&mut self, definition: &Definition, name: &str) -> Rc<[Definition]> {
+    pub fn attribute(&mut self, definition: &Definition, name: &str) -> Arc<[Definition]> {
         match definition.kind {
             DefinitionKind::Module => {
                 let Some(module) = self.module(&definition.path) else {
@@ -243,12 +243,12 @@ impl Stubs {
                 };
                 let path = format!("{}.{name}", definition.path);
                 if let Some(&entry) = self.module_data(module).names.get(name) {
-                    return Rc::from(self.follow(&path, entry, None));
+                    return Arc::from(self.follow(&path, entry, None));
                 }
                 if self.module(&path).is_some() {
-                    return Rc::from([Definition::module(&path)]);
+                    return Arc::from([Definition::module(&path)]);
                 }
-                Rc::from([])
+                Arc::from([])
             }
             DefinitionKind::Class => {
                 let found = self.member(&definition.path, name);
@@ -258,12 +258,12 @@ impl Stubs {
                 self.metaclass_member(&definition.path, name)
             }
             DefinitionKind::Function | DefinitionKind::Property | DefinitionKind::Variable => {
-                Rc::from([])
+                Arc::from([])
             }
         }
     }
 
-    pub fn metaclass_member(&mut self, class: &str, name: &str) -> Rc<[Definition]> {
+    pub fn metaclass_member(&mut self, class: &str, name: &str) -> Arc<[Definition]> {
         let metaclass = self.metaclass(class);
         self.member(&metaclass, name)
     }
@@ -297,7 +297,7 @@ impl Stubs {
         })
     }
 
-    pub fn member(&mut self, class: &str, name: &str) -> Rc<[Definition]> {
+    pub fn member(&mut self, class: &str, name: &str) -> Arc<[Definition]> {
         if let Some(found) = self
             .members_by_class_and_name
             .get(class)
@@ -305,7 +305,7 @@ impl Stubs {
         {
             return found.clone();
         }
-        let found: Rc<[Definition]> = Rc::from(self.find_member(class, name));
+        let found: Arc<[Definition]> = Arc::from(self.find_member(class, name));
         self.members_by_class_and_name
             .entry(Box::from(class))
             .or_default()
@@ -434,7 +434,7 @@ impl Stubs {
 
     fn start_mro(&mut self, class: &str) -> MroFrame {
         self.mro_by_class
-            .insert(Box::from(class), Rc::from([Box::from(class)]));
+            .insert(Box::from(class), Arc::from([Box::from(class)]));
         let mut bases = self.class_bases(class);
         if bases.is_empty() && class != IMPLICIT_BASE {
             bases.push(Box::from(IMPLICIT_BASE));
@@ -463,7 +463,7 @@ impl Stubs {
             }
             let frame = stack.pop().expect("a frame on the stack");
             let memo = &self.mro_by_class;
-            let mro: Mro = Rc::from(linearize(
+            let mro: Mro = Arc::from(linearize(
                 &frame.class,
                 &frame.bases,
                 |base| &memo[base][..],
@@ -508,7 +508,7 @@ impl Stubs {
         result
     }
 
-    pub fn abstract_reach(&mut self, class: &str) -> Rc<BTreeSet<Box<str>>> {
+    pub fn abstract_reach(&mut self, class: &str) -> Arc<BTreeSet<Box<str>>> {
         if let Some(found) = self.abstract_reach_by_class.get(class) {
             return found.clone();
         }
@@ -522,7 +522,7 @@ impl Stubs {
             reach.insert(current);
             pending.extend(bases);
         }
-        let reach = Rc::new(reach);
+        let reach = Arc::new(reach);
         self.abstract_reach_by_class
             .insert(Box::from(class), reach.clone());
         reach
