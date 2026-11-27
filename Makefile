@@ -30,6 +30,7 @@ SCALE_CONTAINER_MIB = $(shell python3 -I evaluation/scale/measure.py container-m
 SCALE_SANDBOX = $(call sandbox,$(SCALE_CONTAINER_MIB)m)
 SCALE_MEASURE = $(CURDIR)/evaluation/scale/measure.py
 SCALE_RESULT = $(EVAL_OUT)/scale-$(COMMIT)
+SCALE_RUST_RESULT = $(EVAL_OUT)/scale-rust-$(COMMIT)
 SCALE_BASE_RESULT = $(EVAL_OUT)/scale-base-$(BASE_COMMIT)-for-$(COMMIT)
 LOOP = $(SANDBOX) $(CURDIR)/evaluation/common/loop.py
 GATE = $(SANDBOX) $(CURDIR)/evaluation/common/gate.py
@@ -48,7 +49,7 @@ base_inputs = if [ "$$(python3 -I $(BASE_TREE)/tools/inputs_key.py)" = "$$(pytho
 	&& $(MAKE) --no-print-directory eval-inputs; fi
 need_base = $(if $(BASE),,$(error $@ needs BASE=<git ref of the base commit>))
 need_name = $(if $(NAME),,$(error $@ needs NAME=<package of evaluation/scale/projects.toml>))
-measure_scale = $(SCALE_SANDBOX) $(SCALE_MEASURE) run --checkout $(1) --name $(notdir $(2)) \
+measure_scale = $(SCALE_SANDBOX) $(SCALE_MEASURE) run --checkout $(1) --name $(notdir $(2)) --flavour $(3) \
 	--package $(NAME) --out $(EVAL_OUT) --memory-mib $(SCALE_MEMORY_MIB)
 scale_record = $(1)/scale/$(NAME).record.json
 PARITY_SETS ?= micro macro
@@ -79,7 +80,7 @@ endef
 
 define measure_scale_base
 git worktree add --detach $(BASE_TREE) $(BASE)
-$(call measure_scale,$(BASE_TREE),$(SCALE_BASE_RESULT)) \
+$(call measure_scale,$(BASE_TREE),$(SCALE_BASE_RESULT),new) \
 	|| (git worktree remove --force $(BASE_TREE) && false)
 git worktree remove --force $(BASE_TREE)
 endef
@@ -120,7 +121,7 @@ endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
-	eval-same-graphs eval-labels eval-changes eval-scale eval-trace eval-rust parity-oracle parity-key parity
+	eval-same-graphs eval-labels eval-changes eval-scale eval-scale-rust eval-trace eval-rust parity-oracle parity-key parity
 
 setup:
 	uv sync --locked
@@ -235,9 +236,18 @@ eval-labels: eval-inputs
 eval-scale: eval-inputs
 	$(need_name)
 	$(if $(BASE),$(measure_scale_base))
-	$(call measure_scale,$(CURDIR),$(SCALE_RESULT))
+	$(call measure_scale,$(CURDIR),$(SCALE_RESULT),new)
 	$(if $(BASE),$(SCALE_SANDBOX) $(SCALE_MEASURE) compare \
 		$(call scale_record,$(SCALE_BASE_RESULT)) $(call scale_record,$(SCALE_RESULT)))
+
+eval-scale-rust: eval-inputs
+	$(need_name)
+	CARGO_TARGET_DIR=$(CURDIR)/target cargo build --release --locked
+	$(call measure_scale,$(CURDIR),$(SCALE_RUST_RESULT),rust)
+	$(if $(wildcard $(call scale_record,$(SCALE_RESULT))),$(SCALE_SANDBOX) $(SCALE_MEASURE) compare \
+		$(call scale_record,$(SCALE_RESULT)) $(call scale_record,$(SCALE_RUST_RESULT)))
+	$(SCALE_SANDBOX) $(SCALE_MEASURE) summary $(SCALE_RUST_RESULT) \
+		$(if $(wildcard $(SCALE_RESULT)),--oracle $(SCALE_RESULT))
 
 eval-changes:
 	$(need_base)
