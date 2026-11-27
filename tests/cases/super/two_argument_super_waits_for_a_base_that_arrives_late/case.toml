@@ -1,0 +1,11 @@
+statement = "two argument super waits for a base that arrives late"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.Late.run", "main.Root.run"],
+]
+absent = [
+    ["main.Late.run", "main.Base.run"],
+]

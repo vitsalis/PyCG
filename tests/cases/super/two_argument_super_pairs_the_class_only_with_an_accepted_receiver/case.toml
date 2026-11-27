@@ -1,0 +1,13 @@
+statement = "two argument super pairs the class only with an accepted receiver"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.pick", "main.Root.run"],
+]
+absent = [
+    ["main.pick", "main.Base.run"],
+    ["main.pick", "main.Child.run"],
+    ["main.pick", "main.Other.run"],
+]

@@ -1,0 +1,11 @@
+statement = "super with alternative hierarchies"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.C.run", "<builtin>.super"],
+    ["main.C.run", "main.A.run"],
+    ["main.C.run", "main.B.run"],
+]
+absent = []

@@ -1,0 +1,11 @@
+statement = "super in a class method"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.B.create", "<builtin>.super"],
+    ["main.B.create", "main.A.create"],
+    ["main.A.create", "main.B.__init__"],
+]
+absent = []

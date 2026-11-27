@@ -1,0 +1,11 @@
+statement = "super reads a property of a base"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.B.handler", "<builtin>.super"],
+    ["main.B.handler", "main.A.handler"],
+    ["main", "main.f"],
+]
+absent = []

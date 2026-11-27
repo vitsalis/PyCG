@@ -1,0 +1,10 @@
+statement = "super with explicit arguments"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.B.__init__", "<builtin>.super"],
+    ["main.B.__init__", "main.A.__init__"],
+]
+absent = []

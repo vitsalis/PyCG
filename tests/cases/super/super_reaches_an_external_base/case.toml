@@ -1,0 +1,10 @@
+statement = "super reaches an external base"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.Failure.__init__", "<builtin>.Exception.__init__"],
+    ["main.Failure.__init__", "<builtin>.super"],
+]
+absent = []

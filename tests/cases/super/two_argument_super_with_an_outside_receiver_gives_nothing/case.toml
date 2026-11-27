@@ -1,0 +1,9 @@
+statement = "two argument super with an outside receiver gives nothing"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = []
+absent = [
+    ["main.pick", "main.Base.run"],
+]

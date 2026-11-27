@@ -1,0 +1,12 @@
+statement = "super without arguments follows the mro of the receiver"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.B.run", "<builtin>.super"],
+    ["main.B.run", "main.C.run"],
+    ["main.C.run", "<builtin>.super"],
+    ["main.C.run", "main.A.run"],
+]
+absent = []

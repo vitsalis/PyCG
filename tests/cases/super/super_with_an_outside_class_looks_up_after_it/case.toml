@@ -1,0 +1,10 @@
+statement = "super with an outside class looks up after it"
+design = "`super()`"
+entry_points = ["main.py"]
+package = true
+warnings = []
+present = [
+    ["main.Results.__init__", "<builtin>.super"],
+    ["main.Results.__init__", "main.Mixin.__init__"],
+]
+absent = []
