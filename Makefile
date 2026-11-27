@@ -274,3 +274,6 @@ parity:
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine-all.txt,--dumps D3 D5)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 --inputs $(PARITY_ENGINE))
+	@$(PARITY_BINARIES)/pycg_dump document $(PARITY_ORACLE)/seed-0 > $(PARITY_RUST)/writer.txt; \
+	status=$$?; { echo '```'; cat $(PARITY_RUST)/writer.txt; echo '```'; } >> $(SUMMARY); \
+	exit $$status

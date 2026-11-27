@@ -24,7 +24,7 @@ pub fn run(path: &str) -> ExitCode {
                 return ExitCode::from(EXIT_FAILURE);
             }
         };
-        if let Err(error) = writeln!(out, "{}", python_json(&record)) {
+        if let Err(error) = write!(out, "{}", crate::canonical::line(&record)) {
             eprintln!("pycg_dump: cannot write: {error}");
             return ExitCode::from(EXIT_FAILURE);
         }
@@ -116,20 +116,4 @@ fn argument_definition(stubs: &mut Stubs, value: Option<&Value>) -> Result<Defin
         Some(found) if found.kind.name() == kind && found.owner.as_deref() == owner => Ok(found),
         _ => Err(format!("the definition {kind} {path} is not in the stubs")),
     }
-}
-
-fn python_json(value: &Value) -> String {
-    let compact = value.to_string();
-    let mut out = String::with_capacity(compact.len());
-    for character in compact.chars() {
-        if character.is_ascii() {
-            out.push(character);
-            continue;
-        }
-        let mut units = [0u16; 2];
-        for unit in character.encode_utf16(&mut units) {
-            out.push_str(&format!("\\u{unit:04x}"));
-        }
-    }
-    out
 }
