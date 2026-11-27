@@ -92,14 +92,12 @@ fn the_builder_into_the_engine_gives_the_trace_and_points_to_of_the_oracle() {
             .join(name);
         std::fs::create_dir_all(&out).expect("the output directory is made");
         let program = &programs(&vector)[0];
-        let modules = out.join("modules.tsv");
-        std::fs::write(&modules, format!("main\t{}\n", program.display()))
-            .expect("the module list is written");
-        let entries = out.join("entries.txt");
-        std::fs::write(&entries, "main\n").expect("the entry list is written");
         let output = Command::new(env!("CARGO_BIN_EXE_pycg-dump"))
             .arg("engine-build")
-            .args([&modules, &entries, &out])
+            .arg(&out)
+            .arg("--package")
+            .arg(&vector)
+            .arg(program)
             .output()
             .expect("pycg-dump runs");
         assert!(

@@ -18,6 +18,7 @@ pub struct RuleInfo<'a> {
 }
 
 pub trait Trace {
+    fn module(&mut self, _module: Option<&str>) {}
     fn solver(&mut self, _cap: Option<u32>, _saturated: ObjId, _node: NodeId) {}
     fn node(&mut self, _node: NodeId, _label: Option<&str>) {}
     fn witness(&mut self, _node: NodeId, _watch: WatchId) {}

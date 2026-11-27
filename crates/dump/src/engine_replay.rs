@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::fs::{self, File};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::panic::{self, AssertUnwindSafe};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use num_bigint::BigInt;
@@ -11,16 +11,12 @@ use pycg_analysis::builder::calls::{
     Allocator, Analysis, Call, CallSite, ClassStatement, Constant, Key, MethodKind, NewClass,
     Passthrough, Slice, Subscript,
 };
-use pycg_analysis::builder::{ModuleBuilder, Source};
 use pycg_analysis::engine::objects::{Kind, Object};
 use pycg_analysis::engine::trace::{Opacity, RuleInfo, Trace};
 use pycg_analysis::engine::{Engine, RuleId, not_ported};
 use pycg_analysis::model::Signature;
+use pycg_analysis::program::Program;
 use pycg_solver::{NodeId, ObjId, Solver, WatchId};
-use pycg_syntax::parse::with_parsed;
-use pycg_syntax::read::read_file;
-use pycg_syntax::scopes::analyse_scopes;
-use ruff_source_file::LineIndex;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde_json::{Value, json};
 
@@ -237,6 +233,10 @@ fn numbered(counts: &mut FxHashMap<String, u32>, key: &str, separator: char) -> 
 }
 
 impl Trace for Recorder {
+    fn module(&mut self, module: Option<&str>) {
+        self.context = module.unwrap_or(CONTEXT_PROGRAM).to_string();
+    }
+
     fn solver(&mut self, cap: Option<u32>, saturated: ObjId, node: NodeId) {
         self.write(&json!({"op": "solver", "cap": cap}));
         self.declare_object(saturated);
@@ -446,67 +446,26 @@ struct Replay {
 }
 
 pub fn build(arguments: &[String]) -> Option<ExitCode> {
-    let [command, modules, entries, out] = arguments else {
+    let [command, out, flag, package, entry_points @ ..] = arguments else {
         return None;
     };
-    if command != "engine-build" {
+    if command != "engine-build" || flag != "--package" || entry_points.is_empty() {
         return None;
     }
-    let listed = fs::read_to_string(modules).expect("the module list is readable");
-    let entries: Vec<String> = fs::read_to_string(entries)
-        .expect("the entry list is readable")
-        .lines()
-        .map(str::to_owned)
-        .collect();
-    let mut replay = Replay {
-        engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(Path::new(out))),
+    let cwd = std::env::current_dir().expect("a working directory");
+    let entry_points: Vec<PathBuf> = entry_points.iter().map(PathBuf::from).collect();
+    let engine = Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(Path::new(out)));
+    let mut program = Program::new(&entry_points, Some(Path::new(package)), &cwd, engine);
+    let built = panic::catch_unwind(AssertUnwindSafe(|| {
+        program.build_modules();
+        program.analysis.trace_mut().context = CONTEXT_SOLVE.to_string();
+        program.analysis.solve();
+    }));
+    let replay = Replay {
+        engine: program.analysis,
         fields: FxHashMap::default(),
     };
-    let built = panic::catch_unwind(AssertUnwindSafe(|| {
-        for line in listed.lines() {
-            let (module, path) = line.split_once('\t').expect("a module and its file");
-            replay.engine.trace_mut().context = module.to_string();
-            build_module(
-                &mut replay.engine,
-                module,
-                Path::new(path),
-                entries.iter().any(|entry| entry == module),
-            );
-        }
-        replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
-        replay.engine.solve();
-    }));
     Some(replay.write(Path::new(out), built.is_ok()))
-}
-
-fn build_module(engine: &mut Engine<Recorder>, module: &str, path: &Path, is_entry: bool) {
-    let Ok(source) = read_file(path) else {
-        return;
-    };
-    with_parsed(&source, |parsed| {
-        let Ok(parsed) = parsed else {
-            return;
-        };
-        let lines = LineIndex::from_source_text(&source);
-        let tokens = parsed.tokens();
-        let scopes = analyse_scopes(parsed.syntax(), module, tokens, &lines, &source);
-        let object = engine.module(module);
-        let is_package = path.file_name().is_some_and(|name| name == "__init__.py");
-        let mut builder = ModuleBuilder::new(
-            engine,
-            module,
-            object,
-            Source {
-                text: &source,
-                tokens,
-                lines: &lines,
-            },
-            &scopes,
-            is_package,
-            is_entry,
-        );
-        builder.build(&parsed.syntax().body);
-    });
 }
 
 pub fn run(input: &str, out: &str) -> ExitCode {
