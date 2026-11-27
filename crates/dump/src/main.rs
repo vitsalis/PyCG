@@ -7,7 +7,10 @@ mod engine_replay;
 mod solver_replay;
 mod stubs_replay;
 
+use std::panic;
 use std::process::ExitCode;
+
+use pycg_analysis::engine::NotPorted;
 
 const USAGE: &str = "usage: pycg-dump stubs <D2.jsonl> | solver <D3.jsonl> | document <directory> \
     | document-build ORACLE_INPUT ANALYSIS OUT \
@@ -16,6 +19,13 @@ const USAGE: &str = "usage: pycg-dump stubs <D2.jsonl> | solver <D3.jsonl> | doc
 const EXIT_USAGE: u8 = 2;
 
 fn main() -> ExitCode {
+    let default_hook = panic::take_hook();
+    panic::set_hook(Box::new(move |info| {
+        match info.payload().downcast_ref::<NotPorted>() {
+            Some(NotPorted(feature)) => eprintln!("not ported: {feature}"),
+            None => default_hook(info),
+        }
+    }));
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     match arguments.as_slice() {
         [command, path] if command == "stubs" => stubs_replay::run(path),

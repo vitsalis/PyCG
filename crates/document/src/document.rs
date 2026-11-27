@@ -8,7 +8,7 @@ use pycg_analysis::results::{
     AnalysisPart, ClassDefinition, Construct, FunctionDefinition, RolePart,
 };
 
-use crate::Value;
+use crate::{Text, Value};
 
 pub const FORMAT: &str = "pycg/1";
 pub const TOOL_NAME: &str = "pycg";
@@ -77,8 +77,8 @@ pub struct SourceModule {
 pub fn build(
     program: &ProgramPart,
     analysis: &AnalysisPart,
-    package_name: Option<&str>,
-    package_version: Option<&str>,
+    package_name: Option<&Text>,
+    package_version: Option<&Text>,
 ) -> Value {
     let definitions = definitions(program, analysis);
     let calls = calls(program, analysis, &definitions);
@@ -110,8 +110,14 @@ pub fn build(
         (
             "package",
             object(vec![
-                ("name", package_name.map_or(Value::Null, text)),
-                ("version", package_version.map_or(Value::Null, text)),
+                (
+                    "name",
+                    package_name.map_or(Value::Null, |name| Value::Str(name.clone())),
+                ),
+                (
+                    "version",
+                    package_version.map_or(Value::Null, |version| Value::Str(version.clone())),
+                ),
             ]),
         ),
         ("modules", modules_section(program)),

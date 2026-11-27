@@ -33,6 +33,7 @@ def load(name, path):
 compare = load("parity_compare", PARITY / "compare.py")
 diff = load("parity_diff", PARITY / "diff.py")
 oracle = load("parity_dump", PARITY / "dump.py")
+program = load("parity_program", PARITY / "program.py")
 
 PROGRAMS = {
     "classes": """
@@ -820,3 +821,56 @@ def test_the_required_dumps_are_dumps_that_the_oracle_writes():
 
     assert {"D1", "D2"} <= set(required)
     assert set(required) <= {"D1", "D2", "D3", "D4", "D5", "D6"}
+
+
+FAKE_PYCG = """\
+import sys
+from pathlib import Path
+
+arguments = sys.argv[1:]
+output = Path(arguments[arguments.index("-o") + 1])
+package = arguments[arguments.index("--package") + 1]
+if package == "broken":
+    print("pycg: not ported: a rule", file=sys.stderr)
+    sys.exit(3)
+output.write_text("{" + package + "}\\n", encoding="utf-8")
+"""
+
+
+def program_input(oracle_root, name, package, document):
+    directory = oracle_root / name
+    directory.mkdir(parents=True)
+    run = {"entry_points": [f"{package}/main.py"], "package": package}
+    (directory / "run.json").write_text(json.dumps(run), encoding="utf-8")
+    (directory / "D6.json").write_text(document, encoding="utf-8")
+
+
+def test_the_program_runs_on_every_input_the_engine_is_not_listed_for(tmp_path, capsys):
+    oracle_root = tmp_path / "oracle"
+    program_input(oracle_root, "micro/a/same", "same", "{same}")
+    program_input(oracle_root, "micro/a/other", "other", "{different}")
+    program_input(oracle_root, "micro/a/broken", "broken", "{broken}")
+    program_input(oracle_root, "micro/a/listed", "listed", "{elsewhere}")
+    (oracle_root / "micro/a/unwritten/D6.json").parent.mkdir(parents=True)
+    run = {"entry_points": ["unwritten/main.py"], "package": "unwritten"}
+    (oracle_root / "micro/a/unwritten/run.json").write_text(json.dumps(run))
+    differences = tmp_path / "differences.txt"
+    differences.write_text(
+        "# run\tdump\tinput\tstatus\tcause\n"
+        "engine\tD3\tmicro/a/listed\tpartial\tnot ported: a rule\n"
+        "replay\tD3\tmicro/a/same\tpartial\tnot ported: a rule\n"
+    )
+    fake = tmp_path / "pycg"
+    fake.write_text(f"#!{sys.executable}\n{FAKE_PYCG}", encoding="utf-8")
+    fake.chmod(0o755)
+    status = program.main(
+        [str(oracle_root), str(tmp_path / "out"), str(fake)]
+        + ["--differences", str(differences), "--checkout", str(tmp_path)]
+    )
+    assert status == 1
+    assert capsys.readouterr().out.splitlines() == [
+        "program: 4 inputs, 1 identical, 3 different",
+        "  micro/a/broken: pycg exited with 3: pycg: not ported: a rule",
+        "  micro/a/other: the documents differ",
+        "  micro/a/unwritten: the oracle wrote no D6",
+    ]

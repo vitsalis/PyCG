@@ -62,8 +62,9 @@ def test_the_rust_flavour_records_the_last_error_line_as_a_crash(tmp_path):
     record = run.run_job(fake, job, graph_path, timeout_seconds=60)
 
     assert record["status"] == "crash"
-    assert record["error"] == "pycg: the analysis is not ported yet"
-    assert record["where"] == "target/release/pycg (exit 1)"
+    assert record["error"] == "pycg: not ported: outside attributes"
+    assert record["where"] == "target/release/pycg (exit 3)"
+    assert record["exit_status"] == 3
     assert not graph_path.exists()
 
 

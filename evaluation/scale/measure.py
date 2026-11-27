@@ -11,6 +11,8 @@ SCALE = Path(__file__).resolve().parent
 EVALUATION = SCALE.parent
 OUTCOME_FINISHED = "finished"
 OUTCOME_KILLED_BY_THE_CAP = "killed by the cap"
+OUTCOME_NOT_PORTED = "not ported"
+RUST_STATUS_NOT_PORTED = 3
 OUTCOME_CONTAINER_OUT_OF_MEMORY = "killed: the container ran out of memory"
 OUTCOME_MACHINE_OUT_OF_MEMORY = "killed: the machine ran out of memory"
 OUTCOME_KILLED = "killed by SIGKILL"
@@ -55,11 +57,17 @@ class MeasureError(Exception):
     pass
 
 
-def outcome_of(record, events_before, events_after):
+def outcome_of(record, flavour, events_before, events_after):
     if record["status"] == "ok":
         return OUTCOME_FINISHED
     if record["status"] == "memory":
         return OUTCOME_KILLED_BY_THE_CAP
+    if (
+        flavour == "rust"
+        and record["status"] == "crash"
+        and record.get("exit_status") == RUST_STATUS_NOT_PORTED
+    ):
+        return OUTCOME_NOT_PORTED
     if record["status"] == "crash" and record.get("exit_status") == -signal.SIGKILL:
         return killed_from_outside(events_before, events_after)
     return record["status"]
@@ -169,7 +177,7 @@ def measure(
         "memory_available_mib": available,
         "timeout": timeout_seconds,
         "files": len(files),
-        "outcome": outcome_of(record, events_before, events_after),
+        "outcome": outcome_of(record, flavour, events_before, events_after),
         "seconds": record.get("seconds"),
         "wall_seconds": record.get("wall_seconds"),
         "peak_rss_mib": record.get("peak_rss_mib"),
