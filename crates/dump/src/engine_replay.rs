@@ -1261,10 +1261,6 @@ impl Replay {
                 self.engine.add_structure_class(class, &fields, &bases);
                 None
             }
-            "typed" => {
-                let typed = self.engine.typed(text(&arguments["cls"]));
-                Some(self.object_answer(typed))
-            }
             _ => not_ported(&format!("the builder call {call}")),
         };
         let expected = &record["answer"];

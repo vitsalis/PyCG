@@ -166,7 +166,7 @@ struct State<T: Trace> {
     callbacks: FxHashMap<Origin, CallId>,
     callback_values: FxHashSet<(CallId, NodeId)>,
     protocol_plans: Vec<Vec<(Sym, Unless)>>,
-    model_bindings: FxHashMap<(CallId, usize), BoundId>,
+    model_bindings: FxHashMap<(CallId, builtin_rules::BindingEntry), BoundId>,
     returning: FxHashMap<(Sym, bool), ObjId>,
     wrappers: FxHashMap<WrapperKey, ObjId>,
     builtin_methods: FxHashMap<(ObjId, Sym), ObjId>,

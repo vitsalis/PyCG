@@ -12,7 +12,7 @@ use crate::engine::rules::{Rule, RuleId};
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, OrderedMap, State, not_ported};
+use crate::engine::{Graph, OrderedMap, State};
 use crate::models::{CONTAINER_CLASSES, LENGTH_HINT, builtin_kind};
 
 const COMPARISON_METHODS: [&str; 6] = ["__eq__", "__ne__", "__lt__", "__le__", "__gt__", "__ge__"];

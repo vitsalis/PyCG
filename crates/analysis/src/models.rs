@@ -93,7 +93,7 @@ impl Rule {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct Model {
     pub signature: &'static str,
     pub rule: Rule,
@@ -783,7 +783,7 @@ pub static WRAPPED_ATTRIBUTES_BY_TYPE: &[(&str, &[&str])] = &[
     ("property", &["fget", "fset", "fdel"]),
 ];
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct ReturnsArgument {
     pub signature: &'static str,
     pub argument: Option<&'static str>,

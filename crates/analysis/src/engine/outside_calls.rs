@@ -13,7 +13,7 @@ use crate::engine::rules::Rule;
 use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, OrderedMap, State, not_ported};
+use crate::engine::{Graph, OrderedMap, State};
 use crate::model::Signature;
 use crate::models::{
     CACHED_FUNCTIONS, CALLS_BACK, CLOSURES, CONTAINER_CLASSES, HASHED_ARGUMENTS, KEY_WRAPPERS,

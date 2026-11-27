@@ -41,6 +41,12 @@ const KIND_CLASSES: &[(&str, (&str, &str))] = &[
 ];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(super) enum BindingEntry {
+    Model(&'static Model),
+    ReturnsArgument(&'static ReturnsArgument),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum WrapperKey {
     Call(Sym, Origin),
     Field(Sym, NodeId),
@@ -150,15 +156,14 @@ impl<T: Trace> State<T> {
     }
 
     fn bind_model(&mut self, graph: &mut Graph, call: CallId, model: &'static Model) -> BoundId {
-        let key = std::ptr::from_ref(model) as usize;
-        self.bind_entry(graph, call, key, model.signature)
+        self.bind_entry(graph, call, BindingEntry::Model(model), model.signature)
     }
 
     fn bind_entry(
         &mut self,
         graph: &mut Graph,
         call: CallId,
-        entry: usize,
+        entry: BindingEntry,
         signature: &str,
     ) -> BoundId {
         let key = (call, entry);
@@ -220,8 +225,12 @@ impl<T: Trace> State<T> {
         let Some(dst) = self.calls[call.index()].dst else {
             return;
         };
-        let key = std::ptr::from_ref(entry) as usize;
-        let args = self.bind_entry(graph, call, key, entry.signature);
+        let args = self.bind_entry(
+            graph,
+            call,
+            BindingEntry::ReturnsArgument(entry),
+            entry.signature,
+        );
         if let Some(parameter) = entry.argument
             && self.bound_given(args, parameter)
         {
