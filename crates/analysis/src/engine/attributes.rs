@@ -7,7 +7,8 @@ use crate::engine::rules::{Rule, WaitingRule};
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, OrderedMap, OrderedSet, State, not_ported};
+use crate::engine::{Graph, OrderedMap, OrderedSet, State};
+use crate::models::STUB_RESULTS;
 
 pub const ANALYSED_METHODS: &[Kind] = &[
     Kind::Function,
@@ -737,8 +738,17 @@ impl<T: Trace> State<T> {
                 let text = self.symbols.text(attr).to_string();
                 if !self.stubs.member(&class, &text).is_empty() {
                     self.stub_member(graph, object, &class, &prefix, attr, dst);
-                } else if !self.stubs.member(&class, "__getattr__").is_empty() {
-                    not_ported("outside types: the __getattr__ of a typed value");
+                } else {
+                    let members = self.stubs.member(&class, "__getattr__");
+                    for definition in members.iter() {
+                        if let Some(&(_, result)) = STUB_RESULTS
+                            .iter()
+                            .find(|&&(path, _)| path == &*definition.path)
+                        {
+                            let concrete = self.concrete_typed(graph, result);
+                            self.add_object(graph, dst, concrete);
+                        }
+                    }
                 }
             }
             Object::Coroutine { .. } => {

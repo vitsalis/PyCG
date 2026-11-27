@@ -10,6 +10,7 @@ use crate::engine::arguments::{BindingId, SpreadId, Spreads};
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Container, Kind, Literal, Object};
 use crate::engine::outside_calls::BoundId;
+use crate::engine::outside_types::TypeOrigin;
 use crate::engine::protocols::OperatorId;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
@@ -69,6 +70,7 @@ pub(super) enum ContainerOrigin {
     Iterate(Sym, Sym, IterationRoleId),
     Iterator(ObjId),
     Operator(OperatorId),
+    Stub(u32),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -1840,12 +1842,6 @@ impl<T: Trace> State<T> {
         }
         let mut grouped = Vec::new();
         for &object in objects {
-            if let Object::Const { value, .. } = self.objects.get(object) {
-                if matches!(value, Literal::Int(_)) {
-                    continue;
-                }
-                not_ported("containers: subscripting a string constant (typed values)");
-            }
             if self.container_of(object).is_some() {
                 grouped.push(object);
                 self.apply_subscript(graph, object, id, false);
@@ -1872,11 +1868,18 @@ impl<T: Trace> State<T> {
     ) {
         let subscript = &self.containers.subscripts[index_of(id.0)];
         let (key, dst, src) = (subscript.key, subscript.dst, subscript.src);
+        let (caller, site) = (subscript.caller, subscript.site);
+        let object = match self.objects.get(object) {
+            Object::Const { .. } => match self.string_constant_value(graph, object) {
+                Some(typed) => typed,
+                None => return,
+            },
+            _ => object,
+        };
         match self.objects.get(object) {
-            Object::Const { value, .. } => {
-                if !matches!(value, Literal::Int(_)) {
-                    not_ported("containers: subscripting a string constant (typed values)")
-                }
+            Object::Typed { .. } => {
+                let origin = TypeOrigin::Subscript { caller, site };
+                self.typed_special(graph, object, "__getitem__", dst, origin);
             }
             Object::Container(_) => {
                 match key {
@@ -1897,13 +1900,13 @@ impl<T: Trace> State<T> {
             Object::Instance { .. } | Object::Class(_) => {
                 self.subscript_object(graph, object, Access::Subscript(id), key);
             }
-            Object::Typed { .. } => not_ported("containers: subscripting a typed value"),
             Object::External(_) | Object::UnknownExternal(_) => {
                 if let Some(dst) = dst {
                     self.add_object(graph, dst, object);
                 }
             }
             Object::Saturated
+            | Object::Const { .. }
             | Object::Module(_)
             | Object::Function(_)
             | Object::BoundMethod { .. }
@@ -2121,11 +2124,19 @@ impl<T: Trace> State<T> {
     }
 
     pub(super) fn apply_slice(&mut self, graph: &mut Graph, object: ObjId, id: SliceId) {
+        let object = match self.objects.get(object) {
+            Object::Const { .. } => match self.string_constant_value(graph, object) {
+                Some(typed) => typed,
+                None => return,
+            },
+            _ => object,
+        };
         match self.objects.get(object) {
-            Object::Const { value, .. } => {
-                if !matches!(value, Literal::Int(_)) {
-                    not_ported("containers: slicing a string constant (typed values)")
-                }
+            Object::Typed { .. } => {
+                let slice = &self.containers.slices[index_of(id.0)];
+                let (dst, caller, site) = (slice.dst, slice.caller, slice.site);
+                let origin = TypeOrigin::Slice { caller, site };
+                self.typed_special(graph, object, "__getitem__", dst, origin);
             }
             Object::Instance { .. } | Object::Class(_) => {
                 self.subscript_object(graph, object, Access::Slice(id), None);
@@ -2159,7 +2170,6 @@ impl<T: Trace> State<T> {
                     self.add_edge(graph, elements, unknown);
                 }
             }
-            Object::Typed { .. } => not_ported("containers: slicing a typed value"),
             Object::External(_) | Object::UnknownExternal(_) => {
                 let dst = self.containers.slices[index_of(id.0)].dst;
                 if let Some(dst) = dst {
@@ -2168,6 +2178,7 @@ impl<T: Trace> State<T> {
             }
             Object::Container(_)
             | Object::Saturated
+            | Object::Const { .. }
             | Object::Module(_)
             | Object::Function(_)
             | Object::BoundMethod { .. }
@@ -2324,15 +2335,24 @@ impl<T: Trace> State<T> {
     }
 
     fn iterator(&mut self, graph: &mut Graph, object: ObjId, iteration: IterationId, dst: NodeId) {
+        let object = match self.objects.get(object) {
+            Object::Const { .. } => match self.string_constant_value(graph, object) {
+                Some(typed) => typed,
+                None => return,
+            },
+            _ => object,
+        };
         match self.objects.get(object) {
-            Object::Const { value, .. } => {
-                if !matches!(value, Literal::Int(_)) {
-                    not_ported("containers: iterating a string constant (typed values)")
-                }
+            Object::Typed { .. } => {
+                let found = &self.containers.iterations[index_of(iteration.0)];
+                let (is_async, caller, site, role) =
+                    (found.is_async, found.caller, found.site, found.role);
+                let name = if is_async { "__aiter__" } else { "__iter__" };
+                let origin = TypeOrigin::Iteration { caller, site, role };
+                self.typed_special(graph, object, name, Some(dst), origin);
                 return;
             }
             Object::Instance { .. } | Object::Class(_) => {}
-            Object::Typed { .. } => not_ported("containers: iterating a typed value"),
             Object::Container(_)
             | Object::Generator { .. }
             | Object::External(_)
@@ -2341,6 +2361,7 @@ impl<T: Trace> State<T> {
                 return;
             }
             Object::Saturated
+            | Object::Const { .. }
             | Object::Module(_)
             | Object::Function(_)
             | Object::BoundMethod { .. }
@@ -2517,7 +2538,19 @@ impl<T: Trace> State<T> {
                     .expect("a generator yields");
                 self.add_edge(graph, yield_node, found.dst);
             }
-            Object::Typed { .. } => not_ported("containers: the next element of a typed value"),
+            Object::Typed { .. } => {
+                let origin = TypeOrigin::Iteration {
+                    caller: found.caller,
+                    site: found.site,
+                    role: found.role,
+                };
+                if found.is_async {
+                    let anext = self.iteration_anext(graph, iteration);
+                    self.typed_special(graph, object, "__anext__", Some(anext), origin);
+                } else {
+                    self.typed_special(graph, object, "__next__", Some(found.dst), origin);
+                }
+            }
             Object::External(_) | Object::UnknownExternal(_) => {
                 self.add_object(graph, found.dst, object);
             }
