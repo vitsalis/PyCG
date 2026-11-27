@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
-use std::fs;
+use std::fs::{self, File};
+use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::panic::{self, AssertUnwindSafe};
 use std::path::Path;
 use std::process::ExitCode;
@@ -44,7 +45,7 @@ struct DeclaredRule {
 }
 
 pub struct Recorder {
-    lines: Vec<String>,
+    trace: BufWriter<File>,
     context: String,
     label_counts: FxHashMap<String, u32>,
     context_counts: FxHashMap<String, u32>,
@@ -60,15 +61,18 @@ pub struct Recorder {
     other_counts: FxHashMap<String, u32>,
     declared_objects: FxHashSet<ObjId>,
     declared_rules: FxHashSet<RuleId>,
-    first_rounds: BTreeMap<(String, String), u32>,
+    first_rounds: FxHashMap<(NodeId, ObjId), u32>,
     round: u32,
     witness_of_watch: FxHashMap<WatchId, NodeId>,
 }
 
 impl Recorder {
-    fn new() -> Recorder {
+    fn new(out: &Path) -> Recorder {
+        let path = out.join(PARTIAL_TRACE);
+        let file = File::create(&path)
+            .unwrap_or_else(|error| panic!("{} cannot be written: {error}", path.display()));
         Recorder {
-            lines: Vec::new(),
+            trace: BufWriter::new(file),
             context: CONTEXT_PROGRAM.to_string(),
             label_counts: FxHashMap::default(),
             context_counts: FxHashMap::default(),
@@ -84,14 +88,16 @@ impl Recorder {
             other_counts: FxHashMap::default(),
             declared_objects: FxHashSet::default(),
             declared_rules: FxHashSet::default(),
-            first_rounds: BTreeMap::new(),
+            first_rounds: FxHashMap::default(),
             round: 0,
             witness_of_watch: FxHashMap::default(),
         }
     }
 
     fn write(&mut self, value: &Value) {
-        self.lines.push(canonical::line(value));
+        self.trace
+            .write_all(canonical::line(value).as_bytes())
+            .expect("the trace is written");
     }
 
     fn name_node(&mut self, node: NodeId, label: Option<&str>) -> String {
@@ -191,11 +197,9 @@ impl Recorder {
     fn note_first_rounds(&mut self, solver: &mut Solver<RuleId>, named_nodes: &[NodeId]) {
         for &node in named_nodes {
             for object in solver.objects(node) {
-                let key = (
-                    self.node_name(node).to_string(),
-                    self.object_name(object).to_string(),
-                );
-                self.first_rounds.entry(key).or_insert(self.round);
+                self.first_rounds
+                    .entry((node, object))
+                    .or_insert(self.round);
             }
         }
     }
@@ -454,7 +458,7 @@ pub fn build(arguments: &[String]) -> Option<ExitCode> {
         .map(str::to_owned)
         .collect();
     let mut replay = Replay {
-        engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new()),
+        engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(Path::new(out))),
         fields: FxHashMap::default(),
     };
     let built = panic::catch_unwind(AssertUnwindSafe(|| {
@@ -505,32 +509,32 @@ fn build_module(engine: &mut Engine<Recorder>, module: &str, path: &Path, is_ent
 }
 
 pub fn run(input: &str, out: &str) -> ExitCode {
-    let text = match fs::read_to_string(input) {
-        Ok(text) => text,
-        Err(error) => {
-            eprintln!("pycg_dump engine: cannot read {input}: {error}");
-            return ExitCode::FAILURE;
-        }
+    let lines = || -> std::io::Result<std::io::Lines<BufReader<File>>> {
+        Ok(BufReader::new(File::open(input)?).lines())
     };
+    if let Err(error) = lines() {
+        eprintln!("pycg_dump engine: cannot read {input}: {error}");
+        return ExitCode::FAILURE;
+    }
+    let out = Path::new(out);
     let mut replay = Replay {
-        engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new()),
+        engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(out)),
         fields: FxHashMap::default(),
     };
-    let out = Path::new(out);
     let replayed = panic::catch_unwind(AssertUnwindSafe(|| {
-        let records: Vec<Value> = text
-            .lines()
-            .enumerate()
-            .map(|(number, line)| {
-                serde_json::from_str(line).unwrap_or_else(|error| {
-                    not_ported(&format!("the record {} of D4 as JSON: {error}", number + 1))
-                })
+        let record = |number: usize, line: &str| -> Value {
+            serde_json::from_str(line).unwrap_or_else(|error| {
+                not_ported(&format!("the record {} of D4 as JSON: {error}", number + 1))
             })
-            .collect();
-        replay.prescan(&records);
-        for (number, record) in records.iter().enumerate() {
+        };
+        let read = |line: std::io::Result<String>| line.expect("the D4 dump is readable");
+        for (number, line) in lines().expect("the D4 dump opens").enumerate() {
+            replay.prescan(&record(number, &read(line)));
+        }
+        for (number, line) in lines().expect("the D4 dump opens").enumerate() {
+            let record = record(number, &read(line));
             if record.get("call").is_some() {
-                replay.call(number + 1, record);
+                replay.call(number + 1, &record);
             }
         }
         replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
@@ -541,28 +545,36 @@ pub fn run(input: &str, out: &str) -> ExitCode {
 
 impl Replay {
     fn write(self, out: &Path, finished: bool) -> ExitCode {
+        let mut replay = self;
         if !finished {
-            let partial = self.engine.trace().lines.concat();
-            if let Err(error) = fs::write(out.join(PARTIAL_TRACE), partial) {
-                eprintln!("pycg_dump engine: cannot write {PARTIAL_TRACE}: {error}");
-            }
+            replay
+                .engine
+                .trace_mut()
+                .trace
+                .flush()
+                .expect("the partial trace is written");
             return ExitCode::FAILURE;
         }
-        let (points_to, trace) = self.finish();
-        for (name, lines) in [("D3.jsonl", trace), ("D5.jsonl", points_to)] {
-            if let Err(error) = fs::write(out.join(name), lines.concat()) {
-                eprintln!(
-                    "pycg_dump engine: cannot write {name} in {}: {error}",
-                    out.display()
-                );
-                return ExitCode::FAILURE;
-            }
+        let points_to = replay.finish();
+        replay
+            .engine
+            .trace_mut()
+            .trace
+            .flush()
+            .expect("the trace is written");
+        if let Err(error) = fs::rename(out.join(PARTIAL_TRACE), out.join("D3.jsonl")) {
+            eprintln!("pycg_dump engine: cannot name the trace D3.jsonl: {error}");
+            return ExitCode::FAILURE;
+        }
+        if let Err(error) = fs::write(out.join("D5.jsonl"), points_to.concat()) {
+            eprintln!("pycg_dump engine: cannot write D5.jsonl: {error}");
+            return ExitCode::FAILURE;
         }
         ExitCode::SUCCESS
     }
 
-    fn prescan(&mut self, records: &[Value]) {
-        for record in records {
+    fn prescan(&mut self, record: &Value) {
+        {
             if let Some(fields) = record.get("fields") {
                 let name = record["object"]["object"]
                     .as_str()
@@ -980,7 +992,7 @@ impl Replay {
         self.engine.trace().object_named(value)
     }
 
-    fn finish(mut self) -> (Vec<String>, Vec<String>) {
+    fn finish(&mut self) -> Vec<String> {
         let named: Vec<NodeId> = self.engine.named_nodes().to_vec();
         let mut points_to: BTreeMap<String, Vec<String>> = BTreeMap::new();
         for &node in &named {
@@ -1003,19 +1015,17 @@ impl Replay {
                 canonical::line(&json!({"node": label, "objects": held}))
             })
             .collect();
-        let mut first = std::mem::take(&mut self.engine.trace_mut().first_rounds);
         let round = self.engine.trace().round;
         for &node in &named {
             for object in self.engine.held(node) {
-                let key = (
-                    self.engine.trace().node_name(node).to_string(),
-                    self.engine.trace().object_name(object).to_string(),
-                );
-                first.entry(key).or_insert(round);
+                self.engine
+                    .trace_mut()
+                    .first_rounds
+                    .entry((node, object))
+                    .or_insert(round);
             }
         }
         let reported = self.engine.trace().reported.clone();
-        let mut finals = Vec::new();
         for node in reported {
             let held: Vec<String> = self
                 .engine
@@ -1023,12 +1033,14 @@ impl Replay {
                 .into_iter()
                 .map(|object| self.engine.trace().object_name(object).to_string())
                 .collect();
-            finals.push(json!({
+            let saturated = self.engine.held_saturated(node);
+            let record = json!({
                 "op": "final",
                 "node": self.engine.trace().node_name(node),
                 "objects": held,
-                "saturated": self.engine.held_saturated(node),
-            }));
+                "saturated": saturated,
+            });
+            self.engine.trace_mut().write(&record);
         }
         let mut absorbed: Vec<String> = self
             .engine
@@ -1040,11 +1052,20 @@ impl Replay {
         let work = self.engine.work();
         let phase = self.engine.phase();
         let recorder = self.engine.trace_mut();
-        for record in finals {
-            recorder.write(&record);
-        }
         recorder.write(&json!({"op": "absorbed", "objects": absorbed}));
-        for ((node, object), round) in first {
+        let first = std::mem::take(&mut recorder.first_rounds);
+        let mut first: Vec<(String, String, u32)> = first
+            .into_iter()
+            .map(|((node, object), round)| {
+                (
+                    recorder.node_name(node).to_string(),
+                    recorder.object_name(object).to_string(),
+                    round,
+                )
+            })
+            .collect();
+        first.sort_unstable();
+        for (node, object, round) in first {
             recorder.write(&json!({"op": "first", "node": node, "object": object, "round": round}));
         }
         recorder.write(&json!({
@@ -1059,7 +1080,7 @@ impl Replay {
                 "searched": work.searched,
             },
         }));
-        (points_to, std::mem::take(&mut recorder.lines))
+        points_to
     }
 }
 
