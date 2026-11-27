@@ -314,6 +314,12 @@ impl<T: Trace> State<T> {
         hook: Option<Sym>,
         access: AccessId,
     ) -> bool {
+        if self.wrapper_kind_is(object, "property") {
+            let accessor = self.symbols.intern(self.property_accessor(method));
+            let accessor = self.field(graph, object, accessor);
+            self.call_accessor(graph, (accessor, access, false, 1), receiver, hook);
+            return true;
+        }
         let &Object::Instance { class, .. } = self.objects.get(object) else {
             return false;
         };
@@ -342,7 +348,8 @@ impl<T: Trace> State<T> {
             vec![receiver]
         };
         let found = self.lookup_name(graph, class, method, Some(object), None, Unless::Nothing);
-        self.call_accessor(graph, found, receiver, &prefix, hook, access);
+        let width = u32::try_from(prefix.len()).expect("a short prefix");
+        self.call_accessor(graph, (found, access, true, width), receiver, hook);
         true
     }
 
@@ -413,14 +420,11 @@ impl<T: Trace> State<T> {
     fn call_accessor(
         &mut self,
         graph: &mut Graph,
-        accessor: NodeId,
+        entry: AccessorEntry,
         receiver: ObjId,
-        prefix: &[ObjId],
         hook: Option<Sym>,
-        access: AccessId,
     ) {
-        let analysed_only = true;
-        let width = u32::try_from(prefix.len()).expect("a short prefix");
+        let (accessor, access, analysed_only, width) = entry;
         let Some(hook) = hook else {
             let accessors = self.accessors_of(graph, None, accessor, access, analysed_only, width);
             self.accessors_add(graph, accessors, receiver);
@@ -718,9 +722,14 @@ impl<T: Trace> State<T> {
                 let field = self.field(graph, function, attr);
                 self.add_edge(graph, field, dst);
             }
-            Object::Container(_) | Object::Generator { .. } | Object::Const { .. } => {
-                not_ported("builtin attributes")
+            Object::Wrapper { .. }
+            | Object::Container(_)
+            | Object::Generator { .. }
+            | Object::Const { .. } => {
+                let type_name = self.object_type_name(object);
+                self.load_builtin_attribute(graph, object, &type_name, attr, dst);
             }
+            Object::BuiltinMethod { .. } => {}
             Object::Coroutine { .. } => {
                 let name = format!("types.CoroutineType.{}", self.symbols.text(attr));
                 let external = self.external(graph, &name, 2, false);
@@ -871,6 +880,9 @@ impl<T: Trace> State<T> {
         src: NodeId,
         field: NodeId,
     ) {
+        if self.wrapper_kind_is(value, "property") {
+            return;
+        }
         if let &Object::Instance { class, .. } = self.objects.get(value) {
             let written =
                 self.lookup_name(graph, class, "__set__", None, None, Unless::DataDescriptor);

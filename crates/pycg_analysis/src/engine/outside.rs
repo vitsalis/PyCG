@@ -201,6 +201,11 @@ impl<T: Trace> State<T> {
                 let inexact = !exact;
                 self.external(graph, &name, 0, inexact)
             }
+            Object::Wrapper { kind, .. } => {
+                let kind = self.symbols.text(*kind).to_string();
+                let (_, name) = self.kind_class(&kind);
+                self.external(graph, &name, 0, false)
+            }
             _ => not_ported("the class of a builtin value"),
         }
     }

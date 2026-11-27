@@ -811,6 +811,22 @@ impl<T: Trace> State<T> {
                 let method = self.bound_method(graph, receiver, object);
                 self.add_object(graph, dst, method);
             }
+            &Object::Wrapper { kind, .. } if self.symbols.text(kind) == "staticmethod" => {
+                let name = self.symbols.intern("__func__");
+                let func = self.field(graph, object, name);
+                self.add_edge(graph, func, dst);
+            }
+            &Object::Wrapper { kind, .. } if self.symbols.text(kind) == "classmethod" => {
+                let receiver = receiver.expect("a class method has a receiver");
+                let owner = match self.objects.get(receiver) {
+                    &Object::Instance { class, .. } => class,
+                    _ => receiver,
+                };
+                let name = self.symbols.intern("__func__");
+                let func = self.field(graph, object, name);
+                let rule = self.rule(Rule::BindTo { owner, dst });
+                self.attach(graph, func, rule);
+            }
             _ => self.add_object(graph, dst, object),
         }
     }

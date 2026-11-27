@@ -8,7 +8,7 @@ use crate::engine::symbols::{Sym, Symbols};
 use crate::engine::{OrderedMap, OrderedSet};
 use crate::model::{
     ConstValue, Signature, bound_method_name, constant_name, container_name, coroutine_name,
-    fallback_name, generator_name, instance_name,
+    fallback_name, generator_name, instance_name, wrapper_name,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -225,13 +225,40 @@ pub enum Object {
     UnknownExternal(External),
     Function(Box<Function>),
     Class(Box<Class>),
-    Instance { class: ObjId, site: Sym },
-    BoundMethod { receiver: ObjId, function: ObjId },
-    Fallback { method: ObjId },
-    Const { value: Literal, exact: bool },
+    Instance {
+        class: ObjId,
+        site: Sym,
+    },
+    BoundMethod {
+        receiver: ObjId,
+        function: ObjId,
+    },
+    Fallback {
+        method: ObjId,
+    },
+    Wrapper {
+        kind: Sym,
+        site: Sym,
+    },
+    BuiltinMethod {
+        receiver: ObjId,
+        type_name: Sym,
+        method: Sym,
+        name: Sym,
+    },
+    Const {
+        value: Literal,
+        exact: bool,
+    },
     Container(Container),
-    Generator { function: ObjId, exact: bool },
-    Coroutine { function: ObjId, exact: bool },
+    Generator {
+        function: ObjId,
+        exact: bool,
+    },
+    Coroutine {
+        function: ObjId,
+        exact: bool,
+    },
 }
 
 impl Object {
@@ -246,6 +273,8 @@ impl Object {
             Object::Instance { .. } => Kind::Instance,
             Object::BoundMethod { .. } => Kind::BoundMethod,
             Object::Fallback { .. } => Kind::Fallback,
+            Object::Wrapper { .. } => Kind::Wrapper,
+            Object::BuiltinMethod { .. } => Kind::BuiltinMethod,
             Object::Const { .. } => Kind::Const,
             Object::Container(_) => Kind::Container,
             Object::Generator { .. } => Kind::Generator,
@@ -337,6 +366,10 @@ impl Objects {
                 &self.name(*receiver, symbols),
             ),
             Object::Fallback { method } => fallback_name(&self.name(*method, symbols)),
+            Object::Wrapper { kind, site } => {
+                wrapper_name(symbols.text(*kind), symbols.text(*site))
+            }
+            Object::BuiltinMethod { name, .. } => symbols.text(*name).to_string(),
             Object::Const { value, .. } => constant_name(&value.view()),
             Object::Container(container) => {
                 container_name(symbols.text(container.kind), symbols.text(container.site))

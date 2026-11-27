@@ -1,6 +1,7 @@
 mod analysis;
 mod arguments;
 mod attributes;
+mod builtin_rules;
 mod containers;
 mod fixpoint;
 pub mod hierarchy;
@@ -25,6 +26,7 @@ use attributes::{
     Access, AccessorEntry, AccessorHooks, Accessors, AccessorsId, Deliveries, DeliveriesId,
     FieldWrites, HookCalls, HookCallsId, HooksId, WritesId,
 };
+use builtin_rules::WrapperKey;
 use hierarchy::{LookupAttr, Namespace, Unless};
 use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
 use outside_calls::{Bound, BoundId, Known};
@@ -144,6 +146,12 @@ struct State<T: Trace> {
     callbacks: FxHashMap<Origin, CallId>,
     callback_values: FxHashSet<(CallId, NodeId)>,
     protocol_plans: Vec<Vec<(Sym, Unless)>>,
+    model_bindings: FxHashMap<(CallId, usize), BoundId>,
+    wrappers: FxHashMap<WrapperKey, ObjId>,
+    builtin_methods: FxHashMap<(ObjId, Sym), ObjId>,
+    none_arguments: FxHashMap<(Sym, Sym), Vec<u32>>,
+    synced_none_arguments: usize,
+    callees: FxHashMap<CallId, NodeId>,
     handed: Vec<ObjId>,
     tables: BuilderTables,
 }
@@ -234,6 +242,12 @@ impl<T: Trace> Engine<T> {
             callbacks: FxHashMap::default(),
             callback_values: FxHashSet::default(),
             protocol_plans: Vec::new(),
+            model_bindings: FxHashMap::default(),
+            wrappers: FxHashMap::default(),
+            builtin_methods: FxHashMap::default(),
+            none_arguments: FxHashMap::default(),
+            synced_none_arguments: 0,
+            callees: FxHashMap::default(),
             handed: Vec::new(),
             tables: BuilderTables::default(),
         };

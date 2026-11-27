@@ -7,7 +7,8 @@ use std::process::ExitCode;
 use num_bigint::BigInt;
 use pycg_analysis::CAP_DEFAULT_OBJECTS;
 use pycg_analysis::builder::calls::{
-    Allocator, Analysis, Call, ClassStatement, Constant, MethodKind, NewClass, Passthrough,
+    Allocator, Analysis, Call, CallSite, ClassStatement, Constant, MethodKind, NewClass,
+    Passthrough,
 };
 use pycg_analysis::builder::{ModuleBuilder, Source};
 use pycg_analysis::engine::objects::{Kind, Object};
@@ -577,6 +578,17 @@ impl Replay {
                         not_ported(&format!("the builder table {table}"));
                     }
                 }
+                for pair in pairs(&tables["none_arguments"]) {
+                    let site: CallSite = (text(&pair[0][0]).into(), text(&pair[0][1]).into());
+                    let indices = set(&pair[1])
+                        .iter()
+                        .map(|index| {
+                            u32::try_from(index.as_u64().expect("an argument index"))
+                                .expect("an index fits u32")
+                        })
+                        .collect();
+                    self.engine.tables().none_arguments.push((site, indices));
+                }
             }
         }
     }
@@ -691,6 +703,18 @@ impl Replay {
                 };
                 self.engine
                     .add_method(class, text(&arguments["name"]), function, kind);
+                None
+            }
+            "add_implicit_method" => {
+                let value = self.node(&arguments["value"]);
+                let field = self.node(&arguments["field"]);
+                let kind = match text(&arguments["kind"]) {
+                    "staticmethod" => MethodKind::StaticMethod,
+                    "classmethod" => MethodKind::ClassMethod,
+                    other => panic!("a method kind: {other}"),
+                };
+                self.engine
+                    .add_implicit_method(value, field, kind, text(&arguments["site"]));
                 None
             }
             "add_class_member" => {

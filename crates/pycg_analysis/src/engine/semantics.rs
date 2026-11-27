@@ -54,6 +54,7 @@ pub enum Role {
     ClassGet(Sym),
     ModuleGetattr(Sym),
     Protocol(Sym),
+    Property(AccessKind, Sym),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -169,6 +170,15 @@ impl<T: Trace> State<T> {
                 self.call_dunder(graph, object, "__call__", call, dst, Unless::Nothing);
             }
             Object::External(_) => self.call_external(graph, object, call),
+            &Object::Wrapper { kind, .. } => {
+                if self.symbols.text(kind) == "staticmethod" {
+                    let name = self.symbols.intern("__func__");
+                    let func = self.field(graph, object, name);
+                    let callee = self.callee(graph, call);
+                    self.add_edge(graph, func, callee);
+                }
+            }
+            Object::BuiltinMethod { .. } => self.call_builtin_method(graph, object, call),
             Object::Saturated
             | Object::Module(_)
             | Object::Fallback { .. }
@@ -450,6 +460,17 @@ impl<T: Trace> State<T> {
         };
         let key = (details.caller, details.site, construct);
         self.site_edges.entry(key).or_default().insert(callee);
+    }
+
+    fn callee(&mut self, graph: &mut Graph, call: CallId) -> NodeId {
+        if let Some(&node) = self.callees.get(&call) {
+            return node;
+        }
+        let node = self.node(graph, None);
+        let rule = self.calls[call.index()].rule;
+        self.attach(graph, node, rule);
+        self.callees.insert(call, node);
+        node
     }
 
     pub(super) fn instance(&mut self, graph: &mut Graph, class: ObjId, call: CallId) -> ObjId {
