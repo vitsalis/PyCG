@@ -380,7 +380,14 @@ dependencies = [
 name = "pycg_analysis"
 version = "0.0.0"
 dependencies = [
+ "indexmap",
  "num-bigint",
+ "pycg_solver",
+ "pycg_stubs",
+ "pycg_syntax",
+ "ruff_python_ast",
+ "ruff_source_file",
+ "rustc-hash",
  "serde_json",
 ]
 
@@ -392,6 +399,9 @@ version = "0.0.0"
 name = "pycg_dump"
 version = "0.0.0"
 dependencies = [
+ "indexmap",
+ "num-bigint",
+ "pycg_analysis",
  "pycg_solver",
  "pycg_stubs",
  "pycg_syntax",

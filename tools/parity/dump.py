@@ -80,6 +80,7 @@ BUILDER_TABLES = (
     "read_namespaces",
     "zero_argument_super",
 )
+BUILT_TYPES = ("Function", "Class")
 BUILDER_FIELDS = {
     "Module": ("defines",),
     "Function": (
@@ -352,15 +353,10 @@ class Recorder:
         def new_witness(witness):
             recorder.witness_of_watch[witness.watch] = names.node(witness)
 
-        def new_object(obj):
-            names.new_object(obj)
-            if recorder.building is not None and type(obj).__name__ in BUILDER_FIELDS:
-                recorder.built_objects.append(obj)
-
         wrap_init(solver.Node, new_node)
         wrap_init(solver.Witness, new_witness)
         wrap_init(solver.Constant, names.new_node)
-        wrap_init(self.model.Object, new_object)
+        wrap_init(self.model.Object, names.new_object)
         wrap_init(self.model.Const, names.new_object)
         wrap_init(self.semantics.Call, names.constraint)
 
@@ -881,6 +877,11 @@ class Recorder:
                         "answer": canon(answer),
                     }
                 )
+                if (
+                    type(answer).__name__ in BUILT_TYPES
+                    and answer not in recorder.built_objects
+                ):
+                    recorder.built_objects.append(answer)
                 return answer
 
             functools.update_wrapper(wrapped, original)

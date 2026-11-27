@@ -1,18 +1,87 @@
 import argparse
+import ast
 import json
 import random
+import shutil
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from pycg.analysis import builtin_models, model, mro, stubs  # noqa: E402
+from pycg.analysis.builder import NESTING_MAX, nesting  # noqa: E402
 from pycg.analysis.builtin_rules import _signature  # noqa: E402
 
 VECTORS_DIRECTORY = ROOT / "crates" / "pycg_stubs" / "tests" / "vectors"
 MODEL_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "model.rs"
 MODELS_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "models.rs"
+NESTING_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "nesting.rs"
+BUILDER_VECTORS = ROOT / "crates" / "pycg_dump" / "tests" / "vectors" / "builder"
+DUMP = ROOT / "tools" / "parity" / "dump.py"
+BUILDER_PROGRAMS = {
+    "assignments": "x = 1\ny = x\nfirst, *rest = x\nlast = first = y\ndel x\n",
+    "functions": (
+        "def f(a, b=2, *args, c, d=4, **kw):\n    return a\n"
+        "def g(p, /, q):\n    p = q\n    return p\n"
+    ),
+    "classes": (
+        "class A:\n    x = 1\n    def m(self):\n        return self\n"
+        "class B(A):\n    __slots__ = 'p'\n    y = x = 2\n"
+    ),
+    "branches": (
+        "if flag:\n    y = 1\nelif other:\n    y = 2\nelse:\n    y = 3\n"
+        "while flag:\n    x = y\n    if other:\n        break\n"
+        "    continue\nelse:\n    z = 1\n"
+    ),
+    "handlers": (
+        "try:\n    a = 1\nexcept E as e:\n    a = 2\nelse:\n    b = 1\n"
+        "finally:\n    c = a\nwith m as n:\n    d = n\n"
+    ),
+    "imports": (
+        "import os\nimport os.path as p\nfrom os import path\n"
+        "from typing import TYPE_CHECKING\nfrom . import sibling\n"
+    ),
+}
+
+
+def nested_lambdas(depth):
+    return "lambda: " * (depth - 2) + "None"
+
+
+def nested_conditionals(depth):
+    return "a if b else " * (depth - 2) + "c"
+
+
+def else_ifs(count):
+    lines = []
+    for level in range(count):
+        indent = "    " * level
+        lines += [f"{indent}if a:", f"{indent}    pass", f"{indent}else:"]
+    lines.append("    " * count + "x = 1")
+    return "\n".join(lines) + "\n"
+
+
+BUILDER_PROGRAMS["nesting"] = f"x = 1\ny = {nested_lambdas(NESTING_MAX + 1)}\nz = x\n"
+NESTING_PROGRAMS = (
+    f"x = {nested_lambdas(NESTING_MAX)}\n",
+    f"x = {nested_lambdas(NESTING_MAX + 1)}\n",
+    f"x = {nested_conditionals(NESTING_MAX)}\n",
+    f"x = {nested_conditionals(NESTING_MAX + 1)}\n",
+    "x = " + " + ".join(["a"] * (NESTING_MAX + 1)) + "\n",
+    "x = " + " + ".join(["a"] * NESTING_MAX) + f" + ({nested_lambdas(NESTING_MAX)})\n",
+    "if a:\n    pass\n" + "elif a:\n    pass\n" * (NESTING_MAX + 1),
+    "if a:\n    pass\n"
+    + "elif a:\n    pass\n" * NESTING_MAX
+    + f"elif b:\n    x = {nested_lambdas(NESTING_MAX)}\n",
+    else_ifs(64),
+    "if a:\n    pass\nelse:\n    x = 1\n    if b:\n        if c:\n            y = 1\n",
+    "def f():\n    return 1\n"
+    "class A:\n    y = [a for a in b if a]\n"
+    "with m as n:\n    del n\n",
+)
 SEED = 20261126
 CASES_PER_FUNCTION = 400
 POOL_SIZE = 8
@@ -149,6 +218,22 @@ BINDS_PER_SIGNATURE = 6
 PATTERN_CASES = 300
 MATCHES_PER_PATTERN = 6
 PATTERN_ALPHABET = "aAbB_"
+DOTTED_NAMES = (
+    "os",
+    "os.path",
+    "a\u00b7b",
+    "\u2118",
+    "\u2118.x",
+    "\u00e9t\u00e9",
+    "x\u0300",
+    "\u0300x",
+    "1a",
+    "a..b",
+    "",
+    "a.",
+    "\u212e",
+    "_\u00b7",
+)
 SITE_CASES = ("main", "main#1", "main#1#2", "#3", "", "a.b:1:2#site")
 STEPS_CASES = (("a.b.c", 0), ("a.b.c", 1), ("a.b.c", 2), ("a.b.c", 3), ("a", 1))
 
@@ -282,6 +367,11 @@ def model_vectors(generator):
     lines.append("pub const INT_NAMES: &[(&str, &str)] = &[")
     for value in int_values(generator):
         lines.append(f'    ("{value}", "{model.constant_name(value)}"),')
+    lines.append("];")
+    lines.append("pub const DOTTED_IDENTIFIERS: &[(&str, bool)] = &[")
+    for name in DOTTED_NAMES:
+        dotted = all(part.isidentifier() for part in name.split("."))
+        lines.append(f"    ({rust_text(name)}, {str(dotted).lower()}),")
     lines.append("];")
     lines.append("pub const SITE_NAMES: &[(&str, &str)] = &[")
     for site in SITE_CASES:
@@ -539,6 +629,43 @@ def models_vectors():
     return "\n".join(lines) + "\n"
 
 
+def nesting_vectors():
+    lines = ["pub const NESTING_MAX: usize = " + str(NESTING_MAX) + ";"]
+    lines.append("pub const NESTING: &[(&str, &[usize])] = &[")
+    for source in NESTING_PROGRAMS:
+        depths = [nesting(statement) for statement in ast.parse(source).body]
+        lines.append(f"    ({rust_text(source)}, &{depths}),")
+    lines.append("];")
+    return "\n".join(lines) + "\n"
+
+
+def builder_vectors():
+    if BUILDER_VECTORS.exists():
+        shutil.rmtree(BUILDER_VECTORS)
+    for name, source in BUILDER_PROGRAMS.items():
+        target = BUILDER_VECTORS / name
+        target.mkdir(parents=True)
+        (target / "main.py").write_text(source, encoding="utf-8")
+        with tempfile.TemporaryDirectory() as scratch:
+            program = Path(scratch) / "program"
+            program.mkdir()
+            (program / "main.py").write_text(source, encoding="utf-8")
+            out = Path(scratch) / "out"
+            subprocess.run(
+                [sys.executable, "-I", str(DUMP), "input", "--checkout", str(ROOT)]
+                + [
+                    "--out",
+                    str(out),
+                    "--package",
+                    str(program),
+                    str(program / "main.py"),
+                ],
+                check=True,
+            )
+            shutil.copy(out / "D4.jsonl", target / "D4.jsonl")
+            shutil.copy(out / "entries.txt", target / "entries.txt")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Write the unit vectors of the Rust crates from the Python engine."
@@ -553,6 +680,8 @@ def main(argv=None):
     MODEL_VECTORS.parent.mkdir(parents=True, exist_ok=True)
     MODEL_VECTORS.write_text(model_vectors(random.Random(SEED)), encoding="utf-8")
     MODELS_VECTORS.write_text(models_vectors(), encoding="utf-8")
+    NESTING_VECTORS.write_text(nesting_vectors(), encoding="utf-8")
+    builder_vectors()
 
 
 if __name__ == "__main__":
