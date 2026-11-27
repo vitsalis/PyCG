@@ -31,6 +31,8 @@ pub trait Trace {
     fn attach(&mut self, _node: NodeId, _rule: RuleId) {}
     fn objects(&mut self, _node: NodeId, _objects: &[ObjId]) {}
     fn holds(&mut self, _node: NodeId, _object: ObjId, _answer: bool) {}
+    fn is_saturated(&mut self, _node: NodeId, _answer: bool) {}
+    fn apply_now(&mut self, _node: NodeId, _rule: RuleId) {}
     fn apply(&mut self, _rule: RuleId, _objects: &[ObjId]) {}
     fn applied(&mut self) {}
     fn saturate(&mut self, _rule: RuleId) {}

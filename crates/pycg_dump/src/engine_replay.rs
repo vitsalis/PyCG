@@ -343,6 +343,24 @@ impl Trace for Recorder {
         self.write(&record);
     }
 
+    fn is_saturated(&mut self, node: NodeId, answer: bool) {
+        let record = json!({
+            "op": "is_saturated",
+            "args": [self.node_value(node)],
+            "answer": answer,
+        });
+        self.write(&record);
+    }
+
+    fn apply_now(&mut self, node: NodeId, rule: RuleId) {
+        self.declare_rule(rule);
+        let record = json!({
+            "op": "apply_now",
+            "args": [self.node_value(node), self.rule_value(rule)],
+        });
+        self.write(&record);
+    }
+
     fn apply(&mut self, rule: RuleId, objects: &[ObjId]) {
         self.declare_rule(rule);
         let listed: Vec<Value> = objects
@@ -642,6 +660,40 @@ impl Replay {
                     arguments["inexact"].as_bool().expect("inexact"),
                 );
                 Some(self.object_answer(external))
+            }
+            "add_load" => {
+                let base = self.node(&arguments["base"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.add_load(
+                    base,
+                    text(&arguments["attr"]),
+                    dst,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_store" => {
+                let base = self.node(&arguments["base"]);
+                let src = self.optional_node(&arguments["src"]);
+                self.engine.add_store(
+                    base,
+                    text(&arguments["attr"]),
+                    src,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_delete" => {
+                let base = self.node(&arguments["base"]);
+                self.engine.add_delete(
+                    base,
+                    text(&arguments["attr"]),
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
             }
             "add_external_module" => {
                 self.engine.add_external_module(text(&arguments["name"]));

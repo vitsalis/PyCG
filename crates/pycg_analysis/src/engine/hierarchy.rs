@@ -921,6 +921,29 @@ impl<T: Trace> State<T> {
         }
     }
 
+    pub(super) fn class_attribute_stored(&mut self, graph: &mut Graph, class: ObjId, name: Sym) {
+        if !self
+            .objects
+            .class_mut(class)
+            .stored_names_outside_body
+            .insert(name)
+        {
+            return;
+        }
+        let mut pending = vec![class];
+        let mut seen = FxHashSet::default();
+        while let Some(current) = pending.pop() {
+            if !seen.insert(current) {
+                continue;
+            }
+            let found = self.objects.class(current);
+            if found.ready && !found.unknown {
+                self.decide_concrete(graph, current);
+            }
+            pending.extend(self.objects.class(current).subclasses.iter().copied());
+        }
+    }
+
     fn concrete(&mut self, class: ObjId) -> bool {
         let found = self.objects.class(class);
         let init = self.symbols.intern("__init__");
@@ -1758,6 +1781,7 @@ impl<T: Trace> State<T> {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Namespace {
+    Names,
     Subclasses,
     Members,
 }

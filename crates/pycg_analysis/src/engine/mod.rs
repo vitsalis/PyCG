@@ -1,4 +1,5 @@
 mod arguments;
+mod attributes;
 mod containers;
 mod fixpoint;
 pub mod hierarchy;
@@ -17,6 +18,10 @@ use pycg_stubs::{Definition, Stubs};
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 
 use crate::model::{BUILTIN_MODULE, Signature};
+use attributes::{
+    Access, AccessorEntry, AccessorHooks, Accessors, AccessorsId, Deliveries, DeliveriesId,
+    FieldWrites, HookCalls, HookCallsId, HooksId, WritesId,
+};
 use hierarchy::{LookupAttr, Namespace, NewClass, Unless};
 use objects::{Class, Container, External, Function, Kind, Literal, Module, Object, Objects};
 pub use rules::RuleId;
@@ -103,6 +108,23 @@ struct State<T: Trace> {
     receivers: Vec<Receiver>,
     entry_receivers: Vec<Receiver>,
     completed_receivers: usize,
+    accesses: Vec<Access>,
+    accessor_hooks: Vec<AccessorHooks>,
+    accessor_hooks_by_key: FxHashMap<(ObjId, Sym, Option<AccessorEntry>), HooksId>,
+    accessor_hook_rules: FxHashMap<HooksId, RuleId>,
+    accessors: Vec<Accessors>,
+    accessor_receivers: FxHashMap<(NodeId, CallId, bool, u32), AccessorsId>,
+    writes: Vec<FieldWrites>,
+    field_writes: FxHashMap<NodeId, WritesId>,
+    hook_calls: Vec<HookCalls>,
+    hook_calls_by_lookup: FxHashMap<NodeId, HookCallsId>,
+    deliveries: Vec<Deliveries>,
+    deliveries_by_lookup: FxHashMap<NodeId, DeliveriesId>,
+    descriptors_itself: FxHashSet<(ObjId, NodeId)>,
+    store_names: FxHashSet<Sym>,
+    class_store_names: FxHashMap<ObjId, FxHashSet<Sym>>,
+    pattern_states: FxHashMap<ObjId, ()>,
+    field_readers: FxHashMap<(ObjId, Sym), OrderedMap<NodeId, Vec<ObjId>>>,
 }
 
 impl<T: Trace> Engine<T> {
@@ -162,6 +184,23 @@ impl<T: Trace> Engine<T> {
             receivers: Vec::new(),
             entry_receivers: Vec::new(),
             completed_receivers: 0,
+            accesses: Vec::new(),
+            accessor_hooks: Vec::new(),
+            accessor_hooks_by_key: FxHashMap::default(),
+            accessor_hook_rules: FxHashMap::default(),
+            accessors: Vec::new(),
+            accessor_receivers: FxHashMap::default(),
+            writes: Vec::new(),
+            field_writes: FxHashMap::default(),
+            hook_calls: Vec::new(),
+            hook_calls_by_lookup: FxHashMap::default(),
+            deliveries: Vec::new(),
+            deliveries_by_lookup: FxHashMap::default(),
+            descriptors_itself: FxHashSet::default(),
+            store_names: FxHashSet::default(),
+            class_store_names: FxHashMap::default(),
+            pattern_states: FxHashMap::default(),
+            field_readers: FxHashMap::default(),
         };
         state.trace.object(
             saturated,
@@ -364,6 +403,28 @@ impl<T: Trace> Engine<T> {
         self.state.add_external_module(name);
     }
 
+    pub fn add_load(&mut self, base: NodeId, attr: &str, dst: NodeId, caller: &str, site: &str) {
+        self.state
+            .add_load(&mut self.graph, base, attr, dst, caller, site);
+    }
+
+    pub fn add_store(
+        &mut self,
+        base: NodeId,
+        attr: &str,
+        src: Option<NodeId>,
+        caller: &str,
+        site: &str,
+    ) {
+        self.state
+            .add_store(&mut self.graph, base, attr, src, caller, site);
+    }
+
+    pub fn add_delete(&mut self, base: NodeId, attr: &str, caller: &str, site: &str) {
+        self.state
+            .add_delete(&mut self.graph, base, attr, caller, site);
+    }
+
     pub fn solve(&mut self) {
         self.state.solve(&mut self.graph);
     }
@@ -411,6 +472,37 @@ impl<T: Trace> State<T> {
         let objects = graph.objects(node);
         self.trace.objects(node, &objects);
         objects
+    }
+
+    fn is_saturated(&mut self, graph: &mut Graph, node: NodeId) -> bool {
+        let answer = graph.is_saturated(node);
+        self.trace.is_saturated(node, answer);
+        answer
+    }
+
+    fn apply_now(&mut self, graph: &mut Graph, node: NodeId, rule: RuleId) {
+        self.trace.apply_now(node, rule);
+        graph.apply_now(self, node, rule);
+    }
+
+    fn read_field(&mut self, graph: &mut Graph, instance: ObjId, name: Sym, dst: NodeId) {
+        if let Some(&node) = self
+            .fields
+            .get(&instance)
+            .and_then(|fields| fields.get(&name))
+        {
+            self.add_edge(graph, node, dst);
+            return;
+        }
+        let &Object::Instance { class, .. } = self.objects.get(instance) else {
+            panic!("a field read of an instance")
+        };
+        self.field_readers
+            .entry((class, name))
+            .or_default()
+            .entry(dst)
+            .or_default()
+            .push(instance);
     }
 
     fn holds(&mut self, graph: &mut Graph, node: NodeId, object: ObjId) -> bool {
@@ -467,6 +559,22 @@ impl<T: Trace> State<T> {
         );
         let node = self.node(graph, Some(&label));
         self.fields.entry(object).or_default().insert(name, node);
+        if let &Object::Instance { class, .. } = self.objects.get(object) {
+            let readers: Vec<NodeId> = self
+                .field_readers
+                .get(&(class, name))
+                .map(|readers| {
+                    readers
+                        .iter()
+                        .filter(|(_, receivers)| receivers.contains(&object))
+                        .map(|(&dst, _)| dst)
+                        .collect()
+                })
+                .unwrap_or_default();
+            for dst in readers {
+                self.add_edge(graph, node, dst);
+            }
+        }
         node
     }
 
