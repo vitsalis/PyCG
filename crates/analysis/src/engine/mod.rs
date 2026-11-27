@@ -609,19 +609,21 @@ impl<T: Trace> State<T> {
         let kind = object.kind();
         let id = self.objects.push(object);
         graph.declare(id, kind.mask());
-        let name = self.objects.name(id, &self.symbols);
-        let opacity = match self.objects.get(id) {
-            Object::Saturated => Opacity::Saturated,
-            Object::Class(_) => Opacity::Class(id),
-            &Object::Instance { class, .. } => Opacity::Class(class),
-            &Object::Fallback { method } => match self.objects.get(method) {
+        if T::RECORDS {
+            let name = self.objects.name(id, &self.symbols);
+            let opacity = match self.objects.get(id) {
+                Object::Saturated => Opacity::Saturated,
+                Object::Class(_) => Opacity::Class(id),
                 &Object::Instance { class, .. } => Opacity::Class(class),
-                Object::Class(_) => Opacity::Class(method),
+                &Object::Fallback { method } => match self.objects.get(method) {
+                    &Object::Instance { class, .. } => Opacity::Class(class),
+                    Object::Class(_) => Opacity::Class(method),
+                    _ => Opacity::Never,
+                },
                 _ => Opacity::Never,
-            },
-            _ => Opacity::Never,
-        };
-        self.trace.object(id, kind, &name, opacity);
+            };
+            self.trace.object(id, kind, &name, opacity);
+        }
         id
     }
 
