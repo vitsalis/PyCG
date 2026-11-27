@@ -140,6 +140,11 @@ pub enum Role {
     Raise,
     Special(Sym),
     TypeMetaclass,
+    CallBack,
+    Key,
+    SequenceKey,
+    LibraryKey(Sym),
+    MergeKey(Sym),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]

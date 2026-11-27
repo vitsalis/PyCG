@@ -7,6 +7,7 @@ mod builtin_rules;
 mod containers;
 mod fixpoint;
 pub mod hierarchy;
+mod library;
 pub mod objects;
 mod outside;
 mod outside_calls;
@@ -170,6 +171,8 @@ struct State<T: Trace> {
     builtin_methods: FxHashMap<(ObjId, Sym), ObjId>,
     none_arguments: FxHashMap<(Sym, Sym), Vec<u32>>,
     synced_none_arguments: usize,
+    none_keywords: FxHashMap<(Sym, Sym), Vec<Sym>>,
+    synced_none_keywords: usize,
     callees: FxHashMap<CallId, NodeId>,
     dynamic_accesses: Vec<DynamicAccess>,
     namespace_names_read: FxHashSet<Sym>,
@@ -199,6 +202,7 @@ struct State<T: Trace> {
     outside_types: outside_types::OutsideTypes,
     annotations: annotations::Annotations,
     outside_results: outside_results::OutsideResults,
+    library: library::Library,
 }
 
 impl<T: Trace> Engine<T> {
@@ -299,6 +303,8 @@ impl<T: Trace> Engine<T> {
             builtin_methods: FxHashMap::default(),
             none_arguments: FxHashMap::default(),
             synced_none_arguments: 0,
+            none_keywords: FxHashMap::default(),
+            synced_none_keywords: 0,
             callees: FxHashMap::default(),
             dynamic_accesses: Vec::new(),
             namespace_names_read: FxHashSet::default(),
@@ -327,6 +333,7 @@ impl<T: Trace> Engine<T> {
             outside_types: outside_types::OutsideTypes::default(),
             annotations: annotations::Annotations::default(),
             outside_results: outside_results::OutsideResults::default(),
+            library: library::Library::default(),
             tables: BuilderTables::default(),
         };
         state.trace.object(

@@ -611,6 +611,11 @@ impl Replay {
                         .collect();
                     self.engine.tables().none_arguments.push((site, indices));
                 }
+                for pair in pairs(&tables["none_keywords"]) {
+                    let site: CallSite = (text(&pair[0][0]).into(), text(&pair[0][1]).into());
+                    let names = set(&pair[1]).iter().map(|name| text(name).into()).collect();
+                    self.engine.tables().none_keywords.push((site, names));
+                }
             }
         }
     }
@@ -1094,6 +1099,15 @@ impl Replay {
                     text(&arguments["caller"]),
                     text(&arguments["site"]),
                     arguments["is_async"].as_bool().expect("is_async"),
+                );
+                None
+            }
+            "add_length_hint" => {
+                let iterable = self.node(&arguments["iterable"]);
+                self.engine.add_length_hint(
+                    iterable,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
                 );
                 None
             }
