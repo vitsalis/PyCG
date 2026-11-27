@@ -10,7 +10,7 @@ MACRO = Path("evaluation/macro-benchmark")
 SAME_FUNCTION = Path("evaluation/common/same_function.json")
 SNIPPETS = Path("evaluation/micro-benchmark/snippets")
 SNIPPET_FILES = ("callgraph.json", "requires-python")
-DESCRIPTION = """The gate of the evaluation (evaluation/README.md, "The gate"). A RESULT
+DESCRIPTION = """The gate of the evaluation (AGENTS.md, "Evaluation"). A RESULT
 is a directory that `make` measures into: the result.json of `loop.py run`
 and the benchmark_sha256 of the checkout measured. BASE_METRICS is the
 evaluation/metrics.json of the base, METRICS that of this checkout.

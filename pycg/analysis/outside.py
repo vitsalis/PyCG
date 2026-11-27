@@ -675,7 +675,6 @@ class Outside:
         definitions = self.stub_definitions(external)
         return bool(definitions) and all(
             definition.kind == "function"
-            and not definition.path.startswith(f"{STUB_BUILTINS}.")
             and definition.path not in GROUP_EXCLUDED_PATHS
             for definition in definitions
         )

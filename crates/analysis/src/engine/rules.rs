@@ -7,13 +7,13 @@ use crate::engine::builtin_rules::DynamicId;
 use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::containers::ContainerRule;
 use crate::engine::containers::IterationId;
-use crate::engine::hierarchy::Unless;
+use crate::engine::hierarchy::{BindsId, Unless};
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
 use crate::engine::patterns::PatternRule;
 use crate::engine::protocols::ProtocolRule;
 use crate::engine::reflection::{DefaultAction, GetmembersId};
-use crate::engine::semantics::{CallId, ReturnedId};
+use crate::engine::semantics::{CallId, ReturnedId, SharedId};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::{RuleInfo, Trace};
 use crate::engine::{Graph, OrderedMap, State, not_ported};
@@ -36,6 +36,8 @@ pub(crate) enum Rule {
         class: ObjId,
         index: u32,
     },
+    Binds(BindsId),
+    Shared(SharedId),
     Bind {
         receiver: Option<ObjId>,
         dst: NodeId,
@@ -292,6 +294,7 @@ impl Rule {
             Rule::Call(_) => "Call",
             Rule::Bases { .. } => "_Bases",
             Rule::Bind { .. } => "_Bind",
+            Rule::Binds(_) => "_Binds",
             Rule::KeywordCandidate { .. } => "Each:Hierarchy._keyword_candidate",
             Rule::MemberOfMetaclass { .. } => "Each:Hierarchy._member_of_metaclass",
             Rule::BindFallback { .. } => "Each:Hierarchy._bind_fallback",
@@ -299,7 +302,8 @@ impl Rule {
             Rule::PythonNew { .. } => "Each:Analysis._python_new",
             Rule::PythonInstance { .. } => "Each:Analysis._python_instance",
             Rule::New { .. } => "Each:Analysis._new",
-            Rule::ReturnedOfClass(_) => "Each:_Returned.of_class",
+            Rule::ReturnedOfClass(_) => "Each:Analysis._of_class",
+            Rule::Shared(_) => "Shared",
             Rule::ReturnedByItsNew(_) => "Each:_Returned.by_its_new",
             Rule::ReturnedRelease(_) => "Each:_Returned.release",
             Rule::ReturnedByNew(_) => "Each:_Returned.by_new",
@@ -368,6 +372,8 @@ impl Rule {
             Rule::Call(_)
                 | Rule::Bases { .. }
                 | Rule::Bind { .. }
+                | Rule::Binds(_)
+                | Rule::Shared(_)
                 | Rule::Access(_)
                 | Rule::Deliver { .. }
                 | Rule::Deliveries(_)
@@ -417,6 +423,10 @@ impl Rule {
             | Rule::SetName { class, .. }
             | Rule::CallMetaclass { class } => vec![class],
             Rule::Bind { receiver, .. } => receiver.into_iter().collect(),
+            Rule::Binds(_) => Vec::new(),
+            Rule::Shared(_) => {
+                unreachable!("the captured objects of a shared record are kept apart")
+            }
             Rule::BindFallback { receiver, .. } => vec![receiver],
             Rule::TypeMethod { object, .. }
             | Rule::Itself { object, .. }
@@ -485,6 +495,7 @@ impl<T: Trace> State<T> {
         };
         let captured = match rule {
             Rule::Deliveries(id) => vec![self.deliveries_receiver(id)],
+            Rule::Shared(shared) => self.shared_captured(shared),
             _ => rule.captured(),
         };
         self.trace.rule(
@@ -512,6 +523,8 @@ impl<T: Trace> State<T> {
             Rule::TypeMethod { implicit, .. } => {
                 self.calls[implicit.index()].dst.into_iter().collect()
             }
+            Rule::Binds(binds) => self.binds_results(binds),
+            Rule::Shared(shared) => self.shared_results(shared),
             Rule::Bind { dst, .. }
             | Rule::MemberOfMetaclass { dst, .. }
             | Rule::BindFallback { dst, .. }
@@ -584,6 +597,14 @@ impl<T: Trace> State<T> {
                 dst,
                 instance,
             } => self.bind(graph, object, receiver, dst, Some(instance)),
+            Rule::Binds(binds) => self.binds_apply(graph, binds, object),
+            Rule::Shared(shared) => {
+                let (rule, items) = self.shared_items(shared);
+                for item in items {
+                    let each = rule.each(item);
+                    self.apply_one(graph, &each, object);
+                }
+            }
             Rule::KeywordCandidate { class } => self.keyword_candidate(graph, object, class),
             Rule::MemberOfMetaclass { class, attr, dst } => {
                 self.member_of_metaclass(graph, object, class, attr, dst)
@@ -822,8 +843,11 @@ impl<T: Trace> Rules<RuleId> for State<T> {
     }
 
     fn captures_opaque(&self, _graph: &Graph, rule: RuleId) -> bool {
-        self.rules[rule.index()]
-            .captured()
+        let captured = match self.rules[rule.index()] {
+            Rule::Shared(shared) => self.shared_captured(shared),
+            ref rule => rule.captured(),
+        };
+        captured
             .into_iter()
             .any(|object| State::opaque(self, object))
     }

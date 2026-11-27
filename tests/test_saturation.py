@@ -919,7 +919,7 @@ EACH_RULES_WITHOUT_RESULTS = {
     "_type_base",
     "_call_type_metaclass",
     "by_new",
-    "of_class",
+    "_of_class",
     "key",
     "stored",
     "arrive",
@@ -948,6 +948,14 @@ def test_every_rule_that_puts_objects_in_a_node_names_it():
             ):
                 rule = node.args[0]
                 unnamed.add(rule.attr if isinstance(rule, ast.Attribute) else rule.id)
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "share"
+                and isinstance(node.args[-1], ast.Constant)
+                and node.args[-1].value is False
+            ):
+                unnamed.add(node.args[1].attr)
 
     assert unnamed == EACH_RULES_WITHOUT_RESULTS
 

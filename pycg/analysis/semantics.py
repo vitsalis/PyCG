@@ -122,6 +122,7 @@ class Analysis(
         self._constants = {}
         self._subscriptions = set()
         self._compared_keys = {}
+        self._field_binds = {}
         self._sequences = {}
         self._accessor_hooks = {}
         self._accessor_receivers = {}
@@ -733,19 +734,15 @@ class Analysis(
 
     def instantiate(self, cls, call):
         default = self.python_method(cls, "__new__")
-        self.solver.attach(
-            default, Each(self._python_new, cls, call, results=(call.dst,))
-        )
+        self.solver.share(default, self._python_new, (cls,), call, True)
         new = self._implicit_call(cls, "__new__", call, None)
         if new not in self._new_results:
             instances = self._class_instances.setdefault(cls, set())
             returned = _Returned(self, call, cls, instances)
             self._new_results[new] = returned
-            self.solver.attach(
-                self.lookup(cls, "__new__", cls),
-                Each(self._new, cls, new, results=(new.dst,)),
-            )
-            self.solver.attach(cls.instances, Each(returned.of_class))
+            found = self.lookup(cls, "__new__", cls)
+            self.solver.share(found, self._new, (cls,), new, True)
+            self.solver.share(cls.instances, self._of_class, (), returned, False)
         if call.dst is not None:
             self._new_results[new].add_dst(call.dst)
 
@@ -832,8 +829,10 @@ class Analysis(
             self.call_dunder(cls, "__init__", calls[0], None)
 
     def _python_new(self, method, cls, call):
-        made = Each(self._python_instance, call, results=(call.dst,))
-        self.solver.attach(cls.instantiable, made)
+        self.solver.share(cls.instantiable, self._python_instance, (), call, True)
+
+    def _of_class(self, obj, returned):
+        returned.of_class(obj)
 
     def _python_instance(self, cls, call):
         instance = self.instance(cls, call)
@@ -1058,12 +1057,12 @@ class _Returned:
         self.analysis = analysis
         self.call = call
         self.cls = cls
-        self.returned = set()
+        self.returned = None
         self.instances = instances
         self.sees = False
         self.dst = None
         self.dsts = []
-        self.held = []
+        self.held = None
         self.another = False
 
     def add_dst(self, dst):
@@ -1086,17 +1085,21 @@ class _Returned:
 
     def by_its_new(self, obj):
         if type(obj) is Instance and obj.cls is not self.cls and not self.another:
+            if self.held is None:
+                self.held = []
             self.held.append(obj)
         else:
             self.analysis.add_object(self.dst, obj)
 
     def release(self, marker):
         self.another = True
-        for obj in self.held:
+        for obj in self.held or ():
             self.analysis.add_object(self.dst, obj)
-        self.held = []
+        self.held = None
 
     def by_new(self, obj):
+        if self.returned is None:
+            self.returned = set()
         self.returned.add(obj)
         if self.sees and obj in self.instances:
             self._initialise(obj)
@@ -1104,7 +1107,7 @@ class _Returned:
     def of_class(self, obj):
         self.sees = True
         self.instances.add(obj)
-        if obj in self.returned:
+        if self.returned is not None and obj in self.returned:
             self._initialise(obj)
 
     def _initialise(self, obj):

@@ -1262,3 +1262,51 @@ def test_each_load_of_an_instance_gets_what_its_lookup_finds(tmp_path):
     assert set(points_to["main.a"]) == set(points_to["main.b"]) == bound
     assert points_to["main.c"] == [f"<bound main.Dog.speak of {first[0]}>"]
     assert set(points_to["main.d"]) == set(points_to["main.e"]) == {*first, *second}
+
+
+def test_each_instance_gets_the_class_attributes_bound_to_itself(tmp_path):
+    generator = analysed(
+        tmp_path,
+        {
+            "main.py": """
+            import pathlib
+            class Base:
+                def speak(self): return self
+                @staticmethod
+                def plain(): pass
+                @classmethod
+                def make(cls): return cls
+                def __getattr__(self, name): return self
+            class Dog(Base):
+                pass
+            class Place(pathlib.PurePosixPath):
+                pass
+            def talk(animal):
+                animal.plain()
+                animal.make()
+                animal.missing
+                return animal.speak()
+            first = talk(Dog())
+            second = talk(Dog())
+            here = Place("a").with_name("b")
+            there = Place("c").with_name("d")
+            """
+        },
+    )
+    graph = generator.output()
+    assert set(graph["main.talk"]) >= {
+        "main.Base.speak",
+        "main.Base.plain",
+        "main.Base.make",
+        "main.Base.__getattr__",
+    }
+    points_to = generator.output_points_to()
+    dogs = [name for name in points_to["main.first"] if "@main" in name]
+    assert len(dogs) == 2 and points_to["main.second"] == points_to["main.first"]
+    assert [
+        name for name in points_to["main.Base.speak.self"] if "@main" in name
+    ] == dogs
+    assert [name for name in points_to["main.here"] if "@main" in name] == [
+        name for name in points_to["main.here"] if name.startswith("main.Place@main")
+    ]
+    assert len([name for name in points_to["main.here"] if "@main" in name]) == 1

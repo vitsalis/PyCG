@@ -119,7 +119,7 @@ endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
-	eval-same-graphs eval-labels eval-changes eval-scale parity-oracle parity-key parity
+	eval-same-graphs eval-labels eval-changes eval-scale eval-trace parity-oracle parity-key parity
 
 setup:
 	uv sync --locked
@@ -233,6 +233,12 @@ eval-scale: eval-inputs
 eval-changes:
 	$(need_base)
 	python3 -I tools/check.py --base $(BASE) --detect-eval $(OUTPUTS) >> $(SUMMARY)
+
+eval-trace:
+	$(if $(NAME),,$(error $@ needs NAME=<project of evaluation/macro-benchmark/projects.toml>))
+	mkdir -p evaluation/results/trace
+	NAME=$(NAME) EVAL_UID=$$(id -u) EVAL_GID=$$(id -g) docker compose -f evaluation/compose.yaml \
+		run --rm trace $(if $(wildcard evaluation/macro-benchmark/dynamic/$(NAME).json),--compare)
 
 parity-oracle: eval-inputs
 	@test -z "$$(git status --porcelain -- $(PARITY_KEYED))" \

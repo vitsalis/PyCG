@@ -952,6 +952,16 @@ was attached for (`_dunder_owners`): the first one itself, and a set from
 the second one on, which answers whether an object is new as the set
 would.
 
+Every lookup of an attribute through an instance is the instance's own node,
+walked over the classes of its MRO, and binds the value of each class field
+that it meets to its receiver. One constraint per field and kind of binding
+(to an instance, or to a class) does that for every lookup that meets the
+field: it keeps their nodes and receivers and binds each value that the
+field gets to each of them, and a lookup that meets the field later gets the
+field's values bound at once, as its own constraint would have; a receiver
+of an unknown class still gets the saturated value. On sqlalchemy these were
+2.9 million constraints, one per field, receiver and lookup.
+
 A node that no rule can read yet need not exist. A call of a modelled builtin
 or of a stubbed function binds its arguments to the parameters of each
 signature that it fits, and no rule reads most of those parameters (on sphinx,
@@ -2858,6 +2868,17 @@ class or of a subclass (the instances of the class, joined with what
 calls and of instances, so the calls of a class share one set of its
 instances; each call sees every instance, in the same rounds, unless it
 comes after the instances of the class saturated: it then sees none.
+Likewise the calls of one class wait on its nodes (its `__new__`, whether
+Python's own runs, its instances, whether it is instantiable) as one
+record per node and rule that keeps the list of its calls
+(`Solver.share`), instead of one constraint per call (pandas: 1.5
+million calls of a class at a site, 69 classes per site on average). Each
+object that the node gets reaches every call of the record, and a call
+that joins later gets the node's objects at once, as a constraint
+attached then would (`Solver.apply_now`), the saturated value included.
+An object that the node held but had not yet given the record reaches the
+new call twice: its rules make the same instance, call and edges again,
+which changes nothing.
 
 - Where no analysed class of an MRO defines `__new__` before an outside
   base or the end, Python's own (or the base's) runs: it returns
@@ -4602,15 +4623,14 @@ that a construct iterates, what an unpacked argument passes, the node that
 that it was asked with the same, so a kind of call that broke the rule
 fails the tests instead of losing values.
 
-A plain stub method (one that no model, protocol or library rule reads: a
-function of a non-builtin stub with no rule of its own, that returns no
-argument, and that no table of `builtin_models.py` lists,
+A plain stub method (a stub function with no rule of its own, that returns
+no argument, and that no table of `builtin_models.py` lists,
 `GROUP_EXCLUDED_PATHS`) called through bound methods of many receivers at
 one call is one call for all of them, up to the cap of receivers
-(`_BoundGroup`): a tuple of receivers goes to the group that holds it,
-else to the last group while that holds fewer than the cap, else to a new
-one; a rule that observes a group sees every tuple of it, also those added
-before it. its receiver positions are nodes that hold the receivers, and its
+(`_BoundGroup`): a tuple of receivers goes to the group that holds it, else
+to the last group while that holds fewer than the cap, else to a new one; a
+rule that observes a group sees every tuple of it, also those added before
+it. its receiver positions are nodes that hold the receivers, and its
 binding, typed callbacks and call edges are made once. What a single
 receiver decides is still decided per receiver: the results that name the
 receiver (`*self`, `type[Self]`) are added for each receiver, whether the
@@ -4619,9 +4639,13 @@ unknown, which is part of the key, and any other use of the call (a call of
 something else with it, a bound method or implicit call that extends it)
 goes through each receiver's own call. The parameters of the binding get the
 union of the receivers, which is what the result and the callees received
-from the calls of every receiver. A group takes at most the cap of
-receivers, so its receiver nodes never saturate, as no receiver node of one
-receiver's call did.
+from the calls of every receiver. The rules of a builtins method that read a
+parameter (a callable called back, the methods of a protocol, an iterable
+consumed) do the same for each value of the parameter's node at the same
+call site, so the node that holds the receivers gives each receiver what its
+own call's node gave it. A group takes at most the cap of receivers, so its
+receiver nodes never saturate, as no receiver node of one receiver's call
+did.
 
 **Receivers are bounded.** A bound method has one receiver: only a
 function is bound, so binding never nests. The cap of three receivers
@@ -4696,6 +4720,7 @@ them, so no kind of node keys another of its own kind:
 | Accessor calls of a class (`_AccessorHooks`; `_Accessors`) | class and hook, or class, hook and entry for an entry met after a saturation; accessor node, call, kinds and width |
 | Field writes of a store decision (`_FieldWrites`) | decision node |
 | Loads through a lookup (`_Deliveries`) | lookup node |
+| Calls of a class waiting on one of its nodes (`Solver.share`) | node, rule and the rule's arguments other than the call |
 | Group of bound calls of a plain stub method (`_BoundGroup`) | the call that it extends, the method, the number of receivers and whether the class of the first is unknown; a list of groups of at most the cap of receivers |
 
 The other rules make nodes and constraints per call and object, or per

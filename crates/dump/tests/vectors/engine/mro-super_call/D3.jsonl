@@ -85,8 +85,10 @@
 {"args":[{"node":"main#10"},{"constraint":"Each:Analysis._set_name~2"}],"op":"attach"}
 {"node":"main#17","op":"node"}
 {"named":true,"node":"main.A.__init_subclass__","op":"node"}
+{"captured":[],"constraint":"_Binds","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.A.__init_subclass__"},{"constraint":"_Binds"}],"op":"attach"}
 {"captured":["Class:main.B"],"constraint":"_Bind","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.A.__init_subclass__"},{"constraint":"_Bind"}],"op":"attach"}
+{"args":[{"node":"main.A.__init_subclass__"},{"constraint":"_Bind"}],"op":"apply_now"}
 {"args":[{"node":"main#17"},{"object":"External:<builtin>.object.__init_subclass__"}],"op":"add_object"}
 {"captured":[],"constraint":"Call:main:5:0#7:26","kinds":null,"mode":"list","op":"constraint"}
 {"args":[{"node":"main#17"},{"call":"Call:main:5:0#7:26"}],"op":"attach"}
@@ -133,10 +135,12 @@
 {"args":[{"node":"main#21"},{"constraint":"Each:Analysis._set_name~3"}],"op":"attach"}
 {"node":"main#26","op":"node"}
 {"named":true,"node":"main.B.__init_subclass__","op":"node"}
+{"captured":[],"constraint":"_Binds~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.B.__init_subclass__"},{"constraint":"_Binds~2"}],"op":"attach"}
 {"captured":["Class:main.C"],"constraint":"_Bind~2","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.B.__init_subclass__"},{"constraint":"_Bind~2"}],"op":"attach"}
+{"args":[{"node":"main.B.__init_subclass__"},{"constraint":"_Bind~2"}],"op":"apply_now"}
 {"captured":["Class:main.C"],"constraint":"_Bind~3","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.A.__init_subclass__"},{"constraint":"_Bind~3"}],"op":"attach"}
+{"args":[{"node":"main.A.__init_subclass__"},{"constraint":"_Bind~3"}],"op":"apply_now"}
 {"args":[{"node":"main#26"},{"object":"External:<builtin>.object.__init_subclass__"}],"op":"add_object"}
 {"captured":[],"constraint":"Call:main:9:0#11:26","kinds":null,"mode":"list","op":"constraint"}
 {"args":[{"node":"main#26"},{"call":"Call:main:9:0#11:26"}],"op":"attach"}
@@ -151,23 +155,29 @@
 {"node":"main#28","op":"node"}
 {"object":"External:<builtin>.object.__new__","op":"object","opacity":null,"types":["External","Object"]}
 {"args":[{"node":"main#28"},{"object":"External:<builtin>.object.__new__"}],"op":"add_object"}
-{"captured":["Class:main.C"],"constraint":"Each:Analysis._python_new","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#28"},{"constraint":"Each:Analysis._python_new"}],"op":"attach"}
+{"captured":["Class:main.C"],"constraint":"Shared","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#28"},{"constraint":"Shared"}],"op":"attach"}
 {"node":"main#29","op":"node"}
 {"node":"main#30","op":"node"}
 {"named":true,"node":"main.C.__new__","op":"node"}
+{"captured":[],"constraint":"_Binds~3","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.C.__new__"},{"constraint":"_Binds~3"}],"op":"attach"}
 {"captured":["Class:main.C"],"constraint":"_Bind~4","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.C.__new__"},{"constraint":"_Bind~4"}],"op":"attach"}
+{"args":[{"node":"main.C.__new__"},{"constraint":"_Bind~4"}],"op":"apply_now"}
 {"named":true,"node":"main.B.__new__","op":"node"}
+{"captured":[],"constraint":"_Binds~4","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.B.__new__"},{"constraint":"_Binds~4"}],"op":"attach"}
 {"captured":["Class:main.C"],"constraint":"_Bind~5","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.B.__new__"},{"constraint":"_Bind~5"}],"op":"attach"}
+{"args":[{"node":"main.B.__new__"},{"constraint":"_Bind~5"}],"op":"apply_now"}
 {"named":true,"node":"main.A.__new__","op":"node"}
+{"captured":[],"constraint":"_Binds~5","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.A.__new__"},{"constraint":"_Binds~5"}],"op":"attach"}
 {"captured":["Class:main.C"],"constraint":"_Bind~6","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.A.__new__"},{"constraint":"_Bind~6"}],"op":"attach"}
-{"captured":["Class:main.C"],"constraint":"Each:Analysis._new","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#30"},{"constraint":"Each:Analysis._new"}],"op":"attach"}
-{"captured":[],"constraint":"Each:_Returned.of_class","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#18"},{"constraint":"Each:_Returned.of_class"}],"op":"attach"}
+{"args":[{"node":"main.A.__new__"},{"constraint":"_Bind~6"}],"op":"apply_now"}
+{"captured":["Class:main.C"],"constraint":"Shared~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#30"},{"constraint":"Shared~2"}],"op":"attach"}
+{"captured":[],"constraint":"Shared~3","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#18"},{"constraint":"Shared~3"}],"op":"attach"}
 {"op":"applied"}
 {"named":true,"node":"main.c","op":"node"}
 {"args":[{"node":"main#27"},{"node":"main.c"}],"op":"add_edge"}
@@ -195,20 +205,24 @@
 {"op":"applied"}
 {"constraint":"Call:main:5:0#7:26","objects":[{"object":"External:<builtin>.object.__init_subclass__"}],"op":"apply"}
 {"op":"applied"}
-{"constraint":"Each:_Returned.of_class","objects":[{"object":"Instance:main.C@<object>"}],"op":"apply"}
+{"constraint":"Shared~3","objects":[{"object":"Instance:main.C@<object>"}],"op":"apply"}
 {"op":"applied"}
 {"constraint":"Call:main:9:0#11:26","objects":[{"object":"External:<builtin>.object.__init_subclass__"}],"op":"apply"}
 {"op":"applied"}
-{"constraint":"Each:Analysis._python_new","objects":[{"object":"External:<builtin>.object.__new__"}],"op":"apply"}
-{"captured":[],"constraint":"Each:Analysis._python_instance","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#20"},{"constraint":"Each:Analysis._python_instance"}],"op":"attach"}
-{"constraint":"Each:Analysis._python_instance","objects":[{"object":"Class:main.C"}],"op":"apply"}
+{"constraint":"Shared","objects":[{"object":"External:<builtin>.object.__new__"}],"op":"apply"}
+{"captured":[],"constraint":"Shared~4","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#20"},{"constraint":"Shared~4"}],"op":"attach"}
+{"constraint":"Shared~4","objects":[{"object":"Class:main.C"}],"op":"apply"}
 {"object":"Instance:main.C@main:13:4","op":"object","opacity":"Class:main.C","types":["Instance","Object"]}
 {"args":[{"node":"main#18"},{"object":"Instance:main.C@main:13:4"}],"op":"add_object"}
 {"args":[{"node":"main#27"},{"object":"Instance:main.C@main:13:4"}],"op":"add_object"}
 {"node":"<solve>#9","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~6","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.C.__init__"},{"constraint":"_Binds~6"}],"op":"attach"}
+{"constraint":"_Binds~6","objects":[{"object":"Function:main.C.__init__"}],"op":"apply"}
+{"op":"applied"}
 {"captured":["Instance:main.C@main:13:4"],"constraint":"_Bind~7","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.C.__init__"},{"constraint":"_Bind~7"}],"op":"attach"}
+{"args":[{"node":"main.C.__init__"},{"constraint":"_Bind~7"}],"op":"apply_now"}
 {"constraint":"_Bind~7","objects":[{"object":"Function:main.C.__init__"}],"op":"apply"}
 {"object":"BoundMethod:<bound main.C.__init__ of main.C@main:13:4>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
 {"args":[{"node":"<solve>#9"},{"object":"BoundMethod:<bound main.C.__init__ of main.C@main:13:4>"}],"op":"add_object"}
@@ -235,7 +249,7 @@
 {"captured":["Class:main.C"],"constraint":"Each:BuiltinRules._super_object~2","kinds":null,"mode":"each","op":"constraint"}
 {"args":[{"node":"<solve>#6"},{"constraint":"Each:BuiltinRules._super_object~2"}],"op":"attach"}
 {"op":"applied"}
-{"constraint":"Each:_Returned.of_class","objects":[{"object":"Instance:main.C@main:13:4"}],"op":"apply"}
+{"constraint":"Shared~3","objects":[{"object":"Instance:main.C@main:13:4"}],"op":"apply"}
 {"op":"applied"}
 {"constraint":"Call:main:13:4#13:7~3","objects":[{"object":"BoundMethod:<bound main.C.__init__ of main.C@main:13:4>"}],"op":"apply"}
 {"args":[{"node":"main.C.__init__.self"},{"object":"Instance:main.C@main:13:4"}],"op":"add_object"}
@@ -253,8 +267,12 @@
 {"op":"fire","phase":4}
 {"constraint":"Load~2","objects":[{"object":"Super:super(main.C, main.C@main:13:4)"}],"op":"apply"}
 {"node":"<solve>#11","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~7","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.B.__init__"},{"constraint":"_Binds~7"}],"op":"attach"}
+{"constraint":"_Binds~7","objects":[{"object":"Function:main.B.__init__"}],"op":"apply"}
+{"op":"applied"}
 {"captured":["Instance:main.C@main:13:4"],"constraint":"_Bind~8","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.B.__init__"},{"constraint":"_Bind~8"}],"op":"attach"}
+{"args":[{"node":"main.B.__init__"},{"constraint":"_Bind~8"}],"op":"apply_now"}
 {"constraint":"_Bind~8","objects":[{"object":"Function:main.B.__init__"}],"op":"apply"}
 {"object":"BoundMethod:<bound main.B.__init__ of main.C@main:13:4>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
 {"args":[{"node":"<solve>#11"},{"object":"BoundMethod:<bound main.B.__init__ of main.C@main:13:4>"}],"op":"add_object"}
@@ -291,8 +309,12 @@
 {"op":"fire","phase":8}
 {"constraint":"Load","objects":[{"object":"Super:super(main.B, main.C@main:13:4)"}],"op":"apply"}
 {"node":"<solve>#12","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~8","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.A.__init__"},{"constraint":"_Binds~8"}],"op":"attach"}
+{"constraint":"_Binds~8","objects":[{"object":"Function:main.A.__init__"}],"op":"apply"}
+{"op":"applied"}
 {"captured":["Instance:main.C@main:13:4"],"constraint":"_Bind~9","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.A.__init__"},{"constraint":"_Bind~9"}],"op":"attach"}
+{"args":[{"node":"main.A.__init__"},{"constraint":"_Bind~9"}],"op":"apply_now"}
 {"constraint":"_Bind~9","objects":[{"object":"Function:main.A.__init__"}],"op":"apply"}
 {"object":"BoundMethod:<bound main.A.__init__ of main.C@main:13:4>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
 {"args":[{"node":"<solve>#12"},{"object":"BoundMethod:<bound main.A.__init__ of main.C@main:13:4>"}],"op":"add_object"}
@@ -397,4 +419,4 @@
 {"node":"main.__name__","object":"Const:'__main__'","op":"first","round":0}
 {"node":"main.__name__","object":"Const:'main'","op":"first","round":0}
 {"node":"main.c","object":"Instance:main.C@main:13:4","op":"first","round":1}
-{"op":"work","rounds":11,"work":{"applied":36,"copied":66,"edges":11,"merged":0,"processed":50,"searched":0}}
+{"op":"work","rounds":11,"work":{"applied":39,"copied":66,"edges":11,"merged":0,"processed":50,"searched":0}}

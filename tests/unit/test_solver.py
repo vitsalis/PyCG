@@ -1421,3 +1421,113 @@ def test_a_cycle_that_closes_between_rounds_merges_a_merged_node_once_more():
     assert solver.work["merged"] == 2
     assert recorder.applied == [x]
     assert names(c, solver) == ["x"]
+
+
+class Waiter:
+    def __init__(self, name):
+        self.name = name
+        self.dst = Node(name)
+
+
+def _by_each(solver, node, rule, args, waiter):
+    solver.attach(node, Each(rule, *args, waiter, results=(waiter.dst,)))
+
+
+def _by_share(solver, node, rule, args, waiter):
+    solver.share(node, rule, args, waiter, True)
+
+
+def _join_late(wait):
+    solver = Solver(SATURATED)
+    node, seen = Node("node"), []
+    early, late = Waiter("early"), Waiter("late")
+
+    def rule(obj, waiter):
+        seen.append((obj.name, waiter.name))
+
+    wait(solver, node, rule, (), early)
+    solver.add_object(node, Marker("x"))
+    solver.solve()
+    wait(solver, node, rule, (), late)
+    solver.add_object(node, Marker("y"))
+    solver.solve()
+    return sorted(seen), [names(w.dst, solver) for w in (early, late)]
+
+
+def _join_saturated(wait):
+    solver = Solver(SATURATED, cap=1)
+    node, seen = Node("node"), []
+    early, late = Waiter("early"), Waiter("late")
+
+    def rule(obj, waiter):
+        seen.append((obj.name, waiter.name))
+
+    wait(solver, node, rule, (), early)
+    solver.add_object(node, Marker("x"))
+    solver.solve()
+    solver.add_object(node, Marker("y"))
+    solver.solve()
+    wait(solver, node, rule, (), late)
+    solver.solve()
+    return sorted(seen), [names(w.dst, solver) for w in (early, late)]
+
+
+def _join_with_an_opaque_argument(wait):
+    solver = Solver(SATURATED)
+    hidden = Marker("hidden")
+    solver.opaque = lambda obj: obj is hidden or obj is SATURATED
+    empty, full, seen = Node("empty"), Node("full"), []
+    waiters = [Waiter(name) for name in ("e1", "e2", "f1", "f2")]
+
+    def rule(obj, held, waiter):
+        seen.append((obj.name, waiter.name))
+
+    wait(solver, empty, rule, (hidden,), waiters[0])
+    wait(solver, full, rule, (hidden,), waiters[2])
+    solver.add_object(full, Marker("x"))
+    solver.solve()
+    wait(solver, empty, rule, (hidden,), waiters[1])
+    wait(solver, full, rule, (hidden,), waiters[3])
+    solver.solve()
+    return sorted(seen), [names(w.dst, solver) for w in waiters]
+
+
+def _join_after_an_object_turned_opaque(wait):
+    solver = Solver(SATURATED)
+    hidden = set()
+    solver.opaque = lambda obj: obj in hidden or obj is SATURATED
+    node, seen = Node("node"), []
+    x, y = Marker("x"), Marker("y")
+    early, late = Waiter("early"), Waiter("late")
+
+    def rule(obj, waiter):
+        seen.append((obj.name, waiter.name))
+
+    wait(solver, node, rule, (), early)
+    solver.add_object(node, x)
+    solver.add_object(node, y)
+    solver.solve()
+    hidden.add(x)
+    wait(solver, node, rule, (), late)
+    solver.solve()
+    return sorted(seen), [names(w.dst, solver) for w in (early, late)]
+
+
+@pytest.mark.parametrize(
+    "scenario",
+    [
+        _join_late,
+        _join_saturated,
+        _join_with_an_opaque_argument,
+        _join_after_an_object_turned_opaque,
+    ],
+)
+def test_a_shared_record_gives_each_waiter_what_its_own_constraint_would(scenario):
+    assert scenario(_by_share) == scenario(_by_each)
+
+
+def test_a_waiter_that_joins_a_shared_record_sees_every_object_once():
+    seen, results = _join_late(_by_share)
+
+    assert seen == [("x", "early"), ("x", "late"), ("y", "early"), ("y", "late")]
+    assert results == [[], []]

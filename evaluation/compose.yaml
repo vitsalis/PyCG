@@ -1,16 +1,15 @@
 # The services of the macro-benchmark, with Docker only.
 #
 #   docker compose -f evaluation/compose.yaml build inputs          # every pinned source
-#   NAME=jmespath docker compose -f evaluation/compose.yaml run --rm trace --compare
+#   make eval-trace NAME=jmespath    # the trace service, as your user
 #
 # The one rule of the network: every download, and every git command on
 # third-party content, runs in the build of the inputs image
 # (container/Dockerfile.inputs); the trace image takes its project's source
 # from it at its own build. CI runs that build and publishes the images of
 # `make eval-inputs` under their content key (tools/inputs_key.py), so
-# that `make eval` pulls them instead (evaluation/README.md, "The inputs
-# image"). No service has network, and nothing runs on
-# the host. A new trace goes to evaluation/results/trace/, the only host
+# that `make eval` pulls them instead. No service has network, and nothing
+# runs on the host. A new trace goes to evaluation/results/trace/, the only host
 # path that a service writes. See evaluation/macro-benchmark/README.md
 # ("Re-recording a trace").
 #

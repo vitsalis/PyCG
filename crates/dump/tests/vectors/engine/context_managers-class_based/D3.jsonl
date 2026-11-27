@@ -80,17 +80,19 @@
 {"node":"main#10","op":"node"}
 {"object":"External:<builtin>.object.__new__","op":"object","opacity":null,"types":["External","Object"]}
 {"args":[{"node":"main#10"},{"object":"External:<builtin>.object.__new__"}],"op":"add_object"}
-{"captured":["Class:main.Session"],"constraint":"Each:Analysis._python_new","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#10"},{"constraint":"Each:Analysis._python_new"}],"op":"attach"}
+{"captured":["Class:main.Session"],"constraint":"Shared","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#10"},{"constraint":"Shared"}],"op":"attach"}
 {"node":"main#11","op":"node"}
 {"node":"main#12","op":"node"}
 {"named":true,"node":"main.Session.__new__","op":"node"}
+{"captured":[],"constraint":"_Binds","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Session.__new__"},{"constraint":"_Binds"}],"op":"attach"}
 {"captured":["Class:main.Session"],"constraint":"_Bind","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.Session.__new__"},{"constraint":"_Bind"}],"op":"attach"}
-{"captured":["Class:main.Session"],"constraint":"Each:Analysis._new","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#12"},{"constraint":"Each:Analysis._new"}],"op":"attach"}
-{"captured":[],"constraint":"Each:_Returned.of_class","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#1"},{"constraint":"Each:_Returned.of_class"}],"op":"attach"}
+{"args":[{"node":"main.Session.__new__"},{"constraint":"_Bind"}],"op":"apply_now"}
+{"captured":["Class:main.Session"],"constraint":"Shared~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#12"},{"constraint":"Shared~2"}],"op":"attach"}
+{"captured":[],"constraint":"Shared~3","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#1"},{"constraint":"Shared~3"}],"op":"attach"}
 {"op":"applied"}
 {"node":"main#13","op":"node"}
 {"node":"main#14","op":"node"}
@@ -112,32 +114,38 @@
 {"op":"between_rounds"}
 {"answer":false,"op":"between_rounds_done","unknown":[]}
 {"op":"fire","phase":1}
-{"constraint":"Each:_Returned.of_class","objects":[{"object":"Instance:main.Session@<object>"}],"op":"apply"}
+{"constraint":"Shared~3","objects":[{"object":"Instance:main.Session@<object>"}],"op":"apply"}
 {"op":"applied"}
 {"constraint":"Call:main:1:0#9:12","objects":[{"object":"External:<builtin>.object.__init_subclass__"}],"op":"apply"}
 {"op":"applied"}
-{"constraint":"Each:Analysis._python_new","objects":[{"object":"External:<builtin>.object.__new__"}],"op":"apply"}
-{"captured":[],"constraint":"Each:Analysis._python_instance","kinds":null,"mode":"each","op":"constraint"}
-{"args":[{"node":"main#3"},{"constraint":"Each:Analysis._python_instance"}],"op":"attach"}
-{"constraint":"Each:Analysis._python_instance","objects":[{"object":"Class:main.Session"}],"op":"apply"}
+{"constraint":"Shared","objects":[{"object":"External:<builtin>.object.__new__"}],"op":"apply"}
+{"captured":[],"constraint":"Shared~4","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#3"},{"constraint":"Shared~4"}],"op":"attach"}
+{"constraint":"Shared~4","objects":[{"object":"Class:main.Session"}],"op":"apply"}
 {"object":"Instance:main.Session@main:12:5","op":"object","opacity":"Class:main.Session","types":["Instance","Object"]}
 {"args":[{"node":"main#1"},{"object":"Instance:main.Session@main:12:5"}],"op":"add_object"}
 {"args":[{"node":"main#9"},{"object":"Instance:main.Session@main:12:5"}],"op":"add_object"}
 {"node":"<solve>#1","op":"node","witness":true}
 {"named":true,"node":"main.Session.__init__","op":"node"}
+{"captured":[],"constraint":"_Binds~2","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Session.__init__"},{"constraint":"_Binds~2"}],"op":"attach"}
 {"captured":["Instance:main.Session@main:12:5"],"constraint":"_Bind~2","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.Session.__init__"},{"constraint":"_Bind~2"}],"op":"attach"}
+{"args":[{"node":"main.Session.__init__"},{"constraint":"_Bind~2"}],"op":"apply_now"}
 {"op":"applied"}
 {"op":"applied"}
 {"op":"between_rounds"}
 {"answer":false,"op":"between_rounds_done","unknown":[]}
 {"op":"fire","phase":2}
-{"constraint":"Each:_Returned.of_class","objects":[{"object":"Instance:main.Session@main:12:5"}],"op":"apply"}
+{"constraint":"Shared~3","objects":[{"object":"Instance:main.Session@main:12:5"}],"op":"apply"}
 {"op":"applied"}
 {"constraint":"Each:Protocols._with","objects":[{"object":"Instance:main.Session@main:12:5"}],"op":"apply"}
 {"node":"<solve>#2","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~3","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Session.__enter__"},{"constraint":"_Binds~3"}],"op":"attach"}
+{"constraint":"_Binds~3","objects":[{"object":"Function:main.Session.__enter__"}],"op":"apply"}
+{"op":"applied"}
 {"captured":["Instance:main.Session@main:12:5"],"constraint":"_Bind~3","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.Session.__enter__"},{"constraint":"_Bind~3"}],"op":"attach"}
+{"args":[{"node":"main.Session.__enter__"},{"constraint":"_Bind~3"}],"op":"apply_now"}
 {"constraint":"_Bind~3","objects":[{"object":"Function:main.Session.__enter__"}],"op":"apply"}
 {"object":"BoundMethod:<bound main.Session.__enter__ of main.Session@main:12:5>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
 {"args":[{"node":"<solve>#2"},{"object":"BoundMethod:<bound main.Session.__enter__ of main.Session@main:12:5>"}],"op":"add_object"}
@@ -153,8 +161,12 @@
 {"args":[{"node":"<solve>#2"},{"call":"Call:main:12:5#12:14~5"}],"op":"attach"}
 {"op":"applied"}
 {"node":"<solve>#4","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~4","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Session.__exit__"},{"constraint":"_Binds~4"}],"op":"attach"}
+{"constraint":"_Binds~4","objects":[{"object":"Function:main.Session.__exit__"}],"op":"apply"}
+{"op":"applied"}
 {"captured":["Instance:main.Session@main:12:5"],"constraint":"_Bind~4","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.Session.__exit__"},{"constraint":"_Bind~4"}],"op":"attach"}
+{"args":[{"node":"main.Session.__exit__"},{"constraint":"_Bind~4"}],"op":"apply_now"}
 {"constraint":"_Bind~4","objects":[{"object":"Function:main.Session.__exit__"}],"op":"apply"}
 {"object":"BoundMethod:<bound main.Session.__exit__ of main.Session@main:12:5>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
 {"args":[{"node":"<solve>#4"},{"object":"BoundMethod:<bound main.Session.__exit__ of main.Session@main:12:5>"}],"op":"add_object"}
@@ -189,8 +201,12 @@
 {"op":"fire","phase":4}
 {"constraint":"Load","objects":[{"object":"Instance:main.Session@main:12:5"}],"op":"apply"}
 {"node":"<solve>#6","op":"node","witness":true}
+{"captured":[],"constraint":"_Binds~5","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Session.query"},{"constraint":"_Binds~5"}],"op":"attach"}
+{"constraint":"_Binds~5","objects":[{"object":"Function:main.Session.query"}],"op":"apply"}
+{"op":"applied"}
 {"captured":["Instance:main.Session@main:12:5"],"constraint":"_Bind~5","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.Session.query"},{"constraint":"_Bind~5"}],"op":"attach"}
+{"args":[{"node":"main.Session.query"},{"constraint":"_Bind~5"}],"op":"apply_now"}
 {"constraint":"_Bind~5","objects":[{"object":"Function:main.Session.query"}],"op":"apply"}
 {"object":"BoundMethod:<bound main.Session.query of main.Session@main:12:5>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
 {"args":[{"node":"<solve>#6"},{"object":"BoundMethod:<bound main.Session.query of main.Session@main:12:5>"}],"op":"add_object"}
@@ -208,8 +224,10 @@
 {"args":[{"node":"<solve>#9"},{"node":"main#19"}],"op":"add_edge"}
 {"node":"<solve>#10","op":"node","witness":true}
 {"named":true,"node":"main.Session.__getattribute__","op":"node"}
+{"captured":[],"constraint":"_Binds~6","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main.Session.__getattribute__"},{"constraint":"_Binds~6"}],"op":"attach"}
 {"captured":["Instance:main.Session@main:12:5"],"constraint":"_Bind~6","kinds":null,"mode":"list","op":"constraint"}
-{"args":[{"node":"main.Session.__getattribute__"},{"constraint":"_Bind~6"}],"op":"attach"}
+{"args":[{"node":"main.Session.__getattribute__"},{"constraint":"_Bind~6"}],"op":"apply_now"}
 {"op":"applied"}
 {"op":"between_rounds"}
 {"answer":false,"op":"between_rounds_done","unknown":[]}
@@ -290,4 +308,4 @@
 {"node":"main.__name__","object":"Const:'__main__'","op":"first","round":0}
 {"node":"main.__name__","object":"Const:'main'","op":"first","round":0}
 {"node":"main.session","object":"Instance:main.Session@main:12:5","op":"first","round":3}
-{"op":"work","rounds":7,"work":{"applied":24,"copied":35,"edges":9,"merged":0,"processed":26,"searched":0}}
+{"op":"work","rounds":7,"work":{"applied":27,"copied":35,"edges":9,"merged":0,"processed":26,"searched":0}}
