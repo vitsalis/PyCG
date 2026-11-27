@@ -3,6 +3,7 @@ use num_bigint::BigInt;
 use pycg_solver::{NodeId, ObjId};
 
 use crate::model::Signature;
+use crate::program::imports::ImportManager;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct CallId(pub u32);
@@ -266,8 +267,15 @@ pub trait Analysis {
     fn add_truth(&mut self, value: NodeId, caller: &str, site: &str);
     fn add_handler(&mut self, types: Option<NodeId>, dst: NodeId);
 
-    fn handle_import(&mut self, name: &str, level: u32, record: bool) -> Option<String>;
-    fn locate(&mut self, name: &str) -> Option<(String, Option<String>)>;
+    fn imports(&mut self) -> &mut ImportManager;
+    fn begin_module(&mut self, _name: &str) {}
+    fn end_module(&mut self, _name: &str, _analysed: bool) {}
+    fn handle_import(&mut self, name: &str, level: u32, record: bool) -> Option<String> {
+        self.imports().handle_import(name, level, record)
+    }
+    fn locate(&mut self, name: &str) -> Option<(String, Option<String>)> {
+        self.imports().locate(name)
+    }
 
     fn type_form(&mut self, operator: &str, parts: &[Option<NodeId>], site: &str) -> ObjId;
     fn gate_type_form(&mut self, form: ObjId, gate: NodeId);

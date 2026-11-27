@@ -22,6 +22,7 @@ use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 
 use crate::builder::calls::{BuilderTables, ClassFields, FunctionFields, MethodKind};
 use crate::model::{BUILTIN_MODULE, Signature};
+use crate::program::imports::ImportManager;
 use attributes::{
     Access, AccessorEntry, AccessorHooks, Accessors, AccessorsId, Deliveries, DeliveriesId,
     FieldWrites, HookCalls, HookCallsId, HooksId, WritesId,
@@ -94,6 +95,7 @@ struct State<T: Trace> {
     call_expressions: Vec<(Sym, Sym, Option<NodeId>)>,
     classes: Vec<ObjId>,
     stubs: Stubs,
+    imports: ImportManager,
     stub_definitions: FxHashMap<Sym, Option<Arc<[Definition]>>>,
     external_modules: FxHashSet<String>,
     watches: FxHashMap<(ObjId, LookupAttr, Option<ObjId>, Unless), WatchId>,
@@ -198,6 +200,7 @@ impl<T: Trace> Engine<T> {
             call_expressions: Vec::new(),
             classes: Vec::new(),
             stubs: Stubs::new(),
+            imports: ImportManager::default(),
             stub_definitions: FxHashMap::default(),
             external_modules: FxHashSet::default(),
             watches: FxHashMap::default(),

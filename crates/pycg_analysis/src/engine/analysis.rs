@@ -10,6 +10,7 @@ use crate::engine::objects::{self, Literal, Object};
 use crate::engine::trace::Trace;
 use crate::engine::{BuilderFields, Engine, not_ported};
 use crate::model::Signature;
+use crate::program::imports::ImportManager;
 
 impl<T: Trace> Engine<T> {
     fn sync(&mut self) {
@@ -365,8 +366,8 @@ impl<T: Trace> Analysis for Engine<T> {
         not_ported("the builder call add_handler")
     }
 
-    fn handle_import(&mut self, _name: &str, _level: u32, _record: bool) -> Option<String> {
-        not_ported("the import manager")
+    fn imports(&mut self) -> &mut ImportManager {
+        &mut self.state.imports
     }
 
     fn function_fields(&mut self, function: ObjId) -> &mut FunctionFields {
@@ -554,10 +555,6 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn pattern(&mut self, _prefix: &[u32], _suffix: &[u32]) -> ObjId {
         not_ported("the builder call pattern")
-    }
-
-    fn locate(&mut self, _name: &str) -> Option<(String, Option<String>)> {
-        not_ported("the import manager")
     }
 
     fn type_form(&mut self, _operator: &str, _parts: &[Option<NodeId>], _site: &str) -> ObjId {

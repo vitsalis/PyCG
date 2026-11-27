@@ -5,21 +5,25 @@ fn vectors() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/vectors/builder")
 }
 
-fn replay(case: &Path, scratch: &Path) -> String {
-    let modules = scratch.join("modules.tsv");
-    let main = case.join("main.py");
-    std::fs::write(&modules, format!("main\t{}\n", main.display())).expect("the module list");
-    let out = scratch.join("D4.jsonl");
+fn replay(case: &Path, scratch: &Path) -> (String, String, String) {
+    let out = scratch.join("out");
     let status = Command::new(env!("CARGO_BIN_EXE_pycg_dump"))
+        .current_dir(case)
         .arg("d4")
-        .arg(&modules)
-        .arg(case.join("entries.txt"))
         .arg(case.join("D4.jsonl"))
         .arg(&out)
+        .arg("--package")
+        .arg(".")
+        .arg("main.py")
         .status()
         .expect("pycg_dump runs");
     assert!(status.success(), "{}", case.display());
-    std::fs::read_to_string(out).expect("the replayed D4")
+    let read = |name: &str| std::fs::read_to_string(out.join(name)).expect("a replayed dump");
+    (
+        read("D4.jsonl"),
+        read("modules.json"),
+        read("definitions.json"),
+    )
 }
 
 #[test]
@@ -34,8 +38,15 @@ fn the_builder_makes_the_oracles_calls_on_statement_programs() {
     std::fs::create_dir_all(&scratch).expect("a scratch directory");
     let mut differing = Vec::new();
     for case in &cases {
-        let expected = std::fs::read_to_string(case.join("D4.jsonl")).expect("the oracle's D4");
-        let found = replay(case, &scratch);
+        let read = |name: &str| std::fs::read_to_string(case.join(name)).expect("an oracle dump");
+        let expected = read("D4.jsonl");
+        let (found, modules, definitions) = replay(case, &scratch);
+        if modules != read("modules.json") {
+            differing.push(format!("{}: the modules differ", case.display()));
+        }
+        if definitions != read("definitions.json") {
+            differing.push(format!("{}: the module definitions differ", case.display()));
+        }
         if found != expected {
             let line = expected
                 .lines()

@@ -97,6 +97,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
         self.statements(&body[..too_deep.unwrap_or(body.len())]);
         let module_scope = self.scopes.module();
         let bound: Vec<String> = self.bound_at_end(module_scope).into_keys().collect();
+        self.names_bound_at_run_time = bound.clone();
         let top_level = top_level_bindings(body);
         let maybe: Vec<(String, NodeId)> = self
             .maybe_builtins
