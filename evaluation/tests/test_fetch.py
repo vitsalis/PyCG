@@ -26,6 +26,7 @@ projects = load("macro_projects", EVALUATION / "macro-benchmark" / "projects.py"
 needs_git = pytest.mark.skipif(shutil.which("git") is None, reason="needs git")
 SUBMODULE_COMMIT = "5" * 40
 FILES_AS_COMMITTED = {
+    "LICENSE": b"MIT\n",
     "pkg/__init__.py": b"x = 'released'\n",
     "pkg/run.sh": ("exec", b"#!/bin/sh\n"),
     "pkg/link.py": ("link", "__init__.py"),
@@ -193,3 +194,79 @@ def test_the_benchmark_reads_the_sources_of_the_image_where_it_has_them(
         project_of_other_benchmark.directory
         == (tmp_path / "bench" / "projects" / "demo").resolve()
     )
+
+
+NOTICE_URL = "https://files.pythonhosted.org/packages/cd/demo-1.0.tar.gz"
+NOTICE_RELEASE = {
+    "demo-1.0/LICENSE": b"MIT License of the release\n",
+    "demo-1.0/demo/__init__.py": b"",
+}
+
+
+def notice_of(data, member="demo-1.0/LICENSE"):
+    return {
+        "url": NOTICE_URL,
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "member": member,
+    }
+
+
+def source_without_licence(tmp_path, monkeypatch):
+    monkeypatch.setattr(fetch, "GIT_PROTOCOLS_ALLOWED", ("file",))
+    files = {k: v for k, v in FILES_AS_COMMITTED.items() if k != "LICENSE"}
+    url, commit = make_repository(tmp_path / "unlicensed", files)
+    return write_benchmark_with_project_demo(
+        tmp_path / "bench",
+        f'repository = "{url}"\ncommit = "{commit}"\npackages = ["pkg"]\n',
+    )
+
+
+@needs_git
+def test_a_source_without_a_licence_file_is_refused(tmp_path, monkeypatch, capsys):
+    config = source_without_licence(tmp_path, monkeypatch)
+    monkeypatch.setattr(fetch, "LICENCE_NOTICES", {})
+    out = tmp_path / "inputs"
+    assert fetch.fetch_macro(out, config) == 1
+    assert "demo: refused: no licence file" in capsys.readouterr().err
+    assert not (out / "demo").exists()
+
+
+@needs_git
+def test_the_licence_file_of_the_release_is_added_beside_the_source(
+    tmp_path, monkeypatch, served_body_by_url, capsys
+):
+    config = source_without_licence(tmp_path, monkeypatch)
+    data = make_tar(NOTICE_RELEASE)
+    served_body_by_url[NOTICE_URL] = data
+    monkeypatch.setattr(fetch, "LICENCE_NOTICES", {"demo": notice_of(data)})
+    out = tmp_path / "inputs"
+    assert fetch.fetch_macro(out, config) == 0
+    assert "; added LICENSE of demo-1.0.tar.gz" in capsys.readouterr().out
+    licence = out / "demo" / "LICENSE"
+    assert licence.read_bytes() == NOTICE_RELEASE["demo-1.0/LICENSE"]
+    assert not (out / "demo" / "demo").exists()
+
+
+@needs_git
+@pytest.mark.parametrize(
+    ("served", "member", "message"),
+    [
+        (b"\0", "demo-1.0/LICENSE", "has the SHA-256"),
+        (b"", "demo-1.0/COPYING", "has no demo-1.0/COPYING"),
+    ],
+)
+def test_a_licence_notice_that_is_not_its_pin_is_refused(
+    tmp_path, monkeypatch, served_body_by_url, capsys, served, member, message
+):
+    config = source_without_licence(tmp_path, monkeypatch)
+    data = make_tar(NOTICE_RELEASE)
+    served_body_by_url[NOTICE_URL] = data + served
+    monkeypatch.setattr(fetch, "LICENCE_NOTICES", {"demo": notice_of(data, member)})
+    out = tmp_path / "inputs"
+    assert fetch.fetch_macro(out, config) == 1
+    assert message in capsys.readouterr().err
+    assert not (out / "demo").exists()
+
+
+def test_every_licence_notice_names_a_project_of_the_benchmark():
+    assert set(fetch.LICENCE_NOTICES) <= set(projects.load_projects())

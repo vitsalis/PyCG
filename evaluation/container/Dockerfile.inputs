@@ -8,7 +8,11 @@
 #   /inputs/scale/projects/<name>             each package of scale/projects.toml (fetch.py scale)
 #
 # A step fails, and so the build, if a source is not its pin: git checks the
-# commit, fetch.py the SHA-256 of an sdist, a wheel or a git archive. git and the downloads run only
+# commit, fetch.py the SHA-256 of an sdist, a wheel or a git archive. It
+# also fails if a source has no licence file: fetch.py adds the licence file
+# of a project whose source lacks one from its release archive, pinned by
+# SHA-256 (LICENCE_NOTICES; path's git source has no LICENSE, its sdist
+# has the generated one). git and the downloads run only
 # here, as a user without rights, with git's hooks, submodules and
 # configuration off (fetch.py); nothing fetched is installed, imported or
 # run.
