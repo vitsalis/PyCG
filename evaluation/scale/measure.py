@@ -30,8 +30,9 @@ DESCRIPTION = """Measures a PyCG checkout on one package of the scale set
 (evaluation/scale/README.md).
 
     python3 -I evaluation/scale/measure.py run --checkout PATH --name NAME \\
-        --package rich --out OUT --memory-mib 4096
+        --flavour new --package rich --out OUT --memory-mib 4096
     python3 -I evaluation/scale/measure.py compare BASE_RECORD RECORD
+    python3 -I evaluation/scale/measure.py summary RESULT [--oracle ORACLE]
     python3 -I evaluation/scale/measure.py container-mib 4096
 
 The container needs RUNNER_HEADROOM_MIB above the analysis's cap, so that
@@ -132,6 +133,7 @@ def measure(
     memory_mib,
     timeout_seconds,
     python,
+    flavour,
     cgroup_memory_max=CGROUP_MEMORY_MAX,
     cgroup_memory_events=CGROUP_MEMORY_EVENTS,
     meminfo=PROC_MEMINFO,
@@ -147,7 +149,7 @@ def measure(
         raise MeasureError(
             f"{project.directory} has no Python source: run make eval-inputs"
         )
-    tool = run.Tool(name, "new", Path(checkout).resolve(), python)
+    tool = run.Tool(name, flavour, Path(checkout).resolve(), python)
     job = run.Job(f"scale/{project.name}", files, project.root)
     graph = run.graph_file(Path(out) / name, job.key)
     available = memory_available_mib(meminfo)
@@ -160,6 +162,7 @@ def measure(
         "version": project.version,
         "archive_sha256": project.sha256,
         "tool": version,
+        "flavour": flavour,
         "python": ".".join(map(str, run.python_version(python))),
         "hash_seed": tool.hash_seed,
         "memory_cap_mib": memory_mib,
@@ -205,7 +208,8 @@ MEASURED_ROWS = ("seconds", "wall seconds", "peak MiB")
 def heading(result):
     return (
         f"{result['package']} {result['version']}: {result['files']} files, "
-        f"cap {result['memory_cap_mib']} MiB, Python {result['python']}"
+        f"cap {result['memory_cap_mib']} MiB, flavour {result['flavour']}, "
+        f"Python {result['python']}"
     )
 
 
@@ -247,6 +251,68 @@ def read_record(path):
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+def records_in(result):
+    found = sorted((Path(result) / "scale").glob("*.record.json"))
+    return {record["package"]: record for record in map(read_record, found)}
+
+
+def ratio(now, oracle):
+    if now is None or oracle is None or oracle == 0:
+        return "-"
+    return f"{now / oracle:.3f}"
+
+
+def graphs(now, oracle):
+    if now["graph_sha256"] is None or oracle["graph_sha256"] is None:
+        return "-"
+    return "identical" if now["graph_sha256"] == oracle["graph_sha256"] else "differ"
+
+
+def summary(result, oracle=None):
+    measured = records_in(result)
+    if not measured:
+        raise MeasureError(f"{result} has no records of the scale set")
+    oracles = {} if oracle is None else records_in(oracle)
+    columns = ["package", "outcome", "seconds", "peak MiB"]
+    if oracle is not None:
+        columns += [
+            "oracle outcome",
+            "oracle seconds",
+            "time ratio",
+            "oracle peak MiB",
+            "memory ratio",
+            "graphs",
+        ]
+    columns.append("error")
+    lines = [
+        "| " + " | ".join(columns) + " |",
+        "|" + "---|" * len(columns),
+    ]
+    for package, record in measured.items():
+        cells = [
+            package,
+            record["outcome"],
+            shown(record["seconds"]),
+            shown(record["peak_rss_mib"]),
+        ]
+        if oracle is not None:
+            base = oracles.get(package)
+            if base is None:
+                cells += ["not measured", "-", "-", "-", "-", "-"]
+            else:
+                cells += [
+                    base["outcome"],
+                    shown(base["seconds"]),
+                    ratio(record["seconds"], base["seconds"]),
+                    shown(base["peak_rss_mib"]),
+                    ratio(record["peak_rss_mib"], base["peak_rss_mib"]),
+                    graphs(record, base),
+                ]
+        cells.append(record["run"].get("error") or "")
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -255,6 +321,9 @@ def main(argv=None):
     measuring = commands.add_parser("run", help="measure one package")
     measuring.add_argument("--checkout", type=Path, required=True)
     measuring.add_argument("--name", required=True, help="name of the results")
+    measuring.add_argument(
+        "--flavour", choices=sorted(run.analyse.FLAVOURS), required=True
+    )
     measuring.add_argument("--package", required=True)
     measuring.add_argument("--out", type=Path, required=True)
     measuring.add_argument("--memory-mib", type=int, required=True)
@@ -263,6 +332,11 @@ def main(argv=None):
     comparing = commands.add_parser("compare", help="compare two records")
     comparing.add_argument("base", type=Path)
     comparing.add_argument("record", type=Path)
+    summarising = commands.add_parser(
+        "summary", help="one row for each package measured in a result"
+    )
+    summarising.add_argument("result", type=Path)
+    summarising.add_argument("--oracle", type=Path)
     sizing = commands.add_parser(
         "container-mib", help="the memory of the container for a cap"
     )
@@ -274,6 +348,9 @@ def main(argv=None):
     try:
         if args.command == "compare":
             print(comparison(read_record(args.base), read_record(args.record)))
+            return 0
+        if args.command == "summary":
+            print(summary(args.result, args.oracle))
             return 0
         found = projects.load_projects()
         if args.package not in found:
@@ -288,6 +365,7 @@ def main(argv=None):
             args.memory_mib,
             args.timeout,
             args.python,
+            args.flavour,
         )
     except (MeasureError, ValueError, OSError) as error:
         print(f"measure.py: {error}", file=sys.stderr)
