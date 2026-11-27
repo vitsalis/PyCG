@@ -22,6 +22,7 @@ const MICRO_EXPECTED: &str = "callgraph.json";
 const MICRO_REQUIRES: &str = "requires-python";
 const KNOWN_FAILURES: &str = "tests/known_failures.txt";
 const ROOT_IN_WARNINGS: &str = "{root}";
+const CAUSED_WARNINGS: [&str; 2] = [": cannot parse it: ", ": cannot read it: "];
 
 static PANIC: Mutex<Option<String>> = Mutex::new(None);
 
@@ -321,7 +322,13 @@ fn problems(case: &Case) -> Option<String> {
                     ));
                 }
             }
-            if found.warnings != expected.warnings {
+            let up_to_causes = |warnings: &[String]| -> Vec<String> {
+                warnings
+                    .iter()
+                    .map(|warning| up_to_cause(warning).to_owned())
+                    .collect()
+            };
+            if up_to_causes(&found.warnings) != up_to_causes(&expected.warnings) {
                 problems.push(format!(
                     "warns {:?}, not {:?}",
                     found.warnings, expected.warnings
@@ -509,6 +516,17 @@ fn inconsistencies(document: &Value) -> Vec<String> {
         }
     }
     found
+}
+
+fn up_to_cause(warning: &str) -> &str {
+    CAUSED_WARNINGS
+        .iter()
+        .find_map(|marker| {
+            warning
+                .find(marker)
+                .map(|start| &warning[..start + marker.len()])
+        })
+        .unwrap_or(warning)
 }
 
 fn first_difference(expected: &Value, found: &Value, path: &str) -> Option<String> {

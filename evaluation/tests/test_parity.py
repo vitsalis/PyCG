@@ -1101,3 +1101,63 @@ def test_a_property_runs_with_one_seed_and_a_test_without_a_program_is_listed(
         )
     assert len(programs[0]) > 1
     assert programs[0] == programs[1]
+
+
+PATCHING_TESTS = """
+import sys
+
+sys.path.insert(0, {tests!r})
+from programs import analysed
+
+from pycg.analysis import solver
+
+PROGRAM = {{"main.py": "import a, b\\n", "a.py": "def f(): pass\\nf()\\n", "b.py": ""}}
+
+
+def test_entry_orders(tmp_path):
+    for entries in (("main.py", "a.py"), ("a.py", "main.py"), ("main.py",)):
+        analysed(tmp_path, PROGRAM, entries)
+
+
+def test_orders(tmp_path, monkeypatch):
+    for order in (solver.Reversed(), solver.LastInFirstOut()):
+        monkeypatch.setattr(solver.Solver, "order", order)
+        analysed(tmp_path, PROGRAM)
+
+
+def test_rules_in_a_context(tmp_path, monkeypatch):
+    with monkeypatch.context() as patch:
+        patch.setattr(solver.Solver, "solve", solver.Solver.solve)
+        analysed(tmp_path, PROGRAM)
+"""
+
+
+def test_repeated_programs_patches_in_a_context_and_orders(tmp_path):
+    test_file = tmp_path / "test_patching.py"
+    test_file.write_text(PATCHING_TESTS.format(tests=str(ROOT / "tests")))
+    out = tmp_path / "cases"
+    canonical = solver_order()
+
+    recorder, passed = cases.convert(
+        out, test_file, "tests/test_patching.py", "demo", "D"
+    )
+
+    assert passed
+    assert recorder.skipped == ["test_rules_in_a_context"]
+    assert recorder.deduplicated == [("test_entry_orders", 1), ("test_orders", 1)]
+    assert sorted(path.name for path in (out / "demo").iterdir()) == [
+        "entry_orders",
+        "entry_orders-2",
+        "orders",
+    ]
+    assert solver_order() is canonical
+    case = json.loads((out / "demo" / "orders" / "case.json").read_text())
+    assert case["entry_points"] == ["main.py"]
+    expected = json.loads((out / "demo" / "orders" / "expected.json").read_text())
+    assert expected["edges"].get("a") == ["a.f"], expected
+
+
+def solver_order():
+    from pycg.analysis import solver
+
+    return solver.Solver.__dict__["order"]
