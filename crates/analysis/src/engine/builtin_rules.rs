@@ -61,6 +61,12 @@ pub enum PropertyRule {
     },
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(super) enum BindingEntry {
+    Model(&'static str, ModelRule, &'static [&'static str]),
+    Returns(&'static str, Option<&'static str>, Option<&'static str>),
+}
+
 impl<T: Trace> State<T> {
     pub(super) fn apply_rule(
         &mut self,
@@ -149,15 +155,15 @@ impl<T: Trace> State<T> {
     }
 
     fn bind_model(&mut self, graph: &mut Graph, call: CallId, model: &'static Model) -> BoundId {
-        let key = std::ptr::from_ref(model) as usize;
-        self.bind_entry(graph, call, key, model.signature)
+        let entry = BindingEntry::Model(model.signature, model.rule, model.arguments);
+        self.bind_entry(graph, call, entry, model.signature)
     }
 
     fn bind_entry(
         &mut self,
         graph: &mut Graph,
         call: CallId,
-        entry: usize,
+        entry: BindingEntry,
         signature: &str,
     ) -> BoundId {
         let key = (call, entry);
@@ -219,7 +225,7 @@ impl<T: Trace> State<T> {
         let Some(dst) = self.calls[call.index()].dst else {
             return;
         };
-        let key = std::ptr::from_ref(entry) as usize;
+        let key = BindingEntry::Returns(entry.signature, entry.argument, entry.wrapper);
         let args = self.bind_entry(graph, call, key, entry.signature);
         if let Some(parameter) = entry.argument
             && self.bound_given(args, parameter)
@@ -595,6 +601,21 @@ impl<T: Trace> State<T> {
         let rule = self.rule(Rule::BindClass { method, dst });
         let metaclass = self.objects.class(instance).metaclass;
         self.attach(graph, metaclass, rule);
+    }
+
+    pub(super) fn literal_none_keyword(&self, call: CallId, name: &str) -> bool {
+        let base = match self.prefixes.get(&call) {
+            None => call,
+            Some((base, _)) => *base,
+        };
+        let root = self.roots.get(&base).copied().unwrap_or(base);
+        if self.calls[root.index()].origin != Origin::Call(root) {
+            return false;
+        }
+        let details = &self.calls[root.index()];
+        self.none_keywords
+            .get(&(details.caller, details.site))
+            .is_some_and(|names| names.iter().any(|&known| self.symbols.text(known) == name))
     }
 
     pub(super) fn literal_none(&self, call: CallId, index: usize) -> bool {

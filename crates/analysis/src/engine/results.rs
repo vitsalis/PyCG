@@ -5,8 +5,9 @@ use num_bigint::BigInt;
 use pycg_solver::ObjId;
 
 use crate::engine::attributes::AccessKind;
-use crate::engine::containers::IterationRoleId;
+use crate::engine::containers::{IterationName, IterationRoleId};
 use crate::engine::hierarchy::Unless;
+use crate::engine::library::{LibraryRole, Position};
 use crate::engine::objects::Object;
 use crate::engine::outside_calls::Known;
 use crate::engine::semantics::{Construct, Role};
@@ -226,6 +227,15 @@ impl<T: Trace> State<T> {
                 Role::Raise => vec![text("raise")],
                 Role::Special(name) => named("special", name),
                 Role::TypeMetaclass => vec![text("type"), text("metaclass")],
+                Role::CallBack => vec![text("call back")],
+                Role::Key => vec![text("key")],
+                Role::SequenceKey => vec![text("key"), text("sequence")],
+                Role::LibraryKey(path) => named("key", path),
+                Role::MergeKey(path) => vec![
+                    text("iterate"),
+                    text("key"),
+                    RolePart::Text(self.text(path).to_owned()),
+                ],
             }),
         }
     }
@@ -240,8 +250,12 @@ impl<T: Trace> State<T> {
                 .collect(),
             other => vec![RolePart::Text(sentinel(other).to_owned())],
         };
+        let role = match role {
+            IterationName::Plain(role) => RolePart::Text(self.text(role).to_owned()),
+            IterationName::Library(role) => library_role(role),
+        };
         RolePart::Parts(vec![
-            RolePart::Text(self.text(role).to_owned()),
+            role,
             RolePart::Flag(is_async),
             RolePart::Parts(unless),
         ])
@@ -305,4 +319,34 @@ fn sentinel(unless: &Unless) -> &'static str {
         Unless::NotNominal => "<not nominal>",
         Unless::Nothing | Unless::Names(_) => unreachable!("an unless of names is its names"),
     }
+}
+
+fn library_role(role: LibraryRole) -> RolePart {
+    let text = |value: &str| RolePart::Text(value.to_owned());
+    let position = |position: Position| match position {
+        Position::At(index) => RolePart::Number(i64::from(index)),
+        Position::Unknown => text("*"),
+    };
+    let again = |again: bool| again.then(|| text("again"));
+    RolePart::Parts(match role {
+        LibraryRole::Tag {
+            path,
+            position: at,
+            again: twice,
+        } => {
+            let mut tag = vec![text(path), position(at)];
+            tag.extend(again(twice));
+            vec![text("library"), RolePart::Parts(tag)]
+        }
+        LibraryRole::Position {
+            position: at,
+            again: twice,
+        } => {
+            let mut parts = vec![text("library"), position(at)];
+            parts.extend(again(twice));
+            parts
+        }
+        LibraryRole::Inner => vec![text("library"), text("inner")],
+        LibraryRole::Bundle => vec![text("library"), text("bundle")],
+    })
 }

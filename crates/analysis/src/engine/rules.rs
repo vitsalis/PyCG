@@ -8,6 +8,7 @@ use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::containers::ContainerRule;
 use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::{BindsId, Unless};
+use crate::engine::library::LibraryRule;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
 use crate::engine::outside_results::OutsideResultRule;
@@ -287,6 +288,7 @@ pub(crate) enum Rule {
     Pattern(PatternRule),
     Outside(OutsideRule),
     OutsideResult(OutsideResultRule),
+    Library(LibraryRule),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -346,6 +348,7 @@ impl Rule {
             Rule::Pattern(rule) => rule.key(),
             Rule::Outside(rule) => rule.key(),
             Rule::OutsideResult(rule) => rule.key(),
+            Rule::Library(rule) => rule.key(),
             Rule::Access(_) => "Access",
             Rule::Deliver { .. } => "_Deliver",
             Rule::Deliveries(_) => "_Deliveries",
@@ -424,6 +427,7 @@ impl Rule {
             Rule::Protocol(rule) => rule.kinds(),
             Rule::Pattern(rule) => rule.kinds(),
             Rule::OutsideResult(rule) => rule.kinds(),
+            Rule::Library(rule) => rule.kinds(),
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. }
             | Rule::StatementMade
@@ -455,6 +459,7 @@ impl Rule {
             Rule::Pattern(ref rule) => rule.captured(),
             Rule::Outside(_) => Vec::new(),
             Rule::OutsideResult(ref rule) => rule.captured(),
+            Rule::Library(_) => Vec::new(),
             Rule::Bases { class, .. }
             | Rule::KeywordCandidate { class }
             | Rule::MemberOfMetaclass { class, .. }
@@ -566,6 +571,7 @@ impl<T: Trace> State<T> {
             Rule::Pattern(ref rule) => self.pattern_results(rule),
             Rule::Outside(ref rule) => rule.results(),
             Rule::OutsideResult(ref rule) => rule.results(),
+            Rule::Library(ref rule) => rule.results(),
             Rule::Call(call)
             | Rule::PythonNew { call, .. }
             | Rule::PythonInstance { call }
@@ -833,6 +839,7 @@ impl<T: Trace> State<T> {
             Rule::Pattern(ref rule) => self.pattern_apply(graph, rule, object),
             Rule::Outside(ref rule) => self.outside_apply(graph, rule, object),
             Rule::OutsideResult(ref rule) => self.outside_result_apply(graph, rule, object),
+            Rule::Library(rule) => self.library_apply(graph, rule, object),
         }
     }
 

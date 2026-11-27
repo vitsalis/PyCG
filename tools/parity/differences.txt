@@ -59,29 +59,11 @@ engine	D3	macro/validators	partial	not ported: annotations
 engine	D3	macro/vulture	partial	not ported: the builder call class_filter
 engine	D3	macro/websocket-client	partial	not ported: annotations
 engine	D3	macro/whitenoise	partial	not ported: outside types: an imported variable
-engine	D3	micro/args/call_site_unpacking	partial	not ported: the builder call add_length_hint
-engine	D3	micro/args/forward_star_args	partial	not ported: the builder call add_length_hint
-engine	D3	micro/args/multiple_unpacking_call	partial	not ported: the builder call add_length_hint
 engine	D3	micro/assignments/annotated	partial	not ported: the builder call annotated
 engine	D3	micro/assignments/augmented_list_in_place	partial	not ported: containers: the length hint of an in-place concatenation
 engine	D3	micro/async/async_for	partial	not ported: containers: asynchronous iteration (add_await)
 engine	D3	micro/async/task_group	partial	not ported: outside types: the special method of an outside context manager
-engine	D3	micro/builtins/bound_method_callback	partial	not ported: library: the operations of an outside function
-engine	D3	micro/builtins/builtin_as_callback	partial	not ported: library: the operations of an outside function
-engine	D3	micro/builtins/constructors	partial	not ported: library: the operations of an outside function
-engine	D3	micro/builtins/functools_reduce	partial	not ported: library: a deferred result
-engine	D3	micro/builtins/itertools_callbacks	partial	not ported: library: the operations of an outside function
-engine	D3	micro/builtins/lambda_key	partial	not ported: protocols: the hashes and comparisons of a builtin call
-engine	D3	micro/builtins/length_hint	partial	not ported: the builder call add_length_hint
-engine	D3	micro/builtins/list_sort_key	partial	not ported: protocols: the hashes and comparisons of a builtin call
-engine	D3	micro/builtins/method_chain	partial	not ported: library: the operations of an outside function
-engine	D3	micro/builtins/methods_on_variables	partial	not ported: protocols: the hashes and comparisons of a builtin call
-engine	D3	micro/builtins/min_max_key	partial	not ported: protocols: the hashes and comparisons of a builtin call
-engine	D3	micro/builtins/sorted_key	partial	not ported: library: the operations of an outside function
-engine	D3	micro/builtins/types	partial	not ported: library: the operations of an outside function
-engine	D3	micro/classes/subclasses_listing	partial	not ported: library: an outside call that consumes an iterable
-engine	D3	micro/comprehensions/generator_expression	partial	not ported: library: an outside call that consumes an iterable
-engine	D3	micro/comprehensions/generator_short_circuit	partial	not ported: library: an outside call that consumes an iterable
+engine	D3	micro/builtins/length_hint	partial	not ported: containers: the length hint of an in-place concatenation
 engine	D3	micro/context_managers/closing	partial	not ported: outside types: the special method of an outside context manager
 engine	D3	micro/context_managers/contextmanager_generator	partial	not ported: outside types: the special method of an outside context manager
 engine	D3	micro/context_managers/contextmanager_handles_exception	partial	not ported: outside types: the special method of an outside context manager
@@ -91,47 +73,26 @@ engine	D3	micro/control_flow/iscoroutine_guard	partial	not ported: the builder c
 engine	D3	micro/control_flow/isinstance_else_branch	partial	not ported: the builder call class_filter
 engine	D3	micro/control_flow/isinstance_filters_values	partial	not ported: the builder call class_filter
 engine	D3	micro/control_flow/isinstance_guard	partial	not ported: the builder call class_filter
-engine	D3	micro/decorators/class_based_decorator	partial	not ported: the builder call add_length_hint
-engine	D3	micro/decorators/decorated_classmethod_staticmethod	partial	not ported: the builder call add_length_hint
-engine	D3	micro/decorators/functools_wraps	partial	not ported: the builder call add_length_hint
 engine	D3	micro/decorators/singledispatch	partial	not ported: annotations
-engine	D3	micro/descriptors/property_calls_methods	partial	not ported: library: an outside call that consumes an iterable
+engine	D3	micro/descriptors/property_calls_methods	partial	not ported: outside types: the special method of an outside operand
 engine	D3	micro/descriptors/property_init_invalid	partial	not ported: the builder call type_form
 engine	D3	micro/descriptors/property_set_returns	partial	not ported: the builder call callable_filter
-engine	D3	micro/descriptors/wrapper_get_binds	partial	not ported: the builder call add_length_hint
-engine	D3	micro/dicts/fromkeys	partial	not ported: protocols: the hashes and comparisons of a builtin call
 engine	D3	micro/dynamic/dunder_import	partial	not ported: the builder table literal_imports
 engine	D3	micro/dynamic/getattr_annotated_name	partial	not ported: annotations
 engine	D3	micro/dynamic/getattr_lowered_name	partial	not ported: builtin rules: the rule case
 engine	D3	micro/dynamic/import_module_constant	partial	not ported: the builder table literal_imports
 engine	D3	micro/functions/generic_function	partial	not ported: annotations
-engine	D3	micro/imports/shadow_stdlib_module	partial	not ported: library: an outside call that consumes an iterable
+engine	D3	micro/imports/shadow_stdlib_module	partial	not ported: outside types: the special method of an outside operand
 engine	D3	micro/lists/comprehension_val	partial	not ported: outside types: the special method of an outside operand
 engine	D3	micro/lists/nested_comprehension	partial	not ported: outside types: the special method of an outside operand
 engine	D3	micro/lists/slice	partial	not ported: the builder call type_form
-engine	D3	micro/lists/sort_key	partial	not ported: protocols: the hashes and comparisons of a builtin call
-engine	D3	micro/lists/starred_display	partial	not ported: the builder call add_length_hint
 engine	D3	micro/match/class_pattern_match_args	partial	not ported: the builder call add_named_load
 engine	D3	micro/match/class_pattern_property	partial	not ported: the builder call add_named_load
-engine	D3	micro/metaclasses/metaclass_call	partial	not ported: the builder call add_length_hint
 engine	D3	micro/new_syntax/copy_replace	partial	not ported: builtin rules: the rule special_method
-engine	D3	micro/operators/operator_module	partial	not ported: library: a deferred result
-engine	D3	micro/operators/sorted_max_comparisons	partial	not ported: library: the operations of an outside function
-engine	D3	micro/operators/unpacking_iter	partial	not ported: the builder call add_length_hint
-engine	D3	micro/sets/discard	partial	not ported: protocols: the hashes and comparisons of a builtin call
-engine	D3	micro/stdlib/cmp_to_key	partial	not ported: library: the operations of an outside function
 engine	D3	micro/stdlib/counter_methods	partial	not ported: containers: a container of an outside class
 engine	D3	micro/stdlib/ctypes_structure_fields	partial	not ported: the builder call add_structure_class
 engine	D3	micro/stdlib/datetime_methods	partial	not ported: outside types: the special method of an outside operand
 engine	D3	micro/stdlib/exit_stack_callback	partial	not ported: outside types: the special method of an outside context manager
-engine	D3	micro/stdlib/heapq_bisect_key	partial	not ported: library: a deferred result
-engine	D3	micro/stdlib/itertools_eager	partial	not ported: library: a deferred result
-engine	D3	micro/stdlib/itertools_lazy_advance	partial	not ported: library: the operations of an outside function
-engine	D3	micro/stdlib/itertools_not_iterated	partial	not ported: library: the operations of an outside function
-engine	D3	micro/stdlib/itertools_repeat_items	partial	not ported: library: the operations of an outside function
-engine	D3	micro/stdlib/json_default_hook	partial	not ported: library: the operations of an outside function
-engine	D3	micro/stdlib/json_encoder_subclass	partial	not ported: library: the operations of an outside function
-engine	D3	micro/stdlib/re_sub_function	partial	not ported: library: the operations of an outside function
 engine	D3	micro/stdlib_classes/abc_async_iterator_returns_self	partial	not ported: containers: asynchronous iteration (add_await)
 engine	D3	micro/stdlib_classes/dataclass_default_factory	partial	not ported: annotations
 engine	D3	micro/stdlib_classes/dataclass_order	partial	not ported: annotations
