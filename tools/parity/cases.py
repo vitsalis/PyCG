@@ -49,6 +49,18 @@ FAMILIES = {
         "classes",
         "Classes that Python does not instantiate",
     ),
+    "tests/test_arguments.py": (
+        "calls",
+        "Arguments",
+    ),
+    "tests/test_call_arity.py": (
+        "calls",
+        "Calls",
+    ),
+    "tests/test_callbacks.py": (
+        "calls",
+        "Call backs",
+    ),
     "tests/test_class_rule_limits.py": (
         "classes",
         "Classes and hierarchies",
@@ -56,6 +68,14 @@ FAMILIES = {
     "tests/test_class_tests.py": (
         "classes",
         "Class tests",
+    ),
+    "tests/test_decorators_and_descriptors.py": (
+        "calls",
+        "Decorators and functions that return a parameter",
+    ),
+    "tests/test_defaults_and_receivers.py": (
+        "calls",
+        "Arguments",
     ),
     "tests/test_descriptors.py": (
         "classes",
