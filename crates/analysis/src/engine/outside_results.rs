@@ -6,7 +6,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use crate::engine::objects::{Kind, Literal, Object};
 use crate::engine::outside_calls::{BoundId, Known};
 use crate::engine::outside_types::TypeContext;
-use crate::engine::rules::Rule;
+use crate::engine::rules::{Rule, RuleId};
 use crate::engine::semantics::CallId;
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
@@ -94,6 +94,10 @@ pub(crate) struct OutsideResults {
 }
 
 impl<T: Trace> State<T> {
+    fn result_rule(&mut self, rule: OutsideResultRule) -> RuleId {
+        self.rule(Rule::OutsideResult(Box::new(rule)))
+    }
+
     pub(super) fn closure(&mut self, graph: &mut Graph, name: &str, result: &Type) -> ObjId {
         let name = self.symbols.intern(name);
         let key = (name, result.clone());
@@ -139,10 +143,7 @@ impl<T: Trace> State<T> {
         if !details.star.is_empty() || !details.keywords.is_empty() {
             return;
         }
-        let rule = self.rule(Rule::OutsideResult(OutsideResultRule::MethodFunction {
-            receiver,
-            dst,
-        }));
+        let rule = self.result_rule(OutsideResultRule::MethodFunction { receiver, dst });
         self.attach(graph, function, rule);
     }
 
@@ -151,10 +152,7 @@ impl<T: Trace> State<T> {
         let (Some(dst), Some(&Some(class))) = (details.dst, details.args.first()) else {
             return;
         };
-        let rule = self.rule(Rule::OutsideResult(OutsideResultRule::NewInstance {
-            call,
-            dst,
-        }));
+        let rule = self.result_rule(OutsideResultRule::NewInstance { call, dst });
         self.attach(graph, class, rule);
     }
 
@@ -175,12 +173,12 @@ impl<T: Trace> State<T> {
             let node = self.bound_parameter(graph, bound, "mode");
             let mode = self.open_argument(graph, node);
             let dst = self.calls[call.index()].dst.expect("an opened file");
-            let rule = self.rule(Rule::OutsideResult(OutsideResultRule::OpenMode {
+            let rule = self.result_rule(OutsideResultRule::OpenMode {
                 call,
                 buffering,
                 results: results.into_boxed_slice(),
                 dst,
-            }));
+            });
             self.attach(graph, mode, rule);
         } else {
             let mode: Box<[u32]> = DEFAULT_MODE.chars().map(u32::from).collect();
@@ -208,10 +206,7 @@ impl<T: Trace> State<T> {
             return;
         };
         if self.outside_results.open_modes.insert((call, mode.clone())) {
-            let rule = self.rule(Rule::OutsideResult(OutsideResultRule::OpenBuffering {
-                mode,
-                dst,
-            }));
+            let rule = self.result_rule(OutsideResultRule::OpenBuffering { mode, dst });
             self.attach(graph, buffering, rule);
         }
     }
@@ -252,10 +247,10 @@ impl<T: Trace> State<T> {
     ) {
         match *rule {
             OutsideResultRule::MethodFunction { receiver, dst } => {
-                let rule = self.rule(Rule::OutsideResult(OutsideResultRule::BoundTo {
+                let rule = self.result_rule(OutsideResultRule::BoundTo {
                     function: object,
                     dst,
-                }));
+                });
                 self.attach(graph, receiver, rule);
             }
             OutsideResultRule::BoundTo { function, dst } => {
@@ -310,10 +305,7 @@ impl<T: Trace> State<T> {
                 if mros.iter().all(|mro| self.derives_from_type(mro)) {
                     self.add_edge(graph, instances, dst);
                 } else {
-                    let rule = self.rule(Rule::OutsideResult(OutsideResultRule::MadeInstance {
-                        call,
-                        dst,
-                    }));
+                    let rule = self.result_rule(OutsideResultRule::MadeInstance { call, dst });
                     self.attach(graph, instantiable, rule);
                 }
             }

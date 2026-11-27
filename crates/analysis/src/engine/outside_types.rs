@@ -701,7 +701,7 @@ impl<T: Trace> State<T> {
     }
 
     fn outside_rule(&mut self, rule: OutsideRule) -> crate::engine::rules::RuleId {
-        self.rule(Rule::Outside(rule))
+        self.rule(Rule::Outside(Box::new(rule)))
     }
 
     pub(super) fn outside_apply(&mut self, graph: &mut Graph, rule: &OutsideRule, object: ObjId) {

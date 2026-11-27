@@ -354,7 +354,7 @@ fn index_of(id: u32) -> usize {
 
 impl<T: Trace> State<T> {
     fn protocol_rule(&mut self, rule: ProtocolRule) -> RuleId {
-        self.rule(Rule::Protocol(rule))
+        self.rule(Rule::Protocol(Box::new(rule)))
     }
 
     fn operator(&self, id: OperatorId) -> &Operator {

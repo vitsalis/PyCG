@@ -219,7 +219,7 @@ fn constructor_kind(constructor: &str) -> Option<&'static str> {
 
 impl<T: Trace> State<T> {
     fn annotation_rule(&mut self, rule: AnnotationRule) -> RuleId {
-        self.rule(Rule::Annotation(rule))
+        self.rule(Rule::Annotation(Box::new(rule)))
     }
 
     pub(super) fn type_form(

@@ -33,6 +33,9 @@ pub enum LookupAttr {
     Object(ObjId),
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct UnlessId(u32);
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Unless {
     Nothing,
@@ -74,6 +77,17 @@ pub(super) enum BaseOrder {
 }
 
 type Shape = (bool, Vec<Vec<ObjId>>);
+
+impl<T: Trace> State<T> {
+    pub(super) fn unless_id(&mut self, unless: Unless) -> UnlessId {
+        let (index, _) = self.unlesses.insert_full(unless);
+        UnlessId(u32::try_from(index).expect("fewer than 2^32 exclusions"))
+    }
+
+    pub(super) fn unless_of(&self, id: UnlessId) -> Unless {
+        self.unlesses[id.0 as usize].clone()
+    }
+}
 
 impl<T: Trace> State<T> {
     pub(super) fn new_class(&mut self, graph: &mut Graph, new: &NewClass<'_>) -> ObjId {
