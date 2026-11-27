@@ -648,21 +648,50 @@ of the solver that a change of its sets would rewrite.
 How each becomes Rust (stage 9):
 
 1. **Cases.** A case is a directory under `tests/cases/<family>/<name>/`:
-   the program's files, `case.toml` (entry points, package root, cap, the
-   section of `docs/design.md` that the case pins, a one-line statement),
-   and `expected.json`, the edges and unresolved causes in the format of
-   `pycg.formats.edges` plus the `unresolved` map. One Rust test harness
-   (`harness = false`, about 150 lines, no crate) runs every case and
-   prints the edges gained and lost. The 696 micro cases run through the
-   same harness against their `callgraph.json`, with the known failures
-   of `tests/known_failures.txt` expected to fail. A Python test becomes a
-   case by a script (`tools/parity/cases.py`) that runs it, captures the
-   program and writes the oracle's output; a test that asserts an edge
-   is absent or present keeps that assertion in `case.toml` (`present`,
-   `absent`), so the case says what it is about. The 43 test files that
-   use `tests/programs.py` convert this way; their families
-   (`calls`, `classes`, `containers`, `outside`, ...) become the
-   directories.
+   `program/`, the program's files; `case.json` (entry points and package
+   root, relative to `program/`, the cap, the section of `docs/design.md`
+   that the family pins, a one-line statement, the Python test it comes
+   from, and `focus`, the callers that the test read); and
+   `expected.json`, the oracle's output: the edges in the format of
+   `pycg.formats.edges` (every caller, with an empty list for one that
+   calls nothing), the unresolved sites as `[caller, site, cause]`
+   (`Analysis.unresolved_calls`), the points-to sets of the named nodes
+   that the test read (`output_points_to`), the warnings, and each
+   document that the test read with the package name and version it
+   asked for. The
+   expected edges are exact, so a test's assertion that an edge is
+   present or absent holds in the case; `focus` names what the test was
+   about, and the harness prints the differences of those callers first.
+   JSON, not TOML, so that the harness needs no crate beyond `serde_json`.
+   The harness, `crates/pycg/tests/cases/main.rs` (`harness = false`), runs
+   every case and every micro case through `Program`, `Engine` and
+   `pycg_document::build`, and prints for each failure the edges, sites
+   and points-to names gained and lost, or the first path at which a
+   document differs. Every document that the harness builds must also be
+   consistent in itself: each caller a definition, each callee a
+   definition or outside, the callees of a site sorted and distinct, a
+   site with no callee unresolved, the sites of a caller sorted and
+   distinct, and no site naming its caller's own module (the property of
+   `test_the_edges_of_the_document_are_consistent`, over every case and
+   every micro case). A micro case is compared with its
+   `callgraph.json`, a case of `tests/known_failures.txt` must differ from
+   it, and a case that needs a newer Python than the parser's
+   (`pycg_syntax::parse::TARGET_VERSION`) is left out, as the Python suite
+   skips it. `tests/cases/pending.txt` lists, sorted, each case that the
+   Rust engine does not give yet, with its cause (`<case>\t<cause>`); it
+   is strict, as the known failures are: a listed case that passes fails
+   the suite, and a pull request removes the lines of the cases it makes
+   pass and never adds one. A Python test becomes cases by
+   `tools/parity/cases.py <test file>`, which runs the file's tests under
+   the oracle and writes one case per program a test analyses
+   (`<test name>-2` for the second); `FAMILIES` of the script names each
+   file's family and section. A test that monkeypatches an attribute is
+   not converted but listed: it states an invariant, for the simulation
+   below. So are a hypothesis property, a test that analyses no program
+   in its own process, and a test that analyses micro cases, which the
+   harness runs anyway. The 43 test files that use `tests/programs.py`
+   convert this way; their families (`calls`, `classes`, `containers`,
+   `outside`, ...) are the directories.
 2. **Simulation.** `pycg-solver` and `pycg-analysis` take an `Order` (the
    FIFO of the program, or under test LIFO, reversed and SplitMix64 with a
    seed). The properties, each a test that takes a seed range and prints

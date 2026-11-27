@@ -23,6 +23,7 @@ NOT_SCANNED_DIRECTORIES = (
     "evaluation/scale/projects/",
     "evaluation/macro-benchmark/selection/",
     "tests/fixtures/",
+    "tests/cases/",
 )
 SCANNED_SUFFIXES = (".py", ".sh")
 TOOL_PRAGMA_PREFIXES = (
