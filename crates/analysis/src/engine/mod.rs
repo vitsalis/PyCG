@@ -26,7 +26,7 @@ pub mod trace;
 use std::sync::Arc;
 
 use indexmap::{IndexMap, IndexSet};
-use pycg_solver::{NodeId, ObjId, Solver, WatchId, Work};
+use pycg_solver::{NodeId, ObjId, Order, Solver, WatchId, Work};
 use pycg_stubs::{Definition, Stubs};
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 
@@ -345,7 +345,7 @@ impl<T: Trace> Engine<T> {
             "<saturated>",
             Opacity::Saturated,
         );
-        let mut graph = Solver::new(saturated, Kind::Saturated.mask(), cap);
+        let mut graph = Solver::new(saturated, Kind::Saturated.mask(), cap, Order::Canonical);
         state.trace.solver(cap, saturated, graph.saturated_node());
         let name = state.symbols.intern("<unknown>");
         state.unknown_external = state.new_object(

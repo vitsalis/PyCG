@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader, BufWriter, Lines, Stdout, Write};
 use std::process::ExitCode;
 
-use pycg_solver::{KindMask, NodeId, ObjId, Rules, Solver, WatchId};
+use pycg_solver::{KindMask, NodeId, ObjId, Order, Rules, Solver, WatchId};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde_json::{Value, json};
 
@@ -124,7 +124,7 @@ impl Replay {
             saturated,
             "the trace starts with the constant node of the saturated value"
         );
-        let solver = Solver::new(saturated, kinds, cap);
+        let solver = Solver::new(saturated, kinds, cap, Order::Canonical);
         let node = solver.saturated_node();
         self.name_node(node, answer_node(&constant.value), false);
         self.write_text(&constant.text);

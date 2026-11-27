@@ -4,6 +4,7 @@ use indexmap::{IndexMap, IndexSet};
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 
 use crate::ids::{NodeId, ObjId, SetId, WatchId};
+use crate::order::Order;
 use crate::sets::{KIND_SELECTION_OBJECTS_MIN, KindMask, Sets};
 
 pub const OBJECTS_PER_NODE_DEFAULT: u32 = 5000;
@@ -82,6 +83,7 @@ pub struct Solver<C> {
     saturated_node: NodeId,
     saturated_set: SetId,
     cap: Option<u32>,
+    order: Order,
     worklist: VecDeque<NodeId>,
     cycle_suspects: Vec<NodeId>,
     last_search_walked: u64,
@@ -105,7 +107,12 @@ pub struct Solver<C> {
 }
 
 impl<C: Copy> Solver<C> {
-    pub fn new(saturated: ObjId, saturated_kinds: KindMask, cap: Option<u32>) -> Self {
+    pub fn new(
+        saturated: ObjId,
+        saturated_kinds: KindMask,
+        cap: Option<u32>,
+        order: Order,
+    ) -> Self {
         let mut solver = Solver {
             sets: Sets::new(),
             nodes: Vec::new(),
@@ -114,6 +121,7 @@ impl<C: Copy> Solver<C> {
             saturated_node: NodeId::new(0),
             saturated_set: SetId::EMPTY,
             cap,
+            order,
             worklist: VecDeque::new(),
             cycle_suspects: Vec::new(),
             last_search_walked: 0,
@@ -425,7 +433,7 @@ impl<C: Copy> Solver<C> {
                 self.collapse_cycles();
                 continue;
             }
-            let Some(node) = self.worklist.pop_front() else {
+            let Some(node) = self.order.take(&mut self.worklist) else {
                 self.phase += 1;
                 if rules.between_rounds(self) {
                     starting = true;
@@ -662,7 +670,8 @@ impl<C: Copy> Solver<C> {
                 }
             }
             Successors::Many(mut map) => {
-                let listed: Vec<NodeId> = map.keys().copied().collect();
+                let mut listed: Vec<NodeId> = map.keys().copied().collect();
+                self.order.arrange(&mut listed);
                 for listed_target in listed {
                     let target = self.find(listed_target);
                     if target != listed_target {
@@ -693,7 +702,8 @@ impl<C: Copy> Solver<C> {
 
     fn fire(&mut self, rules: &mut impl Rules<C>) {
         rules.firing(self);
-        let firing = std::mem::take(&mut self.firing_nodes);
+        let mut firing: Vec<NodeId> = std::mem::take(&mut self.firing_nodes).into_iter().collect();
+        self.order.arrange(&mut firing);
         self.applications_in_progress += 1;
         for node in firing {
             let node = self.find(node);
@@ -729,6 +739,8 @@ impl<C: Copy> Solver<C> {
 
     fn apply(&mut self, rules: &mut impl Rules<C>, constraints: Vec<C>, objects: SetId) {
         self.applied += (constraints.len() * self.sets.len(objects)) as u64;
+        let mut constraints = constraints;
+        self.order.arrange(&mut constraints);
         let mut objects = objects;
         let opaque_inside = self.opacity && self.sets.ordered(objects).any(|o| rules.opaque(o));
         if objects == self.saturated_set || opaque_inside {
@@ -750,7 +762,6 @@ impl<C: Copy> Solver<C> {
             }
             objects = self.sets.intern(&kept);
         }
-        let mut constraints = constraints;
         if self.opacity {
             let mut applied = Vec::with_capacity(constraints.len());
             for constraint in constraints {

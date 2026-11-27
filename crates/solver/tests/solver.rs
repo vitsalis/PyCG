@@ -1,4 +1,4 @@
-use pycg_solver::{ATTACH_NESTING_MAX, KindMask, NodeId, ObjId, Rules, Solver, WatchId};
+use pycg_solver::{ATTACH_NESTING_MAX, KindMask, NodeId, ObjId, Order, Rules, Solver, WatchId};
 
 const SATURATED: ObjId = ObjId(0);
 const PLAIN: KindMask = 1;
@@ -62,7 +62,7 @@ impl Rules<u32> for Recorded {
 }
 
 fn solver(cap: Option<u32>) -> Solver<u32> {
-    Solver::new(SATURATED, PLAIN, cap)
+    Solver::new(SATURATED, PLAIN, cap, Order::Canonical)
 }
 
 fn objects(solver: &mut Solver<u32>, numbers: &[u32]) -> Vec<ObjId> {
