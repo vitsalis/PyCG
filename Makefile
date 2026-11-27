@@ -26,6 +26,12 @@ sandbox = docker run --rm --network none --read-only --tmpfs /tmp \
 	-v $(CURDIR):$(CURDIR):ro -v $(GIT_COMMON):$(GIT_COMMON):ro \
 	-v $(EVAL_OUT):$(EVAL_OUT) pycg-eval-runner python3 -I
 SANDBOX = $(call sandbox,6g)
+RUST_IMAGE = rust:1.100.0-slim-trixie@sha256:3b199fd6db7d709274df56565b8f4003f9e30d7bfcff9d53148c86053b7855e2
+rust_release = mkdir -p $(EVAL_OUT)/cargo-home && docker run --rm --memory 4g --memory-swap 4g \
+	--cap-drop ALL --security-opt no-new-privileges --user $$(id -u):$$(id -g) \
+	-e HOME=/tmp -e RUSTUP_TOOLCHAIN=1.100.0 -e CARGO_HOME=$(EVAL_OUT)/cargo-home \
+	-v $(CURDIR):$(CURDIR) -v $(EVAL_OUT):$(EVAL_OUT) -w $(CURDIR) \
+	$(RUST_IMAGE) cargo build --release --locked
 SCALE_CONTAINER_MIB = $(shell python3 -I evaluation/scale/measure.py container-mib $(SCALE_MEMORY_MIB))
 SCALE_SANDBOX = $(call sandbox,$(SCALE_CONTAINER_MIB)m)
 SCALE_MEASURE = $(CURDIR)/evaluation/scale/measure.py
@@ -220,7 +226,7 @@ eval-same-graphs:
 	$(same_graphs)
 
 eval-rust: eval-inputs
-	CARGO_TARGET_DIR=$(CURDIR)/target cargo build --release --locked
+	$(rust_release)
 	$(measured)
 	$(SANDBOX) $(CURDIR)/evaluation/common/loop.py run --flavour rust --checkout $(CURDIR) \
 		--name $(notdir $(RUST_RESULT)) --hash-seed 0 --micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT)
@@ -243,7 +249,7 @@ eval-scale: eval-inputs
 
 eval-scale-rust: eval-inputs
 	$(need_name)
-	CARGO_TARGET_DIR=$(CURDIR)/target cargo build --release --locked
+	$(rust_release)
 	$(call measure_scale,$(CURDIR),$(SCALE_RUST_RESULT),rust)
 	$(if $(wildcard $(call scale_record,$(SCALE_RESULT))),$(SCALE_SANDBOX) $(SCALE_MEASURE) compare \
 		$(call scale_record,$(SCALE_RESULT)) $(call scale_record,$(SCALE_RUST_RESULT)))
