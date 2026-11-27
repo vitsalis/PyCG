@@ -1,0 +1,348 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 11,
+       "end": [
+        15,
+        17
+       ],
+       "line": 15
+      }
+     ],
+     "main.Allocating.__new__": [
+      {
+       "callees": [
+        "<builtin>.super"
+       ],
+       "col": 15,
+       "end": [
+        5,
+        22
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "<builtin>.object.__new__"
+       ],
+       "col": 15,
+       "end": [
+        5,
+        35
+       ],
+       "line": 5
+      }
+     ],
+     "main.made": [
+      {
+       "callees": [
+        "main.Allocating.__new__",
+        "main.Factory.__new__"
+       ],
+       "col": 4,
+       "end": [
+        23,
+        10
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "main.Loud.__getattr__"
+       ],
+       "col": 4,
+       "end": [
+        23,
+        14
+       ],
+       "implicit": "attribute",
+       "line": 23
+      },
+      {
+       "callees": [
+        "main.Made.run",
+        "main.Quiet.run",
+        "main.Real.run"
+       ],
+       "col": 4,
+       "end": [
+        23,
+        16
+       ],
+       "line": 23
+      }
+     ],
+     "main.quiet": [
+      {
+       "callees": [
+        "main.Allocating.__new__"
+       ],
+       "col": 4,
+       "end": [
+        25,
+        10
+       ],
+       "line": 25
+      },
+      {
+       "callees": [
+        "main.Allocating.__new__"
+       ],
+       "col": 4,
+       "end": [
+        26,
+        11
+       ],
+       "line": 26
+      },
+      {
+       "callees": [
+        "main.Quiet.run"
+       ],
+       "col": 4,
+       "end": [
+        26,
+        17
+       ],
+       "line": 26
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       26
+      ],
+      "module": "main"
+     },
+     "main.Allocating": {
+      "kind": "class",
+      "lines": [
+       3,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Allocating",
+       "<builtin>.object"
+      ]
+     },
+     "main.Allocating.__new__": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Factory": {
+      "kind": "class",
+      "lines": [
+       6,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.Factory",
+       "<builtin>.object"
+      ]
+     },
+     "main.Factory.__new__": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Loud": {
+      "kind": "class",
+      "lines": [
+       18,
+       19
+      ],
+      "module": "main",
+      "mro": [
+       "main.Loud",
+       "main.Allocating",
+       "<builtin>.object"
+      ]
+     },
+     "main.Loud.__getattr__": {
+      "kind": "function",
+      "lines": [
+       19,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Made": {
+      "kind": "class",
+      "lines": [
+       16,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Made",
+       "main.Allocating",
+       "main.Factory",
+       "<builtin>.object"
+      ]
+     },
+     "main.Made.run": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Quiet": {
+      "kind": "class",
+      "lines": [
+       20,
+       21
+      ],
+      "module": "main",
+      "mro": [
+       "main.Quiet",
+       "main.Allocating",
+       "<builtin>.object"
+      ]
+     },
+     "main.Quiet.run": {
+      "kind": "function",
+      "lines": [
+       21,
+       21
+      ],
+      "module": "main"
+     },
+     "main.Real": {
+      "kind": "class",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Real",
+       "<builtin>.object"
+      ]
+     },
+     "main.Real.run": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.late": {
+      "kind": "function",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main"
+     },
+     "main.made": {
+      "kind": "function",
+      "lines": [
+       22,
+       23
+      ],
+      "module": "main"
+     },
+     "main.quiet": {
+      "kind": "function",
+      "lines": [
+       24,
+       26
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.Base": [
+      "main.Allocating",
+      "main.Factory"
+     ],
+     "main.sys": [
+      "sys"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.object.__new__": {
+      "known": "stub"
+     },
+     "<builtin>.super": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.object.__new__": [],
+  "<builtin>.super": [],
+  "main": [
+   "main.late"
+  ],
+  "main.Allocating.__new__": [
+   "<builtin>.object.__new__",
+   "<builtin>.super"
+  ],
+  "main.Factory.__new__": [],
+  "main.Loud.__getattr__": [],
+  "main.Made.run": [],
+  "main.Quiet.run": [],
+  "main.Real.run": [],
+  "main.late": [],
+  "main.made": [
+   "main.Allocating.__new__",
+   "main.Factory.__new__",
+   "main.Loud.__getattr__",
+   "main.Made.run",
+   "main.Quiet.run",
+   "main.Real.run"
+  ],
+  "main.quiet": [
+   "main.Allocating.__new__",
+   "main.Quiet.run"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

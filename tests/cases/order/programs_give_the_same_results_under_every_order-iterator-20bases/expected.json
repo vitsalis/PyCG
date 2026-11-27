@@ -1,0 +1,248 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.items"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        14
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.items"
+       ],
+       "col": 0,
+       "end": [
+        15,
+        25
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "collections.abc.Iterator.__iter__"
+       ],
+       "col": 6,
+       "end": [
+        15,
+        24
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "main.stream"
+       ],
+       "col": 0,
+       "end": [
+        16,
+        16
+       ],
+       "line": 16
+      }
+     ],
+     "main.items": [
+      {
+       "callees": [
+        "main.Items.__next__"
+       ],
+       "col": 16,
+       "end": [
+        9,
+        22
+       ],
+       "implicit": "iteration",
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.f"
+       ],
+       "col": 8,
+       "end": [
+        10,
+        14
+       ],
+       "line": 10
+      }
+     ],
+     "main.stream": [
+      {
+       "callees": [
+        "collections.abc.AsyncIterator.__aiter__"
+       ],
+       "col": 22,
+       "end": [
+        12,
+        40
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.Stream.__anext__"
+       ],
+       "col": 22,
+       "end": [
+        12,
+        40
+       ],
+       "implicit": "iteration",
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.f"
+       ],
+       "col": 8,
+       "end": [
+        13,
+        14
+       ],
+       "line": 13
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Items": {
+      "kind": "class",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Items",
+       "collections.abc.Iterator"
+      ]
+     },
+     "main.Items.__next__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Stream": {
+      "kind": "class",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Stream",
+       "collections.abc.AsyncIterator"
+      ]
+     },
+     "main.Stream.__anext__": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.items": {
+      "kind": "function",
+      "lines": [
+       8,
+       10
+      ],
+      "module": "main"
+     },
+     "main.stream": {
+      "kind": "function",
+      "lines": [
+       11,
+       13
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.collections": [
+      "collections"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "collections.abc.AsyncIterator.__aiter__": {
+      "known": "stub"
+     },
+     "collections.abc.Iterator.__iter__": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "collections.abc.AsyncIterator.__aiter__": [],
+  "collections.abc.Iterator.__iter__": [],
+  "main": [
+   "collections.abc.Iterator.__iter__",
+   "main.items",
+   "main.stream"
+  ],
+  "main.Items.__next__": [],
+  "main.Stream.__anext__": [],
+  "main.f": [],
+  "main.items": [
+   "main.Items.__next__",
+   "main.f"
+  ],
+  "main.stream": [
+   "collections.abc.AsyncIterator.__aiter__",
+   "main.Stream.__anext__",
+   "main.f"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

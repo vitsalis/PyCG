@@ -1,0 +1,208 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        16
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 9,
+       "end": [
+        12,
+        15
+       ],
+       "line": 12
+      }
+     ],
+     "main.late": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 11,
+       "end": [
+        8,
+        33
+       ],
+       "line": 8
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        24
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.C.b"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        26
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        50
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.C.b"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        52
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 17,
+       "end": [
+        11,
+        23
+       ],
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       12
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       3,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.a": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.C.b": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.late": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       9,
+       11
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.ext": [
+      "ext"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "main": [
+   "main.late",
+   "main.run"
+  ],
+  "main.C.a": [],
+  "main.C.b": [],
+  "main.late": [
+   "<builtin>.getattr"
+  ],
+  "main.run": [
+   "<builtin>.getattr",
+   "main.C.b",
+   "main.late"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

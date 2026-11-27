@@ -1,0 +1,376 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.setattr"
+       ],
+       "col": 0,
+       "end": [
+        18,
+        27
+       ],
+       "line": 18
+      },
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 5,
+       "end": [
+        20,
+        13
+       ],
+       "implicit": "decorator",
+       "line": 20
+      },
+      {
+       "callees": [
+        "<builtin>.property.setter"
+       ],
+       "col": 5,
+       "end": [
+        23,
+        17
+       ],
+       "implicit": "decorator",
+       "line": 23
+      },
+      {
+       "callees": [
+        "<builtin>.property.deleter"
+       ],
+       "col": 5,
+       "end": [
+        26,
+        18
+       ],
+       "implicit": "decorator",
+       "line": 26
+      },
+      {
+       "callees": [
+        "main.C.value",
+        "main.Hooked.__getattribute__"
+       ],
+       "col": 0,
+       "end": [
+        32,
+        7
+       ],
+       "implicit": "attribute",
+       "line": 32
+      },
+      {
+       "callees": [
+        "main.C.value",
+        "main.put"
+       ],
+       "col": 0,
+       "end": [
+        33,
+        7
+       ],
+       "implicit": "attribute",
+       "line": 33
+      },
+      {
+       "callees": [
+        "main.C.value",
+        "main.remove"
+       ],
+       "col": 4,
+       "end": [
+        34,
+        11
+       ],
+       "implicit": "delete",
+       "line": 34
+      }
+     ],
+     "main.C.value": [
+      {
+       "callees": [
+        "main.helper"
+       ],
+       "col": 8,
+       "end": [
+        22,
+        16
+       ],
+       "line": 22
+      },
+      {
+       "callees": [
+        "main.target"
+       ],
+       "col": 8,
+       "end": [
+        25,
+        13
+       ],
+       "line": 25
+      },
+      {
+       "callees": [
+        "main.helper"
+       ],
+       "col": 8,
+       "end": [
+        28,
+        16
+       ],
+       "line": 28
+      }
+     ],
+     "main.Hooked.__getattribute__": [
+      {
+       "callees": [
+        "main.C.value"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        12
+       ],
+       "implicit": "attribute",
+       "line": 9
+      }
+     ],
+     "main.put": [
+      {
+       "callees": [
+        "main.C.value"
+       ],
+       "col": 0,
+       "end": [
+        5,
+        11
+       ],
+       "implicit": "attribute",
+       "line": 4
+      },
+      {
+       "callees": [
+        "main.target"
+       ],
+       "col": 4,
+       "end": [
+        5,
+        11
+       ],
+       "line": 5
+      }
+     ],
+     "main.remove": [
+      {
+       "callees": [
+        "main.C.value"
+       ],
+       "col": 0,
+       "end": [
+        7,
+        12
+       ],
+       "implicit": "delete",
+       "line": 6
+      },
+      {
+       "callees": [
+        "main.helper"
+       ],
+       "col": 4,
+       "end": [
+        7,
+        12
+       ],
+       "line": 7
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       34
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       19,
+       28
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "main.Hooked",
+       "main.Plain",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.value": {
+      "kind": "function",
+      "lines": [
+       21,
+       22
+      ],
+      "module": "main"
+     },
+     "main.Holder": {
+      "kind": "class",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main",
+      "mro": [
+       "main.Holder",
+       "<builtin>.object"
+      ]
+     },
+     "main.Hooked": {
+      "kind": "class",
+      "lines": [
+       8,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Hooked",
+       "<builtin>.object"
+      ]
+     },
+     "main.Hooked.__getattribute__": {
+      "kind": "function",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main"
+     },
+     "main.Plain": {
+      "kind": "class",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.Plain",
+       "<builtin>.object"
+      ]
+     },
+     "main.helper": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.put": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.remove": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.target": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.property": {
+      "known": "stub"
+     },
+     "<builtin>.property.deleter": {
+      "known": "stub"
+     },
+     "<builtin>.property.setter": {
+      "known": "stub"
+     },
+     "<builtin>.setattr": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.property": [],
+  "<builtin>.property.deleter": [],
+  "<builtin>.property.setter": [],
+  "<builtin>.setattr": [],
+  "main": [
+   "<builtin>.property",
+   "<builtin>.property.deleter",
+   "<builtin>.property.setter",
+   "<builtin>.setattr",
+   "main.C.value",
+   "main.Hooked.__getattribute__",
+   "main.put",
+   "main.remove"
+  ],
+  "main.C.value": [
+   "main.helper",
+   "main.target"
+  ],
+  "main.Hooked.__getattribute__": [
+   "main.C.value"
+  ],
+  "main.helper": [],
+  "main.put": [
+   "main.C.value",
+   "main.target"
+  ],
+  "main.remove": [
+   "main.C.value",
+   "main.helper"
+  ],
+  "main.target": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

@@ -1,0 +1,157 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "abc.abstractmethod"
+       ],
+       "col": 5,
+       "end": [
+        7,
+        23
+       ],
+       "implicit": "decorator",
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.C.__init__"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        3
+       ],
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       10
+      ],
+      "module": "main"
+     },
+     "main.AbstractMeta": {
+      "kind": "class",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.AbstractMeta",
+       "abc.ABCMeta"
+      ]
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       6,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.__init__": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.C.f": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Meta": {
+      "kind": "class",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Meta",
+       "main.PlainMeta",
+       "<builtin>.type",
+       "main.AbstractMeta",
+       "abc.ABCMeta"
+      ]
+     },
+     "main.PlainMeta": {
+      "kind": "class",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.PlainMeta",
+       "<builtin>.type"
+      ]
+     }
+    },
+    "exports": {
+     "main.abc": [
+      "abc"
+     ],
+     "main.sys": [
+      "sys"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "abc.abstractmethod": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "abc.abstractmethod": [],
+  "main": [
+   "abc.abstractmethod",
+   "main.C.__init__"
+  ],
+  "main.C.__init__": [],
+  "main.C.f": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

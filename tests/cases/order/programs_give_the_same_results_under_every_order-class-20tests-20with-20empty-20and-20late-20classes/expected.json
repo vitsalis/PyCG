@@ -1,0 +1,364 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.f"
+       ],
+       "col": 0,
+       "end": [
+        8,
+        10
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.h"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        13
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.meta"
+       ],
+       "col": 21,
+       "end": [
+        16,
+        27
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 12,
+       "end": [
+        18,
+        18
+       ],
+       "line": 18
+      }
+     ],
+     "main.f": [
+      {
+       "callees": [
+        "<builtin>.isinstance"
+       ],
+       "col": 11,
+       "end": [
+        4,
+        33
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "<builtin>.str.lower"
+       ],
+       "col": 8,
+       "end": [
+        5,
+        17
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "<builtin>.isinstance"
+       ],
+       "col": 7,
+       "end": [
+        6,
+        29
+       ],
+       "line": 6
+      },
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        7,
+        17
+       ],
+       "line": 7,
+       "unresolved": "no value"
+      }
+     ],
+     "main.g": [
+      {
+       "callees": [
+        "<builtin>.isinstance"
+       ],
+       "col": 11,
+       "end": [
+        24,
+        30
+       ],
+       "line": 24
+      },
+      {
+       "callees": [
+        "main.Late.f",
+        "main.Plain.f"
+       ],
+       "col": 12,
+       "end": [
+        25,
+        17
+       ],
+       "line": 25
+      },
+      {
+       "callees": [
+        "<builtin>.isinstance"
+       ],
+       "col": 15,
+       "end": [
+        26,
+        44
+       ],
+       "line": 26
+      },
+      {
+       "callees": [
+        "main.Late.f"
+       ],
+       "col": 12,
+       "end": [
+        27,
+        17
+       ],
+       "line": 27
+      }
+     ],
+     "main.h": [
+      {
+       "callees": [
+        "<builtin>.isinstance"
+       ],
+       "col": 7,
+       "end": [
+        11,
+        29
+       ],
+       "line": 11
+      },
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        12,
+        11
+       ],
+       "line": 12,
+       "unresolved": "no value"
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       27
+      ],
+      "module": "main"
+     },
+     "main.Late": {
+      "kind": "class",
+      "lines": [
+       16,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Late",
+       "<builtin>.object"
+      ]
+     },
+     "main.Late.f": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Later": {
+      "kind": "class",
+      "lines": [
+       18,
+       19
+      ],
+      "module": "main",
+      "mro": [
+       "main.Later",
+       "abc.ABC"
+      ]
+     },
+     "main.Later.f": {
+      "kind": "function",
+      "lines": [
+       19,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Plain": {
+      "kind": "class",
+      "lines": [
+       20,
+       21
+      ],
+      "module": "main",
+      "mro": [
+       "main.Plain",
+       "<builtin>.object"
+      ]
+     },
+     "main.Plain.f": {
+      "kind": "function",
+      "lines": [
+       21,
+       21
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       3,
+       7
+      ],
+      "module": "main"
+     },
+     "main.g": {
+      "kind": "function",
+      "lines": [
+       22,
+       27
+      ],
+      "module": "main"
+     },
+     "main.h": {
+      "kind": "function",
+      "lines": [
+       10,
+       12
+      ],
+      "module": "main"
+     },
+     "main.meta": {
+      "kind": "function",
+      "lines": [
+       14,
+       14
+      ],
+      "module": "main"
+     },
+     "main.target": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.abc": [
+      "abc"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.isinstance": {
+      "known": "stub"
+     },
+     "<builtin>.str.lower": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.isinstance": [],
+  "<builtin>.str.lower": [],
+  "main": [
+   "main.base",
+   "main.f",
+   "main.h",
+   "main.meta"
+  ],
+  "main.Late.f": [],
+  "main.Later.f": [],
+  "main.Plain.f": [],
+  "main.base": [],
+  "main.f": [
+   "<builtin>.isinstance",
+   "<builtin>.str.lower"
+  ],
+  "main.g": [
+   "<builtin>.isinstance",
+   "main.Late.f",
+   "main.Plain.f"
+  ],
+  "main.h": [
+   "<builtin>.isinstance"
+  ],
+  "main.meta": [],
+  "main.target": []
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.f",
+   "main:7:8#7:17",
+   "no value"
+  ],
+  [
+   "main.h",
+   "main:12:8#12:11",
+   "no value"
+  ]
+ ],
+ "warnings": []
+}

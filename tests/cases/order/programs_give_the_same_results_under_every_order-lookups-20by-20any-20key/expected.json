@@ -1,0 +1,202 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.dict.get"
+       ],
+       "col": 0,
+       "end": [
+        7,
+        12
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.Key.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        7,
+        12
+       ],
+       "implicit": "dict",
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.Key.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        8,
+        8
+       ],
+       "implicit": "dict",
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.Key.__eq__"
+       ],
+       "col": 12,
+       "end": [
+        8,
+        22
+       ],
+       "implicit": "operator",
+       "line": 8
+      },
+      {
+       "callees": [
+        "<builtin>.dict.pop"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        24
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.Key.__eq__",
+        "main.Key.__hash__"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        24
+       ],
+       "implicit": "dict",
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.Key.__hash__"
+       ],
+       "col": 0,
+       "end": [
+        11,
+        12
+       ],
+       "implicit": "dict",
+       "line": 11
+      },
+      {
+       "callees": [
+        "<builtin>.list.append"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        18
+       ],
+       "line": 12
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       12
+      ],
+      "module": "main"
+     },
+     "main.Key": {
+      "kind": "class",
+      "lines": [
+       3,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Key",
+       "<builtin>.object"
+      ]
+     },
+     "main.Key.__eq__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Key.__hash__": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.dict.get": {
+      "known": "stub"
+     },
+     "<builtin>.dict.pop": {
+      "known": "stub"
+     },
+     "<builtin>.list.append": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.dict.get": [],
+  "<builtin>.dict.pop": [],
+  "<builtin>.list.append": [],
+  "main": [
+   "<builtin>.dict.get",
+   "<builtin>.dict.pop",
+   "<builtin>.list.append",
+   "main.Key.__eq__",
+   "main.Key.__hash__"
+  ],
+  "main.Key.__eq__": [],
+  "main.Key.__hash__": [],
+  "main.f": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

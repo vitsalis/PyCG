@@ -1,0 +1,117 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main.use": [
+      {
+       "callees": [
+        "pkg.T.run"
+       ],
+       "col": 4,
+       "end": [
+        7,
+        15
+       ],
+       "line": 7
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "pkg": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "pkg"
+     },
+     "pkg.T": {
+      "kind": "class",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "pkg",
+      "mro": [
+       "pkg.T",
+       "<builtin>.object"
+      ]
+     },
+     "pkg.T.run": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "pkg"
+     }
+    },
+    "exports": {
+     "main.TYPE_CHECKING": [
+      "typing.TYPE_CHECKING"
+     ],
+     "main.pkg": [
+      "pkg"
+     ],
+     "pkg.X": [
+      "pkg.T"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "pkg": {
+      "file": "pkg/__init__.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [],
+  "main.use": [
+   "pkg.T.run"
+  ],
+  "pkg": [],
+  "pkg.T.run": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

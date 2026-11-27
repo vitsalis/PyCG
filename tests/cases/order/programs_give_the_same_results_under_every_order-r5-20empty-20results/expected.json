@@ -1,0 +1,126 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.list.extend"
+       ],
+       "col": 0,
+       "end": [
+        6,
+        13
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "main.Needle.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        7,
+        14
+       ],
+       "implicit": "operator",
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.Needle.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        8,
+        19
+       ],
+       "implicit": "operator",
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.Needle.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        14
+       ],
+       "implicit": "operator",
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       10
+      ],
+      "module": "main"
+     },
+     "main.Needle": {
+      "kind": "class",
+      "lines": [
+       2,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Needle",
+       "<builtin>.object"
+      ]
+     },
+     "main.Needle.__eq__": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.list.extend": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.list.extend": [],
+  "main": [
+   "<builtin>.list.extend",
+   "main.Needle.__eq__"
+  ],
+  "main.Needle.__eq__": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

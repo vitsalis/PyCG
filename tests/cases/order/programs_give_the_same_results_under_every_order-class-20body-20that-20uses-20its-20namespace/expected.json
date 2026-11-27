@@ -1,0 +1,193 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.Field.__set_name__"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        29
+       ],
+       "implicit": "class",
+       "line": 6
+      },
+      {
+       "callees": [
+        "<builtin>.locals"
+       ],
+       "col": 4,
+       "end": [
+        7,
+        12
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.Child.__init_subclass__"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        8
+       ],
+       "implicit": "class",
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.Child.method"
+       ],
+       "col": 0,
+       "end": [
+        15,
+        21
+       ],
+       "line": 15
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Base": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Base.method": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.Child": {
+      "kind": "class",
+      "lines": [
+       6,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.Child",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Child.__init_subclass__": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.Child.method": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Field": {
+      "kind": "class",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Field",
+       "<builtin>.object"
+      ]
+     },
+     "main.Field.__set_name__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Grandchild": {
+      "kind": "class",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main",
+      "mro": [
+       "main.Grandchild",
+       "main.Child",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.locals": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.locals": [],
+  "main": [
+   "<builtin>.locals",
+   "main.Child.__init_subclass__",
+   "main.Child.method",
+   "main.Field.__set_name__"
+  ],
+  "main.Base.method": [],
+  "main.Child.__init_subclass__": [],
+  "main.Child.method": [],
+  "main.Field.__set_name__": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

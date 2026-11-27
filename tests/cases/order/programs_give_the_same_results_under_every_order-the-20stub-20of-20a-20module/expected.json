@@ -1,0 +1,282 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 11,
+       "end": [
+        5,
+        17
+       ],
+       "line": 5
+      }
+     ],
+     "main.Canvas.draw": [
+      {
+       "callees": [
+        "main.Late.area",
+        "shapes.Shape.area",
+        "shapes.Square.area"
+       ],
+       "col": 8,
+       "end": [
+        14,
+        25
+       ],
+       "line": 14
+      }
+     ],
+     "main.pick": [
+      {
+       "callees": [
+        "main.Late.area",
+        "shapes.Shape.area",
+        "shapes.Square.area"
+       ],
+       "col": 4,
+       "end": [
+        8,
+        15
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "shapes.Square.area"
+       ],
+       "col": 8,
+       "end": [
+        10,
+        19
+       ],
+       "line": 10
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "shapes.Square.area"
+       ],
+       "col": 4,
+       "end": [
+        17,
+        18
+       ],
+       "line": 17
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 4,
+       "end": [
+        18,
+        16
+       ],
+       "line": 18
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       18
+      ],
+      "module": "main"
+     },
+     "main.Canvas": {
+      "kind": "class",
+      "lines": [
+       11,
+       14
+      ],
+      "module": "main",
+      "mro": [
+       "main.Canvas",
+       "<builtin>.object"
+      ]
+     },
+     "main.Canvas.draw": {
+      "kind": "function",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Late": {
+      "kind": "class",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Late",
+       "shapes.Shape",
+       "<builtin>.object"
+      ]
+     },
+     "main.Late.area": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     },
+     "main.pick": {
+      "kind": "function",
+      "lines": [
+       7,
+       10
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       16,
+       18
+      ],
+      "module": "main"
+     },
+     "shapes": {
+      "kind": "module",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "shapes"
+     },
+     "shapes.Shape": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "shapes",
+      "mro": [
+       "shapes.Shape",
+       "<builtin>.object"
+      ]
+     },
+     "shapes.Shape.area": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "shapes"
+     },
+     "shapes.Square": {
+      "kind": "class",
+      "lines": [
+       5,
+       7
+      ],
+      "module": "shapes",
+      "mro": [
+       "shapes.Square",
+       "shapes.Shape",
+       "collections.abc.Iterator"
+      ]
+     },
+     "shapes.Square.__next__": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "shapes"
+     },
+     "shapes.Square.area": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "shapes"
+     }
+    },
+    "exports": {
+     "main.shapes": [
+      "shapes"
+     ],
+     "shapes.Iterator": [
+      "collections.abc.Iterator"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "shapes": {
+      "file": "shapes.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.base"
+  ],
+  "main.Canvas.draw": [
+   "main.Late.area",
+   "shapes.Shape.area",
+   "shapes.Square.area"
+  ],
+  "main.Late.area": [],
+  "main.base": [],
+  "main.pick": [
+   "main.Late.area",
+   "shapes.Shape.area",
+   "shapes.Square.area"
+  ],
+  "main.run": [
+   "main.pick",
+   "shapes.Square.area"
+  ],
+  "shapes": [],
+  "shapes.Shape.area": [],
+  "shapes.Square.__next__": [],
+  "shapes.Square.area": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

@@ -1,0 +1,159 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "toml.loads"
+       ],
+       "col": 0,
+       "end": [
+        4,
+        19
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "toml.Document.run"
+       ],
+       "col": 0,
+       "end": [
+        4,
+        25
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "requests.get"
+       ],
+       "col": 0,
+       "end": [
+        5,
+        17
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "requests.Response.json"
+       ],
+       "col": 0,
+       "end": [
+        5,
+        24
+       ],
+       "line": 5
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       5
+      ],
+      "module": "main"
+     },
+     "toml": {
+      "kind": "module",
+      "lines": [
+       1,
+       5
+      ],
+      "module": "toml"
+     },
+     "toml.Document": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "toml",
+      "mro": [
+       "toml.Document",
+       "<builtin>.object"
+      ]
+     },
+     "toml.Document.run": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "toml"
+     },
+     "toml.loads": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "toml"
+     }
+    },
+    "exports": {
+     "main.requests": [
+      "requests"
+     ],
+     "main.toml": [
+      "toml"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "toml": {
+      "file": "toml.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "requests.Response.json": {
+      "known": "stub"
+     },
+     "requests.get": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "requests.Response.json",
+   "requests.get",
+   "toml.Document.run",
+   "toml.loads"
+  ],
+  "requests.Response.json": [],
+  "requests.get": [],
+  "toml": [],
+  "toml.Document.run": [],
+  "toml.loads": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

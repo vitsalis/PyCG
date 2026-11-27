@@ -1,0 +1,238 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 5,
+       "end": [
+        5,
+        13
+       ],
+       "implicit": "decorator",
+       "line": 5
+      },
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 14,
+       "end": [
+        10,
+        20
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.Wrapper.__init__"
+       ],
+       "col": 0,
+       "end": [
+        19,
+        13
+       ],
+       "line": 19
+      },
+      {
+       "callees": [
+        "main.Wrapper.run"
+       ],
+       "col": 0,
+       "end": [
+        19,
+        19
+       ],
+       "line": 19
+      }
+     ],
+     "main.Wrapper.run": [
+      {
+       "callees": [
+        "main.work"
+       ],
+       "col": 8,
+       "end": [
+        16,
+        26
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "main.work"
+       ],
+       "col": 8,
+       "end": [
+        17,
+        22
+       ],
+       "line": 17
+      },
+      {
+       "callees": [
+        "main.Wrapped.__getattr__"
+       ],
+       "col": 8,
+       "end": [
+        18,
+        20
+       ],
+       "implicit": "attribute",
+       "line": 18
+      },
+      {
+       "callees": [
+        "main.work"
+       ],
+       "col": 8,
+       "end": [
+        18,
+        22
+       ],
+       "line": 18
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Wrapped": {
+      "kind": "class",
+      "lines": [
+       4,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Wrapped",
+       "typing.Protocol"
+      ]
+     },
+     "main.Wrapped.__getattr__": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.Wrapped.__wrapped__": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Wrapper": {
+      "kind": "class",
+      "lines": [
+       10,
+       18
+      ],
+      "module": "main",
+      "mro": [
+       "main.Wrapper",
+       "main.Wrapped",
+       "typing.Protocol"
+      ]
+     },
+     "main.Wrapper.__init__": {
+      "kind": "function",
+      "lines": [
+       12,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Wrapper.run": {
+      "kind": "function",
+      "lines": [
+       15,
+       18
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main"
+     },
+     "main.work": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.Protocol": [
+      "typing.Protocol"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.property": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.property": [],
+  "main": [
+   "<builtin>.property",
+   "main.Wrapper.__init__",
+   "main.Wrapper.run",
+   "main.base"
+  ],
+  "main.Wrapped.__getattr__": [],
+  "main.Wrapped.__wrapped__": [],
+  "main.Wrapper.__init__": [],
+  "main.Wrapper.run": [
+   "main.Wrapped.__getattr__",
+   "main.work"
+  ],
+  "main.base": [],
+  "main.work": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

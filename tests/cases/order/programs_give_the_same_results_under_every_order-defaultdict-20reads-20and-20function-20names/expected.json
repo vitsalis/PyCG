@@ -1,0 +1,325 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "collections.defaultdict"
+       ],
+       "col": 8,
+       "end": [
+        11,
+        45
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.read"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        11
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.read"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        18
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "collections.defaultdict.copy"
+       ],
+       "col": 5,
+       "end": [
+        13,
+        17
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.read"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        36
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.Cache.get"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        42
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "collections.defaultdict"
+       ],
+       "col": 5,
+       "end": [
+        14,
+        35
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "<builtin>.list.append"
+       ],
+       "col": 0,
+       "end": [
+        15,
+        31
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 0,
+       "end": [
+        20,
+        5
+       ],
+       "line": 20
+      },
+      {
+       "callees": [
+        "<builtin>.list.append"
+       ],
+       "col": 0,
+       "end": [
+        21,
+        26
+       ],
+       "line": 21
+      },
+      {
+       "callees": [
+        "<builtin>.list.append"
+       ],
+       "col": 0,
+       "end": [
+        24,
+        24
+       ],
+       "line": 24
+      }
+     ],
+     "main.read": [
+      {
+       "callees": [
+        "main.Cache.clear"
+       ],
+       "col": 11,
+       "end": [
+        7,
+        21
+       ],
+       "implicit": "subscript",
+       "line": 7
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 4,
+       "end": [
+        9,
+        34
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.Cache.clear",
+        "main.Cache.get"
+       ],
+       "col": 4,
+       "end": [
+        9,
+        36
+       ],
+       "line": 9
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 8,
+       "end": [
+        19,
+        26
+       ],
+       "line": 19
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       25
+      ],
+      "module": "main"
+     },
+     "main.Cache": {
+      "kind": "class",
+      "lines": [
+       3,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Cache",
+       "<builtin>.object"
+      ]
+     },
+     "main.Cache.clear": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Cache.get": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.read": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.renamed": {
+      "kind": "function",
+      "lines": [
+       22,
+       22
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       17,
+       19
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.collections": [
+      "collections"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     },
+     "<builtin>.list.append": {
+      "known": "stub"
+     },
+     "collections.defaultdict": {
+      "known": "stub"
+     },
+     "collections.defaultdict.copy": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "<builtin>.list.append": [],
+  "collections.defaultdict": [],
+  "collections.defaultdict.copy": [],
+  "main": [
+   "<builtin>.list.append",
+   "collections.defaultdict",
+   "collections.defaultdict.copy",
+   "main.Cache.get",
+   "main.read",
+   "main.use"
+  ],
+  "main.Cache.clear": [],
+  "main.Cache.get": [],
+  "main.read": [
+   "main.Cache.clear"
+  ],
+  "main.renamed": [],
+  "main.run": [
+   "<builtin>.getattr",
+   "main.Cache.clear",
+   "main.Cache.get"
+  ],
+  "main.use": [
+   "main.run"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

@@ -995,7 +995,7 @@ def test_a_test_file_becomes_one_case_per_analysed_program(tmp_path):
     )
 
     assert passed
-    assert recorder.skipped == ["test_patched"]
+    assert recorder.skipped == [("test_patched", 1, 1)]
     assert recorder.micro == ["test_a_micro_case"]
     assert sorted(path.name for path in (out / "demo").iterdir()) == [
         "nothing_to_analyse",
@@ -1109,9 +1109,16 @@ import sys
 sys.path.insert(0, {tests!r})
 from programs import analysed
 
-from pycg.analysis import solver
+import pytest
+
+from pycg.analysis import semantics, solver
 
 PROGRAM = {{"main.py": "import a, b\\n", "a.py": "def f(): pass\\nf()\\n", "b.py": ""}}
+
+
+@pytest.fixture
+def without_solving(monkeypatch):
+    monkeypatch.setattr(solver.Solver, "solve", lambda self: None)
 
 
 def test_entry_orders(tmp_path):
@@ -1129,6 +1136,22 @@ def test_rules_in_a_context(tmp_path, monkeypatch):
     with monkeypatch.context() as patch:
         patch.setattr(solver.Solver, "solve", solver.Solver.solve)
         analysed(tmp_path, PROGRAM)
+
+
+def test_rules_by_a_fixture(tmp_path, without_solving):
+    analysed(tmp_path, PROGRAM)
+
+
+def test_observed_and_patched_runs(tmp_path, monkeypatch):
+    init = semantics.Analysis.__init__
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            semantics.Analysis, "__init__", lambda self, *args: init(self, *args)
+        )
+        analysed(tmp_path / "observed", PROGRAM)
+    with monkeypatch.context() as patch:
+        patch.setattr(solver.Solver, "solve", solver.Solver.solve)
+        analysed(tmp_path / "patched", PROGRAM)
 """
 
 
@@ -1137,20 +1160,30 @@ def test_repeated_programs_patches_in_a_context_and_orders(tmp_path):
     test_file.write_text(PATCHING_TESTS.format(tests=str(ROOT / "tests")))
     out = tmp_path / "cases"
     canonical = solver_order()
+    init = semantics_init()
 
     recorder, passed = cases.convert(
         out, test_file, "tests/test_patching.py", "demo", "D"
     )
 
     assert passed
-    assert recorder.skipped == ["test_rules_in_a_context"]
+    assert recorder.skipped == [
+        ("test_rules_in_a_context", 1, 1),
+        ("test_rules_by_a_fixture", 1, 1),
+        ("test_observed_and_patched_runs", 1, 2),
+    ]
     assert recorder.deduplicated == [("test_entry_orders", 1), ("test_orders", 1)]
     assert sorted(path.name for path in (out / "demo").iterdir()) == [
         "entry_orders",
         "entry_orders-2",
+        "observed_and_patched_runs",
         "orders",
     ]
     assert solver_order() is canonical
+    assert semantics_init() is init
+    observed = out / "demo" / "observed_and_patched_runs"
+    case = json.loads((observed / "case.json").read_text())
+    assert case["entry_points"] == ["observed/main.py"]
     case = json.loads((out / "demo" / "orders" / "case.json").read_text())
     assert case["entry_points"] == ["main.py"]
     expected = json.loads((out / "demo" / "orders" / "expected.json").read_text())
@@ -1161,3 +1194,9 @@ def solver_order():
     from pycg.analysis import solver
 
     return solver.Solver.__dict__["order"]
+
+
+def semantics_init():
+    from pycg.analysis import semantics
+
+    return semantics.Analysis.__dict__["__init__"]

@@ -1,0 +1,178 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 11,
+       "end": [
+        9,
+        26
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.M1.__bool__"
+       ],
+       "col": 3,
+       "end": [
+        13,
+        8
+       ],
+       "implicit": "truth",
+       "line": 13
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       14
+      ],
+      "module": "main"
+     },
+     "main.M1": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.M1",
+       "<builtin>.type"
+      ]
+     },
+     "main.M1.__bool__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.M2": {
+      "kind": "class",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.M2",
+       "main.M1",
+       "<builtin>.type"
+      ]
+     },
+     "main.M3": {
+      "kind": "class",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.M3",
+       "main.M1",
+       "<builtin>.type"
+      ]
+     },
+     "main.Meta": {
+      "kind": "class",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Meta",
+       "main.M1",
+       "<builtin>.type",
+       "main.M2",
+       "main.M3"
+      ]
+     },
+     "main.Meta.__len__": {
+      "kind": "function",
+      "lines": [
+       11,
+       11
+      ],
+      "module": "main"
+     },
+     "main.Value": {
+      "kind": "class",
+      "lines": [
+       12,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.Value",
+       "<builtin>.object"
+      ]
+     },
+     "main.pick": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.base": [
+      "main.M1",
+      "main.M2",
+      "main.M3"
+     ],
+     "main.candidate": [
+      "main.M2",
+      "main.M3"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": null,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.M1.__bool__",
+   "main.pick"
+  ],
+  "main.M1.__bool__": [],
+  "main.Meta.__len__": [],
+  "main.pick": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

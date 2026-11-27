@@ -1,0 +1,243 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.staticmethod"
+       ],
+       "col": 13,
+       "end": [
+        33,
+        33
+       ],
+       "line": 33
+      },
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 9,
+       "end": [
+        34,
+        26
+       ],
+       "line": 34
+      },
+      {
+       "callees": [
+        "main.Node.__init__"
+       ],
+       "col": 13,
+       "end": [
+        34,
+        25
+       ],
+       "line": 34
+      },
+      {
+       "callees": [
+        "main.Node.__init__"
+       ],
+       "col": 18,
+       "end": [
+        34,
+        24
+       ],
+       "line": 34
+      },
+      {
+       "callees": [
+        "main.Node.walk"
+       ],
+       "col": 0,
+       "end": [
+        35,
+        16
+       ],
+       "line": 35
+      },
+      {
+       "callees": [
+        "main.f",
+        "main.g"
+       ],
+       "col": 0,
+       "end": [
+        36,
+        10
+       ],
+       "line": 36
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "main.f",
+        "main.g"
+       ],
+       "col": 8,
+       "end": [
+        12,
+        17
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.Node.walk"
+       ],
+       "col": 19,
+       "end": [
+        14,
+        30
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.Node.__init__"
+       ],
+       "col": 15,
+       "end": [
+        27,
+        25
+       ],
+       "line": 27
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       36
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       29,
+       33
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.Node": {
+      "kind": "class",
+      "lines": [
+       3,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Node",
+       "<builtin>.object"
+      ]
+     },
+     "main.Node.__init__": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Node.walk": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.g": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       10,
+       28
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.ext": [
+      "ext"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.staticmethod": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.staticmethod": [],
+  "main": [
+   "<builtin>.staticmethod",
+   "main.Node.__init__",
+   "main.Node.walk",
+   "main.f",
+   "main.g",
+   "main.run"
+  ],
+  "main.Node.__init__": [],
+  "main.Node.walk": [],
+  "main.f": [],
+  "main.g": [],
+  "main.run": [
+   "main.Node.__init__",
+   "main.Node.walk",
+   "main.f",
+   "main.g"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

@@ -1,0 +1,233 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 11,
+       "end": [
+        7,
+        17
+       ],
+       "line": 7
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.Late.ping",
+        "main.Later.ping",
+        "mod.Peek.ping"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        16
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "mod.Measured.ping"
+       ],
+       "col": 4,
+       "end": [
+        14,
+        16
+       ],
+       "line": 14
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Late": {
+      "kind": "class",
+      "lines": [
+       7,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Late",
+       "collections.abc.Iterator"
+      ]
+     },
+     "main.Late.__next__": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Late.ping": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Later": {
+      "kind": "class",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Later",
+       "main.Late",
+       "collections.abc.Iterator"
+      ]
+     },
+     "main.Later.ping": {
+      "kind": "function",
+      "lines": [
+       11,
+       11
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       12,
+       14
+      ],
+      "module": "main"
+     },
+     "mod": {
+      "kind": "module",
+      "lines": [
+       1,
+       4
+      ],
+      "module": "mod"
+     },
+     "mod.Measured": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "mod",
+      "mro": [
+       "mod.Measured",
+       "<builtin>.object"
+      ]
+     },
+     "mod.Measured.ping": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "mod"
+     },
+     "mod.Peek": {
+      "kind": "class",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "mod",
+      "mro": [
+       "mod.Peek",
+       "<builtin>.object"
+      ]
+     },
+     "mod.Peek.ping": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "mod"
+     }
+    },
+    "exports": {
+     "main.BASE": [
+      "collections.abc.Iterator"
+     ],
+     "main.collections": [
+      "collections"
+     ],
+     "main.mod": [
+      "mod"
+     ],
+     "main.typing": [
+      "typing"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "mod": {
+      "file": "mod.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.base"
+  ],
+  "main.Late.__next__": [],
+  "main.Late.ping": [],
+  "main.Later.ping": [],
+  "main.base": [],
+  "main.use": [
+   "main.Late.ping",
+   "main.Later.ping",
+   "mod.Measured.ping",
+   "mod.Peek.ping"
+  ],
+  "mod": [],
+  "mod.Measured.ping": [],
+  "mod.Peek.ping": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

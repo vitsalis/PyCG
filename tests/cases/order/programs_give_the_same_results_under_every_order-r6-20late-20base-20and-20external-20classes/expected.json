@@ -1,0 +1,187 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 0,
+       "end": [
+        9,
+        29
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "<builtin>.Exception.__init__",
+        "<builtin>.dict.__init__",
+        "<builtin>.list.__init__",
+        "<builtin>.set.__init__"
+       ],
+       "col": 8,
+       "end": [
+        9,
+        11
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "<builtin>.setattr"
+       ],
+       "col": 0,
+       "end": [
+        11,
+        27
+       ],
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       11
+      ],
+      "module": "main"
+     },
+     "main.A": {
+      "kind": "class",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.A",
+       "<builtin>.object"
+      ]
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "main.A",
+       "main.Last",
+       "<builtin>.Exception",
+       "<builtin>.bytes",
+       "<builtin>.dict",
+       "<builtin>.int",
+       "<builtin>.list",
+       "<builtin>.set",
+       "<builtin>.str",
+       "<builtin>.tuple"
+      ]
+     },
+     "main.Holder": {
+      "kind": "class",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main",
+      "mro": [
+       "main.Holder",
+       "<builtin>.object"
+      ]
+     },
+     "main.Last": {
+      "kind": "class",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Last",
+       "<builtin>.object"
+      ]
+     }
+    },
+    "exports": {
+     "main.base": [
+      "<builtin>.Exception",
+      "<builtin>.bytes",
+      "<builtin>.dict",
+      "<builtin>.int",
+      "<builtin>.list",
+      "<builtin>.set",
+      "<builtin>.str",
+      "<builtin>.tuple",
+      "main.A"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.Exception.__init__": {
+      "known": "stub"
+     },
+     "<builtin>.dict.__init__": {
+      "known": "stub"
+     },
+     "<builtin>.getattr": {
+      "known": "stub"
+     },
+     "<builtin>.list.__init__": {
+      "known": "stub"
+     },
+     "<builtin>.set.__init__": {
+      "known": "stub"
+     },
+     "<builtin>.setattr": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.Exception.__init__": [],
+  "<builtin>.dict.__init__": [],
+  "<builtin>.getattr": [],
+  "<builtin>.list.__init__": [],
+  "<builtin>.set.__init__": [],
+  "<builtin>.setattr": [],
+  "main": [
+   "<builtin>.Exception.__init__",
+   "<builtin>.dict.__init__",
+   "<builtin>.getattr",
+   "<builtin>.list.__init__",
+   "<builtin>.set.__init__",
+   "<builtin>.setattr"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

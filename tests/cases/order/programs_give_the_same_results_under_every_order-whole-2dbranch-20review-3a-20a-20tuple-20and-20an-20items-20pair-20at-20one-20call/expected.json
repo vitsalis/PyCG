@@ -1,0 +1,152 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.make"
+       ],
+       "col": 0,
+       "end": [
+        8,
+        13
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.make"
+       ],
+       "col": 8,
+       "end": [
+        9,
+        30
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.a",
+        "main.b",
+        "main.c"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        11
+       ],
+       "line": 10
+      }
+     ],
+     "main.make": [
+      {
+       "callees": [
+        "<builtin>.dict.items",
+        "<builtin>.tuple"
+       ],
+       "col": 11,
+       "end": [
+        6,
+        25
+       ],
+       "line": 6
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       10
+      ],
+      "module": "main"
+     },
+     "main.a": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.b": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.c": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.make": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.dict.items": {
+      "known": "stub"
+     },
+     "<builtin>.tuple": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.dict.items": [],
+  "<builtin>.tuple": [],
+  "main": [
+   "main.a",
+   "main.b",
+   "main.c",
+   "main.make"
+  ],
+  "main.a": [],
+  "main.b": [],
+  "main.c": [],
+  "main.make": [
+   "<builtin>.dict.items",
+   "<builtin>.tuple"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

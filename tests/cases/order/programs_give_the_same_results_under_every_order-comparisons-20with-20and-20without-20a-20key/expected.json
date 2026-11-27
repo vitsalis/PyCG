@@ -1,0 +1,323 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.order"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        34
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.order"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        25
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "<builtin>.sorted",
+        "main.<lambda1>",
+        "main.Meta.__lt__"
+       ],
+       "col": 0,
+       "end": [
+        18,
+        39
+       ],
+       "line": 18
+      },
+      {
+       "callees": [
+        "<builtin>.reversed",
+        "main.Meta.__reversed__"
+       ],
+       "col": 0,
+       "end": [
+        19,
+        16
+       ],
+       "line": 19
+      }
+     ],
+     "main.Meta.__reversed__": [
+      {
+       "callees": [
+        "<builtin>.iter"
+       ],
+       "col": 34,
+       "end": [
+        16,
+        42
+       ],
+       "line": 16
+      }
+     ],
+     "main.key": [
+      {
+       "callees": [
+        "main.Item.rank"
+       ],
+       "col": 22,
+       "end": [
+        7,
+        33
+       ],
+       "line": 7
+      }
+     ],
+     "main.order": [
+      {
+       "callees": [
+        "<builtin>.list.sort",
+        "main.Key.__gt__",
+        "main.key"
+       ],
+       "col": 4,
+       "end": [
+        9,
+        23
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "<builtin>.sorted",
+        "main.Item.__lt__",
+        "main.Key.__gt__",
+        "main.key"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        28
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "<builtin>.max",
+        "main.Item.__lt__"
+       ],
+       "col": 11,
+       "end": [
+        11,
+        38
+       ],
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       19
+      ],
+      "module": "main"
+     },
+     "main.<lambda1>": {
+      "kind": "function",
+      "lines": [
+       18,
+       18
+      ],
+      "module": "main"
+     },
+     "main.Item": {
+      "kind": "class",
+      "lines": [
+       4,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Item",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item.__lt__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Item.rank": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Key": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.Key",
+       "<builtin>.object"
+      ]
+     },
+     "main.Key.__gt__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.Meta": {
+      "kind": "class",
+      "lines": [
+       14,
+       16
+      ],
+      "module": "main",
+      "mro": [
+       "main.Meta",
+       "<builtin>.type"
+      ]
+     },
+     "main.Meta.__lt__": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Meta.__reversed__": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Ranked": {
+      "kind": "class",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Ranked",
+       "<builtin>.object"
+      ]
+     },
+     "main.key": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.order": {
+      "kind": "function",
+      "lines": [
+       8,
+       11
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.iter": {
+      "known": "stub"
+     },
+     "<builtin>.list.sort": {
+      "known": "stub"
+     },
+     "<builtin>.max": {
+      "known": "stub"
+     },
+     "<builtin>.reversed": {
+      "known": "stub"
+     },
+     "<builtin>.sorted": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.iter": [],
+  "<builtin>.list.sort": [],
+  "<builtin>.max": [],
+  "<builtin>.reversed": [],
+  "<builtin>.sorted": [],
+  "main": [
+   "<builtin>.reversed",
+   "<builtin>.sorted",
+   "main.<lambda1>",
+   "main.Meta.__lt__",
+   "main.Meta.__reversed__",
+   "main.order"
+  ],
+  "main.<lambda1>": [],
+  "main.Item.__lt__": [],
+  "main.Item.rank": [],
+  "main.Key.__gt__": [],
+  "main.Meta.__lt__": [],
+  "main.Meta.__reversed__": [
+   "<builtin>.iter"
+  ],
+  "main.key": [
+   "main.Item.rank"
+  ],
+  "main.order": [
+   "<builtin>.list.sort",
+   "<builtin>.max",
+   "<builtin>.sorted",
+   "main.Item.__lt__",
+   "main.Key.__gt__",
+   "main.key"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}
