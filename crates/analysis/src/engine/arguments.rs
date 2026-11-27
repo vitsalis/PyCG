@@ -1,4 +1,4 @@
-use num_bigint::BigInt;
+use num_bigint::{BigInt, Sign};
 use pycg_solver::{NodeId, ObjId};
 use rustc_hash::FxHashMap;
 
@@ -115,7 +115,7 @@ impl<T: Trace> State<T> {
                 self.add_object(graph, first, receiver);
                 let vararg = vararg.as_deref().map(|name| self.symbols.intern(name));
                 if let (Some(dst), Some(vararg)) = (details.dst, vararg)
-                    && passthrough.contains(&Passthrough::Element(vararg, 0))
+                    && passthrough.contains(&Passthrough::Element(vararg, BigInt::ZERO))
                 {
                     self.add_object(graph, dst, receiver);
                 }
@@ -131,7 +131,7 @@ impl<T: Trace> State<T> {
                     graph,
                     function,
                     &positional,
-                    index + varargs_taken_by_receiver,
+                    BigInt::from(index + varargs_taken_by_receiver),
                     arg,
                     call,
                 );
@@ -193,20 +193,16 @@ impl<T: Trace> State<T> {
         graph: &mut Graph,
         function: ObjId,
         positional: &[Sym],
-        index: usize,
+        index: BigInt,
         source: NodeId,
         call: CallId,
     ) {
-        if index < positional.len() {
-            self.bind_parameter(graph, function, positional[index], source, call);
+        let count = BigInt::from(positional.len());
+        if index < count {
+            let position = usize::try_from(&index).expect("a position below the count");
+            self.bind_parameter(graph, function, positional[position], source, call);
         } else if self.objects.function(function).varargs.is_some() {
-            self.bind_varargs(
-                graph,
-                function,
-                Some(index - positional.len()),
-                source,
-                call,
-            );
+            self.bind_varargs(graph, function, Some(index - count), source, call);
         }
     }
 
@@ -214,7 +210,7 @@ impl<T: Trace> State<T> {
         &mut self,
         graph: &mut Graph,
         function: ObjId,
-        index: Option<usize>,
+        index: Option<BigInt>,
         source: NodeId,
         call: CallId,
     ) {
@@ -225,7 +221,7 @@ impl<T: Trace> State<T> {
             .expect("a function with varargs");
         let target = match index {
             None => self.unknown(graph, varargs),
-            Some(index) => self.element(graph, varargs, &Literal::Int(BigInt::from(index))),
+            Some(ref index) => self.element(graph, varargs, &Literal::Int(index.clone())),
         };
         self.add_edge(graph, source, target);
         let Some(dst) = self.calls[call.index()].dst else {
@@ -244,7 +240,6 @@ impl<T: Trace> State<T> {
                     .clone()
                     .expect("a function with varargs names them");
                 let vararg = self.symbols.intern(&vararg);
-                let index = i64::try_from(index).expect("an index fits i64");
                 self.objects
                     .function(function)
                     .passthrough
@@ -308,14 +303,24 @@ impl<T: Trace> State<T> {
         let Literal::Int(key) = key else {
             unreachable!("a sequence spread is keyed by positions")
         };
-        let key = usize::try_from(key).expect("a gathered position is not negative");
+        assert!(
+            key.sign() != Sign::Minus,
+            "a gathered position is not negative"
+        );
         if start > positional.len() {
             if self.objects.function(function).varargs.is_some() {
                 self.bind_varargs(graph, function, None, node, call);
             }
             return;
         }
-        self.bind_position(graph, function, &positional, start + key, node, call);
+        self.bind_position(
+            graph,
+            function,
+            &positional,
+            BigInt::from(start) + key,
+            node,
+            call,
+        );
     }
 
     fn spread(

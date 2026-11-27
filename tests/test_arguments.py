@@ -1,3 +1,4 @@
+import pytest
 from programs import callees, main_graph
 
 FUNCTIONS = "def f(): pass\ndef g(): pass\ndef h(): pass\n"
@@ -334,3 +335,55 @@ forward(i3(i3({"stop": 1})))
         "main.A.run",
         "main.A.stop",
     ]
+
+
+@pytest.mark.parametrize(
+    "position, first_callees, far_callees",
+    [
+        pytest.param(
+            "9345883071009581737",
+            ["main.f", "main.first"],
+            ["main.far", "main.g"],
+            id="above 2 to the 63",
+        ),
+        pytest.param(
+            "9223372036854775808",
+            ["main.f", "main.first"],
+            ["main.far", "main.g"],
+            id="2 to the 63",
+        ),
+        pytest.param(
+            "18446744073709551617",
+            ["main.f", "main.first"],
+            ["main.far", "main.g"],
+            id="2 to the 64 and 1",
+        ),
+        pytest.param(
+            "-9223372036854775809",
+            ["main.f", "main.first", "main.g"],
+            ["main.f", "main.far", "main.g"],
+            id="below minus 2 to the 63",
+        ),
+    ],
+)
+def test_an_unpacked_position_beyond_a_machine_integer_binds_to_args(
+    tmp_path, position, first_callees, far_callees
+):
+    graph = graph_of(
+        tmp_path,
+        f"""
+def first(*args):
+    return args[0]
+def far(*args):
+    return args[{position}]
+items = [f]
+items[{position}] = g
+def call_first():
+    first(*items)()
+def call_far():
+    far(*items)()
+""",
+    )
+
+    assert callees(graph, "main.call_first") == first_callees
+    assert callees(graph, "main.call_far") == far_callees

@@ -93,7 +93,7 @@ impl Allocator {
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Passthrough {
     Name(Box<str>),
-    Element(Box<str>, i64),
+    Element(Box<str>, BigInt),
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

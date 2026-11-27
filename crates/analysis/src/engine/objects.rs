@@ -123,10 +123,10 @@ impl Literal {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Passthrough {
     Name(Sym),
-    Element(Sym, i64),
+    Element(Sym, BigInt),
 }
 
 pub struct Module {

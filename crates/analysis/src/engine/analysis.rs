@@ -133,7 +133,7 @@ impl<T: Trace> Engine<T> {
                     objects::Passthrough::Name(self.state.symbols.intern(name))
                 }
                 Passthrough::Element(name, index) => {
-                    objects::Passthrough::Element(self.state.symbols.intern(name), *index)
+                    objects::Passthrough::Element(self.state.symbols.intern(name), index.clone())
                 }
             })
             .collect();
@@ -470,12 +470,12 @@ impl<T: Trace> Analysis for Engine<T> {
             passthrough: made
                 .passthrough
                 .iter()
-                .map(|entry| match *entry {
+                .map(|entry| match entry {
                     objects::Passthrough::Name(name) => {
-                        Passthrough::Name(symbols.text(name).into())
+                        Passthrough::Name(symbols.text(*name).into())
                     }
                     objects::Passthrough::Element(name, index) => {
-                        Passthrough::Element(symbols.text(name).into(), index)
+                        Passthrough::Element(symbols.text(*name).into(), index.clone())
                     }
                 })
                 .collect(),
