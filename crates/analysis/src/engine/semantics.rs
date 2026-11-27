@@ -14,7 +14,7 @@ use crate::engine::objects::{Literal, Object};
 use crate::engine::outside_calls::Known;
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule, not_ported};
+use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule};
 use crate::models::RETURNED_DECORATOR;
 
 pub const RECEIVERS_PER_CALL_MAX: usize = 3;
