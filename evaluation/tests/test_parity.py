@@ -166,7 +166,7 @@ def test_the_trace_declares_every_object_and_constraint_before_it_is_used(dumped
             objects[record["object"]] = record
         elif operation == "constraint":
             assert set(record["captured"]) <= set(objects)
-            assert record["mode"] in ("each", "apply", "batch")
+            assert record["mode"] in ("each", "list")
             constraints[record["constraint"]] = record
         elif operation == "node":
             nodes.add(record["node"])
