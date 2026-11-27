@@ -23,7 +23,8 @@ writes them, in d1/<program>.jsonl, and
 names.txt, the NFKC normalisation of strings and the answer of
 str.isidentifier at the bounds of the identifier ranges, and bounds.txt,
 the outcome of reading and parsing a construct repeated on either side
-of the limits of CPython's parser. Run it with the Python of the oracle;
+of the limits of CPython's parser, and expression_bounds.txt, the same
+for a parse in eval mode. Run it with the Python of the oracle;
 the output is committed.
 """
 
@@ -258,6 +259,42 @@ BOUNDS = (
 )
 
 
+EXPRESSION_BOUNDS = (
+    ("unary", "-", "1", "", (5974, 5975)),
+    ("not", "not ", "a", "", (5975, 5976)),
+    ("conditional", "a if b else ", "c", "", (5975, 5976)),
+    ("lambda", "lambda: ", "None", "", (2987, 2988)),
+    ("power", "a ** ", "b", "", (2987, 2988)),
+    ("and", "(a and ", "b", ")", (199, 200)),
+    ("parentheses", "(", "a", ")", (200, 201)),
+    ("attribute", "", "a", ".b", (43382, 43582)),
+    ("sum", "", "a", " + a", (43382, 43582)),
+)
+EXPRESSION_STRINGS = (149, 150)
+
+
+def parse_expression(text):
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            ast.parse(text, mode="eval")
+    except (SyntaxError, ValueError, RecursionError, MemoryError) as error:
+        return "failed", cause(error)
+    return "ok", "-"
+
+
+def expression_bounds_lines():
+    for name, unit, middle, close, counts in EXPRESSION_BOUNDS:
+        parts = [part.encode("ascii").hex() for part in (unit, middle, close)]
+        for count in counts:
+            text = unit * count + middle + close * count
+            yield "\t".join([name, *parts, str(count), *parse_expression(text)])
+    for count in EXPRESSION_STRINGS:
+        text = nested_strings(b"f", count)[len(b"x = ") : -1]
+        status, shown = parse_expression(text.decode("ascii"))
+        yield "\t".join([f"fstrings-{count}", "", text.hex(), "", "0", status, shown])
+
+
 def bounds_lines():
     for name, prefix, unit, middle, close, suffix, counts in BOUNDS:
         parts = [
@@ -296,6 +333,7 @@ def main(argv):
         ("constants", constants_lines()),
         ("names", names_lines()),
         ("bounds", bounds_lines()),
+        ("expression_bounds", expression_bounds_lines()),
     )
     for name, lines in written:
         text = "".join(f"{line}\n" for line in (version, *lines))

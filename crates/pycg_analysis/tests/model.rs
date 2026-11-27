@@ -43,6 +43,21 @@ fn an_int_constant_is_named_in_decimal_below_10_to_the_640_and_in_hexadecimal_fr
 }
 
 #[test]
+fn a_space_is_what_python_strips() {
+    for point in 0..=0x10ffff_u32 {
+        let Some(character) = char::from_u32(point) else {
+            continue;
+        };
+        let expected = vectors::PYTHON_SPACES.contains(&point);
+        assert_eq!(
+            pycg_syntax::names::is_python_space(character),
+            expected,
+            "{point:#x}"
+        );
+    }
+}
+
+#[test]
 fn a_dotted_module_name_is_identifiers_as_python_tests_them() {
     let mut alphabetic_wrong = 0;
     for (name, expected) in vectors::DOTTED_IDENTIFIERS {

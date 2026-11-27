@@ -35,6 +35,23 @@ impl MethodKind {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Shape {
+    Instance,
+    Element,
+    Class,
+}
+
+impl Shape {
+    pub fn name(self) -> &'static str {
+        match self {
+            Shape::Instance => "instance",
+            Shape::Element => "element",
+            Shape::Class => "class",
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MadeFunction {
     pub object: ObjId,
@@ -250,6 +267,14 @@ pub trait Analysis {
     fn add_handler(&mut self, types: Option<NodeId>, dst: NodeId);
 
     fn handle_import(&mut self, name: &str, level: u32, record: bool) -> Option<String>;
+    fn locate(&mut self, name: &str) -> Option<(String, Option<String>)>;
+
+    fn type_form(&mut self, operator: &str, parts: &[Option<NodeId>], site: &str) -> ObjId;
+    fn gate_type_form(&mut self, form: ObjId, gate: NodeId);
+    fn annotated(&mut self, node: NodeId, dst: NodeId, shape: Shape, owner: ObjId, name: &str);
+    fn bind_annotations(&mut self, function: ObjId);
+    fn add_name_lookup(&mut self, base: NodeId, attr: &str, dst: NodeId);
+    fn add_stub_bases(&mut self, cls: ObjId, node: NodeId);
 
     fn function_fields(&mut self, function: ObjId) -> &mut FunctionFields;
     fn class_fields(&mut self, class: ObjId) -> &mut ClassFields;

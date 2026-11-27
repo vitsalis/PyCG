@@ -21,6 +21,15 @@ MODELS_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "mode
 NESTING_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "nesting.rs"
 BUILDER_VECTORS = ROOT / "crates" / "pycg_dump" / "tests" / "vectors" / "builder"
 DUMP = ROOT / "tools" / "parity" / "dump.py"
+BUILDER_STUBS = {
+    "stubs": (
+        "from typing import Any, List\nimport os.path as p\nAlias = List[int]\n"
+        "class Base: ...\nclass C(Base[int], p.Mixin):\n    attr: 'Alias'\n"
+        "    def m(self, a: int, b: p.Thing = ...) -> None: ...\n"
+        "def g(x: C, *rest: Alias, **kw: str) -> None: ...\nh = g\n"
+        "v: List['C']\nw: str\nif flag:\n    z: Base\nelse:\n    y: 'C | None'\n"
+    ),
+}
 BUILDER_PROGRAMS = {
     "assignments": "x = 1\ny = x\nfirst, *rest = x\nlast = first = y\ndel x\n",
     "functions": (
@@ -65,6 +74,26 @@ BUILDER_PROGRAMS = {
     ),
     "surrogates": (
         "def g(x):\n    return '{0.\\ud800}'.format(x), '\\udcff' + str(x)\n"
+    ),
+    "annotations": (
+        "import typing\nfrom typing import TYPE_CHECKING, Optional\n"
+        "if TYPE_CHECKING:\n    from collections import OrderedDict\n"
+        "    import os.path\n"
+        "elif other:\n    import json\nelse:\n    from . import sibling\n"
+        "class A:\n    x: int = 1\n    y: 'Optional[A]'\n"
+        "    def m(self, a: 'A', *args: int, b: typing.List[int] | None = None,"
+        " **kw: 'os.path.sep'):\n"
+        "        z: OrderedDict[str, int] = {}\n        return a\n"
+        "v: list[int] = []\nAlias = dict[str, int]\nUnion = int | str\n"
+        "type T = list[A]\n"
+        "def f(p: '  A  ', q: '1 +', r: 'A.B.C', s: \"'A'\", t: '\\x1cA', u: x()):\n"
+        "    pass\n"
+    ),
+    "stubs": (
+        "from typing import Any\nclass Base:\n    pass\nclass C(Base):\n"
+        "    attr = None\n    def m(self, a, b=1):\n        return a\n"
+        "def g(x, *rest, **kw):\n    return x\nh = g\nv = None\nw: int = 2\n"
+        "z = y = 3\n"
     ),
     "redefinitions": (
         "def f(a):\n    x = a\n    return x\n"
@@ -430,6 +459,8 @@ def model_vectors(generator):
         dotted = all(part.isidentifier() for part in name.split("."))
         lines.append(f"    ({rust_text(name)}, {str(dotted).lower()}),")
     lines.append("];")
+    spaces = [point for point in range(0x110000) if chr(point).isspace()]
+    lines.append(f"pub const PYTHON_SPACES: &[u32] = &{spaces};")
     lines.append("pub const SITE_NAMES: &[(&str, &str)] = &[")
     for site in SITE_CASES:
         lines.append(f"    ({rust_text(site)}, {rust_text(model.site_name(site))}),")
@@ -703,10 +734,15 @@ def builder_vectors():
         target = BUILDER_VECTORS / name
         target.mkdir(parents=True)
         (target / "main.py").write_text(source, encoding="utf-8")
+        stub = BUILDER_STUBS.get(name)
+        if stub is not None:
+            (target / "main.pyi").write_text(stub, encoding="utf-8")
         with tempfile.TemporaryDirectory() as scratch:
             program = Path(scratch) / "program"
             program.mkdir()
             (program / "main.py").write_text(source, encoding="utf-8")
+            if stub is not None:
+                (program / "main.pyi").write_text(stub, encoding="utf-8")
             out = Path(scratch) / "out"
             subprocess.run(
                 [sys.executable, "-I", str(DUMP), "input", "--checkout", str(ROOT)]

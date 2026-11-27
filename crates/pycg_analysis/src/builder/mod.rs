@@ -15,8 +15,8 @@ use indexmap::IndexMap;
 use pycg_solver::{NodeId, ObjId};
 use pycg_syntax::scopes::{ModuleScopes, NodeKey, ScopeId, ScopeKind};
 use pycg_syntax::tree::{Node, Position, position};
-use ruff_python_ast::Stmt;
 use ruff_python_ast::token::Tokens;
+use ruff_python_ast::{ModModule, Stmt};
 use ruff_source_file::LineIndex;
 use rustc_hash::FxHashMap;
 
@@ -25,6 +25,7 @@ use std::sync::OnceLock;
 use pycg_stubs::{Entry, Stubs};
 use rustc_hash::FxHashSet;
 
+use crate::builder::annotations::{AnnotationTables, OwnStub};
 use crate::builder::calls::{Analysis, MadeFunction};
 use crate::builder::expressions::ExpressionTables;
 use crate::builder::flow::{
@@ -71,6 +72,7 @@ pub type Facts = (Truth, Option<Literals>);
 
 pub const UNKNOWN_FACTS: Facts = (UNKNOWN, None);
 
+#[derive(Clone, Copy)]
 pub struct Source<'a> {
     pub text: &'a str,
     pub tokens: &'a Tokens,
@@ -102,6 +104,7 @@ pub struct ModuleBuilder<'a, 's, A: Analysis> {
     pub outside_star_imported_modules: Vec<String>,
     pub(crate) expressions: ExpressionTables,
     pub(crate) class_tests: ClassTests,
+    pub(crate) annotations: AnnotationTables<'s>,
 }
 
 impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
@@ -139,7 +142,15 @@ impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
             outside_star_imported_modules: Vec::new(),
             expressions: ExpressionTables::default(),
             class_tests: ClassTests::default(),
+            annotations: AnnotationTables::default(),
         }
+    }
+
+    pub fn with_own_stub(mut self, tree: &'s ModModule, source: Source<'s>) -> Self {
+        let absolute = |module: Option<&str>, level: u32| self.absolute_module_name(module, level);
+        let stub = OwnStub::new(tree, source, &absolute);
+        self.annotations.own_stub = Some(stub);
+        self
     }
 
     pub(crate) fn position(&self, node: &Node<'_>) -> Position {
