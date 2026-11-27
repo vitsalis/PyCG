@@ -15,6 +15,7 @@ use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
 use crate::engine::{BuilderFields, Engine, containers, not_ported};
 use crate::model::Signature;
+use crate::models::LENGTH_HINT;
 use crate::program::imports::ImportManager;
 
 impl<T: Trace> Engine<T> {
@@ -62,6 +63,24 @@ impl<T: Trace> Engine<T> {
                 .entry(key)
                 .or_default()
                 .extend(indices);
+        }
+        let fresh: Vec<_> =
+            self.state.tables.none_keywords[self.state.synced_none_keywords..].to_vec();
+        self.state.synced_none_keywords = self.state.tables.none_keywords.len();
+        for ((caller, site), names) in fresh {
+            let key = (
+                self.state.symbols.intern(&caller),
+                self.state.symbols.intern(&site),
+            );
+            let names: Vec<crate::engine::symbols::Sym> = names
+                .iter()
+                .map(|name| self.state.symbols.intern(name))
+                .collect();
+            self.state
+                .none_keywords
+                .entry(key)
+                .or_default()
+                .extend(names);
         }
         let sites: Vec<Box<str>> = self.state.tables.zero_argument_super.clone();
         for site in sites {
@@ -623,8 +642,12 @@ impl<T: Trace> Analysis for Engine<T> {
             .add_iteration(&mut self.graph, iterable, dst, caller, site, is_async);
     }
 
-    fn add_length_hint(&mut self, _iterable: NodeId, _caller: &str, _site: &str) {
-        not_ported("the builder call add_length_hint")
+    fn add_length_hint(&mut self, iterable: NodeId, caller: &str, site: &str) {
+        self.sync();
+        let caller = self.state.symbols.intern(caller);
+        let site = self.state.symbols.intern(site);
+        self.state
+            .add_length_hint(&mut self.graph, iterable, caller, site, LENGTH_HINT);
     }
 
     fn entering_keys(

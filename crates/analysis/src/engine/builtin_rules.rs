@@ -597,6 +597,21 @@ impl<T: Trace> State<T> {
         self.attach(graph, metaclass, rule);
     }
 
+    pub(super) fn literal_none_keyword(&self, call: CallId, name: &str) -> bool {
+        let base = match self.prefixes.get(&call) {
+            None => call,
+            Some((base, _)) => *base,
+        };
+        let root = self.roots.get(&base).copied().unwrap_or(base);
+        if self.calls[root.index()].origin != Origin::Call(root) {
+            return false;
+        }
+        let details = &self.calls[root.index()];
+        self.none_keywords
+            .get(&(details.caller, details.site))
+            .is_some_and(|names| names.iter().any(|&known| self.symbols.text(known) == name))
+    }
+
     pub(super) fn literal_none(&self, call: CallId, index: usize) -> bool {
         let (base, receivers) = match self.prefixes.get(&call) {
             None => (call, 0),

@@ -8,6 +8,7 @@ use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::engine::arguments::{BindingId, SpreadId, Spreads};
 use crate::engine::hierarchy::Unless;
+use crate::engine::library::{LibraryOrigin, LibraryRole};
 use crate::engine::objects::{Container, Kind, Literal, Object};
 use crate::engine::outside_calls::BoundId;
 use crate::engine::outside_types::TypeOrigin;
@@ -60,6 +61,12 @@ fn next_id(length: usize) -> u32 {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum IterationName {
+    Plain(Sym),
+    Library(LibraryRole),
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(super) enum ContainerOrigin {
     Rule(Origin, &'static str, Option<u32>),
     Object(ObjId, &'static str),
@@ -71,12 +78,14 @@ pub(super) enum ContainerOrigin {
     Iterator(ObjId),
     Operator(OperatorId),
     Stub(u32),
+    Library(LibraryOrigin),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) enum KeysConstruct {
     Builder(Sym, Sym),
     Bound(BoundId),
+    Arguments(CallId, &'static str),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -159,8 +168,8 @@ struct KeyLookup {
 #[derive(Clone, Copy)]
 pub(crate) struct Iteration {
     pub(crate) dst: NodeId,
-    caller: Sym,
-    site: Sym,
+    pub(crate) caller: Sym,
+    pub(crate) site: Sym,
     is_async: bool,
     role: IterationRoleId,
     iterators: Option<NodeId>,
@@ -257,7 +266,7 @@ pub(crate) struct Containers {
     subscript_keys: FxHashMap<(NodeId, Sym, Sym), KeyLookupId>,
     iterated: FxHashMap<Iterated, (NodeId, NodeId, Option<NodeId>)>,
     iterations: Vec<Iteration>,
-    iteration_roles: IndexMap<(Sym, bool, Unless), ()>,
+    iteration_roles: IndexMap<(IterationName, bool, Unless), ()>,
     subscripts: Vec<Subscript>,
     slices: Vec<Slice>,
     unpacks: Vec<Unpack>,
@@ -299,7 +308,7 @@ impl Containers {
         &self.sequences[index_of(id.0)]
     }
 
-    pub(crate) fn iteration_role(&self, id: IterationRoleId) -> (Sym, bool, &Unless) {
+    pub(crate) fn iteration_role(&self, id: IterationRoleId) -> (IterationName, bool, &Unless) {
         let ((role, is_async, unless), ()) = self
             .iteration_roles
             .get_index(index_of(id.0))
@@ -1521,11 +1530,10 @@ impl<T: Trace> State<T> {
 
     fn intern_iteration_role(
         &mut self,
-        role: &str,
+        role: IterationName,
         is_async: bool,
         unless: Unless,
     ) -> IterationRoleId {
-        let role = self.symbols.intern(role);
         let (index, _) = self
             .containers
             .iteration_roles
@@ -1543,6 +1551,19 @@ impl<T: Trace> State<T> {
         is_async: bool,
         unless: Unless,
         role: &str,
+    ) -> IterationId {
+        let role = IterationName::Plain(self.symbols.intern(role));
+        self.new_named_iteration(dst, caller, site, is_async, unless, role)
+    }
+
+    pub(super) fn new_named_iteration(
+        &mut self,
+        dst: NodeId,
+        caller: Sym,
+        site: Sym,
+        is_async: bool,
+        unless: Unless,
+        role: IterationName,
     ) -> IterationId {
         let role = self.intern_iteration_role(role, is_async, unless);
         let id = IterationId(next_id(self.containers.iterations.len()));
@@ -2337,7 +2358,13 @@ impl<T: Trace> State<T> {
         self.iterator(graph, object, iteration, iterators);
     }
 
-    fn iterator(&mut self, graph: &mut Graph, object: ObjId, iteration: IterationId, dst: NodeId) {
+    pub(super) fn iterator(
+        &mut self,
+        graph: &mut Graph,
+        object: ObjId,
+        iteration: IterationId,
+        dst: NodeId,
+    ) {
         let object = match self.objects.get(object) {
             Object::Const { .. } => match self.string_constant_value(graph, object) {
                 Some(typed) => typed,
@@ -2394,7 +2421,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn types_node(&mut self, graph: &mut Graph, object: ObjId) -> NodeId {
+    pub(super) fn types_node(&mut self, graph: &mut Graph, object: ObjId) -> NodeId {
         match self.objects.get(object) {
             &Object::Instance { class, .. } => self.constant(graph, class),
             Object::Class(class) => class.metaclass,
@@ -2516,6 +2543,9 @@ impl<T: Trace> State<T> {
                         Unless::Nothing,
                     );
                 }
+            }
+            Object::Container(_) if self.is_library(object) && !found.is_async => {
+                self.advance_library(graph, object, iteration);
             }
             Object::Container(container) => match self.symbols.text(container.kind) {
                 "iterator" => {
