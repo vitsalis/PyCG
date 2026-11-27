@@ -137,6 +137,10 @@ FAMILIES = {
         "classes",
         "Attribute hooks",
     ),
+    "tests/test_order_independence.py": (
+        "order",
+        "Order independence",
+    ),
     "tests/test_outside_call_results.py": (
         "outside",
         "Typed outside values",
@@ -165,6 +169,10 @@ FAMILIES = {
         "reflection",
         "Namespaces read by reflection",
     ),
+    "tests/test_saturation.py": (
+        "saturation",
+        "Saturation and the rounds",
+    ),
     "tests/test_slots.py": (
         "classes",
         "The class statement",
@@ -184,6 +192,10 @@ FAMILIES = {
     "tests/test_type_three_arguments.py": (
         "classes",
         "The class statement",
+    ),
+    "tests/test_waiting_lookups.py": (
+        "waiting",
+        "Rules that wait",
     ),
     "tests/test_with_and_exceptions.py": (
         "language",

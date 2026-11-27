@@ -1,0 +1,145 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.choose"
+       ],
+       "col": 8,
+       "end": [
+        6,
+        20
+       ],
+       "line": 6
+      }
+     ]
+    },
+    "definitions": {
+     "a": {
+      "kind": "module",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "a"
+     },
+     "a.A": {
+      "kind": "class",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "a",
+      "mro": [
+       "a.A",
+       "<builtin>.object"
+      ]
+     },
+     "b": {
+      "kind": "module",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "b"
+     },
+     "b.B": {
+      "kind": "class",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "b",
+      "mro": [
+       "b.B",
+       "<builtin>.object"
+      ]
+     },
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       6
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "a.A",
+       "b.B",
+       "<builtin>.object"
+      ]
+     },
+     "main.choose": {
+      "kind": "function",
+      "lines": [
+       3,
+       5
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.A": [
+      "a.A"
+     ],
+     "main.B": [
+      "b.B"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "a": {
+      "file": "a.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "b": {
+      "file": "b.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "a": [],
+  "b": [],
+  "main": [
+   "main.choose"
+  ],
+  "main.choose": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

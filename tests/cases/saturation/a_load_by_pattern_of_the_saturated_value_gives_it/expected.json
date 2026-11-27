@@ -1,0 +1,155 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 4,
+       "end": [
+        9,
+        19
+       ],
+       "line": 9
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 4,
+       "end": [
+        7,
+        35
+       ],
+       "line": 7
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        7,
+        37
+       ],
+       "line": 7,
+       "unresolved": "saturated"
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       9
+      ],
+      "module": "main"
+     },
+     "main.A": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.A",
+       "<builtin>.object"
+      ]
+     },
+     "main.A.visit_x": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.B": {
+      "kind": "class",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.B",
+       "main.A",
+       "<builtin>.object"
+      ]
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "main.A",
+       "<builtin>.object"
+      ]
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 2,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "main": [
+   "main.use"
+  ],
+  "main.A.visit_x": [],
+  "main.use": [
+   "<builtin>.getattr"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.use",
+   "main:7:4#7:37",
+   "saturated"
+  ]
+ ],
+ "warnings": []
+}

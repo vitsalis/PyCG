@@ -1,0 +1,122 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "pkg": [
+      {
+       "callees": [
+        "pkg._a.f"
+       ],
+       "col": 0,
+       "end": [
+        3,
+        3
+       ],
+       "line": 3
+      }
+     ],
+     "pkg.mod": [
+      {
+       "callees": [
+        "pkg._b.h"
+       ],
+       "col": 0,
+       "end": [
+        2,
+        6
+       ],
+       "line": 2
+      }
+     ]
+    },
+    "definitions": {
+     "pkg": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "pkg"
+     },
+     "pkg.mod": {
+      "kind": "module",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "pkg.mod"
+     }
+    },
+    "exports": {
+     "pkg.f": [
+      "pkg._a.f"
+     ],
+     "pkg.g": [
+      "pkg._b.g"
+     ],
+     "pkg.mod._b": [
+      "pkg._b"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "pkg": {
+      "file": "pkg/__init__.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "pkg._a": {
+      "file": "pkg/_a.cpython-312-darwin.so",
+      "kind": "extension",
+      "shadows": [
+       "pkg/_a.so"
+      ]
+     },
+     "pkg._b": {
+      "file": "pkg/_b.abi3.so",
+      "kind": "extension"
+     },
+     "pkg.mod": {
+      "file": "pkg/mod.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "pkg._a.f": {
+      "known": "extension"
+     },
+     "pkg._b.h": {
+      "known": "extension"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "pkg": [
+   "pkg._a.f"
+  ],
+  "pkg._a.f": [],
+  "pkg._b.h": [],
+  "pkg.mod": [
+   "pkg._b.h"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}
