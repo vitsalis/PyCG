@@ -1,7 +1,9 @@
 use num_bigint::BigInt;
 use pycg_solver::{NodeId, ObjId};
 
-use pycg_stubs::{DefinitionKind, Type};
+use pycg_stubs::DefinitionKind;
+
+use crate::engine::outside_calls::TypedResult;
 use rustc_hash::FxHashSet;
 
 use crate::builder::calls::{Call as BuilderCall, ClassStatement as BuilderClassStatement};
@@ -41,7 +43,7 @@ pub struct BoundGroup {
     pub call: CallId,
     pub unknown: bool,
     receivers: OrderedSet<Receivers>,
-    observers: Vec<(CallId, Vec<Type>)>,
+    observers: Vec<(CallId, Vec<TypedResult>)>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -281,7 +283,7 @@ impl<T: Trace> State<T> {
                 }
             }
             Object::BuiltinMethod { .. } => self.call_builtin_method(graph, object, call),
-            Object::Typed { .. } => not_ported("outside calls of typed values"),
+            Object::Typed { .. } => self.call_typed(graph, object, call),
             Object::Super { .. } => {}
             Object::Saturated
             | Object::Module(_)
@@ -412,11 +414,11 @@ impl<T: Trace> State<T> {
         }
         let observers = self.group_records[group.0 as usize].observers.clone();
         for (call, typed) in observers {
-            self.add_results_of(graph, call, &typed);
+            self.add_results_of(graph, call, &typed, &receivers);
         }
     }
 
-    pub(super) fn group_observe(&mut self, group: GroupId, call: CallId, typed: Vec<Type>) {
+    pub(super) fn group_observe(&mut self, group: GroupId, call: CallId, typed: Vec<TypedResult>) {
         let found = &mut self.group_records[group.0 as usize];
         assert!(
             found.receivers.is_empty(),

@@ -7,6 +7,7 @@ use rustc_hash::FxHashMap;
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Container, Function, Literal, Object};
 use crate::engine::outside::outside_name;
+use crate::engine::outside_types::TypeContext;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Role, SiteKey};
 use crate::engine::symbols::Sym;
@@ -46,10 +47,17 @@ pub enum Known {
 
 #[derive(Clone, Debug)]
 pub struct Param {
-    name: Box<str>,
-    kind: ParameterKind,
+    pub(crate) name: Box<str>,
+    pub(crate) kind: ParameterKind,
     has_default: bool,
-    annotation: Type,
+    pub(crate) annotation: Type,
+}
+
+#[derive(Clone, Debug)]
+pub struct TypedResult {
+    reduced: Type,
+    bound: BoundId,
+    parameters: Arc<[Param]>,
 }
 
 pub enum Bound {
@@ -300,8 +308,9 @@ impl<T: Trace> State<T> {
                 }
                 DefinitionKind::Class => {
                     let overloads = self.constructor_signatures(graph, definition, call);
-                    if dst.is_some() {
-                        not_ported("outside types: an instance of an outside class");
+                    if let Some(dst) = dst {
+                        let context = TypeContext::of_call(call, self.calls[call.index()].origin);
+                        self.add_instance(graph, &definition.path, &[], dst, &context, &[]);
                     }
                     overloads
                 }
@@ -399,10 +408,23 @@ impl<T: Trace> State<T> {
         self.calls[call.index()].args.len() - self.calls[base.index()].args.len()
     }
 
-    pub(super) fn add_results_of(&mut self, graph: &mut Graph, call: CallId, typed: &[Type]) {
-        let dst = self.calls[call.index()].dst.expect("a typed result");
-        for reduced in typed {
-            self.add_type(graph, reduced, dst);
+    pub(super) fn add_results_of(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        typed: &[TypedResult],
+        receivers: &[ObjId],
+    ) {
+        let details = &self.calls[call.index()];
+        let dst = details.dst.expect("a typed result");
+        let origin = details.origin;
+        for result in typed {
+            let context = TypeContext {
+                receiver: receivers.first().copied(),
+                binding: Some((result.bound, result.parameters.clone())),
+                ..TypeContext::of_call(call, origin)
+            };
+            self.add_type(graph, &result.reduced, dst, &context, &[]);
         }
     }
 
@@ -561,16 +583,19 @@ impl<T: Trace> State<T> {
             let parameters: Arc<[Param]> =
                 Arc::from(&signatures[index][skip.min(signatures[index].len())..]);
             let bound = self.bind_stub(graph, call, &definition.path, index, &parameters);
-            if dst.is_some() && group.is_some() {
-                typed.push(results[index].clone());
-            } else if dst.is_some() {
-                if LIBRARY_ITERATION
-                    .iter()
-                    .any(|&(path, _)| path == &*definition.path)
+            if dst.is_some() {
+                if group.is_none()
+                    && LIBRARY_ITERATION
+                        .iter()
+                        .any(|&(path, _)| path == &*definition.path)
                 {
                     not_ported("library: a deferred result");
                 }
-                typed.push(results[index].clone());
+                typed.push(TypedResult {
+                    reduced: results[index].clone(),
+                    bound,
+                    parameters: parameters.clone(),
+                });
             }
             overloads.push(Overload { parameters, bound });
         }
@@ -586,11 +611,23 @@ impl<T: Trace> State<T> {
             not_ported("outside calls: the file of open");
         }
         let closure = lookup(CLOSURES, &*definition.path).is_some();
-        for reduced in typed {
-            if closure && matches!(reduced, Type::Callable { .. }) {
+        let origin = self.calls[call.index()].origin;
+        for result in typed {
+            if closure && matches!(result.reduced, Type::Callable { .. }) {
                 not_ported("outside types: a closure");
             }
-            self.add_type(graph, &reduced, dst.expect("a typed result"));
+            let context = TypeContext {
+                receiver: receivers.first().copied(),
+                binding: Some((result.bound, result.parameters)),
+                ..TypeContext::of_call(call, origin)
+            };
+            self.add_type(
+                graph,
+                &result.reduced,
+                dst.expect("a typed result"),
+                &context,
+                &[],
+            );
         }
         let creates = self
             .fitting(&signatures, skip, call)
@@ -907,7 +944,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn parameter_node(
+    pub(super) fn parameter_node(
         &mut self,
         graph: &mut Graph,
         bound: BoundId,
@@ -932,22 +969,6 @@ impl<T: Trace> State<T> {
                 }
                 Some(self.bound_parameter(graph, bound, &parameter.name))
             }
-        }
-    }
-
-    fn add_type(&mut self, graph: &mut Graph, reduced: &Type, dst: NodeId) {
-        match reduced {
-            Type::Unknown | Type::Callable { .. } => {
-                let unknown = self.unknown_external;
-                self.add_object(graph, dst, unknown);
-            }
-            Type::None => {}
-            Type::Union(arms) => {
-                for arm in arms.iter() {
-                    self.add_type(graph, arm, dst);
-                }
-            }
-            _ => not_ported("outside types: the result of an outside call"),
         }
     }
 

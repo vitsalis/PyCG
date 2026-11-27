@@ -3,12 +3,13 @@ use std::sync::Arc;
 use pycg_solver::{NodeId, ObjId};
 use pycg_stubs::{Decorator, Definition, DefinitionKind, Entry};
 
-use crate::engine::objects::Object;
+use crate::engine::objects::{Container, Object};
+use crate::engine::outside_types::{TypeContext, named};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{EXTERNAL_STEPS_PAST_ROOT_MAX, Graph, State, not_ported};
+use crate::engine::{EXTERNAL_STEPS_PAST_ROOT_MAX, Graph, State};
 use crate::model::BUILTIN_MODULE;
-use crate::models::CONCRETE_CLASSES;
+use crate::models::{CONCRETE_CLASSES, VARIABLE_FUNCTIONS};
 
 pub const STUB_BUILTINS: &str = "builtins";
 const OBJECT: &str = "builtins.object";
@@ -177,7 +178,11 @@ impl<T: Trace> State<T> {
                     let external = self.external(graph, &name, 1, false);
                     self.add_object(graph, dst, external);
                 }
-                _ => not_ported("outside types: the type of a stub member"),
+                _ => {
+                    let context = TypeContext::of_attribute(&definition.path, Some(receiver));
+                    let reduced = self.annotation_type(definition);
+                    self.add_type(graph, &reduced, dst, &context, &[]);
+                }
             }
         }
     }
@@ -189,7 +194,7 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn class_object(&mut self, graph: &mut Graph, object: ObjId) -> ObjId {
+    pub(super) fn class_object(&mut self, graph: &mut Graph, object: ObjId) -> ObjId {
         match self.objects.get(object) {
             Object::Class(_) | Object::External(_) | Object::UnknownExternal(_) => object,
             &Object::Instance { class, .. } => class,
@@ -210,7 +215,12 @@ impl<T: Trace> State<T> {
                 let (_, name) = self.kind_class(&kind);
                 self.external(graph, &name, 0, false)
             }
-            _ => not_ported("the class of a builtin value"),
+            &Object::Container(Container { exact, .. }) | &Object::Generator { exact, .. } => {
+                let kind = self.object_type_name(object);
+                let (_, name) = self.kind_class(&kind);
+                self.external(graph, &name, 0, !exact)
+            }
+            _ => object,
         }
     }
 
@@ -322,8 +332,13 @@ impl<T: Trace> State<T> {
                 let external = self.base_member_external(graph, base, attr);
                 self.add_object(graph, dst, external);
             }
-            DefinitionKind::Variable => not_ported("outside types: the type of a base member"),
-            _ if instance => not_ported("outside types: the type of a base member"),
+            DefinitionKind::Variable | DefinitionKind::Property
+                if instance || member.kind == DefinitionKind::Variable =>
+            {
+                let context = TypeContext::of_attribute(&member.path, receiver);
+                let reduced = self.annotation_type(member);
+                self.add_type(graph, &reduced, dst, &context, &[]);
+            }
             _ => {}
         }
     }
@@ -355,8 +370,9 @@ impl<T: Trace> State<T> {
         let past_root = crate::model::steps_past_root(&name, steps as usize);
         let bounded =
             steps < EXTERNAL_STEPS_PAST_ROOT_MAX && !past_root.contains(&self.symbols.text(attr));
-        if self.stub_definitions(external).is_some() {
-            not_ported("outside attributes");
+        if let Some(definitions) = self.stub_definitions(external) {
+            self.outside_attribute(graph, external, attr, dst, &definitions, bounded);
+            return;
         }
         if bounded {
             let attribute = format!("{name}.{}", self.symbols.text(attr));
@@ -427,27 +443,88 @@ impl<T: Trace> State<T> {
         typed
     }
 
+    fn outside_attribute(
+        &mut self,
+        graph: &mut Graph,
+        external: ObjId,
+        attr: Sym,
+        dst: NodeId,
+        definitions: &[Definition],
+        bounded: bool,
+    ) {
+        let text = self.symbols.text(attr).to_string();
+        if text == "__dict__"
+            && definitions
+                .iter()
+                .any(|definition| definition.kind == DefinitionKind::Module)
+        {
+            let dict = self.typed(graph, &format!("{STUB_BUILTINS}.dict"));
+            self.add_object(graph, dst, dict);
+        }
+        let mut named_found = false;
+        for definition in definitions {
+            for found in self.stubs.attribute(definition, &text).iter() {
+                if let Some(&(_, function)) = VARIABLE_FUNCTIONS
+                    .iter()
+                    .find(|&&(path, _)| path == &*found.path)
+                {
+                    let function = self.external(graph, function, 0, false);
+                    self.add_object(graph, dst, function);
+                } else if named(found) {
+                    named_found = true;
+                } else {
+                    let receiver = (found.owner.is_some()
+                        && definition.kind == DefinitionKind::Class)
+                        .then_some(external);
+                    let context = TypeContext::of_attribute(&found.path, receiver);
+                    let reduced = self.variable_type(found);
+                    self.add_type(graph, &reduced, dst, &context, &[]);
+                }
+            }
+        }
+        if !named_found {
+            return;
+        }
+        if bounded {
+            let found = self.objects.external(external).expect("an outside value");
+            let name = self.symbols.text(found.name).to_string();
+            let steps = found.steps;
+            let attribute = format!("{name}.{text}");
+            let steps = if self.external_modules.contains(&attribute) || name == BUILTIN_MODULE {
+                0
+            } else {
+                steps + 1
+            };
+            let external = self.external(graph, &attribute, steps, false);
+            self.add_object(graph, dst, external);
+        } else {
+            let unknown = self.unknown_external;
+            self.add_object(graph, dst, unknown);
+        }
+    }
+
     pub(super) fn imported_value(&mut self, graph: &mut Graph, name: &str) -> NodeId {
         let external = self.external(graph, name, 0, false);
         let definitions = self.stub_definitions(external).unwrap_or_default();
         if definitions.iter().all(named) {
             return self.constant(graph, external);
         }
-        not_ported("outside types: an imported variable")
+        let node = self.node(graph, None);
+        for definition in definitions.iter() {
+            if let Some(&(_, function)) = VARIABLE_FUNCTIONS
+                .iter()
+                .find(|&&(path, _)| path == &*definition.path)
+            {
+                let function = self.external(graph, function, 0, false);
+                self.add_object(graph, node, function);
+            } else if !named(definition) {
+                let context = TypeContext::of_attribute(&definition.path, None);
+                let reduced = self.variable_type(definition);
+                self.add_type(graph, &reduced, node, &context, &[]);
+            } else {
+                self.add_object(graph, node, external);
+            }
+        }
+        node
     }
-}
-
-fn named(definition: &Definition) -> bool {
-    if matches!(
-        definition.kind,
-        DefinitionKind::Module | DefinitionKind::Class | DefinitionKind::Function
-    ) {
-        return true;
-    }
-    let module = definition
-        .path
-        .split('.')
-        .next()
-        .unwrap_or(&definition.path);
-    module == "typing" || module == "typing_extensions"
 }
