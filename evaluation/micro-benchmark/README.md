@@ -3,6 +3,15 @@
 Small Python programs, each with a hand-written call graph that is the ground
 truth for call graph generators.
 
+## Scoring
+
+A tool's graph of a case is complete when every edge it gives is in the
+ground truth, sound when it gives every edge of the ground truth, and exact
+when it equals the ground truth, nodes included. Precision and recall count
+the edges of every case. A case whose `requires-python` is newer than the
+interpreter is skipped; a case without a graph is neither complete, sound
+nor exact.
+
 ## Case layout
 
 ```

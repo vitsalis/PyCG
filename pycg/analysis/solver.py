@@ -121,6 +121,7 @@ class Solver:
         self._added_by_node = {}
         self._attach_nesting = 0
         self._attach_deferred = deque()
+        self._shared = {}
         self._firing_nodes = {}
         self._set_by_content = {EMPTY: EMPTY}
         self._union_by_set_ids = {}
@@ -300,6 +301,19 @@ class Solver:
             self._apply([constraint], seen)
         finally:
             self._attach_nesting -= 1
+
+    def share(self, node, function, args, item, gives_dst):
+        key = (node, function, args)
+        shared = self._shared.get(key)
+        if shared is None:
+            shared = Shared(function, args, gives_dst)
+            self._shared[key] = shared
+            shared.items.append(item)
+            self.attach(node, shared)
+            return
+        shared.items.append(item)
+        results = (item.dst,) if gives_dst else ()
+        self.apply_now(node, Each(function, *args, item, results=results))
 
     def objects(self, node):
         node = _find_representative(node)
@@ -851,3 +865,38 @@ class Each(Constraint):
             for obj in objects:
                 if isinstance(obj, kinds):
                     function(obj, *args)
+
+
+class Shared(Constraint):
+    __slots__ = ("function", "owner", "args", "gives_dst", "items")
+
+    def __init__(self, function, args, gives_dst):
+        if type(function) is MethodType:
+            self.function = function.__func__
+            self.owner = function.__self__
+        else:
+            self.function = function
+            self.owner = None
+        self.args = args
+        self.gives_dst = gives_dst
+        self.items = []
+
+    def results(self):
+        if not self.gives_dst:
+            return ()
+        return tuple(item.dst for item in self.items)
+
+    def captured(self):
+        return self.args
+
+    def apply(self, obj):
+        self.apply_each((obj,))
+
+    def apply_each(self, objects):
+        function, args = self.function, self.args
+        if self.owner is not None:
+            function = MethodType(function, self.owner)
+        items = list(self.items)
+        for obj in objects:
+            for item in items:
+                function(obj, *args, item)

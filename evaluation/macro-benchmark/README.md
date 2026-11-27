@@ -53,6 +53,20 @@ only if it finds more than 100 missed edges or more than 20 false positives.
 The thresholds are strict; exactly 100 missed edges or 20 false positives
 do not trigger another round.
 
+## Scoring
+
+A tool's graph is scored against each ground truth as a set of (caller,
+callee) edges; precision, recall and F1 add the counts of every project
+first. "Inside" counts the edges whose callee is in the analysed
+packages, "outside" the others (builtins, the standard library, other
+packages), and "all" both, for comparison with PyCG's 2021 evaluation.
+Callers are matched as written. A callee outside the package also matches
+the function it resolves to in the project's trace (`dynamic/<name>.json`,
+`aliases`), and the names of one function of the standard library match
+each other (`../common/same_function.json`). Nothing is imported to
+score. A run that failed scores no edge: its ground-truth edges are false
+negatives.
+
 ## Layout
 
 ```
@@ -147,9 +161,8 @@ graph = (trace - rejected) + added
 - **Trace** (`dynamic/<name>.json`): the calls that the package made while
   its test suite ran (see "Traces"). This part is reproducible: the
   `trace` service records it again in a container, from the pinned source
-  and the pinned test environment, and compares the edges: `NAME=<name>
-  docker compose -f evaluation/compose.yaml run --rm trace --compare` (see
-  "Re-recording a trace").
+  and the pinned test environment, and compares the edges: `make
+  eval-trace NAME=<name>` (see "Re-recording a trace").
 - **Rejected** (`ground-truth/<name>.rejected.json`): the trace edges that
   are not edges of the package (rule A), each with its reason.
 - **Added** (`ground-truth/<name>.added.json`): the edges of the graph that
@@ -3805,17 +3818,19 @@ $C build inputs
 NAME=jmespath $C build trace
 # 3. Run its tests under the tracer, without network; compare the new
 #    trace with the committed one.
-NAME=jmespath $C run --rm trace --compare
+make eval-trace NAME=jmespath
 ```
 
-Step 3 copies the source of jmespath out of the image, runs the
-tests under the tracer, checks the new trace (its format, the project and
-the pin, exactly the distributions of the requirements file) and writes
-`evaluation/results/trace/jmespath.json` and `jmespath.installed.txt`.
-`--compare` prints the Python version, the test counts and the number of
-edges of both traces, the distributions that differ and the edges that
-only one trace has, and exits with 0 only if the edge sets are equal. The
-committed `dynamic/jmespath.json` is never changed by the service.
+Step 3 creates `evaluation/results/trace/` as your user, runs the service as
+your user (`EVAL_UID`, `EVAL_GID`), copies the source of jmespath out of the
+image, runs the tests under the tracer, checks the new trace (its format,
+the project and the pin, exactly the distributions of the requirements file)
+and writes `evaluation/results/trace/jmespath.json` and
+`jmespath.installed.txt`. When the project has a committed trace, the target
+passes `--compare`, which prints the Python version, the test counts and the
+number of edges of both traces, the distributions that differ and the edges
+that only one trace has, and exits with 0 only if the edge sets are equal.
+The committed `dynamic/jmespath.json` is never changed by the service.
 
 The service (`container/trace_entry.py`) runs without network, with a
 read-only root, no capability and a non-root user. `/repo` is this

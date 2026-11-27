@@ -255,18 +255,37 @@ def test_an_archive_of_another_hash_is_not_written(
     assert not (out / "demo").exists()
 
 
+EVENTS = {"low": 0, "high": 0, "max": 3, "oom": 1, "oom_kill": 1}
+KILLED = {"status": "crash", "exit_status": -signal.SIGKILL}
+
+
 @pytest.mark.parametrize(
-    ("record", "outcome"),
+    ("record", "after", "outcome"),
     [
-        ({"status": "ok"}, "finished"),
-        ({"status": "memory"}, "killed by the cap"),
-        ({"status": "crash", "exit_status": -signal.SIGKILL}, "killed by the cap"),
-        ({"status": "crash", "exit_status": 1}, "crash"),
-        ({"status": "timeout"}, "timeout"),
+        ({"status": "ok"}, EVENTS, "finished"),
+        ({"status": "memory"}, EVENTS, "killed by the cap"),
+        (
+            KILLED,
+            EVENTS | {"oom": 2, "oom_kill": 2},
+            "killed: the container ran out of memory",
+        ),
+        (KILLED, EVENTS | {"oom_kill": 2}, "killed: the machine ran out of memory"),
+        (KILLED, EVENTS, "killed by SIGKILL"),
+        (KILLED, None, "killed by SIGKILL"),
+        ({"status": "crash", "exit_status": 1}, EVENTS, "crash"),
+        ({"status": "timeout"}, EVENTS, "timeout"),
     ],
 )
-def test_the_outcome_of_a_run(record, outcome):
-    assert measure.outcome_of(record) == outcome
+def test_the_outcome_of_a_run(record, after, outcome):
+    before = None if after is None else EVENTS
+    assert measure.outcome_of(record, before, after) == outcome
+
+
+def test_the_memory_events_of_the_container_are_read(tmp_path):
+    path = tmp_path / "memory.events"
+    path.write_text("low 0\nhigh 0\nmax 3\noom 1\noom_kill 1\noom_group_kill 0\n")
+    assert measure.memory_events(path) == EVENTS | {"oom_group_kill": 0}
+    assert measure.memory_events(tmp_path / "absent") is None
 
 
 def committed_checkout(tmp_path):
@@ -326,6 +345,69 @@ def test_a_run_over_the_cap_is_recorded_as_killed_by_the_cap(tmp_path):
     assert result["graph_sha256"] is None
     record = measure.record_path(out, "this", "demo")
     assert json.loads(record.read_text()) == result
+
+
+def test_a_run_that_the_machine_kills_is_not_killed_by_the_cap(tmp_path):
+    checkout = committed_checkout(tmp_path)
+    project = demo_project(tmp_path)
+    (project.directory / "BEHAVIOUR").write_text("killed-by-the-machine")
+    events = project.directory / "memory.events"
+    events.write_text("low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n")
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text("MemTotal: 8104408 kB\nMemAvailable: 4723208 kB\n")
+    out = tmp_path / "out"
+
+    result = measure.measure(
+        checkout,
+        "this",
+        project,
+        out,
+        1024,
+        60,
+        sys.executable,
+        tmp_path / "no-limit",
+        events,
+        meminfo,
+    )
+
+    assert result["outcome"] == "killed: the machine ran out of memory"
+    assert result["run"]["exit_status"] == -signal.SIGKILL
+    assert result["peak_rss_mib"] is not None
+    assert result["graph_sha256"] is None
+    assert result["memory_available_mib"] == 4612
+
+
+@pytest.mark.parametrize("outcome", measure.OUTCOMES_KILLED_FROM_OUTSIDE)
+@pytest.mark.parametrize("side", ["base", "this"])
+def test_a_run_killed_from_outside_its_cap_is_not_compared(
+    outcome, side, capsys, tmp_path
+):
+    finished = result_of("finished", "1" * 64, 2.0)
+    killed = result_of(outcome, None, None)
+    base, now = (killed, finished) if side == "base" else (finished, killed)
+    with pytest.raises(
+        measure.MeasureError, match=f"the {side} run .* is not a measurement"
+    ):
+        measure.comparison(base, now)
+    paths = []
+    for name, result in (("base", base), ("this", now)):
+        paths.append(tmp_path / f"{name}.json")
+        paths[-1].write_text(json.dumps(result))
+    assert measure.main(["compare", *map(str, paths)]) == 1
+    assert (
+        f"the {side} run was killed ({outcome}) and is not a measurement"
+        in capsys.readouterr().err
+    )
+
+
+def test_the_memory_that_the_machine_has_available_is_read(tmp_path):
+    meminfo = tmp_path / "meminfo"
+    meminfo.write_text(
+        "MemTotal: 8104408 kB\nMemFree: 1 kB\nMemAvailable: 4723208 kB\n"
+        "HugePages_Total: 0\n"
+    )
+    assert measure.memory_available_mib(meminfo) == 4612
+    assert measure.memory_available_mib(tmp_path / "absent") is None
 
 
 @pytest.mark.parametrize("limit_mib", [1024, 1024 + measure.RUNNER_HEADROOM_MIB - 1])
