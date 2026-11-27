@@ -18,7 +18,7 @@ use pycg_analysis::engine::trace::{Opacity, RuleInfo, Trace};
 use pycg_analysis::engine::{Engine, RuleId, not_ported};
 use pycg_analysis::model::Signature;
 use pycg_analysis::program::Program;
-use pycg_solver::{NodeId, ObjId, Solver, WatchId};
+use pycg_solver::{NodeId, ObjId, Order, Solver, WatchId};
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde_json::{Value, json};
 
@@ -459,7 +459,11 @@ pub fn build(arguments: &[String]) -> Option<ExitCode> {
     }
     let cwd = std::env::current_dir().expect("a working directory");
     let entry_points: Vec<PathBuf> = entry_points.iter().map(PathBuf::from).collect();
-    let engine = Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(Path::new(out)));
+    let engine = Engine::new(
+        Some(CAP_DEFAULT_OBJECTS),
+        Order::Canonical,
+        Recorder::new(Path::new(out)),
+    );
     let mut program = Program::new(&entry_points, Some(Path::new(package)), &cwd, engine)
         .expect("the paths of an oracle input are on one drive");
     let built = panic::catch_unwind(AssertUnwindSafe(|| {
@@ -490,7 +494,11 @@ pub fn run(input: &str, out: &str) -> ExitCode {
     }
     let out = Path::new(out);
     let mut replay = Replay {
-        engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(out)),
+        engine: Engine::new(
+            Some(CAP_DEFAULT_OBJECTS),
+            Order::Canonical,
+            Recorder::new(out),
+        ),
         fields: FxHashMap::default(),
         calls: FxHashMap::default(),
         built: Vec::new(),

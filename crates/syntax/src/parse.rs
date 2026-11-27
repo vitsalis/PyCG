@@ -8,7 +8,7 @@ use ruff_text_size::{Ranged, TextSize};
 
 use crate::tree::Node;
 
-const TARGET_VERSION: PythonVersion = PythonVersion::PY314;
+pub const TARGET_VERSION: PythonVersion = PythonVersion::PY314;
 const PARENTHESES_DEPTH_MAX: usize = 200;
 const INDENTATION_DEPTH_MAX: usize = 100;
 const INTERPOLATED_STRING_DEPTH_MAX: usize = 149;

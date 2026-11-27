@@ -1,6 +1,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use pycg_analysis::Order;
 use pycg_analysis::engine::Engine;
 use pycg_analysis::engine::trace::Untraced;
 use pycg_analysis::program::Program;
@@ -26,7 +27,7 @@ fn scratch(name: &str, files: &[(&str, &str)]) -> Scratch {
 
 fn warnings(root: &Path, package: &str, entry_points: &[&str]) -> Vec<String> {
     let entry_points: Vec<PathBuf> = entry_points.iter().map(PathBuf::from).collect();
-    let engine = Engine::new(Some(5000), Untraced);
+    let engine = Engine::new(Some(5000), Order::Canonical, Untraced);
     let mut program = Program::new(&entry_points, Some(Path::new(package)), root, engine)
         .expect("the paths are on one drive");
     program.build_modules().expect("the paths are on one drive");

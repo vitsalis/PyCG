@@ -208,7 +208,7 @@ struct State<T: Trace> {
 }
 
 impl<T: Trace> Engine<T> {
-    pub fn new(cap: Option<u32>, trace: T) -> Engine<T> {
+    pub fn new(cap: Option<u32>, order: Order, trace: T) -> Engine<T> {
         let mut objects = Objects::default();
         let saturated = objects.push(Object::Saturated);
         let mut state = State {
@@ -345,7 +345,7 @@ impl<T: Trace> Engine<T> {
             "<saturated>",
             Opacity::Saturated,
         );
-        let mut graph = Solver::new(saturated, Kind::Saturated.mask(), cap, Order::Canonical);
+        let mut graph = Solver::new(saturated, Kind::Saturated.mask(), cap, order);
         state.trace.solver(cap, saturated, graph.saturated_node());
         let name = state.symbols.intern("<unknown>");
         state.unknown_external = state.new_object(

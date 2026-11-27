@@ -1,7 +1,7 @@
 use std::ffi::OsString;
 
 use num_bigint::{BigInt, Sign};
-use pycg_analysis::{CAP_DEFAULT_OBJECTS, Cap, Request};
+use pycg_analysis::{CAP_DEFAULT_OBJECTS, Cap, Order, Request};
 
 use crate::help;
 use crate::integer::{IntError, python_int};
@@ -558,6 +558,7 @@ fn outcome(parser: Parser<'_>) -> Outcome {
                 entry_points: parser.entry_points,
                 package: parser.package,
                 cap: parser.cap,
+                order: Order::Canonical,
             },
             package_name: parser.package_name,
             package_version: parser.package_version,
