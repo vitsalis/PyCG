@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - .github/workflows/release.yml
+      - tools/release/**
   workflow_dispatch:
 
 concurrency:
@@ -98,6 +99,11 @@ jobs:
           head -n 1 help.txt | grep -q '^usage: pycg'
           "$program" view "$SAMPLE" -o page.html
           cmp page.html reference/page.html
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+        with:
+          python-version: "3.14"
+      - name: The program gives every micro-benchmark case its expected call graph
+        run: uv run --no-project python -I tools/release/micro.py "target/${{ matrix.target }}/release/pycg"
       - name: Archive
         run: |
           name="pycg-$(git describe --tags --always)-${{ matrix.target }}"
