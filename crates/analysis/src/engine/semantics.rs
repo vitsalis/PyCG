@@ -68,6 +68,16 @@ pub enum Role {
     Reversed,
     ReversedLen,
     ReversedItem,
+    Operator(Sym, bool),
+    Compare(Sym),
+    Truth,
+    Convert(Sym),
+    Format,
+    Await,
+    Enter,
+    Exit,
+    Raise,
+    Special(Sym),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -200,7 +210,8 @@ impl<T: Trace> State<T> {
             | Object::Const { .. }
             | Object::Container(_)
             | Object::Generator { .. }
-            | Object::Coroutine { .. } => {}
+            | Object::Coroutine { .. }
+            | Object::Pattern { .. } => {}
         }
     }
 
@@ -536,7 +547,7 @@ impl<T: Trace> State<T> {
         fallback
     }
 
-    fn instantiate(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
+    pub(super) fn instantiate(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
         let default = self.python_method(graph, class, "__new__");
         let rule = self.rule(Rule::PythonNew { class, call });
         self.attach(graph, default, rule);

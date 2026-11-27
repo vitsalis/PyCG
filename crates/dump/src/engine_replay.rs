@@ -7,9 +7,10 @@ use std::process::ExitCode;
 
 use num_bigint::BigInt;
 use pycg_analysis::CAP_DEFAULT_OBJECTS;
+use pycg_analysis::builder::calls::CallId as BuilderCallId;
 use pycg_analysis::builder::calls::{
     Allocator, Analysis, Call, CallSite, ClassStatement, Constant, Key, MethodKind, NewClass,
-    Passthrough, Slice, Subscript,
+    Operation, Passthrough, Slice, Subscript,
 };
 use pycg_analysis::engine::objects::{Kind, Object};
 use pycg_analysis::engine::trace::{Opacity, RuleInfo, Trace};
@@ -135,7 +136,7 @@ impl Recorder {
         json!({"object": self.object_name(object)})
     }
 
-    fn rule_value(&self, rule: RuleId) -> Value {
+    pub(crate) fn rule_value(&self, rule: RuleId) -> Value {
         let declared = &self.rules[&rule];
         if declared.call {
             json!({"call": declared.name})
@@ -443,6 +444,7 @@ impl Trace for Recorder {
 struct Replay {
     engine: Engine<Recorder>,
     fields: FxHashMap<String, Vec<Value>>,
+    calls: FxHashMap<String, BuilderCallId>,
 }
 
 pub fn build(arguments: &[String]) -> Option<ExitCode> {
@@ -464,6 +466,7 @@ pub fn build(arguments: &[String]) -> Option<ExitCode> {
     let replay = Replay {
         engine: program.analysis,
         fields: FxHashMap::default(),
+        calls: FxHashMap::default(),
     };
     Some(replay.write(Path::new(out), built.is_ok()))
 }
@@ -480,6 +483,7 @@ pub fn run(input: &str, out: &str) -> ExitCode {
     let mut replay = Replay {
         engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new(out)),
         fields: FxHashMap::default(),
+        calls: FxHashMap::default(),
     };
     let replayed = panic::catch_unwind(AssertUnwindSafe(|| {
         let record = |number: usize, line: &str| -> Value {
@@ -848,6 +852,132 @@ impl Replay {
                     text(&arguments["site"]),
                     stored,
                 );
+                None
+            }
+            "site_call" => {
+                let role: Vec<&str> = list(&arguments["role"]).iter().map(text).collect();
+                let call = self.engine.site_call(
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                    &role,
+                );
+                let answer = self
+                    .engine
+                    .trace()
+                    .rule_value(self.engine.builder_call_rule(call));
+                let name = text(&answer["call"]).to_owned();
+                self.calls.insert(name, call);
+                Some(answer)
+            }
+            "add_special_call" => {
+                let value = self.node(&arguments["value"]);
+                let call = self.calls[text(&arguments["call"]["call"])];
+                assert!(
+                    list(&arguments["unless"]).is_empty(),
+                    "the builder calls a special method unconditionally"
+                );
+                self.engine
+                    .add_special_call(value, text(&arguments["name"]), call);
+                None
+            }
+            "pattern" => {
+                assert!(arguments["case"].is_null() && arguments["exact"] == true);
+                let prefix: Vec<u32> = text(&arguments["prefix"]).chars().map(u32::from).collect();
+                let suffix: Vec<u32> = text(&arguments["suffix"]).chars().map(u32::from).collect();
+                let object = self.engine.pattern(&prefix, &suffix);
+                Some(self.object_answer(object))
+            }
+            "add_pattern_operand" => {
+                let operand = self.optional_node(&arguments["operand"]);
+                let result = self.node(&arguments["result"]);
+                self.engine.add_pattern_operand(operand, result);
+                None
+            }
+            "add_truth" => {
+                let value = self.node(&arguments["value"]);
+                self.engine
+                    .add_truth(value, text(&arguments["caller"]), text(&arguments["site"]));
+                None
+            }
+            "add_conversion" => {
+                let value = self.node(&arguments["value"]);
+                let spec = self.optional_node(&arguments["spec"]);
+                self.engine.add_conversion(
+                    value,
+                    text(&arguments["kind"]),
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                    spec,
+                );
+                None
+            }
+            "add_percent" => {
+                let format = self.node(&arguments["fmt"]);
+                let value = self.node(&arguments["value"]);
+                self.engine.add_percent(
+                    format,
+                    value,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_await" => {
+                let value = self.node(&arguments["value"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.add_await(
+                    value,
+                    dst,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_with" => {
+                let manager = self.node(&arguments["manager"]);
+                let dst = self.optional_node(&arguments["dst"]);
+                self.engine.add_with(
+                    manager,
+                    dst,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                    arguments["is_async"].as_bool().expect("is_async"),
+                );
+                None
+            }
+            "add_raise" => {
+                let exception = self.node(&arguments["exception"]);
+                self.engine.add_raise(
+                    exception,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
+                None
+            }
+            "add_handler" => {
+                let types = self.optional_node(&arguments["types"]);
+                let dst = self.node(&arguments["dst"]);
+                self.engine.add_handler(types, dst);
+                None
+            }
+            "add_operator" => {
+                assert!(
+                    list(&arguments["extra"]).is_empty(),
+                    "the builder passes no extra operand"
+                );
+                let operation = Operation {
+                    left: self.optional_node(&arguments["left"]),
+                    right: self.optional_node(&arguments["right"]),
+                    method: text(&arguments["method"]),
+                    reflected: arguments["reflected"].as_str(),
+                    inplace: arguments["inplace"].as_bool().expect("inplace"),
+                    dst: self.node(&arguments["dst"]),
+                    caller: text(&arguments["caller"]),
+                    site: text(&arguments["site"]),
+                    unary: arguments["unary"].as_bool().expect("unary"),
+                    constants: arguments["constants"].as_bool().expect("constants"),
+                };
+                self.engine.add_operator(&operation);
                 None
             }
             "add_subscript" => {

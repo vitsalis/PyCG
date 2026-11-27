@@ -3,12 +3,15 @@ use pycg_solver::{KindMask, NodeId, ObjId, Rules, WatchId};
 use crate::engine::attributes::{
     ANALYSED_METHODS, AccessId, AccessorsId, DeliveriesId, HookCallsId, HooksId, WritesId,
 };
+use crate::engine::builtin_rules::DynamicId;
 use crate::engine::builtin_rules::PropertyRule;
 use crate::engine::containers::ContainerRule;
 use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
+use crate::engine::patterns::PatternRule;
+use crate::engine::protocols::ProtocolRule;
 use crate::engine::reflection::{DefaultAction, GetmembersId};
 use crate::engine::semantics::{CallId, ReturnedId};
 use crate::engine::symbols::Sym;
@@ -225,7 +228,7 @@ pub(crate) enum Rule {
         owner: ObjId,
         dst: NodeId,
     },
-    LoadByPattern,
+    LoadByPattern(DynamicId),
     SuperClass {
         object: NodeId,
         call: CallId,
@@ -254,6 +257,8 @@ pub(crate) enum Rule {
         load: AccessId,
     },
     Container(ContainerRule),
+    Protocol(ProtocolRule),
+    Pattern(PatternRule),
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
@@ -303,6 +308,8 @@ impl Rule {
             Rule::CallMetaclass { .. } => "Each:Analysis._call_metaclass",
             Rule::AddInexact { .. } => "Each:Containers._add_inexact",
             Rule::Container(rule) => rule.key(),
+            Rule::Protocol(rule) => rule.key(),
+            Rule::Pattern(rule) => rule.key(),
             Rule::Access(_) => "Access",
             Rule::Deliver { .. } => "_Deliver",
             Rule::Deliveries(_) => "_Deliveries",
@@ -338,7 +345,7 @@ impl Rule {
             Rule::BindClass { .. } => "Each:BuiltinRules._bind_class",
             Rule::BindType { .. } => "Each:BuiltinRules._bind_type",
             Rule::BindTo { .. } => "Each:Hierarchy._bind_to",
-            Rule::LoadByPattern => "Each:Patterns.load_by_pattern",
+            Rule::LoadByPattern(_) => "Each:Patterns.load_by_pattern",
             Rule::SuperClass { .. } => "Each:BuiltinRules._super_class",
             Rule::SuperAfterOutside { .. } => "Each:BuiltinRules._super_after_outside",
             Rule::SuperObject { .. } => "Each:BuiltinRules._super_object",
@@ -351,6 +358,9 @@ impl Rule {
 
     fn each(&self) -> bool {
         if let Rule::Container(rule) = self {
+            return rule.each();
+        }
+        if let Rule::Protocol(rule) = self {
             return rule.each();
         }
         !matches!(
@@ -371,6 +381,8 @@ impl Rule {
     fn kinds(&self) -> Option<&'static [Kind]> {
         match self {
             Rule::Container(rule) => rule.kinds(),
+            Rule::Protocol(rule) => rule.kinds(),
+            Rule::Pattern(rule) => rule.kinds(),
             Rule::SetName { .. } => Some(SET_NAME_KINDS),
             Rule::CallMetaclass { .. } => Some(CLASS_KINDS),
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
@@ -380,7 +392,7 @@ impl Rule {
             Rule::PropertyReceiver { .. } => Some(PROPERTY_KINDS),
             Rule::BindClass { .. } => Some(OWNER_KINDS),
             Rule::BindType { .. } | Rule::SuperGiven { .. } => Some(SET_NAME_KINDS),
-            Rule::LoadByPattern => Some(PATTERN_KINDS),
+            Rule::LoadByPattern(_) => Some(PATTERN_KINDS),
             Rule::TypeBases => Some(CONTAINER_KINDS),
             Rule::SuperMetaclass { .. } => Some(CLASS_KINDS),
             Rule::ClassGet { .. }
@@ -395,6 +407,8 @@ impl Rule {
     fn captured(&self) -> Vec<ObjId> {
         match *self {
             Rule::Container(ref rule) => rule.captured(),
+            Rule::Protocol(ref rule) => rule.captured(),
+            Rule::Pattern(ref rule) => rule.captured(),
             Rule::Bases { class, .. }
             | Rule::KeywordCandidate { class }
             | Rule::MemberOfMetaclass { class, .. }
@@ -436,7 +450,7 @@ impl Rule {
             | Rule::SuperGiven { class, .. }
             | Rule::SuperAcceptedBy { class, .. } => vec![class],
             Rule::SuperMetaclass { sup, .. } => vec![sup],
-            Rule::LoadByPattern | Rule::SuperClass { .. } | Rule::TypeBases => Vec::new(),
+            Rule::LoadByPattern(_) | Rule::SuperClass { .. } | Rule::TypeBases => Vec::new(),
             Rule::ModuleGetattr { module, .. } => vec![module],
             Rule::Deliver { receiver, .. } => vec![receiver],
             Rule::Access(_)
@@ -489,6 +503,8 @@ impl<T: Trace> State<T> {
     fn results(&self, rule: &Rule) -> Vec<NodeId> {
         match *rule {
             Rule::Container(ref rule) => self.container_results(rule),
+            Rule::Protocol(ref rule) => self.protocol_results(rule),
+            Rule::Pattern(ref rule) => self.pattern_results(rule),
             Rule::Call(call)
             | Rule::PythonNew { call, .. }
             | Rule::PythonInstance { call }
@@ -538,7 +554,7 @@ impl<T: Trace> State<T> {
             | Rule::SuperGiven { dst, .. }
             | Rule::SuperAcceptedBy { dst, .. } => vec![dst],
             Rule::SuperMetaclass { load, .. } => self.access_result(load).into_iter().collect(),
-            Rule::LoadByPattern | Rule::TypeBases | Rule::SequenceLength { .. } => Vec::new(),
+            Rule::LoadByPattern(_) | Rule::TypeBases | Rule::SequenceLength { .. } => Vec::new(),
             Rule::Reversed { dst, .. } | Rule::ReversedSequence { items: dst, .. } => vec![dst],
             Rule::ReverseSequence { implicit, .. } => {
                 self.calls[implicit.index()].dst.into_iter().collect()
@@ -698,7 +714,7 @@ impl<T: Trace> State<T> {
             }
             Rule::BindClass { method, dst } => self.bind(graph, method, Some(object), dst, None),
             Rule::BindType { method, dst } => self.bind_type(graph, object, method, dst),
-            Rule::LoadByPattern => not_ported("patterns: a load by a pattern name"),
+            Rule::LoadByPattern(access) => self.load_by_pattern(graph, object, access),
             Rule::SuperClass {
                 object: node,
                 call,
@@ -726,6 +742,8 @@ impl<T: Trace> State<T> {
                 self.add_object(graph, dst, bound);
             }
             Rule::Container(ref rule) => self.container_apply(graph, rule, object),
+            Rule::Protocol(ref rule) => self.protocol_apply(graph, rule, object),
+            Rule::Pattern(ref rule) => self.pattern_apply(graph, rule, object),
         }
     }
 

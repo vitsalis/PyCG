@@ -98,6 +98,40 @@ impl<T: Trace> State<T> {
         }
     }
 
+    fn subclasses_listed(&mut self, graph: &mut Graph, class: ObjId) -> NodeId {
+        if let Some(&node) = self.namespace_nodes.get(&(class, Namespace::Subclasses)) {
+            return node;
+        }
+        let node = self.node(graph, None);
+        self.namespace_nodes
+            .insert((class, Namespace::Subclasses), node);
+        let subclasses: Vec<ObjId> = self
+            .objects
+            .class(class)
+            .subclasses
+            .iter()
+            .copied()
+            .collect();
+        for subclass in subclasses {
+            self.add_object(graph, node, subclass);
+        }
+        node
+    }
+
+    pub(super) fn subclasses(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
+        let details = &self.calls[call.index()];
+        let Some(dst) = details.dst else {
+            return;
+        };
+        let (origin, site) = (details.origin, details.site);
+        let origin = ContainerOrigin::Rule(origin, "subclasses", None);
+        let found = self.container_at(graph, "list", origin, site, None, false);
+        let listed = self.subclasses_listed(graph, class);
+        let unknown = self.unknown(graph, found);
+        self.add_edge(graph, listed, unknown);
+        self.add_object(graph, dst, found);
+    }
+
     pub(super) fn add_namespace(&mut self, graph: &mut Graph, object: ObjId, dst: NodeId) {
         if self.objects.is_class(object) {
             self.when_default_member(
