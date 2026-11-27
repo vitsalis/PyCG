@@ -6,13 +6,19 @@ use std::process::ExitCode;
 
 use num_bigint::BigInt;
 use pycg_analysis::CAP_DEFAULT_OBJECTS;
-use pycg_analysis::engine::hierarchy::NewClass;
-use pycg_analysis::engine::objects::{Allocator, Kind, Literal, Object, Passthrough};
-use pycg_analysis::engine::symbols::Sym;
+use pycg_analysis::builder::calls::{
+    Allocator, Analysis, Call, ClassStatement, Constant, MethodKind, NewClass, Passthrough,
+};
+use pycg_analysis::builder::{ModuleBuilder, Source};
+use pycg_analysis::engine::objects::{Kind, Object};
 use pycg_analysis::engine::trace::{Opacity, RuleInfo, Trace};
-use pycg_analysis::engine::{Engine, MethodKind, NewCall, RuleId, not_ported};
+use pycg_analysis::engine::{Engine, RuleId, not_ported};
 use pycg_analysis::model::Signature;
 use pycg_solver::{NodeId, ObjId, Solver, WatchId};
+use pycg_syntax::parse::with_parsed;
+use pycg_syntax::read::read_file;
+use pycg_syntax::scopes::analyse_scopes;
+use ruff_source_file::LineIndex;
 use rustc_hash::{FxHashMap, FxHashSet};
 use serde_json::{Value, json};
 
@@ -422,6 +428,70 @@ struct Replay {
     fields: FxHashMap<String, Vec<Value>>,
 }
 
+pub fn build(arguments: &[String]) -> Option<ExitCode> {
+    let [command, modules, entries, out] = arguments else {
+        return None;
+    };
+    if command != "engine-build" {
+        return None;
+    }
+    let listed = fs::read_to_string(modules).expect("the module list is readable");
+    let entries: Vec<String> = fs::read_to_string(entries)
+        .expect("the entry list is readable")
+        .lines()
+        .map(str::to_owned)
+        .collect();
+    let mut replay = Replay {
+        engine: Engine::new(Some(CAP_DEFAULT_OBJECTS), Recorder::new()),
+        fields: FxHashMap::default(),
+    };
+    let built = panic::catch_unwind(AssertUnwindSafe(|| {
+        for line in listed.lines() {
+            let (module, path) = line.split_once('\t').expect("a module and its file");
+            replay.engine.trace_mut().context = module.to_string();
+            build_module(
+                &mut replay.engine,
+                module,
+                Path::new(path),
+                entries.iter().any(|entry| entry == module),
+            );
+        }
+        replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
+        replay.engine.solve();
+    }));
+    Some(replay.write(Path::new(out), built.is_ok()))
+}
+
+fn build_module(engine: &mut Engine<Recorder>, module: &str, path: &Path, is_entry: bool) {
+    let Ok(source) = read_file(path) else {
+        return;
+    };
+    with_parsed(&source, |parsed| {
+        let Ok(parsed) = parsed else {
+            return;
+        };
+        let lines = LineIndex::from_source_text(&source);
+        let tokens = parsed.tokens();
+        let scopes = analyse_scopes(parsed.syntax(), module, tokens, &lines, &source);
+        let object = engine.module(module);
+        let is_package = path.file_name().is_some_and(|name| name == "__init__.py");
+        let mut builder = ModuleBuilder::new(
+            engine,
+            module,
+            object,
+            Source {
+                text: &source,
+                tokens,
+                lines: &lines,
+            },
+            &scopes,
+            is_package,
+            is_entry,
+        );
+        builder.build(&parsed.syntax().body);
+    });
+}
+
 pub fn run(input: &str, out: &str) -> ExitCode {
     let text = match fs::read_to_string(input) {
         Ok(text) => text,
@@ -454,27 +524,31 @@ pub fn run(input: &str, out: &str) -> ExitCode {
         replay.engine.trace_mut().context = CONTEXT_SOLVE.to_string();
         replay.engine.solve();
     }));
-    if replayed.is_err() {
-        let partial = replay.engine.trace().lines.concat();
-        if let Err(error) = fs::write(out.join(PARTIAL_TRACE), partial) {
-            eprintln!("pycg_dump engine: cannot write {PARTIAL_TRACE}: {error}");
-        }
-        return ExitCode::FAILURE;
-    }
-    let (points_to, trace) = replay.finish();
-    for (name, lines) in [("D3.jsonl", trace), ("D5.jsonl", points_to)] {
-        if let Err(error) = fs::write(out.join(name), lines.concat()) {
-            eprintln!(
-                "pycg_dump engine: cannot write {name} in {}: {error}",
-                out.display()
-            );
-            return ExitCode::FAILURE;
-        }
-    }
-    ExitCode::SUCCESS
+    replay.write(out, replayed.is_ok())
 }
 
 impl Replay {
+    fn write(self, out: &Path, finished: bool) -> ExitCode {
+        if !finished {
+            let partial = self.engine.trace().lines.concat();
+            if let Err(error) = fs::write(out.join(PARTIAL_TRACE), partial) {
+                eprintln!("pycg_dump engine: cannot write {PARTIAL_TRACE}: {error}");
+            }
+            return ExitCode::FAILURE;
+        }
+        let (points_to, trace) = self.finish();
+        for (name, lines) in [("D3.jsonl", trace), ("D5.jsonl", points_to)] {
+            if let Err(error) = fs::write(out.join(name), lines.concat()) {
+                eprintln!(
+                    "pycg_dump engine: cannot write {name} in {}: {error}",
+                    out.display()
+                );
+                return ExitCode::FAILURE;
+            }
+        }
+        ExitCode::SUCCESS
+    }
+
     fn prescan(&mut self, records: &[Value]) {
         for record in records {
             if let Some(fields) = record.get("fields") {
@@ -554,13 +628,16 @@ impl Replay {
                     .iter()
                     .map(|pair| (text(&pair[0]).into(), self.optional_node(&pair[1])))
                     .collect();
-                let function = self.engine.function(
-                    text(&arguments["name"]),
-                    text(&arguments["module"]),
-                    &signature,
-                    &defaults,
-                    arguments["generator"].as_bool().expect("generator"),
-                );
+                let function = self
+                    .engine
+                    .function(
+                        text(&arguments["name"]),
+                        text(&arguments["module"]),
+                        &signature,
+                        &defaults,
+                        arguments["generator"].as_bool().expect("generator"),
+                    )
+                    .object;
                 Some(self.object_answer(function))
             }
             "new_class" => {
@@ -644,7 +721,19 @@ impl Replay {
             }
             "add_metaclass_call" => {
                 let class = self.object(&arguments["cls"]);
-                self.engine.add_metaclass_call(class);
+                let statement = ClassStatement {
+                    name: "",
+                    bases: &[],
+                    namespace: &[],
+                    keywords: &[],
+                    double_star: &[],
+                };
+                self.engine.add_metaclass_call(
+                    class,
+                    &statement,
+                    text(&arguments["caller"]),
+                    text(&arguments["site"]),
+                );
                 None
             }
             "imported_value" => {
@@ -741,7 +830,7 @@ impl Replay {
             .collect();
         let callee = self.optional_node(&arguments["callee"]);
         let dst = self.optional_node(&arguments["dst"]);
-        self.engine.add_call(&NewCall {
+        self.engine.add_call(&Call {
             callee,
             caller: text(&arguments["caller"]),
             args: &args,
@@ -765,11 +854,13 @@ impl Replay {
     fn set_recorded_fields(&mut self, object: ObjId, name: &str, fields: &Value) {
         match self.engine.object(object) {
             Object::Module(_) => {
-                let defines: Vec<_> = set(&fields["defines"])
-                    .iter()
-                    .map(|name| self.engine.intern(text(name)))
-                    .collect();
-                self.engine.module_defines_mut(object).extend(defines);
+                let defines = self.engine.module_defines(object);
+                for name in set(&fields["defines"]) {
+                    let name: Box<str> = text(name).into();
+                    if !defines.contains(&name) {
+                        defines.push(name);
+                    }
+                }
             }
             Object::Function(_) => {
                 if !fields["annotations"].is_null() {
@@ -778,15 +869,15 @@ impl Replay {
                 let passthrough: Vec<Passthrough> = set(&fields["passthrough"])
                     .iter()
                     .map(|entry| match entry {
-                        Value::String(name) => Passthrough::Name(self.engine.intern(name)),
+                        Value::String(name) => Passthrough::Name(name.as_str().into()),
                         Value::Array(pair) => Passthrough::Element(
-                            self.engine.intern(text(&pair[0])),
+                            text(&pair[0]).into(),
                             pair[1].as_i64().expect("an element index"),
                         ),
                         _ => panic!("a passthrough entry: {entry}"),
                     })
                     .collect();
-                let function = self.engine.function_mut(object);
+                let function = self.engine.function_fields(object);
                 function.passthrough = passthrough;
                 function.decorated = fields["decorated"].as_bool().expect("decorated");
                 function.is_async = fields["is_async"].as_bool().expect("is_async");
@@ -799,22 +890,19 @@ impl Replay {
                 if !fields["annotations"].is_null() {
                     not_ported("annotations");
                 }
-                let names = |engine: &mut Engine<Recorder>, value: &Value| -> FxHashSet<Sym> {
-                    set(value)
-                        .iter()
-                        .map(|name| engine.intern(text(name)))
-                        .collect()
+                let names = |value: &Value| -> Vec<Box<str>> {
+                    set(value).iter().map(|name| text(name).into()).collect()
                 };
-                let defines = names(&mut self.engine, &fields["defines"]);
-                let bound = names(&mut self.engine, &fields["bound"]);
-                let slots = names(&mut self.engine, &fields["slots"]);
+                let defines = names(&fields["defines"]);
+                let bound = names(&fields["bound"]);
+                let slots = names(&fields["slots"]);
                 let allocator = match fields["allocator"].as_str() {
                     None => None,
                     Some("object") => Some(Allocator::Object),
                     Some("super") => Some(Allocator::Super),
                     Some(other) => panic!("an allocator: {other}"),
                 };
-                let class = self.engine.class_mut(object);
+                let class = self.engine.class_fields(object);
                 class.defines = defines;
                 class.bound = bound;
                 class.slots = slots;
@@ -968,13 +1056,13 @@ fn position(value: &Value) -> Option<u32> {
         .map(|position| u32::try_from(position).expect("a position fits u32"))
 }
 
-fn literal(value: &Value) -> Literal {
+fn literal(value: &Value) -> Constant {
     match value {
-        Value::String(text) => Literal::Str(text.chars().map(u32::from).collect()),
+        Value::String(text) => Constant::Str(text.chars().map(u32::from).collect()),
         Value::Number(number) => {
-            Literal::Int(BigInt::from(number.as_i64().expect("an integer constant")))
+            Constant::Int(BigInt::from(number.as_i64().expect("an integer constant")))
         }
-        Value::Object(form) if form.contains_key("int") => Literal::Int(
+        Value::Object(form) if form.contains_key("int") => Constant::Int(
             text(&form["int"])
                 .parse()
                 .expect("the digits of an integer constant"),
@@ -988,7 +1076,7 @@ fn literal(value: &Value) -> Literal {
                         .expect("a byte in hex")
                 })
                 .collect();
-            Literal::Bytes(bytes)
+            Constant::Bytes(bytes)
         }
         _ => panic!("not a constant: {value}"),
     }

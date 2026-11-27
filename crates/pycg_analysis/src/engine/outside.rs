@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use pycg_solver::{NodeId, ObjId};
 use pycg_stubs::{Decorator, Definition, DefinitionKind, Entry};
@@ -50,7 +50,7 @@ pub fn outside_name(path: &str) -> String {
 }
 
 impl<T: Trace> State<T> {
-    pub(super) fn stub_definitions(&mut self, external: ObjId) -> Option<Rc<[Definition]>> {
+    pub(super) fn stub_definitions(&mut self, external: ObjId) -> Option<Arc<[Definition]>> {
         let (name, unknown) = match self.objects.get(external) {
             Object::External(found) => (found.name, false),
             Object::UnknownExternal(found) => (found.name, true),
@@ -69,7 +69,7 @@ impl<T: Trace> State<T> {
             }
             let top = path.split('.').next().unwrap_or(&path).to_string();
             if self.stubs.module(&top).is_some() {
-                result = Some(Rc::from(self.stubs.find(&path)));
+                result = Some(Arc::from(self.stubs.find(&path)));
             }
         }
         self.stub_definitions.insert(name, result.clone());

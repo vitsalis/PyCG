@@ -79,3 +79,52 @@ fn the_engine_follows_the_oracle_up_to_the_rule_that_is_not_ported_yet() {
         );
     }
 }
+
+#[test]
+fn the_builder_into_the_engine_gives_the_trace_and_points_to_of_the_oracle() {
+    for vector in vectors()
+        .into_iter()
+        .filter(|vector| !vector.join("not-ported.txt").exists() && programs(vector).len() == 1)
+    {
+        let name = vector.file_name().expect("a vector name");
+        let out = Path::new(env!("CARGO_TARGET_TMPDIR"))
+            .join("engine-build")
+            .join(name);
+        std::fs::create_dir_all(&out).expect("the output directory is made");
+        let program = &programs(&vector)[0];
+        let modules = out.join("modules.tsv");
+        std::fs::write(&modules, format!("main\t{}\n", program.display()))
+            .expect("the module list is written");
+        let entries = out.join("entries.txt");
+        std::fs::write(&entries, "main\n").expect("the entry list is written");
+        let output = Command::new(env!("CARGO_BIN_EXE_pycg_dump"))
+            .arg("engine-build")
+            .args([&modules, &entries, &out])
+            .output()
+            .expect("pycg_dump runs");
+        assert!(
+            output.status.success(),
+            "{}: {}",
+            vector.display(),
+            String::from_utf8_lossy(&output.stderr)
+        );
+        for dump in ["D3.jsonl", "D5.jsonl"] {
+            assert_eq!(
+                read(&out.join(dump)),
+                read(&vector.join(dump)),
+                "{} {dump}",
+                vector.display()
+            );
+        }
+    }
+}
+
+fn programs(vector: &Path) -> Vec<PathBuf> {
+    let mut found: Vec<PathBuf> = std::fs::read_dir(vector)
+        .expect("a vector directory")
+        .map(|entry| entry.expect("a directory entry").path())
+        .filter(|path| path.extension().is_some_and(|extension| extension == "py"))
+        .collect();
+    found.sort();
+    found
+}

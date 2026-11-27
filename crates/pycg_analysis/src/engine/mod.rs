@@ -1,3 +1,4 @@
+mod analysis;
 mod arguments;
 mod attributes;
 mod containers;
@@ -10,24 +11,25 @@ mod semantics;
 pub mod symbols;
 pub mod trace;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use indexmap::{IndexMap, IndexSet};
 use pycg_solver::{NodeId, ObjId, Solver, WatchId, Work};
 use pycg_stubs::{Definition, Stubs};
 use rustc_hash::{FxBuildHasher, FxHashMap, FxHashSet};
 
+use crate::builder::calls::{BuilderTables, ClassFields, FunctionFields, MethodKind};
 use crate::model::{BUILTIN_MODULE, Signature};
 use attributes::{
     Access, AccessorEntry, AccessorHooks, Accessors, AccessorsId, Deliveries, DeliveriesId,
     FieldWrites, HookCalls, HookCallsId, HooksId, WritesId,
 };
-use hierarchy::{LookupAttr, Namespace, NewClass, Unless};
-use objects::{Class, Container, External, Function, Kind, Literal, Module, Object, Objects};
+use hierarchy::{LookupAttr, Namespace, Unless};
+use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
 pub use rules::RuleId;
 use rules::{Rule, WaitingRule};
+pub use semantics::CallId;
 use semantics::{Call, Construct, Origin, Receivers, Returned, ReturnedId, SiteKey};
-pub use semantics::{CallId, NewCall};
 use symbols::{Sym, Symbols};
 use trace::{Opacity, Trace};
 
@@ -38,13 +40,14 @@ pub const EXTERNAL_STEPS_PAST_ROOT_MAX: u32 = 2;
 
 pub type Graph = Solver<RuleId>;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum MethodKind {
-    StaticMethod,
-    ClassMethod,
-}
-
 type Receiver = (NodeId, NodeId, ObjId, ObjId, Sym);
+
+#[derive(Clone)]
+enum BuilderFields {
+    Function(FunctionFields),
+    Class(ClassFields),
+    Module(Vec<Box<str>>),
+}
 
 pub fn not_ported(feature: &str) -> ! {
     panic!("not ported: {feature}")
@@ -81,7 +84,7 @@ struct State<T: Trace> {
     call_expressions: Vec<(Sym, Sym, Option<NodeId>)>,
     classes: Vec<ObjId>,
     stubs: Stubs,
-    stub_definitions: FxHashMap<Sym, Option<Rc<[Definition]>>>,
+    stub_definitions: FxHashMap<Sym, Option<Arc<[Definition]>>>,
     external_modules: FxHashSet<String>,
     watches: FxHashMap<(ObjId, LookupAttr, Option<ObjId>, Unless), WatchId>,
     waiting: FxHashMap<WatchId, Vec<(WaitingRule, ObjId)>>,
@@ -125,6 +128,9 @@ struct State<T: Trace> {
     class_store_names: FxHashMap<ObjId, FxHashSet<Sym>>,
     pattern_states: FxHashMap<ObjId, ()>,
     field_readers: FxHashMap<(ObjId, Sym), OrderedMap<NodeId, Vec<ObjId>>>,
+    builder_fields: FxHashMap<ObjId, BuilderFields>,
+    handed: Vec<ObjId>,
+    tables: BuilderTables,
 }
 
 impl<T: Trace> Engine<T> {
@@ -201,6 +207,9 @@ impl<T: Trace> Engine<T> {
             class_store_names: FxHashMap::default(),
             pattern_states: FxHashMap::default(),
             field_readers: FxHashMap::default(),
+            builder_fields: FxHashMap::default(),
+            handed: Vec::new(),
+            tables: BuilderTables::default(),
         };
         state.trace.object(
             saturated,
@@ -246,21 +255,6 @@ impl<T: Trace> Engine<T> {
         self.state.objects.get(object)
     }
 
-    pub fn function_mut(&mut self, function: ObjId) -> &mut Function {
-        self.state.objects.function_mut(function)
-    }
-
-    pub fn class_mut(&mut self, class: ObjId) -> &mut Class {
-        self.state.objects.class_mut(class)
-    }
-
-    pub fn module_defines_mut(&mut self, module: ObjId) -> &mut FxHashSet<Sym> {
-        match self.state.objects.get_mut(module) {
-            Object::Module(module) => &mut module.defines,
-            _ => panic!("object {module:?} is not a module"),
-        }
-    }
-
     pub fn saturated(&self) -> ObjId {
         self.state.saturated
     }
@@ -291,138 +285,6 @@ impl<T: Trace> Engine<T> {
 
     pub fn phase(&self) -> u32 {
         self.graph.phase
-    }
-
-    pub fn node(&mut self, label: Option<&str>) -> NodeId {
-        self.state.node(&mut self.graph, label)
-    }
-
-    pub fn constant(&mut self, object: ObjId) -> NodeId {
-        self.state.constant(&mut self.graph, object)
-    }
-
-    pub fn const_object(&mut self, value: &Literal) -> ObjId {
-        self.state.const_object(&mut self.graph, value)
-    }
-
-    pub fn field(&mut self, object: ObjId, name: &str) -> NodeId {
-        let name = self.state.symbols.intern(name);
-        self.state.field(&mut self.graph, object, name)
-    }
-
-    pub fn add_edge(&mut self, source: NodeId, target: NodeId) {
-        self.state.add_edge(&mut self.graph, source, target);
-    }
-
-    pub fn add_object(&mut self, node: NodeId, object: ObjId) {
-        self.state.add_object(&mut self.graph, node, object);
-    }
-
-    pub fn module(&mut self, name: &str) -> ObjId {
-        self.state.module(&mut self.graph, name)
-    }
-
-    pub fn external(&mut self, name: &str, steps: u32, inexact: bool) -> ObjId {
-        self.state.external(&mut self.graph, name, steps, inexact)
-    }
-
-    pub fn function(
-        &mut self,
-        name: &str,
-        module: &str,
-        signature: &Signature,
-        defaults: &[(Box<str>, Option<NodeId>)],
-        generator: bool,
-    ) -> ObjId {
-        self.state.function(
-            &mut self.graph,
-            name,
-            module,
-            signature,
-            defaults,
-            generator,
-        )
-    }
-
-    pub fn add_call(&mut self, call: &NewCall<'_>) {
-        self.state.add_call(&mut self.graph, call);
-    }
-
-    pub fn new_class(&mut self, class: &NewClass<'_>) -> ObjId {
-        self.state.new_class(&mut self.graph, class)
-    }
-
-    pub fn add_method(
-        &mut self,
-        class: ObjId,
-        name: &str,
-        function: ObjId,
-        kind: Option<MethodKind>,
-    ) {
-        self.state
-            .add_method(&mut self.graph, class, name, function, kind);
-    }
-
-    pub fn add_class_member(&mut self, value: NodeId, field: NodeId) {
-        self.state.add_inexact(&mut self.graph, value, field);
-    }
-
-    pub fn add_set_name(
-        &mut self,
-        value: NodeId,
-        class: ObjId,
-        name: &str,
-        caller: &str,
-        site: &str,
-    ) {
-        self.state
-            .add_set_name(&mut self.graph, value, class, name, caller, site);
-    }
-
-    pub fn add_init_subclass(
-        &mut self,
-        class: ObjId,
-        keywords: &[(Box<str>, Option<NodeId>)],
-        double_star: &[Option<NodeId>],
-        caller: &str,
-        site: &str,
-    ) {
-        self.state
-            .add_init_subclass(&mut self.graph, class, keywords, double_star, caller, site);
-    }
-
-    pub fn add_metaclass_call(&mut self, class: ObjId) {
-        self.state.add_metaclass_call(&mut self.graph, class);
-    }
-
-    pub fn imported_value(&mut self, name: &str) -> NodeId {
-        self.state.imported_value(&mut self.graph, name)
-    }
-
-    pub fn add_external_module(&mut self, name: &str) {
-        self.state.add_external_module(name);
-    }
-
-    pub fn add_load(&mut self, base: NodeId, attr: &str, dst: NodeId, caller: &str, site: &str) {
-        self.state
-            .add_load(&mut self.graph, base, attr, dst, caller, site);
-    }
-
-    pub fn add_store(
-        &mut self,
-        base: NodeId,
-        attr: &str,
-        src: Option<NodeId>,
-        caller: &str,
-        site: &str,
-    ) {
-        self.state
-            .add_store(&mut self.graph, base, attr, src, caller, site);
-    }
-
-    pub fn add_delete(&mut self, base: NodeId, attr: &str, caller: &str, site: &str) {
-        self.state
-            .add_delete(&mut self.graph, base, attr, caller, site);
     }
 
     pub fn solve(&mut self) {

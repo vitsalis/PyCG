@@ -5,7 +5,8 @@ use pycg_stubs::mro::{exhaustive_order, linearizations};
 use pycg_stubs::{DefinitionKind, Entry, class_names};
 use rustc_hash::FxHashSet;
 
-use crate::engine::objects::{Allocator, Class, Object};
+use crate::builder::calls::{Allocator, NewClass};
+use crate::engine::objects::{Class, Object};
 use crate::engine::outside::{OutsideGives, outside_name};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
@@ -55,17 +56,6 @@ pub struct LookupKey {
     pub receiver: Option<ObjId>,
     pub after: Option<ObjId>,
     pub unless: Unless,
-}
-
-pub struct NewClass<'a> {
-    pub name: &'a str,
-    pub module: &'a str,
-    pub defines: &'a [Box<str>],
-    pub base_nodes: &'a [Option<NodeId>],
-    pub protocol: bool,
-    pub abstract_methods: &'a [Box<str>],
-    pub metaclass: Option<NodeId>,
-    pub uses_namespace: bool,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
