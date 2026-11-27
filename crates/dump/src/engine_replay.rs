@@ -503,6 +503,15 @@ pub fn run(input: &str, out: &str) -> ExitCode {
             let record = record(number, &read(line));
             if record.get("call").is_some() {
                 replay.call(number + 1, &record);
+            } else if let Some(tables) = record.get("tables") {
+                for pair in pairs(&tables["literal_imports"]) {
+                    let module = replay.node(&pair[1]);
+                    replay
+                        .engine
+                        .tables()
+                        .literal_imports
+                        .push((text(&pair[0]).into(), module));
+                }
             } else if record.get("fields").is_some() && record["module"] == PROGRAM {
                 let object = replay.object(&record["object"]);
                 let name = replay.engine.trace().object_name(object).to_string();
@@ -570,9 +579,6 @@ impl Replay {
                 let module = text(&record["module"]).to_owned();
                 if !self.built.contains(&module) {
                     self.built.push(module);
-                }
-                if !empty_collection(&tables["literal_imports"]) {
-                    not_ported("the builder table literal_imports");
                 }
                 for site in set(&tables["zero_argument_super"]) {
                     self.engine
@@ -1388,15 +1394,6 @@ fn pairs(value: &Value) -> &[Value] {
 
 fn set(value: &Value) -> &[Value] {
     list(&value["set"])
-}
-
-fn empty_collection(value: &Value) -> bool {
-    ["set", "dict"].iter().any(|form| {
-        value
-            .get(form)
-            .and_then(Value::as_array)
-            .is_some_and(Vec::is_empty)
-    })
 }
 
 fn position(value: &Value) -> Option<u32> {
