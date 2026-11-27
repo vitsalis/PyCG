@@ -496,6 +496,17 @@ oracle runs once per key, and its output is cached.
 that ends adds its own (section 4), and none is ever removed. A dump that
 the Rust side does not write yet is reported as missing, not compared.
 
+Until stages 4 and 6 join the rules to the builder and the document,
+`make parity` also drives the Rust engine from the oracle's D4 (`pycg_dump
+engine <D4.jsonl> OUT`): it makes each recorded builder call, checks its
+answer against the recorded one, solves, and writes D3 and D5 of the
+engine. The fields and tables that D4 records at the end of a module are
+set when their object is made. A builder call or a rule that is not
+ported stops the replay with `not ported: <what>`. D3 and D5 must agree on
+the inputs that `tools/parity/engine.txt` lists; each pull request of
+stage 5 adds the inputs it makes agree, and the job summary counts the
+others.
+
 ## The CI job
 
 `.github/workflows/parity.yml`, added by the stage 0 pull request that

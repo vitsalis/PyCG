@@ -422,6 +422,55 @@ def test_a_required_dump_that_the_other_side_lacks_fails(
     assert f"failed: {dump} is required and absent" in capsys.readouterr().out
 
 
+def test_only_the_listed_inputs_are_compared_on_the_named_dumps(
+    dumped, tmp_path, capsys
+):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    copy_as_input(first, expected, "micro/a/other")
+    agreeing = copy_as_input(first, actual, "micro/a/classes")
+    (agreeing / "D4.jsonl").write_text("{}\n", encoding="utf-8")
+    (copy_as_input(first, actual, "micro/a/other") / "error.txt").write_text("")
+    inputs = tmp_path / "inputs.txt"
+    inputs.write_text("micro/a/classes\n", encoding="utf-8")
+
+    status = compare.main(
+        [str(expected), str(actual), "--dumps", "D3", "D5", "--inputs", str(inputs)]
+    )
+
+    assert status == 0
+    assert "micro: 1 inputs, 1 identical, 0 different" in capsys.readouterr().out
+
+
+def test_a_listed_input_that_the_oracle_lacks_fails(dumped, tmp_path, capsys):
+    first, _ = dumped["classes"]
+    expected = tmp_path / "expected"
+    actual = tmp_path / "actual"
+    copy_as_input(first, expected, "micro/a/classes")
+    copy_as_input(first, actual, "micro/a/classes")
+    inputs = tmp_path / "inputs.txt"
+    inputs.write_text("micro/a/classes\nmicro/a/renamed\n", encoding="utf-8")
+
+    status = compare.main(
+        [str(expected), str(actual), "--dumps", "D3", "--inputs", str(inputs)]
+    )
+
+    assert status == 1
+    assert "micro/a/renamed: failed: the oracle has no such input" in (
+        capsys.readouterr().out
+    )
+
+
+def test_the_inputs_of_the_engine_are_inputs_of_the_oracle():
+    inputs = compare.listed(PARITY / "engine.txt")
+    snippets = ROOT / "evaluation" / "micro-benchmark" / "snippets"
+
+    assert inputs == sorted(set(inputs))
+    assert all((snippets / key.removeprefix("micro/")).is_dir() for key in inputs)
+
+
 KEY_FILES = (
     "tools/inputs_key.py",
     "evaluation/compose.yaml",
@@ -499,7 +548,7 @@ def test_the_key_of_an_oracle_run_follows_every_input_of_the_run(tmp_path, chang
 
 
 def test_the_required_dumps_are_dumps_that_the_oracle_writes():
-    required = compare.required_dumps(PARITY / "required.txt")
+    required = compare.listed(PARITY / "required.txt")
 
     assert {"D1", "D2"} <= set(required)
     assert set(required) <= {"D1", "D2", "D3", "D4", "D5", "D6"}
