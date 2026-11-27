@@ -88,6 +88,7 @@ pub(crate) type Bounds = (Option<BigInt>, Option<BigInt>);
 #[derive(Clone, Copy, Debug)]
 enum Observer {
     CopyField { target: ObjId },
+    ReadPattern { pattern: ObjId, dst: NodeId },
 }
 
 #[derive(Default)]
@@ -330,6 +331,15 @@ impl<T: Trace> State<T> {
             Object::Container(container) if container.exact => {
                 return self.inexact_container(graph, object);
             }
+            Object::Pattern {
+                prefix,
+                suffix,
+                case,
+                exact: true,
+            } => {
+                let (prefix, suffix, case) = (prefix.clone(), suffix.clone(), *case);
+                return self.pattern(graph, &prefix, &suffix, case, false);
+            }
             Object::Const { exact: false, .. }
             | Object::Generator { exact: false, .. }
             | Object::Coroutine { exact: false, .. }
@@ -346,7 +356,8 @@ impl<T: Trace> State<T> {
             | Object::Wrapper { .. }
             | Object::Super { .. }
             | Object::Typed { .. }
-            | Object::BuiltinMethod { .. } => return object,
+            | Object::BuiltinMethod { .. }
+            | Object::Pattern { exact: false, .. } => return object,
         };
         if let Some(&found) = self.inexact.get(&object) {
             return found;
@@ -792,6 +803,13 @@ impl<T: Trace> State<T> {
                 };
                 self.add_edge(graph, node, field);
             }
+            Observer::ReadPattern { pattern, dst } => {
+                if let Literal::Str(points) = key
+                    && self.pattern_matches_points(pattern, points)
+                {
+                    self.add_edge(graph, node, dst);
+                }
+            }
         }
     }
 
@@ -832,8 +850,30 @@ impl<T: Trace> State<T> {
             self.add_edge(graph, unknown, dst);
             return;
         }
+        if let Some(pattern) = key.filter(|&key| self.exact_pattern(key))
+            && self.const_value(pattern).is_none()
+            && self.is_dict(container)
+        {
+            let unknown = self.unknown(graph, container);
+            self.add_edge(graph, unknown, dst);
+            let aliased = self.aliased(graph, container);
+            self.add_edge(graph, aliased, dst);
+            self.observe(graph, container, Observer::ReadPattern { pattern, dst });
+            return;
+        }
         let every = self.every(graph, container);
         self.add_edge(graph, every, dst);
+    }
+
+    fn exact_pattern(&self, key: ObjId) -> bool {
+        matches!(self.objects.get(key), Object::Pattern { exact: true, .. })
+    }
+
+    fn literal_key(&self, key: ObjId) -> bool {
+        matches!(
+            self.objects.get(key),
+            Object::Const { .. } | Object::Pattern { .. }
+        )
     }
 
     fn write_key(&mut self, graph: &mut Graph, key: Option<ObjId>, container: ObjId, src: NodeId) {
@@ -1013,7 +1053,7 @@ impl<T: Trace> State<T> {
     }
 
     fn read_group(&mut self, graph: &mut Graph, key: Option<ObjId>, group: GroupId, dst: NodeId) {
-        let hub_key = key.filter(|&key| self.const_value(key).is_some());
+        let hub_key = key.filter(|&key| self.const_value(key).is_some() || self.exact_pattern(key));
         let existing = self.containers.groups[index_of(group.0)]
             .hubs
             .get(&hub_key)
@@ -1077,7 +1117,7 @@ impl<T: Trace> State<T> {
     }
 
     fn keyed_pair(&mut self, graph: &mut Graph, id: KeyedGroupId, key: ObjId, container: Keyable) {
-        if self.const_value(key).is_none() {
+        if !self.literal_key(key) {
             let group = &mut self.containers.keyed_groups[index_of(id.0)];
             if !group.other_keys.insert(container) {
                 return;
@@ -1302,7 +1342,10 @@ impl<T: Trace> State<T> {
 
     pub(super) fn keyed_apply(&mut self, graph: &mut Graph, id: KeyedId, key: ObjId) {
         let keyed = &mut self.containers.keyed_rules[index_of(id.0)];
-        if !matches!(self.objects.get(key), Object::Const { .. }) {
+        if !matches!(
+            self.objects.get(key),
+            Object::Const { .. } | Object::Pattern { .. }
+        ) {
             if keyed.other_key {
                 return;
             }
@@ -1771,7 +1814,8 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
             | Object::Generator { .. }
-            | Object::Coroutine { .. } => {}
+            | Object::Coroutine { .. }
+            | Object::Pattern { .. } => {}
         }
     }
 
@@ -2033,7 +2077,8 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
             | Object::Generator { .. }
-            | Object::Coroutine { .. } => {}
+            | Object::Coroutine { .. }
+            | Object::Pattern { .. } => {}
         }
     }
 
@@ -2203,7 +2248,8 @@ impl<T: Trace> State<T> {
             | Object::Wrapper { .. }
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
-            | Object::Coroutine { .. } => return,
+            | Object::Coroutine { .. }
+            | Object::Pattern { .. } => return,
         }
         let is_async = self.containers.iterations[index_of(iteration.0)].is_async;
         let role = self.containers.iterations[index_of(iteration.0)].role;
@@ -2378,7 +2424,8 @@ impl<T: Trace> State<T> {
             | Object::Super { .. }
             | Object::BuiltinMethod { .. }
             | Object::Const { .. }
-            | Object::Coroutine { .. } => {}
+            | Object::Coroutine { .. }
+            | Object::Pattern { .. } => {}
         }
     }
 

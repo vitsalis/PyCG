@@ -210,7 +210,8 @@ impl<T: Trace> State<T> {
             | Object::Const { .. }
             | Object::Container(_)
             | Object::Generator { .. }
-            | Object::Coroutine { .. } => {}
+            | Object::Coroutine { .. }
+            | Object::Pattern { .. } => {}
         }
     }
 

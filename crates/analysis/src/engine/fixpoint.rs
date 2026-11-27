@@ -8,6 +8,7 @@ use crate::engine::{Graph, State};
 
 impl<T: Trace> State<T> {
     pub(super) fn solve(&mut self, graph: &mut Graph) {
+        self.freeze_module_names();
         let mut read = FxHashSet::default();
         for &class in &self.classes {
             let found = self.objects.class(class);
@@ -68,7 +69,10 @@ impl<T: Trace> State<T> {
         self.completed_functions = self.functions.len();
         added = self.complete_keys(graph) || added;
         added = self.complete_dynamic_accesses(graph) || added;
-        added
+        if added {
+            return true;
+        }
+        self.complete_pattern_operands(graph)
     }
 
     fn absorbed_functions(&mut self, graph: &mut Graph) -> FxHashSet<ObjId> {
@@ -125,7 +129,8 @@ impl<T: Trace> State<T> {
                 | Object::Const { .. }
                 | Object::Container(_)
                 | Object::Generator { .. }
-                | Object::Coroutine { .. } => {}
+                | Object::Coroutine { .. }
+                | Object::Pattern { .. } => {}
             }
         }
         functions

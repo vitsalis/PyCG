@@ -683,12 +683,16 @@ impl<T: Trace> Analysis for Engine<T> {
             .add_yield_from(&mut self.graph, iterable, function, dst, caller, site);
     }
 
-    fn add_pattern_operand(&mut self, _operand: Option<NodeId>, _result: NodeId) {
-        not_ported("the builder call add_pattern_operand")
+    fn add_pattern_operand(&mut self, operand: Option<NodeId>, result: NodeId) {
+        self.sync();
+        self.state
+            .add_pattern_operand(&mut self.graph, operand, result);
     }
 
-    fn pattern(&mut self, _prefix: &[u32], _suffix: &[u32]) -> ObjId {
-        not_ported("the builder call pattern")
+    fn pattern(&mut self, prefix: &[u32], suffix: &[u32]) -> ObjId {
+        self.sync();
+        self.state
+            .pattern(&mut self.graph, prefix, suffix, None, true)
     }
 
     fn type_form(&mut self, _operator: &str, _parts: &[Option<NodeId>], _site: &str) -> ObjId {

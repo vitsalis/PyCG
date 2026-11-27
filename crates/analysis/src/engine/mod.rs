@@ -9,6 +9,7 @@ pub mod hierarchy;
 pub mod objects;
 mod outside;
 mod outside_calls;
+mod patterns;
 mod protocols;
 mod reflection;
 mod rules;
@@ -142,7 +143,6 @@ struct State<T: Trace> {
     descriptors_itself: FxHashSet<(ObjId, NodeId)>,
     store_names: FxHashSet<Sym>,
     class_store_names: FxHashMap<ObjId, FxHashSet<Sym>>,
-    pattern_states: FxHashMap<ObjId, ()>,
     field_readers: FxHashMap<(ObjId, Sym), OrderedMap<NodeId, Vec<ObjId>>>,
     builder_fields: FxHashMap<ObjId, BuilderFields>,
     external_callees: FxHashMap<Sym, Known>,
@@ -180,6 +180,7 @@ struct State<T: Trace> {
     containers: containers::Containers,
     protocols: protocols::Protocols,
     builder_calls: Vec<CallId>,
+    patterns: patterns::Patterns,
 }
 
 impl<T: Trace> Engine<T> {
@@ -259,7 +260,6 @@ impl<T: Trace> Engine<T> {
             descriptors_itself: FxHashSet::default(),
             store_names: FxHashSet::default(),
             class_store_names: FxHashMap::default(),
-            pattern_states: FxHashMap::default(),
             field_readers: FxHashMap::default(),
             builder_fields: FxHashMap::default(),
             external_callees: FxHashMap::default(),
@@ -296,6 +296,7 @@ impl<T: Trace> Engine<T> {
             containers: containers::Containers::default(),
             protocols: protocols::Protocols::default(),
             builder_calls: Vec::new(),
+            patterns: patterns::Patterns::default(),
             tables: BuilderTables::default(),
         };
         state.trace.object(
