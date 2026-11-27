@@ -3,7 +3,7 @@ mod stubs_replay;
 
 use std::process::ExitCode;
 
-const USAGE: &str = "usage: pycg_dump stubs <D2.jsonl> | d1-positions FILE";
+const USAGE: &str = "usage: pycg_dump stubs <D2.jsonl> | d1-positions FILE | d1-scopes FILE MODULE";
 const EXIT_USAGE: u8 = 2;
 
 fn main() -> ExitCode {
