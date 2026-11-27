@@ -50,6 +50,14 @@ pub enum Unless {
     Names(Box<[Sym]>),
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct BindsId(u32);
+
+pub(crate) struct Binds {
+    instance: bool,
+    receivers: OrderedMap<NodeId, Option<ObjId>>,
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct LookupKey {
     pub attr: LookupAttr,
@@ -769,19 +777,12 @@ impl<T: Trace> State<T> {
                 }
             } else {
                 let field = self.field(graph, base, attr);
-                if self.class_binds.insert((field, receiver, dst)) {
-                    let instance = match receiver.map(|receiver| self.objects.get(receiver)) {
-                        Some(Object::Instance { .. }) => true,
-                        Some(Object::Class(receiver)) => !receiver.ancestors.contains(&base),
-                        _ => false,
-                    };
-                    let rule = self.rule(Rule::Bind {
-                        receiver,
-                        dst,
-                        instance,
-                    });
-                    self.attach(graph, field, rule);
-                }
+                let instance = match receiver.map(|receiver| self.objects.get(receiver)) {
+                    Some(Object::Instance { .. }) => true,
+                    Some(Object::Class(receiver)) => !receiver.ancestors.contains(&base),
+                    _ => false,
+                };
+                self.bind_field(graph, field, receiver, dst, instance);
                 self.objects.class(base).defines.contains(&attr)
             };
             found = found || defines;
@@ -790,6 +791,70 @@ impl<T: Trace> State<T> {
             }
         }
         found
+    }
+
+    fn bind_field(
+        &mut self,
+        graph: &mut Graph,
+        field: NodeId,
+        receiver: Option<ObjId>,
+        dst: NodeId,
+        instance: bool,
+    ) {
+        let binds = match self.field_binds.get(&(field, instance)) {
+            Some(&binds) => binds,
+            None => {
+                let binds = BindsId(
+                    u32::try_from(self.binds.len()).expect("fewer than 2^32 field bindings"),
+                );
+                self.binds.push(Binds {
+                    instance,
+                    receivers: OrderedMap::default(),
+                });
+                self.field_binds.insert((field, instance), binds);
+                let rule = self.rule(Rule::Binds(binds));
+                self.attach(graph, field, rule);
+                binds
+            }
+        };
+        let receivers = &mut self.binds[binds.0 as usize].receivers;
+        if let Some(&known) = receivers.get(&dst) {
+            assert_eq!(known, receiver, "a lookup node belongs to one receiver");
+            return;
+        }
+        receivers.insert(dst, receiver);
+        let rule = self.rule(Rule::Bind {
+            receiver,
+            dst,
+            instance,
+        });
+        self.apply_now(graph, field, rule);
+    }
+
+    pub(super) fn binds_results(&self, binds: BindsId) -> Vec<NodeId> {
+        self.binds[binds.0 as usize]
+            .receivers
+            .keys()
+            .copied()
+            .collect()
+    }
+
+    pub(super) fn binds_apply(&mut self, graph: &mut Graph, binds: BindsId, object: ObjId) {
+        let found = &self.binds[binds.0 as usize];
+        let instance = found.instance;
+        let receivers: Vec<(NodeId, Option<ObjId>)> = found
+            .receivers
+            .iter()
+            .map(|(&dst, &receiver)| (dst, receiver))
+            .collect();
+        for (dst, receiver) in receivers {
+            if receiver.is_some_and(|receiver| self.opaque(receiver)) {
+                let saturated = self.saturated;
+                self.add_object(graph, dst, saturated);
+            } else {
+                self.bind(graph, object, receiver, dst, Some(instance));
+            }
+        }
     }
 
     pub(super) fn bind(

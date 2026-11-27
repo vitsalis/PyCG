@@ -47,6 +47,61 @@ pub struct BoundGroup {
 pub struct ReturnedId(u32);
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub struct SharedId(u32);
+
+impl SharedId {
+    fn index(self) -> usize {
+        self.0 as usize
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum SharedRule {
+    PythonNew { class: ObjId },
+    New { class: ObjId },
+    OfClass,
+    PythonInstance,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum SharedItem {
+    Call(CallId),
+    Returned(ReturnedId),
+}
+
+impl SharedRule {
+    fn gives_dst(self) -> bool {
+        !matches!(self, SharedRule::OfClass)
+    }
+
+    pub(crate) fn captured(self) -> Vec<ObjId> {
+        match self {
+            SharedRule::PythonNew { class } | SharedRule::New { class } => vec![class],
+            SharedRule::OfClass | SharedRule::PythonInstance => Vec::new(),
+        }
+    }
+
+    pub(crate) fn each(self, item: SharedItem) -> Rule {
+        match (self, item) {
+            (SharedRule::PythonNew { class }, SharedItem::Call(call)) => {
+                Rule::PythonNew { class, call }
+            }
+            (SharedRule::New { class }, SharedItem::Call(call)) => Rule::New { class, call },
+            (SharedRule::OfClass, SharedItem::Returned(returned)) => {
+                Rule::ReturnedOfClass(returned)
+            }
+            (SharedRule::PythonInstance, SharedItem::Call(call)) => Rule::PythonInstance { call },
+            _ => unreachable!("a shared rule and an item of its kind"),
+        }
+    }
+}
+
+pub struct Shared {
+    rule: SharedRule,
+    items: Vec<SharedItem>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Role {
     SetName(Sym),
     Getattr(AccessKind, Sym),
@@ -549,8 +604,12 @@ impl<T: Trace> State<T> {
 
     pub(super) fn instantiate(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
         let default = self.python_method(graph, class, "__new__");
-        let rule = self.rule(Rule::PythonNew { class, call });
-        self.attach(graph, default, rule);
+        self.share(
+            graph,
+            default,
+            SharedRule::PythonNew { class },
+            SharedItem::Call(call),
+        );
         let new = self.implicit_call(graph, class, "__new__", call, None, Unless::Nothing);
         if !self.new_results.contains_key(&new) {
             self.class_instances.entry(class).or_default();
@@ -569,11 +628,19 @@ impl<T: Trace> State<T> {
             self.new_results.insert(new, id);
             let found =
                 self.lookup_name(graph, class, "__new__", Some(class), None, Unless::Nothing);
-            let rule = self.rule(Rule::New { class, call: new });
-            self.attach(graph, found, rule);
-            let rule = self.rule(Rule::ReturnedOfClass(id));
+            self.share(
+                graph,
+                found,
+                SharedRule::New { class },
+                SharedItem::Call(new),
+            );
             let instances = self.objects.class(class).instances;
-            self.attach(graph, instances, rule);
+            self.share(
+                graph,
+                instances,
+                SharedRule::OfClass,
+                SharedItem::Returned(id),
+            );
         }
         if let Some(dst) = self.calls[call.index()].dst {
             let id = self.new_results[&new];
@@ -582,9 +649,56 @@ impl<T: Trace> State<T> {
     }
 
     pub(super) fn python_new(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {
-        let rule = self.rule(Rule::PythonInstance { call });
         let instantiable = self.objects.class(class).instantiable;
-        self.attach(graph, instantiable, rule);
+        self.share(
+            graph,
+            instantiable,
+            SharedRule::PythonInstance,
+            SharedItem::Call(call),
+        );
+    }
+
+    fn share(&mut self, graph: &mut Graph, node: NodeId, rule: SharedRule, item: SharedItem) {
+        let key = (node, rule);
+        let Some(&shared) = self.shared_by_key.get(&key) else {
+            let shared =
+                SharedId(u32::try_from(self.shared.len()).expect("fewer than 2^32 shared records"));
+            self.shared.push(Shared {
+                rule,
+                items: vec![item],
+            });
+            self.shared_by_key.insert(key, shared);
+            let id = self.rule(Rule::Shared(shared));
+            self.attach(graph, node, id);
+            return;
+        };
+        self.shared[shared.index()].items.push(item);
+        let each = self.rule(rule.each(item));
+        self.apply_now(graph, node, each);
+    }
+
+    pub(super) fn shared_results(&self, shared: SharedId) -> Vec<NodeId> {
+        let found = &self.shared[shared.index()];
+        if !found.rule.gives_dst() {
+            return Vec::new();
+        }
+        found
+            .items
+            .iter()
+            .filter_map(|item| match *item {
+                SharedItem::Call(call) => self.calls[call.index()].dst,
+                SharedItem::Returned(_) => None,
+            })
+            .collect()
+    }
+
+    pub(super) fn shared_captured(&self, shared: SharedId) -> Vec<ObjId> {
+        self.shared[shared.index()].rule.captured()
+    }
+
+    pub(super) fn shared_items(&self, shared: SharedId) -> (SharedRule, Vec<SharedItem>) {
+        let found = &self.shared[shared.index()];
+        (found.rule, found.items.clone())
     }
 
     pub(super) fn python_instance(&mut self, graph: &mut Graph, class: ObjId, call: CallId) {

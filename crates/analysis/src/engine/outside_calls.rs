@@ -385,9 +385,7 @@ impl<T: Trace> State<T> {
         !definitions.is_empty()
             && definitions.iter().all(|definition| {
                 let path = &*definition.path;
-                definition.kind == DefinitionKind::Function
-                    && !path.starts_with(STUB_BUILTINS_PREFIX)
-                    && !group_excluded(path)
+                definition.kind == DefinitionKind::Function && !group_excluded(path)
             })
     }
 
