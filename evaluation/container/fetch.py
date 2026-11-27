@@ -60,7 +60,7 @@ def git(*args):
     command = ["git", *(part for s in settings for part in ("-c", s)), *args]
     done = subprocess.run(command, env=environment, capture_output=True)
     if done.returncode:
-        message = done.stderr.decode("utf-8", "replace").strip()[-2000:]
+        message = done.stderr.decode("utf-8", "replace").strip()
         raise FetchError(f"git failed: {message}")
     return done.stdout
 
