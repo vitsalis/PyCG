@@ -229,8 +229,8 @@ impl<T: Trace> State<T> {
         let found = self.objects.external(external).expect("an outside value");
         let (name, inexact, steps) = (found.name, found.inexact, found.steps);
         let text = self.symbols.text(name).to_string();
-        if RETURNS_ARGUMENT.iter().any(|&(model, _)| model == text) {
-            not_ported("the models of functions that return an argument");
+        if self.returns_argument(graph, external, call) {
+            return;
         }
         let unknown = match group {
             Some(group) => self.group_records[group.0 as usize].unknown,

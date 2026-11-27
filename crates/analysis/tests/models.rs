@@ -158,10 +158,10 @@ fn the_name_tables_are_the_python_tables() {
     assert_eq!(models::ITERABLE, vectors::ITERABLE);
     assert_eq!(models::REVERSIBLE, vectors::REVERSIBLE);
     assert_eq!(models::DYNAMIC_NAMES_MAX, vectors::DYNAMIC_NAMES_MAX);
-    assert_eq!(
-        models::RETURNED_DECORATOR_SIGNATURE,
-        vectors::RETURNED_DECORATOR_SIGNATURE
-    );
+    let (signature, argument) = vectors::RETURNED_DECORATOR_SIGNATURE;
+    assert_eq!(models::RETURNED_DECORATOR.signature, signature);
+    assert_eq!(models::RETURNED_DECORATOR.argument, Some(argument));
+    assert_eq!(models::RETURNED_DECORATOR.wrapper, None);
 }
 
 #[test]

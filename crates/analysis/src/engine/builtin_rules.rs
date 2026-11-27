@@ -7,7 +7,7 @@ use crate::engine::attributes::AccessKind;
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Literal, Object};
 use crate::engine::outside::outside_name;
-use crate::engine::outside_calls::BoundId;
+use crate::engine::outside_calls::{BoundId, Known};
 use crate::engine::protocols::{Conversion, OperatorCall};
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
@@ -16,8 +16,8 @@ use crate::engine::trace::Trace;
 use crate::engine::{Graph, State, not_ported};
 use crate::model::BUILTIN_MODULE;
 use crate::models::{
-    DefaultConstant, Model, PROPERTY_ACCESSORS, Rule as ModelRule, WRAPPED_ATTRIBUTES_BY_TYPE,
-    lookup, method_model, parse_signature,
+    DefaultConstant, Model, PROPERTY_ACCESSORS, RETURNS_ARGUMENT, ReturnsArgument,
+    Rule as ModelRule, WRAPPED_ATTRIBUTES_BY_TYPE, lookup, method_model, parse_signature,
 };
 
 const KIND_CLASSES: &[(&str, (&str, &str))] = &[
@@ -149,11 +149,22 @@ impl<T: Trace> State<T> {
     }
 
     fn bind_model(&mut self, graph: &mut Graph, call: CallId, model: &'static Model) -> BoundId {
-        let key = (call, std::ptr::from_ref(model) as usize);
+        let key = std::ptr::from_ref(model) as usize;
+        self.bind_entry(graph, call, key, model.signature)
+    }
+
+    fn bind_entry(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        entry: usize,
+        signature: &str,
+    ) -> BoundId {
+        let key = (call, entry);
         if let Some(&bound) = self.model_bindings.get(&key) {
             return bound;
         }
-        let parsed = parse_signature(model.signature);
+        let parsed = parse_signature(signature);
         let constants: Vec<(Box<str>, Literal)> = parsed
             .constants
             .iter()
@@ -170,6 +181,72 @@ impl<T: Trace> State<T> {
         let bound = self.bind_signature(graph, call, parsed.signature, &constants);
         self.model_bindings.insert(key, bound);
         bound
+    }
+
+    pub(super) fn returns_argument(
+        &mut self,
+        graph: &mut Graph,
+        callee: ObjId,
+        call: CallId,
+    ) -> bool {
+        let name = self.objects.name(callee, &self.symbols);
+        let Some(entry) = lookup(RETURNS_ARGUMENT, &name) else {
+            return false;
+        };
+        let analysed = matches!(self.objects.get(callee), Object::Function(_));
+        let name = self.symbols.intern(&name);
+        self.model_edge(name, analysed, call);
+        self.return_argument(graph, entry, name, analysed, call);
+        true
+    }
+
+    pub(super) fn model_edge(&mut self, name: Sym, analysed: bool, call: CallId) {
+        if analysed {
+            self.add_call_edge(call, name);
+        } else {
+            self.add_external_call_edge(call, name, Known::Stub);
+        }
+    }
+
+    pub(super) fn return_argument(
+        &mut self,
+        graph: &mut Graph,
+        entry: &'static ReturnsArgument,
+        name: Sym,
+        analysed: bool,
+        call: CallId,
+    ) {
+        let Some(dst) = self.calls[call.index()].dst else {
+            return;
+        };
+        let key = std::ptr::from_ref(entry) as usize;
+        let args = self.bind_entry(graph, call, key, entry.signature);
+        if let Some(parameter) = entry.argument
+            && self.bound_given(args, parameter)
+        {
+            let given = self.bound_parameter(graph, args, parameter);
+            self.add_edge(graph, given, dst);
+        }
+        if entry
+            .argument
+            .is_none_or(|parameter| !self.bound_surely(args, parameter))
+        {
+            let named = match entry.wrapper {
+                Some(wrapper) => self.symbols.intern(wrapper),
+                None => name,
+            };
+            let decorator = self.returning_argument(graph, named, analysed);
+            self.add_object(graph, dst, decorator);
+        }
+    }
+
+    fn returning_argument(&mut self, graph: &mut Graph, name: Sym, analysed: bool) -> ObjId {
+        if let Some(&found) = self.returning.get(&(name, analysed)) {
+            return found;
+        }
+        let made = self.new_object(graph, Object::ReturnsArgument { name, analysed });
+        self.returning.insert((name, analysed), made);
+        made
     }
 
     fn args(&mut self, graph: &mut Graph, args: BoundId, name: &str) -> NodeId {

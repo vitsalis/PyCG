@@ -707,7 +707,7 @@ impl<T: Trace> State<T> {
                 let type_name = self.object_type_name(object);
                 self.load_builtin_attribute(graph, object, &type_name, attr, dst);
             }
-            Object::BuiltinMethod { .. } => {}
+            Object::BuiltinMethod { .. } | Object::ReturnsArgument { .. } => {}
             &Object::Super { class, receiver } => {
                 let instance = matches!(self.objects.get(receiver), Object::Instance { .. });
                 let owner = match self.objects.get(receiver) {

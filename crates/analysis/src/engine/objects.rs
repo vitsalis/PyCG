@@ -275,6 +275,10 @@ pub enum Object {
         case: Option<Sym>,
         exact: bool,
     },
+    ReturnsArgument {
+        name: Sym,
+        analysed: bool,
+    },
 }
 
 impl Object {
@@ -298,6 +302,7 @@ impl Object {
             Object::Generator { .. } => Kind::Generator,
             Object::Coroutine { .. } => Kind::Coroutine,
             Object::Pattern { .. } => Kind::Pattern,
+            Object::ReturnsArgument { .. } => Kind::ReturnsArgument,
         }
     }
 }
@@ -399,6 +404,7 @@ impl Objects {
             }
             Object::Generator { function, .. } => generator_name(&self.name(*function, symbols)),
             Object::Coroutine { function, .. } => coroutine_name(&self.name(*function, symbols)),
+            Object::ReturnsArgument { name, .. } => symbols.text(*name).to_string(),
             Object::Pattern {
                 prefix,
                 suffix,
