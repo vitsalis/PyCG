@@ -6,6 +6,7 @@ use pycg_solver::{NodeId, ObjId};
 use pycg_stubs::DefinitionKind;
 use rustc_hash::{FxHashMap, FxHashSet};
 
+use crate::engine::arguments::{BindingId, SpreadId, Spreads};
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Container, Kind, Literal, Object};
 use crate::engine::outside_calls::BoundId;
@@ -23,7 +24,7 @@ const COLLECTIONS: [&str; 5] = ["list", "tuple", "set", "frozenset", "dict"];
 const HASHED: [&str; 3] = ["set", "frozenset", "dict"];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub(crate) struct StorageId(u32);
+pub(crate) struct StorageId(pub(crate) u32);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(crate) struct GroupId(u32);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -86,9 +87,13 @@ type ContainerKey = (Sym, ContainerOrigin, bool);
 pub(crate) type Bounds = (Option<BigInt>, Option<BigInt>);
 
 #[derive(Clone, Copy, Debug)]
-enum Observer {
+pub(crate) enum Observer {
     CopyField { target: ObjId },
     ReadPattern { pattern: ObjId, dst: NodeId },
+    BindUnpacked(BindingId),
+    GatherSequence(SpreadId),
+    GatherMapping(SpreadId),
+    BindKeyword { function: ObjId, call: CallId },
 }
 
 #[derive(Default)]
@@ -258,6 +263,7 @@ pub(crate) struct Containers {
     sequences: Vec<Sequences>,
     sequences_of: FxHashMap<(ObjId, bool, IterationId, NodeId), SequencesId>,
     subscriptions: FxHashSet<Subscription>,
+    pub(crate) spreads: Spreads,
 }
 
 impl Containers {
@@ -298,7 +304,7 @@ impl Containers {
     }
 }
 
-fn is_sequence(kind: &str) -> bool {
+pub(super) fn is_sequence(kind: &str) -> bool {
     SEQUENCES.contains(&kind)
 }
 
@@ -367,7 +373,7 @@ impl<T: Trace> State<T> {
         found
     }
 
-    fn container_of(&self, object: ObjId) -> Option<&Container> {
+    pub(super) fn container_of(&self, object: ObjId) -> Option<&Container> {
         match self.objects.get(object) {
             Object::Container(container) => Some(container),
             _ => None,
@@ -601,7 +607,7 @@ impl<T: Trace> State<T> {
         self.labelled_container_node(graph, container, "<keys>", |nodes| &mut nodes.keys)
     }
 
-    fn aliased(&mut self, graph: &mut Graph, container: ObjId) -> NodeId {
+    pub(super) fn aliased(&mut self, graph: &mut Graph, container: ObjId) -> NodeId {
         self.labelled_container_node(graph, container, "<aliased>", |nodes| &mut nodes.aliased)
     }
 
@@ -760,6 +766,21 @@ impl<T: Trace> State<T> {
 
     fn observe(&mut self, graph: &mut Graph, container: ObjId, observer: Observer) {
         let storage = self.storage(container);
+        self.observe_storage(graph, storage, observer);
+    }
+
+    pub(super) fn new_storage(&mut self) -> StorageId {
+        let storage = StorageId(next_id(self.containers.storages.len()));
+        self.containers.storages.push(Storage::default());
+        storage
+    }
+
+    pub(super) fn observe_storage(
+        &mut self,
+        graph: &mut Graph,
+        storage: StorageId,
+        observer: Observer,
+    ) {
         let entry = &mut self.containers.storages[index_of(storage.0)];
         entry.observers.push(observer);
         let fields: Vec<(Literal, NodeId)> = entry
@@ -770,6 +791,35 @@ impl<T: Trace> State<T> {
         for (key, node) in fields {
             self.notify(graph, observer, key, node);
         }
+    }
+
+    pub(super) fn storage_field(
+        &mut self,
+        graph: &mut Graph,
+        storage: StorageId,
+        key: &Literal,
+    ) -> NodeId {
+        if let Some(&node) = self.containers.storages[index_of(storage.0)]
+            .fields
+            .get(key)
+        {
+            return node;
+        }
+        let node = self.node(graph, None);
+        self.containers.storages[index_of(storage.0)]
+            .fields
+            .insert(key.clone(), node);
+        let observers = self.containers.storages[index_of(storage.0)]
+            .observers
+            .clone();
+        for observer in observers {
+            self.notify(graph, observer, key.clone(), node);
+        }
+        node
+    }
+
+    pub(super) fn container_storage(&mut self, container: ObjId) -> StorageId {
+        self.storage(container)
     }
 
     fn notify(&mut self, graph: &mut Graph, observer: Observer, key: Literal, node: NodeId) {
@@ -809,6 +859,35 @@ impl<T: Trace> State<T> {
                 {
                     self.add_edge(graph, node, dst);
                 }
+            }
+            Observer::BindUnpacked(binding) => self.bind_unpacked_field(graph, binding, key, node),
+            Observer::GatherSequence(spread) => {
+                if let Literal::Int(value) = key
+                    && *value >= BigInt::ZERO
+                {
+                    let field = self.spread_field(graph, spread, key);
+                    self.add_edge(graph, node, field);
+                }
+            }
+            Observer::GatherMapping(spread) => {
+                if let Literal::Str(_) = key {
+                    let field = self.spread_field(graph, spread, key);
+                    self.add_edge(graph, node, field);
+                }
+            }
+            Observer::BindKeyword { function, call } => {
+                let Literal::Str(code_points) = key else {
+                    unreachable!("a spread mapping is keyed by strings")
+                };
+                let name: String = code_points
+                    .iter()
+                    .map(|&point| {
+                        char::from_u32(point)
+                            .unwrap_or_else(|| not_ported("a keyword with a lone surrogate"))
+                    })
+                    .collect();
+                let name = self.symbols.intern(&name);
+                self.bind_keyword(graph, function, name, node, call);
             }
         }
     }
@@ -2607,6 +2686,11 @@ pub(crate) enum ContainerRule {
         dst: NodeId,
     },
     NextItem(IterationId),
+    SpreadSequence {
+        spread: SpreadId,
+        iteration: IterationId,
+    },
+    SpreadMapping(SpreadId),
 }
 
 impl ContainerRule {
@@ -2634,6 +2718,8 @@ impl ContainerRule {
             ContainerRule::GenericAlias { .. } => "Each:Containers._generic_alias",
             ContainerRule::SequenceType { .. } => "Each:Containers._sequence_type",
             ContainerRule::NextItem(_) => "Each:Containers._next_item",
+            ContainerRule::SpreadSequence { .. } => "Each:Arguments._spread_sequence",
+            ContainerRule::SpreadMapping(_) => "Each:Arguments._spread_mapping",
         }
     }
 
@@ -2668,7 +2754,7 @@ impl ContainerRule {
 }
 
 impl<T: Trace> State<T> {
-    fn container_rule(&mut self, rule: ContainerRule) -> crate::engine::rules::RuleId {
+    pub(super) fn container_rule(&mut self, rule: ContainerRule) -> crate::engine::rules::RuleId {
         self.rule(Rule::Container(rule))
     }
 
@@ -2714,6 +2800,9 @@ impl<T: Trace> State<T> {
             }
             ContainerRule::ClassGetitem { call } => {
                 self.calls[call.index()].dst.into_iter().collect()
+            }
+            ContainerRule::SpreadSequence { spread, .. } | ContainerRule::SpreadMapping(spread) => {
+                vec![containers.spreads.unknown(spread)]
             }
         }
     }
@@ -2782,6 +2871,10 @@ impl<T: Trace> State<T> {
                 dst,
             } => self.sequence_type(graph, object, owner, iteration, dst),
             ContainerRule::NextItem(id) => self.next_item(graph, object, id),
+            ContainerRule::SpreadSequence { spread, iteration } => {
+                self.spread_sequence(graph, object, spread, iteration)
+            }
+            ContainerRule::SpreadMapping(spread) => self.spread_mapping(graph, object, spread),
         }
     }
 
