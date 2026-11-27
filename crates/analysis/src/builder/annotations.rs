@@ -367,8 +367,16 @@ fn imported_names(
                             found.push((identifier(asname.as_str()).into_owned(), module));
                         }
                         None => {
-                            let first = name.split('.').next().unwrap_or(&name).to_owned();
-                            let module = module.split('.').next().unwrap_or(&module).to_owned();
+                            let first = name
+                                .split('.')
+                                .next()
+                                .expect("a split gives a first part")
+                                .to_owned();
+                            let module = module
+                                .split('.')
+                                .next()
+                                .expect("a split gives a first part")
+                                .to_owned();
                             found.push((first, module));
                         }
                     }

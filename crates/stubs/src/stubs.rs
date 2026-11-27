@@ -203,7 +203,7 @@ impl Stubs {
         if let Some(found) = self.module_by_name.get(name) {
             return *found;
         }
-        let top = name.split('.').next().unwrap_or(name);
+        let top = name.split('.').next().expect("a split gives a first part");
         let found = self
             .package(top)
             .and_then(|modules| modules.get(name).copied());
@@ -213,7 +213,7 @@ impl Stubs {
 
     pub fn find(&mut self, path: &str) -> Vec<Definition> {
         let mut parts = path.split('.');
-        let first = parts.next().unwrap_or(path);
+        let first = parts.next().expect("a split gives a first part");
         if self.module(first).is_none() {
             return Vec::new();
         }

@@ -68,7 +68,11 @@ impl<T: Trace> State<T> {
                     path = format!("{class}{}", &path[concrete.len()..]);
                 }
             }
-            let top = path.split('.').next().unwrap_or(&path).to_string();
+            let top = path
+                .split('.')
+                .next()
+                .expect("a split gives a first part")
+                .to_string();
             if self.stubs.module(&top).is_some() {
                 result = Some(Arc::from(self.stubs.find(&path)));
             }

@@ -1317,13 +1317,21 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
                 self.bind(&identifier(asname.as_str()), Some(value), UNKNOWN, None);
                 continue;
             }
-            let top = name.split('.').next().unwrap_or(&name).to_owned();
+            let top = name
+                .split('.')
+                .next()
+                .expect("a split gives a first part")
+                .to_owned();
             let top_object = match imported {
                 None => self.analysis.external(&top, 0, false),
                 Some(_) => self.analysis.module(&top),
             };
             let value = self.analysis.constant(top_object);
-            let bound = original.split('.').next().unwrap_or(&original).to_owned();
+            let bound = original
+                .split('.')
+                .next()
+                .expect("a split gives a first part")
+                .to_owned();
             self.bind(&bound, Some(value), UNKNOWN, None);
         }
     }
@@ -1392,7 +1400,11 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
         if !top {
             return Some(self.imported_module(&name, imported.as_deref()));
         }
-        let package = name.split('.').next().unwrap_or(&name).to_owned();
+        let package = name
+            .split('.')
+            .next()
+            .expect("a split gives a first part")
+            .to_owned();
         let object = match imported {
             None => self.analysis.external(&package, 0, false),
             Some(_) => self.analysis.module(&package),
@@ -1408,7 +1420,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
             }
             Some(found) => {
                 let module = self.analysis.module(found);
-                let last = name.rsplit('.').next().unwrap_or(name);
+                let last = name.rsplit('.').next().expect("a split gives a first part");
                 self.analysis.field(module, last)
             }
             None => {
@@ -1660,7 +1672,10 @@ fn bound_import_name(alias: &Alias) -> String {
         Some(asname) => identifier(asname.as_str()).into_owned(),
         None => {
             let name = identifier(alias.name.as_str());
-            name.split('.').next().unwrap_or(&name).to_owned()
+            name.split('.')
+                .next()
+                .expect("a split gives a first part")
+                .to_owned()
         }
     }
 }

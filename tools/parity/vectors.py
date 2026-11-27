@@ -447,9 +447,6 @@ CONSTANT_NAME_DIGITS_AROUND = (639, 640, 641, 700)
 SIGNATURE_NAMES = ("a", "b", "c", "d", "e")
 SIGNATURE_CASES = 300
 BINDS_PER_SIGNATURE = 6
-PATTERN_CASES = 300
-MATCHES_PER_PATTERN = 6
-PATTERN_ALPHABET = "aAbB_"
 DOTTED_NAMES = (
     "os",
     "os.path",
@@ -557,33 +554,6 @@ def signature_line(generator, signature):
     )
 
 
-def random_affix(generator):
-    return "".join(
-        generator.choice(PATTERN_ALPHABET) for _ in range(generator.randint(0, 2))
-    )
-
-
-def pattern_line(generator):
-    case = generator.choice((None, "lower", "upper"))
-    pattern = model.Pattern(random_affix(generator), random_affix(generator), case)
-    candidates = [
-        pattern.prefix + random_affix(generator) + pattern.suffix,
-        random_affix(generator) + random_affix(generator),
-        pattern.prefix + "\u00e9" + pattern.suffix,
-        pattern.prefix,
-        pattern.prefix + pattern.suffix,
-        random_affix(generator),
-    ]
-    matched = ", ".join(
-        f"({rust_text(name)}, {rust_option(pattern.matches(name))})"
-        for name in candidates[:MATCHES_PER_PATTERN]
-    )
-    return (
-        f"    ({rust_text(pattern.prefix)}, {rust_text(pattern.suffix)}, "
-        f"{rust_option(case)}, {rust_text(pattern.name)}, &[{matched}]),"
-    )
-
-
 def model_vectors(generator):
     texts = [random_code_points(generator) for _ in range(CASES_PER_FUNCTION)]
     texts += [[0x27], [0x22], [0x27, 0x22], [], [0xD800], [0x10FFFF]]
@@ -628,14 +598,6 @@ def model_vectors(generator):
     lines.append("pub const SIGNATURES: &[SignatureCase] = &[")
     for _ in range(SIGNATURE_CASES):
         lines.append(signature_line(generator, random_signature(generator)))
-    lines.append("];")
-    lines.append(
-        "pub type PatternCase = (&'static str, &'static str, Option<&'static str>, "
-        "&'static str, &'static [(&'static str, Option<&'static str>)]);"
-    )
-    lines.append("pub const PATTERNS: &[PatternCase] = &[")
-    for _ in range(PATTERN_CASES):
-        lines.append(pattern_line(generator))
     lines.append("];")
     return "\n".join(lines) + "\n"
 

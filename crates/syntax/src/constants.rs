@@ -12,10 +12,6 @@ impl PyStr {
     pub fn code_points(&self) -> &[u32] {
         &self.0
     }
-
-    pub fn from_text(text: &str) -> PyStr {
-        PyStr(text.chars().map(u32::from).collect())
-    }
 }
 
 #[derive(Clone, Debug, PartialEq)]

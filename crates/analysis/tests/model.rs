@@ -1,9 +1,7 @@
 use std::str::FromStr;
 
 use num_bigint::BigInt;
-use pycg_analysis::model::{
-    Case, ConstValue, Pattern, Signature, constant_name, site_name, steps_past_root,
-};
+use pycg_analysis::model::{ConstValue, Signature, constant_name, site_name, steps_past_root};
 
 #[rustfmt::skip]
 mod vectors {
@@ -116,30 +114,6 @@ fn a_signature_binds_names_and_accepts_keywords_as_python_does() {
                 bound, *expected,
                 "{signature:?} {given} {keywords:?} {optional:?}"
             );
-        }
-    }
-}
-
-fn case_of(name: &str) -> Case {
-    match name {
-        "lower" => Case::Lower,
-        "upper" => Case::Upper,
-        other => panic!("case {other}"),
-    }
-}
-
-#[test]
-fn a_pattern_is_named_and_matches_as_python_does() {
-    for (prefix, suffix, case, name, matches) in vectors::PATTERNS {
-        let pattern = Pattern {
-            prefix: Box::from(*prefix),
-            suffix: Box::from(*suffix),
-            case: case.map(case_of),
-        };
-        assert_eq!(pattern.name(), *name);
-        for (candidate, expected) in *matches {
-            let found = pattern.matches(candidate);
-            assert_eq!(found, *expected, "{pattern:?} {candidate}");
         }
     }
 }

@@ -1803,7 +1803,7 @@ impl<T: Trace> State<T> {
             if owner.starts_with("builtins.") || entry.final_ {
                 return true;
             }
-            let module = owner.split('.').next().unwrap_or(owner);
+            let module = owner.split('.').next().expect("a split gives a first part");
             if MODULES_OF_ABCS.contains(&module) || self.stubs.is_abstract(owner) {
                 return false;
             }
