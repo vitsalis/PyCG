@@ -59,7 +59,6 @@ parity_key = python3 -I tools/parity/dump.py key --checkout $(CURDIR)
 PARITY_ORACLE = $(EVAL_OUT)/parity-oracle-$(shell $(parity_key))
 PARITY_RUST = $(EVAL_OUT)/parity-rust-$(COMMIT)
 PARITY_REQUIRED = tools/parity/required.txt
-PARITY_ENGINE = tools/parity/engine.txt
 PARITY_BINARIES = $(or $(CARGO_TARGET_DIR),$(CURDIR)/target)/release
 
 define gate
@@ -102,8 +101,10 @@ done
 endef
 
 define parity_compare
-python3 -I tools/parity/compare.py $(1) $(2) $(or $(4),--required $(PARITY_REQUIRED)) > $(3); \
+python3 -I tools/parity/compare.py $(1) $(2) $(or $(4),--required $(PARITY_REQUIRED)) \
+	$$(test -f $(PARITY_RUST)/base-differences.txt && echo --base $(PARITY_RUST)/base-differences.txt) > $(3); \
 status=$$?; \
+cat $(3); \
 { echo '```'; cat $(3); echo '```'; } >> $(SUMMARY); \
 sed -n 's/^  \([^:]*\): different: \(.*\)$$/\1 \2/p' $(3) | while read -r input dumps; do \
 	for dump in $$(echo "$$dumps" | tr ',' ' '); do \
@@ -278,6 +279,8 @@ parity:
 	cargo build --release --locked
 	rm -rf $(PARITY_RUST)
 	mkdir -p $(PARITY_RUST)/run-1 $(PARITY_RUST)/run-2
+	@if [ -n "$(BASE)" ] && git cat-file -e $(BASE):tools/parity/differences.txt 2>/dev/null; then \
+		git show $(BASE):tools/parity/differences.txt > $(PARITY_RUST)/base-differences.txt; fi
 	@$(call parity_d1,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1)
 	@$(call parity_d1,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2)
 	@cd $(PARITY_ORACLE)/seed-0 && find . -name D2.jsonl | sort | while read -r dump; do \
@@ -297,24 +300,33 @@ parity:
 			then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
 		done; \
 	done
+	@oracle=$(PARITY_ORACLE)/seed-0 && cd $$oracle && find . -name D4.jsonl | sort | while read -r dump; do \
+		input=$${dump%/D4.jsonl}; input=$${input#./}; \
+		set -- $$(python3 -I -c 'import json, sys; run = json.load(open(sys.argv[1])); print(run["package"], *run["entry_points"])' $$oracle/$$input/run.json); \
+		for run in run-1 run-2; do \
+			out=$(PARITY_RUST)/$$run/$$input && mkdir -p $$out && \
+			if (cd $(CURDIR) && $(PARITY_BINARIES)/pycg-dump d4 $$oracle/$$input/D4.jsonl $$out \
+				--package "$$@") 2> $$out/replay.txt; \
+			then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
+		done; \
+	done
 	@cd $(PARITY_ORACLE)/seed-0 && find . -name D4.jsonl | sort | while read -r dump; do \
 		input=$$(dirname "$$dump"); \
 		out=$(PARITY_RUST)/engine/$$input && mkdir -p $$out && \
 		if $(PARITY_BINARIES)/pycg-dump engine "$$dump" $$out 2> $$out/replay.txt; \
-		then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
+		then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; \
+			echo "engine stops on $${input#./}: $$(grep -m1 -A1 'panicked at' $$out/error.txt | tail -n 1)"; fi; \
 	done
-	@while read -r input; do \
-		out=$(PARITY_RUST)/engine/$$input; \
-		if [ -f $$out/D6in.json ]; then \
-			$(PARITY_BINARIES)/pycg-dump document-build $(PARITY_ORACLE)/seed-0/$$input \
-				$$out/D6in.json $$out 2> $$out/build.txt \
-			|| mv $$out/build.txt $$out/error.txt; \
-		fi; \
-	done < $(PARITY_ENGINE)
+	@cd $(PARITY_RUST)/engine && find . -name D6in.json | sort | while read -r inputs; do \
+		input=$$(dirname "$$inputs"); \
+		out=$(PARITY_RUST)/engine/$$input && \
+		(cd $(CURDIR) && $(PARITY_BINARIES)/pycg-dump document-build \
+			$(PARITY_ORACLE)/seed-0/$$input $$out/D6in.json $$out 2> $$out/build.txt) \
+		|| mv $$out/build.txt $$out/error.txt; \
+	done
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
 	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
-	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine-all.txt,--dumps D3 D5)
-	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 D6in D6 --inputs $(PARITY_ENGINE))
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 D6in D6 --run engine)
 	@cd $(PARITY_ORACLE)/seed-0 && find . -name D6in.json | sort | while read -r inputs; do \
 		input=$$(dirname "$$inputs"); \
 		out=$(PARITY_RUST)/document/$$input && mkdir -p $$out && \
@@ -323,7 +335,7 @@ parity:
 			$$out 2> $$out/build.txt) \
 		|| mv $$out/build.txt $$out/error.txt; \
 	done
-	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/document,$(PARITY_RUST)/oracle-document.txt,--dumps D6)
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/document,$(PARITY_RUST)/oracle-document.txt,--dumps D6 --run document)
 	@$(PARITY_BINARIES)/pycg-dump document $(PARITY_ORACLE)/seed-0 > $(PARITY_RUST)/writer.txt; \
 	status=$$?; { echo '```'; cat $(PARITY_RUST)/writer.txt; echo '```'; } >> $(SUMMARY); \
 	exit $$status
