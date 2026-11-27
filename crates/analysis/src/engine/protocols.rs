@@ -7,6 +7,7 @@ use crate::engine::containers::{ContainerOrigin, IterationId};
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, Literal, Object, kinds_mask};
 use crate::engine::outside_calls::PlanId;
+use crate::engine::outside_types::TypeOrigin;
 use crate::engine::rules::{Rule, RuleId};
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
@@ -498,14 +499,13 @@ impl<T: Trace> State<T> {
     }
 
     fn operand(&mut self, graph: &mut Graph, object: ObjId, id: OperatorId, is_left: bool) {
-        if let Object::Const { value, .. } = self.objects.get(object) {
-            match value {
-                Literal::Str(_) | Literal::Bytes(_) => {
-                    not_ported("outside types: the operand of a str or bytes constant")
-                }
-                Literal::Int(_) => return,
-            }
-        }
+        let object = match self.objects.get(object) {
+            Object::Const { .. } => match self.string_constant_value(graph, object) {
+                Some(typed) => typed,
+                None => return,
+            },
+            _ => object,
+        };
         let method = self.symbols.text(self.operator(id).method).to_owned();
         if method == CONTAINS {
             if is_left {
@@ -546,7 +546,15 @@ impl<T: Trace> State<T> {
             Kind::Container if !is_container_class(self.container_kind(object)) => {
                 self.combine(graph, object, id, is_left)
             }
-            _ => not_ported("outside types: the special method of an outside operand"),
+            _ => {
+                let operator = self.operator(id);
+                let origin = TypeOrigin::Operator {
+                    caller: operator.caller,
+                    site: operator.site,
+                    is_left,
+                };
+                self.typed_special(graph, object, &name, Some(dst), origin);
+            }
         }
     }
 
@@ -1168,7 +1176,12 @@ impl<T: Trace> State<T> {
             self.call_dunder(graph, object, entering, enter, dst, Unless::Nothing);
             self.call_dunder(graph, object, leaving, leave, exited, Unless::Nothing);
         } else if kind == Kind::Typed {
-            not_ported("outside types: the special method of an outside context manager")
+            let details = &self.calls[enter.index()];
+            let origin = TypeOrigin::Enter {
+                caller: details.caller,
+                site: details.site,
+            };
+            self.typed_special(graph, object, entering, dst, origin);
         } else if is_a(kind, &[Kind::External])
             && let Some(dst) = dst
         {

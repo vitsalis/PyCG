@@ -550,8 +550,9 @@ impl<T: Trace> Analysis for Engine<T> {
         self.state.write_keyed(&mut self.graph, container, key, src);
     }
 
-    fn typed(&mut self, _cls: &str) -> ObjId {
-        not_ported("the builder call typed")
+    fn typed(&mut self, cls: &str) -> ObjId {
+        self.sync();
+        self.state.typed(&mut self.graph, cls)
     }
 
     fn add_operator(&mut self, operation: &Operation<'_>) {

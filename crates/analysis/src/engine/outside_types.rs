@@ -19,7 +19,8 @@ use crate::models::{
     CONCRETE_CLASSES, CONTAINER_CLASSES, STUB_RESULTS, VARIABLE_TYPES, builtin_kind, lookup,
 };
 
-const TYPES_SAYING_NOTHING: &[&str] = &["builtins.object"];
+const OBJECT: &str = "builtins.object";
+const TYPES_SAYING_NOTHING: &[&str] = &[OBJECT];
 const TYPE_CALL: &str = "builtins.type.__call__";
 const FUNCTION_TYPES: &[&str] = &[
     "builtins.function",
@@ -87,6 +88,15 @@ pub(crate) enum TypeOrigin {
         site: Sym,
     },
     Annotation(Owner),
+    Operator {
+        caller: Sym,
+        site: Sym,
+        is_left: bool,
+    },
+    Enter {
+        caller: Sym,
+        site: Sym,
+    },
 }
 
 #[derive(Clone, Debug)]
@@ -289,7 +299,9 @@ impl<T: Trace> State<T> {
                 None,
                 &TypeOrigin::Iteration { site, .. }
                 | &TypeOrigin::Subscript { site, .. }
-                | &TypeOrigin::Slice { site, .. },
+                | &TypeOrigin::Slice { site, .. }
+                | &TypeOrigin::Operator { site, .. }
+                | &TypeOrigin::Enter { site, .. },
             ) => site,
             (None, TypeOrigin::Call(_)) => panic!("a call origin comes with its call"),
         }
@@ -345,9 +357,7 @@ impl<T: Trace> State<T> {
         let Some(dst) = dst else {
             return;
         };
-        let class = self
-            .stub_class(typed)
-            .expect("a typed value has a stub class");
+        let class = self.stub_class(typed).unwrap_or_else(|| OBJECT.to_string());
         for definition in self.stubs.member(&class, method).iter() {
             if definition.kind != DefinitionKind::Function {
                 continue;
