@@ -3,6 +3,7 @@ use pycg_solver::{NodeId, ObjId};
 use pycg_stubs::DefinitionKind;
 use rustc_hash::FxHashSet;
 
+use crate::engine::attributes::AccessKind;
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::Object;
 use crate::engine::symbols::Sym;
@@ -29,6 +30,11 @@ pub struct ReturnedId(u32);
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum Role {
     SetName(Sym),
+    Getattr(AccessKind, Sym),
+    Hook(AccessKind, Sym),
+    Accessor(AccessKind, Sym),
+    ClassGet(Sym),
+    ModuleGetattr(Sym),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -187,7 +193,13 @@ impl<T: Trace> State<T> {
         }
     }
 
-    fn call_bound(&mut self, graph: &mut Graph, callee: ObjId, receivers: Receivers, call: CallId) {
+    pub(super) fn call_bound(
+        &mut self,
+        graph: &mut Graph,
+        callee: ObjId,
+        receivers: Receivers,
+        call: CallId,
+    ) {
         let (base, prefix) = self
             .prefixes
             .get(&call)

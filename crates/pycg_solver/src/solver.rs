@@ -379,6 +379,10 @@ impl<C: Copy> Solver<C> {
             .is_some_and(|added| added.contains(&object))
     }
 
+    pub fn opacity_enabled(&self) -> bool {
+        self.opacity
+    }
+
     pub fn has_absorbed(&self) -> bool {
         !self.absorbed_sets.is_empty()
     }
