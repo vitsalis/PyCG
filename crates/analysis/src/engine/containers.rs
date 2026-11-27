@@ -59,6 +59,7 @@ fn next_id(length: usize) -> u32 {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub(super) enum ContainerOrigin {
     Rule(Origin, &'static str, Option<u32>),
+    Object(ObjId, &'static str),
     Inexact(ObjId),
     Slice(SliceId),
     Rest(Sym, Sym),

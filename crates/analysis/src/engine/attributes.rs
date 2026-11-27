@@ -104,7 +104,7 @@ pub struct Deliveries {
 }
 
 impl<T: Trace> State<T> {
-    fn new_access(
+    pub(super) fn new_access(
         &mut self,
         kind: AccessKind,
         attr: &str,
@@ -693,7 +693,7 @@ impl<T: Trace> State<T> {
                 });
                 self.attach(graph, found, rule);
                 if self.symbols.text(attr) == "__dict__" {
-                    not_ported("reflection: the namespace of a class");
+                    self.add_namespace(graph, object, dst);
                 }
             }
             &Object::Instance { class, .. } => {
@@ -821,7 +821,7 @@ impl<T: Trace> State<T> {
         self.add_object(graph, names, named);
     }
 
-    fn namespace_names(&mut self, graph: &mut Graph, object: ObjId) -> NodeId {
+    pub(super) fn namespace_names(&mut self, graph: &mut Graph, object: ObjId) -> NodeId {
         if let Some(&node) = self.namespace_nodes.get(&(object, Namespace::Names)) {
             return node;
         }
