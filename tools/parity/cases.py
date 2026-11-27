@@ -17,6 +17,11 @@ Rust harness runs (docs/rust/PLAN.md, section 5, Testing).
 
     python3 tools/parity/cases.py tests/test_super.py
 
+Run it with CPython 3.14.10, the interpreter that the syntax vectors pin
+(crates/syntax/data/codecs.txt), for example in the python:3.14.10 image:
+a case can copy the interpreter's standard library (the stdlib json case
+of the language family does), and another interpreter writes other files.
+
 Runs the file's tests under the oracle. Every program that a test analyses
 becomes a case directory, tests/cases/<family>/<test name>[-<n>]/:
 program/ holds the files of the program; case.json the entry points, the
