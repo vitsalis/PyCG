@@ -6,8 +6,8 @@ use std::process::ExitCode;
 
 use indexmap::IndexMap;
 use pycg_analysis::builder::calls::{
-    Analysis, BuilderTables, Call, ClassFields, ClassStatement, Constant, FunctionFields, Key,
-    MadeFunction, MethodKind, NewClass, Operation, Passthrough, Slice, Subscript,
+    Analysis, BuilderTables, Call, CallId, ClassFields, ClassStatement, Constant, FunctionFields,
+    Key, MadeFunction, MethodKind, NewClass, Operation, Passthrough, Slice, Subscript,
 };
 use pycg_analysis::builder::{ModuleBuilder, Source};
 use pycg_analysis::model::Signature;
@@ -208,6 +208,8 @@ struct Replay<'r> {
     node_by_name: BTreeMap<String, NodeId>,
     object_names: Vec<String>,
     object_by_name: BTreeMap<String, ObjId>,
+    call_names: Vec<String>,
+    call_by_name: BTreeMap<String, CallId>,
     made: IndexMap<ObjId, Made>,
     module_defines: Vec<Box<str>>,
     tables: BuilderTables,
@@ -232,6 +234,8 @@ impl<'r> Replay<'r> {
             node_by_name: BTreeMap::new(),
             object_names: Vec::new(),
             object_by_name: BTreeMap::new(),
+            call_names: Vec::new(),
+            call_by_name: BTreeMap::new(),
             made: IndexMap::new(),
             module_defines: Vec::new(),
             tables: BuilderTables::default(),
@@ -309,6 +313,24 @@ impl<'r> Replay<'r> {
         self.object_by_name.insert(name.clone(), object);
         self.object_names.push(name);
         object
+    }
+
+    fn call_from(&mut self, answer: &Value) -> CallId {
+        let name = match answer.get("call").and_then(Value::as_str) {
+            Some(name) => name.to_owned(),
+            None => answer.to_string(),
+        };
+        if let Some(&call) = self.call_by_name.get(&name) {
+            return call;
+        }
+        let call = CallId(u32::try_from(self.call_names.len()).expect("calls fit u32"));
+        self.call_by_name.insert(name.clone(), call);
+        self.call_names.push(name);
+        call
+    }
+
+    fn canon_call(&self, call: CallId) -> Value {
+        json!({"call": self.call_names[call.0 as usize]})
     }
 
     fn canon_node(&self, node: NodeId) -> Value {
@@ -735,6 +757,86 @@ impl Analysis for Replay<'_> {
         ]);
         self.record("pattern", recorded, answer.clone());
         self.object_from(&answer)
+    }
+
+    fn site_call(&mut self, caller: &str, site: &str, role: &[&str]) -> CallId {
+        let answer = self.answer("site_call");
+        let recorded = arguments(vec![
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+            ("role", json!(role)),
+            ("args", json!([])),
+            ("implicit", json!(true)),
+            ("dst", Value::Null),
+            ("rest", Value::Null),
+        ]);
+        self.record("site_call", recorded, answer.clone());
+        self.call_from(&answer)
+    }
+
+    fn add_special_call(&mut self, value: NodeId, name: &str, call: CallId) {
+        let recorded = arguments(vec![
+            ("value", self.canon_node(value)),
+            ("name", json!(name)),
+            ("call", self.canon_call(call)),
+            ("unless", json!([])),
+        ]);
+        self.simple("add_special_call", recorded);
+    }
+
+    fn add_named_load(&mut self, obj: NodeId, name: NodeId, dst: NodeId, caller: &str, site: &str) {
+        let recorded = arguments(vec![
+            ("obj", self.canon_node(obj)),
+            ("name", self.canon_node(name)),
+            ("dst", self.canon_node(dst)),
+            ("caller", json!(caller)),
+            ("site", json!(site)),
+        ]);
+        self.simple("add_named_load", recorded);
+    }
+
+    fn callable_filter(&mut self, source: NodeId, dst: NodeId, holds: bool) {
+        let recorded = arguments(vec![
+            ("source", self.canon_node(source)),
+            ("dst", self.canon_node(dst)),
+            ("holds", json!(holds)),
+        ]);
+        self.simple("callable_filter", recorded);
+    }
+
+    fn class_filter(
+        &mut self,
+        source: NodeId,
+        classes: Option<NodeId>,
+        dst: NodeId,
+        as_class: bool,
+        holds: bool,
+    ) {
+        let recorded = arguments(vec![
+            ("source", self.canon_node(source)),
+            ("classes", self.optional_node(classes)),
+            ("dst", self.canon_node(dst)),
+            ("as_class", json!(as_class)),
+            ("holds", json!(holds)),
+        ]);
+        self.simple("class_filter", recorded);
+    }
+
+    fn tested_classes(
+        &mut self,
+        classes: NodeId,
+        dst: NodeId,
+        as_class: bool,
+        module: ObjId,
+        site: &str,
+    ) {
+        let recorded = arguments(vec![
+            ("classes", self.canon_node(classes)),
+            ("dst", self.canon_node(dst)),
+            ("as_class", json!(as_class)),
+            ("owner", json!([self.object(module), site])),
+        ]);
+        self.simple("tested_classes", recorded);
     }
 
     fn add_pattern_operand(&mut self, operand: Option<NodeId>, result: NodeId) {

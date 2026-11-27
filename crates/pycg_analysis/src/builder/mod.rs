@@ -6,6 +6,7 @@ pub mod expressions;
 pub mod flow;
 mod format;
 mod literals;
+mod matching;
 mod narrowing;
 mod patterns;
 pub mod statements;
@@ -29,6 +30,7 @@ use crate::builder::expressions::ExpressionTables;
 use crate::builder::flow::{
     Definition, FALSE, Flow, Literal, Literals, TRUE, Truth, UNBOUND, UNKNOWN,
 };
+use crate::builder::narrowing::ClassTests;
 
 pub const IMPLICIT_MODULE_NAMES: [&str; 6] = [
     "__debug__",
@@ -99,6 +101,7 @@ pub struct ModuleBuilder<'a, 's, A: Analysis> {
     pub star_imported_modules: Vec<String>,
     pub outside_star_imported_modules: Vec<String>,
     pub(crate) expressions: ExpressionTables,
+    pub(crate) class_tests: ClassTests,
 }
 
 impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
@@ -135,6 +138,7 @@ impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
             star_imported_modules: Vec::new(),
             outside_star_imported_modules: Vec::new(),
             expressions: ExpressionTables::default(),
+            class_tests: ClassTests::default(),
         }
     }
 

@@ -262,6 +262,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
                 attempt.is_star,
             ),
             Stmt::Import(import) => self.import(&import.names),
+            Stmt::Match(matched) => self.match_statement(matched),
             Stmt::ImportFrom(import) => self.import_from(
                 import.module.as_ref().map(|name| name.as_str()),
                 &import.names,

@@ -72,6 +72,35 @@ BUILDER_PROGRAMS = {
         "class C:\n    def m(self, c):\n        y = c\n        return y\n"
         "    def m(self, c):\n        y = c\n        return y\n"
     ),
+    "matching": (
+        "class P:\n    __match_args__ = ('x', 'y')\n"
+        "def f(v, kind):\n"
+        "    match v:\n"
+        "        case 1 | 2 if kind:\n            r = 'small'\n"
+        "        case None:\n            r = None\n"
+        "        case [first, *rest, last]:\n            r = rest\n"
+        "        case (a, b):\n            r = a\n"
+        "        case {'k': k, **others}:\n            r = others\n"
+        "        case P(px, y=py) as point:\n            r = point\n"
+        "        case int(n) | str(n):\n            r = n\n"
+        "        case _:\n            r = v\n"
+        "    return r\n"
+        "match 3:\n    case 3:\n        three = True\n"
+        "    case 4:\n        four = True\n"
+        "match 'a':\n    case True:\n        t = 1\n    case [x]:\n        t = x\n"
+    ),
+    "class_tests": (
+        "import inspect\nfrom inspect import iscoroutine\n"
+        "class A:\n    pass\nclass B(A):\n    pass\n"
+        "def f(x, y, t):\n"
+        "    if isinstance(x, (A, B)) and not callable(y):\n        r = x\n"
+        "    elif issubclass(t, A):\n        r = t\n"
+        "    if not (isinstance(x, A) or inspect.iscoroutine(x)):\n        r = x\n"
+        "    if iscoroutine(y):\n        r = y\n"
+        "    while isinstance(x, B):\n        x = x\n"
+        "    assert callable(x)\n"
+        "    return isinstance(x, A, B), isinstance(f(x), A), r\n"
+    ),
 }
 
 
