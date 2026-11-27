@@ -1,13 +1,14 @@
 mod canonical;
 mod d1;
 mod d4;
+mod document_check;
 mod engine_replay;
 mod solver_replay;
 mod stubs_replay;
 
 use std::process::ExitCode;
 
-const USAGE: &str = "usage: pycg_dump stubs <D2.jsonl> | solver <D3.jsonl> | d1 MODULES OUT \
+const USAGE: &str = "usage: pycg_dump stubs <D2.jsonl> | solver <D3.jsonl> | document <directory> | d1 MODULES OUT \
     | d4 MODULES ENTRIES ORACLE_D4 OUT | engine <D4.jsonl> OUT | engine-build MODULES ENTRIES OUT";
 const EXIT_USAGE: u8 = 2;
 
@@ -17,6 +18,7 @@ fn main() -> ExitCode {
         [command, path] if command == "stubs" => stubs_replay::run(path),
         [command, path] if command == "solver" => solver_replay::run(path),
         [command, path, out] if command == "engine" => engine_replay::run(path, out),
+        [command, root] if command == "document" => document_check::run(root),
         _ => d1::run(&arguments)
             .or_else(|| d4::run(&arguments))
             .or_else(|| engine_replay::build(&arguments))
