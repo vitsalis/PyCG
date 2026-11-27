@@ -9,6 +9,7 @@ pub mod hierarchy;
 pub mod objects;
 mod outside;
 mod outside_calls;
+mod reflection;
 mod rules;
 mod semantics;
 pub mod symbols;
@@ -168,6 +169,11 @@ struct State<T: Trace> {
     length_hints: FxHashSet<(Sym, Sym, NodeId, usize)>,
     length_plans: FxHashMap<usize, outside_calls::PlanId>,
     reverse_sequences: FxHashSet<(ObjId, NodeId, CallId)>,
+    namespaces: FxHashSet<ObjId>,
+    namespace_calls: FxHashSet<CallId>,
+    getmembers: Vec<reflection::Getmembers>,
+    getmembers_calls: FxHashSet<CallId>,
+    members_listed: FxHashSet<(ObjId, reflection::GetmembersId)>,
     handed: Vec<ObjId>,
     tables: BuilderTables,
     containers: containers::Containers,
@@ -278,6 +284,11 @@ impl<T: Trace> Engine<T> {
             length_hints: FxHashSet::default(),
             length_plans: FxHashMap::default(),
             reverse_sequences: FxHashSet::default(),
+            namespaces: FxHashSet::default(),
+            namespace_calls: FxHashSet::default(),
+            getmembers: Vec::new(),
+            getmembers_calls: FxHashSet::default(),
+            members_listed: FxHashSet::default(),
             handed: Vec::new(),
             containers: containers::Containers::default(),
             tables: BuilderTables::default(),

@@ -9,6 +9,7 @@ use crate::engine::containers::IterationId;
 use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Kind, kinds_mask};
 use crate::engine::outside_calls::PlanId;
+use crate::engine::reflection::{DefaultAction, GetmembersId};
 use crate::engine::semantics::{CallId, ReturnedId};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::{RuleInfo, Trace};
@@ -157,6 +158,38 @@ pub(crate) enum Rule {
         implicit: CallId,
         reversing: Option<NodeId>,
     },
+    WhenDefaultMemberOnType {
+        object: ObjId,
+        name: Sym,
+        action: DefaultAction,
+        result: Option<NodeId>,
+    },
+    RunDefaultAction {
+        object: ObjId,
+        action: DefaultAction,
+        result: Option<NodeId>,
+    },
+    NamespaceElement {
+        object: ObjId,
+        container: ObjId,
+        unknown: NodeId,
+    },
+    AddNamespace {
+        dst: NodeId,
+    },
+    MembersOf {
+        access: GetmembersId,
+        dst: NodeId,
+    },
+    LoadMember {
+        object: ObjId,
+        access: GetmembersId,
+        values: NodeId,
+    },
+    MemberField {
+        object: ObjId,
+        values: NodeId,
+    },
     MetaclassProtocol {
         class: ObjId,
         name: Sym,
@@ -244,6 +277,7 @@ const CLASS_KINDS: &[Kind] = &[Kind::Class];
 const PROPERTY_KINDS: &[Kind] = &[Kind::Wrapper, Kind::Instance];
 const PATTERN_KINDS: &[Kind] = &[Kind::Pattern];
 const CONTAINER_KINDS: &[Kind] = &[Kind::Container];
+const OWNER_OR_INSTANCE_KINDS: &[Kind] = &[Kind::Class, Kind::Instance];
 const OWNER_KINDS: &[Kind] = &[Kind::Class, Kind::External];
 const CALLED_BACK_KINDS: &[Kind] = &[Kind::Function, Kind::BoundMethod, Kind::Instance];
 
@@ -289,6 +323,13 @@ impl Rule {
             Rule::Reversed { .. } => "Each:BuiltinRules._reversed",
             Rule::ReversedSequence { .. } => "Each:BuiltinRules._reversed_sequence",
             Rule::ReverseSequence { .. } => "Each:BuiltinRules._reverse_sequence",
+            Rule::WhenDefaultMemberOnType { .. } => "Each:Reflection._when_default_member_on_type",
+            Rule::RunDefaultAction { .. } => "Each:Reflection._run_default_action",
+            Rule::NamespaceElement { .. } => "Each:Reflection._namespace_element",
+            Rule::AddNamespace { .. } => "Each:Reflection.add_namespace",
+            Rule::MembersOf { .. } => "Each:Reflection._members_of",
+            Rule::LoadMember { .. } => "Each:Reflection._load_member",
+            Rule::MemberField { .. } => "Each:Reflection._member_field",
             Rule::MetaclassProtocol { .. } => "Each:Outside._metaclass_protocol",
             Rule::CallEach { .. } => "Each:Analysis.call",
             Rule::ImplicitMethod { .. } => "Each:BuiltinRules._implicit_method",
@@ -335,6 +376,7 @@ impl Rule {
             Rule::CallBackObject { .. } => Some(CALLED_BACK_KINDS),
             Rule::CallProtocol { .. } => Some(SET_NAME_KINDS),
             Rule::SequenceLength { .. } => Some(CONTAINER_KINDS),
+            Rule::MembersOf { .. } => Some(OWNER_OR_INSTANCE_KINDS),
             Rule::PropertyReceiver { .. } => Some(PROPERTY_KINDS),
             Rule::BindClass { .. } => Some(OWNER_KINDS),
             Rule::BindType { .. } | Rule::SuperGiven { .. } => Some(SET_NAME_KINDS),
@@ -380,7 +422,15 @@ impl Rule {
             Rule::BindTo { owner, .. } => vec![owner],
             Rule::Reversed { result, .. } => vec![result],
             Rule::ReversedSequence { object, result, .. } => vec![object, result],
-            Rule::ReverseSequence { object, .. } => vec![object],
+            Rule::ReverseSequence { object, .. }
+            | Rule::WhenDefaultMemberOnType { object, .. }
+            | Rule::RunDefaultAction { object, .. }
+            | Rule::LoadMember { object, .. }
+            | Rule::MemberField { object, .. } => vec![object],
+            Rule::NamespaceElement {
+                object, container, ..
+            } => vec![object, container],
+            Rule::AddNamespace { .. } | Rule::MembersOf { .. } => Vec::new(),
             Rule::SuperAfterOutside { class, .. }
             | Rule::SuperObject { class, .. }
             | Rule::SuperGiven { class, .. }
@@ -493,6 +543,13 @@ impl<T: Trace> State<T> {
             Rule::ReverseSequence { implicit, .. } => {
                 self.calls[implicit.index()].dst.into_iter().collect()
             }
+            Rule::WhenDefaultMemberOnType { result, .. }
+            | Rule::RunDefaultAction { result, .. } => result.into_iter().collect(),
+            Rule::NamespaceElement { unknown: dst, .. }
+            | Rule::AddNamespace { dst }
+            | Rule::MembersOf { dst, .. }
+            | Rule::LoadMember { values: dst, .. }
+            | Rule::MemberField { values: dst, .. } => vec![dst],
             Rule::Bases { .. }
             | Rule::KeywordCandidate { .. }
             | Rule::ReturnedOfClass(_)
@@ -596,6 +653,33 @@ impl<T: Trace> State<T> {
                 implicit,
                 reversing,
             } => self.reverse_sequence(graph, owner, methods, implicit, reversing),
+            Rule::WhenDefaultMemberOnType {
+                object: owner,
+                name,
+                action,
+                result,
+            } => self.when_default_member_on_type(graph, object, owner, name, action, result),
+            Rule::RunDefaultAction {
+                object: owner,
+                action,
+                ..
+            } => self.run_default_action(graph, owner, action),
+            Rule::NamespaceElement {
+                object: owner,
+                container,
+                ..
+            } => self.namespace_element(graph, object, owner, container),
+            Rule::AddNamespace { dst } => self.add_namespace(graph, object, dst),
+            Rule::MembersOf { access, .. } => self.members_of(graph, object, access),
+            Rule::LoadMember {
+                object: owner,
+                access,
+                ..
+            } => self.load_member(graph, object, owner, access),
+            Rule::MemberField {
+                object: owner,
+                values,
+            } => self.member_field(graph, object, owner, values),
             Rule::MetaclassProtocol {
                 class,
                 name,

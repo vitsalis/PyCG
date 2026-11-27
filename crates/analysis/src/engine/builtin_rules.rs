@@ -133,6 +133,8 @@ impl<T: Trace> State<T> {
             ModelRule::Next => self.rule_next(graph, call, args),
             ModelRule::Advance => self.rule_advance(graph, call, container(receiver), args),
             ModelRule::Reversed => self.rule_reversed(graph, call, args),
+            ModelRule::Namespace => self.rule_namespace(graph, call, args),
+            ModelRule::Members => self.rule_members(graph, call, args),
             ModelRule::Bind => {
                 self.rule_bind(graph, call, receiver.expect("a bound wrapper"), args)
             }

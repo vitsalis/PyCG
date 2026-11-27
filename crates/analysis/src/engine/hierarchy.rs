@@ -59,7 +59,7 @@ pub struct LookupKey {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-enum BaseOrder {
+pub(super) enum BaseOrder {
     Nothing,
     Class(String, u32),
     External(u32, String),
@@ -1241,12 +1241,7 @@ impl<T: Trace> State<T> {
                     let own = self.family(graph, class);
                     self.add_edge(graph, own, family);
                 }
-                if self
-                    .namespace_nodes
-                    .contains_key(&(class, Namespace::Members))
-                {
-                    not_ported("reflection: the members of a class");
-                }
+                self.members_base(graph, base, class);
             }
             Some(base) => self.add_outside_base(graph, class, base),
             None => {}
@@ -1419,7 +1414,7 @@ impl<T: Trace> State<T> {
         (vec![exhaustive_order(&class, &slots, mros_of)], true)
     }
 
-    fn base_order(&self, base: Option<ObjId>) -> BaseOrder {
+    pub(super) fn base_order(&self, base: Option<ObjId>) -> BaseOrder {
         let Some(base) = base else {
             return BaseOrder::Nothing;
         };
