@@ -4,7 +4,7 @@ import unicodedata
 from pathlib import Path
 
 DESCRIPTION = """\
-Writes the Unicode data that pycg_syntax normalises identifiers with, as
+Writes the Unicode data that pycg-syntax normalises identifiers with, as
 CPython's parser does (NFKC), and tests identifiers with, as
 str.isidentifier does: the full compatibility decomposition of each code
 point that has one, the canonical combining class of each code point
@@ -16,7 +16,7 @@ committed.
 """
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT = ROOT / "crates" / "pycg_syntax" / "data" / "unicode.txt"
+OUT = ROOT / "crates" / "syntax" / "data" / "unicode.txt"
 CODE_POINTS = 0x110000
 HANGUL_SYLLABLES = range(0xAC00, 0xD7A4)
 SURROGATES = range(0xD800, 0xE000)

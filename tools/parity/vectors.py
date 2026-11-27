@@ -15,11 +15,11 @@ from pycg.analysis import builtin_models, model, mro, stubs  # noqa: E402
 from pycg.analysis.builder import NESTING_MAX, nesting  # noqa: E402
 from pycg.analysis.builtin_rules import _signature  # noqa: E402
 
-VECTORS_DIRECTORY = ROOT / "crates" / "pycg_stubs" / "tests" / "vectors"
-MODEL_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "model.rs"
-MODELS_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "models.rs"
-NESTING_VECTORS = ROOT / "crates" / "pycg_analysis" / "tests" / "vectors" / "nesting.rs"
-BUILDER_VECTORS = ROOT / "crates" / "pycg_dump" / "tests" / "vectors" / "builder"
+VECTORS_DIRECTORY = ROOT / "crates" / "stubs" / "tests" / "vectors"
+MODEL_VECTORS = ROOT / "crates" / "analysis" / "tests" / "vectors" / "model.rs"
+MODELS_VECTORS = ROOT / "crates" / "analysis" / "tests" / "vectors" / "models.rs"
+NESTING_VECTORS = ROOT / "crates" / "analysis" / "tests" / "vectors" / "nesting.rs"
+BUILDER_VECTORS = ROOT / "crates" / "dump" / "tests" / "vectors" / "builder"
 DUMP = ROOT / "tools" / "parity" / "dump.py"
 BUILDER_FILES = {
     "stubs": {

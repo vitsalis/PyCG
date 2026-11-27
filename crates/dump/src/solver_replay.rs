@@ -62,7 +62,7 @@ pub fn run(input: &str) -> ExitCode {
     let reader = match File::open(input) {
         Ok(file) => BufReader::new(file).lines(),
         Err(error) => {
-            eprintln!("pycg_dump solver: cannot read {input}: {error}");
+            eprintln!("pycg-dump solver: cannot read {input}: {error}");
             return ExitCode::FAILURE;
         }
     };
@@ -74,7 +74,7 @@ pub fn run(input: &str) -> ExitCode {
     match replay.output.flush() {
         Ok(()) => ExitCode::SUCCESS,
         Err(error) => {
-            eprintln!("pycg_dump solver: cannot write the trace: {error}");
+            eprintln!("pycg-dump solver: cannot write the trace: {error}");
             ExitCode::FAILURE
         }
     }

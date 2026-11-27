@@ -12,7 +12,7 @@ import warnings
 from pathlib import Path
 
 DESCRIPTION = """\
-Writes the test vectors of pycg_syntax from the Python of the oracle:
+Writes the test vectors of pycg-syntax from the Python of the oracle:
 reading.txt, the text or the failure that reading a file of given bytes
 gives (program._read, then program._parse, with program._cause), and
 positions.txt, the kind and position of every node of each program of
@@ -30,7 +30,7 @@ the output is committed.
 
 ROOT = Path(__file__).resolve().parents[2]
 
-OUT = ROOT / "crates" / "pycg_syntax" / "tests" / "vectors"
+OUT = ROOT / "crates" / "syntax" / "tests" / "vectors"
 
 
 def nested_strings(prefixes, count):

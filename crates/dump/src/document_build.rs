@@ -24,14 +24,14 @@ pub fn run(oracle: &str, out: &str) -> ExitCode {
     }) {
         Ok(found) => found,
         Err(problem) => {
-            eprintln!("pycg_dump: {}: {problem}", oracle.display());
+            eprintln!("pycg-dump: {}: {problem}", oracle.display());
             return ExitCode::from(EXIT_FAILURE);
         }
     };
     let (package, entry_points) = match run_paths(&run) {
         Ok(paths) => paths,
         Err(problem) => {
-            eprintln!("pycg_dump: {}: {problem}", oracle.join(RUN).display());
+            eprintln!("pycg-dump: {}: {problem}", oracle.join(RUN).display());
             return ExitCode::from(EXIT_FAILURE);
         }
     };
@@ -44,7 +44,7 @@ pub fn run(oracle: &str, out: &str) -> ExitCode {
         .and_then(|mut file| file.write_all(document.as_bytes()));
     if let Err(error) = written {
         eprintln!(
-            "pycg_dump: cannot write {}: {error}",
+            "pycg-dump: cannot write {}: {error}",
             out.join(DOCUMENT).display()
         );
         return ExitCode::from(EXIT_FAILURE);
