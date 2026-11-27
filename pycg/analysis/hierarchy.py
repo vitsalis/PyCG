@@ -472,13 +472,20 @@ class Hierarchy:
                 defines = True
             else:
                 field = self.field(base, attr)
-                key = (field, receiver, dst)
-                if key not in self._subscriptions:
-                    self._subscriptions.add(key)
-                    instance = isinstance(receiver, Instance) or (
-                        isinstance(receiver, Class) and not _inherits(receiver, base)
-                    )
-                    self.solver.attach(field, _Bind(self, receiver, dst, instance))
+                instance = isinstance(receiver, Instance) or (
+                    isinstance(receiver, Class) and not _inherits(receiver, base)
+                )
+                binds = self._field_binds.get((field, instance))
+                if binds is None:
+                    binds = _Binds(self, instance)
+                    self._field_binds[(field, instance)] = binds
+                    self.solver.attach(field, binds)
+                known = binds.receivers.get(dst)
+                if known is None:
+                    binds.receivers[dst] = receiver
+                    self.solver.apply_now(field, _Bind(self, receiver, dst, instance))
+                else:
+                    assert known is receiver, dst
                 defines = attr in base.defines
             found = found or defines
             if defines and first_only:
@@ -983,6 +990,27 @@ class _Bases(Constraint):
 
     def captured(self):
         return (self.cls,)
+
+
+class _Binds(Constraint):
+    __slots__ = ("analysis", "instance", "receivers")
+
+    def __init__(self, analysis, instance):
+        self.analysis = analysis
+        self.instance = instance
+        self.receivers = {}
+
+    def apply(self, obj):
+        analysis = self.analysis
+        solver = analysis.solver
+        for dst, receiver in list(self.receivers.items()):
+            if solver.opaque and opaque(receiver):
+                analysis.add_object(dst, analysis.saturated)
+            else:
+                analysis.bind(obj, receiver, dst, self.instance)
+
+    def results(self):
+        return tuple(self.receivers)
 
 
 class _Bind(Constraint):

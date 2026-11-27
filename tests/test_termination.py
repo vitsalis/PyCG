@@ -783,6 +783,7 @@ COUNTED = {
 }
 
 NOT_COUNTED = {
+    "_field_binds",
     "_bound_groups",
     "_groups",
     "_grouped_externals",

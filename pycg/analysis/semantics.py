@@ -122,6 +122,7 @@ class Analysis(
         self._constants = {}
         self._subscriptions = set()
         self._compared_keys = {}
+        self._field_binds = {}
         self._sequences = {}
         self._accessor_hooks = {}
         self._accessor_receivers = {}
