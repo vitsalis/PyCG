@@ -113,25 +113,17 @@ def test_get_imports_of_unknown_module():
     assert ImportManager().get_imports("missing") == []
 
 
-def test_is_internal(tmp_path):
-    im = ImportManager()
-    im.set_pkg(str(tmp_path / "pkg"))
-
-    assert im.is_internal(str(tmp_path / "pkg" / "mod.py"))
-    assert im.is_internal(str(tmp_path / "pkg" / "sub" / "mod.py"))
-    assert im.is_internal(str(tmp_path / "pkg"))
-    sibling_with_the_root_name_as_prefix = tmp_path / "pkg2" / "mod.py"
-    assert not im.is_internal(str(sibling_with_the_root_name_as_prefix))
-    assert not im.is_internal(str(tmp_path / "mod.py"))
-
-
 def test_set_pkg_makes_root_absolute(tmp_path, monkeypatch):
+    make_files(tmp_path, "pkg/mod.py", "pkg/main.py")
     monkeypatch.chdir(tmp_path)
     im = ImportManager()
     im.set_pkg("pkg")
+    im.create_node("main")
+    im.set_current_mod("main", "pkg/main.py")
+    monkeypatch.chdir(tmp_path / "pkg")
 
-    assert im.get_mod_dir() == str(tmp_path / "pkg")
-    assert im.is_internal(str(tmp_path / "pkg" / "mod.py"))
+    assert im.handle_import("mod", 0) == "mod"
+    assert im.get_filepath("mod") == str(tmp_path / "pkg" / "mod.py")
 
 
 def test_import_module_file(tmp_path):

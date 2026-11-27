@@ -40,7 +40,7 @@ RECORDED = (
     "get_import_graph",
 )
 SETTERS = ("set_pkg", "create_node", "set_filepath", "set_current_mod")
-UNPORTED = ("create_edge", "is_internal", "get_mod_dir")
+UNPORTED = ("create_edge",)
 SKIPPED_FILES = ("__pycache__",)
 
 

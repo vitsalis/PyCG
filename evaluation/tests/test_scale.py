@@ -241,6 +241,19 @@ def test_an_archive_that_is_not_well_formed_is_refused(
     assert not (out / "demo").exists()
 
 
+def test_a_package_without_a_licence_file_is_refused(
+    tmp_path, served_body_by_url, capsys
+):
+    data = make_wheel({"demo/__init__.py": b""})
+    config = pinned(
+        tmp_path, served_body_by_url, data, {"file": "demo-1.0-py3-none-any.whl"}
+    )
+    out = tmp_path / "inputs"
+    assert fetch.fetch_scale(out, config) == 1
+    assert "demo: refused: no licence file" in capsys.readouterr().err
+    assert not (out / "demo").exists()
+
+
 def test_an_archive_of_another_hash_is_not_written(
     tmp_path, served_body_by_url, capsys
 ):

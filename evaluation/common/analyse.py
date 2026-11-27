@@ -129,7 +129,7 @@ def analyse(request):
         message = str(error).splitlines()[0] if str(error) else ""
         result = {
             "status": "crash",
-            "error": f"{type(error).__name__}: {message}"[:300],
+            "error": f"{type(error).__name__}: {message}",
             "where": _crash_location_innermost_in_checkout(error, checkout),
         }
     result["seconds"] = round(time.perf_counter() - start, 3)

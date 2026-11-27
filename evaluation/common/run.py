@@ -126,7 +126,7 @@ def run_job(tool, job, graph_path, timeout_seconds, memory_limit_mib=None):
             tail = (error_lines or [""])[-1]
             return {
                 "status": "crash",
-                "error": f"exit status {child.returncode}: {tail}"[:300],
+                "error": f"exit status {child.returncode}: {tail}",
                 "exit_status": child.returncode,
                 "wall_seconds": wall,
             } | sampled
