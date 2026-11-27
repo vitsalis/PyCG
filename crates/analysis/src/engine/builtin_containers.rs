@@ -8,7 +8,7 @@ use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::trace::Trace;
-use crate::engine::{Graph, State, not_ported};
+use crate::engine::{Graph, State};
 use crate::models::{LENGTH_HINT, LengthPlan, REVERSED_LENGTH, SEQUENCE_LENGTH};
 
 const SEQUENCES: [&str; 2] = ["list", "tuple"];
@@ -580,7 +580,8 @@ impl<T: Trace> State<T> {
         let function = self.bound_parameter(graph, args, "function");
         let callee = self.callee(graph, back);
         self.add_edge(graph, function, callee);
-        not_ported("protocols: the truth of a filter's verdict")
+        self.add_truth(graph, verdict, caller, site);
+        self.result(graph, call, result);
     }
 
     pub(super) fn rule_next(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
