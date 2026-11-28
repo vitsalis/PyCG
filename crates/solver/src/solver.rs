@@ -46,7 +46,7 @@ enum Inbox {
 }
 
 struct Received {
-    sets: Vec<SetId>,
+    sets: OrderedSet<SetId>,
 }
 
 enum Successors {
@@ -144,7 +144,7 @@ pub struct Solver<C> {
     propagated_at_last_search: u64,
     propagated_nodes_and_edges: u64,
     applications_in_progress: u32,
-    added_by_node: OrderedMap<NodeId, Vec<ObjId>>,
+    added_by_node: OrderedMap<NodeId, OrderedSet<ObjId>>,
     attach_nesting: u32,
     attach_deferred: VecDeque<(C, SetId)>,
     firing_nodes: OrderedSet<NodeId>,
@@ -309,10 +309,7 @@ impl<C: Copy> Solver<C> {
         );
         if self.applications_in_progress > 0 {
             self.sets.number(object, kinds);
-            let added = self.added_by_node.entry(node).or_default();
-            if !added.contains(&object) {
-                added.push(object);
-            }
+            self.added_by_node.entry(node).or_default().insert(object);
         } else {
             let single = self.singleton(object);
             self.receive(node, single);
@@ -623,13 +620,11 @@ impl<C: Copy> Solver<C> {
             Inbox::One(only) if *only == objects => {}
             Inbox::One(only) => {
                 entry.inbox = Inbox::Many(Box::new(Received {
-                    sets: vec![*only, objects],
+                    sets: OrderedSet::from_iter([*only, objects]),
                 }))
             }
             Inbox::Many(received) => {
-                if !received.sets.contains(&objects) {
-                    received.sets.push(objects);
-                }
+                received.sets.insert(objects);
             }
         }
     }
@@ -1178,7 +1173,7 @@ fn received_sets(inbox: &Inbox) -> Vec<SetId> {
     match inbox {
         Inbox::Empty => Vec::new(),
         Inbox::One(set) => vec![*set],
-        Inbox::Many(received) => received.sets.clone(),
+        Inbox::Many(received) => received.sets.iter().copied().collect(),
     }
 }
 
