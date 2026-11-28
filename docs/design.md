@@ -65,8 +65,14 @@ and `re.subn`, which call a callable replacement, `copy.replace`, which
 calls `__replace__`, and a table of selected standard-library operations
 (`itertools`, `functools.reduce`, `math.sumprod`, `heapq.nlargest`, ...),
 which iterate what they get: at the call, or, for a lazy object, where
-analysed code advances it. Of the overloads that fit a call by arity and
-keywords, the result is that of those whose parameter accepts a value of
+analysed code advances it. `threading.Thread` and `multiprocessing.Process`
+follow CPython: the constructor stores `target`, `args` and `kwargs` in the
+instance's `_target`, `_args` and `_kwargs`, `start` calls the instance's
+`run` from the site of `start`, and their own `run` calls
+`_target(*_args, **_kwargs)`. An instance that their own constructor makes
+is one value per call that makes it, so each holds its own target. Of the
+overloads that fit a call by arity and keywords, the result is that of
+those whose parameter accepts a value of
 the first positional argument whose declared types differ between them: a
 value accepts a class that its class derives from, a protocol whose methods
 its class has, and `float` or `complex` for an `int`. A value of unknown
@@ -123,8 +129,9 @@ own `__iter__` makes one instance per loop.
 - **No calling context.** A parameter holds what every caller passes, so a
   helper that forwards its arguments mixes the values of all its callers.
 - **No model of what outside code calls.** A function given to outside
-  code (a thread target, a callback) gets no edge from that code; if no
-  analysed code calls it, it is an entry point and its body is analysed.
+  code (a callback) gets no edge from that code, except for the exceptions
+  that idea 3 names; if no analysed code calls it, it is an entry point and
+  its body is analysed.
 - **No code built at run time.** `eval`, `exec`, and attribute names
   computed from more than four strings are not followed, so the calls that
   they make give no edges.

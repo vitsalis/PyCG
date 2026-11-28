@@ -147,8 +147,6 @@ stdlib/json_object_hook: outside/library-calls-back: a function passed to librar
 stdlib/logging_handler_emit: outside/library-calls-back: library code is not modelled: Logger.warning calls the handler's emit
 stdlib/re_sub_function: outside/library-types: the match that re.sub passes to its function has no type
 stdlib/sched_callbacks: outside/library-calls-back: a function passed to library code is not a call: sched calls the actions it schedules
-stdlib/thread_subclass_run: outside/library-calls-back: Thread.start does not call the subclass's run
-stdlib/thread_target: outside/library-calls-back: a function passed to library code is not a call: Thread.start calls the target
 stdlib/unittest_runner: outside/library-calls-back: a unittest runner does not call setUp and the test methods
 stdlib_classes/dataclass_default_factory: outside/library-calls-back: the generated __init__ calls default_factory only when the argument is omitted
 stdlib_classes/dataclass_order: outside/library-calls-back: the comparison methods that a dataclass generates are not modelled
