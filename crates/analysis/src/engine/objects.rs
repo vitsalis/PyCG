@@ -177,6 +177,7 @@ pub struct Class {
     pub defines: FxHashSet<Sym>,
     pub bound: FxHashSet<Sym>,
     pub slots: FxHashSet<Sym>,
+    pub init_stores: FxHashSet<Sym>,
     pub bases: Vec<OrderedSet<Option<ObjId>>>,
     pub mros: Vec<Vec<ObjId>>,
     pub ancestors: FxHashSet<ObjId>,

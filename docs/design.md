@@ -36,7 +36,11 @@ that may reach it. Assignments, argument passing and returns are subset
 edges between nodes. A load, store or call on a node is a constraint that
 acts on each object that reaches the node. A worklist solver applies the
 constraints until nothing changes, once for the whole program. A call edge
-exists where a call constraint meets a function.
+exists where a call constraint meets a function. Python calls `__getattr__`
+only when the normal lookup fails, so a load through an instance calls it
+only where no class of the MRO defines the name and no `__init__` of the MRO
+assigns the name on its receiver in its own body (`self.x = ...`); a load
+that runs before that store loses its `__getattr__` call.
 
 ### 2. Local names by definition; code that cannot run is not analysed
 
@@ -162,5 +166,4 @@ values meet it may not end in reasonable time or memory.
   function gives the union of the overloads that fit by arity and keywords;
   only the mode of an opened file is selected, by a table of Python's rule.
 - **Small measured imprecisions.** The result of a coroutine function names
-  any attribute, and a load of an attribute that `__init__` stores still
-  calls `__getattr__`.
+  any attribute.
