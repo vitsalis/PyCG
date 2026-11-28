@@ -21,6 +21,7 @@ pub trait Rules<C> {
     fn between_rounds(&mut self, solver: &mut Solver<C>) -> bool;
     fn wake(&mut self, solver: &mut Solver<C>, watch: WatchId);
     fn firing(&mut self, solver: &mut Solver<C>);
+    fn tick(&mut self, _solver: &Solver<C>) {}
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -220,6 +221,119 @@ impl<C: Copy> Solver<C> {
 
     pub fn enable_opacity(&mut self) {
         self.opacity = true;
+    }
+
+    pub fn census(&self, prefix: &str) {
+        let live = || self.nodes.iter().filter(|x| x.representative.is_none());
+        let n = self.nodes.len();
+        let merged = n - live().count();
+        let constant = live().filter(|x| x.constant).count();
+        let empty_done = live().filter(|x| x.done == SetId::EMPTY).count();
+        let saturated = live().filter(|x| x.done == self.saturated_set).count();
+        let with_constraints = live().filter(|x| !x.constraints.is_empty()).count();
+        let constraints: usize = self.nodes.iter().map(|x| x.constraints.len()).sum();
+        let constraints_cap: usize = self.nodes.iter().map(|x| x.constraints.capacity()).sum();
+        let on_constant: usize = live()
+            .filter(|x| x.constant)
+            .map(|x| x.constraints.len())
+            .sum();
+        let grouped_nodes = self.nodes.iter().filter(|x| x.groups.is_some()).count();
+        let grouped: usize = self
+            .nodes
+            .iter()
+            .filter_map(|x| x.groups.as_ref())
+            .map(|g| g.iter().map(|(c, _)| c.len()).sum::<usize>())
+            .sum();
+        let one = self
+            .nodes
+            .iter()
+            .filter(|x| matches!(x.successors, Successors::One(_)))
+            .count();
+        let many = self
+            .nodes
+            .iter()
+            .filter(|x| matches!(x.successors, Successors::Many(_)))
+            .count();
+        let many_len: usize = self
+            .nodes
+            .iter()
+            .map(|x| match &x.successors {
+                Successors::Many(t) => t.len(),
+                _ => 0,
+            })
+            .sum();
+        let searched: usize = self
+            .nodes
+            .iter()
+            .map(|x| match &x.successors {
+                Successors::Many(t) => t.searched.len(),
+                _ => 0,
+            })
+            .sum();
+        let fired_differs = live()
+            .filter(|x| x.fired != SetId::EMPTY && x.fired != x.done)
+            .count();
+        let inbox_one = live().filter(|x| matches!(x.inbox, Inbox::One(_))).count();
+        let inbox_many: usize = live()
+            .map(|x| match &x.inbox {
+                Inbox::Many(s) => s.len(),
+                _ => 0,
+            })
+            .sum();
+        let held: usize = live().map(|x| self.sets.len(x.done)).sum();
+        let mut product: u128 = 0;
+        let mut product_max = (0usize, 0usize);
+        let mut by_size = [(0usize, 0usize); 6];
+        for x in live() {
+            let objects = if x.done == self.saturated_set {
+                0
+            } else {
+                self.sets.len(x.done)
+            };
+            let attached = x.constraints.len()
+                + x.groups
+                    .as_ref()
+                    .map_or(0, |g| g.iter().map(|(c, _)| c.len()).sum::<usize>());
+            product += (attached as u128) * (objects as u128);
+            if attached * objects > product_max.0 * product_max.1 {
+                product_max = (attached, objects);
+            }
+            let bucket = match objects {
+                0 => 0,
+                1..=10 => 1,
+                11..=100 => 2,
+                101..=1000 => 3,
+                1001..=4999 => 4,
+                _ => 5,
+            };
+            by_size[bucket].0 += 1;
+            by_size[bucket].1 += attached;
+        }
+        let node_bytes = self.nodes.capacity() * std::mem::size_of::<Node<C>>();
+        let succ_bytes = many * std::mem::size_of::<Targets>()
+            + many_len * (std::mem::size_of::<NodeId>() * 2 + 2);
+        eprintln!(
+            "{prefix} NODES n={n} merged={merged} constant={constant} empty={empty_done} saturated={saturated} with_constraints={with_constraints} constraints={constraints} constraints_cap={constraints_cap} constraints_on_constant_nodes={on_constant} grouped_nodes={grouped_nodes} grouped_constraints={grouped} succ_one={one} succ_many={many} succ_many_len={many_len} searched_entries={searched} fired_differs={fired_differs} inbox_one={inbox_one} inbox_many_sets={inbox_many} held_objects={held}"
+        );
+        eprintln!(
+            "{prefix} CROSS constraints_x_objects={product} max_node_constraints={} max_node_objects={} by_objects(0,<=10,<=100,<=1k,<5k,>=5k)=(nodes,constraints){by_size:?} applied_total={}",
+            product_max.0, product_max.1, self.applied
+        );
+        eprintln!(
+            "{prefix} SOLVER worklist={} cycle_suspects={} added_by_node={} attach_deferred={} firing_nodes={} set_holders={} watches={} absorbed_sets={} kinds_by_object={} phase={} est_bytes(nodes={node_bytes} successors={succ_bytes} constraints={})",
+            self.worklist.len(),
+            self.cycle_suspects.len(),
+            self.added_by_node.len(),
+            self.attach_deferred.len(),
+            self.firing_nodes.len(),
+            self.set_holders.len(),
+            self.watches_waiting.len(),
+            self.absorbed_sets.len(),
+            self.kinds_by_object.len(),
+            self.phase,
+            constraints_cap * std::mem::size_of::<C>()
+        );
+        self.sets.census(prefix);
     }
 
     pub fn work(&self) -> Work {
@@ -472,6 +586,7 @@ impl<C: Copy> Solver<C> {
     pub fn solve(&mut self, rules: &mut impl Rules<C>) {
         let mut starting = true;
         loop {
+            rules.tick(self);
             if let Some((constraint, objects)) = self.attach_deferred.pop_front() {
                 self.apply(rules, vec![constraint], objects);
                 continue;

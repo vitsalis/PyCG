@@ -130,7 +130,7 @@ impl SharedRule {
 
 pub struct Shared {
     rule: SharedRule,
-    items: Vec<SharedItem>,
+    pub(crate) items: Vec<SharedItem>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -402,6 +402,7 @@ impl State {
         receivers: &[ObjId],
         call: CallId,
     ) {
+        self.census.call_bound += 1;
         assert!(
             !self.groups.contains_key(&call),
             "a group call is not bound again"
@@ -538,6 +539,7 @@ impl State {
         call: CallId,
         receiver: Option<ObjId>,
     ) {
+        self.census.call_function += 1;
         if !self.may_bind(function, call, receiver) {
             return;
         }

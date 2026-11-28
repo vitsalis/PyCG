@@ -70,8 +70,8 @@ pub type AccessorEntry = (NodeId, AccessId, bool, u32);
 #[derive(Default)]
 pub struct AccessorHooks {
     lookups: OrderedSet<NodeId>,
-    receivers: OrderedMap<AccessorEntry, Chain>,
-    callers: OrderedSet<Option<Sym>>,
+    pub(crate) receivers: OrderedMap<AccessorEntry, Chain>,
+    pub(crate) callers: OrderedSet<Option<Sym>>,
     pub results_of: OrderedSet<NodeId>,
     saturated: bool,
 }
@@ -80,8 +80,8 @@ pub struct Accessors {
     pub call: CallId,
     pub analysed_only: bool,
     width: u32,
-    receivers: Chain,
-    methods: Vec<ObjId>,
+    pub(crate) receivers: Chain,
+    pub(crate) methods: Vec<ObjId>,
 }
 
 #[derive(Default)]
@@ -597,6 +597,7 @@ impl State {
             .chains
             .objects(self.accessors[accessors.0 as usize].receivers);
         for receiver in receivers {
+            self.census.accessors_apply_receiver += 1;
             let prefix = self.accessor_prefix(receiver, width);
             self.call_bound(graph, method, &prefix, call);
         }
@@ -609,6 +610,7 @@ impl State {
         let methods = found.methods.clone();
         let prefix = self.accessor_prefix(receiver, width);
         for method in methods {
+            self.census.accessors_add_method += 1;
             self.call_bound(graph, method, &prefix, call);
         }
     }

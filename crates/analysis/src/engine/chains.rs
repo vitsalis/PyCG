@@ -2,7 +2,7 @@ use pycg_solver::ObjId;
 use rustc_hash::FxHashMap;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub struct Chain(u32);
+pub struct Chain(pub(crate) u32);
 
 impl Chain {
     pub const EMPTY: Chain = Chain(0);
@@ -10,8 +10,8 @@ impl Chain {
 
 #[derive(Default)]
 pub struct Chains {
-    links: Vec<(Chain, ObjId)>,
-    extensions: FxHashMap<(Chain, ObjId), Chain>,
+    pub(crate) links: Vec<(Chain, ObjId)>,
+    pub(crate) extensions: FxHashMap<(Chain, ObjId), Chain>,
 }
 
 impl Chains {

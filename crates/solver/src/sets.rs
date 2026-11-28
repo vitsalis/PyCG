@@ -230,6 +230,43 @@ impl Sets {
         self.sweep_at_new_objects = kept_objects.max(SWEEP_NEW_OBJECTS_MIN);
     }
 
+    pub fn census(&self, prefix: &str) {
+        let selection_elements: usize = self
+            .selection_by_id_and_kinds
+            .values()
+            .map(|v| v.len())
+            .sum();
+        let selection_cap: usize = self
+            .selection_by_id_and_kinds
+            .values()
+            .map(|v| v.capacity())
+            .sum();
+        let pair = std::mem::size_of::<((SetId, SetId), SetId)>() + 1;
+        eprintln!(
+            "{prefix} SETS elements={} elements_cap={} spans={} spans_cap={} by_content={} unions={} differences={} selections={} selection_elements={} singletons={} numbered_objects={} new_sets_objects={} sweep_at={} est_bytes(elements={} spans={} unions={} differences={} selections={})",
+            self.elements.len(),
+            self.elements.capacity(),
+            self.spans.len(),
+            self.spans.capacity(),
+            self.by_content.len(),
+            self.union_by_ids.len(),
+            self.difference_by_ids.len(),
+            self.selection_by_id_and_kinds.len(),
+            selection_elements,
+            self.singletons.len(),
+            self.object_by_number.len(),
+            self.new_sets_object_count,
+            self.sweep_at_new_objects,
+            self.elements.capacity() * std::mem::size_of::<u32>(),
+            self.spans.capacity() * std::mem::size_of::<Span>(),
+            self.union_by_ids.capacity() * pair,
+            self.difference_by_ids.capacity() * pair,
+            selection_cap * std::mem::size_of::<ObjId>()
+                + self.selection_by_id_and_kinds.capacity()
+                    * (std::mem::size_of::<((SetId, KindMask), Vec<ObjId>)>() + 1),
+        );
+    }
+
     pub fn count(&self) -> usize {
         self.spans.len()
     }

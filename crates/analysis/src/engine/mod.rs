@@ -4,6 +4,7 @@ mod arguments;
 mod attributes;
 mod builtin_containers;
 mod builtin_rules;
+mod census;
 mod chains;
 mod containers;
 mod fixpoint;
@@ -209,6 +210,7 @@ struct State {
     outside_results: outside_results::OutsideResults,
     library: library::Library,
     class_tests: narrowing::ClassTests,
+    census: census::Census,
 }
 
 impl State {
@@ -344,6 +346,7 @@ impl State {
             outside_results,
             library,
             class_tests,
+            census: _,
         } = self;
         let mut sizes = vec![
             ("named_nodes", named_nodes.len()),
@@ -522,6 +525,7 @@ impl Engine {
             library: library::Library::default(),
             class_tests: narrowing::ClassTests::default(),
             tables: BuilderTables::default(),
+            census: census::Census::default(),
         };
         let mut graph = Solver::new(saturated, Kind::Saturated.mask(), cap, order);
         let name = state.symbols.intern("<unknown>");
@@ -582,7 +586,9 @@ impl Engine {
 
     pub fn solve(&mut self) {
         self.sync();
+        self.state.census_dump(&self.graph, "start", false);
         self.state.solve(&mut self.graph);
+        self.state.census_dump(&self.graph, "end", true);
     }
 }
 
@@ -663,10 +669,14 @@ impl State {
     }
 
     fn add_object(&mut self, graph: &mut Graph, node: NodeId, object: ObjId) {
+        self.census.add_object += 1;
+        self.census_step(graph);
         graph.add_object(self, node, object);
     }
 
     fn add_edge(&mut self, graph: &mut Graph, source: NodeId, target: NodeId) {
+        self.census.add_edge += 1;
+        self.census_step(graph);
         graph.add_edge(self, source, target);
     }
 

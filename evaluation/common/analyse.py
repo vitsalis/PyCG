@@ -39,17 +39,18 @@ def graph_of(request):
         "-o",
         str(document_path),
     ]
-    done = subprocess.run(
-        command,
-        env={},
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.PIPE,
-        text=True,
-        errors="replace",
-    )
+    stderr_path = Path(request["graph"]).with_suffix(".stderr")
+    with stderr_path.open("w", encoding="utf-8") as stderr:
+        done = subprocess.run(
+            command,
+            env={},
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=stderr,
+        )
     if done.returncode != 0:
-        lines = done.stderr.strip().splitlines()
+        text = stderr_path.read_text(encoding="utf-8", errors="replace")
+        lines = text.strip().splitlines()
         raise ProgramExit(done.returncode, lines[-1] if lines else "")
     return edges(json.loads(document_path.read_text(encoding="utf-8")))
 

@@ -321,7 +321,7 @@ impl Object {
 
 #[derive(Default)]
 pub struct Objects {
-    objects: Vec<Object>,
+    pub(crate) objects: Vec<Object>,
 }
 
 impl Objects {

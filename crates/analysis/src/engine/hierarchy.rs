@@ -58,7 +58,7 @@ pub struct BindsId(u32);
 
 pub(crate) struct Binds {
     instance: bool,
-    receivers: OrderedMap<NodeId, Option<ObjId>>,
+    pub(crate) receivers: OrderedMap<NodeId, Option<ObjId>>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]

@@ -28,7 +28,7 @@ pub struct RuleId(u32);
 impl RuleId {
     pub(crate) const PLACEHOLDER: RuleId = RuleId(u32::MAX);
 
-    fn index(self) -> usize {
+    pub(crate) fn index(self) -> usize {
         self.0 as usize
     }
 }
@@ -476,6 +476,7 @@ impl Rule {
 impl State {
     pub(super) fn rule(&mut self, rule: Rule) -> RuleId {
         if let Some(id) = self.released_rules.pop() {
+            self.census.rules_reused += 1;
             self.rules[id.index()] = rule;
             return id;
         }
@@ -487,6 +488,7 @@ impl State {
     pub(super) fn attach_rule(&mut self, graph: &mut Graph, node: NodeId, rule: Rule) {
         let id = self.rule(rule);
         if graph.attach(self, node, id) == Attached::Released {
+            self.census.rules_released += 1;
             self.released_rules.push(id);
         }
     }
@@ -803,8 +805,8 @@ impl State {
     }
 }
 
-impl Rules<RuleId> for State {
-    fn apply(&mut self, graph: &mut Graph, rule: RuleId, objects: &[ObjId]) {
+impl State {
+    fn apply_counted(&mut self, graph: &mut Graph, rule: RuleId, objects: &[ObjId]) {
         let found = self.rules[rule.index()].clone();
         if let Rule::Deliveries(id) = found {
             self.deliveries_apply(graph, id, objects);
@@ -832,6 +834,19 @@ impl Rules<RuleId> for State {
             }
             self.apply_one(graph, &found, object);
         }
+    }
+}
+
+impl Rules<RuleId> for State {
+    fn apply(&mut self, graph: &mut Graph, rule: RuleId, objects: &[ObjId]) {
+        self.census_step(graph);
+        let (key, start) = self.census_enter(rule);
+        self.apply_counted(graph, rule, objects);
+        self.census_leave(key, start, objects.len());
+    }
+
+    fn tick(&mut self, graph: &Graph) {
+        self.census_step(graph);
     }
 
     fn saturate(&mut self, graph: &mut Graph, rule: RuleId) {
@@ -884,9 +899,12 @@ impl Rules<RuleId> for State {
             .collect();
         for (rule, receivers) in receivers_by_rule {
             let rule = self.waiting_rules[rule as usize].clone();
+            let start = std::time::Instant::now();
+            let count = receivers.len();
             for receiver in receivers {
                 self.run_waiting(graph, rule.clone(), receiver);
             }
+            self.census_wake(&rule, count, start);
         }
     }
 
