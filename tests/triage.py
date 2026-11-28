@@ -747,15 +747,6 @@ CASES = {
         "a function passed to library code is not a call: sched calls the actions it "
         "schedules",
     ),
-    "stdlib/thread_subclass_run": (
-        "outside/library-calls-back",
-        "Thread.start does not call the subclass's run",
-    ),
-    "stdlib/thread_target": (
-        "outside/library-calls-back",
-        "a function passed to library code is not a call: Thread.start calls the "
-        "target",
-    ),
     "stdlib/unittest_runner": (
         "outside/library-calls-back",
         "a unittest runner does not call setUp and the test methods",

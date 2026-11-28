@@ -1,0 +1,54 @@
+{
+ "documents": [],
+ "edges": {
+  "<builtin>.super": [],
+  "main": [],
+  "main.Child.run": [
+   "main.helper"
+  ],
+  "main.Item.ping": [],
+  "main.Looper.__init__": [
+   "<builtin>.super",
+   "threading.Thread.__init__"
+  ],
+  "main.Looper.loop": [
+   "main.Item.ping"
+  ],
+  "main.another": [
+   "main.helper",
+   "threading.Thread",
+   "threading.Thread.start"
+  ],
+  "main.helper": [],
+  "main.processes": [
+   "main.Child.run",
+   "main.work",
+   "multiprocessing.Process",
+   "multiprocessing.Process.__init__",
+   "multiprocessing.Process.start"
+  ],
+  "main.threads": [
+   "main.Looper.__init__",
+   "main.Looper.loop",
+   "main.helper",
+   "main.work",
+   "threading.Thread",
+   "threading.Thread.__init__",
+   "threading.Thread.run",
+   "threading.Thread.start"
+  ],
+  "main.work": [
+   "main.Item.ping"
+  ],
+  "multiprocessing.Process": [],
+  "multiprocessing.Process.__init__": [],
+  "multiprocessing.Process.start": [],
+  "threading.Thread": [],
+  "threading.Thread.__init__": [],
+  "threading.Thread.run": [],
+  "threading.Thread.start": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

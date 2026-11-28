@@ -17,7 +17,7 @@ use crate::model::Signature;
 use crate::models::{
     CACHED_FUNCTIONS, CALLS_BACK, CLOSURES, CONTAINER_CLASSES, HASHED_ARGUMENTS, KEY_WRAPPERS,
     KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, OPENERS, REFLECTION_CALLS, RETURNS_ARGUMENT,
-    SPECIAL_METHOD_CALLS, function_model, lookup,
+    SPECIAL_METHOD_CALLS, THREAD_METHODS, ThreadMethod, function_model, lookup,
 };
 
 const STUB_BUILTINS_PREFIX: &str = "builtins.";
@@ -109,6 +109,7 @@ fn group_excluded(path: &str) -> bool {
         || lookup(CLOSURES, path).is_some()
         || lookup(REFLECTION_CALLS, path).is_some()
         || lookup(SPECIAL_METHOD_CALLS, path).is_some()
+        || lookup(THREAD_METHODS, path).is_some()
 }
 
 fn positional_kind(kind: ParameterKind) -> bool {
@@ -319,6 +320,7 @@ impl State {
         let mut hinting = Vec::new();
         let mut keyed = Vec::new();
         let mut library = Vec::new();
+        let mut threads = Vec::new();
         for definition in definitions {
             let overloads = match definition.kind {
                 DefinitionKind::Function => {
@@ -326,7 +328,22 @@ impl State {
                 }
                 DefinitionKind::Class => {
                     let overloads = self.constructor_signatures(graph, definition, call);
-                    if let Some(dst) = dst {
+                    let thread = self
+                        .stubs
+                        .member(&definition.path, "__init__")
+                        .iter()
+                        .any(|member| lookup(THREAD_METHODS, &*member.path).is_some());
+                    if let Some(dst) = dst
+                        && thread
+                    {
+                        let made = self.thread_instance(graph, call, &definition.path);
+                        self.add_object(graph, dst, made);
+                        threads.push((
+                            ThreadMethod::Init,
+                            Receivers::first_of([&made]),
+                            overloads.clone(),
+                        ));
+                    } else if let Some(dst) = dst {
                         let context = TypeContext::of_call(call, self.calls[call.index()].origin);
                         self.add_instance(graph, &definition.path, &[], dst, &context, &[]);
                     }
@@ -341,6 +358,11 @@ impl State {
             }
             if let Some(&hint) = lookup(LENGTH_HINTS, path) {
                 hinting.extend(overloads.iter().map(|overload| (hint, overload.clone())));
+            }
+            if definition.kind == DefinitionKind::Function
+                && let Some(&method) = lookup(THREAD_METHODS, path)
+            {
+                threads.push((method, receivers, overloads.clone()));
             }
             if let Some(&name) = lookup(CALLS_BACK, path) {
                 calling.extend(overloads.iter().map(|overload| (name, overload.clone())));
@@ -402,6 +424,9 @@ impl State {
         }
         for (path, found) in &library {
             self.library_operation(graph, call, path, found);
+        }
+        for (method, receivers, overloads) in &threads {
+            self.thread_method(graph, call, *method, receivers, overloads);
         }
         if !consuming.is_empty() {
             self.consume_library(graph, call, &consuming);

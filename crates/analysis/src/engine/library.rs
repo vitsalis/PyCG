@@ -10,13 +10,13 @@ use crate::engine::objects::{Kind, Literal, Object};
 use crate::engine::outside_calls::{Overload, abstract_iterable};
 use crate::engine::protocols::reflected_comparison;
 use crate::engine::rules::Rule;
-use crate::engine::semantics::{CallId, Origin, Role};
+use crate::engine::semantics::{Call, CallId, Origin, Role};
 use crate::engine::symbols::Sym;
-use crate::engine::{Graph, OrderedMap, State};
+use crate::engine::{Graph, OrderedMap, RuleId, State};
 use crate::models::{
     GROUPER, HASHED_ARGUMENTS, IterationMode, KEYED_OPERATIONS, LENGTH_HINT, LIBRARY_ITERATION,
     LIBRARY_VALUES, LengthPlan, LengthSource, NOT_CONSUMING, READS_TUPLES, REPEATS, Shape,
-    TUPLE_STORAGE, lookup,
+    THREAD_FIELDS, TUPLE_STORAGE, ThreadMethod, lookup,
 };
 
 const LENGTH_SPECIAL_CALLS: LengthPlan = &[("__len__", &[])];
@@ -120,6 +120,7 @@ pub(crate) struct Library {
     lazy: FxHashMap<ObjId, OperationId>,
     advances: FxHashMap<(ObjId, Sym, Sym), NodeId>,
     iterator_length_hints: FxHashSet<(Sym, Sym, NodeId)>,
+    threads: FxHashMap<(Origin, Sym), ObjId>,
 }
 
 fn lazy_mode(mode: IterationMode) -> bool {
@@ -961,6 +962,85 @@ impl State {
         }
     }
 
+    pub(super) fn thread_instance(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        class: &str,
+    ) -> ObjId {
+        let key = (self.calls[call.index()].origin, self.symbols.intern(class));
+        if let Some(&made) = self.library.threads.get(&key) {
+            return made;
+        }
+        let made = self.new_typed(graph, class, None);
+        self.library.threads.insert(key, made);
+        made
+    }
+
+    pub(super) fn thread_method(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        method: ThreadMethod,
+        receivers: &[ObjId],
+        overloads: &[Overload],
+    ) {
+        for &receiver in receivers {
+            match method {
+                ThreadMethod::Init => {
+                    for overload in overloads {
+                        for parameter in overload.parameters.iter() {
+                            if let Some(&field) = lookup(&THREAD_FIELDS, &*parameter.name)
+                                && let Some(node) =
+                                    self.parameter_node(graph, overload.bound, parameter)
+                            {
+                                let name = self.symbols.intern(field);
+                                let stored = self.field(graph, receiver, name);
+                                self.add_edge(graph, node, stored);
+                            }
+                        }
+                    }
+                }
+                ThreadMethod::Start
+                    if matches!(self.objects.get(receiver), Object::Instance { .. }) =>
+                {
+                    let details = &self.calls[call.index()];
+                    let (caller, site) = (details.caller, details.site);
+                    let run = self.symbols.intern("run");
+                    let key = self.site_key(caller, site, Role::Special(run));
+                    let back = self.site_call(graph, key, &[], None, None);
+                    self.call_dunder(graph, receiver, "run", back, None, Unless::Nothing);
+                }
+                ThreadMethod::Start | ThreadMethod::Run => self.run_target(graph, call, receiver),
+            }
+        }
+    }
+
+    fn run_target(&mut self, graph: &mut Graph, call: CallId, receiver: ObjId) {
+        let [target, args, kwargs] = THREAD_FIELDS.map(|(_, field)| {
+            let name = self.symbols.intern(field);
+            self.field(graph, receiver, name)
+        });
+        let details = &self.calls[call.index()];
+        let made = Call {
+            caller: details.caller,
+            args: Vec::new(),
+            keywords: Vec::new(),
+            dst: None,
+            site: details.site,
+            origin: details.origin,
+            star: vec![(Some(args), true)],
+            double_star: vec![Some(kwargs)],
+            implicit: true,
+            decorator: false,
+            applies: false,
+            rule: RuleId::PLACEHOLDER,
+        };
+        let made = self.new_call(made, None);
+        let rule = self.calls[made.index()].rule;
+        self.attach(graph, target, rule);
+    }
+
     pub(super) fn wrapped_key(
         &mut self,
         graph: &mut Graph,
@@ -1156,10 +1236,12 @@ impl Library {
             lazy: _,
             advances,
             iterator_length_hints: _,
+            threads,
         } = self;
         sizes.extend([
             ("library operations", operations.len()),
             ("library advances", advances.len()),
+            ("library threads", threads.len()),
         ]);
     }
 }

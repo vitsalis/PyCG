@@ -1,5 +1,6 @@
 import functools
 import itertools
+import threading
 import typing
 import lib
 async def coroutine(): pass
@@ -54,3 +55,4 @@ class E:
 E()
 vars(C)
 list(itertools.islice(c, 1))
+threading.Thread(target=gen).start()

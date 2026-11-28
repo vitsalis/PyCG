@@ -763,6 +763,34 @@ pub static CALLS_BACK: &[(&str, &str)] = &[
     ("re.Pattern.subn", "repl"),
 ];
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum ThreadMethod {
+    Init,
+    Start,
+    Run,
+}
+
+pub static THREAD_METHODS: &[(&str, ThreadMethod)] = &[
+    ("threading.Thread.__init__", ThreadMethod::Init),
+    ("threading.Thread.start", ThreadMethod::Start),
+    ("threading.Thread.run", ThreadMethod::Run),
+    (
+        "multiprocessing.process.BaseProcess.__init__",
+        ThreadMethod::Init,
+    ),
+    (
+        "multiprocessing.process.BaseProcess.start",
+        ThreadMethod::Start,
+    ),
+    ("multiprocessing.process.BaseProcess.run", ThreadMethod::Run),
+];
+
+pub static THREAD_FIELDS: [(&str, &str); 3] = [
+    ("target", "_target"),
+    ("args", "_args"),
+    ("kwargs", "_kwargs"),
+];
+
 pub static VARIABLE_TYPES: &[(&str, &str)] = &[
     ("sys.stdin", "_io.TextIOWrapper"),
     ("sys.stdout", "_io.TextIOWrapper"),
