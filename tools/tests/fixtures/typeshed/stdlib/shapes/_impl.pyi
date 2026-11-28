@@ -7,7 +7,7 @@ _T = TypeVar("_T")
 _Number = int | float
 _Handler = Callable[[str], None]
 
-__all__ = ["Shape", "Circle", "area", "scale", "Runner"]
+__all__ = ["Shape", "Circle", "Figure", "area", "scale", "Runner"]
 
 class _Callback(Protocol):
     def __call__(self, value: int, /) -> str: ...
@@ -57,6 +57,8 @@ async def wait(delay: float) -> None: ...
 def legacy(__a: int, __b: int, c: int) -> None: ...
 
 class _Hidden: ...
+
+Figure = Shape
 
 _default: Circle
 default_area = _default.area

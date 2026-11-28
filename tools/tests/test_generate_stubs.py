@@ -178,6 +178,15 @@ def test_public_names_of_classes(data):
     assert "pub" not in _names(data, "builtins")["str"]
 
 
+def test_a_public_name_bound_to_another_public_name_does_not_name_the_class(data):
+    package = _names(data, "shapes")
+    assert package["Figure"] == {"k": "r", "to": [["shapes._impl", "Shape"]]}
+    assert package["Ball"] == {"k": "r", "to": [["shapes._impl", "Circle"]]}
+    names = _names(data, "shapes._impl")
+    assert names["Shape"]["pub"] == "shapes.Shape"
+    assert names["Circle"]["pub"] == "shapes.Circle"
+
+
 def test_what_a_module_keeps(data):
     package = _names(data, "shapes")
     assert package["Hidden"] == {"k": "r", "to": [["shapes._impl", "_Hidden"]]}
@@ -187,6 +196,7 @@ def test_what_a_module_keeps(data):
     for name in ("Iterable", "_T", "_Number", "_Handler", "abstractmethod"):
         assert name not in impl
     assert data["shapes"]["modules"]["shapes"]["all"] == [
+        "Ball",
         "Hidden",
         "Shape",
         "area",
