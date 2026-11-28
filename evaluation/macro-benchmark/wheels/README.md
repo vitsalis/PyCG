@@ -4,6 +4,14 @@ A test environment installs wheels only, each pinned by its SHA-256. A
 dependency that PyPI has no wheel of is built here once from its pinned
 sdist and committed beside this file.
 
+```mermaid
+flowchart LR
+    sdist["Pinned sdist from PyPI"] --> scan["Scans of the sdist"]
+    scan --> build["Build in a sealed container"]
+    build --> wheel["Wheel, committed here with its record"]
+    wheel --> env["Pinned in a test environment by its SHA-256"]
+```
+
 ## odfpy 1.4.1 (for tablib, batch 8)
 
 | | |

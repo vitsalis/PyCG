@@ -1,35 +1,55 @@
 # Macro-benchmark
 
 Sixty real Python packages at pinned releases, each with a hand-written call
-graph of its source: the ground truth. The micro-benchmark shows which
-language feature a tool gets wrong; this set shows how a tool does on real
-code, where the features mix and most calls cross modules and classes.
+graph of its source: the ground truth.
 
-A ground truth is written as a call-site ledger: one entry per place in the
-source that can call a function, with the callees of that site. A naive list
-of candidate callees by name, for every site, protects the ledger against
-missed edges by construction. Where a package's own test suite runs, a trace
-of the calls it makes checks the ground truth further. A trace is a lower
-bound: every traced call of the package must be in the ground truth, which
-also has the calls that no test makes.
+The micro-benchmark shows which language feature a tool gets wrong; this set
+shows how a tool does on real code, where the features mix and most calls
+cross modules and classes.
+
+| Part of a ground truth | What it is |
+|---|---|
+| Call-site ledger | One entry per place in the source that can call a function, with the callees of that site |
+| Candidates | A naive list of candidate callees by name, for every site, which protects the ledger against missed edges by construction |
+| Trace | Where a package's own test suite runs, the calls that it makes. A lower bound: every traced call of the package must be in the ground truth, which also has the calls that no test makes |
 
 The rules by which a ground truth is written, audited and extended, and a
 batch is drawn, are in [benchmark-rules.md](../benchmark-rules.md).
 
 ## How it was built
 
-The packages came in batches. Batches 1 and 2 were chosen by hand; five
-packages of PyCG's ICSE 2021 evaluation were added between batches 3 and 4.
-Batches 3 to 8 were drawn by a seeded draw, stratified by size, from a frame
-of PyPI's most downloaded packages that passed quality filters and was then
-frozen. Batches 1 to 5 have five packages each, batches 6 to 8 ten.
+The packages came in batches.
 
-Each batch after the first was measured once by a frozen engine before
+| Batch | Packages | Chosen by | Role |
+|---|---|---|---|
+| 1 | 5 | Hand | Development |
+| 2 | 5 | Hand | Development |
+| 3 | 5 | Seeded draw | Development |
+| ICSE 2021 | 5 | PyCG's ICSE 2021 evaluation, added between batches 3 and 4 | Development |
+| 4, 5 | 5 each | Seeded draw | Development |
+| 6 | 10 | Seeded draw | Development |
+| 7, 8 | 10 each | Seeded draw | Held out |
+
+The seeded draw is stratified by size, from a frame of PyPI's most
+downloaded packages that passed quality filters and was then frozen.
+
+```mermaid
+flowchart LR
+    batch["New batch after the first"] --> measure["Measured once by a frozen engine"]
+    measure --> dev["Development: errors read, analysis improved"]
+    measure --> held["Held out"]
+    held --> stop{"Two held-out batches in a row within 10 points of development?"}
+    stop -->|"yes"| done["Procedure stops"]
+    stop -->|"no"| more["Next batch drawn"]
+```
+
+Each batch after the first was measured once by the frozen engine before
 anyone read its false positives and false negatives. Batches 2 to 6 then
 became development batches: their errors were read and the analysis was
-improved on them. Batches 7 and 8 are held out. The procedure stopped when
-two held-out batches in a row came within 10 points of precision and of
-recall of the development set.
+improved on them.
+
+The procedure stopped when two held-out batches in a row came within 10
+points of precision and of recall of the development set.
 
 ## Held-out evidence
 
@@ -43,10 +63,24 @@ Edges inside the package, each batch measured once by the engine at commit
 | Batch 8, measured 2026-11-24 | 10 | 0.8590 | 0.8463 | 3101 / 509 / 563 | -7.1 / -3.2 points |
 
 Both held-out batches are within 10 points of development, so the stop
-rule is met. The 10-point threshold was set after these measurements;
-batches 3 and 4 would also have passed under it.
+rule is met.
+
+The 10-point threshold was set after these measurements; batches 3 and 4
+would also have passed under it.
 
 ## How a ground truth is checked
+
+```mermaid
+flowchart TD
+    writer["Writer: builds the ledger from the source and the trace"] --> ledger["Ledger: every candidate of every site decided"]
+    ledger --> audit["Blind audit: another agent re-derives a sample of sites"]
+    audit -->|"findings, applied or answered"| writer
+    audit -->|"disputes, questions that decide many edges"| referee["Referee: a model of another provider"]
+    referee -->|"rulings"| writer
+    ledger --> rounds["Audit round over the whole set"]
+    rounds -->|"more than 100 missed or 20 false edges"| rounds
+    rounds -->|"at most 100 missed and 20 false edges"| done["Ground truth"]
+```
 
 1. A writer builds the ledger from the source and the trace, deciding every
    candidate of every site.
