@@ -1016,6 +1016,28 @@ impl State {
         }
     }
 
+    pub(super) fn mixin_calls(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        names: &[&str],
+        receivers: &[ObjId],
+    ) {
+        let details = &self.calls[call.index()];
+        let (caller, site) = (details.caller, details.site);
+        for &receiver in receivers {
+            if !matches!(self.objects.get(receiver), Object::Instance { .. }) {
+                continue;
+            }
+            for &name in names {
+                let symbol = self.symbols.intern(name);
+                let key = self.site_key(caller, site, Role::Special(symbol));
+                let back = self.site_call(graph, key, &[], None, None);
+                self.call_dunder(graph, receiver, name, back, None, Unless::Nothing);
+            }
+        }
+    }
+
     fn run_target(&mut self, graph: &mut Graph, call: CallId, receiver: ObjId) {
         let [target, args, kwargs] = THREAD_FIELDS.map(|(_, field)| {
             let name = self.symbols.intern(field);

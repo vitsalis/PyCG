@@ -785,6 +785,57 @@ pub static THREAD_METHODS: &[(&str, ThreadMethod)] = &[
     ("multiprocessing.process.BaseProcess.run", ThreadMethod::Run),
 ];
 
+pub static MIXIN_CALLS: &[(&str, &[&str])] = &[
+    ("typing.Coroutine.close", &["throw"]),
+    ("typing.Generator.__next__", &["send"]),
+    ("typing.Generator.close", &["throw"]),
+    ("typing.AsyncGenerator.__anext__", &["asend"]),
+    ("typing.AsyncGenerator.aclose", &["athrow"]),
+    ("typing.AbstractSet.__le__", &["__len__", "__iter__"]),
+    ("typing.AbstractSet.__lt__", &["__len__", "__le__"]),
+    ("typing.AbstractSet.__gt__", &["__len__", "__ge__"]),
+    ("typing.AbstractSet.__ge__", &["__len__"]),
+    ("typing.AbstractSet.__and__", &["_from_iterable"]),
+    ("typing.AbstractSet.__or__", &["__iter__", "_from_iterable"]),
+    (
+        "typing.AbstractSet.__sub__",
+        &["__iter__", "_from_iterable"],
+    ),
+    ("typing.AbstractSet.__xor__", &["__sub__"]),
+    ("typing.AbstractSet._hash", &["__len__", "__iter__"]),
+    ("typing.MutableSet.remove", &["__contains__", "discard"]),
+    ("typing.MutableSet.pop", &["__iter__", "discard"]),
+    ("typing.MutableSet.clear", &["pop"]),
+    ("typing.MutableSet.__iand__", &["__sub__"]),
+    ("typing.Mapping.get", &["__getitem__"]),
+    ("typing.Mapping.__contains__", &["__getitem__"]),
+    ("typing.MutableMapping.pop", &["__getitem__", "__delitem__"]),
+    (
+        "typing.MutableMapping.popitem",
+        &["__iter__", "__getitem__", "__delitem__"],
+    ),
+    ("typing.MutableMapping.clear", &["popitem"]),
+    (
+        "typing.MutableMapping.setdefault",
+        &["__getitem__", "__setitem__"],
+    ),
+    ("typing.Sequence.__contains__", &["__iter__"]),
+    ("typing.Sequence.index", &["__getitem__"]),
+    ("typing.Sequence.count", &["__iter__"]),
+    ("typing.MutableSequence.append", &["__len__", "insert"]),
+    ("typing.MutableSequence.clear", &["pop"]),
+    (
+        "typing.MutableSequence.reverse",
+        &["__len__", "__getitem__", "__setitem__"],
+    ),
+    (
+        "typing.MutableSequence.pop",
+        &["__getitem__", "__delitem__"],
+    ),
+    ("typing.MutableSequence.remove", &["index", "__delitem__"]),
+    ("typing.MutableSequence.__iadd__", &["extend"]),
+];
+
 pub static THREAD_FIELDS: [(&str, &str); 3] = [
     ("target", "_target"),
     ("args", "_args"),
