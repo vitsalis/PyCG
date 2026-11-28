@@ -1021,7 +1021,12 @@ impl State {
             Object::Instance { .. } => None,
             _ => Some(owner),
         };
-        let key = (typed, self.symbols.intern(name), root, unless);
+        let key = (
+            typed,
+            self.symbols.intern(name),
+            root,
+            self.unless_id(unless),
+        );
         let template = match self.dunder_calls.get(&key) {
             Some(&template) => template,
             None => {

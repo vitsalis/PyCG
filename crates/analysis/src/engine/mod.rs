@@ -39,7 +39,7 @@ use attributes::{
 };
 use builtin_rules::{DynamicAccess, WrapperKey};
 use chains::{Chain, Chains};
-use hierarchy::{LookupAttr, Namespace, Unless};
+use hierarchy::{LookupAttr, Namespace, Unless, UnlessId};
 use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
 use outside_calls::{Bound, BoundId, Known};
 pub use rules::RuleId;
@@ -139,7 +139,7 @@ struct State {
     returned: Vec<Returned>,
     class_instances: FxHashMap<ObjId, FxHashSet<ObjId>>,
     roots: FxHashMap<CallId, CallId>,
-    dunder_calls: FxHashMap<(Option<ObjId>, Sym, CallId, Unless), CallId>,
+    dunder_calls: FxHashMap<(Option<ObjId>, Sym, CallId, UnlessId), CallId>,
     dunder_owners: FxHashMap<CallId, FxHashSet<ObjId>>,
     site_calls: FxHashMap<SiteKey, CallId>,
     receivers: Vec<Receiver>,
