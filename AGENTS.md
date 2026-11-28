@@ -16,9 +16,10 @@ It never imports or executes the code it analyses. Keep it that way.
 | `tests/cases/<family>/<name>/` | A program (`program/`), its request (`case.json`) and the document PyCG gives for it (`expected.json`) |
 | `tests/known_failures.txt`, `tests/triage.py` | The micro-benchmark cases that the analysis fails, and the script that writes the list |
 | `evaluation/micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json`; the case harness runs each against it |
-| `docs/design.md` | The design of the analysis: what it models, its rules, termination, open problems |
+| `docs/design.md` | The design of the analysis: its five ideas, what it does not do, its bounds, open problems |
 | `evaluation/` | Measures PyCG: the runner, the scorer and their tests (`evaluation/README.md`) |
 | `evaluation/macro-benchmark/` | 60 real packages with hand-written ground truths and traces |
+| `evaluation/benchmark-rules.md` | The rules and procedures of both benchmarks' ground truths and of the draw of a batch |
 | `tools/` | The repository's tools in Python, with their tests (`tools/tests/`) |
 
 ## Commands
@@ -35,8 +36,6 @@ cargo test -p pycg --test cases -- micro/classes/call   # the cases whose name c
 
 The tool reads Python 3.14 syntax (`pycg_syntax::parse::TARGET_VERSION`)
 and runs no Python. The harness and the tools need Python 3.14 or later.
-Crate dependencies are pinned to exact versions; do not add one without
-approval.
 
 ## Rules
 
@@ -52,11 +51,10 @@ approval.
   which the solver meets its work.
 - **Replace, do not deprecate.** Remove code that a change makes obsolete.
 - **No comments or docstrings** in Python, shell and Rust code. Names and
-  types carry the meaning; the why goes to `docs/design.md` and to commit
-  messages. Only licence headers and the pragmas that tools read (`# noqa`,
-  `# type:`, `# shellcheck`) stay; the analysed programs and test data are
-  data, not code. `make lint` runs `tools/no_comments.py`, which enforces
-  this.
+  types carry the meaning; the why goes to commit messages. Only licence
+  headers and the pragmas that tools read (`# noqa`, `# type:`,
+  `# shellcheck`) stay; the analysed programs and test data are data, not
+  code. `make lint` runs `tools/no_comments.py`, which enforces this.
 - **Docs describe what exists now.** No decision logs, status, plan or
   results documents: the commit message is the record, and history is in
   git. Update a document in the change that makes it untrue.
@@ -72,21 +70,54 @@ approval.
 
 ## Style
 
-[TIGER_STYLE.md](TIGER_STYLE.md) is how PyCG applies TigerStyle; this file
-wins where they differ.
+PyCG applies TigerBeetle's [TigerStyle][tigerstyle] so that bugs surface
+early, in a test. A change that departs from a rule says so in its commit
+message, with why and what bounds it.
+
+[tigerstyle]: https://github.com/tigerbeetle/tigerbeetle/blob/main/docs/TIGER_STYLE.md
 
 - Keep code simple and changes small. Match the surrounding code and
   preserve unrelated work.
-- No magic constants or arbitrary caps: a limit comes from Python, a
-  measurement or the design, and `docs/design.md` states it. Surface an
-  invalid state; never hide it with silent truncation, clamping or a
-  fallback.
+- Three kinds of failure, never mixed: a broken invariant of our own is an
+  assertion, which crashes; wrong external input (a file that does not
+  parse, a missing path, stub data that does not match its schema) is a
+  diagnostic that names what was wrong, and the analysis goes on where it
+  can; a bound reached is the documented behaviour of that bound, which
+  the output shows. Never assert on external input: the analysed program
+  is external input, and PyCG never crashes or hangs on a program that
+  Python accepts.
+- Assert what the code relies on, and pair assertions across a boundary:
+  check a property where it is written and again where it is read back (a
+  constraint the builder emits and the solver applies, a document written
+  and parsed).
+- Every set, queue, depth and loop has a bound whose value comes from
+  Python, a measurement or the design; the Bounds table of
+  `docs/design.md` lists each one. Reaching a bound is visible in the
+  output. Walk input-shaped data (syntax trees, stub data, annotations)
+  iteratively, or with an explicit depth bound that gives a diagnostic.
+  Surface an invalid state; never hide it with silent truncation, clamping
+  or a fallback.
+- Back every performance or memory change with before and after
+  measurements, run back to back, and the proof that the output is byte
+  for byte the same.
+- Iterate in an order that does not depend on a hash seed, an address or
+  the order of the file system wherever the order reaches the output or a
+  decision. The analysis reads no clock, no randomness and no environment
+  variable; tests that choose orders take their seed as an argument and
+  print it on failure. An error message carries no value that differs
+  between two runs.
 - Make invalid states unrepresentable: model a lifecycle as one type whose
   variants carry only what that phase has.
 - No premature abstraction: write the same code three times before you make
   a helper of it.
-- One behaviour, no modes or options. Every rule of the analysis fits in a
-  few sentences of `docs/design.md`.
+- One behaviour, no modes or options. Every rule of the analysis can be
+  stated in a few sentences.
+- Names are whole words (except `id`, `url`, `ast`, `mro`), with units and
+  qualifiers last (`objects_max`, `depth_max`). A constant is named for the
+  bound or the Python fact it is.
+- Every dependency is pinned to an exact version (`=x.y.z`, `Cargo.lock`
+  and `uv.lock` committed). A new dependency needs approval first, with
+  its cost and why the standard library does not do.
 - Finish the job: handle the edge cases you can see and clean up what you
   touched. Report a defect next to your change; do not widen the task.
 - Prose states facts plainly, without filler or hype. Wrap Markdown at 80
@@ -123,8 +154,8 @@ a bug. Tests use no network and no sleeps.
 
 `evaluation/README.md` says why the evaluation exists, what its sets are
 and their results; the README of each set (`evaluation/micro-benchmark/`,
-`evaluation/macro-benchmark/`, `evaluation/scale/`) has its internals. The
-`make` targets run in Docker; the measuring ones build the Rust binary
+`evaluation/macro-benchmark/`, `evaluation/scale/`) says how it was built.
+The `make` targets run in Docker; the measuring ones build the Rust binary
 there first. A result goes to `$EVAL_OUT/pycg-<commit>/`
 (`EVAL_OUT` defaults to `$TMPDIR/pycg-evaluation`): a call graph per micro
 case and per project, `runs.json` (status, time and peak memory of each
@@ -167,6 +198,10 @@ failed run fails either way. Time and memory are reported, not gated.
   what Python does when the code runs. Never edit a ledger, a
   `ground-truth/*.json`, a trace or `common/same_function.json` to match
   PyCG's output.
+- **The benchmark rules are followed exactly.** Whoever writes, audits or
+  extends a ground truth, or draws a batch, follows
+  `evaluation/benchmark-rules.md` exactly. The rules and procedures there
+  are never simplified.
 - **Stage files by name.** `evaluation/macro-benchmark/projects/`,
   `evaluation/scale/projects/` and `evaluation/results/trace/` hold
   fetched or generated files; never `git add -A`.
