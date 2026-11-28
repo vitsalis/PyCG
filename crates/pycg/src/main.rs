@@ -105,14 +105,6 @@ fn main() -> ExitCode {
     let width = pycg::width(columns.as_deref(), pycg::stdout_columns());
     match pycg::parse(&program, &arguments, width) {
         Outcome::Run(options) => run(&program, options),
-        Outcome::View(options) => match pycg::view(&options) {
-            Ok(()) => ExitCode::SUCCESS,
-            Err(error) => report(
-                &pycg::view_program(&program),
-                &error.message(),
-                STATUS_FAILURE,
-            ),
-        },
         Outcome::Help(text) => {
             let _ = std::io::stdout().write_all(&text);
             ExitCode::SUCCESS

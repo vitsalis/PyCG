@@ -346,10 +346,6 @@ parity:
 	@$(PARITY_BINARIES)/pycg-dump document $(PARITY_ORACLE)/seed-0 > $(PARITY_RUST)/writer.txt; \
 	status=$$?; { echo '```'; cat $(PARITY_RUST)/writer.txt; echo '```'; } >> $(SUMMARY); \
 	exit $$status
-	@python3 -I tools/parity/view.py $(PARITY_ORACLE)/seed-0 $(PARITY_RUST)/view \
-		$(PARITY_BINARIES)/pycg > $(PARITY_RUST)/view.txt; \
-	status=$$?; { echo '```'; cat $(PARITY_RUST)/view.txt; echo '```'; } >> $(SUMMARY); \
-	exit $$status
 	@python3 -I tools/parity/program.py $(PARITY_ORACLE)/seed-0 \
 		$(PARITY_RUST)/program $(PARITY_BINARIES)/pycg > $(PARITY_RUST)/program.txt; \
 	status=$$?; { echo '```'; cat $(PARITY_RUST)/program.txt; echo '```'; } >> $(SUMMARY); \
