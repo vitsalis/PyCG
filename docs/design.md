@@ -252,8 +252,13 @@ name, and a class stored as its own `__iter__` makes one instance per loop.
 ## Bounds
 
 The cap on the objects of a node is the one setting of the analysis
-(`--cap`, 5,000 by default, or none): it trades precision and recall
-against cost, and the document records it.
+(`--cap`, 1,000 by default, any positive integer, or none): it trades
+precision and recall against cost, and the document records it. PyCG's
+published metrics are measured at the default of 1,000: no node of a
+benchmark program reaches it, and every package of the scale set finishes
+under it. A larger cap, or none, keeps more of the values of a node that
+many flows reach, at a cost in time and memory that grows with the cap; a
+package may then not finish.
 
 Every other bound is the same for every program, and reaching any bound is
 visible in the output.
@@ -268,7 +273,7 @@ visible in the output.
 | Nested attachments of constraints in the solver | 50 | The application waits in a queue for the solve |
 | Nesting of a top-level statement | 247 levels | The builder stops before the statement; the module is `partial`, with the cause `DeepNesting` |
 | The parser, as CPython 3.14 | At most 99 levels of indentation, 200 nested brackets, 149 nested f-strings or t-strings, and a statement depth of 43,482 | The module fails with the error that CPython gives (`IndentationError`, `SyntaxError`, `RecursionError`) |
-| Objects that a node holds (the cap) | 5,000 by default | The node holds the saturated value only: calls of it are unresolved (`saturated`), what it gives is saturated, and stores into it are dropped |
+| Objects that a node holds (the cap) | 1,000 by default | The node holds the saturated value only: calls of it are unresolved (`saturated`), what it gives is saturated, and stores into it are dropped |
 
 The solver applies a constraint attached to a node that already holds
 objects at once, by recursion; the bound of 50 keeps that recursion within

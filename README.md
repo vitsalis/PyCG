@@ -67,7 +67,7 @@ pycg --package pkg pkg/module1.py pkg/subpackage/module2.py -o cg.json
 
 `pycg --help` lists the options. `--cap` is the one setting of the analysis:
 the most values it keeps for one variable or expression before it treats
-the value as unknown (5,000 by default).
+the value as unknown (1,000 by default).
 
 A module that cannot be read or parsed is reported as failed, with a
 warning, and analysed as an empty module.
