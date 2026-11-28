@@ -82,12 +82,16 @@ impl Engine {
                 .or_default()
                 .extend(names);
         }
-        let sites: Vec<Box<str>> = self.state.tables.zero_argument_super.clone();
+        let sites: Vec<Box<str>> =
+            self.state.tables.zero_argument_super[self.state.synced_zero_argument_super..].to_vec();
+        self.state.synced_zero_argument_super = self.state.tables.zero_argument_super.len();
         for site in sites {
             let site = self.state.symbols.intern(&site);
             self.state.zero_argument_super.insert(site);
         }
-        let names: Vec<Box<str>> = self.state.tables.read_namespaces.clone();
+        let names: Vec<Box<str>> =
+            self.state.tables.read_namespaces[self.state.synced_read_namespaces..].to_vec();
+        self.state.synced_read_namespaces = self.state.tables.read_namespaces.len();
         for name in names {
             let name = self.state.symbols.intern(&name);
             self.state.read_namespaces.insert(name);
