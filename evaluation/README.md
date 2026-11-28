@@ -53,12 +53,12 @@ The macro-benchmark's values sum the counts over the 60 packages.
 
 ## Results
 
-Measured by CI on main at commit 41db742d:
+Measured by CI on main at commit 68bc2784:
 
 | Set | Precision | Recall |
 |---|---|---|
-| Micro-benchmark, all edges | 0.952 | 0.951 |
-| Macro-benchmark, inside the package | 0.931 | 0.881 |
+| Micro-benchmark, all edges | 0.953 | 0.951 |
+| Macro-benchmark, inside the package | 0.936 | 0.884 |
 | Macro-benchmark, outside the package | 0.946 | 0.821 |
 
 On the scale set, PyCG finishes all 20 packages, each in under 4 minutes
