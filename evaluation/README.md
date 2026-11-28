@@ -57,14 +57,14 @@ fabric, jsonpickle): at those sites the ground truth is a lower bound
 
 ## Results
 
-Measured by CI on main at commit 68bc2784:
+Measured by CI on main at commit f30b608a:
 
 | Set | Precision | Recall |
 |---|---|---|
 | Micro-benchmark, all edges | 0.953 | 0.951 |
 | Macro-benchmark, inside the package | 0.936 | 0.884 |
-| Macro-benchmark, outside the package | 0.946 | 0.821 |
-| Macro-benchmark, outside the package, without packages with open sets | 0.957 | 0.899 |
+| Macro-benchmark, outside the package | 0.946 | 0.818 |
+| Macro-benchmark, outside the package, without packages with open sets | 0.958 | 0.896 |
 
 On the scale set, PyCG finishes all 20 packages, each in under 4 minutes
 and 7 GiB ([scale/README.md](scale/README.md)).
