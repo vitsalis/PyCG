@@ -885,7 +885,11 @@ not kept. Its set stays in the table of sets. A program has many of them
 millions of nodes with a successor, and most have one: a node keeps its
 one successor itself, and a map (successor to whether the edge started a
 search for cycles) only for more. It has millions of rules too: a rule is
-a variant of `Rule` that keeps its arguments as ids. The solver counts its
+a variant of `Rule` that keeps its arguments as ids. A rule that only the
+class of an instance gets (its special method, its sequence type) is
+applied once and not kept, so its slot goes back to the rules for the
+next one, unless its application waits for the solve (pip: 2.6M of 4.2M
+rules). The solver counts its
 work in measures that do not depend on
 the machine (`Solver::work`): objects written into new sets (a set that is
 reused copies nothing), constraint applications, subset edges, nodes

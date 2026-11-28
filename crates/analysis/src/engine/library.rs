@@ -887,12 +887,12 @@ impl State {
                 }
                 self.call_dunder(graph, object, "__iter__", call, Some(dst), Unless::Nothing);
                 let types = self.types_node(graph, object);
-                let rule = self.rule(Rule::Container(ContainerRule::SequenceType {
+                let rule = Rule::Container(ContainerRule::SequenceType {
                     object,
                     iteration,
                     dst,
-                }));
-                self.attach(graph, types, rule);
+                });
+                self.attach_rule(graph, types, rule);
             }
             LibraryRule::Consume { call } => {
                 if !self.is_library(object) {

@@ -2421,12 +2421,12 @@ impl State {
         self.call_dunder(graph, object, name, call, Some(dst), unless);
         if !is_async {
             let types = self.types_node(graph, object);
-            let rule = self.container_rule(ContainerRule::SequenceType {
+            let rule = Rule::Container(ContainerRule::SequenceType {
                 object,
                 iteration,
                 dst,
             });
-            self.attach(graph, types, rule);
+            self.attach_rule(graph, types, rule);
         }
     }
 
