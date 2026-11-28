@@ -2785,12 +2785,12 @@ The first lookup of the name through an instance of the class is the
 *witness*. Until it gets an object or an edge, each rule waits as one
 entry in a list of the class and the name, with its instance; then the
 rules of the list run, and make the lookups and constraints that they
-would have made at once, which had nothing to act on before. An entry is
-a pair in the list of the watch, the rule and the instance; the rule,
+would have made at once, which had nothing to act on before. The rule,
 with its arguments, is one value that every class waiting on it shares
-(`waiting_rules` of `State`), and the rules run grouped by rule in the
-order in which each first waited, so each runs with the receivers, and in
-the order, that a list per rule would give. On
+(`waiting_rules` of `State`); each watch keeps its rules in the order in
+which each first waited, and each rule of a watch its receivers, in the
+order in which they waited, as a receiver chain (below). The rules run in
+that order, each with its receivers in theirs. On
 openai, 2.75 million entries wait at the end of the solve, a site times
 each of the 2,662 classes of instances that reach it (truth tests,
 attribute hooks), for 23,576 rules; a tuple, a bound method and a list per
@@ -3222,6 +3222,18 @@ width), which binds each receiver as its own call did (the instance, or the
 instance and its class); a receiver that arrives gets every method of the
 accessor seen. Once one of the nodes of the record holds the saturated value,
 an accessor that arrives saturates its result.
+
+**Receiver chains.** The receivers of a waiting rule, of an accessor and of
+an entry of a hook record are a list in the order in which they arrived,
+and most lists repeat a few others: the receivers of every access through
+`self` in the methods of a class are the instances in the node of `self`,
+which every site meets in the same order. A list is a chain (`Chains`):
+the empty chain, or a chain and one more receiver, made once, so that two
+lists with the same receivers in the same order are one chain and lists
+share their common start. Adding a receiver finds or makes the longer
+chain; reading a chain walks it back to the empty one. Every list keeps
+its receivers and their order, so each rule and accessor runs as with a
+list of its own.
 
 - Limit: a hook that replaces Python's (`self.__dict__[name] = value`)
   never calls the accessor, but gets the edge.
