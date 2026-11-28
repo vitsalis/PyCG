@@ -87,6 +87,7 @@ pub struct ModuleBuilder<'a, 's, A: Analysis> {
     pub(crate) scopes: &'a ModuleScopes<'s>,
     pub(crate) is_package: bool,
     pub(crate) is_entry: bool,
+    pub(crate) module_constants: FxHashMap<String, Facts>,
     pub(crate) scope: ScopeId,
     pub(crate) function: Option<MadeFunction>,
     pub(crate) flows: Vec<(ScopeId, Flow)>,
@@ -126,6 +127,7 @@ impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
             scopes,
             is_package,
             is_entry,
+            module_constants: FxHashMap::default(),
             scope: scopes.module(),
             function: None,
             flows: vec![(scopes.module(), Flow::new())],
@@ -310,6 +312,11 @@ impl<'a, 's, A: Analysis> ModuleBuilder<'a, 's, A> {
                 .is_some_and(|imported| TYPE_CHECKING_IMPORTS.contains(&imported))
             {
                 facts = (FALSE, Some(Literals::of([Literal::Bool(false)])));
+            }
+            if kind == ScopeKind::Module
+                && let Some(constant) = self.module_constants.get(&name)
+            {
+                facts = constant.clone();
             }
             let variable = self.variable(scope, &name);
             if kind == ScopeKind::Module && builtin_names().contains(&name) {

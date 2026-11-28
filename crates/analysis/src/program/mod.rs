@@ -1,5 +1,6 @@
 pub mod imports;
 pub mod paths;
+mod stores;
 
 use std::collections::VecDeque;
 use std::ffi::{OsStr, OsString};
@@ -23,6 +24,7 @@ use crate::program::imports::extension_name;
 use crate::program::paths::{
     FLAVOUR, PathsError, abspath, basename, commonpath, dirname, relpath, split, splitext,
 };
+use crate::program::stores::names_stored_by_name;
 
 const INITIALIZER: &str = "__init__.py";
 
@@ -74,6 +76,7 @@ pub struct Program<A: Analysis> {
     outside_star_imported_modules_by_importer: IndexMap<String, Vec<String>>,
     exports_by_module: FxHashMap<String, IndexSet<String>>,
     modules_declaring_all: FxHashSet<String>,
+    names_stored_by_name: FxHashSet<String>,
     stubs: Stubs,
     pub warnings: Vec<OsString>,
 }
@@ -149,6 +152,7 @@ impl<A: Analysis + Send> Program<A> {
             outside_star_imported_modules_by_importer: IndexMap::new(),
             exports_by_module: FxHashMap::default(),
             modules_declaring_all: FxHashSet::default(),
+            names_stored_by_name: FxHashSet::default(),
             stubs: Stubs::new(),
             warnings: Vec::new(),
         };
@@ -178,6 +182,7 @@ impl<A: Analysis + Send> Program<A> {
     }
 
     pub fn build_modules(&mut self) -> Result<(), PathsError> {
+        self.names_stored_by_name = names_stored_by_name(&self.root, &self.entry_points);
         let mut named: IndexMap<String, IndexSet<PathBuf>> = IndexMap::new();
         for path in self.entry_points.clone() {
             if let Some(name) = self.module_name(&path)? {
@@ -342,6 +347,7 @@ impl<A: Analysis + Send> Program<A> {
         let stub_read = own_stub_source(path);
         let stub = stub_read.as_ref().and_then(|read| read.as_ref().ok());
         let analysis = &mut self.analysis;
+        let names_stored_by_name = &self.names_stored_by_name;
         let built =
             with_parsed_and_stub(&source, stub.map(String::as_str), |parsed, stub_parsed| {
                 let parsed = parsed.map_err(|failure| failure.cause())?;
@@ -386,7 +392,7 @@ impl<A: Analysis + Send> Program<A> {
                 if let Some((tree, source)) = own_stub {
                     builder = builder.with_own_stub(tree, source);
                 }
-                let too_deep = builder.build(body);
+                let too_deep = builder.build(body, names_stored_by_name);
                 Ok(Built {
                     star_imported_modules: builder.star_imported_modules.clone(),
                     outside_star_imported_modules: builder.outside_star_imported_modules.clone(),

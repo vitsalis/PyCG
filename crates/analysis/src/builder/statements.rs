@@ -1,21 +1,23 @@
 use indexmap::IndexMap;
 use num_bigint::{BigInt, Sign};
 use pycg_solver::{NodeId, ObjId};
+use pycg_syntax::constants;
 use pycg_syntax::names::identifier;
 use pycg_syntax::scopes::{ScopeId, ScopeKind};
 use pycg_syntax::tree::Node;
 use ruff_python_ast::{
-    Alias, ElifElseClause, ExceptHandler, Expr, ExprContext, Parameters, Stmt, StmtClassDef,
-    StmtFunctionDef,
+    Alias, ElifElseClause, ExceptHandler, Expr, ExprContext, Parameters, Stmt, StmtAnnAssign,
+    StmtClassDef, StmtFunctionDef,
 };
-use rustc_hash::FxHashSet;
+use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::builder::calls::{Allocator, Passthrough};
 use crate::builder::calls::{
     Analysis, Call, ClassStatement, Constant, MadeFunction, MethodKind, NewClass,
 };
+use crate::builder::expressions::literal_of;
 use crate::builder::flow::{FALSE, Literals, StateId, TRUE, Truth, UNKNOWN};
-use crate::builder::{ModuleBuilder, TYPING_MODULES, bindings};
+use crate::builder::{Facts, ModuleBuilder, TYPING_MODULES, bindings, builtin_names};
 use crate::model::Signature;
 
 const IMPLICIT_METHODS: [(&str, MethodKind); 3] = [
@@ -74,7 +76,11 @@ pub(crate) fn signature_of(parameters: &Parameters, mangle: impl Fn(&str) -> Str
 }
 
 impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
-    pub fn build(&mut self, body: &'s [Stmt]) -> Option<usize> {
+    pub fn build(
+        &mut self,
+        body: &'s [Stmt],
+        names_stored_by_name: &FxHashSet<String>,
+    ) -> Option<usize> {
         for statement in body {
             for node in bindings::walk_all(&Node::Stmt(statement)) {
                 if let Node::Stmt(found @ (Stmt::FunctionDef(_) | Stmt::ClassDef(_))) = node {
@@ -83,6 +89,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
                 }
             }
         }
+        self.module_constants = self.module_constants(body, names_stored_by_name);
         let name = self.analysis.field(self.module, "__name__");
         let module_name = Constant::Str(self.module_name.chars().map(u32::from).collect());
         let value = self.analysis.const_object(&module_name);
@@ -125,6 +132,63 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
             }
         }
         too_deep.map(|index| self.position(&Node::Stmt(&body[index])).lineno)
+    }
+
+    fn module_constants(
+        &mut self,
+        body: &[Stmt],
+        names_stored_by_name: &FxHashSet<String>,
+    ) -> FxHashMap<String, Facts> {
+        let mut constants = FxHashMap::default();
+        let mut pending: Vec<Node<'_>> = body.iter().map(Node::Stmt).collect();
+        while let Some(node) = pending.pop() {
+            let (targets, value): (&[Expr], &Expr) = match node {
+                Node::Stmt(Stmt::Assign(assign)) => (&assign.targets, &assign.value),
+                Node::Stmt(Stmt::AnnAssign(StmtAnnAssign {
+                    target,
+                    value: Some(value),
+                    ..
+                })) => (std::slice::from_ref(&**target), value),
+                Node::Stmt(Stmt::FunctionDef(_) | Stmt::ClassDef(_)) | Node::Expr(_) => continue,
+                other => {
+                    pending.extend(other.children());
+                    continue;
+                }
+            };
+            let Some(literal) =
+                constants::literal(value, self.source.text).and_then(|value| literal_of(&value))
+            else {
+                continue;
+            };
+            let truth = if literal.is_true() { TRUE } else { FALSE };
+            for target in targets {
+                let Expr::Name(target) = target else {
+                    continue;
+                };
+                let name = identifier(target.id.as_str()).into_owned();
+                if !names_stored_by_name.contains(&name) && self.is_module_constant(&name) {
+                    constants.insert(name, (truth, Some(Literals::of([literal.clone()]))));
+                }
+            }
+        }
+        constants
+    }
+
+    fn is_module_constant(&mut self, name: &str) -> bool {
+        let module = self.scopes.module();
+        if !self.scopes.tracked(module, name)
+            || self.scopes.scope(module).bound_again.contains(name)
+            || builtin_names().contains(name)
+        {
+            return false;
+        }
+        let submodule = format!("{}.{name}", self.module_name);
+        !self.is_package
+            || self
+                .analysis
+                .imports()
+                .locate(&submodule)
+                .is_none_or(|(found, _)| found != submodule)
     }
 
     pub(crate) fn statements(&mut self, statements: &[Stmt]) {
