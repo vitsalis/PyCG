@@ -8,7 +8,7 @@ use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::library::deferred_result;
 use crate::engine::objects::{Container, Function, Literal, Object};
 use crate::engine::outside::outside_name;
-use crate::engine::outside_types::TypeContext;
+use crate::engine::outside_types::{TypeContext, constrained_variables};
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Receivers, Role, SiteKey};
 use crate::engine::symbols::Sym;
@@ -741,7 +741,9 @@ impl State {
             return None;
         }
         let (first, rest) = results.split_first()?;
-        if rest.iter().all(|(reduced, _)| *reduced == first.0) {
+        let mut variables = Vec::new();
+        constrained_variables(&first.0, &mut variables);
+        if variables.is_empty() && rest.iter().all(|(reduced, _)| *reduced == first.0) {
             return None;
         }
         let count = self.calls[call.index()].args.len();

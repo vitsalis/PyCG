@@ -190,7 +190,7 @@ impl State {
         }
     }
 
-    fn deciding_argument(&mut self, graph: &mut Graph, node: NodeId) -> NodeId {
+    pub(super) fn deciding_argument(&mut self, graph: &mut Graph, node: NodeId) -> NodeId {
         if let Some(&copy) = self.outside_results.deciding_copies.get(&node) {
             return copy;
         }
@@ -268,8 +268,10 @@ impl State {
                     pending.push(bound);
                     false
                 }
-                Type::Class(expected) | Type::Generic(expected, _) => {
+                Type::Class(expected) => self.instance_of(&class, expected),
+                Type::Generic(expected, arguments) => {
                     self.instance_of(&class, expected)
+                        && self.constraint_agrees(object, expected, arguments)
                 }
                 Type::None => self.instance_of(&class, NONE_TYPE),
                 Type::TypeOf(_) => self.instance_of(&class, TYPE),
@@ -281,6 +283,27 @@ impl State {
             }
         }
         false
+    }
+
+    fn constraint_agrees(&mut self, object: ObjId, expected: &str, arguments: &[Type]) -> bool {
+        let &Object::Typed {
+            class,
+            constraint: Some(constraint),
+            ..
+        } = self.objects.get(object)
+        else {
+            return true;
+        };
+        if self.symbols.text(class) != expected {
+            return true;
+        }
+        let Some(parameter) = self.constrained_parameter(expected) else {
+            return true;
+        };
+        match arguments.get(parameter.position) {
+            Some(Type::Class(declared)) => **declared == *self.symbols.text(constraint),
+            _ => true,
+        }
     }
 
     fn instance_of(&mut self, class: &str, expected: &str) -> bool {

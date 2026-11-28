@@ -434,16 +434,26 @@ impl State {
         if let Some(&typed) = self.typed_objects.get(class) {
             return typed;
         }
+        let typed = self.new_typed(graph, class, None);
+        self.typed_objects.insert(class.to_string(), typed);
+        typed
+    }
+
+    pub(super) fn new_typed(
+        &mut self,
+        graph: &mut Graph,
+        class: &str,
+        constraint: Option<Sym>,
+    ) -> ObjId {
         let name = outside_name(&self.stubs.public_name(class));
         let abstract_ = self.stubs.is_abstract(class);
         let object = Object::Typed {
             class: self.symbols.intern(class),
             name: self.symbols.intern(&name),
             abstract_,
+            constraint,
         };
-        let typed = self.new_object(graph, object);
-        self.typed_objects.insert(class.to_string(), typed);
-        typed
+        self.new_object(graph, object)
     }
 
     fn outside_attribute(

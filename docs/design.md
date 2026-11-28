@@ -72,7 +72,13 @@ value accepts a class that its class derives from, a protocol whose methods
 its class has, and `float` or `complex` for an `int`. A value of unknown
 class, or an argument that holds nothing once the solve settles, keeps
 every overload: `re.sub("a", "b", s)` gives a `str`, `re.sub(p, "b", s)`
-with `p` unknown a `str` and a `bytes`.
+with `p` unknown a `str` and a `bytes`. A constrained type variable
+(`AnyStr`) is solved to the constraints that the class of its argument
+derives from, and an instance of a class whose type parameter is one keeps
+the constraint it was made with: `re.compile("x")` is a `Pattern[str]`,
+its `match` a `Match[str]` (as receiver it accepts only overloads declared
+for `Pattern[str]`), and that receiver solves its class's variable, so
+`group` gives a `str`. A value of unknown class keeps every constraint.
 
 ### 4. Declared types supply what value flow cannot
 
