@@ -1,4 +1,6 @@
-use pycg_solver::{ATTACH_NESTING_MAX, KindMask, NodeId, ObjId, Order, Rules, Solver, WatchId};
+use pycg_solver::{
+    ATTACH_NESTING_MAX, Attached, KindMask, NodeId, ObjId, Order, Rules, Solver, WatchId,
+};
 
 const SATURATED: ObjId = ObjId(0);
 const PLAIN: KindMask = 1;
@@ -12,6 +14,7 @@ struct Recorded {
     results: Vec<(u32, NodeId)>,
     kinds: Vec<(u32, KindMask)>,
     nest: Vec<(u32, NodeId)>,
+    attached: Vec<(u32, Attached)>,
     between: u32,
     rounds: u32,
 }
@@ -20,7 +23,8 @@ impl Rules<u32> for Recorded {
     fn apply(&mut self, solver: &mut Solver<u32>, constraint: u32, objects: &[ObjId]) {
         self.applied.push((constraint, objects.to_vec()));
         if let Some(&(_, node)) = self.nest.iter().find(|(c, _)| *c == constraint) {
-            solver.attach(self, node, constraint + 1);
+            let attached = solver.attach(self, node, constraint + 1);
+            self.attached.push((constraint + 1, attached));
         }
     }
 
@@ -230,6 +234,55 @@ fn applications_nested_past_the_bound_wait_for_the_solve() {
     assert_eq!(rules.applied.len(), ATTACH_NESTING_MAX as usize);
     solver.solve(&mut rules);
     assert_eq!(rules.applied.len(), chain as usize + 1);
+}
+
+#[test]
+fn a_constant_node_releases_its_constraints_except_those_that_wait_for_the_solve() {
+    let mut rules = Recorded::default();
+    let mut solver = solver(None);
+    let found = objects(&mut solver, &[1]);
+    let constant = solver.constant(found[0]);
+    let chain = ATTACH_NESTING_MAX + 5;
+    for constraint in 0..chain {
+        rules.nest.push((constraint, constant));
+    }
+    assert_eq!(solver.attach(&mut rules, constant, 0), Attached::Released);
+    let waiting = (ATTACH_NESTING_MAX, Attached::Kept);
+    let applied = (1..ATTACH_NESTING_MAX)
+        .rev()
+        .map(|constraint| (constraint, Attached::Released));
+    let nested: Vec<(u32, Attached)> = [waiting].into_iter().chain(applied).collect();
+    assert_eq!(rules.attached, nested);
+    assert_eq!(rules.applied.len(), ATTACH_NESTING_MAX as usize);
+    assert!(
+        rules
+            .applied
+            .iter()
+            .all(|(constraint, _)| *constraint != ATTACH_NESTING_MAX)
+    );
+    solver.solve(&mut rules);
+    assert_eq!(rules.applied.len(), chain as usize + 1);
+    assert_eq!(
+        rules.applied[ATTACH_NESTING_MAX as usize],
+        (ATTACH_NESTING_MAX, found.clone())
+    );
+    assert!(
+        rules.attached[nested.len()..]
+            .iter()
+            .all(|(_, attached)| *attached == Attached::Released)
+    );
+}
+
+#[test]
+fn a_constraint_on_a_node_is_kept() {
+    let mut rules = Recorded::default();
+    let mut solver = solver(None);
+    let node = solver.node();
+    let found = objects(&mut solver, &[1]);
+    solver.add_object(&mut rules, node, found[0]);
+    solver.solve(&mut rules);
+    assert_eq!(solver.attach(&mut rules, node, 0), Attached::Kept);
+    assert_eq!(rules.applied, vec![(0, found)]);
 }
 
 #[test]

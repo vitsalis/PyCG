@@ -967,13 +967,13 @@ impl State {
             _ => panic!("a special method is called on an instance or a class"),
         };
         let unless = self.unless_id(unless);
-        let rule = self.rule(Rule::TypeMethod {
+        let rule = Rule::TypeMethod {
             object,
             name,
             implicit,
             unless,
-        });
-        self.attach(graph, types, rule);
+        };
+        self.attach_rule(graph, types, rule);
     }
 
     pub(super) fn type_method(

@@ -1,4 +1,4 @@
-use pycg_solver::{KindMask, NodeId, ObjId, Rules, WatchId};
+use pycg_solver::{Attached, KindMask, NodeId, ObjId, Rules, WatchId};
 
 use crate::engine::annotations::AnnotationRule;
 use crate::engine::attributes::{
@@ -475,9 +475,20 @@ impl Rule {
 
 impl State {
     pub(super) fn rule(&mut self, rule: Rule) -> RuleId {
+        if let Some(id) = self.released_rules.pop() {
+            self.rules[id.index()] = rule;
+            return id;
+        }
         let id = RuleId(u32::try_from(self.rules.len()).expect("fewer than 2^32 rules"));
         self.rules.push(rule);
         id
+    }
+
+    pub(super) fn attach_rule(&mut self, graph: &mut Graph, node: NodeId, rule: Rule) {
+        let id = self.rule(rule);
+        if graph.attach(self, node, id) == Attached::Released {
+            self.released_rules.push(id);
+        }
     }
 
     fn results(&self, rule: &Rule) -> Vec<NodeId> {

@@ -23,6 +23,12 @@ pub trait Rules<C> {
     fn firing(&mut self, solver: &mut Solver<C>);
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Attached {
+    Kept,
+    Released,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub struct Work {
     pub copied: u64,
@@ -347,12 +353,14 @@ impl<C: Copy> Solver<C> {
         }
     }
 
-    pub fn attach(&mut self, rules: &mut impl Rules<C>, node: NodeId, constraint: C) {
+    pub fn attach(&mut self, rules: &mut impl Rules<C>, node: NodeId, constraint: C) -> Attached {
         let node = self.find(node);
         let entry = &mut self.nodes[node.index()];
         let seen = entry.done;
         if entry.constant {
-        } else if let Some(groups) = &mut entry.groups {
+            return self.apply_seen(rules, constraint, seen);
+        }
+        if let Some(groups) = &mut entry.groups {
             groups.push((vec![constraint], seen));
         } else if entry.constraints.is_empty() {
             entry.constraints = vec![constraint];
@@ -368,6 +376,7 @@ impl<C: Copy> Solver<C> {
             self.firing_nodes.insert(node);
         }
         self.apply_seen(rules, constraint, seen);
+        Attached::Kept
     }
 
     pub fn apply_now(&mut self, rules: &mut impl Rules<C>, node: NodeId, constraint: C) {
@@ -574,17 +583,18 @@ impl<C: Copy> Solver<C> {
         }
     }
 
-    fn apply_seen(&mut self, rules: &mut impl Rules<C>, constraint: C, seen: SetId) {
+    fn apply_seen(&mut self, rules: &mut impl Rules<C>, constraint: C, seen: SetId) -> Attached {
         if self.sets.is_empty(seen) {
-            return;
+            return Attached::Released;
         }
         if self.attach_nesting >= ATTACH_NESTING_MAX {
             self.attach_deferred.push_back((constraint, seen));
-            return;
+            return Attached::Kept;
         }
         self.attach_nesting += 1;
         self.apply(rules, vec![constraint], seen);
         self.attach_nesting -= 1;
+        Attached::Released
     }
 
     fn receive(&mut self, node: NodeId, objects: SetId) {
