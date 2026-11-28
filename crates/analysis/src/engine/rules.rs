@@ -178,13 +178,13 @@ pub(crate) enum Rule {
         object: ObjId,
         call: CallId,
         result: ObjId,
-        items: NodeId,
+        sequences: NodeId,
     },
     ReverseSequence {
         object: ObjId,
         methods: NodeId,
-        implicit: CallId,
-        reversing: Option<NodeId>,
+        implicit: Option<CallId>,
+        reversing: NodeId,
     },
     WhenDefaultMemberOnType {
         object: ObjId,
@@ -562,10 +562,11 @@ impl State {
             | Rule::TypeBases { .. }
             | Rule::TypeBase { .. }
             | Rule::CallTypeMetaclass { .. } => Vec::new(),
-            Rule::Reversed { dst, .. } | Rule::ReversedSequence { items: dst, .. } => vec![dst],
-            Rule::ReverseSequence { implicit, .. } => {
-                self.calls[implicit.index()].dst.into_iter().collect()
-            }
+            Rule::Reversed { dst, .. } | Rule::ReversedSequence { sequences: dst, .. } => vec![dst],
+            Rule::ReverseSequence { implicit, .. } => implicit
+                .and_then(|implicit| self.calls[implicit.index()].dst)
+                .into_iter()
+                .collect(),
             Rule::WhenDefaultMemberOnType { result, .. }
             | Rule::RunDefaultAction { result, .. } => result.into_iter().collect(),
             Rule::NamespaceElement { unknown: dst, .. }
@@ -692,8 +693,8 @@ impl State {
                 object: owner,
                 call,
                 result,
-                ..
-            } => self.reversed_sequence(graph, object, owner, call, result),
+                sequences,
+            } => self.reversed_sequence(graph, object, owner, call, result, sequences),
             Rule::ReverseSequence {
                 object: owner,
                 methods,

@@ -247,11 +247,6 @@ CASES = {
         "a function passed to library code is not a call: itertools calls the "
         "functions it gets",
     ),
-    "builtins/map_not_consumed": (
-        "flow/uncalled",
-        "map() is lazy; its function is called back although the result is never "
-        "consumed",
-    ),
     "classes/del_on_last_reference": (
         "dynamic/finalization",
         "__del__ runs when the last reference goes, which the analysis does not know",

@@ -10,4 +10,4 @@ class Row:
     def __getitem__(self, index):
         return index
 reversed(Deck())
-reversed(Row())
+list(reversed(Row()))

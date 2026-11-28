@@ -58,6 +58,8 @@ pub const METHODS: &[(&str, &str, (&str, &str, &[&str]))] = &[
     ("dict", "setdefault", ("(key, default=None, /)", "setdefault", &[])),
     ("dict", "update", ("(mapping=(), /, **kwargs)", "update", &[])),
     ("dict", "values", ("()", "view", &["dict_values"])),
+    ("enumerate", "__next__", ("()", "advance", &[])),
+    ("filter", "__next__", ("()", "advance", &[])),
     ("frozenset", "copy", ("()", "copy", &[])),
     ("generator", "__next__", ("()", "advance", &[])),
     ("generator", "send", ("(value, /)", "advance", &[])),
@@ -88,6 +90,8 @@ pub const METHODS: &[(&str, &str, (&str, &str, &[&str]))] = &[
     ("list", "extend", ("(iterable, /)", "extend", &[])),
     ("list", "insert", ("(index, object, /)", "add", &["object"])),
     ("list", "pop", ("(index=-1, /)", "any_element", &[])),
+    ("map", "__next__", ("()", "advance", &[])),
+    ("reversed", "__next__", ("()", "advance", &[])),
     ("set", "add", ("(element, /)", "add", &["element"])),
     ("set", "copy", ("()", "copy", &[])),
     ("set", "pop", ("()", "any_element", &[])),
@@ -96,6 +100,7 @@ pub const METHODS: &[(&str, &str, (&str, &str, &[&str]))] = &[
     ("str", "casefold", ("()", "case", &["lower"])),
     ("str", "lower", ("()", "case", &["lower"])),
     ("str", "upper", ("()", "case", &["upper"])),
+    ("zip", "__next__", ("()", "advance", &[])),
 ];
 pub const CONTAINER_CLASSES: &[(&str, &str, (&str, &str, &[&str]))] = &[
     ("collections.OrderedDict", "dict", ("(mapping=(), /, **kwargs)", "dict", &["collections.OrderedDict"])),

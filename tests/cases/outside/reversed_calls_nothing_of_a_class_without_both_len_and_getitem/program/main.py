@@ -15,7 +15,7 @@ class View(collections.abc.Sequence):
         return index
     def __len__(self):
         return 1
-reversed(OnlyItems())
-reversed(OnlyLength())
-reversed(Keyed)
-reversed(View())
+list(reversed(OnlyItems()))
+list(reversed(OnlyLength()))
+list(reversed(Keyed))
+list(reversed(View()))

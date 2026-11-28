@@ -192,10 +192,12 @@ site is not listed.
 - A link of a comparison chain spans its two operands (`b < c` in
   `a < b < c`). The accessor that a class's own attribute hook runs is an
   `attribute` site of the hook, at its whole `def`.
-- The implicit calls a builtin makes (`list(x)`, `map(f, xs)`,
-  `sorted(xs, key=k)`, `f(*xs)`) are callees of its call. A construct
-  written at the node of a call keeps its word (`with f():` is `with`;
-  `for x in list(c)` is one `iteration` site).
+- The implicit calls a builtin makes (`list(x)`, `sorted(xs, key=k)`,
+  `f(*xs)`) are callees of its call. The function of a lazy `map` or
+  `filter` is called where the object is advanced: `list(map(f, xs))` lists
+  `f` at `list(...)`, `for x in m` at its `iteration`. A construct written
+  at the node of a call keeps its word (`with f():` is `with`; `for x in
+  list(c)` is one `iteration` site).
 - Outside callees are listed only for call expressions and decorators. A
   call expression that calls nothing listed (a class whose `__init__` is
   `object`'s) is not a site.

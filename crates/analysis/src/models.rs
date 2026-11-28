@@ -346,6 +346,11 @@ pub static METHODS: &[((&str, &str), Model)] = &[
     ),
     (("iterator", "__next__"), ADVANCE),
     (("callable_iterator", "__next__"), ADVANCE),
+    (("enumerate", "__next__"), ADVANCE),
+    (("filter", "__next__"), ADVANCE),
+    (("map", "__next__"), ADVANCE),
+    (("reversed", "__next__"), ADVANCE),
+    (("zip", "__next__"), ADVANCE),
     (("itertools._grouper", "__next__"), ADVANCE),
     (("itertools._tee", "__next__"), ADVANCE),
     (("itertools.accumulate", "__next__"), ADVANCE),
@@ -589,6 +594,17 @@ pub static LIBRARY_ITERATION: &[(&str, LibraryOperation)] = &[
         "itertools.chain.from_iterable",
         operation(LazyOuter, &["iterable"], Items, Some("itertools.chain")),
     ),
+];
+
+pub static LAZY_BUILTINS: &[(&str, LibraryOperation)] = &[
+    (
+        "enumerate",
+        operation(Lazy, &[], Positions, Some("enumerate")),
+    ),
+    ("filter", operation(Lazy, &[], Items, Some("filter"))),
+    ("map", operation(Lazy, &[], Nothing, Some("map"))),
+    ("reversed", operation(Lazy, &[], Items, Some("reversed"))),
+    ("zip", operation(Lazy, &[], Positions, Some("zip"))),
 ];
 
 pub static KEYED_OPERATIONS: &[&str] = &["heapq.nlargest", "heapq.nsmallest", "heapq.merge"];
