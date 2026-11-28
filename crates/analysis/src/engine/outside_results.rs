@@ -14,6 +14,13 @@ use crate::models::{DECORATING_CLOSURES, opened_class};
 
 const FUNCTION_KINDS: &[Kind] = &[Kind::Function];
 const DEFAULT_MODE: &str = "r";
+const TYPE: &str = "builtins.type";
+const NONE_TYPE: &str = "types.NoneType";
+const CALL: &str = "__call__";
+const NUMERIC_PROMOTIONS: &[(&str, &[&str])] = &[
+    ("builtins.float", &["builtins.int"]),
+    ("builtins.complex", &["builtins.int", "builtins.float"]),
+];
 
 #[derive(Clone, Debug)]
 pub(crate) enum OutsideResultRule {
@@ -43,6 +50,12 @@ pub(crate) enum OutsideResultRule {
         mode: Box<[u32]>,
         dst: NodeId,
     },
+    Overload {
+        bound: BoundId,
+        annotation: Type,
+        result: Box<(Type, TypeContext)>,
+        dst: NodeId,
+    },
 }
 
 impl OutsideResultRule {
@@ -67,7 +80,8 @@ impl OutsideResultRule {
             | OutsideResultRule::NewInstance { dst, .. }
             | OutsideResultRule::MadeInstance { dst, .. }
             | OutsideResultRule::OpenMode { dst, .. }
-            | OutsideResultRule::OpenBuffering { dst, .. } => vec![dst],
+            | OutsideResultRule::OpenBuffering { dst, .. }
+            | OutsideResultRule::Overload { dst, .. } => vec![dst],
         }
     }
 }
@@ -75,10 +89,12 @@ impl OutsideResultRule {
 #[derive(Default)]
 pub(crate) struct OutsideResults {
     closures: FxHashMap<(Sym, Type), ObjId>,
-    open_arguments: Vec<NodeId>,
-    completed_open_arguments: usize,
+    deciding_arguments: Vec<NodeId>,
+    deciding_copies: FxHashMap<NodeId, NodeId>,
+    completed_deciding_arguments: usize,
     unknown_modes: FxHashSet<CallId>,
     open_modes: FxHashSet<(CallId, Box<[u32]>)>,
+    selected_overloads: FxHashSet<(BoundId, Option<ObjId>)>,
 }
 
 impl State {
@@ -153,13 +169,13 @@ impl State {
     ) {
         let buffering = if self.bound_given(bound, "buffering") {
             let node = self.bound_parameter(graph, bound, "buffering");
-            Some(self.open_argument(graph, node))
+            Some(self.deciding_argument(graph, node))
         } else {
             None
         };
         if self.bound_given(bound, "mode") {
             let node = self.bound_parameter(graph, bound, "mode");
-            let mode = self.open_argument(graph, node);
+            let mode = self.deciding_argument(graph, node);
             let dst = self.calls[call.index()].dst.expect("an opened file");
             let rule = self.result_rule(OutsideResultRule::OpenMode {
                 call,
@@ -174,10 +190,14 @@ impl State {
         }
     }
 
-    fn open_argument(&mut self, graph: &mut Graph, node: NodeId) -> NodeId {
+    fn deciding_argument(&mut self, graph: &mut Graph, node: NodeId) -> NodeId {
+        if let Some(&copy) = self.outside_results.deciding_copies.get(&node) {
+            return copy;
+        }
         let copy = self.node(graph, None);
         self.add_edge(graph, node, copy);
-        self.outside_results.open_arguments.push(copy);
+        self.outside_results.deciding_arguments.push(copy);
+        self.outside_results.deciding_copies.insert(node, copy);
         copy
     }
 
@@ -212,10 +232,79 @@ impl State {
         }
     }
 
-    pub(super) fn complete_open_arguments(&mut self, graph: &mut Graph) -> bool {
-        let start = self.outside_results.completed_open_arguments;
-        let pending = self.outside_results.open_arguments[start..].to_vec();
-        self.outside_results.completed_open_arguments = self.outside_results.open_arguments.len();
+    pub(super) fn select_overload(
+        &mut self,
+        graph: &mut Graph,
+        argument: NodeId,
+        bound: BoundId,
+        annotation: &Type,
+        result: (Type, TypeContext),
+        dst: NodeId,
+    ) {
+        let copy = self.deciding_argument(graph, argument);
+        let rule = self.result_rule(OutsideResultRule::Overload {
+            bound,
+            annotation: annotation.clone(),
+            result: Box::new(result),
+            dst,
+        });
+        self.attach(graph, copy, rule);
+    }
+
+    pub(super) fn accepts(&mut self, object: ObjId, annotation: &Type) -> bool {
+        let Some(class) = self.stub_class(object) else {
+            return true;
+        };
+        let mut pending = vec![annotation];
+        while let Some(current) = pending.pop() {
+            let accepted = match current {
+                Type::Union(arms) => {
+                    pending.extend(arms.iter());
+                    false
+                }
+                Type::Variable {
+                    bound: Some(bound), ..
+                } => {
+                    pending.push(bound);
+                    false
+                }
+                Type::Class(expected) | Type::Generic(expected, _) => {
+                    self.instance_of(&class, expected)
+                }
+                Type::None => self.instance_of(&class, NONE_TYPE),
+                Type::TypeOf(_) => self.instance_of(&class, TYPE),
+                Type::Callable { .. } => !self.stubs.member(&class, CALL).is_empty(),
+                Type::Unknown | Type::SelfType | Type::Ellipsis | Type::Variable { .. } => true,
+            };
+            if accepted {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn instance_of(&mut self, class: &str, expected: &str) -> bool {
+        let mro = self.stubs.mro(class);
+        if mro.iter().any(|owner| &**owner == expected) {
+            return true;
+        }
+        if let Some(&(_, promoted)) = NUMERIC_PROMOTIONS.iter().find(|&&(to, _)| to == expected)
+            && mro.iter().any(|owner| promoted.contains(&&**owner))
+        {
+            return true;
+        }
+        let members = self.protocol_methods(expected);
+        !members.is_empty()
+            && members
+                .iter()
+                .all(|name| !self.stubs.member(class, name).is_empty())
+    }
+
+    pub(super) fn complete_deciding_arguments(&mut self, graph: &mut Graph) -> bool {
+        let start = self.outside_results.completed_deciding_arguments;
+        let pending = self.outside_results.deciding_arguments[start..].to_vec();
+        self.outside_results.completed_deciding_arguments =
+            self.outside_results.deciding_arguments.len();
         let empty: Vec<NodeId> = pending
             .into_iter()
             .filter(|&node| self.objects_of(graph, node).is_empty())
@@ -282,6 +371,21 @@ impl State {
                 let mode = mode.clone();
                 self.add_opened(graph, &mode, unbuffered, dst);
             }
+            OutsideResultRule::Overload {
+                bound,
+                ref annotation,
+                ref result,
+                dst,
+            } => {
+                let (reduced, context) = &**result;
+                let key = (bound, context.receiver);
+                if !self.outside_results.selected_overloads.contains(&key)
+                    && self.accepts(object, annotation)
+                {
+                    self.outside_results.selected_overloads.insert(key);
+                    self.add_type(graph, reduced, dst, context, &[]);
+                }
+            }
         }
     }
 
@@ -311,15 +415,24 @@ impl OutsideResults {
     pub(crate) fn table_sizes(&self, sizes: &mut Vec<(&'static str, usize)>) {
         let OutsideResults {
             closures,
-            open_arguments,
-            completed_open_arguments: _,
+            deciding_arguments,
+            deciding_copies: _,
+            completed_deciding_arguments: _,
             unknown_modes: _,
             open_modes,
+            selected_overloads,
         } = self;
         sizes.extend([
             ("outside results closures", closures.len()),
-            ("outside results open_arguments", open_arguments.len()),
+            (
+                "outside results deciding_arguments",
+                deciding_arguments.len(),
+            ),
             ("outside results open_modes", open_modes.len()),
+            (
+                "outside results selected_overloads",
+                selected_overloads.len(),
+            ),
         ]);
     }
 }

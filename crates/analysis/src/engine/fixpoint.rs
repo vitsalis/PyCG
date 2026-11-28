@@ -70,7 +70,7 @@ impl State {
         if added {
             return true;
         }
-        self.complete_open_arguments(graph) || self.complete_pattern_operands(graph)
+        self.complete_deciding_arguments(graph) || self.complete_pattern_operands(graph)
     }
 
     fn absorbed_functions(&mut self, graph: &mut Graph) -> FxHashSet<ObjId> {
