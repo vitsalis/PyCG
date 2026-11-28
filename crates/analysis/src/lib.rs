@@ -18,7 +18,7 @@ use crate::program::Program;
 use crate::program::paths::PathsError;
 use crate::results::AnalysisPart;
 
-pub const CAP_DEFAULT_OBJECTS: u32 = 5000;
+pub const CAP_DEFAULT_OBJECTS: u32 = 1000;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Cap {

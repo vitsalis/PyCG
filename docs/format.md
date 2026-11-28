@@ -72,7 +72,7 @@ pkg/shapes.py` writes this document, pretty-printed here for reading:
     "os.path.join": {"known": "stub"}
   },
   "package": {"name": "pkg", "version": "1.0"},
-  "tool": {"cap": 5000, "name": "pycg", "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34", "version": "2.0.0"}
+  "tool": {"cap": 1000, "name": "pycg", "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34", "version": "2.0.0"}
 }
 ```
 
@@ -96,7 +96,7 @@ pkg/shapes.py` writes this document, pretty-printed here for reading:
 | `tool.name` | string | `pycg` |
 | `tool.version` | string | The version of PyCG |
 | `tool.typeshed` | string | The typeshed commit of the stub data |
-| `tool.cap` | integer or null | The most values kept for one node (`--cap`, 5,000 by default); `null` for `--cap none` |
+| `tool.cap` | integer or null | The most values kept for one node (`--cap`, 1,000 by default); `null` for `--cap none` |
 | `package.name` | string or null | `--package-name`; `null` when not given |
 | `package.version` | string or null | `--package-version`; `null` when not given |
 
