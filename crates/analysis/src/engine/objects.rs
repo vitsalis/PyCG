@@ -251,6 +251,7 @@ pub enum Object {
         class: Sym,
         name: Sym,
         abstract_: bool,
+        constraint: Option<Sym>,
     },
     BuiltinMethod {
         receiver: ObjId,

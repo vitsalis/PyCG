@@ -131,25 +131,39 @@ pub(crate) enum OutsideRule {
     AddInstancesOf {
         dst: NodeId,
     },
+    SolveConstraint {
+        class: Box<str>,
+        constraints: Arc<[Type]>,
+        dst: NodeId,
+    },
 }
 
 impl OutsideRule {
     pub(crate) fn results(&self) -> Vec<NodeId> {
         match *self {
-            OutsideRule::AddConstraint { dst, .. } | OutsideRule::AddInstancesOf { dst } => {
-                vec![dst]
-            }
+            OutsideRule::AddConstraint { dst, .. }
+            | OutsideRule::AddInstancesOf { dst }
+            | OutsideRule::SolveConstraint { dst, .. } => vec![dst],
         }
     }
 }
 
 type StubContainerKey = (TypeOrigin, Box<[u32]>, Box<[Type]>);
 
+#[derive(Clone)]
+pub(crate) struct ConstrainedParameter {
+    pub(crate) position: usize,
+    pub(crate) name: Box<str>,
+    pub(crate) constraints: Arc<[Type]>,
+}
+
 #[derive(Default)]
 pub(crate) struct OutsideTypes {
     stub_containers: FxHashMap<StubContainerKey, u32>,
     concrete_typed: FxHashMap<String, ObjId>,
     elements: FxHashMap<(CallId, NodeId), NodeId>,
+    constrained_parameters: FxHashMap<String, Option<ConstrainedParameter>>,
+    constrained_typed: FxHashMap<(Sym, Sym), ObjId>,
 }
 
 impl TypeContext {
@@ -199,6 +213,31 @@ fn constraints(reduced: &Type) -> Vec<Type> {
             single => vec![single.clone()],
         },
         _ => Vec::new(),
+    }
+}
+
+pub(super) fn constrained_variables<'t>(reduced: &'t Type, found: &mut Vec<(&'t str, &'t Type)>) {
+    let mut pending = vec![reduced];
+    while let Some(current) = pending.pop() {
+        match current {
+            Type::Variable {
+                name,
+                bound: Some(bound),
+                constrained: true,
+            } => found.push((name, bound)),
+            Type::Variable { .. }
+            | Type::Unknown
+            | Type::Class(_)
+            | Type::None
+            | Type::SelfType
+            | Type::Ellipsis => {}
+            Type::Union(parts) | Type::Generic(_, parts) => pending.extend(parts.iter()),
+            Type::TypeOf(inner) => pending.push(inner),
+            Type::Callable { result, parameters } => {
+                pending.push(result);
+                pending.extend(parameters.iter().flatten());
+            }
+        }
     }
 }
 
@@ -336,6 +375,7 @@ impl State {
             class: self.symbols.intern(class),
             name: self.symbols.intern(name),
             abstract_: false,
+            constraint: None,
         };
         let typed = self.new_object(graph, object);
         self.outside_types
@@ -471,12 +511,158 @@ impl State {
             let kind = kind.to_string();
             self.add_container(graph, &kind, arguments, dst, context, position);
         } else if self.stubs.definition(class).is_some() {
+            if let Some(parameter) = self.constrained_parameter(class) {
+                match arguments.get(parameter.position) {
+                    Some(Type::Class(constraint))
+                        if parameter
+                            .constraints
+                            .contains(&Type::Class(constraint.clone())) =>
+                    {
+                        let typed = self.constrained_typed(graph, class, constraint);
+                        self.add_object(graph, dst, typed);
+                        return;
+                    }
+                    Some(Type::Variable {
+                        name,
+                        constrained: true,
+                        ..
+                    }) => {
+                        self.add_constrained(graph, class, &parameter, name, dst, context);
+                        return;
+                    }
+                    _ => {}
+                }
+            }
             let typed = self.typed(graph, class);
             self.add_object(graph, dst, typed);
         } else {
             let unknown = self.unknown_external;
             self.add_object(graph, dst, unknown);
         }
+    }
+
+    fn add_constrained(
+        &mut self,
+        graph: &mut Graph,
+        class: &str,
+        parameter: &ConstrainedParameter,
+        variable: &str,
+        dst: NodeId,
+        context: &TypeContext,
+    ) {
+        if let Some(constraint) = self.receiver_constraint(context, variable)
+            && parameter
+                .constraints
+                .contains(&Type::Class(constraint.as_str().into()))
+        {
+            let typed = self.constrained_typed(graph, class, &constraint);
+            self.add_object(graph, dst, typed);
+            return;
+        }
+        let values: Vec<NodeId> = self
+            .bindings_of(graph, variable, context)
+            .into_iter()
+            .flatten()
+            .filter(|&(_, how)| how == Binds::Value)
+            .map(|(node, _)| node)
+            .collect();
+        if values.is_empty() {
+            let typed = self.typed(graph, class);
+            self.add_object(graph, dst, typed);
+            return;
+        }
+        for value in values {
+            let copy = self.deciding_argument(graph, value);
+            let rule = self.outside_rule(OutsideRule::SolveConstraint {
+                class: class.into(),
+                constraints: parameter.constraints.clone(),
+                dst,
+            });
+            self.attach(graph, copy, rule);
+        }
+    }
+
+    fn receiver_constraint(&mut self, context: &TypeContext, variable: &str) -> Option<String> {
+        let receiver = context.receiver?;
+        let &Object::Typed {
+            class,
+            constraint: Some(constraint),
+            ..
+        } = self.objects.get(receiver)
+        else {
+            return None;
+        };
+        let class = self.symbols.text(class).to_string();
+        let parameter = self.constrained_parameter(&class)?;
+        (&*parameter.name == variable).then(|| self.symbols.text(constraint).to_string())
+    }
+
+    pub(super) fn constrained_parameter(&mut self, class: &str) -> Option<ConstrainedParameter> {
+        if let Some(found) = self.outside_types.constrained_parameters.get(class) {
+            return found.clone();
+        }
+        let found = self.find_constrained_parameter(class);
+        self.outside_types
+            .constrained_parameters
+            .insert(class.to_string(), found.clone());
+        found
+    }
+
+    fn find_constrained_parameter(&mut self, class: &str) -> Option<ConstrainedParameter> {
+        let definition = self.stubs.definition(class)?;
+        let Some(Entry::Class(entry)) = definition.entry.map(|entry| self.stubs.entry(entry))
+        else {
+            return None;
+        };
+        let mut found: Vec<(&str, &Type)> = Vec::new();
+        for &member in entry.members.values() {
+            match self.stubs.entry(member) {
+                Entry::Function(function) => {
+                    for signature in function.signatures.iter() {
+                        for parameter in signature.parameters.iter() {
+                            constrained_variables(&parameter.annotation, &mut found);
+                        }
+                        constrained_variables(&signature.result, &mut found);
+                    }
+                }
+                Entry::Property(property) => {
+                    constrained_variables(&property.annotation, &mut found)
+                }
+                Entry::Variable(variable) => {
+                    constrained_variables(&variable.annotation, &mut found)
+                }
+                Entry::Class(_) | Entry::Reference(_) => {}
+            }
+        }
+        let mut parameters =
+            entry
+                .type_parameters
+                .iter()
+                .enumerate()
+                .filter_map(|(position, name)| {
+                    let &(_, bound) = found.iter().find(|&&(variable, _)| variable == &**name)?;
+                    let constraints: Arc<[Type]> = match bound {
+                        Type::Union(arms) => arms.to_vec().into(),
+                        single => Arc::from([single.clone()]),
+                    };
+                    Some(ConstrainedParameter {
+                        position,
+                        name: name.clone(),
+                        constraints,
+                    })
+                });
+        let first = parameters.next()?;
+        parameters.next().is_none().then_some(first)
+    }
+
+    fn constrained_typed(&mut self, graph: &mut Graph, class: &str, constraint: &str) -> ObjId {
+        let key = (self.symbols.intern(class), self.symbols.intern(constraint));
+        if let Some(&typed) = self.outside_types.constrained_typed.get(&key) {
+            return typed;
+        }
+        let typed = self.new_typed(graph, class, Some(key.1));
+        self.outside_types.constrained_typed.insert(key, typed);
+        typed
     }
 
     fn add_container(
@@ -612,6 +798,11 @@ impl State {
         let Type::Variable { name, bound, .. } = reduced else {
             panic!("a type variable")
         };
+        if let Some(constraint) = self.receiver_constraint(context, name) {
+            let solved = Type::Class(constraint.into());
+            self.add_type(graph, &solved, dst, context, position);
+            return;
+        }
         let constraints: Arc<[Type]> = constraints(reduced).into();
         let bindings = self.bindings_of(graph, name, context);
         for &(node, how) in bindings.iter().flatten() {
@@ -723,6 +914,31 @@ impl State {
                 };
                 for constraint in &chosen {
                     self.add_type(graph, constraint, *dst, context, position);
+                }
+            }
+            OutsideRule::SolveConstraint {
+                class,
+                constraints,
+                dst,
+            } => {
+                let mro = match self.stub_class(object) {
+                    Some(found) => self.stubs.mro(&found).to_vec(),
+                    None => Vec::new(),
+                };
+                let matching: Vec<Box<str>> = constraints
+                    .iter()
+                    .filter_map(|constraint| match constraint {
+                        Type::Class(path) if mro.contains(path) => Some(path.clone()),
+                        _ => None,
+                    })
+                    .collect();
+                if matching.is_empty() {
+                    let typed = self.typed(graph, class);
+                    self.add_object(graph, *dst, typed);
+                }
+                for constraint in &matching {
+                    let typed = self.constrained_typed(graph, class, constraint);
+                    self.add_object(graph, *dst, typed);
                 }
             }
             &OutsideRule::AddInstancesOf { dst } => match self.objects.get(object) {
