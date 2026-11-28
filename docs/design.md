@@ -48,8 +48,15 @@ A name that only the statements of its own scope bind is followed by
 definition: each read gets the definitions that reach it, and where paths
 meet, a join holds the definitions of each path. Code that the syntax and
 the literal values of names prove cannot run is not walked: its calls give
-no edges and its definitions do not exist. The heap (attributes, container
-elements) is not followed by definition.
+no edges and its definitions do not exist. A module name that its module
+binds once, to a literal, holds that literal in every function too, unless a
+module of the package root may store it otherwise: by a `global` statement,
+a store or deletion of an attribute of that name, a string or keyword
+argument of that name (`setattr(m, "DEBUG", True)`,
+`vars(m).update(DEBUG=True)`), a `from` import of the name that the importer
+rebinds, or a submodule of that name. So `if DEBUG: trace()` in a function
+calls nothing when `DEBUG = False` is all the package does with `DEBUG`. The
+heap (attributes, container elements) is not followed by definition.
 
 ### 3. Outside code is typed from the typeshed stubs
 

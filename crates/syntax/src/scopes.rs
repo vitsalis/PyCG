@@ -48,6 +48,7 @@ pub struct Scope<'a> {
     pub generator: bool,
     pub asynchronous: bool,
     pub rebound: FxHashSet<String>,
+    pub bound_again: FxHashSet<String>,
     pub shared: FxHashSet<String>,
     pub star_import: bool,
     pub dynamic: bool,
@@ -534,7 +535,9 @@ fn bind(scope: &mut Scope<'_>, name: &str, how: Binding) {
     };
     scope.definitions.insert(name.clone(), definition);
     scope.bound.insert(name.clone());
-    scope.defined.insert(name.clone());
+    if !scope.defined.insert(name.clone()) {
+        scope.bound_again.insert(name.clone());
+    }
     if !how.parameter {
         scope.rebound.insert(name);
     }
@@ -701,6 +704,7 @@ impl<'a> Collector<'a> {
             generator: false,
             asynchronous: false,
             rebound: FxHashSet::default(),
+            bound_again: FxHashSet::default(),
             shared: FxHashSet::default(),
             star_import: false,
             dynamic: false,
