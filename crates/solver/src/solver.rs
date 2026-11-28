@@ -42,7 +42,11 @@ pub struct Work {
 enum Inbox {
     Empty,
     One(SetId),
-    Many(Box<[SetId]>),
+    Many(Box<Received>),
+}
+
+struct Received {
+    sets: Vec<SetId>,
 }
 
 enum Successors {
@@ -96,14 +100,17 @@ impl Targets {
 
 type Groups<C> = Vec<(Vec<C>, SetId)>;
 
+enum Constraints<C> {
+    Fired { constraints: Vec<C>, fired: SetId },
+    Grouped(Groups<C>),
+}
+
 struct Node<C> {
     representative: Option<NodeId>,
     done: SetId,
     inbox: Inbox,
     successors: Successors,
-    constraints: Vec<C>,
-    fired: SetId,
-    groups: Option<Box<Groups<C>>>,
+    constraints: Option<Box<Constraints<C>>>,
     constant: bool,
     witness: Option<WatchId>,
 }
@@ -115,9 +122,7 @@ impl<C> Node<C> {
             done,
             inbox: Inbox::Empty,
             successors: Successors::None,
-            constraints: Vec::new(),
-            fired: SetId::EMPTY,
-            groups: None,
+            constraints: None,
             constant,
             witness,
         }
@@ -360,20 +365,27 @@ impl<C: Copy> Solver<C> {
         if entry.constant {
             return self.apply_seen(rules, constraint, seen);
         }
-        if let Some(groups) = &mut entry.groups {
-            groups.push((vec![constraint], seen));
-        } else if entry.constraints.is_empty() {
-            entry.constraints = vec![constraint];
-            entry.fired = seen;
-        } else if entry.fired == seen {
-            entry.constraints.push(constraint);
-        } else {
-            let constraints = std::mem::take(&mut entry.constraints);
-            entry.groups = Some(Box::new(vec![
-                (constraints, entry.fired),
-                (vec![constraint], seen),
-            ]));
-            self.firing_nodes.insert(node);
+        match entry.constraints.as_deref_mut() {
+            None => {
+                entry.constraints = Some(Box::new(Constraints::Fired {
+                    constraints: vec![constraint],
+                    fired: seen,
+                }));
+            }
+            Some(Constraints::Grouped(groups)) => groups.push((vec![constraint], seen)),
+            Some(Constraints::Fired { constraints, fired }) if *fired == seen => {
+                constraints.push(constraint);
+            }
+            Some(grouping @ Constraints::Fired { .. }) => {
+                let Constraints::Fired { constraints, fired } =
+                    std::mem::replace(grouping, Constraints::Grouped(Vec::new()))
+                else {
+                    unreachable!("the constraints were fired together")
+                };
+                *grouping =
+                    Constraints::Grouped(vec![(constraints, fired), (vec![constraint], seen)]);
+                self.firing_nodes.insert(node);
+            }
         }
         self.apply_seen(rules, constraint, seen);
         Attached::Kept
@@ -609,10 +621,14 @@ impl<C: Copy> Solver<C> {
                 self.worklist.push_back(node);
             }
             Inbox::One(only) if *only == objects => {}
-            Inbox::One(only) => entry.inbox = Inbox::Many(Box::new([*only, objects])),
-            Inbox::Many(sets) => {
-                if !sets.contains(&objects) {
-                    *sets = sets.iter().copied().chain([objects]).collect();
+            Inbox::One(only) => {
+                entry.inbox = Inbox::Many(Box::new(Received {
+                    sets: vec![*only, objects],
+                }))
+            }
+            Inbox::Many(received) => {
+                if !received.sets.contains(&objects) {
+                    received.sets.push(objects);
                 }
             }
         }
@@ -628,9 +644,9 @@ impl<C: Copy> Solver<C> {
             return;
         }
         let delta = match inbox {
-            Inbox::Many(sets) => {
-                let mut fresh: Vec<SetId> = Vec::with_capacity(sets.len());
-                for &set in sets.iter() {
+            Inbox::Many(received) => {
+                let mut fresh: Vec<SetId> = Vec::with_capacity(received.sets.len());
+                for &set in &received.sets {
                     let difference = self.sets.difference(set, done);
                     if !self.sets.is_empty(difference) {
                         fresh.push(difference);
@@ -683,7 +699,7 @@ impl<C: Copy> Solver<C> {
             }
         }
         let entry = &self.nodes[node.index()];
-        if !entry.constraints.is_empty() || entry.groups.is_some() {
+        if entry.constraints.is_some() {
             self.firing_nodes.insert(node);
         }
     }
@@ -772,17 +788,32 @@ impl<C: Copy> Solver<C> {
     fn fire_node(&mut self, rules: &mut impl Rules<C>, node: NodeId) {
         let entry = &mut self.nodes[node.index()];
         let done = entry.done;
-        let groups = match entry.groups.take() {
-            None => vec![(entry.constraints.clone(), entry.fired)],
-            Some(groups) => {
-                entry.constraints = groups
-                    .iter()
-                    .flat_map(|(constraints, _)| constraints.iter().copied())
-                    .collect();
-                *groups
+        let Some(firing) = entry.constraints.as_deref_mut() else {
+            return;
+        };
+        let fired_now = Constraints::Fired {
+            constraints: Vec::new(),
+            fired: done,
+        };
+        let groups = match std::mem::replace(firing, fired_now) {
+            Constraints::Fired { constraints, fired } => {
+                *firing = Constraints::Fired {
+                    constraints: constraints.clone(),
+                    fired: done,
+                };
+                vec![(constraints, fired)]
+            }
+            Constraints::Grouped(groups) => {
+                *firing = Constraints::Fired {
+                    constraints: groups
+                        .iter()
+                        .flat_map(|(constraints, _)| constraints.iter().copied())
+                        .collect(),
+                    fired: done,
+                };
+                groups
             }
         };
-        entry.fired = done;
         for (constraints, fired) in groups {
             if !constraints.is_empty() && fired != done {
                 let new = self.sets.difference(done, fired);
@@ -901,10 +932,13 @@ impl<C: Copy> Solver<C> {
         hold(self.saturated_set);
         for entry in &self.nodes {
             hold(entry.done);
-            hold(entry.fired);
             received_sets(&entry.inbox).into_iter().for_each(&mut hold);
-            for (_, set) in entry.groups.iter().flat_map(|groups| groups.iter()) {
-                hold(*set);
+            match entry.constraints.as_deref() {
+                None => {}
+                Some(Constraints::Fired { fired, .. }) => hold(*fired),
+                Some(Constraints::Grouped(groups)) => {
+                    groups.iter().for_each(|&(_, set)| hold(set));
+                }
             }
         }
         for &(_, set) in &self.attach_deferred {
@@ -1085,10 +1119,13 @@ impl<C: Copy> Solver<C> {
         for &member in &members {
             let entry = &mut self.nodes[member.index()];
             inbox.extend(received_sets(&entry.inbox));
-            if let Some(member_groups) = entry.groups.take() {
-                groups.extend(*member_groups);
-            } else if !entry.constraints.is_empty() {
-                groups.push((std::mem::take(&mut entry.constraints), entry.fired));
+            match entry.constraints.take().map(|constraints| *constraints) {
+                None => {}
+                Some(Constraints::Fired { constraints, fired }) => {
+                    assert!(!constraints.is_empty(), "fired constraints are never empty");
+                    groups.push((constraints, fired));
+                }
+                Some(Constraints::Grouped(member_groups)) => groups.extend(member_groups),
             }
             if member != representative {
                 entry.representative = Some(representative);
@@ -1108,9 +1145,6 @@ impl<C: Copy> Solver<C> {
                 entry.done = SetId::EMPTY;
                 entry.inbox = Inbox::Empty;
                 entry.successors = Successors::None;
-                entry.constraints = Vec::new();
-                entry.groups = None;
-                entry.fired = SetId::EMPTY;
             }
         }
         self.merged += members.len() as u64 - 1;
@@ -1120,13 +1154,11 @@ impl<C: Copy> Solver<C> {
             self.link(representative, target, searched);
         }
         let entry = &mut self.nodes[representative.index()];
-        entry.constraints = Vec::new();
-        entry.fired = SetId::EMPTY;
         entry.inbox = Inbox::Empty;
         if groups.is_empty() {
-            entry.groups = None;
+            entry.constraints = None;
         } else {
-            entry.groups = Some(Box::new(groups));
+            entry.constraints = Some(Box::new(Constraints::Grouped(groups)));
             self.firing_nodes.insert(representative);
         }
         for set in inbox {
@@ -1146,7 +1178,7 @@ fn received_sets(inbox: &Inbox) -> Vec<SetId> {
     match inbox {
         Inbox::Empty => Vec::new(),
         Inbox::One(set) => vec![*set],
-        Inbox::Many(sets) => sets.to_vec(),
+        Inbox::Many(received) => received.sets.clone(),
     }
 }
 
@@ -1157,3 +1189,4 @@ fn successor_pairs(successors: &Successors) -> Vec<(NodeId, bool)> {
         Successors::Many(map) => map.pairs().collect(),
     }
 }
+const _: () = assert!(std::mem::size_of::<Node<u32>>() == 56);
