@@ -108,6 +108,7 @@ impl State {
                 .collect(),
             bound: FxHashSet::default(),
             slots: FxHashSet::default(),
+            init_stores: FxHashSet::default(),
             bases: vec![OrderedSet::default(); new.base_nodes.len()],
             mros: Vec::new(),
             ancestors: FxHashSet::default(),
@@ -695,7 +696,7 @@ impl State {
             return;
         }
         self.walk_classes(graph, &classes, attr, receiver, dst, false);
-        if after.is_none() && unless.is_empty() && !defines {
+        if after.is_none() && unless.is_empty() && !defines && !self.init_stores(&order, attr) {
             for base in classes {
                 self.fallback_to(graph, base, attr, receiver, dst);
             }
@@ -710,11 +711,20 @@ impl State {
         receiver: Option<ObjId>,
         dst: NodeId,
     ) {
+        if self.init_stores(mro, attr) {
+            return;
+        }
         for &base in mro {
             if self.fallback_to(graph, base, attr, receiver, dst) {
                 return;
             }
         }
+    }
+
+    fn init_stores(&self, mro: &[ObjId], attr: Sym) -> bool {
+        mro.iter().any(|&base| {
+            matches!(self.objects.get(base), Object::Class(found) if found.init_stores.contains(&attr))
+        })
     }
 
     fn fallback_to(

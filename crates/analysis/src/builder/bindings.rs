@@ -348,3 +348,48 @@ pub fn nesting(statement: &Stmt) -> usize {
     }
     deepest
 }
+
+pub(crate) fn self_stores(initializer: &Stmt) -> Vec<String> {
+    let Stmt::FunctionDef(function) = initializer else {
+        return Vec::new();
+    };
+    let parameters = &function.parameters;
+    let Some(receiver) = parameters
+        .posonlyargs
+        .iter()
+        .chain(parameters.args.iter())
+        .next()
+    else {
+        return Vec::new();
+    };
+    let receiver = identifier(receiver.parameter.name.as_str());
+    let mut names: Vec<String> = Vec::new();
+    let mut pending: Vec<Node<'_>> = function.body.iter().map(Node::Stmt).collect();
+    while let Some(node) = pending.pop() {
+        match &node {
+            Node::Stmt(Stmt::FunctionDef(_) | Stmt::ClassDef(_))
+            | Node::Expr(
+                Expr::Lambda(_)
+                | Expr::ListComp(_)
+                | Expr::SetComp(_)
+                | Expr::DictComp(_)
+                | Expr::Generator(_),
+            )
+            | Node::GeneratorArgument(..) => continue,
+            Node::Stmt(Stmt::AnnAssign(annotated)) if annotated.value.is_none() => continue,
+            Node::Expr(Expr::Attribute(attribute)) if attribute.ctx == ExprContext::Store => {
+                if let Expr::Name(name) = &*attribute.value
+                    && identifier(name.id.as_str()) == receiver
+                {
+                    let name = identifier(attribute.attr.as_str()).into_owned();
+                    if !names.contains(&name) {
+                        names.push(name);
+                    }
+                }
+            }
+            _ => {}
+        }
+        pending.extend(node.children());
+    }
+    names
+}

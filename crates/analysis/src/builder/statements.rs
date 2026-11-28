@@ -790,6 +790,14 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
             } else {
                 Vec::new()
             };
+            let init_stores: Vec<Box<str>> = finals
+                .get("__init__")
+                .copied()
+                .map(bindings::self_stores)
+                .unwrap_or_default()
+                .iter()
+                .map(|name| Box::from(builder.mangle(name).as_str()))
+                .collect();
             let fields = builder.analysis.class_fields(object);
             fields.bound = namespace.iter().map(|(name, _)| name.clone()).collect();
             fields.defines = members
@@ -798,6 +806,7 @@ impl<'s, A: Analysis> ModuleBuilder<'_, 's, A> {
                 .chain(slots.iter().cloned())
                 .collect();
             fields.slots = slots;
+            fields.init_stores = init_stores;
             let structure: Vec<(Box<str>, Option<NodeId>)> =
                 bindings::structure_fields(&finals, builder.source.text)
                     .into_iter()

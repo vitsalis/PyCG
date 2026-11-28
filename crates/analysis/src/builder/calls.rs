@@ -104,6 +104,7 @@ pub struct ClassFields {
     pub slots: Vec<Box<str>>,
     pub bound: Vec<Box<str>>,
     pub defines: Vec<Box<str>>,
+    pub init_stores: Vec<Box<str>>,
     pub annotations: Option<IndexMap<Box<str>, NodeId>>,
 }
 

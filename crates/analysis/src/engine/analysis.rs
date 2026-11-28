@@ -164,10 +164,16 @@ impl Engine {
             .iter()
             .map(|name| symbols.intern(name))
             .collect();
+        let init_stores = fields
+            .init_stores
+            .iter()
+            .map(|name| symbols.intern(name))
+            .collect();
         let class = self.state.objects.class_mut(object);
         class.defines = defines;
         class.bound = bound;
         class.slots = slots;
+        class.init_stores = init_stores;
         class.allocator = fields.allocator;
         class.lineno = fields.lineno;
         class.end_lineno = fields.end_lineno;
@@ -496,6 +502,7 @@ impl Analysis for Engine {
             slots: names(&found.slots),
             bound: names(&found.bound),
             defines: names(&found.defines),
+            init_stores: names(&found.init_stores),
             annotations,
         };
         match self.hand(class, BuilderFields::Class(current)) {
