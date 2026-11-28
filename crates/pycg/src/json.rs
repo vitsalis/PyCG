@@ -71,6 +71,7 @@ enum Frame {
 }
 
 struct Reader<'a> {
+    source: &'a str,
     text: &'a [u8],
     at: usize,
 }
@@ -195,9 +196,7 @@ impl Reader<'_> {
                 }
                 byte if byte < CONTROL_END => return self.refuse(Expected::NoControlCharacter),
                 _ => {
-                    let rest = std::str::from_utf8(&self.text[self.at..])
-                        .expect("the reader reads UTF-8 text");
-                    let character = rest.chars().next().expect("a character");
+                    let character = self.source[self.at..].chars().next().expect("a character");
                     self.at += character.len_utf8();
                     points.push(u32::from(character));
                 }
@@ -263,6 +262,7 @@ impl Reader<'_> {
 
 pub fn read(text: &str) -> Result<Top, Refusal> {
     let mut reader = Reader {
+        source: text,
         text: text.as_bytes(),
         at: 0,
     };
