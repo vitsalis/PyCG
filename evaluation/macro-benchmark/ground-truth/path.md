@@ -181,11 +181,19 @@ value. Gives `absolute -> Path.replace` (also in the trace, through the
 tests' ntpath module) and `ismount -> Path.replace`, `-> Path.__radd__`.
 
 **J6. Hash objects.** `hashlib.new(hash_name)` returns an OpenSSL
-`_hashlib.HASH`, or by the documented fallback a builtin object. The hash
-names in scope are `md5` (`read_md5`, the tests) and `sha1` (the docstring
-of `_hash`). The builtin classes are named `_md5.MD5Type` and
-`_sha1.SHA1Type` on CPython, and `hashlib.md5` (beside `_md5.md5`) and
-`_sha1.sha` on PyPy (see "Corrections of 2026-11-25").
+`_hashlib.HASH` (on CPython `_hashlib.HASHXOF` for a SHAKE name), or by
+the documented fallback a builtin object. The hash names in scope are the
+names that `hashlib.new` accepts on an admitted build: `read_hash` and
+`read_hexhash` refer their `hash_name` to hashlib's list ("List of
+supported hashes can be obtained from :mod:`hashlib` package.", `985`,
+`995`), and `_hash` takes theirs and `read_md5`'s `'md5'`. Only the
+guaranteed names change a callee; the others make the OpenSSL classes. The
+earlier reading, `md5` (`read_md5`, the tests) and `sha1` (the docstring
+of `_hash`) only, yields to scope rule B2 (see "Corrections of
+2026-11-28"). The builtin MD5 and SHA-1 classes are named `_md5.MD5Type`
+and `_sha1.SHA1Type` on CPython, and `hashlib.md5` (beside `_md5.md5`) and
+`_sha1.sha` on PyPy (see "Corrections of 2026-11-25"); the SHA-2, BLAKE2,
+SHA-3 and SHAKE classes as in "Corrections of 2026-11-28".
 
 **J7. File objects.** `chunks` passes the client's `mode` and `buffering`
 to `open`; its overloads admit text and binary modes. The lambda's
@@ -305,11 +313,12 @@ client's `copy_func` of `only_newer`.
 
 ## Statistics
 
-187 nodes; 680 edges (422 inside, 258 outside); 487 (71.6%) confirmed by
-the trace, 193 from reading only; 177 of 182 functions run (not run:
+187 nodes; 763 edges (422 inside, 341 outside); 487 (63.8%) confirmed by
+the trace, 276 from reading only; 177 of 182 functions run (not run:
 `copy2`, `copymode`, `move`, `owner`, `startfile`). Of the edges from
-reading only, 78 rest on J4 and most of the others on the Windows branches
-of J3 and on functions that no test runs. Tracer defect T1: the
+reading only, 83 rest on the hash names of J6 that the tests do not pass,
+78 on J4 and most of the others on the Windows branches of J3 and on
+functions that no test runs. Tracer defect T1: the
 `@contextmanager` function `DirectoryNotEmpty.translate` is called by
 `contextlib` (`rmdir_p`, `removedirs_p`), and the trace misses it.
 
@@ -568,3 +577,66 @@ So at each of the three sites `_sha1.sha1.X` is renamed `_sha1.SHA1Type.X`
 `_sha1.sha.X` stay; on PyPy `_hashlib.HASH` is the class of
 `lib_pypy/_hashlib/__init__.py:34` (3.9), `:57` (3.10). 3 edges renamed, 6
 added: 680 edges (422 inside, 258 outside); no trace edge changes.
+
+## Corrections of 2026-11-28
+
+**Every hash name of hashlib (`_hash`, `read_hash`, `read_hexhash`:
+`__init__.py:979:21`, `990:44`, `1000:47`; the audit of the corrections of
+2026-11-28, N7a; the ruling is
+`selection/corrections-2026-11-28/rulings/n7a.md`).** The public methods
+`read_hash` and `read_hexhash` document their `hash_name` with "List of
+supported hashes can be obtained from :mod:`hashlib` package." (`985`,
+`995`; `docs/api.rst` renders them with `:members:`). By scope rule B2 the
+documentation names the role's values, as avro's `Schema.fingerprint`
+docstring did (avro J5): every name that `hashlib.new` accepts on an
+admitted build. `_hash` is private, so its `hash_name` is what its package
+callers pass: `read_md5`'s `'md5'` and the two public parameters (rule B).
+J6, which kept `md5` and `sha1` only, yields: a project judgement cannot
+override the global rules. hashlib's documentation sends the reader to
+`algorithms_guaranteed` and `algorithms_available`
+(`Lib/hashlib.py:14-19` of 3.9.25); a name outside the guaranteed set goes
+only to `_hashlib.new`, which makes `_hashlib.HASH` or `_hashlib.HASHXOF`,
+so only the guaranteed names change a callee. The classes that each
+guaranteed name makes through `hashlib.new(name)` (OpenSSL, else the
+builtin constructor; BLAKE2 always builtin), named by the public alias
+where hashlib's fallback binds the class, else by the exported type
+attribute, else by the type name (`ruling-names-2.md`,
+`b8-ruling-c-type-names-1.md`), with the private names kept beside the
+aliases at `hashlib.new` (the lead's decision at avro `schema.py:337`):
+
+| Hash | CPython 3.9 | CPython 3.10, 3.11 | CPython 3.12 to 3.15 | PyPy 3.9 to 3.11 |
+|---|---|---|---|---|
+| sha224, sha256 | `_sha256.SHA224Type`, `SHA256Type` (`sha256module.c:718`, `:720`) | the same (`:720`, `:725` of 3.10.22; `:723`, `:728` of 3.11.18) | `_sha2.SHA224Type`, `SHA256Type` (`sha2module.c:852`, `:855` of 3.12.16; `:864`, `:867` of 3.15.2) | the classes `_sha256.sha224`, `sha256` (`lib_pypy/_sha256.py:230`, `:206` of 3.9), bound as `hashlib.sha224`, `sha256` |
+| sha384, sha512 | `_sha512.SHA384Type`, `SHA512Type` (`sha512module.c:776`, `:778`) | SHA-384 by its type name `_sha512.sha384`, SHA-512 as `_sha512.SHA384Type` (the export is overwritten, `:782`, `:788` of 3.10.22; `:785`, `:791` of 3.11.18) | `_sha2.SHA384Type`, `SHA512Type` (`:858`, `:861` of 3.12.16) | the classes `_sha512.sha384`, `sha512` (`_sha512.py:258`, `:234` of 3.9), bound as `hashlib.sha384`, `sha512` |
+| blake2b, blake2s | `hashlib.blake2b`, `blake2s` (always the builtin classes) | same | same | same |
+| sha3_224 to sha3_512 | the types `_sha3.sha3_224` to `sha3_512` (`_sha3/sha3module.c:731-734`), bound as `hashlib.sha3_*` | same (`PyModule_AddType`, `:770` of 3.10.22, `:617` of 3.11.18) | same (`sha3module.c:580-588` of 3.12.16, `:666-674` of 3.15.2) | the classes `_sha3.sha3_*` (`_sha3/__init__.py:88-100` of 3.9), bound as `hashlib.sha3_*` |
+| shake_128, shake_256 | the types `_sha3.shake_*` (`:741-742`), bound as `hashlib.shake_*`; OpenSSL: `_hashlib.HASHXOF` (`_hashopenssl.c:2208`) | same; `HASHXOF` `:2165` of 3.10.22 | same; `HASHXOF` `:2280` of 3.12.16, `:2809` of 3.15.2 | the classes `_sha3.shake_*` (`:104`, `:108` of 3.9); OpenSSL: `_hashlib.HASH` (PyPy's `_hashlib.new` makes no other class without data) |
+
+The `digest` and `hexdigest` of every SHAKE class take a required `length`
+(`_sha3.shake_128.digest`, `Modules/_sha3/clinic/sha3module.c.h:121` of
+3.9.25; `_hashlib.HASHXOF.digest`, `_hashopenssl.c:720` of 3.9.25; PyPy
+`_shake.digest(self, length)`, `lib_pypy/_sha3/__init__.py:66`, `:84` of
+3.9), and path calls them without arguments, so the binding fails before
+entry and `990:44` and `1000:47` get no SHAKE callee (B4, as at avro
+`schema.py:338:24`); `update` binds for every class.
+
+Added, all outside, none removed: at `979:21` 31 callees (`.update` of
+the 26 receivers below, `_hashlib.HASHXOF`, `hashlib.shake_128`,
+`hashlib.shake_256`, `_sha3.shake_128`, `_sha3.shake_256`), at `990:44`
+and `1000:47` 26 each (`.digest`, `.hexdigest`). The 26 receivers:
+`_sha256.SHA224Type`, `_sha256.SHA256Type`, `_sha512.SHA384Type`,
+`_sha512.SHA512Type`, `_sha512.sha384`, `_sha2.SHA224Type`,
+`_sha2.SHA256Type`, `_sha2.SHA384Type`, `_sha2.SHA512Type`,
+`hashlib.sha224`, `hashlib.sha256`, `hashlib.sha384`, `hashlib.sha512`,
+`_sha256.sha224`, `_sha256.sha256`, `_sha512.sha512`, `hashlib.blake2b`,
+`hashlib.blake2s`, `hashlib.sha3_224` to `hashlib.sha3_512` and
+`_sha3.sha3_224` to `_sha3.sha3_512`. 83 site-callee entries and 83 graph
+edges: 680 to 763 edges (422 inside, 341 outside).
+
+The trace (`dynamic/path.json`, CPython 3.14.10 with OpenSSL) runs only
+`read_md5` and `read_hexhash('md5')` (`tests/test_path.py:251`, `256`):
+`_hash -> _hashlib.HASH.update`, `read_hash -> _hashlib.HASH.digest` and
+`read_hexhash -> _hashlib.HASH.hexdigest`, all already in the graph. It
+records none of the 83 added edges, which is what the tests' one hash
+name gives, and it records no edge at these callers that the ground truth
+lacks: no trace edge is rejected or changes.

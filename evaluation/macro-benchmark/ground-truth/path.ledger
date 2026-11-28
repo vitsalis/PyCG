@@ -997,7 +997,38 @@ default reject path.Path.__enter__, path.Path.__exit__, path.TempDir.__enter__, 
     -> hashlib.md5.update
     -> _sha1.SHA1Type.update
     -> _sha1.sha.update
-    note: hashlib.new returns an OpenSSL _hashlib.HASH, or by hashlib's documented fallback a builtin MD5 or SHA-1 object; the hash names in scope are md5 (read_md5, the tests) and sha1 (the docstring of _hash) (path.md J6). Names (README, batch 8 "A C type exported under a module attribute other than its type name", b8-ruling-c-type-names-1.md; "Public class aliases by configuration", ruling-names-2.md): CPython 3.9 to 3.15 export the builtin types as _md5.MD5Type and _sha1.SHA1Type (Modules/md5module.c:583 of 3.9.25, :358 of 3.15.2; sha1module.c:560 of 3.9.25, :353 of 3.15.2), and hashlib.md5 and hashlib.sha1 are factories there; on PyPy (in scope, path.md "PyPy") _md5 exports the class as md5 (pypy/module/_md5/moduledef.py:22), which hashlib's fallback binds as hashlib.md5 (lib-python/3/hashlib.py:92-94), and _sha1.sha1 is a function that returns an instance of the class _sha1.sha (lib_pypy/_sha1.py:129, :359); at hashlib.new the private name _md5.md5 stays beside the alias (the avro schema.py:337 precedent); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) as on CPython (path.md, Corrections of 2026-11-25)
+    -> _sha256.SHA224Type.update
+    -> _sha256.SHA256Type.update
+    -> _sha512.SHA384Type.update
+    -> _sha512.SHA512Type.update
+    -> _sha512.sha384.update
+    -> _sha2.SHA224Type.update
+    -> _sha2.SHA256Type.update
+    -> _sha2.SHA384Type.update
+    -> _sha2.SHA512Type.update
+    -> hashlib.sha224.update
+    -> hashlib.sha256.update
+    -> hashlib.sha384.update
+    -> hashlib.sha512.update
+    -> _sha256.sha224.update
+    -> _sha256.sha256.update
+    -> _sha512.sha512.update
+    -> hashlib.blake2b.update
+    -> hashlib.blake2s.update
+    -> hashlib.sha3_224.update
+    -> hashlib.sha3_256.update
+    -> hashlib.sha3_384.update
+    -> hashlib.sha3_512.update
+    -> _sha3.sha3_224.update
+    -> _sha3.sha3_256.update
+    -> _sha3.sha3_384.update
+    -> _sha3.sha3_512.update
+    -> _hashlib.HASHXOF.update
+    -> hashlib.shake_128.update
+    -> hashlib.shake_256.update
+    -> _sha3.shake_128.update
+    -> _sha3.shake_256.update
+    note: hashlib.new returns an OpenSSL _hashlib.HASH (on CPython _hashlib.HASHXOF for a SHAKE name), or by hashlib's documented fallback a builtin object; the hash names in scope are the names that hashlib.new accepts on an admitted build: read_hash and read_hexhash refer their hash_name to the list of supported hashes of hashlib (985, 995; B2, the avro J5 precedent), and _hash takes theirs and read_md5's 'md5' (path.md J6, Corrections of 2026-11-28; N7a). The builtin classes beside MD5 and SHA-1, named as in avro schema.py:338:24: CPython 3.9 exports _sha256.SHA224Type, SHA256Type and _sha512.SHA384Type, SHA512Type (sha256module.c:718, :720, sha512module.c:776, :778 of 3.9.25); CPython 3.10 and 3.11 _sha256.SHA224Type, SHA256Type, and _sha512.SHA384Type for the SHA-512 type (sha512module.c overwrites the export, :782, :788 of 3.10.22, :785, :791 of 3.11.18), so SHA-384 keeps its type name _sha512.sha384; CPython 3.12 to 3.15 _sha2.SHA224Type to SHA512Type (sha2module.c PyModule_AddType :852-861 of 3.12.16, :864-873 of 3.15.2); PyPy the classes _sha256.sha224, sha256 and _sha512.sha384, sha512 (lib_pypy/_sha256.py:206, :230, _sha512.py:234, :258 of 3.9 v7.3.16), which the fallback binds as hashlib.sha224 to sha512 (ruling-names-2, H2); BLAKE2 always the builtin classes, hashlib.blake2b and blake2s (H1); SHA-3 the types _sha3.sha3_224 to sha3_512 (CPython and PyPy), which the fallback binds as hashlib.sha3_224 to sha3_512 (H3); SHAKE the types _sha3.shake_128 and shake_256, bound by the fallback as hashlib.shake_128 and shake_256, and with OpenSSL on CPython _hashlib.HASHXOF (_hashopenssl.c PyModule_AddType :2208 of 3.9.25, :2809 of 3.15.2); PyPy's _hashlib.new makes _hashlib.HASH without data (path passes none, 977), and on PyPy 3.11 a _hashlib._OneShotHash only when data is passed (lib_pypy/_hashlib/__init__.py:38-53 of 3.11 v7.3.23). At hashlib.new the private names stay beside the aliases (the avro schema.py:337 precedent). Names of MD5 and SHA-1 (README, batch 8 "A C type exported under a module attribute other than its type name", b8-ruling-c-type-names-1.md; "Public class aliases by configuration", ruling-names-2.md): CPython 3.9 to 3.15 export the builtin types as _md5.MD5Type and _sha1.SHA1Type (Modules/md5module.c:583 of 3.9.25, :358 of 3.15.2; sha1module.c:560 of 3.9.25, :353 of 3.15.2), and hashlib.md5 and hashlib.sha1 are factories there; on PyPy (in scope, path.md "PyPy") _md5 exports the class as md5 (pypy/module/_md5/moduledef.py:22), which hashlib's fallback binds as hashlib.md5 (lib-python/3/hashlib.py:92-94), and _sha1.sha1 is a function that returns an instance of the class _sha1.sha (lib_pypy/_sha1.py:129, :359); at hashlib.new the private name _md5.md5 stays beside the alias (the avro schema.py:337 precedent); _hashlib.HASH (lib_pypy/_hashlib/__init__.py:57) as on CPython (path.md, Corrections of 2026-11-25)
 
 [path.Path.read_hash]
 990:26 call  self._hash(hash_name)
@@ -1009,7 +1040,33 @@ default reject path.Path.__enter__, path.Path.__exit__, path.TempDir.__enter__, 
     -> hashlib.md5.digest
     -> _sha1.SHA1Type.digest
     -> _sha1.sha.digest
-    note: the hash object of _hash, named as at 979:21 (path.md J6; Corrections of 2026-11-25)
+    -> _sha256.SHA224Type.digest
+    -> _sha256.SHA256Type.digest
+    -> _sha512.SHA384Type.digest
+    -> _sha512.SHA512Type.digest
+    -> _sha512.sha384.digest
+    -> _sha2.SHA224Type.digest
+    -> _sha2.SHA256Type.digest
+    -> _sha2.SHA384Type.digest
+    -> _sha2.SHA512Type.digest
+    -> hashlib.sha224.digest
+    -> hashlib.sha256.digest
+    -> hashlib.sha384.digest
+    -> hashlib.sha512.digest
+    -> _sha256.sha224.digest
+    -> _sha256.sha256.digest
+    -> _sha512.sha512.digest
+    -> hashlib.blake2b.digest
+    -> hashlib.blake2s.digest
+    -> hashlib.sha3_224.digest
+    -> hashlib.sha3_256.digest
+    -> hashlib.sha3_384.digest
+    -> hashlib.sha3_512.digest
+    -> _sha3.sha3_224.digest
+    -> _sha3.sha3_256.digest
+    -> _sha3.sha3_384.digest
+    -> _sha3.sha3_512.digest
+    note: the hash object of _hash, named as at 979:21 (path.md J6; Corrections of 2026-11-25 and 2026-11-28); no SHAKE object: the digest and hexdigest of _sha3.shake_128, shake_256 and _hashlib.HASHXOF take a required length, so this call without arguments cannot bind (B4, as at avro schema.py:338:24)
 
 [path.Path.read_hexhash]
 1000:26 call  self._hash(hash_name)
@@ -1021,7 +1078,33 @@ default reject path.Path.__enter__, path.Path.__exit__, path.TempDir.__enter__, 
     -> hashlib.md5.hexdigest
     -> _sha1.SHA1Type.hexdigest
     -> _sha1.sha.hexdigest
-    note: the hash object of _hash, named as at 979:21 (path.md J6; Corrections of 2026-11-25)
+    -> _sha256.SHA224Type.hexdigest
+    -> _sha256.SHA256Type.hexdigest
+    -> _sha512.SHA384Type.hexdigest
+    -> _sha512.SHA512Type.hexdigest
+    -> _sha512.sha384.hexdigest
+    -> _sha2.SHA224Type.hexdigest
+    -> _sha2.SHA256Type.hexdigest
+    -> _sha2.SHA384Type.hexdigest
+    -> _sha2.SHA512Type.hexdigest
+    -> hashlib.sha224.hexdigest
+    -> hashlib.sha256.hexdigest
+    -> hashlib.sha384.hexdigest
+    -> hashlib.sha512.hexdigest
+    -> _sha256.sha224.hexdigest
+    -> _sha256.sha256.hexdigest
+    -> _sha512.sha512.hexdigest
+    -> hashlib.blake2b.hexdigest
+    -> hashlib.blake2s.hexdigest
+    -> hashlib.sha3_224.hexdigest
+    -> hashlib.sha3_256.hexdigest
+    -> hashlib.sha3_384.hexdigest
+    -> hashlib.sha3_512.hexdigest
+    -> _sha3.sha3_224.hexdigest
+    -> _sha3.sha3_256.hexdigest
+    -> _sha3.sha3_384.hexdigest
+    -> _sha3.sha3_512.hexdigest
+    note: the hash object of _hash, named as at 979:21 (path.md J6; Corrections of 2026-11-25 and 2026-11-28); no SHAKE object: the digest and hexdigest of _sha3.shake_128, shake_256 and _hashlib.HASHXOF take a required length, so this call without arguments cannot bind (B4, as at avro schema.py:338:24)
 
 [path.Path.isabs]
 1014:33 call  self.module.isabs(self)

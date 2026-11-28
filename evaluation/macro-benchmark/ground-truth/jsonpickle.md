@@ -458,11 +458,11 @@ The real dispatch sites:
 |---|---|
 | Sites | 1046 (1026 call, 1 decorator, 6 op, 13 format); 504 with candidates; 121 value sites |
 | Ledger entries | 1028 (1026 call, 1 decorator, 1 format) |
-| Callee lines / rejection lines (`reject *`) / notes / exclusions | 1626 / 81 (1) / 216 / 0 |
+| Callee lines / rejection lines (`reject *`) / notes / exclusions | 1660 / 81 (1) / 216 / 0 |
 | Default rejections | 6 lines, 49 candidates, 891 candidate-site pairs |
-| Edges | 1310: 383 in the package, 927 outside (a lower bound at the sites of "Open receiver sets") |
-| Edges that the trace confirms | 793 of 1310 (60.5%) |
-| Edges only from reading | 517 (39 in the package, 478 outside) |
+| Edges | 1320: 383 in the package, 937 outside (a lower bound at the sites of "Open receiver sets" and "Open path sets") |
+| Edges that the trace confirms | 793 of 1320 (60.1%) |
+| Edges only from reading | 527 (39 in the package, 488 outside) |
 | Trace edges rejected | 34 |
 | Functions that the tests run | 217 of 235 |
 
@@ -695,6 +695,36 @@ The set is open for these reasons, which sources not on disk would decide
    `pandas.core.indexes.frozen.FrozenList.append` at `unpickler.py:819:36`
    (Codex audit round 3, Unsure 1). Needed: older pandas sources.
 
+## Open path sets
+
+Write `X` for `ujson.loads` or `yaml.safe_load` (missing modules) and `Gk`
+for `X` followed by `k` copies of `.get`. With either backend the
+top-level decoded dict reaches the array handler itself (Corrections of
+2026-11-25); a `data.get(...)` on the dict at nesting depth `d` is
+`G(d+1)`. `NumpyNDArrayHandlerView.flatten` writes the base of a view by
+reference through the same handler (`ext/numpy.py:281-283`), so a base
+that is itself a view gets its own `base`. numpy keeps such a base
+whenever the view changes subclass (`PyArray_SetBaseObject`,
+`arrayobject.c:203` of 2.5.4, `:213` of 1.17.3; "Create subclass so base
+will not be collapsed", `test_multiarray.py:133-135`), so views that
+alternate `numpy.matrix` and `numpy.ndarray` nest without a bound (N5a:
+seven views give a base depth of seven on numpy 2.5.4). `restore` takes
+`data.get('base')` (327) and forwards it through `self.context.restore`
+(333) to the base's own restore, with no bound in the source. The ledger
+records the members with one and two repetitions of `.get` beyond the
+originating `G1`; the graph at these sites is a LOWER BOUND, and a longer
+verified member is a valid addition (Rulings for the corrections of
+2026-11-25, `ruling-fabric-1.md`; batch 7, "Open path sets"; the ruling is
+`selection/corrections-2026-11-28/rulings/n5a.md`).
+
+| Sites | Family | Members recorded |
+|---|---|---|
+| `NumpyNDArrayHandlerView.restore` 327:24 (`data.get('base')`), 343:69, 344:31, 345:32, 346:33 (the view branch) | `Gk`, `k >= 1` | `G1`, `G2`, `G3` |
+| `NumpyNDArrayHandler.restore_flags` 96:24 (every array restore, 118, 228, 349) | `Gk`, `k >= 1` | `G1`, `G2`, `G3` |
+| `NumpyNDArrayHandler.restore` 112:67, 114:25; `NumpyNDArrayHandlerBinary.restore_byteorder` 151:29; `NumpyNDArrayHandlerBinary.restore` 216:67, 217:33, 224:35, 225:35 (the owner at the end of a chain, by value) | `Gk`, `k >= 1` | `G1`, `G2`, `G3` |
+
+No inside edge depends on these families.
+
 ## Codex audit round 3 (confirmation pass)
 
 No wrong pair and nothing inside the package. 47 missing pairs at four
@@ -788,7 +818,11 @@ and for `yaml.safe_load` (X):
 returns (`ext/numpy.py:327`), keeps the path `X.get` when the view's
 handler forwards it through `self.context.restore` (`333`) to the base's
 own restore. A base is an array that owns its data, so its dict has no
-`base` and the view branch (`343-346`) does not run for it.
+`base` and the view branch (`343-346`) does not run for it. (Corrected on
+2026-11-28, N5a: a base can itself be a view, since numpy keeps a view's
+base across a change of subclass, so bases nest without a bound, the view
+branch runs for a base, and the `.get` path is an open path set; see "Open
+path sets" and "Corrections of 2026-11-28".)
 `<builtin>.dict.items`, `<builtin>.str.startswith` and `<builtin>.dict.get`
 stay. +28 outside edges.
 
@@ -873,3 +907,33 @@ at this caller is `numpy.dtype.newbyteorder`, which stays in the graph;
 `numpy.dtypes.ObjectDType.newbyteorder` is only one of its aliases, a
 name of the same method, not a receiver that the tests made. At `343:60`
 the name stays: a by-reference view of an object array writes `'object'`.
+
+**A view's base can itself be a view, without a bound (the audit of the
+corrections of 2026-11-28, N5a; the ruling is
+`selection/corrections-2026-11-28/rulings/n5a.md`).** The Corrections of
+2026-11-25 read a view's base as an array that owns its data. numpy stops
+collapsing a view's base at a change of subclass (`PyArray_SetBaseObject`,
+`numpy/_core/src/multiarray/arrayobject.c:203` of 2.5.4,
+`numpy/core/src/multiarray/arrayobject.c:213` of 1.17.3, the first release
+with CPython 3.8 wheels), and `NumpyNDArrayHandlerView.flatten` writes a
+base that is a contiguous ndarray by reference through the same handler
+(`ext/numpy.py:281-283`), so views that alternate `numpy.matrix` and
+`numpy.ndarray` give bases nested to any depth; `restore` forwards each
+`data.get('base')` (327) through `self.context.restore` (333). A run of
+the package on numpy 2.5.4 (the environment's hashes, json backend) gave
+base depths 1 to 7 for 1 to 7 views and a round trip with 8 restores; with
+`sys.settrace` the view branch (343-346) ran at depth 1 with two views and
+the by-value sites at depth 2 with two views. The rulings "Open path sets"
+(batch 7) and `ruling-fabric-1.md` make the `.get` path an open path set
+(see "Open path sets"). Added, each for `X` = `ujson.loads` and `X` =
+`yaml.safe_load`: `X.get.get` and `X.get.get.get` at 343:69, 344:31,
+345:32 and 346:33, and `X.get.get.get` at 96:24, 112:67, 114:25, 151:29,
+216:67, 217:33, 224:35, 225:35 and 327:24; 34 site-callee entries (1626 to
+1660 callee lines). The `X.get.get` of the view branch was already a graph
+edge of `NumpyNDArrayHandlerView.restore` (327:24), so 10 graph edges are
+added (`-> ujson.loads.get.get.get` and `-> yaml.safe_load.get.get.get` for
+`NumpyNDArrayHandler.restore`, `.restore_flags`,
+`NumpyNDArrayHandlerBinary.restore`, `.restore_byteorder` and
+`NumpyNDArrayHandlerView.restore`): 1310 to 1320 edges (383 inside, 937
+outside), none removed. The trace has none of them (ujson and PyYAML are
+not installed), and no trace edge changes.
