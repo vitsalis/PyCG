@@ -80,6 +80,7 @@ def summary_lines(data):
         f" (inside P {_ratio(total['inside']['precision'])}"
         f" R {_ratio(total['inside']['recall'])})"
     )
+    without = data["macro"]["without_open_sets"]
     for edge_set in ("inside", "outside"):
         lines.append(f"macro, {edge_set}:  P      R      F1     TP/FP/FN")
         rows = [
@@ -87,11 +88,15 @@ def summary_lines(data):
             for name, project in data["macro"]["projects"].items()
         ]
         rows.append(("summed", data["macro"]["summed"][MODE][edge_set]))
+        if edge_set == "outside":
+            rows.append(("no open sets", without["outside"][MODE]))
         for name, c in rows:
             lines.append(
                 f"  {name:14} {_ratio(c['precision'])}  {_ratio(c['recall'])}  "
                 f"{_ratio(c['f1'])}  {c['tp']}/{c['fp']}/{c['fn']}"
             )
+    left_out = ", ".join(without["left_out"])
+    lines.append(f"  no open sets: summed without {left_out}, not gated")
     failed = data["failed"]
     lines.append(f"failed runs: {len(failed)}")
     for run_ in failed:

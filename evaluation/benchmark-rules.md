@@ -33,7 +33,11 @@ the function it resolves to in the project's trace (`dynamic/<name>.json`,
 `aliases`), and the names of one function of the standard library match
 each other (`../common/same_function.json`). Nothing is imported to
 score. A run that failed scores no edge: its ground-truth edges are false
-negatives.
+negatives. Outside is also reported, not gated, without the packages whose
+`<name>.md` declares open path or receiver sets (a section "Open path sets"
+or "Open receiver sets" that is not "None."; now einops, fabric and
+jsonpickle), as the rulings "Open path sets" and "Open receiver sets"
+require.
 
 ### Layout
 

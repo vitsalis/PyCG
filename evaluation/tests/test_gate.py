@@ -20,7 +20,13 @@ def counts(precision, recall):
     return {"tp": 1, "fp": 0, "fn": 0, "precision": precision, "recall": recall}
 
 
-def result(micro=(0.9, 0.8), inside=(0.7, 0.6), outside=(0.5, 0.4), failed=()):
+def result(
+    micro=(0.9, 0.8),
+    inside=(0.7, 0.6),
+    outside=(0.5, 0.4),
+    without_open_sets=(0.6, 0.5),
+    failed=(),
+):
     runs = {
         "macro/a": {"status": "ok", "seconds": 1.5, "peak_rss_mib": 40.0},
         "macro/b": {"status": "ok", "seconds": 0.5, "peak_rss_mib": 90.0},
@@ -28,7 +34,11 @@ def result(micro=(0.9, 0.8), inside=(0.7, 0.6), outside=(0.5, 0.4), failed=()):
     return {
         "micro": {"total": {"raw": {"all": counts(*micro)}}},
         "macro": {
-            "summed": {"raw": {"inside": counts(*inside), "outside": counts(*outside)}}
+            "summed": {"raw": {"inside": counts(*inside), "outside": counts(*outside)}},
+            "without_open_sets": {
+                "left_out": ["b"],
+                "outside": {"raw": counts(*without_open_sets)},
+            },
         },
         "macro_runs": {"runs": runs},
         "failed": list(failed),
@@ -281,6 +291,22 @@ def test_the_report_on_a_changed_benchmark_re_bases_the_bests():
     assert "| macro inside P | 0.7000 | 0.6000 | re-based |" in text
     assert "benchmark changed" in text
     assert gate.dumps(metrics(macro_inside_P=0.6)).rstrip("\n") in text
+
+
+def test_the_report_gives_outside_without_open_sets_beside_and_does_not_gate_it():
+    low = measurement(result(without_open_sets=(0.1, 0.2)))
+    lines, failures = gate.report(low, metrics())
+    assert failures == []
+    assert "| macro outside R | 0.4000 | 0.4000 | kept |" in lines
+    assert "| macro outside P without b | - | 0.1000 | not gated |" in lines
+    assert "| macro outside R without b | - | 0.2000 | not gated |" in lines
+    assert "No value rose: evaluation/metrics.json is up to date." in lines
+
+
+def test_the_report_refuses_outside_without_open_sets_with_no_edges():
+    empty = measurement(result(without_open_sets=(None, None)))
+    with pytest.raises(gate.GateError, match="without b: no edges"):
+        gate.report(empty, metrics())
 
 
 def test_the_report_fails_on_a_failed_run():

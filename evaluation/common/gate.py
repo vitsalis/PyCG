@@ -240,6 +240,14 @@ def report(measured_commit, metrics):
             verdict = f"**below its floor {low:.4f}**"
             failures.append(f"{name} is {value:.4f}, below its floor {low:.4f}")
         lines.append(f"| {name} | {best:.4f} | {value:.4f} | {verdict} |")
+    without = result["macro"]["without_open_sets"]
+    counts = without["outside"]["raw"]
+    left_out = ", ".join(without["left_out"])
+    for letter, field in (("P", "precision"), ("R", "recall")):
+        name = f"macro outside {letter} without {left_out}"
+        if counts[field] is None:
+            raise GateError(f"{name}: no edges to compute it from: {counts}")
+        lines.append(f"| {name} | - | {counts[field]:.4f} | not gated |")
     lines.append("")
     if not same_benchmark:
         lines.append(
