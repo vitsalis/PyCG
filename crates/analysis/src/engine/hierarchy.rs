@@ -12,7 +12,7 @@ use crate::engine::outside::{OutsideGives, outside_name};
 use crate::engine::symbols::Sym;
 use crate::engine::{Graph, OrderedMap, OrderedSet, Rule, State, WaitingRule};
 use crate::model::BUILTIN_MODULE;
-use crate::models::{DEFINES_MARKERS, TUPLE_STORAGE};
+use crate::models::{CONTAINS_WITHOUT_EQUALITY, DEFINES_MARKERS, TUPLE_STORAGE};
 
 pub const HIERARCHIES_PER_CLASS_MAX: u64 = 8;
 
@@ -1634,21 +1634,54 @@ impl State {
         added
     }
 
-    fn python_may_define(&self, class: ObjId, name: Sym) -> bool {
+    fn python_may_define(&mut self, class: ObjId, name: Sym) -> bool {
         let found = self.objects.class(class);
         if found.exhaustive {
             return !found.defines.contains(&name);
         }
-        for mro in &found.mros {
+        let membership = self.symbols.text(name) == MEMBERSHIP_METHOD;
+        for mro in found.mros.clone() {
             let definer = mro.iter().find(|&&base| match self.objects.get(base) {
                 Object::Class(base) => base.defines.contains(&name),
                 _ => true,
             });
-            if !definer.is_some_and(|&definer| self.objects.is_class(definer)) {
+            let Some(&definer) = definer else {
+                return true;
+            };
+            if self.objects.is_class(definer) {
+                continue;
+            }
+            if !(membership && self.outside_contains_skips_equality(definer)) {
                 return true;
             }
         }
         false
+    }
+
+    fn outside_contains_skips_equality(&mut self, definer: ObjId) -> bool {
+        if !self.objects.is_external(definer) {
+            return false;
+        }
+        let Some(definitions) = self.stub_definitions(definer) else {
+            return false;
+        };
+        !definitions.is_empty()
+            && definitions.iter().all(|definition| {
+                if definition.kind != DefinitionKind::Class {
+                    return false;
+                }
+                let builtin = self
+                    .stubs
+                    .mro(&definition.path)
+                    .iter()
+                    .any(|owner| owner.starts_with(BUILTIN_STUBS) && &**owner != OBJECT_PATH);
+                let members = self.stubs.member(&definition.path, MEMBERSHIP_METHOD);
+                !members.is_empty()
+                    && members.iter().all(|member| {
+                        CONTAINS_WITHOUT_EQUALITY.contains(&&*member.path)
+                            && (member.path.starts_with(BUILTIN_STUBS) || !builtin)
+                    })
+            })
     }
 
     fn is_property(&self, object: ObjId) -> bool {
