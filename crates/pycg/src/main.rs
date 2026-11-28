@@ -55,7 +55,7 @@ fn run(program: &[u8], options: Options) -> ExitCode {
         let line = [warning.as_encoded_bytes(), b"\n"].concat();
         let _ = std::io::stderr().write_all(&pycg::for_stderr(&line));
     };
-    let mut analysed = match pycg_analysis::analyse(&options.request, &cwd, &mut warn) {
+    let analysed = match pycg_analysis::analyse(&options.request, &cwd, &mut warn) {
         Ok(analysed) => analysed,
         Err(error @ pycg_analysis::Error::NotPorted(_)) => {
             return report(program, error.to_string().as_bytes(), STATUS_NOT_PORTED);
@@ -64,10 +64,15 @@ fn run(program: &[u8], options: Options) -> ExitCode {
             return report(program, error.to_string().as_bytes(), STATUS_FAILURE);
         }
     };
-    let part = ProgramPart::from_program(&mut analysed.program);
+    let pycg_analysis::Analysed {
+        program: mut analysed_program,
+        results,
+    } = analysed;
+    let part = ProgramPart::from_program(&mut analysed_program);
+    drop(analysed_program);
     let document = pycg_document::build(
         &part,
-        &analysed.results,
+        &results,
         text(options.package_name.as_ref()).as_ref(),
         text(options.package_version.as_ref()).as_ref(),
     );
