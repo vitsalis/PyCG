@@ -19,7 +19,6 @@ permissions:
 
 env:
   COLUMNS: "80"
-  SAMPLE: tests/data/view/sample.json
 
 jobs:
   package:
@@ -37,11 +36,8 @@ jobs:
         run: |
           mkdir -p reference
           target/release/pycg --help > reference/help.txt
-          target/release/pycg view "$SAMPLE" -o reference/page.html
           target/packaged/root/bin/pycg --help > help.txt
-          target/packaged/root/bin/pycg view "$SAMPLE" -o page.html
           cmp help.txt reference/help.txt
-          cmp page.html reference/page.html
       - name: Licences of every target
         run: |
           mkdir -p licences
@@ -92,13 +88,11 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: reference
-      - name: The program runs and writes the reference page
+      - name: The program runs
         run: |
           program="target/${{ matrix.target }}/release/pycg"
           "$program" --help > help.txt
           head -n 1 help.txt | grep -q '^usage: pycg'
-          "$program" view "$SAMPLE" -o page.html
-          cmp page.html reference/page.html
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
         with:
           python-version: "3.14"

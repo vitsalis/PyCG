@@ -33,7 +33,7 @@ Facts about the engine that size the port, counted on `02bf447`:
 | Measure | Value |
 |---|---|
 | Lines of `pycg/analysis/*.py` | 14,586 (25 modules and an empty `__init__.py`) |
-| Lines of `pycg/` in all | 15,153, plus `view/template.html` |
+| Lines of `pycg/` in all | 15,153 |
 | `Constraint` subclasses | 16, plus subclasses of `_Access` and `_Site` |
 | `Each(...)` sites, distinct rule functions | 139, 98 |
 | Fields that `Analysis.__init__` sets (records, tables, queues) | 111 |
@@ -65,7 +65,7 @@ pycg-solver ──┘                                  └► pycg-dump (dev bin
 | `pycg-solver` | Object and set arenas, hash-consed sets, nodes, the worklist, rounds, cycle collapsing, saturation, the work counters; generic over the constraint type, so it is tested and replayed alone | `solver.py` |
 | `pycg-analysis` | The model, module discovery, the builder, every rule, the fixpoint steps | every other module of `pycg/analysis` |
 | `pycg-document` | The document of `docs/format.md` and its JSON writer | `formats/`, `formats/document.py` |
-| `pycg` | The command line, and `pycg view` | `__main__.py`, `view/` |
+| `pycg` | The command line | `__main__.py` |
 | `pycg-dump` | Not shipped: writes the intermediate dumps of section 3 | new |
 
 The toolchain is pinned in `rust-toolchain.toml` to Rust 1.100.0
@@ -409,7 +409,6 @@ where the payload does not give it.
 | `dumps` | `json.dumps(sort_keys=True, separators=(",", ":"))` with `ensure_ascii`: every character past U+007F as `\uXXXX` (surrogate pairs past the BMP), lower-case hex, control characters as `\n`, `\r`, `\t`, `\b`, `\f` or `\u00XX` | a writer of about 100 lines over a `BTreeMap`-ordered value; tested on the D6 of every oracle document (parse with `serde_json`, write, compare bytes) |
 | `edges` | the classic call graph | a function of `Document`, for the evaluation runner |
 | `_typeshed_commit` | the commit in `stub_data/README.md` | read by `build.rs` |
-| `pycg.view` | `pycg-view`: the document checked and embedded in `template.html` | `pycg view`, the template embedded with `include_str!` |
 
 # 3. The parity harness
 
@@ -489,7 +488,7 @@ raw names of `loop.py compare`.
 | Command | Does |
 |---|---|
 | `make parity-oracle` | Runs the oracle on every input for both seeds in the sandbox of `make eval` (no network, read-only checkout), writing D1 to D6 and D6in for every input, into `$EVAL_OUT/parity-oracle-<key>`; `PARITY_SETS=micro` or `macro` limits it to one set |
-| `make parity` | Builds `pycg` and `pycg-dump` (`cargo build --release --locked`), runs them on the same inputs in the same sandbox, and compares every dump that `tools/parity/required.txt` names, and every D6; renders every D6 of the oracle with `pycg-view` and with `pycg view` and compares the pages byte for byte (`tools/parity/view.py`); runs `pycg` on every input that `tools/parity/differences.txt` does not list for the engine, with the package root and entry points of the oracle's run and compares its document with D6 byte for byte (`tools/parity/program.py`) |
+| `make parity` | Builds `pycg` and `pycg-dump` (`cargo build --release --locked`), runs them on the same inputs in the same sandbox, and compares every dump that `tools/parity/required.txt` names, and every D6; runs `pycg` on every input that `tools/parity/differences.txt` does not list for the engine, with the package root and entry points of the oracle's run and compares its document with D6 byte for byte (`tools/parity/program.py`) |
 
 The key of an oracle run is the SHA-256 of the git tree of `pycg/`, the
 inputs key (`tools/inputs_key.py`) and the digest of the Python image: the
@@ -570,7 +569,7 @@ directories of `evaluation/micro-benchmark/snippets`.
 | 5e Outside | `outside.py`, the rule half of `annotations.py` | 3 | identical for `external`, `stdlib`, `stdlib_classes`, `type_hints`, `imports` |
 | 6 Fixpoint and output | `Analysis.solve` and the steps at a fixpoint, `unresolved_calls`, `pycg-document` and its writer | 2 | D6 identical for all 696 micro cases and all 60 macro projects, for both seeds |
 | 7 Scale | Whatever the scale set finds; then the time and memory work of section 6 | as needed | D6 identical for the 20 scale packages, and every target of section 6 met |
-| 8 Command line and distribution | `pycg` (options of `__main__.py`), `pycg view`, the evaluation flavour `rust` in `evaluation/common/analyse.py`, the release workflow (release binaries built by CI for every platform of section 5, a dry run of the publication of the crates on crates.io) | 4: command line; `pycg view`; evaluation flavour; release workflow | `make eval` with the Rust flavour gives the metrics of the Python engine exactly; a release from a test tag gives an archive per platform whose `pycg` runs the micro-benchmark, and `cargo install pycg --locked` from a `cargo package` of the workspace builds the same program |
+| 8 Command line and distribution | `pycg` (options of `__main__.py`), the evaluation flavour `rust` in `evaluation/common/analyse.py`, the release workflow (release binaries built by CI for every platform of section 5, a dry run of the publication of the crates on crates.io) | 3: command line; evaluation flavour; release workflow | `make eval` with the Rust flavour gives the metrics of the Python engine exactly; a release from a test tag gives an archive per platform whose `pycg` runs the micro-benchmark, and `cargo install pycg --locked` from a `cargo package` of the workspace builds the same program |
 | 9 Tests in Rust | The test approach of section 5 | about 8, one per test family | Every behaviour that a Python test pins is a Rust case or property, and the Rust suite passes |
 | 10 Switch | The last release of the pip package, with the deprecation message (section 5); the first release of the Rust tool; then `make eval`, CI and the gate measure the Rust program, and the Python engine and its tests are removed | 3: the last pip release; the first Rust release; the removal | the pip release prints the message and analyses as before; `main` has no `pycg/` engine code and no Python packaging of it; the gate passes against the bests of `evaluation/metrics.json` unchanged |
 
@@ -762,11 +761,10 @@ harness.
 `pycg` keeps the interface of `pycg/__main__.py`: entry points, `--package`,
 `--package-name`, `--package-version`, `-o`, `--cap N|none`, the same
 errors for a bad cap, the document on standard output or in the file,
-with a final newline. `pycg-view` becomes `pycg view`. The
-warnings of `program.py` go to standard error, one line each, in the
-order of the analysis, with the same text: an entry point outside the
-package root, a stub, a directory, the package root as an entry point, and
-a module nested deeper than the bound. A module that cannot be read or
+with a final newline. The warnings of `program.py` go to standard
+error, one line each, in the order of the analysis, with the same text:
+an entry point outside the package root, a stub, a directory, the package
+root as an entry point, and a module nested deeper than the bound. A module that cannot be read or
 parsed is warned with the same words, but the reader's or parser's cause
 of the document (`FileNotFoundError`, `SyntaxError (line 3)`) stands in
 for CPython's message (section 5, *Risks*). The exit status is 0 on a document,
@@ -785,8 +783,8 @@ breaks written as `\n`.
 
 **Decision: A** (the maintainer's). The pip package does not ship the
 Rust program. Its last release, made in stage 10, is the Python engine of
-the oracle unchanged, plus a deprecation message: `pycg` and `pycg-view`
-print it to standard error before they run, and `import pycg` emits it as
+the oracle unchanged, plus a deprecation message: `pycg` prints it to
+standard error before it runs, and `import pycg` emits it as
 a `DeprecationWarning`. The message names the Rust tool, its two install
 paths (below) and the JSON document of `docs/format.md` as the interface
 that replaces the importable API. After that release the pip package gets

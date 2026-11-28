@@ -265,22 +265,3 @@ directly, not every site that it affected.
 
 `pycg.formats.edges(document)` returns the classic map from each node to
 the sorted names it calls.
-
-The viewer (`pycg-view graph.json -o graph.html`) writes one self-contained
-HTML page, which works offline. It reads format `pycg/1` and refuses any
-other. The page shows the callers and callees of a node with their sites,
-implicit constructs, outside callees and unresolved sites, and a module map
-that counts the edges between each pair of modules. It counts an edge once
-for each caller and callee in each module whose code holds a site of it (a
-site's `module`, or else the module of its caller), and puts an
-`extension` name in the extension module whose name is the longest prefix
-of it. A site in another module than its caller's shows that module's file. The filters hide outside
-callees, implicit sites or unresolved sites everywhere on the page; the
-counts in the header are those of the whole document. The page holds the
-document in a `<script type="application/json">` block with each `<`
-written as `\u003c`: in JSON a `<` is always inside a string, where the
-escape means the same character, so no name in the document can end the
-block. Every name comes from the analysed code, so the page puts text in
-as text nodes only. A site is labelled `line:col`, with its end when the
-caller has another site that starts at the same place, and after the file
-of its module when that is not the module of the listed definition.
