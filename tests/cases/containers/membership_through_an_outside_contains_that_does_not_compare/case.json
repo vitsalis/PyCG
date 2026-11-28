@@ -1,0 +1,16 @@
+{
+ "cap": 5000,
+ "design": "Special methods and protocols",
+ "entry_points": [
+  "main.py"
+ ],
+ "focus": [
+  "main.lookup",
+  "main.search",
+  "main.words",
+  "main.scan"
+ ],
+ "package": ".",
+ "source": "CPython Lib/_collections_abc.py (Mapping.__contains__ looks the key up with self[key]), Objects/unicodeobject.c and Lib/collections/__init__.py (str and UserString search characters); Objects/listobject.c compares each item with ==",
+ "statement": "Membership through an outside contains that does not compare calls no __eq__ of the needle"
+}

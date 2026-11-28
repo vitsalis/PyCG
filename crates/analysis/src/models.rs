@@ -852,6 +852,14 @@ pub static MIXIN_CALLS: &[(&str, &[&str])] = &[
     ("typing.MutableSequence.__iadd__", &["extend"]),
 ];
 
+pub static CONTAINS_WITHOUT_EQUALITY: &[&str] = &[
+    "builtins.bytearray.__contains__",
+    "builtins.bytes.__contains__",
+    "builtins.str.__contains__",
+    "collections.UserString.__contains__",
+    "typing.Mapping.__contains__",
+];
+
 pub static THREAD_FIELDS: [(&str, &str); 3] = [
     ("target", "_target"),
     ("args", "_args"),

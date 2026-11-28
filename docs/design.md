@@ -163,7 +163,11 @@ exceptions:
 `x in c` iterates `c` (`__iter__`, then `__getitem__`) only where the class
 of `c` has no `__contains__`, as in Python; a `__contains__` that the stub
 of an outside base declares counts, so a subclass of `Mapping` is not
-iterated.
+iterated. An outside `__contains__` compares the searched value with `==`
+(its `__eq__` runs), except those that CPython implements without it:
+`Mapping.__contains__` looks the key up with `self[key]` (a class that
+derives from a builtin type, `dict`, has that type's own, which compares),
+and `str`, `bytes`, `bytearray` and `UserString` search their characters.
 
 #### Overloads and type variables
 
