@@ -17,6 +17,8 @@ struct Input {
     id: String,
     directory: PathBuf,
     entry_points: Vec<String>,
+    package: Option<PathBuf>,
+    cap: Cap,
     modules: Vec<String>,
 }
 
@@ -77,12 +79,58 @@ fn micro_inputs() -> Vec<Input> {
                     "micro/{}",
                     directory.strip_prefix(&snippets).expect("a case").display()
                 ),
+                package: Some(directory.clone()),
                 directory,
                 entry_points: vec!["main.py".to_owned()],
+                cap: default_cap(),
                 modules,
             });
         }
     }
+    inputs
+}
+
+fn text(value: &serde_json::Value) -> String {
+    value.as_str().expect("a string").to_owned()
+}
+
+fn case_inputs() -> Vec<Input> {
+    let cases = Path::new(ROOT).join("tests/cases");
+    let mut inputs = Vec::new();
+    for family in directories(&cases) {
+        for directory in directories(&family) {
+            let case: serde_json::Value =
+                serde_json::from_str(&read(&directory.join("case.json"))).expect("a case is JSON");
+            let program = directory.join("program");
+            let entry_points: Vec<String> = case["entry_points"]
+                .as_array()
+                .expect("a list of entry points")
+                .iter()
+                .map(text)
+                .collect();
+            let cap = match &case["cap"] {
+                serde_json::Value::Null => Cap::Unbounded,
+                value => Cap::Objects(BigUint::from(value.as_u64().expect("the cap is a count"))),
+            };
+            inputs.push(Input {
+                id: format!(
+                    "cases/{}",
+                    directory.strip_prefix(&cases).expect("a case").display()
+                ),
+                package: (!case["package"].is_null()).then(|| program.join(text(&case["package"]))),
+                directory: program,
+                modules: entry_points.clone(),
+                entry_points,
+                cap,
+            });
+        }
+    }
+    inputs
+}
+
+fn every_input() -> Vec<Input> {
+    let mut inputs = micro_inputs();
+    inputs.extend(case_inputs());
     inputs
 }
 
@@ -101,7 +149,7 @@ fn document(
             .iter()
             .map(|entry| OsString::from(input.directory.join(entry)))
             .collect(),
-        package: Some(input.directory.clone().into_os_string()),
+        package: input.package.clone().map(PathBuf::into_os_string),
         cap,
         order,
     };
@@ -120,6 +168,16 @@ fn outcome(input: &Input, entry_points: &[String], order: Order, cap: Cap) -> St
     match document(input, entry_points, order, cap) {
         Err(error) => format!("error: {error}"),
         Ok((document, warnings)) => format!("{warnings:?}\n{}", pycg_document::dumps(&document)),
+    }
+}
+
+fn outcome_of_entries(input: &Input, entry_points: &[String]) -> String {
+    match document(input, entry_points, Order::Canonical, input.cap.clone()) {
+        Err(error) => format!("error: {error}"),
+        Ok((document, mut warnings)) => {
+            warnings.sort();
+            format!("{warnings:?}\n{}", pycg_document::dumps(&document))
+        }
     }
 }
 
@@ -157,18 +215,22 @@ fn orders() -> Vec<Order> {
 }
 
 fn differences(input: &Input) -> Vec<String> {
-    let canonical = outcome(input, &input.entry_points, Order::Canonical, default_cap());
+    let canonical = outcome(
+        input,
+        &input.entry_points,
+        Order::Canonical,
+        input.cap.clone(),
+    );
     let mut found = Vec::new();
     for order in orders() {
-        if outcome(input, &input.entry_points, order, default_cap()) != canonical {
+        if outcome(input, &input.entry_points, order, input.cap.clone()) != canonical {
             found.push(format!("{}: {order:?} gives another result", input.id));
         }
     }
     if input.modules.len() > 1 {
         let mut reversed = input.modules.clone();
         reversed.reverse();
-        let forward = outcome(input, &input.modules, Order::Canonical, default_cap());
-        if outcome(input, &reversed, Order::Canonical, default_cap()) != forward {
+        if outcome_of_entries(input, &reversed) != outcome_of_entries(input, &input.modules) {
             found.push(format!(
                 "{}: its modules in reverse give another result",
                 input.id
@@ -213,8 +275,7 @@ fn added_edges(input: &Input) -> Vec<String> {
     found
 }
 
-fn everywhere(check: fn(&Input) -> Vec<String>) {
-    let inputs = micro_inputs();
+fn everywhere(inputs: Vec<Input>, check: fn(&Input) -> Vec<String>) {
     assert!(!inputs.is_empty(), "inputs");
     let found = Mutex::new(Vec::new());
     let next = AtomicUsize::new(0);
@@ -245,16 +306,16 @@ fn everywhere(check: fn(&Input) -> Vec<String>) {
 }
 
 #[test]
-fn every_micro_case_gives_one_result_in_every_order() {
-    everywhere(differences);
+fn every_case_and_micro_case_gives_one_result_in_every_order() {
+    everywhere(every_input(), differences);
 }
 
 #[test]
-fn every_micro_case_gives_one_result_in_every_order_at_small_caps() {
-    everywhere(small_cap_differences);
+fn every_case_and_micro_case_gives_one_result_in_every_order_at_small_caps() {
+    everywhere(every_input(), small_cap_differences);
 }
 
 #[test]
 fn a_small_cap_adds_no_edge_to_a_micro_case() {
-    everywhere(added_edges);
+    everywhere(micro_inputs(), added_edges);
 }
