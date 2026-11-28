@@ -220,17 +220,13 @@ CASES = {
         "a rebinding through `nonlocal` before the call keeps the old value",
     ),
     "async/call_soon_callback": (
-        "outside/library-types",
-        "the result of asyncio.get_running_loop() is not an asyncio.EventLoop, and "
-        "the loop callback belongs to the scope that runs the loop",
+        "outside/library-calls-back",
+        "the event loop calls the function that loop.call_soon gets, and the call "
+        "belongs to the scope that runs the loop",
     ),
     "async/coroutine_not_awaited": (
         "flow/uncalled",
         "a coroutine that is never awaited still runs its body",
-    ),
-    "async/explicit_event_loop": (
-        "outside/library-types",
-        "the result of asyncio.new_event_loop() is not an asyncio.EventLoop",
     ),
     "builtins/functools_partial": (
         "outside/library-calls-back",

@@ -861,6 +861,31 @@ pub static STUB_RESULTS: &[(&str, &str)] = &[
     ("ctypes.CDLL.__getitem__", "ctypes.CDLL.__init__._FuncPtr"),
 ];
 
+const DEFAULT_EVENT_LOOPS: &[&str] = &[
+    "asyncio.unix_events._UnixSelectorEventLoop",
+    "asyncio.windows_events.ProactorEventLoop",
+];
+
+pub static CONCRETE_RESULTS: &[(&str, &[&str])] = &[
+    ("_asyncio.get_event_loop", DEFAULT_EVENT_LOOPS),
+    ("_asyncio.get_running_loop", DEFAULT_EVENT_LOOPS),
+    ("asyncio.events.new_event_loop", DEFAULT_EVENT_LOOPS),
+    (
+        "importlib.resources.files",
+        &[
+            "pathlib.PosixPath",
+            "pathlib.WindowsPath",
+            "zipfile._path.Path",
+            "importlib.readers.MultiplexedPath",
+        ],
+    ),
+    ("tokenize.open", &["_io.TextIOWrapper"]),
+    (
+        "urllib.request.urlopen",
+        &["http.client.HTTPResponse", "urllib.response.addinfourl"],
+    ),
+];
+
 pub static CACHED_FUNCTIONS: &[(&str, &str)] =
     &[("urllib.parse.urlsplit", "functools._lru_cache_wrapper")];
 

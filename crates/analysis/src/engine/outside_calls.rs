@@ -15,9 +15,9 @@ use crate::engine::symbols::Sym;
 use crate::engine::{Graph, OrderedMap, State};
 use crate::model::Signature;
 use crate::models::{
-    CACHED_FUNCTIONS, CALLS_BACK, CLOSURES, CONTAINER_CLASSES, HASHED_ARGUMENTS, KEY_WRAPPERS,
-    KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, OPENERS, REFLECTION_CALLS, RETURNS_ARGUMENT,
-    SPECIAL_METHOD_CALLS, function_model, lookup,
+    CACHED_FUNCTIONS, CALLS_BACK, CLOSURES, CONCRETE_RESULTS, CONTAINER_CLASSES, HASHED_ARGUMENTS,
+    KEY_WRAPPERS, KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, OPENERS, REFLECTION_CALLS,
+    RETURNS_ARGUMENT, SPECIAL_METHOD_CALLS, function_model, lookup,
 };
 
 const STUB_BUILTINS_PREFIX: &str = "builtins.";
@@ -570,11 +570,17 @@ impl State {
                     .collect()
             })
             .collect();
-        let results = function
-            .signatures
-            .iter()
-            .map(|signature| signature.result.clone())
-            .collect();
+        let results = match lookup(CONCRETE_RESULTS, &*definition.path) {
+            Some(classes) => {
+                let arms = classes.iter().map(|&class| Type::Class(class.into()));
+                vec![Type::Union(arms.collect()); function.signatures.len()]
+            }
+            None => function
+                .signatures
+                .iter()
+                .map(|signature| signature.result.clone())
+                .collect(),
+        };
         (signatures, results, function.decorator)
     }
 

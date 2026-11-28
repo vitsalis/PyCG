@@ -65,7 +65,16 @@ and `re.subn`, which call a callable replacement, `copy.replace`, which
 calls `__replace__`, and a table of selected standard-library operations
 (`itertools`, `functools.reduce`, `math.sumprod`, `heapq.nlargest`, ...),
 which iterate what they get: at the call, or, for a lazy object, where
-analysed code advances it. Of the overloads that fit a call by arity and
+analysed code advances it. A few standard-library functions whose stub
+declares `Any` or an abstract class give the classes that CPython returns
+on any platform: `urllib.request.urlopen` an `http.client.HTTPResponse` or a
+`urllib.response.addinfourl`; `asyncio.get_running_loop`, `get_event_loop`
+and `new_event_loop` the loop of the default policy, `asyncio.EventLoop`
+(a selector loop on Unix, a proactor loop on Windows);
+`importlib.resources.files` the path that CPython's loaders give (a
+`pathlib.PosixPath` or `pathlib.WindowsPath`, a `zipfile.Path`, or for a
+namespace package a `MultiplexedPath`); and `tokenize.open` an
+`io.TextIOWrapper`. Of the overloads that fit a call by arity and
 keywords, the result is that of those whose parameter accepts a value of
 the first positional argument whose declared types differ between them: a
 value accepts a class that its class derives from, a protocol whose methods

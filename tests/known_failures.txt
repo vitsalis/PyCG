@@ -5,9 +5,8 @@
 
 assignments/global_rebind: flow/rebinding: a rebinding through `global` before the call keeps the old value
 assignments/nonlocal_rebind: flow/rebinding: a rebinding through `nonlocal` before the call keeps the old value
-async/call_soon_callback: outside/library-types: the result of asyncio.get_running_loop() is not an asyncio.EventLoop, and the loop callback belongs to the scope that runs the loop
+async/call_soon_callback: outside/library-calls-back: the event loop calls the function that loop.call_soon gets, and the call belongs to the scope that runs the loop
 async/coroutine_not_awaited: flow/uncalled: a coroutine that is never awaited still runs its body
-async/explicit_event_loop: outside/library-types: the result of asyncio.new_event_loop() is not an asyncio.EventLoop
 builtins/functools_partial: outside/library-calls-back: a function passed to library code is not a call: calling a functools.partial calls its function
 builtins/functools_reduce: outside/library-calls-back: a function passed to library code is not a call: functools.reduce calls its function
 builtins/itertools_callbacks: outside/library-calls-back: a function passed to library code is not a call: itertools calls the functions it gets
