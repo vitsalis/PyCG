@@ -13,11 +13,11 @@ use crate::engine::rules::Rule;
 use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Receivers, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::{Graph, OrderedMap, State};
-use crate::model::Signature;
+use crate::model::{BUILTIN_MODULE, Signature};
 use crate::models::{
     CACHED_FUNCTIONS, CALLS_BACK, CLOSURES, CONTAINER_CLASSES, HASHED_ARGUMENTS, KEY_WRAPPERS,
-    KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, OPENERS, REFLECTION_CALLS, RETURNS_ARGUMENT,
-    SPECIAL_METHOD_CALLS, THREAD_METHODS, ThreadMethod, function_model, lookup,
+    KEYED_SEQUENCES, LENGTH_HINTS, LIBRARY_ITERATION, MIXIN_CALLS, OPENERS, REFLECTION_CALLS,
+    RETURNS_ARGUMENT, SPECIAL_METHOD_CALLS, THREAD_METHODS, ThreadMethod, function_model, lookup,
 };
 
 const STUB_BUILTINS_PREFIX: &str = "builtins.";
@@ -110,6 +110,7 @@ fn group_excluded(path: &str) -> bool {
         || lookup(REFLECTION_CALLS, path).is_some()
         || lookup(SPECIAL_METHOD_CALLS, path).is_some()
         || lookup(THREAD_METHODS, path).is_some()
+        || lookup(MIXIN_CALLS, path).is_some()
 }
 
 fn positional_kind(kind: ParameterKind) -> bool {
@@ -344,6 +345,10 @@ impl State {
         let mut keyed = Vec::new();
         let mut library = Vec::new();
         let mut threads = Vec::new();
+        let mut mixins = Vec::new();
+        let builtin_method = text
+            .split_once('.')
+            .is_some_and(|(module, _)| module == BUILTIN_MODULE);
         for definition in definitions {
             let overloads = match definition.kind {
                 DefinitionKind::Function => {
@@ -386,6 +391,12 @@ impl State {
                 && let Some(&method) = lookup(THREAD_METHODS, path)
             {
                 threads.push((method, receivers, overloads.clone()));
+            }
+            if definition.kind == DefinitionKind::Function
+                && !builtin_method
+                && let Some(&names) = lookup(MIXIN_CALLS, path)
+            {
+                mixins.push((names, receivers));
             }
             if let Some(&name) = lookup(CALLS_BACK, path) {
                 calling.extend(overloads.iter().map(|overload| (name, overload.clone())));
@@ -450,6 +461,9 @@ impl State {
         }
         for (method, receivers, overloads) in &threads {
             self.thread_method(graph, call, *method, receivers, overloads);
+        }
+        for (names, receivers) in &mixins {
+            self.mixin_calls(graph, call, names, receivers);
         }
         if !consuming.is_empty() {
             self.consume_library(graph, call, &consuming);

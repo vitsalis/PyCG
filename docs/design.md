@@ -142,6 +142,15 @@ exceptions:
   the site of `start`, and their own `run` calls
   `_target(*_args, **_kwargs)`. An instance that their own constructor
   makes is one value per call that makes it, so each holds its own target.
+- The mixin methods of `collections.abc` follow CPython: one that an
+  analysed class inherits calls, from the site of its call, the methods
+  that CPython's implementation calls on the receiver whatever its
+  arguments hold (`Mapping.get` calls `__getitem__`, `MutableSet.clear`
+  calls `pop`). The calls that it makes once per element of an argument
+  (the `__setitem__` of `update`) are not made, nor those of a mixin that
+  is a generator (`Sequence.__iter__`), which runs where its iterator
+  advances; a class that derives from a builtin type has that type's own
+  methods instead.
 
 #### Overloads and type variables
 
