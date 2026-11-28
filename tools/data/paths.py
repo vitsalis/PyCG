@@ -11,8 +11,9 @@ Writes crates/analysis/src/program/path_vectors.rs, what the path functions of
 pycg_analysis::program are tested against: every function of os.path that
 module discovery, the import manager and the document use, run by Python
 3.14's posixpath and ntpath on paths made of the roots, bodies and names
-below; where Python raises ValueError, the case expects "ValueError: " and
-its message.
+below, those of relpath and commonpath resolved by abspath against BASE, so
+that the output does not depend on the directory it runs in; where Python
+raises ValueError, the case expects "ValueError: " and its message.
 
     python3 -I tools/data/paths.py
 """
@@ -55,6 +56,7 @@ BODIES = (
     "a/b/../../..",
 )
 CWDS = {"posix": ("/w/x", "/"), "nt": ("C:\\w\\x", "\\\\srv\\shr\\w", "D:\\")}
+BASE = "/w/x"
 NAMES = ("a.py", ".bashrc", "..a.b", "a.", "a..", "...", "a.tar.gz", "name", "")
 
 
@@ -66,7 +68,7 @@ def paths(flavour):
 def cases():
     for flavour, module in FLAVOURS.items():
         found = list(dict.fromkeys(paths(flavour)))
-        absolute = [module.abspath(path) for path in found]
+        absolute = [call(module.abspath, "abspath", (path, BASE)) for path in found]
         for path in found:
             yield flavour, "normpath", (path,), module.normpath
             yield flavour, "split", (path,), module.split
