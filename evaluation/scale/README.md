@@ -1,14 +1,17 @@
 # Scale set
 
 Twenty large packages on which PyCG's time and peak memory are measured,
-and whether it finishes under a memory cap. The benchmarks' packages are
-small enough to analyse in seconds, so they cannot show how PyCG does on
-packages of this size. The set has no ground truth and is not scored or
-gated, and a change of it does not change the digest of the benchmark.
+and whether it finishes under a memory cap.
 
-Each package is pinned by the URL and the SHA-256 of one archive: a wheel
-of PyPI or the archive of a commit that GitHub serves. The entry points are
-every `.py` file of the package's analysed packages.
+The benchmarks' packages are small enough to analyse in seconds, so they
+cannot show how PyCG does on packages of this size.
+
+| | |
+|---|---|
+| Ground truth | None; the set is not scored or gated |
+| Digest of the benchmark | Not changed by a change of the set |
+| Pin | The URL and the SHA-256 of one archive: a wheel of PyPI or the archive of a commit that GitHub serves |
+| Entry points | Every `.py` file of the package's analysed packages |
 
 ## Packages
 
@@ -36,15 +39,21 @@ every `.py` file of the package's analysed packages.
 | elasticsearch-dsl-py | commit 5874ff6bd5 | `elasticsearch_dsl` | Apache-2.0 |
 
 The licence of each package is read from the licence files of its pinned
-archive. The platform wheels of numpy and scipy also bundle compiled
-libraries under other licences (the GCC runtime under GPL-3.0-or-later
-with the GCC runtime library exception, libquadmath under LGPL-2.1); those
-libraries are not unpacked.
+archive.
+
+The platform wheels of numpy and scipy also bundle compiled libraries under
+other licences (the GCC runtime under GPL-3.0-or-later with the GCC runtime
+library exception, libquadmath under LGPL-2.1); those libraries are not
+unpacked.
 
 ## Results
 
-`pycg` at commit 56611d8dc3, one package at a time under a memory cap of
-12 GiB, on a 4-core Intel Xeon at 2.7 GHz:
+| Parameter | Value |
+|---|---|
+| Engine | `pycg` at commit 56611d8dc3 |
+| Runs | One package at a time |
+| Memory cap | 12 GiB |
+| Machine | 4-core Intel Xeon at 2.7 GHz |
 
 | Package | Outcome | Seconds | Peak MiB |
 |---|---|---|---|
