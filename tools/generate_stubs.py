@@ -1186,7 +1186,12 @@ class StubReader:
                     if distribution_of_path != distribution_of_class:
                         continue
                     path = f"{module}.{name}"
-                    rank = (path.count("."), module != found.module, path)
+                    rank = (
+                        self._bound_from_public_name(module, name, found, set()),
+                        path.count("."),
+                        module != found.module,
+                        path,
+                    )
                     if found.path not in paths or rank < paths[found.path][0]:
                         paths[found.path] = (rank, path)
         public = {key: path for key, (_, path) in paths.items()}
@@ -1194,6 +1199,44 @@ class StubReader:
         for module in sorted(self.sources):
             self._add_nested_class_public_names(self.scope(module), public)
         return public
+
+    def _bound_from_public_name(self, module, name, found, keys_visited):
+        if (module, name) in keys_visited:
+            return False
+        keys_visited.add((module, name))
+        scope = self.scope(module)
+        if scope is None:
+            return False
+        if name not in scope.bindings_by_name:
+            return any(
+                self._bound_from_public_name(star, name, found, keys_visited)
+                for star in scope.star_import_modules
+                if name in self.star_import_names(star)
+            )
+        for binding in scope.bindings_by_name[name]:
+            if binding.kind == "assign" and isinstance(
+                binding.node.value, (ast.Name, ast.Attribute)
+            ):
+                value = binding.node.value
+                bound_from = value.id if isinstance(value, ast.Name) else value.attr
+                if not bound_from.startswith("_") and any(
+                    resolved.key == found.key
+                    for resolved in self.resolve_expression(scope, value)
+                ):
+                    return True
+            if binding.kind == "from":
+                target_module, target_name = binding.target
+                if any(
+                    resolved.key == found.key
+                    for resolved in self.resolve_member(target_module, target_name)
+                ):
+                    if target_name != name and not target_name.startswith("_"):
+                        return True
+                    if self._bound_from_public_name(
+                        target_module, target_name, found, keys_visited
+                    ):
+                        return True
+        return False
 
     def _add_extension_class_names(self, public):
         self.extension_name_conflicts = []

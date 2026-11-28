@@ -121,7 +121,9 @@ flowchart LR
 #### Outside calls and values
 
 A call of an outside function gives what its stub declares. A method of an
-outside value is named by the public name of its class. No name is
+outside value is named by the public name of its class. A public name
+bound to another public name of the class (`EventLoop = SelectorEventLoop`)
+is an alias: the class is named by the name it is bound from. No name is
 invented for a value whose type the stubs give.
 
 Outside code is not assumed to call what the analysed code gives it. The
