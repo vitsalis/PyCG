@@ -342,6 +342,36 @@ def score_macro(tool_dir, config=None):
     return scores
 
 
+OPEN_SET_HEADINGS = ("## Open path sets", "## Open receiver sets")
+
+
+def declares_open_sets(notes):
+    declared = False
+    lines = notes.splitlines()
+    for start, line in enumerate(lines):
+        if line not in OPEN_SET_HEADINGS:
+            continue
+        body = []
+        for following in lines[start + 1 :]:
+            if following.startswith("## "):
+                break
+            body.append(following)
+        text = "\n".join(body).strip()
+        assert text, f"{line} has no text"
+        declared |= text != "None."
+    return declared
+
+
+def open_set_projects(names, config=None):
+    config = Path(config or check.macro_trace.CONFIG_PATH).resolve()
+    found = []
+    for name in names:
+        notes = config.parent / "ground-truth" / f"{name}.md"
+        if notes.is_file() and declares_open_sets(notes.read_text(encoding="utf-8")):
+            found.append(name)
+    return sorted(found)
+
+
 def macro_edges(tool_dir, config=None, mode="raw"):
     runs = _runs_or_none(tool_dir, "macro")
     result = {}
@@ -507,6 +537,8 @@ def tool_results(tool_dir, config=None, snippets=SNIPPETS):
         data["tool"] = next(iter(tools.values()))
     if (tool_dir / "macro").is_dir():
         projects = score_macro(tool_dir, config)
+        left_out = open_set_projects(projects, config)
+        kept = {name: r for name, r in projects.items() if name not in left_out}
         data["macro"] = {
             "projects": {
                 name: {
@@ -521,6 +553,12 @@ def tool_results(tool_dir, config=None, snippets=SNIPPETS):
                     for edge_set in EDGE_SETS
                 }
                 for mode in MODES
+            },
+            "without_open_sets": {
+                "left_out": left_out,
+                "outside": {
+                    mode: summed(kept, mode, "outside").to_json() for mode in MODES
+                },
             },
         }
     if (tool_dir / "micro").is_dir():

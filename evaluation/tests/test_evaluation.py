@@ -333,6 +333,101 @@ def test_score_macro_reads_ground_truth_trace_runs_and_source(tmp_path):
     assert counts(scores["demo"]["raw"]) == (0, 1, 0, 0, 1)
 
 
+OPEN_SETS = """# demo
+
+## Open path sets
+
+| Site | Family |
+|---|---|
+| `a.py:1:1` | `S.cloneⁿ` |
+
+## Notes
+"""
+
+
+@pytest.mark.parametrize(
+    ("notes", "declared"),
+    [
+        (OPEN_SETS, True),
+        (OPEN_SETS.replace("path", "receiver"), True),
+        ("# demo\n\n## Open path sets\n\nNone.\n\n## Notes\n\nx\n", False),
+        ("# demo\n\n## Open path sets\n\nNone.\n", False),
+        ("# demo\n\n## Notes\n\nOpen path sets are none.\n", False),
+    ],
+)
+def test_notes_declare_open_sets_under_their_heading_unless_it_says_none(
+    notes, declared
+):
+    assert score.declares_open_sets(notes) is declared
+
+
+def test_an_open_set_heading_without_text_is_an_invalid_state():
+    with pytest.raises(AssertionError):
+        score.declares_open_sets("## Open path sets\n\n## Notes\n")
+
+
+def test_outside_is_also_summed_without_the_projects_that_declare_open_sets(
+    tmp_path,
+):
+    benchmark = tmp_path / "bench"
+    (benchmark / "ground-truth").mkdir(parents=True)
+    tool_dir = tmp_path / "tool"
+    (tool_dir / "macro").mkdir(parents=True)
+    config = ""
+    for name in ("closed", "none", "open"):
+        (benchmark / "projects" / name / name).mkdir(parents=True)
+        (benchmark / "projects" / name / name / "__init__.py").write_text("")
+        config += (
+            f'[{name}]\nroot = "."\npackages = ["{name}"]\nexclude = []\n'
+            "dependencies = []\npytest_args = []\ntest_requirements = []\n"
+        )
+        truth = {name: ["os.getcwd", "os.listdir"]}
+        (benchmark / "ground-truth" / f"{name}.json").write_text(json.dumps(truth))
+        graph = {name: ["os.getcwd", "os.sep"]}
+        (tool_dir / "macro" / f"{name}.json").write_text(json.dumps(graph))
+    (benchmark / "projects.toml").write_text(config)
+    (benchmark / "ground-truth" / "open.md").write_text(OPEN_SETS)
+    (benchmark / "ground-truth" / "none.md").write_text(
+        "## Open receiver sets\n\nNone.\n"
+    )
+    (tool_dir / "macro" / "open.json").write_text(json.dumps({"open": ["os.getcwd"]}))
+
+    data = score.tool_results(
+        tool_dir, benchmark / "projects.toml", snippets=tmp_path / "no-snippets"
+    )
+    without = data["macro"]["without_open_sets"]
+    assert without["left_out"] == ["open"]
+    kept, every = score.Counts(4, 4, 2).to_json(), score.Counts(5, 6, 3).to_json()
+    for mode in score.MODES:
+        assert without["outside"][mode] == kept
+        assert data["macro"]["summed"][mode]["outside"] == every
+
+
+def test_the_summary_prints_outside_without_open_sets_after_the_summed_row():
+    loop = _load("common/loop")
+    edges = score.Counts(2, 4, 1).to_json()
+    total = {"cases": 1, "skipped": 0, "failed": 0, "exact": 1}
+    data = {
+        "tool": {"name": "pycg", "commit": "a" * 40},
+        "micro": {"total": {"raw": total | {"all": edges, "inside": edges}}},
+        "macro": {
+            "projects": {"open": {"raw": {"inside": edges, "outside": edges}}},
+            "summed": {"raw": {"inside": edges, "outside": edges}},
+            "without_open_sets": {
+                "left_out": ["open"],
+                "outside": {"raw": score.Counts(1, 1, 1).to_json()},
+            },
+        },
+        "failed": [],
+    }
+    lines = loop.summary_lines(data)
+    summed = lines.index("  summed         0.500  0.250  0.333  1/1/3")
+    assert lines[summed + 1] == "macro, outside:  P      R      F1     TP/FP/FN"
+    summed = lines.index("  summed         0.500  0.250  0.333  1/1/3", summed + 1)
+    assert lines[summed + 1] == "  no open sets   1.000  1.000  1.000  1/0/0"
+    assert lines[summed + 2] == "  no open sets: summed without open, not gated"
+
+
 MICRO_TRUTH = {"main": ["main.f", "<builtin>.len"], "main.f": [], "<builtin>.len": []}
 
 

@@ -33,9 +33,12 @@ Measured by CI on main at commit 68bc2784:
 | Micro-benchmark, all edges | 0.953 | 0.951 |
 | Macro-benchmark, inside the package | 0.936 | 0.884 |
 | Macro-benchmark, outside the package | 0.946 | 0.821 |
+| Macro-benchmark, outside the package, without packages with open sets | 0.957 | 0.899 |
 
 The micro-benchmark has one small program per language feature; the
-macro-benchmark has 60 real packages with hand-written call graphs.
+macro-benchmark has 60 real packages with hand-written call graphs. The last
+row leaves out einops, fabric and jsonpickle, whose call graphs are lower
+bounds at some call sites into outside code.
 
 On 20 large packages PyCG finishes 19, each in under 4 minutes.
 

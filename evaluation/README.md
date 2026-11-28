@@ -39,8 +39,8 @@ flowchart LR
     gate -->|"yes"| fail["Fail"]
 ```
 
-The six measures are the precision and recall of the three rows of the
-results below.
+The six measures are the precision and recall of the first three rows of
+the results below.
 
 | Measure | Definition |
 |---|---|
@@ -49,7 +49,11 @@ results below.
 | Inside | Macro-benchmark edges whose callee is in the analysed package |
 | Outside | Macro-benchmark edges to builtins, the standard library and other packages, whose names depend on how a tool models code that it does not analyse |
 
-The macro-benchmark's values sum the counts over the 60 packages.
+The macro-benchmark's values sum the counts over the 60 packages. The
+fourth row of the results, not gated, sums the outside counts without the
+packages whose ground truths declare open path or receiver sets (einops,
+fabric, jsonpickle): at those sites the ground truth is a lower bound
+([benchmark-rules.md](benchmark-rules.md), "Scoring").
 
 ## Results
 
@@ -60,6 +64,7 @@ Measured by CI on main at commit 68bc2784:
 | Micro-benchmark, all edges | 0.953 | 0.951 |
 | Macro-benchmark, inside the package | 0.936 | 0.884 |
 | Macro-benchmark, outside the package | 0.946 | 0.821 |
+| Macro-benchmark, outside the package, without packages with open sets | 0.957 | 0.899 |
 
 On the scale set, PyCG finishes all 20 packages, each in under 4 minutes
 and 7 GiB ([scale/README.md](scale/README.md)).
