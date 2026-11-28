@@ -221,8 +221,9 @@ CASES = {
     ),
     "async/call_soon_callback": (
         "outside/library-types",
-        "the result of asyncio.get_running_loop() is not an asyncio.EventLoop, and "
-        "the loop callback belongs to the scope that runs the loop",
+        "the result of asyncio.get_running_loop() is not an "
+        "asyncio.SelectorEventLoop, and the loop callback belongs to the scope "
+        "that runs the loop",
     ),
     "async/coroutine_not_awaited": (
         "flow/uncalled",
@@ -230,7 +231,7 @@ CASES = {
     ),
     "async/explicit_event_loop": (
         "outside/library-types",
-        "the result of asyncio.new_event_loop() is not an asyncio.EventLoop",
+        "the result of asyncio.new_event_loop() is not an asyncio.SelectorEventLoop",
     ),
     "builtins/functools_partial": (
         "outside/library-calls-back",

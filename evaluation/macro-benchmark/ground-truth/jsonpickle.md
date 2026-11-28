@@ -458,10 +458,10 @@ The real dispatch sites:
 |---|---|
 | Sites | 1046 (1026 call, 1 decorator, 6 op, 13 format); 504 with candidates; 121 value sites |
 | Ledger entries | 1028 (1026 call, 1 decorator, 1 format) |
-| Callee lines / rejection lines (`reject *`) / notes / exclusions | 1627 / 81 (1) / 216 / 0 |
+| Callee lines / rejection lines (`reject *`) / notes / exclusions | 1626 / 81 (1) / 216 / 0 |
 | Default rejections | 6 lines, 49 candidates, 891 candidate-site pairs |
-| Edges | 1311: 383 in the package, 928 outside (a lower bound at the sites of "Open receiver sets") |
-| Edges that the trace confirms | 794 of 1311 (60.6%) |
+| Edges | 1310: 383 in the package, 927 outside (a lower bound at the sites of "Open receiver sets") |
+| Edges that the trace confirms | 793 of 1310 (60.5%) |
 | Edges only from reading | 517 (39 in the package, 478 outside) |
 | Trace edges rejected | 34 |
 | Functions that the tests run | 217 of 235 |
@@ -626,7 +626,7 @@ not try to close the set.
 | `jsonpickle/ext/numpy.py:58:45` | `self.restore_dtype(data).type(value)` | 21 |
 | `jsonpickle/ext/numpy.py:80:51` | `obj.tolist()` (numpy scalar) | 26 |
 | `jsonpickle/ext/numpy.py:100:50` | `obj.dtype.newbyteorder('N')` | 28 |
-| `jsonpickle/ext/numpy.py:153:47` | `arr.dtype.newbyteorder(byteorder)` | 23 |
+| `jsonpickle/ext/numpy.py:153:47` | `arr.dtype.newbyteorder(byteorder)` | 22 |
 | `jsonpickle/ext/numpy.py:188:54` | `obj.dtype.newbyteorder('N')` | 28 |
 | `jsonpickle/ext/numpy.py:293:54` | `obj.dtype.newbyteorder('N')` | 28 |
 | `jsonpickle/ext/numpy.py:343:60` | `self.restore_dtype(data).newbyteorder(...)` | 23 |
@@ -856,3 +856,20 @@ Not added: the nested `decode` calls of the pandas handlers return new
 containers or values that the handlers only pass on (`ext/pandas.py:208`,
 `237`, `252`, `279`, `312`, `360`, `403`, `424`); `util.py:626:26` stays a
 site of "Open receiver sets".
+
+## Corrections of 2026-11-28
+
+**`numpy.dtypes.ObjectDType.newbyteorder` cannot run at `ext/numpy.py:153:47`
+(found by the audit of the corrections of 2026-11-28).**
+`NumpyNDArrayHandlerBinary.restore_byteorder` is called only at `227`, in
+the `else` of `if dtype == object:` (`214`), and `flatten_byteorder` writes
+no `byteorder` for `'|'`, the byteorder of an object dtype (`145-148`); a
+client that calls `restore_byteorder` itself passes an opaque array (B5).
+The callee leaves the site, and the pair
+`NumpyNDArrayHandlerBinary.restore_byteorder ->
+numpy.dtypes.ObjectDType.newbyteorder`, which no other site gives, leaves
+the graph: 1311 to 1310 edges (383 inside, 927 outside). The trace's edge
+at this caller is `numpy.dtype.newbyteorder`, which stays in the graph;
+`numpy.dtypes.ObjectDType.newbyteorder` is only one of its aliases, a
+name of the same method, not a receiver that the tests made. At `343:60`
+the name stays: a by-reference view of an object array writes `'object'`.
