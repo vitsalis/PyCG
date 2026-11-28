@@ -740,7 +740,7 @@ impl State {
         }
     }
 
-    fn stub_class(&mut self, object: ObjId) -> Option<String> {
+    pub(super) fn stub_class(&mut self, object: ObjId) -> Option<String> {
         match self.objects.get(object) {
             &Object::Typed { class, .. } => Some(self.symbols.text(class).to_string()),
             Object::Const { value, .. } => Some(format!(

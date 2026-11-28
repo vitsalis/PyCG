@@ -65,7 +65,14 @@ and `re.subn`, which call a callable replacement, `copy.replace`, which
 calls `__replace__`, and a table of selected standard-library operations
 (`itertools`, `functools.reduce`, `math.sumprod`, `heapq.nlargest`, ...),
 which iterate what they get: at the call, or, for a lazy object, where
-analysed code advances it.
+analysed code advances it. Of the overloads that fit a call by arity and
+keywords, the result is that of those whose parameter accepts a value of
+the first positional argument whose declared types differ between them: a
+value accepts a class that its class derives from, a protocol whose methods
+its class has, and `float` or `complex` for an `int`. A value of unknown
+class, or an argument that holds nothing once the solve settles, keeps
+every overload: `re.sub("a", "b", s)` gives a `str`, `re.sub(p, "b", s)`
+with `p` unknown a `str` and a `bytes`.
 
 ### 4. Declared types supply what value flow cannot
 
@@ -162,8 +169,10 @@ values meet it may not end in reasonable time or memory.
 - **`type(x)` gives a typed `type`, not the class of `x`.** Following the
   class would make hubs of values instantiate their own classes until
   memory ends.
-- **Overloads are not selected by argument types.** A call of an outside
-  function gives the union of the overloads that fit by arity and keywords;
-  only the mode of an opened file is selected, by a table of Python's rule.
+- **Overloads are selected by one argument.** A call of an outside
+  function gives the union of the overloads that the first deciding
+  argument accepts (idea 3); later arguments do not narrow it, so
+  `os.path.join(p, "a")` with `p` unknown gives a `str` and a `bytes`. The
+  mode of an opened file is selected by a table of Python's rule.
 - **Small measured imprecisions.** The result of a coroutine function names
   any attribute.

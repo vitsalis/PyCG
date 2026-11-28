@@ -118,6 +118,18 @@ fn positional_kind(kind: ParameterKind) -> bool {
     )
 }
 
+fn positional_parameter(parameters: &[Param], position: usize) -> Option<&Param> {
+    parameters
+        .iter()
+        .filter(|parameter| positional_kind(parameter.kind))
+        .nth(position)
+        .or_else(|| {
+            parameters
+                .iter()
+                .find(|parameter| parameter.kind == ParameterKind::VarPositional)
+        })
+}
+
 fn stub_signature(parameters: &[Param]) -> Signature {
     let positional: Vec<Box<str>> = parameters
         .iter()
@@ -454,13 +466,55 @@ impl State {
         let details = &self.calls[call.index()];
         let dst = details.dst.expect("a typed result");
         let origin = details.origin;
-        for result in typed {
-            let context = TypeContext {
-                receiver: receivers.first().copied(),
-                binding: Some((result.bound, result.parameters.clone())),
-                ..TypeContext::of_call(call, origin)
-            };
-            self.add_type(graph, &result.reduced, dst, &context, &[]);
+        let results = typed
+            .iter()
+            .map(|result| {
+                let context = TypeContext {
+                    receiver: receivers.first().copied(),
+                    binding: Some((result.bound, result.parameters.clone())),
+                    ..TypeContext::of_call(call, origin)
+                };
+                (result.reduced.clone(), context)
+            })
+            .collect();
+        self.add_overload_results(graph, call, results, receivers, dst);
+    }
+
+    fn add_overload_results(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        results: Vec<(Type, TypeContext)>,
+        receivers: &[ObjId],
+        dst: NodeId,
+    ) {
+        let Some(position) = self.deciding_position(call, &results) else {
+            for (reduced, context) in &results {
+                self.add_type(graph, reduced, dst, context, &[]);
+            }
+            return;
+        };
+        for (reduced, context) in results {
+            let (bound, parameters) = context.binding.clone().expect("a bound overload");
+            let parameter = positional_parameter(&parameters, position)
+                .expect("every overload has the deciding parameter");
+            if let Some(&receiver) = receivers.get(position) {
+                if self.accepts(receiver, &parameter.annotation) {
+                    self.add_type(graph, &reduced, dst, &context, &[]);
+                }
+                continue;
+            }
+            match self.parameter_node(graph, bound, parameter) {
+                Some(argument) => self.select_overload(
+                    graph,
+                    argument,
+                    bound,
+                    &parameter.annotation,
+                    (reduced, context),
+                    dst,
+                ),
+                None => self.add_type(graph, &reduced, dst, &context, &[]),
+            }
         }
     }
 
@@ -654,14 +708,18 @@ impl State {
             self.open_file(graph, call, overloads[0].bound, typed_results);
         } else {
             let closure = lookup(CLOSURES, &*definition.path).copied();
+            let mut results = Vec::new();
             for (reduced, context) in typed_results {
                 let dst = dst.expect("a typed result");
                 if let (Some(closure), Type::Callable { result, .. }) = (closure, &reduced) {
                     let closure = self.closure(graph, closure, result);
                     self.add_object(graph, dst, closure);
                 } else {
-                    self.add_type(graph, &reduced, dst, &context, &[]);
+                    results.push((reduced, context));
                 }
+            }
+            if let Some(dst) = dst {
+                self.add_overload_results(graph, call, results, &receivers, dst);
             }
         }
         let creates = self
@@ -675,6 +733,32 @@ impl State {
             }
         }
         overloads
+    }
+
+    fn deciding_position(&self, call: CallId, results: &[(Type, TypeContext)]) -> Option<usize> {
+        let details = &self.calls[call.index()];
+        if !details.star.is_empty() || !details.double_star.is_empty() {
+            return None;
+        }
+        let (first, rest) = results.split_first()?;
+        if rest.iter().all(|(reduced, _)| *reduced == first.0) {
+            return None;
+        }
+        let count = self.calls[call.index()].args.len();
+        (0..count).find(|&position| {
+            let annotations: Vec<Option<&Type>> = results
+                .iter()
+                .map(|(_, context)| {
+                    let (_, parameters) = context.binding.as_ref().expect("a bound overload");
+                    positional_parameter(parameters, position)
+                        .map(|parameter| &parameter.annotation)
+                })
+                .collect();
+            annotations.iter().all(Option::is_some)
+                && annotations
+                    .iter()
+                    .any(|annotation| *annotation != annotations[0])
+        })
     }
 
     fn class_method_owner(
@@ -1135,7 +1219,7 @@ impl State {
         }
     }
 
-    fn protocol_methods(&mut self, class: &str) -> Vec<String> {
+    pub(super) fn protocol_methods(&mut self, class: &str) -> Vec<String> {
         let Some(definition) = self.stubs.definition(class) else {
             return Vec::new();
         };
