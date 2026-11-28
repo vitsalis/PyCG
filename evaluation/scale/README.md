@@ -50,33 +50,32 @@ unpacked.
 
 | Parameter | Value |
 |---|---|
-| Engine | `pycg` at commit 56611d8dc3 |
+| Engine | `pycg` at commit c7fc8fb3f9 with the default cap of 1,000 objects per node |
 | Runs | One package at a time |
-| Memory cap | 12 GiB |
-| Machine | 4-core Intel Xeon at 2.7 GHz |
+| Memory cap | 13 GiB |
+| Machine | 4-core Intel Xeon at 2.3 GHz |
 
 | Package | Outcome | Seconds | Peak MiB |
 |---|---|---|---|
-| pydantic | finished | 12.4 | 636 |
-| numpy | finished | 229.5 | 1,468 |
-| pandas | finished | 228.4 | 8,072 |
-| fsspec | finished | 5.0 | 218 |
-| rich | finished | 1.9 | 211 |
-| pip | finished | 29.1 | 1,069 |
-| sqlalchemy | finished | 69.9 | 5,660 |
-| pyparsing | finished | 3.4 | 224 |
-| scipy | finished | 71.2 | 2,298 |
-| openai | finished | 27.3 | 2,050 |
-| dask | finished | 23.5 | 1,714 |
-| matplotlib | finished | 31.7 | 1,292 |
-| scikit-learn | finished | 151.5 | 5,056 |
-| sphinx | finished | 6.7 | 513 |
-| sympy | crash (internal assertion) | 142.9 | 4,256 |
-| xarray | finished | 28.2 | 1,991 |
-| cerberus | finished | 12.6 | 422 |
-| python-future | finished | 35.5 | 979 |
-| graphene | finished | 0.8 | 171 |
-| elasticsearch-dsl-py | finished | 5.2 | 410 |
+| pydantic | finished | 2.3 | 192 |
+| numpy | finished | 8.7 | 494 |
+| pandas | finished | 231.9 | 6,537 |
+| fsspec | finished | 6.3 | 215 |
+| rich | finished | 1.3 | 120 |
+| pip | finished | 8.8 | 404 |
+| sqlalchemy | finished | 25.4 | 1,165 |
+| pyparsing | finished | 1.1 | 120 |
+| scipy | finished | 34.0 | 1,168 |
+| openai | finished | 7.0 | 313 |
+| dask | finished | 8.5 | 641 |
+| matplotlib | finished | 27.1 | 813 |
+| scikit-learn | finished | 31.6 | 701 |
+| sphinx | finished | 7.4 | 495 |
+| sympy | finished | 161.1 | 4,720 |
+| xarray | finished | 10.1 | 596 |
+| cerberus | finished | 1.0 | 174 |
+| python-future | finished | 4.9 | 325 |
+| graphene | finished | 0.5 | 77 |
+| elasticsearch-dsl-py | finished | 0.4 | 50 |
 
-19 of the 20 packages finish; sympy stops on an internal assertion, a
-defect of the engine.
+All 20 packages finish, each in under 4 minutes and 7 GiB.
