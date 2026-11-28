@@ -1365,7 +1365,7 @@ impl Replay {
                         Value::String(name) => Passthrough::Name(name.as_str().into()),
                         Value::Array(pair) => Passthrough::Element(
                             text(&pair[0]).into(),
-                            pair[1].as_i64().expect("an element index"),
+                            bound(&pair[1]).expect("an element index"),
                         ),
                         _ => panic!("a passthrough entry: {entry}"),
                     })
