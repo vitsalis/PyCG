@@ -20,7 +20,7 @@ use crate::engine::protocols::ProtocolRule;
 use crate::engine::reflection::{DefaultAction, GetmembersId};
 use crate::engine::semantics::{CallId, ReturnedId, SharedId};
 use crate::engine::symbols::Sym;
-use crate::engine::{Graph, OrderedMap, State};
+use crate::engine::{Graph, State};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct RuleId(u32);
@@ -860,11 +860,17 @@ impl Rules<RuleId> for State {
     }
 
     fn wake(&mut self, graph: &mut Graph, watch: WatchId) {
-        let waiting = self.waiting.remove(&watch).unwrap_or_default();
-        let mut receivers_by_rule: OrderedMap<u32, Vec<ObjId>> = OrderedMap::default();
-        for (rule, receiver) in waiting {
-            receivers_by_rule.entry(rule).or_default().push(receiver);
-        }
+        let order = self.waiting_order.remove(&watch).unwrap_or_default();
+        let receivers_by_rule: Vec<(u32, Vec<ObjId>)> = order
+            .into_iter()
+            .map(|rule| {
+                let receivers = self
+                    .waiting
+                    .remove(&(watch, rule))
+                    .expect("a waiting rule has receivers");
+                (rule, self.chains.objects(receivers))
+            })
+            .collect();
         for (rule, receivers) in receivers_by_rule {
             let rule = self.waiting_rules[rule as usize].clone();
             for receiver in receivers {

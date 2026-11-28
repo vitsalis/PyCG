@@ -1,6 +1,7 @@
 use pycg_solver::{NodeId, ObjId};
 use rustc_hash::FxHashMap;
 
+use crate::engine::chains::Chain;
 use crate::engine::hierarchy::{LookupAttr, LookupKey, Namespace, Unless};
 use crate::engine::objects::{Kind, Literal, Object};
 use crate::engine::rules::{Rule, WaitingRule};
@@ -69,7 +70,7 @@ pub type AccessorEntry = (NodeId, AccessId, bool, u32);
 #[derive(Default)]
 pub struct AccessorHooks {
     lookups: OrderedSet<NodeId>,
-    receivers: OrderedMap<AccessorEntry, Vec<ObjId>>,
+    receivers: OrderedMap<AccessorEntry, Chain>,
     callers: OrderedSet<Option<Sym>>,
     pub results_of: OrderedSet<NodeId>,
     saturated: bool,
@@ -79,7 +80,7 @@ pub struct Accessors {
     pub call: CallId,
     pub analysed_only: bool,
     width: u32,
-    receivers: Vec<ObjId>,
+    receivers: Chain,
     methods: Vec<ObjId>,
 }
 
@@ -463,7 +464,7 @@ impl State {
     ) {
         let found = &mut self.accessor_hooks[hooks.0 as usize];
         if !found.receivers.contains_key(&entry) {
-            found.receivers.insert(entry, Vec::new());
+            found.receivers.insert(entry, Chain::EMPTY);
             let result = self.access(entry.1).dst;
             if let Some(result) = result {
                 let found = &mut self.accessor_hooks[hooks.0 as usize];
@@ -473,11 +474,11 @@ impl State {
                 }
             }
         }
-        self.accessor_hooks[hooks.0 as usize]
+        let receivers = self.accessor_hooks[hooks.0 as usize]
             .receivers
             .get_mut(&entry)
-            .expect("an entry")
-            .push(receiver);
+            .expect("an entry");
+        *receivers = self.chains.push(*receivers, receiver);
         let callers: Vec<Option<Sym>> = self.accessor_hooks[hooks.0 as usize]
             .callers
             .iter()
@@ -506,7 +507,7 @@ impl State {
         let entries: Vec<(AccessorEntry, Vec<ObjId>)> = self.accessor_hooks[hooks.0 as usize]
             .receivers
             .iter()
-            .map(|(entry, receivers)| (*entry, receivers.clone()))
+            .map(|(entry, &receivers)| (*entry, self.chains.objects(receivers)))
             .collect();
         for ((accessor, access, analysed_only, width), receivers) in entries {
             let accessors =
@@ -548,7 +549,7 @@ impl State {
             call,
             analysed_only,
             width,
-            receivers: Vec::new(),
+            receivers: Chain::EMPTY,
             methods: Vec::new(),
         });
         self.accessor_receivers.insert(key, accessors);
@@ -592,7 +593,9 @@ impl State {
         }
         let (call, width) = (found.call, found.width);
         self.accessors[accessors.0 as usize].methods.push(method);
-        let receivers = self.accessors[accessors.0 as usize].receivers.clone();
+        let receivers = self
+            .chains
+            .objects(self.accessors[accessors.0 as usize].receivers);
         for receiver in receivers {
             let prefix = self.accessor_prefix(receiver, width);
             self.call_bound(graph, method, &prefix, call);
@@ -601,7 +604,7 @@ impl State {
 
     fn accessors_add(&mut self, graph: &mut Graph, accessors: AccessorsId, receiver: ObjId) {
         let found = &mut self.accessors[accessors.0 as usize];
-        found.receivers.push(receiver);
+        found.receivers = self.chains.push(found.receivers, receiver);
         let (call, width) = (found.call, found.width);
         let methods = found.methods.clone();
         let prefix = self.accessor_prefix(receiver, width);

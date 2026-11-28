@@ -4,6 +4,7 @@ mod arguments;
 mod attributes;
 mod builtin_containers;
 mod builtin_rules;
+mod chains;
 mod containers;
 mod fixpoint;
 pub mod hierarchy;
@@ -38,6 +39,7 @@ use attributes::{
 };
 use builtin_containers::Iterated;
 use builtin_rules::{DynamicAccess, WrapperKey};
+use chains::{Chain, Chains};
 use hierarchy::{LookupAttr, Namespace, Unless};
 use objects::{Container, External, Function, Kind, Literal, Module, Object, Objects};
 use outside_calls::{Bound, BoundId, Known};
@@ -109,7 +111,9 @@ struct State {
     stub_definitions: FxHashMap<Sym, Option<Arc<[Definition]>>>,
     external_modules: FxHashSet<String>,
     watches: FxHashMap<(ObjId, LookupAttr, Option<ObjId>, Unless), WatchId>,
-    waiting: FxHashMap<WatchId, Vec<(u32, ObjId)>>,
+    waiting: FxHashMap<(WatchId, u32), Chain>,
+    waiting_order: FxHashMap<WatchId, Vec<u32>>,
+    chains: Chains,
     waiting_rules: OrderedSet<WaitingRule>,
     unlesses: OrderedSet<Unless>,
     watch_of_witness: FxHashMap<NodeId, WatchId>,
@@ -242,6 +246,8 @@ impl State {
             external_modules: _,
             watches: _,
             waiting: _,
+            waiting_order: _,
+            chains: _,
             waiting_rules: _,
             unlesses: _,
             watch_of_witness: _,
@@ -417,6 +423,8 @@ impl Engine {
             external_modules: FxHashSet::default(),
             watches: FxHashMap::default(),
             waiting: FxHashMap::default(),
+            waiting_order: FxHashMap::default(),
+            chains: Chains::default(),
             waiting_rules: OrderedSet::default(),
             unlesses: OrderedSet::default(),
             watch_of_witness: FxHashMap::default(),

@@ -6,6 +6,7 @@ use pycg_stubs::{DefinitionKind, Entry, class_names};
 use rustc_hash::FxHashSet;
 
 use crate::builder::calls::{Allocator, NewClass};
+use crate::engine::chains::Chain;
 use crate::engine::objects::{Class, Object};
 use crate::engine::outside::{OutsideGives, outside_name};
 use crate::engine::symbols::Sym;
@@ -239,11 +240,15 @@ impl State {
         if graph.is_waiting(watch) {
             let (index, _) = self.waiting_rules.insert_full(rule);
             let rule = u32::try_from(index).expect("fewer than 2^32 waiting rules");
-            let waiting = self.waiting.entry(watch).or_default();
-            if waiting.len() == waiting.capacity() {
-                waiting.reserve_exact(waiting.len() / 2 + 1);
-            }
-            waiting.push((rule, receiver));
+            let receivers = match self.waiting.get(&(watch, rule)) {
+                Some(&receivers) => receivers,
+                None => {
+                    self.waiting_order.entry(watch).or_default().push(rule);
+                    Chain::EMPTY
+                }
+            };
+            let receivers = self.chains.push(receivers, receiver);
+            self.waiting.insert((watch, rule), receivers);
         } else {
             self.run_waiting(graph, rule, receiver);
         }
