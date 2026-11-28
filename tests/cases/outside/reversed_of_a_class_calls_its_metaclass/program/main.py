@@ -10,4 +10,4 @@ class Sequence(type):
 class Deck(metaclass=Backwards): pass
 class Row(metaclass=Sequence): pass
 reversed(Deck)
-reversed(Row)
+list(reversed(Row))

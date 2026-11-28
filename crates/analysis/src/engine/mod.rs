@@ -37,7 +37,6 @@ use attributes::{
     Access, AccessorEntry, AccessorHooks, Accessors, AccessorsId, Deliveries, DeliveriesId,
     FieldWrites, HookCalls, HookCallsId, HooksId, WritesId,
 };
-use builtin_containers::Iterated;
 use builtin_rules::{DynamicAccess, WrapperKey};
 use chains::{Chain, Chains};
 use hierarchy::{LookupAttr, Namespace, Unless};
@@ -189,10 +188,10 @@ struct State {
     super_accepted: FxHashMap<ObjId, FxHashSet<ObjId>>,
     supers: FxHashMap<(ObjId, ObjId), ObjId>,
     typed_objects: FxHashMap<String, ObjId>,
-    iterated_nodes: FxHashMap<Iterated, (NodeId, NodeId)>,
+    iterated_nodes: FxHashMap<outside_calls::BoundId, (NodeId, NodeId)>,
     length_hints: FxHashSet<(Sym, Sym, NodeId, usize)>,
     length_plans: FxHashMap<usize, outside_calls::PlanId>,
-    reverse_sequences: FxHashSet<(ObjId, NodeId, CallId)>,
+    reverse_sequences: FxHashSet<(ObjId, NodeId, Option<CallId>)>,
     namespaces: FxHashSet<ObjId>,
     namespace_calls: FxHashSet<CallId>,
     getmembers: Vec<reflection::Getmembers>,

@@ -202,15 +202,15 @@ impl State {
                 Role::Iterate(id) => vec![text("iterate"), self.iteration_role(id)],
                 Role::Index(id) => vec![text("index"), self.iteration_role(id)],
                 Role::Callable(id) => vec![text("callable"), self.iteration_role(id)],
-                Role::Map(width, rest) => vec![
+                Role::Map(_, width, rest) => vec![
+                    text("iterate"),
                     text("map"),
                     RolePart::Number(i64::from(width)),
                     RolePart::Flag(rest),
                 ],
-                Role::Filter => vec![text("filter")],
+                Role::Filter(_) => vec![text("iterate"), text("filter")],
                 Role::Reversed => vec![text("reversed")],
                 Role::ReversedLen => vec![text("reversed"), text("len")],
-                Role::ReversedItem => vec![text("reversed"), text("item")],
                 Role::Operator(method, is_left) => vec![
                     text("operator"),
                     RolePart::Text(self.text(method).to_owned()),

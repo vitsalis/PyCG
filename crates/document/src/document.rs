@@ -689,7 +689,7 @@ fn implicit_construct_by_role(role: &str) -> Option<&'static str> {
         "special" => Some("match"),
         "subscript" => Some("subscript"),
         "truth" => Some("truth"),
-        "call back" | "key" | "filter" | "map" | "protocol" | "reversed" | "type" => None,
+        "call back" | "key" | "protocol" | "reversed" | "type" => None,
         other => panic!("{other} is a role of an implicit call"),
     }
 }

@@ -127,15 +127,20 @@ invented for a value whose type the stubs give.
 Outside code is not assumed to call what the analysed code gives it. The
 exceptions:
 
-- Only the builtins of Python apply their arguments: `map`,
-  `sorted(key=...)`, and the special methods of their protocol parameters
-  (`len(x)` calls `x.__len__`).
+- Only the builtins of Python apply their arguments: `sorted(key=...)`,
+  the function of `map` and `filter`, and the special methods of their
+  protocol parameters (`len(x)` calls `x.__len__`).
 - `re.sub` and `re.subn` call a callable replacement.
 - `copy.replace` calls `__replace__`.
 - A table of selected standard-library operations (`itertools`,
   `functools.reduce`, `math.sumprod`, `heapq.nlargest`, ...): they iterate
-  what they get, at the call, or, for a lazy object, where analysed code
-  advances it.
+  what they get.
+- As in Python, `map`, `filter`, `zip`, `enumerate`, `reversed` and the
+  lazy operations of the table call at most `iter()` on their arguments
+  when they are created (`reversed` calls `__reversed__`, or `__len__`).
+  Their function, the `__next__` of what they iterate and the `__getitem__`
+  of a sequence run where analysed code advances the lazy object: a loop,
+  `next`, unpacking, or a builtin or table operation that iterates it.
 - `threading.Thread` and `multiprocessing.Process` follow CPython: the
   constructor stores `target`, `args` and `kwargs` in the instance's
   `_target`, `_args` and `_kwargs`, `start` calls the instance's `run` from

@@ -2,6 +2,7 @@ use pycg_solver::{NodeId, ObjId};
 
 use crate::engine::containers::{ContainerOrigin, Keeps, KeysConstruct};
 use crate::engine::hierarchy::Unless;
+use crate::engine::library::{Applied, Position};
 use crate::engine::objects::{Literal, Object};
 use crate::engine::outside_calls::BoundId;
 use crate::engine::rules::Rule;
@@ -11,17 +12,6 @@ use crate::engine::{Graph, State};
 use crate::models::{LENGTH_HINT, LengthPlan, REVERSED_LENGTH, SEQUENCE_LENGTH};
 
 const SEQUENCES: [&str; 2] = ["list", "tuple"];
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum Iterated {
-    Bound(BoundId),
-    Enumerate(CallId),
-    Zip(CallId),
-    ZipAt(CallId, usize),
-    Map(CallId, usize),
-    MapStar(CallId, usize),
-    Filter(CallId),
-}
 
 impl State {
     fn caller_site(&self, call: CallId) -> (Sym, Sym) {
@@ -61,7 +51,7 @@ impl State {
         &mut self,
         graph: &mut Graph,
         iterable: NodeId,
-        construct: Iterated,
+        construct: BoundId,
         call: CallId,
     ) -> NodeId {
         if let Some(&(found, node)) = self.iterated_nodes.get(&construct) {
@@ -310,7 +300,7 @@ impl State {
             );
             return;
         }
-        let elements = self.iterated(graph, iterables, Iterated::Bound(args), call);
+        let elements = self.iterated(graph, iterables, args, call);
         let unknown = self.unknown(graph, receiver);
         self.add_edge(graph, elements, unknown);
         if self.kind_text_of(receiver) == "list" {
@@ -469,118 +459,88 @@ impl State {
     }
 
     pub(super) fn rule_enumerate(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
-        let result = self.rule_container(graph, "enumerate", call, "enumerate", None, false);
-        let pair = self.rule_container(graph, "tuple", call, "enumerate", Some(2), true);
+        let state = self.lazy_builtin(graph, call, "enumerate", None);
+        let made = self.lazy_made(state);
+        self.result(graph, call, made);
         let iterable = self.bound_parameter(graph, args, "iterable");
-        let elements = self.iterated(graph, iterable, Iterated::Enumerate(call), call);
-        let second = self.element(graph, pair, &Literal::Int(1.into()));
-        self.add_edge(graph, elements, second);
-        let unknown = self.unknown(graph, result);
-        self.add_object(graph, unknown, pair);
-        self.result(graph, call, result);
+        self.lazy_argument(graph, state, Position::At(1), iterable);
+        self.arity(graph, state, Some(2));
     }
 
     pub(super) fn rule_zip(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
-        let result = self.rule_container(graph, "zip", call, "zip", None, false);
+        let state = self.lazy_builtin(graph, call, "zip", None);
+        let made = self.lazy_made(state);
+        self.result(graph, call, made);
         let details = self.calls[call.index()].clone();
-        let starred = !details.star.is_empty();
-        let length = if starred {
-            None
-        } else {
-            Some(u32::try_from(details.args.len()).expect("a short call"))
-        };
-        let items = self.rule_container(graph, "tuple", call, "zip", length, true);
-        if starred {
-            let varargs = self.bound_varargs(args).expect("the iterables of zip");
-            let iterables = self.every(graph, varargs);
-            let elements = self.iterated(graph, iterables, Iterated::Zip(call), call);
-            let unknown = self.unknown(graph, items);
-            self.add_edge(graph, elements, unknown);
-        } else {
+        if details.star.is_empty() {
             for (index, node) in details.args.iter().enumerate() {
                 if let Some(node) = *node {
-                    let elements = self.iterated(graph, node, Iterated::ZipAt(call, index), call);
-                    let element = self.element(graph, items, &Literal::Int(index.into()));
-                    self.add_edge(graph, elements, element);
+                    let index = u32::try_from(index).expect("a short call");
+                    self.lazy_argument(graph, state, Position::At(index), node);
                 }
             }
+            let length = u32::try_from(details.args.len()).expect("a short call");
+            self.arity(graph, state, Some(length));
+        } else {
+            let varargs = self.bound_varargs(args).expect("the iterables of zip");
+            let iterables = self.every(graph, varargs);
+            self.lazy_argument(graph, state, Position::Unknown, iterables);
+            self.arity(graph, state, None);
         }
-        let unknown = self.unknown(graph, result);
-        self.add_object(graph, unknown, items);
-        self.result(graph, call, result);
     }
 
     pub(super) fn rule_map(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
-        let result = self.rule_container(graph, "map", call, "map", None, false);
         let base = self.prefixes.get(&call).map_or(call, |(base, _)| *base);
         let base_count = self.calls[base.index()].args.len();
         let details = self.calls[call.index()].clone();
         let mut elements = Vec::new();
         let mut surplus = Vec::new();
         for (index, node) in details.args.iter().skip(1).enumerate() {
-            let node =
-                node.map(|node| self.iterated(graph, node, Iterated::Map(call, index), call));
             if index + 1 < base_count {
-                elements.push(node);
+                elements.push(*node);
             } else {
-                surplus.push(node);
+                surplus.push(*node);
             }
         }
         let starred = !details.star.is_empty();
-        let mut rest = None;
-        if starred || !surplus.is_empty() {
-            let node = self.node(graph, None);
-            for found in surplus.iter().flatten() {
-                self.add_edge(graph, *found, node);
+        let rest = starred || !surplus.is_empty();
+        let applied = Applied::Map {
+            function: self.bound_parameter(graph, args, "function"),
+            width: u32::try_from(elements.len()).expect("a short map"),
+            rest,
+        };
+        let state = self.lazy_builtin(graph, call, "map", Some(applied));
+        let made = self.lazy_made(state);
+        self.result(graph, call, made);
+        for (index, node) in elements.iter().enumerate() {
+            if let Some(node) = *node {
+                let index = u32::try_from(index).expect("a short map");
+                self.lazy_argument(graph, state, Position::At(index), node);
             }
-            rest = Some(node);
+        }
+        for node in surplus.iter().flatten() {
+            self.lazy_argument(graph, state, Position::Unknown, *node);
         }
         if starred {
             let varargs = self.bound_varargs(args).expect("the iterables of map");
-            let mut iterables = vec![self.every(graph, varargs)];
+            let iterables = self.every(graph, varargs);
+            self.lazy_argument(graph, state, Position::Unknown, iterables);
             if details.args.len() < 2 {
-                iterables.push(self.bound_parameter(graph, args, "iterable"));
-            }
-            for (part, node) in iterables.into_iter().enumerate() {
-                let found = self.iterated(graph, node, Iterated::MapStar(call, part), call);
-                self.add_edge(graph, found, rest.expect("a rest"));
+                let iterable = self.bound_parameter(graph, args, "iterable");
+                self.lazy_argument(graph, state, Position::Unknown, iterable);
             }
         }
-        let width = u32::try_from(elements.len()).expect("a short map");
-        let key = SiteKey {
-            caller: details.caller,
-            site: details.site,
-            role: Role::Map(width, rest.is_some()),
-            implicit: true,
-        };
-        let dst = self.unknown(graph, result);
-        let back = self.site_call(graph, key, &elements, Some(dst), rest);
-        let function = self.bound_parameter(graph, args, "function");
-        let callee = self.callee(graph, back);
-        self.add_edge(graph, function, callee);
-        self.result(graph, call, result);
     }
 
     pub(super) fn rule_filter(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
-        let result = self.rule_container(graph, "filter", call, "filter", None, false);
-        let iterable = self.bound_parameter(graph, args, "iterable");
-        let elements = self.iterated(graph, iterable, Iterated::Filter(call), call);
-        let unknown = self.unknown(graph, result);
-        self.add_edge(graph, elements, unknown);
-        let verdict = self.node(graph, None);
-        let (caller, site) = self.caller_site(call);
-        let key = SiteKey {
-            caller,
-            site,
-            role: Role::Filter,
-            implicit: true,
+        let applied = Applied::Filter {
+            function: self.bound_parameter(graph, args, "function"),
         };
-        let back = self.site_call(graph, key, &[Some(elements)], Some(verdict), None);
-        let function = self.bound_parameter(graph, args, "function");
-        let callee = self.callee(graph, back);
-        self.add_edge(graph, function, callee);
-        self.add_truth(graph, verdict, caller, site);
-        self.result(graph, call, result);
+        let state = self.lazy_builtin(graph, call, "filter", Some(applied));
+        let made = self.lazy_made(state);
+        self.result(graph, call, made);
+        let iterable = self.bound_parameter(graph, args, "iterable");
+        self.lazy_argument(graph, state, Position::At(0), iterable);
     }
 
     pub(super) fn rule_next(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
@@ -619,12 +579,15 @@ impl State {
 
     pub(super) fn rule_reversed(&mut self, graph: &mut Graph, call: CallId, args: BoundId) {
         let dst = self.result_node(graph, call);
-        let result = self.rule_container(graph, "reversed", call, "reversed", None, false);
-        let unknown = self.unknown(graph, result);
+        let state = self.lazy_builtin(graph, call, "reversed", None);
+        let result = self.lazy_made(state);
+        let source = self.lazy_source(graph, state, Position::At(0));
+        let sequences = self.rule_container(graph, "iterator", call, "reversed", None, false);
+        self.add_object(graph, source, sequences);
         let (caller, site) = self.caller_site(call);
         let iteration = self.new_iteration(
             graph,
-            unknown,
+            source,
             caller,
             site,
             false,
@@ -670,17 +633,19 @@ impl State {
                 Some(dst),
                 Unless::Nothing,
             );
-            let items = self.unknown(graph, result);
+            let iterator = self.rule_container(graph, "iterator", call, "reversed", None, false);
+            let sequences = self.keys(graph, iterator);
             let rule = self.rule(Rule::ReversedSequence {
                 object,
                 call,
                 result,
-                items,
+                sequences,
             });
             let types = self.types_of(graph, object);
             self.attach(graph, types, rule);
         } else {
-            self.iterate(graph, object, iteration);
+            let source = self.containers.iteration(iteration).dst;
+            self.iterator(graph, object, iteration, source);
         }
         self.add_object(graph, dst, result);
     }
@@ -692,6 +657,7 @@ impl State {
         object: ObjId,
         call: CallId,
         result: ObjId,
+        sequences: NodeId,
     ) {
         if !self.objects.is_class(class) {
             return;
@@ -720,25 +686,11 @@ impl State {
             None,
             None,
         );
-        let index = self.site_call(
-            graph,
-            SiteKey {
-                caller,
-                site,
-                role: Role::ReversedItem,
-                implicit: true,
-            },
-            &[None],
-            None,
-            None,
-        );
-        let length = self.implicit_call(graph, object, "__len__", length, None, unless.clone());
-        let items = self.unknown(graph, result);
-        let index = self.implicit_call(graph, object, "__getitem__", index, Some(items), unless);
+        let length = self.implicit_call(graph, object, "__len__", length, None, unless);
         let source = self.keys(graph, result);
         for (other, methods, implicit, reversing) in [
-            (getters, lengths, length, Some(source)),
-            (lengths, getters, index, None),
+            (getters, lengths, Some(length), source),
+            (lengths, getters, None, sequences),
         ] {
             let rule = self.rule(Rule::ReverseSequence {
                 object,
@@ -755,17 +707,17 @@ impl State {
         graph: &mut Graph,
         object: ObjId,
         methods: NodeId,
-        implicit: CallId,
-        reversing: Option<NodeId>,
+        implicit: Option<CallId>,
+        reversing: NodeId,
     ) {
         if !self.reverse_sequences.insert((object, methods, implicit)) {
             return;
         }
-        let rule = self.calls[implicit.index()].rule;
-        self.attach(graph, methods, rule);
-        if let Some(reversing) = reversing {
-            self.add_object(graph, reversing, object);
+        if let Some(implicit) = implicit {
+            let rule = self.calls[implicit.index()].rule;
+            self.attach(graph, methods, rule);
         }
+        self.add_object(graph, reversing, object);
     }
 
     fn types_of(&mut self, graph: &mut Graph, object: ObjId) -> NodeId {

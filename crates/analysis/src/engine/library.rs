@@ -10,13 +10,13 @@ use crate::engine::objects::{Kind, Literal, Object};
 use crate::engine::outside_calls::{Overload, abstract_iterable};
 use crate::engine::protocols::reflected_comparison;
 use crate::engine::rules::Rule;
-use crate::engine::semantics::{Call, CallId, Origin, Role};
+use crate::engine::semantics::{Call, CallId, Origin, Role, SiteKey};
 use crate::engine::symbols::Sym;
 use crate::engine::{Graph, OrderedMap, RuleId, State};
 use crate::models::{
-    GROUPER, HASHED_ARGUMENTS, IterationMode, KEYED_OPERATIONS, LENGTH_HINT, LIBRARY_ITERATION,
-    LIBRARY_VALUES, LengthPlan, LengthSource, NOT_CONSUMING, READS_TUPLES, REPEATS, Shape,
-    THREAD_FIELDS, TUPLE_STORAGE, ThreadMethod, lookup,
+    GROUPER, HASHED_ARGUMENTS, IterationMode, KEYED_OPERATIONS, LAZY_BUILTINS, LENGTH_HINT,
+    LIBRARY_ITERATION, LIBRARY_VALUES, LengthPlan, LengthSource, LibraryOperation, NOT_CONSUMING,
+    READS_TUPLES, REPEATS, Shape, THREAD_FIELDS, TUPLE_STORAGE, ThreadMethod, lookup,
 };
 
 const LENGTH_SPECIAL_CALLS: LengthPlan = &[("__len__", &[])];
@@ -37,6 +37,18 @@ struct SourcesId(u32);
 pub(crate) enum Position {
     At(u32),
     Unknown,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Applied {
+    Map {
+        function: NodeId,
+        width: u32,
+        rest: bool,
+    },
+    Filter {
+        function: NodeId,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -110,6 +122,7 @@ struct Operation {
     group: Option<ObjId>,
     activations: Vec<Activation>,
     key: Option<NodeId>,
+    applied: Vec<Applied>,
 }
 
 #[derive(Default)]
@@ -197,15 +210,7 @@ impl State {
         overloads: &[Overload],
     ) {
         let &operation = lookup(LIBRARY_ITERATION, path).expect("a library operation");
-        let key = (self.calls[call.index()].origin, path);
-        let state = match self.library.calls.get(&key) {
-            Some(&state) => state,
-            None => {
-                let state = self.new_operation(graph, call, path);
-                self.library.calls.insert(key, state);
-                state
-            }
-        };
+        let state = self.operation_of(graph, call, path, operation, None);
         let arguments = self.operation_arguments(graph, operation.roles, overloads, call);
         for &(position, node) in &arguments {
             let argument = self.argument(graph, state, position);
@@ -260,13 +265,69 @@ impl State {
         }
     }
 
+    fn operation_of(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        path: &'static str,
+        operation: LibraryOperation,
+        applied: Option<Applied>,
+    ) -> OperationId {
+        let key = (self.calls[call.index()].origin, path);
+        let state = match self.library.calls.get(&key) {
+            Some(&state) => state,
+            None => {
+                let state = self.new_operation(graph, call, path, operation);
+                self.library.calls.insert(key, state);
+                state
+            }
+        };
+        if let Some(applied) = applied
+            && !self.operation(state).applied.contains(&applied)
+        {
+            self.operation_mut(state).applied.push(applied);
+            for activation in 0..self.operation(state).activations.len() {
+                self.apply_function(graph, state, activation, applied);
+            }
+        }
+        state
+    }
+
+    pub(super) fn lazy_builtin(
+        &mut self,
+        graph: &mut Graph,
+        call: CallId,
+        name: &'static str,
+        applied: Option<Applied>,
+    ) -> OperationId {
+        let &operation = lookup(LAZY_BUILTINS, name).expect("a lazy builtin");
+        self.operation_of(graph, call, name, operation, applied)
+    }
+
+    pub(super) fn lazy_argument(
+        &mut self,
+        graph: &mut Graph,
+        state: OperationId,
+        position: Position,
+        node: NodeId,
+    ) {
+        let argument = self.argument(graph, state, position);
+        self.add_edge(graph, node, argument);
+    }
+
+    pub(super) fn lazy_made(&self, state: OperationId) -> ObjId {
+        self.operation(state)
+            .made
+            .expect("a lazy builtin makes its iterator")
+    }
+
     fn new_operation(
         &mut self,
         graph: &mut Graph,
         call: CallId,
         path: &'static str,
+        operation: LibraryOperation,
     ) -> OperationId {
-        let &operation = lookup(LIBRARY_ITERATION, path).expect("a library operation");
         let details = &self.calls[call.index()];
         let (caller, site, origin) = (details.caller, details.site, details.origin);
         let sources = SourcesId(u32::try_from(self.library.sources.len()).expect("fewer sources"));
@@ -297,6 +358,7 @@ impl State {
             group: None,
             activations: Vec::new(),
             key,
+            applied: Vec::new(),
         };
         let id =
             OperationId(u32::try_from(self.library.operations.len()).expect("fewer operations"));
@@ -352,6 +414,7 @@ impl State {
                 group: None,
                 activations: Vec::new(),
                 key: None,
+                applied: Vec::new(),
             });
             self.library.lazy.insert(group, grouped);
         }
@@ -470,14 +533,40 @@ impl State {
                         source
                     }
                 };
-                let sources = self.operation(state).sources;
-                self.library.sources[sources.0 as usize].insert(position, source);
-                for activation in 0..self.operation(state).activations.len() {
-                    self.wire(graph, state, activation, position);
-                }
+                self.add_source(graph, state, position, source);
             }
         }
         node
+    }
+
+    pub(super) fn lazy_source(
+        &mut self,
+        graph: &mut Graph,
+        state: OperationId,
+        position: Position,
+    ) -> NodeId {
+        let sources = self.operation(state).sources;
+        if let Some(&source) = self.library.sources[sources.0 as usize].get(&position) {
+            return source;
+        }
+        let source = self.node(graph, None);
+        self.add_source(graph, state, position, source);
+        source
+    }
+
+    fn add_source(
+        &mut self,
+        graph: &mut Graph,
+        state: OperationId,
+        position: Position,
+        source: NodeId,
+    ) {
+        let sources = self.operation(state).sources;
+        let previous = self.library.sources[sources.0 as usize].insert(position, source);
+        assert!(previous.is_none(), "{position:?} has one source");
+        for activation in 0..self.operation(state).activations.len() {
+            self.wire(graph, state, activation, position);
+        }
     }
 
     fn values_as_given_node(&mut self, graph: &mut Graph, state: OperationId) -> NodeId {
@@ -504,7 +593,7 @@ impl State {
         node
     }
 
-    fn arity(&mut self, graph: &mut Graph, state: OperationId, arity: Option<u32>) {
+    pub(super) fn arity(&mut self, graph: &mut Graph, state: OperationId, arity: Option<u32>) {
         if self.operation(state).arities.contains_key(&arity) {
             return;
         }
@@ -739,6 +828,9 @@ impl State {
                 }
                 self.operation_mut(state).activations.push(activation);
                 let index = self.operation(state).activations.len() - 1;
+                for applied in self.operation(state).applied.clone() {
+                    self.apply_function(graph, state, index, applied);
+                }
                 let arities: Vec<_> = self.operation(state).arities.keys().copied().collect();
                 for arity in arities {
                     self.activation_shape(graph, state, index, arity);
@@ -792,10 +884,7 @@ impl State {
             self.call_key(graph, key, node, caller, site, Role::MergeKey(path));
             return;
         }
-        let items = self.node(graph, None);
-        self.operation_mut(state).activations[activation]
-            .items
-            .insert(position, items);
+        let items = self.activation_items(graph, state, activation, position);
         self.library_advance(graph, source, items, caller, site, role);
         match mode {
             IterationMode::LazyOuter => {
@@ -847,6 +936,75 @@ impl State {
                 }
             }
             _ => {}
+        }
+    }
+
+    fn activation_items(
+        &mut self,
+        graph: &mut Graph,
+        state: OperationId,
+        activation: usize,
+        position: Position,
+    ) -> NodeId {
+        if let Some(&items) = self.operation(state).activations[activation]
+            .items
+            .get(&position)
+        {
+            return items;
+        }
+        let items = self.node(graph, None);
+        self.operation_mut(state).activations[activation]
+            .items
+            .insert(position, items);
+        items
+    }
+
+    fn apply_function(
+        &mut self,
+        graph: &mut Graph,
+        state: OperationId,
+        activation: usize,
+        applied: Applied,
+    ) {
+        let found = &self.operation(state).activations[activation];
+        let (lazy, caller, site, node) = (found.lazy, found.caller, found.site, found.found);
+        match applied {
+            Applied::Map {
+                function,
+                width,
+                rest,
+            } => {
+                let arguments: Vec<Option<NodeId>> = (0..width)
+                    .map(|index| {
+                        Some(self.activation_items(graph, state, activation, Position::At(index)))
+                    })
+                    .collect();
+                let rest = rest
+                    .then(|| self.activation_items(graph, state, activation, Position::Unknown));
+                let key = SiteKey {
+                    caller,
+                    site,
+                    role: Role::Map(lazy, width, rest.is_some()),
+                    implicit: true,
+                };
+                let back = self.site_call(graph, key, &arguments, Some(node), rest);
+                let callee = self.callee(graph, back);
+                self.add_edge(graph, function, callee);
+            }
+            Applied::Filter { function } => {
+                let items = self.activation_items(graph, state, activation, Position::At(0));
+                let verdict = self.node(graph, None);
+                let key = SiteKey {
+                    caller,
+                    site,
+                    role: Role::Filter(lazy),
+                    implicit: true,
+                };
+                let back = self.site_call(graph, key, &[Some(items)], Some(verdict), None);
+                let callee = self.callee(graph, back);
+                self.add_edge(graph, function, callee);
+                self.add_truth(graph, verdict, caller, site);
+            }
         }
     }
 

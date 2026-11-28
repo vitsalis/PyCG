@@ -11,4 +11,4 @@ class B:
         def __getitem__(self, i): pass
 def run():
     reversed(A)
-    reversed(B())
+    list(reversed(B()))
