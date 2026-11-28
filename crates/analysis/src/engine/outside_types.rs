@@ -228,6 +228,7 @@ pub(super) fn constrained_variables<'t>(reduced: &'t Type, found: &mut Vec<(&'t 
             Type::Variable { .. }
             | Type::Unknown
             | Type::Class(_)
+            | Type::Literal(..)
             | Type::None
             | Type::SelfType
             | Type::Ellipsis => {}
@@ -255,7 +256,12 @@ fn mentions(reduced: &Type, name: &str) -> bool {
                     .flatten()
                     .any(|parameter| mentions(parameter, name))
         }
-        Type::Unknown | Type::Class(_) | Type::None | Type::SelfType | Type::Ellipsis => false,
+        Type::Unknown
+        | Type::Class(_)
+        | Type::Literal(..)
+        | Type::None
+        | Type::SelfType
+        | Type::Ellipsis => false,
     }
 }
 
@@ -480,7 +486,9 @@ impl State {
             }
             Type::None => {}
             Type::SelfType => self.add_receivers(graph, dst, context),
-            Type::Class(class) => self.add_instance(graph, class, &[], dst, context, position),
+            Type::Class(class) | Type::Literal(class, _) => {
+                self.add_instance(graph, class, &[], dst, context, position)
+            }
             Type::Ellipsis => self.add_instance(graph, "...", &[], dst, context, position),
             Type::Generic(class, arguments) => {
                 self.add_instance(graph, class, arguments, dst, context, position)

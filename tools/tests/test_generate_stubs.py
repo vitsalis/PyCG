@@ -199,7 +199,7 @@ def test_types_of_signatures(data):
     names = _names(data, "shapes._impl")
     area = names["area"]["s"]
     assert area[1]["p"][0] == ["shape", "/", 0, "*none"]
-    assert area[1]["r"] == "builtins.int"
+    assert area[1]["r"] == ["*lit", "builtins.int", [0]]
     scale = names["scale"]["s"][0]
     assert scale["p"] == [
         ["shape", "", 0, ["shapes._impl.Shape", ["*var", "shapes._impl._T"]]],
@@ -216,6 +216,19 @@ def test_types_of_signatures(data):
     kinds = [p[1] for p in names["legacy"]["s"][0]["p"]]
     assert kinds == ["/", "/", ""]
     assert names["Circle"]["m"]["scaled"]["s"][0]["p"][1][1] == "/"
+
+
+def test_literal_types_keep_their_str_and_int_values(data):
+    opened = _names(data, "shapes._impl")["opened"]["s"][0]["p"]
+    assert opened == [
+        ["mode", "", 0, ["|", ["*lit", "builtins.str", ["r", "w", "a"]], "*none"]],
+        [
+            "buffering",
+            "",
+            0,
+            ["|", ["*lit", "builtins.int", [-1, 1]], "builtins.bool", "builtins.bytes"],
+        ],
+    ]
 
 
 def test_a_method_of_a_module_instance_is_a_function(data):

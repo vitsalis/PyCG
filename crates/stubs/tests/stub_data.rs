@@ -1,4 +1,7 @@
-use pycg_stubs::{DefinitionKind, Entry, EntryId, Stubs, TYPESHED_COMMIT, Type, package_names};
+use pycg_stubs::{
+    DefinitionKind, Entry, EntryId, LiteralValue, Stubs, TYPESHED_COMMIT, Type, package_names,
+};
+use serde_json::json;
 
 #[test]
 fn every_embedded_package_decodes_and_holds_its_top_level_module() {
@@ -23,6 +26,27 @@ fn a_missing_package_has_no_module() {
 }
 
 #[test]
+fn a_literal_type_keeps_its_class_and_values() {
+    let reduced = Type::from_json(&json!(["*lit", "builtins.int", [-1, 1]])).expect("a literal");
+    let values = [LiteralValue::Int(-1), LiteralValue::Int(1)];
+    assert_eq!(reduced, Type::Literal("builtins.int".into(), values.into()));
+    let reduced = Type::from_json(&json!(["*lit", "builtins.int", [u64::MAX]])).expect("a literal");
+    let values = [LiteralValue::Int(u64::MAX.into())];
+    assert_eq!(reduced, Type::Literal("builtins.int".into(), values.into()));
+    let reduced = Type::from_json(&json!(["*lit", "builtins.str", ["rb"]])).expect("a literal");
+    let values = [LiteralValue::Str("rb".into())];
+    assert_eq!(reduced, Type::Literal("builtins.str".into(), values.into()));
+    for malformed in [
+        json!(["*lit", "builtins.int"]),
+        json!(["*lit", "builtins.int", 1]),
+        json!(["*lit", "builtins.float", [1.5]]),
+        json!(["*lit", "builtins.bool", [true]]),
+    ] {
+        assert!(Type::from_json(&malformed).is_err(), "{malformed}");
+    }
+}
+
+#[test]
 fn a_builtin_class_is_found_with_its_mro() {
     let mut stubs = Stubs::new();
     let found = stubs.find("builtins.bool");
@@ -37,7 +61,7 @@ fn class_paths(reduced: &Type, paths: &mut Vec<String>) {
     let mut pending = vec![reduced];
     while let Some(current) = pending.pop() {
         match current {
-            Type::Class(path) => paths.push(path.to_string()),
+            Type::Class(path) | Type::Literal(path, _) => paths.push(path.to_string()),
             Type::Generic(path, arguments) => {
                 paths.push(path.to_string());
                 pending.extend(arguments.iter());

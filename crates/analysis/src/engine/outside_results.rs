@@ -1,6 +1,6 @@
 use num_bigint::BigInt;
 use pycg_solver::{NodeId, ObjId};
-use pycg_stubs::Type;
+use pycg_stubs::{LiteralValue, Type};
 use rustc_hash::{FxHashMap, FxHashSet};
 
 use crate::engine::objects::{Kind, Literal, Object};
@@ -17,10 +17,24 @@ const DEFAULT_MODE: &str = "r";
 const TYPE: &str = "builtins.type";
 const NONE_TYPE: &str = "types.NoneType";
 const CALL: &str = "__call__";
+const STR: &str = "builtins.str";
+const INT: &str = "builtins.int";
 const NUMERIC_PROMOTIONS: &[(&str, &[&str])] = &[
     ("builtins.float", &["builtins.int"]),
     ("builtins.complex", &["builtins.int", "builtins.float"]),
 ];
+
+fn literal_holds(value: &Literal, class: &str, values: &[LiteralValue]) -> bool {
+    values.iter().any(|expected| match (value, expected) {
+        (Literal::Str(code_points), LiteralValue::Str(text)) => {
+            class == STR && text.chars().map(u32::from).eq(code_points.iter().copied())
+        }
+        (Literal::Int(found), &LiteralValue::Int(expected)) => {
+            class == INT && *found == BigInt::from(expected)
+        }
+        _ => false,
+    })
+}
 
 #[derive(Clone, Debug)]
 pub(crate) enum OutsideResultRule {
@@ -51,11 +65,16 @@ pub(crate) enum OutsideResultRule {
         dst: NodeId,
     },
     Overload {
-        bound: BoundId,
+        selection: u32,
+        argument: u32,
         annotation: Type,
-        result: Box<(Type, TypeContext)>,
         dst: NodeId,
     },
+}
+
+struct Selection {
+    result: (Type, TypeContext),
+    accepted: Box<[bool]>,
 }
 
 impl OutsideResultRule {
@@ -94,7 +113,8 @@ pub(crate) struct OutsideResults {
     completed_deciding_arguments: usize,
     unknown_modes: FxHashSet<CallId>,
     open_modes: FxHashSet<(CallId, Box<[u32]>)>,
-    selected_overloads: FxHashSet<(BoundId, Option<ObjId>)>,
+    selecting: FxHashSet<(BoundId, Option<ObjId>)>,
+    selections: Vec<Selection>,
 }
 
 impl State {
@@ -235,20 +255,34 @@ impl State {
     pub(super) fn select_overload(
         &mut self,
         graph: &mut Graph,
-        argument: NodeId,
+        arguments: Vec<(NodeId, Type)>,
         bound: BoundId,
-        annotation: &Type,
         result: (Type, TypeContext),
         dst: NodeId,
     ) {
-        let copy = self.deciding_argument(graph, argument);
-        let rule = self.result_rule(OutsideResultRule::Overload {
-            bound,
-            annotation: annotation.clone(),
-            result: Box::new(result),
-            dst,
+        if !self
+            .outside_results
+            .selecting
+            .insert((bound, result.1.receiver))
+        {
+            return;
+        }
+        let selection = u32::try_from(self.outside_results.selections.len())
+            .expect("fewer than 2^32 selections");
+        self.outside_results.selections.push(Selection {
+            result,
+            accepted: vec![false; arguments.len()].into(),
         });
-        self.attach(graph, copy, rule);
+        for (index, (argument, annotation)) in arguments.into_iter().enumerate() {
+            let copy = self.deciding_argument(graph, argument);
+            let rule = self.result_rule(OutsideResultRule::Overload {
+                selection,
+                argument: u32::try_from(index).expect("fewer than 2^32 arguments"),
+                annotation,
+                dst,
+            });
+            self.attach(graph, copy, rule);
+        }
     }
 
     pub(super) fn accepts(&mut self, object: ObjId, annotation: &Type) -> bool {
@@ -269,6 +303,10 @@ impl State {
                     false
                 }
                 Type::Class(expected) => self.instance_of(&class, expected),
+                Type::Literal(expected, values) => match self.objects.get(object) {
+                    Object::Const { value, .. } => literal_holds(value, expected, values),
+                    _ => self.instance_of(&class, expected),
+                },
                 Type::Generic(expected, arguments) => {
                     self.instance_of(&class, expected)
                         && self.constraint_agrees(object, expected, arguments)
@@ -395,18 +433,23 @@ impl State {
                 self.add_opened(graph, &mode, unbuffered, dst);
             }
             OutsideResultRule::Overload {
-                bound,
+                selection,
+                argument,
                 ref annotation,
-                ref result,
                 dst,
             } => {
-                let (reduced, context) = &**result;
-                let key = (bound, context.receiver);
-                if !self.outside_results.selected_overloads.contains(&key)
-                    && self.accepts(object, annotation)
+                let selection = selection as usize;
+                let argument = argument as usize;
+                if self.outside_results.selections[selection].accepted[argument]
+                    || !self.accepts(object, annotation)
                 {
-                    self.outside_results.selected_overloads.insert(key);
-                    self.add_type(graph, reduced, dst, context, &[]);
+                    return;
+                }
+                let found = &mut self.outside_results.selections[selection];
+                found.accepted[argument] = true;
+                if found.accepted.iter().all(|&accepted| accepted) {
+                    let (reduced, context) = found.result.clone();
+                    self.add_type(graph, &reduced, dst, &context, &[]);
                 }
             }
         }
@@ -443,7 +486,8 @@ impl OutsideResults {
             completed_deciding_arguments: _,
             unknown_modes: _,
             open_modes,
-            selected_overloads,
+            selecting: _,
+            selections,
         } = self;
         sizes.extend([
             ("outside results closures", closures.len()),
@@ -452,10 +496,7 @@ impl OutsideResults {
                 deciding_arguments.len(),
             ),
             ("outside results open_modes", open_modes.len()),
-            (
-                "outside results selected_overloads",
-                selected_overloads.len(),
-            ),
+            ("outside results selections", selections.len()),
         ]);
     }
 }

@@ -1,12 +1,14 @@
 {
  "documents": [],
  "edges": {
+  "<builtin>.bytes.center": [],
   "<builtin>.bytes.lower": [],
-  "<builtin>.bytes.strip": [],
   "<builtin>.object": [],
+  "<builtin>.str.center": [],
   "<builtin>.str.strip": [],
   "<builtin>.str.title": [],
   "<builtin>.str.upper": [],
+  "<builtin>.str.zfill": [],
   "main": [
    "<builtin>.object",
    "main.data",
@@ -26,9 +28,17 @@
    "re.sub"
   ],
   "main.unknown": [
-   "<builtin>.bytes.strip",
    "<builtin>.str.strip",
    "re.sub"
+  ],
+  "main.unknown_both": [
+   "<builtin>.bytes.center",
+   "<builtin>.str.center",
+   "os.path.join"
+  ],
+  "main.unknown_first": [
+   "<builtin>.str.zfill",
+   "os.path.join"
   ],
   "os.path.join": [],
   "re.sub": []
