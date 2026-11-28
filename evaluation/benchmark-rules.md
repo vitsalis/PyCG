@@ -103,7 +103,7 @@ name is one path component of letters, digits, `_`, `-` and `.`, and names
 | `root` | The directory on `sys.path`; module names are relative to it |
 | `packages` | Package directories or module files: the analysed source. A module file is named as its module (`configargparse.py` is `configargparse`) |
 | `exclude` | Paths in the packages that are not analysed |
-| `dependencies` | Installed top-level modules that are library code |
+| `dependencies` | Top-level modules of the libraries that the package imports, directly or through other libraries: `trace.py` counts installed code under these names as library code, not client code. The key installs nothing; what the test environment installs is `test_requirements` |
 | `pytest_args`, `test_requirements` | The test paths, and what the test environment has installed (name or name==version). They go together: a project without them has no test run, its ground truth comes from reading only, and `trace.py` refuses it |
 | `pytest_config` | The project's own pytest configuration file |
 | `deselect` | The deselected tests: `{test = <node id>, reason = <why>}` |
@@ -3237,6 +3237,99 @@ records the application under "Corrections of 2026-11-25".
   only: no new receiver, no implicit outside edge, no renamed Python
   closure, and public aliases such as `functools.partial` stay.
 
+#### Rulings for the corrections of 2026-11-28
+
+The corrections of 2026-11-28 answer questions about published ground
+truths that a study of a tool's errors raised; the study only pointed at
+the sites, and each answer rests on these rules, the package and
+dependency sources and the traces. The lead ruled in place of a referee
+(the maintainer's instruction of 2026-11-28); each ruling, with its
+evidence, is in `selection/corrections-2026-11-28/rulings/q<N>.md`, and
+the independent audit of their application is in
+`selection/corrections-2026-11-28/audits/`.
+
+- **A public name bound to another public name of the same class adds no
+  class path (asyncio's loops; Q14, `q14.md`).** Where a module binds a
+  public name to another public name of one class (asyncio's `EventLoop`
+  to `SelectorEventLoop`), the second is an alias, not a further class
+  path: the receiver keeps the name that it is bound from. From CPython
+  3.13 `asyncio.EventLoop` is `SelectorEventLoop` on Unix and
+  `ProactorEventLoop` on Windows (`Lib/asyncio/unix_events.py`, 3.13.18
+  `:1548-1550`, 3.14.10 `:1029-1031`; `windows_events.py`, 3.13.18 `:906`,
+  3.15.2 `:899`): one name for two classes, which exists from 3.13 only,
+  while `SelectorEventLoop` and `ProactorEventLoop` hold their classes on
+  every admitted version. So the default loop's methods are
+  `asyncio.SelectorEventLoop.<m>` on Unix and
+  `asyncio.ProactorEventLoop.<m>` on Windows, and `asyncio.EventLoop` adds
+  no name. This chooses between two public aliases of one class on one
+  runtime. It leaves the order of `ruling-names-2.md` and the batch-8
+  C-type ruling (public alias, exported type attribute, type name) as it
+  is (`threading.Lock` still names `_thread.LockType` from 3.13), it does
+  not touch a name that the package writes itself, and a factory is not
+  an alias. The macro ground truths already follow it (aiocache, bottle
+  and structlog keep their 16 edges); in the micro-benchmark
+  `async/call_soon_callback` (`asyncio.EventLoop.call_soon`) and
+  `async/explicit_event_loop` (`asyncio.EventLoop.run_until_complete`,
+  `.close`) name `asyncio.SelectorEventLoop.<m>`, 3 edges renamed, and the
+  micro "Methods" convention states the rule.
+- **`array.array` and `array.ArrayType` (pyusb, pgvector, jsonpickle;
+  Q6, `q6.md`).** `array.array` is the class's name, as the packages
+  import it; `array.ArrayType` is a second alias of the same type object
+  on every runtime (CPython's "Older undocumented alias") and adds no
+  name. The ground truths already follow it. The scorer turns a trace's
+  aliases into identities per package, so a tool's `array.ArrayType.<m>`
+  matched where the package's trace had recorded `<m>` and not elsewhere;
+  `../common/same_function.json` joins `array.array` and
+  `array.ArrayType`, and their `buffer_info`, `byteswap`, `frombytes`,
+  `tobytes` and `tolist`, the members that the ground truths name, so
+  that the score does not depend on what a trace recorded. Its condition
+  holds: `Modules/arraymodule.c` adds one type object as `ArrayType` and,
+  through `PyModule_AddType`, as `array` (3.12.16 `:3081`, `:3102`;
+  3.13.18 `:3286`, `:3304`; 3.14.10 `:3320`, `:3338`; 3.15.2 `:3527`,
+  `:3545`). No edge changed.
+- **A library is installed for a ground truth only when the project's
+  test environment installs it (fabric; Q3, `q3.md`).** A tool's bundled
+  stubs, typeshed's included, are not a source for names. fabric has no
+  test run and no environment installs paramiko or invoke, so their
+  callees keep their access paths as missing modules ("Callees outside
+  the package"). The `dependencies` key of `projects.toml` installs
+  nothing; its row in the table of "`projects.toml`" says what it means.
+  No edge changed.
+- **An object array never reaches jsonpickle's `restore_byteorder`
+  (found by the audit of the corrections of 2026-11-28).**
+  `NumpyNDArrayHandlerBinary.restore_byteorder` is called only in the
+  `else` of `if dtype == object:` (`ext/numpy.py:214`, `227`), and
+  `flatten_byteorder` writes no `byteorder` for `'|'`, the byteorder of an
+  object dtype (`145-148`); so `numpy.dtypes.ObjectDType.newbyteorder`
+  cannot run at `153:47`. The callee and its pair leave the ground truth
+  (1 outside edge; `jsonpickle.md`, "Corrections of 2026-11-28"). This
+  applies the edge definition and changes no rule.
+- **Decided by the rules above, with no change (Q2, Q4, Q5, Q7 to Q13).**
+  Q2, jsonpickle's per-class `numpy.dtypes` and pandas names: "One name per
+  admitted concrete receiver class" and "Open receiver sets of a generic
+  serialisation path" (batch 6). Q4, numpy access paths in
+  face_classification against classes in pgvector and uncertainties:
+  "Callees outside the package" (a library that the test environment does
+  not install is named by access paths). Q5, `yaml.safe_load.get` beside
+  `<builtin>.dict.get`: the same rule and "A stub result keeps its path
+  through assignment" (batch 7); an `Any` annotation decides nothing. Q7,
+  hashlib's builtin fallback classes and `_sre.SRE_Pattern`: "Versions and
+  configuration" (2026-11-15), the batch-8 C-type ruling,
+  `ruling-names-2.md` and "Compiled patterns on CPython 3.6" (batch 7).
+  Q8, `raise C` of a class whose first `__init__` is outside: "Implicit
+  calls" (the micro and macro conventions differ on purpose). Q9,
+  more-itertools' `_concurrent_tee` and numeric inputs and funcy's lazy
+  objects: "Declared iterable types (B2)" (batch 6) and "Factory outputs
+  (B2)" (2026-11-15). Q10, hash matches, `__getattr__` fallbacks and
+  warnings as errors: "Client control flow (B5)" and "Versions and
+  configuration" (2026-11-15), and "Call sites and candidates". Q11,
+  path's Windows and PyPy call-backs: "Library behaviour on supported
+  platforms" and "Implementation, version and platform combinations"
+  (batch 6). Q12, django-constance's proxy recursion and cache:
+  django-constance (a), (b) and (e) (batch 6). Q13, toolz's
+  `check_valid`: "A dispatch table of the package selected by a client
+  input" (batch 8).
+
 ### Call sites and candidates
 
 `sites.py` reads the source with `ast` and `tokenize` and finds every call
@@ -4143,7 +4236,10 @@ snippet reaches it:
   (`os.path.join`, not `posixpath.join`).
 - **Methods**: The public import path of the class of the instance, then the
   method (`threading.Thread.start`, `logging.Logger.info`,
-  `<builtin>.str.join`).
+  `<builtin>.str.join`). A public name that a module binds to another
+  public name of the class adds no path (from Python 3.13 asyncio binds
+  `EventLoop` to `SelectorEventLoop` on Unix, and the default loop's
+  `call_soon` is `asyncio.SelectorEventLoop.call_soon`).
 - **Inherited methods**: Named through the class that the snippet names
   (`<builtin>.Exception.__init__` for `class E(Exception)`,
   `threading.Thread.start` for a snippet subclass of `Thread` that does not

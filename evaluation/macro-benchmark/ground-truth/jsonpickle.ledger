@@ -478,13 +478,12 @@ default reject jsonpickle.util.items: util.items is called only by its qualified
     -> numpy.dtypes.Complex64DType.newbyteorder
     -> numpy.dtypes.Complex128DType.newbyteorder
     -> numpy.dtypes.CLongDoubleDType.newbyteorder
-    -> numpy.dtypes.ObjectDType.newbyteorder
     -> numpy.dtypes.BytesDType.newbyteorder
     -> numpy.dtypes.StrDType.newbyteorder
     -> numpy.dtypes.VoidDType.newbyteorder
     -> numpy.dtypes.DateTime64DType.newbyteorder
     -> numpy.dtypes.TimeDelta64DType.newbyteorder
-    note: arr is a numpy.ndarray rebuilt from the dtype strings that flatten_dtype writes; its dtype class is one of the set R (the referee, ruling (e) after Codex audit round 1), named one by one; numpy.dtype.newbyteorder stays as the name of the older admitted releases
+    note: arr is a numpy.ndarray rebuilt from the dtype strings that flatten_dtype writes; its dtype class is one of the set R (the referee, ruling (e) after Codex audit round 1), named one by one; numpy.dtype.newbyteorder stays as the name of the older admitted releases; not ObjectDType (the audit of the corrections of 2026-11-28): restore calls this only in the else of `if dtype == object:` (214, 227), and flatten_byteorder writes no byteorder for '|', the byteorder of an object dtype (145-148)
 
 [jsonpickle.ext.numpy.NumpyNDArrayHandlerBinary.flatten]
 159:25 call  super()
