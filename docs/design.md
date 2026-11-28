@@ -1,8 +1,10 @@
 # Analysis design
 
 PyCG computes the call graph of a Python package with a static analysis.
-It never imports or runs the code. This document gives the analysis in five
-ideas, what it does not do, its bounds and its open problems.
+It never imports or runs the code.
+
+This document gives the analysis in five ideas, what it does not do, its
+bounds and its open problems.
 
 Terms used throughout:
 
@@ -18,12 +20,25 @@ Terms used throughout:
 
 ## Overview
 
-The analysis runs in five stages: the discovery of the modules that the
-entry modules import inside the package root; the scopes, which decide the
-scope that binds each name; the builder, which walks each module's syntax
-tree once and emits nodes and constraints; the solver, which propagates
-objects along the constraints until nothing changes and resolves calls as
-it goes; and the call graph that it writes.
+The analysis runs in five stages:
+
+```mermaid
+flowchart LR
+    entry["Entry modules"] --> discovery["Discovery"]
+    discovery --> scopes["Scopes"]
+    scopes --> builder["Builder"]
+    builder --> solver["Solver"]
+    solver --> callgraph["Call graph"]
+```
+
+1. The discovery of the modules that the entry modules import inside the
+   package root.
+2. The scopes, which decide the scope that binds each name.
+3. The builder, which walks each module's syntax tree once and emits nodes
+   and constraints.
+4. The solver, which propagates objects along the constraints until nothing
+   changes and resolves calls as it goes.
+5. The call graph that it writes.
 
 ## The analysis in five ideas
 
@@ -31,102 +46,181 @@ it goes; and the call graph that it writes.
 
 Every value is an object identified by the place that creates it: a
 function by its definition, an instance by its class and the call that
-creates it, a container by its display or call. Each node holds the objects
-that may reach it. Assignments, argument passing and returns are subset
-edges between nodes. A load, store or call on a node is a constraint that
-acts on each object that reaches the node. A worklist solver applies the
-constraints until nothing changes, once for the whole program. A call edge
-exists where a call constraint meets a function. Python calls `__getattr__`
-only when the normal lookup fails, so a load through an instance calls it
-only where no class of the MRO defines the name and no `__init__` of the MRO
-assigns the name on its receiver in its own body (`self.x = ...`); a load
-that runs before that store loses its `__getattr__` call.
+creates it, a container by its display or call.
+
+Each node holds the objects that may reach it. Assignments, argument
+passing and returns are subset edges between nodes. A load, store or call
+on a node is a constraint that acts on each object that reaches the node.
+
+A worklist solver applies the constraints until nothing changes, once for
+the whole program. A call edge exists where a call constraint meets a
+function.
+
+```mermaid
+flowchart LR
+    object["Object, named by where it is created"] --> source["Node"]
+    source -->|"subset edge: assignment, argument, return"| target["Node"]
+    target --> constraint["Load, store or call constraint"]
+    constraint -->|"a call constraint meets a function"| edge["Call edge"]
+```
+
+Python calls `__getattr__` only when the normal lookup fails, so a load
+through an instance calls it only where no class of the MRO defines the
+name and no `__init__` of the MRO assigns the name on its receiver in its
+own body (`self.x = ...`). A load that runs before that store loses its
+`__getattr__` call.
 
 ### 2. Local names by definition; code that cannot run is not analysed
 
 A name that only the statements of its own scope bind is followed by
 definition: each read gets the definitions that reach it, and where paths
-meet, a join holds the definitions of each path. Code that the syntax and
-the literal values of names prove cannot run is not walked: its calls give
-no edges and its definitions do not exist. A module name that its module
-binds once, to a literal, holds that literal in every function too, unless a
-module of the package root may store it otherwise: by a `global` statement,
-a store or deletion of an attribute of that name, a string or keyword
-argument of that name (`setattr(m, "DEBUG", True)`,
-`vars(m).update(DEBUG=True)`), a `from` import of the name that the importer
-rebinds, or a submodule of that name. So `if DEBUG: trace()` in a function
-calls nothing when `DEBUG = False` is all the package does with `DEBUG`. The
-heap (attributes, container elements) is not followed by definition.
+meet, a join holds the definitions of each path.
+
+Code that the syntax and the literal values of names prove cannot run is
+not walked: its calls give no edges and its definitions do not exist.
+
+A module name that its module binds once, to a literal, holds that literal
+in every function too, unless a module of the package root may store it
+otherwise:
+
+- by a `global` statement;
+- by a store or deletion of an attribute of that name;
+- by a string or keyword argument of that name
+  (`setattr(m, "DEBUG", True)`, `vars(m).update(DEBUG=True)`);
+- by a `from` import of the name that the importer rebinds;
+- by a submodule of that name.
+
+So `if DEBUG: trace()` in a function calls nothing when `DEBUG = False` is
+all the package does with `DEBUG`.
+
+The heap (attributes, container elements) is not followed by definition.
 
 ### 3. Outside code is typed from the typeshed stubs
 
 The stubs of the builtins, the standard library and the third-party
-libraries that typeshed describes are read as data. A call of an outside
-function gives what its stub declares. A method of an outside value is
-named by the public name of its class. No name is invented for a value
-whose type the stubs give. Outside code is not assumed to call what the
-analysed code gives it. Only the builtins of Python apply their arguments:
-`map`, `sorted(key=...)`, and the special methods of their protocol
-parameters (`len(x)` calls `x.__len__`). The other exceptions are `re.sub`
-and `re.subn`, which call a callable replacement, `copy.replace`, which
-calls `__replace__`, and a table of selected standard-library operations
-(`itertools`, `functools.reduce`, `math.sumprod`, `heapq.nlargest`, ...),
-which iterate what they get: at the call, or, for a lazy object, where
-analysed code advances it. `threading.Thread` and `multiprocessing.Process`
-follow CPython: the constructor stores `target`, `args` and `kwargs` in the
-instance's `_target`, `_args` and `_kwargs`, `start` calls the instance's
-`run` from the site of `start`, and their own `run` calls
-`_target(*_args, **_kwargs)`. An instance that their own constructor makes
-is one value per call that makes it, so each holds its own target. Of the
-overloads that fit a call by arity and keywords, the result is that of
-those whose parameter accepts a value of
-the first positional argument whose declared types differ between them: a
-value accepts a class that its class derives from, a protocol whose methods
-its class has, and `float` or `complex` for an `int`. A value of unknown
-class, or an argument that holds nothing once the solve settles, keeps
-every overload: `re.sub("a", "b", s)` gives a `str`, `re.sub(p, "b", s)`
-with `p` unknown a `str` and a `bytes`. A constrained type variable
-(`AnyStr`) is solved to the constraints that the class of its argument
-derives from, and an instance of a class whose type parameter is one keeps
-the constraint it was made with: `re.compile("x")` is a `Pattern[str]`,
-its `match` a `Match[str]` (as receiver it accepts only overloads declared
-for `Pattern[str]`), and that receiver solves its class's variable, so
-`group` gives a `str`. A value of unknown class keeps every constraint.
+libraries that typeshed describes are read as data.
+
+```mermaid
+flowchart LR
+    subgraph root["Package root"]
+        analysed["Analysed code"]
+        shipped["Stubs x.pyi beside x.py"]
+    end
+    subgraph outside["Outside code"]
+        builtins["Builtins"]
+        stdlib["Standard library"]
+        packages["Other packages"]
+    end
+    typeshed["typeshed stubs"]
+    analysed -->|"calls"| outside
+    typeshed -->|"types"| outside
+    outside -->|"calls back: only the exceptions below"| analysed
+    shipped -->|"annotations, bases (idea 4)"| analysed
+```
+
+#### Outside calls and values
+
+A call of an outside function gives what its stub declares. A method of an
+outside value is named by the public name of its class. No name is
+invented for a value whose type the stubs give.
+
+Outside code is not assumed to call what the analysed code gives it. The
+exceptions:
+
+- Only the builtins of Python apply their arguments: `map`,
+  `sorted(key=...)`, and the special methods of their protocol parameters
+  (`len(x)` calls `x.__len__`).
+- `re.sub` and `re.subn` call a callable replacement.
+- `copy.replace` calls `__replace__`.
+- A table of selected standard-library operations (`itertools`,
+  `functools.reduce`, `math.sumprod`, `heapq.nlargest`, ...): they iterate
+  what they get, at the call, or, for a lazy object, where analysed code
+  advances it.
+- `threading.Thread` and `multiprocessing.Process` follow CPython: the
+  constructor stores `target`, `args` and `kwargs` in the instance's
+  `_target`, `_args` and `_kwargs`, `start` calls the instance's `run` from
+  the site of `start`, and their own `run` calls
+  `_target(*_args, **_kwargs)`. An instance that their own constructor
+  makes is one value per call that makes it, so each holds its own target.
+
+#### Overloads and type variables
+
+Of the overloads that fit a call by arity and keywords, the result is that
+of those whose parameter accepts a value of the first positional argument
+whose declared types differ between them. A value accepts:
+
+- a class that its class derives from;
+- a protocol whose methods its class has;
+- `float` or `complex` for an `int`.
+
+A value of unknown class, or an argument that holds nothing once the solve
+settles, keeps every overload: `re.sub("a", "b", s)` gives a `str`,
+`re.sub(p, "b", s)` with `p` unknown a `str` and a `bytes`.
+
+A constrained type variable (`AnyStr`) is solved to the constraints that
+the class of its argument derives from, and an instance of a class whose
+type parameter is one keeps the constraint it was made with:
+`re.compile("x")` is a `Pattern[str]`, its `match` a `Match[str]` (as
+receiver it accepts only overloads declared for `Pattern[str]`), and that
+receiver solves its class's variable, so `group` gives a `str`. A value of
+unknown class keeps every constraint.
 
 ### 4. Declared types supply what value flow cannot
 
 A call edge exists only where analysed code makes the call. Values that
-only outside callers could supply come from two declarations. A function
-that no analysed code calls is an entry point: its receiver is any instance
-of its class or of a subclass that inherits it, and its parameters take
-their defaults. An annotation of a parameter, or of an assignment, names
-what the parameter or the target may hold: the instances of the class it
-names and of its subclasses. For an abstract class of outside code, which
-no value of its own can be, the subclasses are the analysed classes that
-derive from it (`it: AsyncIterator[T]` holds the instances of the analysed
-async iterators). For the protocols that the builtin types implement
-(`Iterable`, `Sized`, ...), only those that derive from them through
-abstract classes count: for a class that reaches one only through a
-concrete class (a subclass of `list`), a client most likely passes a
-builtin. A stub `x.pyi` that the package ships beside `x.py` gives the
-annotations that the source leaves out, and the bases of its classes for
-what an annotation names.
+only outside callers could supply come from two declarations:
+
+- **Entry points.** A function that no analysed code calls is an entry
+  point: its receiver is any instance of its class or of a subclass that
+  inherits it, and its parameters take their defaults.
+- **Annotations.** An annotation of a parameter, or of an assignment, names
+  what the parameter or the target may hold: the instances of the class it
+  names and of its subclasses.
+
+For an abstract class of outside code, which no value of its own can be,
+the subclasses are the analysed classes that derive from it
+(`it: AsyncIterator[T]` holds the instances of the analysed async
+iterators).
+
+For the protocols that the builtin types implement (`Iterable`, `Sized`,
+...), only those that derive from them through abstract classes count: for
+a class that reaches one only through a concrete class (a subclass of
+`list`), a client most likely passes a builtin.
+
+A stub `x.pyi` that the package ships beside `x.py` gives the annotations
+that the source leaves out, and the bases of its classes for what an
+annotation names.
 
 ### 5. The result does not depend on the order of the solve, and the solve ends
 
 Rules only add facts. A rule subscribes to a points-to set and acts on each
-object that arrives, in any order. The few decisions that read what a node
-holds (does a base hold anything, does a receiver hold anything) run only
-at a fixpoint, in a fixed order, and they add facts too. A class lookup
-waits until the class hierarchy is complete. A node that would hold more
-objects than the cap holds one saturated value instead, about which nothing
-is known; the solve applies rules to a node's objects only once propagation
-has filled it, in rounds, so which objects a node's rules saw before it
-saturated does not depend on the order either. The solve ends because every
-object and every call is keyed by finite things: source positions, names
-from the source, and a bounded context (see [Bounds](#bounds)). So
-`x = x.parent` on an outside value adds one name, and a class stored as its
-own `__iter__` makes one instance per loop.
+object that arrives, in any order.
+
+The few decisions that read what a node holds (does a base hold anything,
+does a receiver hold anything) run only at a fixpoint, in a fixed order,
+and they add facts too. A class lookup waits until the class hierarchy is
+complete.
+
+A node that would hold more objects than the cap holds one saturated value
+instead, about which nothing is known. The solve applies rules to a node's
+objects only once propagation has filled it, in rounds, so which objects a
+node's rules saw before it saturated does not depend on the order either.
+
+```mermaid
+flowchart TD
+    propagate["Propagate objects along subset edges"]
+    decisions["Decisions, in a fixed order"]
+    propagate -->|"nothing left"| decisions
+    decisions -->|"they add facts"| propagate
+    decisions -->|"they add none"| round{"New objects for rules?"}
+    round -->|"yes: the rules act and add facts"| propagate
+    round -->|"no"| done["Fixpoint"]
+```
+
+The solve ends because every object and every call is keyed by finite
+things: source positions, names from the source, and a bounded context
+(see [Bounds](#bounds)). So `x = x.parent` on an outside value adds one
+name, and a class stored as its own `__iter__` makes one instance per loop.
 
 ## What the analysis does not do
 
@@ -146,9 +240,11 @@ own `__iter__` makes one instance per loop.
 ## Bounds
 
 The cap on the objects of a node is the one setting of the analysis
-(`--cap`, 5,000 by default, or none): it trades precision and recall against
-cost, and the document records it. Every other bound is the same for every
-program, and reaching any bound is visible in the output.
+(`--cap`, 5,000 by default, or none): it trades precision and recall
+against cost, and the document records it.
+
+Every other bound is the same for every program, and reaching any bound is
+visible in the output.
 
 | Bound | Value | Past it |
 |---|---|---|
@@ -169,16 +265,19 @@ not depend on its order.
 
 The bound of 247 levels was measured for the Python engine: the deepest
 nesting that a recursive walk of the syntax tree built at Python's default
-recursion limit. No stack forces it in the Rust engine, whose parse thread
-has a stack sized from the source; it remains because it defines when a
-module is `partial`. The deepest statement of the micro, macro and scale
-sets is 31 levels.
+recursion limit.
+
+No stack forces it in the Rust engine, whose parse thread has a stack sized
+from the source; it remains because it defines when a module is `partial`.
+The deepest statement of the micro, macro and scale sets is 31 levels.
 
 What a saturated node stood for is lost: code reached only through it is
 code that no analysed code calls, and a rule that depends on how much a set
-holds may apply where it would not without the cap. Without a cap no node
-saturates; the analysis still ends in principle, but on inputs where many
-values meet it may not end in reasonable time or memory.
+holds may apply where it would not without the cap.
+
+Without a cap no node saturates; the analysis still ends in principle, but
+on inputs where many values meet it may not end in reasonable time or
+memory.
 
 ## Open problems
 
