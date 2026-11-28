@@ -80,15 +80,14 @@ impl Targets {
         }
     }
 
-    fn remove(&mut self, target: NodeId) -> Option<bool> {
-        let searched = self.searched.remove(&target)?;
-        let position = self
-            .order
-            .iter()
-            .position(|&listed| listed == target)
-            .expect("a target is in the order");
-        self.order.remove(position);
-        Some(searched)
+    fn forget(&mut self, target: NodeId) -> Option<bool> {
+        self.searched.remove(&target)
+    }
+
+    fn drop_forgotten(&mut self) {
+        let searched = &self.searched;
+        self.order.retain(|target| searched.contains_key(target));
+        assert_eq!(self.order.len(), self.searched.len(), "a target per entry");
     }
 
     fn pairs(&self) -> impl Iterator<Item = (NodeId, bool)> + '_ {
@@ -739,12 +738,14 @@ impl<C: Copy> Solver<C> {
             Successors::Many(mut map) => {
                 let mut listed: Vec<NodeId> = map.order.clone();
                 self.order.arrange(&mut listed);
+                let mut forgotten = false;
                 for listed_target in listed {
                     let target = self.find(listed_target);
                     if target != listed_target {
                         let searched = map
-                            .remove(listed_target)
+                            .forget(listed_target)
                             .expect("a listed successor is in the map");
+                        forgotten = true;
                         if target == node || map.contains(target) {
                             continue;
                         }
@@ -761,6 +762,9 @@ impl<C: Copy> Solver<C> {
                         map.insert(target, true);
                         self.cycle_suspects.push(target);
                     }
+                }
+                if forgotten {
+                    map.drop_forgotten();
                 }
                 self.nodes[node.index()].successors = Successors::Many(map);
             }
