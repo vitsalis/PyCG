@@ -1,4 +1,4 @@
-import broken, nul, chain
+import broken, null_byte, chain
 
 
 def deco(f):

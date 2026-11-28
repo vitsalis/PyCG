@@ -1315,7 +1315,7 @@ def test_a_module_has_the_lines_that_python_numbers(tmp_path):
 
 VERSIONS = {
     "main.py": """\
-import broken, nul, chain
+import broken, null_byte, chain
 
 
 def deco(f):
@@ -1341,7 +1341,7 @@ if a:
 else:
     def f(): b < c
 """,
-    "nul.py": "x = 1\x00\n",
+    "null_byte.py": "x = 1\x00\n",
 }
 
 
@@ -1363,8 +1363,8 @@ def test_the_document_is_the_same_on_every_python_version(tmp_path):
                 },
                 "chain": {"file": "chain.py", "kind": "source", "status": "analysed"},
                 "main": {"file": "main.py", "kind": "source", "status": "analysed"},
-                "nul": {
-                    "file": "nul.py",
+                "null_byte": {
+                    "file": "null_byte.py",
                     "kind": "source",
                     "status": "failed",
                     "cause": "SyntaxError",
@@ -1393,12 +1393,12 @@ def test_the_document_is_the_same_on_every_python_version(tmp_path):
                     "module": "main",
                     "lines": [14, 14],
                 },
-                "nul": {"kind": "module", "module": "nul", "lines": [0, 0]},
+                "null_byte": {"kind": "module", "module": "null_byte", "lines": [0, 0]},
             },
             "exports": {
                 "main.broken": ["broken"],
                 "main.chain": ["chain"],
-                "main.nul": ["nul"],
+                "main.null_byte": ["null_byte"],
             },
             "outside": {
                 "<builtin>.print": {"known": "stub"},
