@@ -24,7 +24,8 @@ const BUILTIN_STUBS: &str = "builtins.";
 const ABC_META: &str = "abc.ABCMeta";
 const MODULES_OF_ABCS: &[&str] = &["abc", "typing", "typing_extensions", "_collections_abc"];
 const GENERIC_CLASSES: &[&str] = &["typing.Generic", "typing_extensions.Generic"];
-const FINAL_BUILTIN_METHODS: &[&str] = &["__iter__", "__contains__"];
+const FINAL_BUILTIN_METHODS: &[&str] = &["__iter__"];
+const MEMBERSHIP_METHOD: &str = "__contains__";
 const STR_DEFINED_BEYOND_STUBS: &[&str] = &["builtins.str", "builtins.bytes", "builtins.bytearray"];
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -1712,6 +1713,11 @@ impl State {
                     if marked
                         .iter()
                         .any(|name| self.outside_defines(&base_name, name))
+                    {
+                        return true;
+                    }
+                    if texts.iter().any(|name| name == MEMBERSHIP_METHOD)
+                        && self.outside_defines(&base_name, MEMBERSHIP_METHOD)
                     {
                         return true;
                     }

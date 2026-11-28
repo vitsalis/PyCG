@@ -153,11 +153,17 @@ exceptions:
   analysed class inherits calls, from the site of its call, the methods
   that CPython's implementation calls on the receiver whatever its
   arguments hold (`Mapping.get` calls `__getitem__`, `MutableSet.clear`
-  calls `pop`). The calls that it makes once per element of an argument
-  (the `__setitem__` of `update`) are not made, nor those of a mixin that
-  is a generator (`Sequence.__iter__`), which runs where its iterator
-  advances; a class that derives from a builtin type has that type's own
-  methods instead.
+  calls `pop`); one that loops over the receiver iterates it there, as a
+  loop does (`Sequence.__contains__`). The calls that it makes once per
+  element of an argument (the `__setitem__` of `update`) are not made, nor
+  those of a mixin that is a generator (`Sequence.__iter__`), which runs
+  where its iterator advances; a class that derives from a builtin type
+  has that type's own methods instead.
+
+`x in c` iterates `c` (`__iter__`, then `__getitem__`) only where the class
+of `c` has no `__contains__`, as in Python; a `__contains__` that the stub
+of an outside base declares counts, so a subclass of `Mapping` is not
+iterated.
 
 #### Overloads and type variables
 
