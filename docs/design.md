@@ -252,7 +252,10 @@ name, and a class stored as its own `__iter__` makes one instance per loop.
   its body is analysed.
 - **No code built at run time.** `eval`, `exec`, and attribute names
   computed from more than four strings are not followed, so the calls that
-  they make give no edges.
+  they make give no edges. An `exec` or `eval` without a globals mapping may
+  bind any name of the scope that calls it and of its module, whose names
+  are then not followed by definition (idea 2); given one (not `None`), the
+  code runs in that mapping and binds no name of either.
 
 ## Bounds
 

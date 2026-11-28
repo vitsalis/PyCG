@@ -3,7 +3,8 @@ use std::cell::RefCell;
 use indexmap::{IndexMap, IndexSet};
 use ruff_python_ast::token::Tokens;
 use ruff_python_ast::{
-    Alias, ExceptHandlerExceptHandler, Expr, ExprContext, ModModule, Parameters, Pattern, Stmt,
+    Alias, Arguments, ExceptHandlerExceptHandler, Expr, ExprContext, ModModule, Parameters,
+    Pattern, Stmt,
 };
 use ruff_source_file::LineIndex;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -104,6 +105,8 @@ pub fn node_key(node: &Node<'_>) -> NodeKey {
 const SURROGATES: std::ops::RangeInclusive<u32> = 0xd800..=0xdfff;
 const UNREADABLE_NAME_SURROGATE: char = char::REPLACEMENT_CHARACTER;
 
+const GLOBALS_POSITION: usize = 1;
+
 const NAMESPACE_CALLS: [(&str, &[NamespaceTarget]); 5] = [
     ("globals", &[NamespaceTarget::Module]),
     ("locals", &[NamespaceTarget::Caller]),
@@ -116,6 +119,27 @@ const NAMESPACE_CALLS: [(&str, &[NamespaceTarget]); 5] = [
 enum NamespaceTarget {
     Module,
     Caller,
+}
+
+fn runs_in_given_globals(arguments: &Arguments) -> bool {
+    let globals = match arguments.args.get(GLOBALS_POSITION) {
+        Some(argument) => Some(argument),
+        None => arguments
+            .keywords
+            .iter()
+            .find(|keyword| {
+                keyword
+                    .arg
+                    .as_ref()
+                    .is_some_and(|arg| arg.as_str() == "globals")
+            })
+            .map(|keyword| &keyword.value),
+    };
+    let starred = arguments
+        .args
+        .iter()
+        .any(|argument| matches!(argument, Expr::Starred(_)));
+    !starred && globals.is_some_and(|globals| !matches!(globals, Expr::NoneLiteral(_)))
 }
 
 fn namespace_targets(name: &str) -> Option<&'static [NamespaceTarget]> {
@@ -992,7 +1016,12 @@ impl<'a> Collector<'a> {
                 {
                     let arguments = &call.arguments;
                     let empty = arguments.args.is_empty() && arguments.keywords.is_empty();
-                    if *name != "vars" || empty {
+                    let own_namespace = match *name {
+                        "vars" => empty,
+                        "exec" | "eval" => !runs_in_given_globals(arguments),
+                        _ => true,
+                    };
+                    if own_namespace {
                         self.namespace_uses.push((NamespaceUse::Call(name), scope));
                     }
                 }
