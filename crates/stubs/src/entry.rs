@@ -105,6 +105,7 @@ pub struct Target {
 pub enum Type {
     Unknown,
     Class(Box<str>),
+    Literal(Box<str>, Box<[LiteralValue]>),
     None,
     SelfType,
     Ellipsis,
@@ -120,6 +121,12 @@ pub enum Type {
         bound: Option<Box<Type>>,
         constrained: bool,
     },
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub enum LiteralValue {
+    Str(Box<str>),
+    Int(i128),
 }
 
 impl Type {
@@ -161,6 +168,7 @@ const TYPE_UNION: &str = "|";
 const TYPE_TYPE: &str = "*type";
 const TYPE_CALL: &str = "*call";
 const TYPE_VARIABLE: &str = "*var";
+const TYPE_LITERAL: &str = "*lit";
 const TYPE_VARIABLE_CONSTRAINED: &str = "c";
 const SPECIAL_PREFIX: char = '*';
 
@@ -169,7 +177,9 @@ pub fn class_names(reduced: &Type) -> Vec<&str> {
     let mut pending = vec![reduced];
     while let Some(current) = pending.pop() {
         match current {
-            Type::Class(path) | Type::Generic(path, _) => names.push(&**path),
+            Type::Class(path) | Type::Literal(path, _) | Type::Generic(path, _) => {
+                names.push(&**path)
+            }
             Type::Ellipsis => names.push(TYPE_ELLIPSIS),
             Type::Union(arms) => pending.extend(arms.iter().rev()),
             Type::Unknown
@@ -467,6 +477,21 @@ fn decode_type(value: &Value, location: &str) -> Decoded<Type> {
     Ok(single)
 }
 
+fn literal_value(value: &Value, location: &str) -> Decoded<LiteralValue> {
+    match value {
+        Value::String(text) => Ok(LiteralValue::Str(Box::from(text.as_str()))),
+        Value::Number(number) => match number
+            .as_i64()
+            .map(i128::from)
+            .or_else(|| number.as_u64().map(i128::from))
+        {
+            Some(value) => Ok(LiteralValue::Int(value)),
+            None => error(location, format!("literal {number} is not an int")),
+        },
+        _ => error(location, "a literal is not a string or an int"),
+    }
+}
+
 fn simple_type(text: &str, location: &str) -> Decoded<Type> {
     Ok(match text {
         TYPE_NONE => Type::None,
@@ -509,6 +534,10 @@ fn type_children<'v>(items: &'v [Value], location: &str) -> Decoded<Vec<&'v Valu
             }
             _ => return error(location, "*var takes a name and a bound or constraints"),
         },
+        TYPE_LITERAL => match rest {
+            [Value::String(_), Value::Array(_)] => vec![],
+            _ => return error(location, "*lit takes a class and values"),
+        },
         _ if head.starts_with(SPECIAL_PREFIX) => {
             return error(location, format!("type list {head:?}"));
         }
@@ -538,6 +567,17 @@ fn compound_type(items: &[Value], children: Vec<Type>, location: &str) -> Decode
                 bound,
                 constrained: items.len() == 4,
             }
+        }
+        TYPE_LITERAL => {
+            let class = Box::from(string(&items[1], location)?);
+            let Value::Array(values) = &items[2] else {
+                unreachable!("*lit values are a list");
+            };
+            let values = values
+                .iter()
+                .map(|value| literal_value(value, location))
+                .collect::<Decoded<_>>()?;
+            Type::Literal(class, values)
         }
         _ => Type::Generic(Box::from(head), children.collect()),
     })

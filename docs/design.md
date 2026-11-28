@@ -146,16 +146,19 @@ exceptions:
 #### Overloads and type variables
 
 Of the overloads that fit a call by arity and keywords, the result is that
-of those whose parameter accepts a value of the first positional argument
-whose declared types differ between them. A value accepts:
+of those whose parameters accept a value of each argument whose declared
+types differ between them. A value accepts:
 
 - a class that its class derives from;
 - a protocol whose methods its class has;
-- `float` or `complex` for an `int`.
+- `float` or `complex` for an `int`;
+- for a `Literal` of strings or ints, a constant whose value it lists and
+  any other value of its class.
 
 A value of unknown class, or an argument that holds nothing once the solve
-settles, keeps every overload: `re.sub("a", "b", s)` gives a `str`,
-`re.sub(p, "b", s)` with `p` unknown a `str` and a `bytes`.
+settles (`True`, `False` and `None` hold no value), keeps every overload:
+`re.sub(p, "b", s)` with `p` unknown gives a `str`, `sock.makefile("rb")` a
+`BufferedReader`.
 
 A constrained type variable (`AnyStr`) is solved to the constraints that
 the class of its argument derives from, and an instance of a class whose
@@ -288,10 +291,11 @@ memory.
 - **`type(x)` gives a typed `type`, not the class of `x`.** Following the
   class would make hubs of values instantiate their own classes until
   memory ends.
-- **Overloads are selected by one argument.** A call of an outside
-  function gives the union of the overloads that the first deciding
-  argument accepts (idea 3); later arguments do not narrow it, so
-  `os.path.join(p, "a")` with `p` unknown gives a `str` and a `bytes`. The
-  mode of an opened file is selected by a table of Python's rule.
+- **Overloads are selected argument by argument.** A call of an outside
+  function gives the union of the overloads that accept each deciding
+  argument (idea 3), not the first overload that accepts them all, as
+  Python's rule picks: `open(f, "rb")` would give `BinaryIO` and `IO[Any]`
+  beside `BufferedReader`, so the mode of an opened file is selected by a
+  table of Python's rule.
 - **Small measured imprecisions.** The result of a coroutine function names
   any attribute.

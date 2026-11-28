@@ -131,6 +131,29 @@ fn positional_parameter(parameters: &[Param], position: usize) -> Option<&Param>
         })
 }
 
+fn keyword_parameter<'p>(parameters: &'p [Param], name: &str) -> Option<&'p Param> {
+    parameters
+        .iter()
+        .find(|parameter| {
+            &*parameter.name == name
+                && matches!(
+                    parameter.kind,
+                    ParameterKind::PositionalOrKeyword | ParameterKind::KeywordOnly
+                )
+        })
+        .or_else(|| {
+            parameters
+                .iter()
+                .find(|parameter| parameter.kind == ParameterKind::VarKeyword)
+        })
+}
+
+#[derive(Clone, Copy)]
+enum Deciding {
+    Position(usize),
+    Keyword(Sym),
+}
+
 fn stub_signature(parameters: &[Param]) -> Signature {
     let positional: Vec<Box<str>> = parameters
         .iter()
@@ -197,7 +220,7 @@ fn parameter_classes(reduced: &Type, classes: &mut Vec<String>) {
                 pending.push(bound);
                 continue;
             }
-            Type::Class(path) | Type::Generic(path, _) => path.to_string(),
+            Type::Class(path) | Type::Literal(path, _) | Type::Generic(path, _) => path.to_string(),
             Type::Ellipsis => "...".to_string(),
             _ => continue,
         };
@@ -513,33 +536,50 @@ impl State {
         receivers: &[ObjId],
         dst: NodeId,
     ) {
-        let Some(position) = self.deciding_position(call, &results) else {
+        let deciding = self.deciding_arguments(call, &results);
+        if deciding.is_empty() {
             for (reduced, context) in &results {
                 self.add_type(graph, reduced, dst, context, &[]);
             }
             return;
-        };
+        }
         for (reduced, context) in results {
             let (bound, parameters) = context.binding.clone().expect("a bound overload");
-            let parameter = positional_parameter(&parameters, position)
-                .expect("every overload has the deciding parameter");
-            if let Some(&receiver) = receivers.get(position) {
-                if self.accepts(receiver, &parameter.annotation) {
-                    self.add_type(graph, &reduced, dst, &context, &[]);
+            let mut accepted = true;
+            let mut arguments = Vec::new();
+            for &decider in &deciding {
+                let parameter = self
+                    .deciding_parameter(decider, &parameters)
+                    .expect("every overload has the deciding parameter");
+                if let Deciding::Position(position) = decider
+                    && let Some(&receiver) = receivers.get(position)
+                {
+                    accepted &= self.accepts(receiver, &parameter.annotation);
+                    continue;
                 }
+                if let Some(argument) = self.parameter_node(graph, bound, parameter) {
+                    arguments.push((argument, parameter.annotation.clone()));
+                }
+            }
+            if !accepted {
                 continue;
             }
-            match self.parameter_node(graph, bound, parameter) {
-                Some(argument) => self.select_overload(
-                    graph,
-                    argument,
-                    bound,
-                    &parameter.annotation,
-                    (reduced, context),
-                    dst,
-                ),
-                None => self.add_type(graph, &reduced, dst, &context, &[]),
+            if arguments.is_empty() {
+                self.add_type(graph, &reduced, dst, &context, &[]);
+            } else {
+                self.select_overload(graph, arguments, bound, (reduced, context), dst);
             }
+        }
+    }
+
+    fn deciding_parameter<'p>(
+        &self,
+        decider: Deciding,
+        parameters: &'p [Param],
+    ) -> Option<&'p Param> {
+        match decider {
+            Deciding::Position(position) => positional_parameter(parameters, position),
+            Deciding::Keyword(name) => keyword_parameter(parameters, self.symbols.text(name)),
         }
     }
 
@@ -760,32 +800,41 @@ impl State {
         overloads
     }
 
-    fn deciding_position(&self, call: CallId, results: &[(Type, TypeContext)]) -> Option<usize> {
+    fn deciding_arguments(&self, call: CallId, results: &[(Type, TypeContext)]) -> Vec<Deciding> {
         let details = &self.calls[call.index()];
         if !details.star.is_empty() || !details.double_star.is_empty() {
-            return None;
+            return Vec::new();
         }
-        let (first, rest) = results.split_first()?;
+        let Some((first, rest)) = results.split_first() else {
+            return Vec::new();
+        };
         let mut variables = Vec::new();
         constrained_variables(&first.0, &mut variables);
         if variables.is_empty() && rest.iter().all(|(reduced, _)| *reduced == first.0) {
-            return None;
+            return Vec::new();
         }
-        let count = self.calls[call.index()].args.len();
-        (0..count).find(|&position| {
-            let annotations: Vec<Option<&Type>> = results
-                .iter()
-                .map(|(_, context)| {
-                    let (_, parameters) = context.binding.as_ref().expect("a bound overload");
-                    positional_parameter(parameters, position)
-                        .map(|parameter| &parameter.annotation)
-                })
-                .collect();
-            annotations.iter().all(Option::is_some)
-                && annotations
+        let positions = (0..details.args.len()).map(Deciding::Position);
+        let keywords = details
+            .keywords
+            .iter()
+            .map(|&(name, _)| Deciding::Keyword(name));
+        positions
+            .chain(keywords)
+            .filter(|&decider| {
+                let annotations: Vec<Option<&Type>> = results
                     .iter()
-                    .any(|annotation| *annotation != annotations[0])
-        })
+                    .map(|(_, context)| {
+                        let (_, parameters) = context.binding.as_ref().expect("a bound overload");
+                        self.deciding_parameter(decider, parameters)
+                            .map(|parameter| &parameter.annotation)
+                    })
+                    .collect();
+                annotations.iter().all(Option::is_some)
+                    && annotations
+                        .iter()
+                        .any(|annotation| *annotation != annotations[0])
+            })
+            .collect()
     }
 
     fn class_method_owner(

@@ -825,11 +825,16 @@ class StubReader:
         return ["*call", returns, None]
 
     def _literal_type(self, scope, node):
-        if isinstance(node, ast.UnaryOp):
-            node = node.operand
+        match node:
+            case ast.UnaryOp(op=ast.USub(), operand=ast.Constant(value=int() as value)):
+                node = ast.Constant(value=-value)
+            case ast.UnaryOp():
+                node = node.operand
         if isinstance(node, ast.Constant):
             if node.value is None:
                 return "*none"
+            if type(node.value) in (str, int):
+                return ["*lit", f"builtins.{type(node.value).__name__}", [node.value]]
             return f"builtins.{type(node.value).__name__}"
         if isinstance(node, ast.Attribute):
             enum_classes = [
@@ -1257,6 +1262,8 @@ def _class_paths(reduced):
     match reduced:
         case ["|", *arms]:
             return [name for arm in arms for name in _class_paths(arm)]
+        case ["*lit", str() as cls, _]:
+            return [cls]
         case [str() as cls, *_] if not cls.startswith("*"):
             return [cls]
         case str() if not reduced.startswith("*"):
@@ -1280,7 +1287,20 @@ def _union(arms):
     flat = []
     for arm in arms:
         for item in arm[1:] if isinstance(arm, list) and arm[:1] == ["|"] else [arm]:
-            if item not in flat:
+            same_class = [
+                index
+                for index, other in enumerate(flat)
+                if isinstance(item, list)
+                and item[:1] == ["*lit"]
+                and isinstance(other, list)
+                and other[:2] == item[:2]
+            ]
+            if same_class:
+                index = same_class[0]
+                values = flat[index][2]
+                added = [value for value in item[2] if value not in values]
+                flat[index] = [*item[:2], [*values, *added]]
+            elif item not in flat:
                 flat.append(item)
     if not flat:
         return None
