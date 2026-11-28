@@ -1,264 +1,234 @@
 # Output format
 
-PyCG writes one JSON document. The document is deterministic: the same
-input gives the same bytes on every run and platform. Object keys are
-sorted, lists are sorted as stated below, and the text is compact (no
-whitespace between tokens) and ASCII: every character past ASCII is
-escaped as `\uXXXX`.
+PyCG writes one JSON document in the format `pycg/1`. The document is
+deterministic: object keys are sorted, the text is compact (no whitespace
+between tokens) and ASCII, with every other character, a lone surrogate
+included, escaped as `\uXXXX`. A reader refuses a `format` it does not know.
+
+## Example
+
+`pkg/__init__.py`:
+
+```python
+from .shapes import Square
+```
+
+`pkg/shapes.py`:
+
+```python
+import os
+
+
+class Square:
+    def __init__(self, side):
+        self.side = side
+
+    def __bool__(self):
+        return self.side > 0
+
+    def area(self):
+        return self.side * self.side
+
+
+def report(path, hook):
+    square = Square(2)
+    if square:
+        hook(os.path.join(path, "area"), square.area())
+```
+
+`pycg --package . --package-name pkg --package-version 1.0 pkg/__init__.py
+pkg/shapes.py` writes this document, pretty-printed here for reading:
 
 ```json
 {
-  "format": "pycg/1",
-  "tool": {"name": "pycg", "version": "2.0.0", "typeshed": "<commit>", "cap": 5000},
-  "package": {"name": "pkg", "version": "2.1.0"},
-  "modules": {
-    "pkg.mod": {"file": "pkg/mod.py", "kind": "source", "status": "analysed"},
-    "pkg.broken": {"file": "pkg/broken.py", "kind": "source", "status": "failed", "cause": "SyntaxError (line 3)"},
-    "pkg._speedups": {"file": "pkg/_speedups.cpython-312-darwin.so", "kind": "extension"}
+  "calls": {
+    "pkg.shapes.report": [
+      {"callees": ["pkg.shapes.Square.__init__"], "col": 13, "end": [16, 22], "line": 16},
+      {"callees": ["pkg.shapes.Square.__bool__"], "col": 7, "end": [17, 13], "implicit": "truth", "line": 17},
+      {"callees": [], "col": 8, "end": [18, 55], "line": 18, "unresolved": "no value"},
+      {"callees": ["os.path.join"], "col": 13, "end": [18, 39], "line": 18},
+      {"callees": ["pkg.shapes.Square.area"], "col": 41, "end": [18, 54], "line": 18}
+    ]
   },
   "definitions": {
-    "pkg.mod": {"kind": "module", "module": "pkg.mod", "lines": [1, 40]},
-    "pkg.mod.C": {"kind": "class", "module": "pkg.mod", "lines": [8, 30], "mro": ["pkg.mod.C", "pkg.base.B", "<builtin>.object"]},
-    "pkg.mod.C.m": {"kind": "function", "module": "pkg.mod", "lines": [10, 20]}
+    "pkg": {"kind": "module", "lines": [1, 1], "module": "pkg"},
+    "pkg.shapes": {"kind": "module", "lines": [1, 18], "module": "pkg.shapes"},
+    "pkg.shapes.Square": {"kind": "class", "lines": [4, 12], "module": "pkg.shapes", "mro": ["pkg.shapes.Square", "<builtin>.object"]},
+    "pkg.shapes.Square.__bool__": {"kind": "function", "lines": [8, 9], "module": "pkg.shapes"},
+    "pkg.shapes.Square.__init__": {"kind": "function", "lines": [5, 6], "module": "pkg.shapes"},
+    "pkg.shapes.Square.area": {"kind": "function", "lines": [11, 12], "module": "pkg.shapes"},
+    "pkg.shapes.report": {"kind": "function", "lines": [15, 18], "module": "pkg.shapes"}
   },
-  "exports": {"pkg.C": ["pkg.mod.C"]},
+  "exports": {
+    "pkg.Square": ["pkg.shapes.Square"],
+    "pkg.shapes.os": ["os"]
+  },
+  "format": "pycg/1",
+  "modules": {
+    "pkg": {"file": "pkg/__init__.py", "kind": "source", "status": "analysed"},
+    "pkg.shapes": {"file": "pkg/shapes.py", "kind": "source", "status": "analysed"}
+  },
   "outside": {
-    "requests.Response.json": {"known": "stub"},
-    "foo.get.bar": {"known": "name"},
-    "pkg._speedups.escape": {"known": "extension"}
+    "os.path.join": {"known": "stub"}
   },
-  "calls": {
-    "pkg.mod.C.m": [
-      {"line": 12, "col": 8, "end": [12, 30], "callees": ["pkg.util.f", "requests.Response.json"]},
-      {"line": 14, "col": 13, "end": [14, 17], "callees": ["pkg.mod.C.__iter__"], "implicit": "iteration"},
-      {"line": 17, "col": 12, "end": [17, 34], "callees": [], "unresolved": "computed name"}
-    ]
-  }
+  "package": {"name": "pkg", "version": "1.0"},
+  "tool": {"cap": 5000, "name": "pycg", "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34", "version": "2.0.0"}
 }
 ```
 
-## Parts
+## Top-level keys
 
-**`format`** names this format and its version. A reader refuses a version
-that it does not know.
+| Key | Type | Meaning |
+|---|---|---|
+| `format` | string | `pycg/1` |
+| `tool` | object | The tool that wrote the document |
+| `package` | object | The analysed package, as given on the command line |
+| `modules` | object | Module name to module, for every module of the package |
+| `definitions` | object | Qualified name to definition |
+| `exports` | object | Access path to the sorted definitions or outside names it reaches |
+| `outside` | object | Each callee that is not a definition, to how PyCG knows it |
+| `calls` | object | Caller (a module or function of `definitions`) to its call sites |
 
-**`tool`** is the version of PyCG, the typeshed commit of its stub data,
-and the cap of the analysis: the most values that it keeps for one node
-(`--cap`, 5,000 by default), or `null` if there was none. The result
-depends on the cap (see the cause `saturated`).
+## `tool` and `package`
 
-**`package`** is the name and version of the analysed package, as given on
-the command line (`--package-name`, `--package-version`); each is `null`
-when not given. PyCG does not read installed metadata: the output does not
-depend on the environment.
+| Field | Type | Meaning |
+|---|---|---|
+| `tool.name` | string | `pycg` |
+| `tool.version` | string | The version of PyCG |
+| `tool.typeshed` | string | The typeshed commit of the stub data |
+| `tool.cap` | integer or null | The most values kept for one node (`--cap`, 5,000 by default); `null` for `--cap none` |
+| `package.name` | string or null | `--package-name`; `null` when not given |
+| `package.version` | string or null | `--package-version`; `null` when not given |
 
-**`modules`** has every module of the analysed package: each Python source
-file that the analysis reached under the package root, and each extension
-module that an import of the package or an entry point reaches there. A
-binary file that neither reaches is not listed: PyCG does not search the
-root for them. An entry point outside the package root, a stub (`.pyi`,
-which is not source), a directory, or the `__init__.py` of the root (which
-is not a package) is not analysed; PyCG warns. A file is known by its path
-as written, not by what it is on the disk: a symbolic link to `a.py`
-named `b.py` is the module `b` too, as for Python.
+## `modules`
 
-Several files can hold one module name. One rule picks the module's file,
-for imports and entry points alike, whatever the order in which they reach
-the files: the package (`a/__init__.py`), then the module file (`a.py`),
-then the extension binaries (`a.so`, `a.abi3.so`, ...), by name, and
-last the files that only an entry point names, which no import finds (a
-script `a` without a suffix, `a.pyw`, `a.b.py` for the module `a.b`), by
-their path. Python picks the package before the module file too, and
-imports neither the module file then nor a binary that is not the first;
-it tries a binary before a module file, where PyCG analyses the source. A
-directory without `__init__.py` (a namespace package) holds the name only
-when no file of it does.
+Every source file that the analysis reached under the package root, and
+every extension module that an import or an entry point reaches there.
 
-- `file` is relative to the package root, with `/` separators.
-- `shadows`, when present, lists the other files of the module's name,
-  which the rule does not pick (`"shadows": ["a.py"]` beside
-  `a/__init__.py`), sorted, relative to the root. PyCG does not analyse
-  them.
-- `kind` is `source` or `extension`. An extension is a binary module file
-  (`name.cpython-*.so`, `name.abi3.so`, `name.so`, `name.pyd`: the name,
-  an optional tag, then `.so` or `.pyd`) that an import of the package
-  reaches, where no package directory (`name/__init__.py`) and no source
-  file (`name.py`) of that name is. PyCG reads the file's name only. The
-  module is outside code, named by its dotted name, and an attribute of
-  its package.
-- A source module has a `status`, and a `cause` unless it is `analysed`:
-  - `analysed`: the analysis built the whole module;
-  - `failed`: the file cannot be decoded or parsed. The module has no
-    definitions but itself (with lines `[0, 0]`) and no calls;
-  - `partial`: the analysis stopped before a top-level statement that
-    nests deeper than it follows (247 levels, see
-    [Bounds](design.md#bounds)), with the cause `DeepNesting (line 3)`, the
-    line of that statement. The
-    definitions and calls of the statements before it are kept, and the
-    module may call less than its code does.
+| Field | Type | Meaning |
+|---|---|---|
+| `file` | string | The path as written, relative to the package root, with `/` separators |
+| `kind` | string | `source`, or `extension`: a binary `name.so`, `name.<tag>.so` or `name.pyd`, of which PyCG reads only the name |
+| `status` | string | Source only: `analysed`, `partial` or `failed` |
+| `cause` | string | Source only, unless `analysed`: why the module is not whole |
+| `shadows` | list of strings | When present: the other files of the module's name, sorted, which PyCG does not analyse |
 
-  Nothing is dropped silently. The cause of a failed module is the type
-  of the error, with its line or byte where Python gives one
-  (`SyntaxError (line 3)`, `UnicodeDecodeError (byte 17)`, `SyntaxError`,
-  `RecursionError`, `MemoryError` when the source is too complex for
-  Python's parser): not its message, so that it is the same on every run
-  and platform.
+The file of a module name is the package (`a/__init__.py`), else `a.py`,
+else the first extension binary by name, else the first file that only an
+entry point names, by path. A namespace package holds a name only when no
+file does.
 
-**`definitions`** has every module, class and function (lambdas included)
-that the analysed source defines, by qualified name: its `kind`, its
-`module`, its first and last line, and for a class its `mro` (the names of
-its linearization, outside classes included). Code that the analysis
-proves cannot run defines nothing.
+| `status` | Meaning | `cause` |
+|---|---|---|
+| `analysed` | The whole module is analysed | None |
+| `partial` | The analysis stopped before a top-level statement nested deeper than 247 levels ([Bounds](design.md#bounds)); what came before is kept | `DeepNesting (line N)` |
+| `failed` | The file cannot be read, decoded or parsed; the module defines only itself, with lines `[0, 0]`, and calls nothing | The error type, below |
 
-- A module's lines are `[1, n]`, `n` its number of lines as Python numbers
-  them (the file is read with universal newlines, and only a newline ends
-  a line: a form feed does not, though `str.splitlines` breaks there);
-  `[0, 0]` for an empty module. A function's or class's lines are
-  those of its `ast` node: from its `def` or `class` line (not its
-  decorators) to its last line.
-- The `mro` is the C3 linearization over the bases that the analysis
-  knows. An analysed class is listed with its own bases. A base outside
-  the package (`ext.Base`, `<builtin>.dict`) is one entry, at its place in
-  the order; its own bases are outside code and are not listed. So
-  `class X(ext.Base, A)` gives `["pkg.X", "ext.Base", "pkg.A"]`, and
-  `class E(Exception)` gives `["pkg.E", "<builtin>.Exception"]`. Only a
-  linearization without an outside class ends with `<builtin>.object`. A
-  class with several possible hierarchies lists each class at its first
-  position. An unknown class lists itself only: one whose base or
-  metaclass may be more values than the analysis keeps for one node, or
-  has a base that is an unknown class (see the cause `saturated`); nothing
-  about it is known, and a call of it, or of what its instances give, is
-  unresolved with the cause `saturated`.
-- Of two definitions of one name, a module comes before a function, a
-  function before a class (the call graph has no class nodes), and then
-  the first by module and position.
+The cause of a failed module is the type of the error, with `(line N)` or
+`(byte N)` where Python gives one: `SyntaxError`, `IndentationError`,
+`TabError`, `RecursionError`, `MemoryError` (the source is too complex for
+Python's parser), `UnicodeDecodeError (byte N)`, `unsupported encoding
+<codec>`, `FileNotFoundError`, `PermissionError`, `IsADirectoryError`,
+`NotADirectoryError` or `OSError`.
 
-**`exports`** maps an access path to the definitions it reaches: for each
-module of the package, each name bound at the end of the module's code that
-holds a module, class or function whose qualified name is not that path
-(the values that the module-level name may hold, flow-insensitively).
-`pkg.C` reaches `pkg.mod.C` after `from .mod import C` in
-`pkg/__init__.py`. The targets are a sorted list (a conditional import can
-give two); a target outside the package is an outside name. With this
-table, graphs of several packages are joined without importing anything.
+## `definitions`
 
-**`outside`** has every callee that is not a definition of the package,
-with how PyCG knows it:
+Every module, class and function (lambdas included) that the analysed
+source defines, except in code that the analysis proves cannot run.
 
-- `stub`: a function or method that the stub data or PyCG's models of the
-  builtins declare (a builtin, the standard library, a third-party library
-  with a stub). A function is named by the path through which the code
-  reaches it (`os.path.join`, `requests.get`), a method of an outside value
-  by the public name of its class (`requests.Response.json`). A name that
-  the models of the builtins give to analysed code that does not define it
-  is `stub` too (`functools.partial.__call__`, which an analysed
-  `functools.wraps` returns);
-- `name`: a name built from the access path of a value without a type
-  (`foo.get.bar`): it need not exist under that name;
-- `extension`: a name in an extension module of the package, by the
-  module's dotted name.
+| Field | Type | Meaning |
+|---|---|---|
+| `kind` | string | `module`, `class` or `function` |
+| `module` | string | The module that defines it |
+| `lines` | [integer, integer] | First and last line: of a function or class, from its `def` or `class` line (not its decorators) to its end; of a module, `[1, n]` as Python numbers lines, `[0, 0]` when empty |
+| `mro` | list of strings | Class only: its C3 linearization over the bases that the analysis knows |
 
-**`calls`** is the call graph. Each key is a caller (a module or a function
-of `definitions`); its value lists the call sites in the caller's code,
-sorted by `line`, `col`, `end` and then `implicit` (a site without it
-first). Calls in a class body or a comprehension belong to the function or
-module around it.
+- An outside base (`ext.Base`, `<builtin>.dict`) is one entry at its place;
+  its own bases are not listed. Only an `mro` without an outside class ends
+  with `<builtin>.object`.
+- A class with several possible hierarchies lists each class at its first
+  position.
+- An unknown class (its base or metaclass saturated, or a base unknown)
+  lists only itself; a call of it or through its instances is unresolved
+  with `saturated`.
+- Of the definitions of one name, the one listed is a module, else a
+  function, else a class, and of those the first by module and position.
 
-The definitions of one qualified name (two `def f` in one module, a
-property's getter and setter, or a module and a function `pkg.retry`)
-share the name's entry, as in the classic call graph: the sites of each
-are listed, and none replaces another. A site in another module than the
-definition that `definitions` lists for the name has `module`, the module
-whose code holds it; such sites come after the others, by `module`.
+## `exports`
 
-- `line` and `col` are the start of the `ast` node of the expression or
-  statement that makes the call, and `end` is its end, `[line, col]` (as
-  `ast`: lines from 1, columns from 0). For an implicit call the node is
-  the one that the construct acts on, as the list below says. Two sites
-  can start at one position (`f(x)(y)` and `a.b().c()` hold a call inside
-  a call); their ends tell them apart. The calls of one node and one
-  construct are one site, with their callees merged: a `for` loop's
-  `__iter__` and `__next__` are one `iteration` site. Two exceptions to
-  the position. A link of a comparison chain spans its left and right
-  operands, which no `ast` node does (`a < b` and `b < c` in `a < b < c`;
-  a comparison of one link is its whole expression). The accessor that a
-  class's own attribute hook calls (`__setattr__` calls a property's
-  setter) is an `attribute` site of the hook, at its `def` (the whole
-  function), since Python's code that the hook's body runs makes that
-  call.
-- `callees` is the sorted list of what the site can call: definitions and
-  outside names. A package function that library code calls back is a
-  callee of the site that made the library call (`map(f, xs)`). So are the
-  implicit calls that a builtin makes while it runs: `list(x)` iterates
-  `x`, `str(x)` calls `__str__`, `len(x)` calls `__len__`, `getattr(o,
-  "p")` runs a property, `sorted(xs, key=k)` calls `k` and `__lt__`, and
-  `f(*xs)` iterates `xs`. Where the construct written at the same node
-  iterates too (`for x in list(c)`), the analysis makes one call for both,
-  listed as `iteration`. Any other construct written at the node of a call
-  expression keeps its word (`with f():` is `with`, `if f():` is `truth`,
-  `{f(): v}` is `dict`).
-- Implicit calls to outside code are not listed: the call graph reports
-  outside callees for call expressions only. A call expression whose
-  callee is known but calls nothing that the call graph reports (a class
-  whose `__init__` is `object`'s, a method of an abstract outside class) is
-  not listed either.
-- `implicit`, when present, says that the call is not written as a call and
-  names the construct (the list is below). A site without it is a call
-  expression.
-- `unresolved`, when present, says why a call expression has no callee at
-  all: the site is unknown, not unreachable. The causes are below.
+For each module of the package, each name bound at the end of its code to
+a module, class or function whose qualified name is not that path, mapped
+to the sorted names it may hold (flow-insensitively). Graphs of several
+packages join on this table.
 
-The classic call graph has a node for each definition that is not a class
-and each outside name; its edges are `caller -> callee` for each callee of
-each site, so a caller's callees are the union of the callees of its sites.
-A caller with no call site is in `definitions` and not in `calls`.
+## `outside`
 
-### Implicit constructs
-
-A closed list. Each word names a language construct; the start and the
-end are those of the node in parentheses.
-
-| `implicit` | The construct and what it calls |
+| `known` | Meaning |
 |---|---|
-| `attribute` | A load or store of an attribute, by `.` (the attribute expression), `from m import x` (the name) or a sub-pattern of a class pattern (the sub-pattern): a property's getter or setter, `__get__`, `__set__`, `__getattribute__`, `__setattr__`, `__getattr__`, a module's `__getattr__` |
-| `await` | `await`, `async with` and `async for` (the expression): `__await__` |
-| `class` | A class statement (the statement): the metaclass's `__prepare__`, `__new__` and `__init__`, `__init_subclass__`, `__set_name__` |
-| `decorator` | A decorator (its expression): the decorator, with the function or class |
-| `delete` | `del x.a` and `del x[k]` (the target): a property's deleter, `__delete__`, `__delattr__`, `__delitem__` |
-| `dict` | A key that enters a set or dict or is looked up there: a set or dict display or comprehension, a subscript of a dict, a builtin that stores or looks up keys (the display, the key or element, the subscript, or the call): `__hash__` of the key, `__eq__` of the stored keys |
-| `format` | An f-string field, `"%s" % x` and the fields of a literal `"{}".format(x)` (the field, the operation, or the call): `__format__`, `__str__`, `__repr__` |
-| `iteration` | `for`, comprehensions, unpacking, `yield from`, `*` in a display, `xs += ys` and slice assignment on a list (the iterated expression, the operation, or the subscript): `__iter__`, `__next__`, `__getitem__` of the sequence protocol, `__aiter__`, `__anext__` |
-| `match` | A sequence pattern of `match` (the pattern): `__len__` |
-| `operator` | A unary, binary or augmented operator, a comparison, `in` and `not in`, and a value pattern of `match` (the operation; a link of a comparison, from its left operand to its right one; or the pattern): the special method of the operator, `__eq__` of the compared elements of `in`, `__eq__` and the ordering method of the elements of compared containers. `is` and `is not` call nothing |
-| `raise` | `raise C` (the raised expression): `__new__` and `__init__` of the instance it creates |
-| `subscript` | A subscript, and an item that a sequence or mapping pattern reads (the subscript, or the pattern): `__getitem__`, `__setitem__`, `__missing__`, `__class_getitem__`, the factory of a `defaultdict` |
-| `truth` | A condition (`if`, `while`, `assert`, a conditional expression, a comprehension's `if`, a guard), `not`, the operands of `and` and `or` but the last, the result of a comparison link that the chain goes on from, of `in` and of a value pattern (the tested expression; the `not` expression; the link; the pattern): `__bool__`, `__len__` |
-| `with` | `with` and `async with` (the context expression): `__enter__`, `__exit__`, `__aenter__`, `__aexit__` |
+| `stub` | Declared by the stub data or the models of the builtins: a function by the path the code reaches it through (`os.path.join`), a method by its class's public name (`requests.Response.json`), or a name the models give to analysed code (`functools.partial.__call__`) |
+| `name` | Built from the access path of a value without a type (`foo.get.bar`); it need not exist |
+| `extension` | A name in an extension module of the package |
 
-### Causes of an unresolved site
+## `calls`
 
-A closed list:
+A caller's sites are sorted by `module` (a site without it first), `line`,
+`col`, `end`, then `implicit` (a site without it first). A caller with no
+site is not listed.
 
-- `no value`: the called expression holds no value that the analysis
-  knows (a parameter that no analysed code passes, a name that nothing
-  binds);
-- `computed name`: the called value is an attribute looked up with a name
-  that is not a constant (`getattr(obj, name)()`), whose names the
-  analysis does not know (the name may hold a value other than a str
-  constant, or more str constants than the analysis follows);
-- `outside value`: the called expression holds only a value of outside
-  code that has no name: an access path longer than the bound of names
-  (`lib.a.b.c()`), what a call of outside code without stubs returns
-  (`lib.f()()`, `lib.f().run()`, also through `getattr` with a name that
-  the analysis knows), or a value whose type is not known;
-- `saturated`: the called expression may hold more values than the
-  analysis keeps for one node (the cap, 5,000 by default, `tool.cap`; see
-  [Bounds](design.md#bounds)), so it holds a value about which
-  nothing is known.
+| Field | Type | Meaning |
+|---|---|---|
+| `line`, `col` | integer | Start of the `ast` node that makes the call (lines from 1, columns from 0) |
+| `end` | [integer, integer] | End of that node, `[line, col]` |
+| `callees` | list of strings | The sorted definitions and outside names the site can call |
+| `implicit` | string | When present: the call is not written as a call; the construct, below |
+| `unresolved` | string | When present: the site is a call expression with no callee; the cause, below |
+| `module` | string | When present: the module whose code holds the site, if not the caller's |
 
-The cause is that of the called expression itself. Saturation of another
-node can leave a call with another cause: a parameter whose only call was
-through a saturated value has `no value`, and an attribute looked up by a
-computed name whose candidates were lost with the instances of a class has
-`computed name`. So `saturated` marks the sites where the cap applied
-directly, not every site that it affected.
+- Calls in a class body or a comprehension belong to the enclosing function
+  or module. The definitions of one name (two `def f`, a property's getter
+  and setter) share its entry.
+- The calls of one node and one construct are one site; two sites can
+  start at one position (`f(x)(y)`).
+- A link of a comparison chain spans its two operands (`b < c` in
+  `a < b < c`). The accessor that a class's own attribute hook runs is an
+  `attribute` site of the hook, at its whole `def`.
+- The implicit calls a builtin makes (`list(x)`, `map(f, xs)`,
+  `sorted(xs, key=k)`, `f(*xs)`) are callees of its call. A construct
+  written at the node of a call keeps its word (`with f():` is `with`;
+  `for x in list(c)` is one `iteration` site).
+- Outside callees are listed only for call expressions and decorators. A
+  call expression that calls nothing listed (a class whose `__init__` is
+  `object`'s) is not a site.
+- The classic call graph has a node for each definition that is not a class
+  and each outside name, and an edge to each callee of each site.
+
+### `implicit`
+
+| Construct | Node | What it calls |
+|---|---|---|
+| `attribute` | An attribute load or store, the name of `from m import x`, a class pattern's sub-pattern | A property's getter or setter, `__get__`, `__set__`, `__getattribute__`, `__setattr__`, `__getattr__`, a module's `__getattr__` |
+| `await` | `await`, `async with`, `async for` | `__await__` |
+| `class` | A class statement | The metaclass's `__prepare__`, `__new__` and `__init__`, `__init_subclass__`, `__set_name__` |
+| `decorator` | A decorator expression | The decorator, with the function or class |
+| `delete` | The target of `del x.a` or `del x[k]` | A property's deleter, `__delete__`, `__delattr__`, `__delitem__` |
+| `dict` | A set or dict display or comprehension, a dict subscript, a builtin that stores or looks up keys | `__hash__` of the key, `__eq__` of the stored keys |
+| `format` | An f-string field, `"%s" % x`, a literal `"{}".format(x)` | `__format__`, `__str__`, `__repr__` |
+| `iteration` | `for`, a comprehension, unpacking, `yield from`, `*` in a display, `xs += ys` or slice assignment on a list | `__iter__`, `__next__`, `__getitem__`, `__aiter__`, `__anext__` |
+| `match` | A sequence pattern | `__len__` |
+| `operator` | A unary, binary or augmented operator, a comparison link, `in`, `not in`, a value pattern | The operator's special method; `__eq__` and the ordering methods of compared elements (`is` calls nothing) |
+| `raise` | The expression of `raise C` | `__new__` and `__init__` of the instance |
+| `subscript` | A subscript, an item that a sequence or mapping pattern reads | `__getitem__`, `__setitem__`, `__missing__`, `__class_getitem__`, a `defaultdict`'s factory |
+| `truth` | A condition (`if`, `while`, `assert`, a conditional expression, a comprehension's `if`, a guard), `not`, each operand of `and` and `or` but the last, a comparison link the chain goes on from, `in`, a value pattern | `__bool__`, `__len__` |
+| `with` | The context expression of `with` or `async with` | `__enter__`, `__exit__`, `__aenter__`, `__aexit__` |
+
+### `unresolved`
+
+| Cause | The called expression holds |
+|---|---|
+| `no value` | No value that the analysis knows (a parameter no analysed code passes, a name nothing binds) |
+| `computed name` | An attribute looked up by a name the analysis does not know (`getattr(obj, name)()`) |
+| `outside value` | Only an unnamed outside value: a path longer than the bound of names, what an outside call without stubs returns, a value of unknown type |
+| `saturated` | More values than the cap (`tool.cap`, see [Bounds](design.md#bounds)) |
+
+`saturated` marks only the sites where the cap applied directly; a site
+that saturation elsewhere affected can have another cause.
