@@ -3244,8 +3244,9 @@ truths that a study of a tool's errors raised; the study only pointed at
 the sites, and each answer rests on these rules, the package and
 dependency sources and the traces. The lead ruled in place of a referee
 (the maintainer's instruction of 2026-11-28); each ruling, with its
-evidence, is in `selection/corrections-2026-11-28/rulings/q<N>.md`, and
-the independent audit of their application is in
+evidence, is in `selection/corrections-2026-11-28/rulings/q<N>.md` (and
+`n5a.md`, `n7a.md` for two questions that the audit raised), and the
+independent audit of their application is in
 `selection/corrections-2026-11-28/audits/`.
 
 - **A public name bound to another public name of the same class adds no
@@ -3304,6 +3305,39 @@ the independent audit of their application is in
   cannot run at `153:47`. The callee and its pair leave the ground truth
   (1 outside edge; `jsonpickle.md`, "Corrections of 2026-11-28"). This
   applies the edge definition and changes no rule.
+- **jsonpickle's nested view bases are an open path set (the audit's
+  N5a, `n5a.md`).** numpy keeps a view's base unchanged across a change of
+  subclass (`PyArray_SetBaseObject`, `arrayobject.c:203` of 2.5.4, `:213`
+  of 1.17.3), and `NumpyNDArrayHandlerView.flatten` writes a base that is a
+  contiguous ndarray by reference through the same handler
+  (`ext/numpy.py:281-283`), so views that alternate `numpy.matrix` and
+  `numpy.ndarray` nest bases without a bound in the source (seven views
+  give a base depth of seven on numpy 2.5.4). `restore` forwards each
+  `data.get('base')` through `self.context.restore` (327, 333), so the
+  `.get` path of a decoded `ujson.loads` or `yaml.safe_load` dict is an
+  open path set ("Rulings for the corrections of 2026-11-25",
+  `ruling-fabric-1.md`; batch 7, "Open path sets"): the members with one
+  and two further `.get` are recorded at the view branch (343-346), at
+  327, at `restore_flags` (96) and at the by-value sites (112, 114, 151,
+  216-225), and `jsonpickle.md` declares them under "Open path sets". 10
+  outside edges added (34 site-callee entries), none removed; the reading
+  that a base owns its data (`q5.md`, jsonpickle's Corrections of
+  2026-11-25) was a factual error and carries a correction note.
+- **A docstring that refers a hash name to hashlib's list admits every
+  name (path; the audit's N7a, `n7a.md`).** `read_hash` and `read_hexhash`
+  document `hash_name` with "List of supported hashes can be obtained
+  from :mod:`hashlib` package." (`__init__.py:985`, `995`): by B2 the
+  documentation names the role's values, as avro's `Schema.fingerprint`
+  did (avro J5), so every name that `hashlib.new` accepts on an admitted
+  build is in scope, and the private `_hash` takes them from its package
+  callers (rule B). Only the guaranteed names change a callee; the SHA-2,
+  BLAKE2, SHA-3 and SHAKE classes are named per runtime by
+  `ruling-names-2.md` and `b8-ruling-c-type-names-1.md`, and a SHAKE
+  `digest()` or `hexdigest()` without a length cannot bind (B4). path's
+  judgement J6 (md5 and sha1 only) yields to the global rules. 83 outside
+  edges added at `979:21`, `990:44` and `1000:47`, none removed; the trace
+  hashes only md5 and changes nothing. A client string with no document,
+  test or package call that states its values keeps the aiocache rule.
 - **Decided by the rules above, with no change (Q2, Q4, Q5, Q7 to Q13).**
   Q2, jsonpickle's per-class `numpy.dtypes` and pandas names: "One name per
   admitted concrete receiver class" and "Open receiver sets of a generic
