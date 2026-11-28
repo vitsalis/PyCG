@@ -1,0 +1,172 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.call"
+       ],
+       "col": 4,
+       "end": [
+        15,
+        11
+       ],
+       "line": 15
+      }
+     ],
+     "main.call": [
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        10
+       ],
+       "line": 13
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        13,
+        12
+       ],
+       "line": 13,
+       "unresolved": "saturated"
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Eager": {
+      "kind": "class",
+      "lines": [
+       7,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Eager",
+       "<builtin>.object"
+      ]
+     },
+     "main.Eager.__getattr__": {
+      "kind": "function",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Lazy": {
+      "kind": "class",
+      "lines": [
+       4,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Lazy",
+       "<builtin>.object"
+      ]
+     },
+     "main.Lazy.__getattr__": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.call": {
+      "kind": "function",
+      "lines": [
+       12,
+       13
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.g": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 1,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.call"
+  ],
+  "main.Eager.__getattr__": [],
+  "main.Lazy.__getattr__": [],
+  "main.call": [
+   "main.use"
+  ],
+  "main.f": [],
+  "main.g": [],
+  "main.use": []
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.call",
+   "main:13:4#13:12",
+   "saturated"
+  ]
+ ],
+ "warnings": []
+}

@@ -1,0 +1,6 @@
+
+class C:
+    from other import __T as T
+    import other
+    def use(self, x: T): ...
+    def use_attribute(self, x: other.__T): ...

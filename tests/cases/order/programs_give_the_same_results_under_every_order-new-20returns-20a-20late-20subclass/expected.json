@@ -1,0 +1,212 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.a"
+       ],
+       "col": 13,
+       "end": [
+        9,
+        16
+       ],
+       "line": 9
+      }
+     ],
+     "main.Shape.__new__": [
+      {
+       "callees": [
+        "<builtin>.object.__new__"
+       ],
+       "col": 19,
+       "end": [
+        5,
+        41
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "<builtin>.super"
+       ],
+       "col": 15,
+       "end": [
+        6,
+        22
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "<builtin>.object.__new__"
+       ],
+       "col": 15,
+       "end": [
+        6,
+        35
+       ],
+       "line": 6
+      }
+     ],
+     "main.a": [
+      {
+       "callees": [
+        "main.b"
+       ],
+       "col": 16,
+       "end": [
+        7,
+        19
+       ],
+       "line": 7
+      }
+     ],
+     "main.make": [
+      {
+       "callees": [
+        "main.Circle.__init__",
+        "main.Shape.__new__"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        19
+       ],
+       "line": 13
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       13
+      ],
+      "module": "main"
+     },
+     "main.Circle": {
+      "kind": "class",
+      "lines": [
+       9,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Circle",
+       "main.Shape",
+       "<builtin>.object"
+      ]
+     },
+     "main.Circle.__init__": {
+      "kind": "function",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main"
+     },
+     "main.Shape": {
+      "kind": "class",
+      "lines": [
+       2,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Shape",
+       "<builtin>.object"
+      ]
+     },
+     "main.Shape.__new__": {
+      "kind": "function",
+      "lines": [
+       3,
+       6
+      ],
+      "module": "main"
+     },
+     "main.a": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.b": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.make": {
+      "kind": "function",
+      "lines": [
+       12,
+       13
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.object.__new__": {
+      "known": "stub"
+     },
+     "<builtin>.super": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.object.__new__": [],
+  "<builtin>.super": [],
+  "main": [
+   "main.a"
+  ],
+  "main.Circle.__init__": [],
+  "main.Shape.__new__": [
+   "<builtin>.object.__new__",
+   "<builtin>.super"
+  ],
+  "main.a": [
+   "main.b"
+  ],
+  "main.b": [],
+  "main.make": [
+   "main.Circle.__init__",
+   "main.Shape.__new__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

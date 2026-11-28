@@ -1,0 +1,272 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "chain": [
+      {
+       "callees": [
+        "chain.C.__lt__"
+       ],
+       "col": 0,
+       "end": [
+        4,
+        5
+       ],
+       "implicit": "operator",
+       "line": 4
+      },
+      {
+       "callees": [
+        "chain.C.__lt__"
+       ],
+       "col": 4,
+       "end": [
+        4,
+        9
+       ],
+       "implicit": "operator",
+       "line": 4
+      }
+     ],
+     "chain.f": [
+      {
+       "callees": [
+        "chain.C.__lt__"
+       ],
+       "col": 13,
+       "end": [
+        6,
+        18
+       ],
+       "implicit": "operator",
+       "line": 6
+      },
+      {
+       "callees": [
+        "chain.C.__lt__"
+       ],
+       "col": 13,
+       "end": [
+        8,
+        18
+       ],
+       "implicit": "operator",
+       "line": 8
+      }
+     ],
+     "main": [
+      {
+       "callees": [
+        "main.deco"
+       ],
+       "col": 1,
+       "end": [
+        8,
+        5
+       ],
+       "implicit": "decorator",
+       "line": 8
+      }
+     ],
+     "main.show": [
+      {
+       "callees": [
+        "<builtin>.print"
+       ],
+       "col": 16,
+       "end": [
+        13,
+        37
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "<builtin>.sorted",
+        "main.show.<lambda1>"
+       ],
+       "col": 11,
+       "end": [
+        14,
+        52
+       ],
+       "line": 14
+      }
+     ]
+    },
+    "definitions": {
+     "broken": {
+      "kind": "module",
+      "lines": [
+       0,
+       0
+      ],
+      "module": "broken"
+     },
+     "chain": {
+      "kind": "module",
+      "lines": [
+       1,
+       8
+      ],
+      "module": "chain"
+     },
+     "chain.C": {
+      "kind": "class",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "chain",
+      "mro": [
+       "chain.C",
+       "<builtin>.object"
+      ]
+     },
+     "chain.C.__lt__": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "chain"
+     },
+     "chain.f": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "chain"
+     },
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       14
+      ],
+      "module": "main"
+     },
+     "main.deco": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.show": {
+      "kind": "function",
+      "lines": [
+       9,
+       14
+      ],
+      "module": "main"
+     },
+     "main.show.<lambda1>": {
+      "kind": "function",
+      "lines": [
+       14,
+       14
+      ],
+      "module": "main"
+     },
+     "null_byte": {
+      "kind": "module",
+      "lines": [
+       0,
+       0
+      ],
+      "module": "null_byte"
+     }
+    },
+    "exports": {
+     "main.broken": [
+      "broken"
+     ],
+     "main.chain": [
+      "chain"
+     ],
+     "main.null_byte": [
+      "null_byte"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "broken": {
+      "cause": "SyntaxError (line 1)",
+      "file": "broken.py",
+      "kind": "source",
+      "status": "failed"
+     },
+     "chain": {
+      "file": "chain.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "null_byte": {
+      "cause": "SyntaxError",
+      "file": "null_byte.py",
+      "kind": "source",
+      "status": "failed"
+     }
+    },
+    "outside": {
+     "<builtin>.print": {
+      "known": "stub"
+     },
+     "<builtin>.sorted": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.print": [],
+  "<builtin>.sorted": [],
+  "broken": [],
+  "chain": [
+   "chain.C.__lt__"
+  ],
+  "chain.C.__lt__": [],
+  "chain.f": [
+   "chain.C.__lt__"
+  ],
+  "main": [
+   "main.deco"
+  ],
+  "main.deco": [],
+  "main.show": [
+   "<builtin>.print",
+   "<builtin>.sorted",
+   "main.show.<lambda1>"
+  ],
+  "main.show.<lambda1>": [],
+  "null_byte": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": [
+  "Skipping {root}/broken.py: cannot parse it: '(' was never closed (broken.py, line 1)",
+  "Skipping {root}/null_byte.py: cannot read it: source code cannot contain null bytes"
+ ]
+}

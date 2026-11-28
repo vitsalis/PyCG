@@ -1,0 +1,139 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        11
+       ],
+       "line": 12
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.fmt"
+       ],
+       "col": 11,
+       "end": [
+        8,
+        16
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.Item.__str__"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        23
+       ],
+       "implicit": "format",
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       12
+      ],
+      "module": "main"
+     },
+     "main.Item": {
+      "kind": "class",
+      "lines": [
+       2,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Item",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item.__repr__": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Item.__str__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.fmt": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       7,
+       10
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.use"
+  ],
+  "main.Item.__repr__": [],
+  "main.Item.__str__": [],
+  "main.fmt": [],
+  "main.use": [
+   "main.Item.__str__",
+   "main.fmt"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

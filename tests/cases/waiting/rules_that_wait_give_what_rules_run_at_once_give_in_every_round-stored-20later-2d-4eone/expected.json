@@ -1,0 +1,319 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 4,
+       "end": [
+        19,
+        10
+       ],
+       "line": 19
+      },
+      {
+       "callees": [
+        "main.g"
+       ],
+       "col": 4,
+       "end": [
+        19,
+        12
+       ],
+       "line": 19
+      },
+      {
+       "callees": [
+        "<builtin>.staticmethod"
+       ],
+       "col": 9,
+       "end": [
+        21,
+        24
+       ],
+       "line": 21
+      },
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 9,
+       "end": [
+        22,
+        20
+       ],
+       "line": 22
+      },
+      {
+       "callees": [
+        "<builtin>.setattr",
+        "main.g"
+       ],
+       "col": 0,
+       "end": [
+        25,
+        19
+       ],
+       "line": 25
+      },
+      {
+       "callees": [
+        "<builtin>.vars"
+       ],
+       "col": 12,
+       "end": [
+        27,
+        19
+       ],
+       "line": 27
+      },
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 4,
+       "end": [
+        28,
+        20
+       ],
+       "line": 28
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        28,
+        22
+       ],
+       "line": 28,
+       "unresolved": "computed name"
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.g"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        12
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.g"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        10
+       ],
+       "implicit": "attribute",
+       "line": 12
+      },
+      {
+       "callees": [
+        "<builtin>.len",
+        "main.f"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        10
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.D.__getitem__"
+       ],
+       "col": 16,
+       "end": [
+        14,
+        17
+       ],
+       "implicit": "iteration",
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.f"
+       ],
+       "col": 8,
+       "end": [
+        15,
+        14
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "main.g"
+       ],
+       "col": 4,
+       "end": [
+        16,
+        11
+       ],
+       "implicit": "attribute",
+       "line": 16
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       28
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.D": {
+      "kind": "class",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.D",
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.D.__getitem__": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.g": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       9,
+       17
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.name": [
+      "<unknown>"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     },
+     "<builtin>.len": {
+      "known": "stub"
+     },
+     "<builtin>.property": {
+      "known": "stub"
+     },
+     "<builtin>.setattr": {
+      "known": "stub"
+     },
+     "<builtin>.staticmethod": {
+      "known": "stub"
+     },
+     "<builtin>.vars": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": null,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "<builtin>.len": [],
+  "<builtin>.property": [],
+  "<builtin>.setattr": [],
+  "<builtin>.staticmethod": [],
+  "<builtin>.vars": [],
+  "main": [
+   "<builtin>.getattr",
+   "<builtin>.property",
+   "<builtin>.setattr",
+   "<builtin>.staticmethod",
+   "<builtin>.vars",
+   "main.g",
+   "main.use"
+  ],
+  "main.D.__getitem__": [],
+  "main.f": [],
+  "main.g": [],
+  "main.use": [
+   "<builtin>.len",
+   "main.D.__getitem__",
+   "main.f",
+   "main.g"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main",
+   "main:28:4#28:22",
+   "computed name"
+  ]
+ ],
+ "warnings": []
+}

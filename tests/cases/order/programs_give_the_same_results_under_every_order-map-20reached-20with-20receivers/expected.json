@@ -1,0 +1,151 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.map"
+       ],
+       "col": 0,
+       "end": [
+        12,
+        6
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "<builtin>.map",
+        "main.<lambda1>"
+       ],
+       "col": 9,
+       "end": [
+        13,
+        35
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.f"
+       ],
+       "col": 4,
+       "end": [
+        14,
+        7
+       ],
+       "line": 14
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       14
+      ],
+      "module": "main"
+     },
+     "main.<lambda1>": {
+      "kind": "function",
+      "lines": [
+       13,
+       13
+      ],
+      "module": "main"
+     },
+     "main.Caller": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Caller",
+       "<builtin>.object"
+      ]
+     },
+     "main.X": {
+      "kind": "class",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.X",
+       "<builtin>.object"
+      ]
+     },
+     "main.Y": {
+      "kind": "class",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.Y",
+       "<builtin>.object"
+      ]
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.g": [
+      "main.f"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.map": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.map": [],
+  "main": [
+   "<builtin>.map",
+   "main.<lambda1>",
+   "main.f"
+  ],
+  "main.<lambda1>": [],
+  "main.f": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

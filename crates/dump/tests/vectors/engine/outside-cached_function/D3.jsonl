@@ -1,0 +1,77 @@
+{"cap":5000,"op":"solver"}
+{"object":"Saturated:<saturated>","op":"object","opacity":"saturated","types":["Saturated","Object"]}
+{"answer":{"node":"<program>#1"},"args":[{"object":"Saturated:<saturated>"}],"op":"constant"}
+{"named":true,"node":"main.__name__","op":"node"}
+{"object":"Const:'main'","op":"object","opacity":null,"types":["Const","Object"]}
+{"args":[{"node":"main.__name__"},{"object":"Const:'main'"}],"op":"add_object"}
+{"object":"Const:'__main__'","op":"object","opacity":null,"types":["Const","Object"]}
+{"args":[{"node":"main.__name__"},{"object":"Const:'__main__'"}],"op":"add_object"}
+{"object":"External:urllib.parse.urlsplit","op":"object","opacity":null,"types":["External","Object"]}
+{"answer":{"node":"main#1"},"args":[{"object":"External:urllib.parse.urlsplit"}],"op":"constant"}
+{"named":true,"node":"main.urlsplit","op":"node"}
+{"args":[{"node":"main#1"},{"node":"main.urlsplit"}],"op":"add_edge"}
+{"object":"Const:'https://example.org/path'","op":"object","opacity":null,"types":["Const","Object"]}
+{"answer":{"node":"main#2"},"args":[{"object":"Const:'https://example.org/path'"}],"op":"constant"}
+{"node":"main#3","op":"node"}
+{"captured":[],"constraint":"Call:main:3:8#3:44","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#1"},{"call":"Call:main:3:8#3:44"}],"op":"attach"}
+{"constraint":"Call:main:3:8#3:44","objects":[{"object":"External:urllib.parse.urlsplit"}],"op":"apply"}
+{"object":"Typed:urllib.parse.SplitResult","op":"object","opacity":null,"types":["Typed","Object"]}
+{"args":[{"node":"main#3"},{"object":"Typed:urllib.parse.SplitResult"}],"op":"add_object"}
+{"object":"Typed:urllib.parse.SplitResultBytes","op":"object","opacity":null,"types":["Typed","Object"]}
+{"args":[{"node":"main#3"},{"object":"Typed:urllib.parse.SplitResultBytes"}],"op":"add_object"}
+{"args":[{"node":"main#3"},{"object":"Typed:urllib.parse.SplitResultBytes"}],"op":"add_object"}
+{"args":[{"node":"main#3"},{"object":"Typed:urllib.parse.SplitResult"}],"op":"add_object"}
+{"args":[{"node":"main#3"},{"object":"Typed:urllib.parse.SplitResultBytes"}],"op":"add_object"}
+{"op":"applied"}
+{"named":true,"node":"main.parts","op":"node"}
+{"args":[{"node":"main#3"},{"node":"main.parts"}],"op":"add_edge"}
+{"node":"main#4","op":"node"}
+{"captured":[],"constraint":"Load","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#3"},{"constraint":"Load"}],"op":"attach"}
+{"node":"main#5","op":"node"}
+{"captured":[],"constraint":"Call:main:4:0#4:14","kinds":null,"mode":"list","op":"constraint"}
+{"args":[{"node":"main#4"},{"call":"Call:main:4:0#4:14"}],"op":"attach"}
+{"op":"solve"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"fire","phase":1}
+{"constraint":"Load","objects":[{"object":"Typed:urllib.parse.SplitResult"},{"object":"Typed:urllib.parse.SplitResultBytes"}],"op":"apply"}
+{"object":"BoundMethod:<bound urllib.parse.SplitResult.geturl of urllib.parse.SplitResult>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
+{"args":[{"node":"main#4"},{"object":"BoundMethod:<bound urllib.parse.SplitResult.geturl of urllib.parse.SplitResult>"}],"op":"add_object"}
+{"object":"BoundMethod:<bound urllib.parse.SplitResultBytes.geturl of urllib.parse.SplitResultBytes>","op":"object","opacity":null,"types":["BoundMethod","Object"]}
+{"args":[{"node":"main#4"},{"object":"BoundMethod:<bound urllib.parse.SplitResultBytes.geturl of urllib.parse.SplitResultBytes>"}],"op":"add_object"}
+{"op":"applied"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"fire","phase":2}
+{"constraint":"Call:main:4:0#4:14","objects":[{"object":"BoundMethod:<bound urllib.parse.SplitResult.geturl of urllib.parse.SplitResult>"},{"object":"BoundMethod:<bound urllib.parse.SplitResultBytes.geturl of urllib.parse.SplitResultBytes>"}],"op":"apply"}
+{"node":"<solve>#1","op":"node"}
+{"answer":{"node":"<solve>#2"},"args":[{"object":"Typed:urllib.parse.SplitResult"}],"op":"constant"}
+{"args":[{"node":"<solve>#2"},{"node":"<solve>#1"}],"op":"add_edge"}
+{"object":"Typed:<builtin>.str","op":"object","opacity":null,"types":["Typed","Object"]}
+{"args":[{"node":"main#5"},{"object":"Typed:<builtin>.str"}],"op":"add_object"}
+{"node":"<solve>#3","op":"node"}
+{"answer":{"node":"<solve>#4"},"args":[{"object":"Typed:urllib.parse.SplitResultBytes"}],"op":"constant"}
+{"args":[{"node":"<solve>#4"},{"node":"<solve>#3"}],"op":"add_edge"}
+{"object":"Typed:<builtin>.bytes","op":"object","opacity":null,"types":["Typed","Object"]}
+{"args":[{"node":"main#5"},{"object":"Typed:<builtin>.bytes"}],"op":"add_object"}
+{"op":"applied"}
+{"op":"between_rounds"}
+{"answer":false,"op":"between_rounds_done","unknown":[]}
+{"op":"solved","phase":3}
+{"node":"main.__name__","objects":["Const:'main'","Const:'__main__'"],"op":"final","saturated":false}
+{"node":"main.urlsplit","objects":["External:urllib.parse.urlsplit"],"op":"final","saturated":false}
+{"node":"main#3","objects":["Typed:urllib.parse.SplitResult","Typed:urllib.parse.SplitResultBytes"],"op":"final","saturated":false}
+{"node":"main.parts","objects":["Typed:urllib.parse.SplitResult","Typed:urllib.parse.SplitResultBytes"],"op":"final","saturated":false}
+{"node":"main#4","objects":["BoundMethod:<bound urllib.parse.SplitResult.geturl of urllib.parse.SplitResult>","BoundMethod:<bound urllib.parse.SplitResultBytes.geturl of urllib.parse.SplitResultBytes>"],"op":"final","saturated":false}
+{"node":"main#5","objects":["Typed:<builtin>.str","Typed:<builtin>.bytes"],"op":"final","saturated":false}
+{"node":"<solve>#1","objects":["Typed:urllib.parse.SplitResult"],"op":"final","saturated":false}
+{"node":"<solve>#3","objects":["Typed:urllib.parse.SplitResultBytes"],"op":"final","saturated":false}
+{"objects":[],"op":"absorbed"}
+{"node":"main.__name__","object":"Const:'__main__'","op":"first","round":0}
+{"node":"main.__name__","object":"Const:'main'","op":"first","round":0}
+{"node":"main.parts","object":"Typed:urllib.parse.SplitResult","op":"first","round":0}
+{"node":"main.parts","object":"Typed:urllib.parse.SplitResultBytes","op":"first","round":0}
+{"node":"main.urlsplit","object":"External:urllib.parse.urlsplit","op":"first","round":0}
+{"op":"work","rounds":3,"work":{"applied":5,"copied":20,"edges":1,"merged":0,"processed":8,"searched":0}}

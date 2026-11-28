@@ -26,10 +26,17 @@ sandbox = docker run --rm --network none --read-only --tmpfs /tmp \
 	-v $(CURDIR):$(CURDIR):ro -v $(GIT_COMMON):$(GIT_COMMON):ro \
 	-v $(EVAL_OUT):$(EVAL_OUT) pycg-eval-runner python3 -I
 SANDBOX = $(call sandbox,6g)
+RUST_IMAGE = rust:1.100.0-slim-trixie@sha256:3b199fd6db7d709274df56565b8f4003f9e30d7bfcff9d53148c86053b7855e2
+rust_release = mkdir -p $(EVAL_OUT)/cargo-home && docker run --rm --memory 4g --memory-swap 4g \
+	--cap-drop ALL --security-opt no-new-privileges --user $$(id -u):$$(id -g) \
+	-e HOME=/tmp -e RUSTUP_TOOLCHAIN=1.100.0 -e CARGO_HOME=$(EVAL_OUT)/cargo-home \
+	-v $(CURDIR):$(CURDIR) -v $(EVAL_OUT):$(EVAL_OUT) -w $(CURDIR) \
+	$(RUST_IMAGE) cargo build --release --locked
 SCALE_CONTAINER_MIB = $(shell python3 -I evaluation/scale/measure.py container-mib $(SCALE_MEMORY_MIB))
 SCALE_SANDBOX = $(call sandbox,$(SCALE_CONTAINER_MIB)m)
 SCALE_MEASURE = $(CURDIR)/evaluation/scale/measure.py
 SCALE_RESULT = $(EVAL_OUT)/scale-$(COMMIT)
+SCALE_RUST_RESULT = $(EVAL_OUT)/scale-rust-$(COMMIT)
 SCALE_BASE_RESULT = $(EVAL_OUT)/scale-base-$(BASE_COMMIT)-for-$(COMMIT)
 LOOP = $(SANDBOX) $(CURDIR)/evaluation/common/loop.py
 GATE = $(SANDBOX) $(CURDIR)/evaluation/common/gate.py
@@ -38,6 +45,7 @@ measure = $(SANDBOX) $(1)/evaluation/common/loop.py run --flavour new --checkout
 	--name $(2) --hash-seed $(3) --micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT) \
 	&& $(GATE) digest $(1) > $(EVAL_OUT)/$(2)/benchmark_sha256
 measured = test -f $(RESULT)/result.json || ($(call measure,$(CURDIR),$(notdir $(RESULT)),0))
+RUST_RESULT = $(EVAL_OUT)/rust-$(COMMIT)
 base_metrics = git rev-parse --verify --quiet $(BASE)^{commit} > /dev/null \
 	&& (git show $(BASE):$(METRICS) > $(BASE_METRICS) 2> /dev/null \
 	|| : > $(BASE_METRICS))
@@ -47,9 +55,17 @@ base_inputs = if [ "$$(python3 -I $(BASE_TREE)/tools/inputs_key.py)" = "$$(pytho
 	&& $(MAKE) --no-print-directory eval-inputs; fi
 need_base = $(if $(BASE),,$(error $@ needs BASE=<git ref of the base commit>))
 need_name = $(if $(NAME),,$(error $@ needs NAME=<package of evaluation/scale/projects.toml>))
-measure_scale = $(SCALE_SANDBOX) $(SCALE_MEASURE) run --checkout $(1) --name $(notdir $(2)) \
+measure_scale = $(SCALE_SANDBOX) $(SCALE_MEASURE) run --checkout $(1) --name $(notdir $(2)) --flavour $(3) \
 	--package $(NAME) --out $(EVAL_OUT) --memory-mib $(SCALE_MEMORY_MIB)
 scale_record = $(1)/scale/$(NAME).record.json
+PARITY_SETS ?= micro macro
+PARITY_DUMP = $(CURDIR)/tools/parity/dump.py
+PARITY_KEYED = pycg tools/parity evaluation/micro-benchmark/snippets evaluation/common/run.py
+parity_key = python3 -I tools/parity/dump.py key --checkout $(CURDIR)
+PARITY_ORACLE = $(EVAL_OUT)/parity-oracle-$(shell $(parity_key))
+PARITY_RUST = $(EVAL_OUT)/parity-rust-$(COMMIT)
+PARITY_REQUIRED = tools/parity/required.txt
+PARITY_BINARIES = $(or $(CARGO_TARGET_DIR),$(CURDIR)/target)/release
 
 define gate
 $(base_metrics)
@@ -69,7 +85,7 @@ endef
 
 define measure_scale_base
 git worktree add --detach $(BASE_TREE) $(BASE)
-$(call measure_scale,$(BASE_TREE),$(SCALE_BASE_RESULT)) \
+$(call measure_scale,$(BASE_TREE),$(SCALE_BASE_RESULT),new) \
 	|| (git worktree remove --force $(BASE_TREE) && false)
 git worktree remove --force $(BASE_TREE)
 endef
@@ -81,6 +97,30 @@ $(GATE) summary $(RESULT) $(BASE_RESULT) $(BASE_METRICS) \
 	--changes $(RESULT)-changes.txt >> $(SUMMARY)
 endef
 
+define parity_d1
+(cd $(1) && find . -name modules.tsv) | sort | while read -r modules; do \
+	input=$$(dirname "$$modules"); \
+	mkdir -p $(2)/$$input && \
+	$(PARITY_BINARIES)/pycg-dump d1 $(1)/$$modules $(2)/$$input/D1.jsonl \
+		|| { echo "parity: pycg-dump d1 $(1)/$$modules failed on $$input" >&2; exit 1; }; \
+done
+endef
+
+define parity_compare
+python3 -I tools/parity/compare.py $(1) $(2) $(or $(4),--required $(PARITY_REQUIRED)) \
+	$$(test -f $(PARITY_RUST)/base-differences.txt && echo --base $(PARITY_RUST)/base-differences.txt) > $(3); \
+status=$$?; \
+cat $(3); \
+{ echo '```'; cat $(3); echo '```'; } >> $(SUMMARY); \
+sed -n 's/^  \([^:]*\): different: \(.*\)$$/\1 \2/p' $(3) | while read -r input dumps; do \
+	for dump in $$(echo "$$dumps" | tr ',' ' '); do \
+		{ echo "$$input $$dump:"; echo '```'; \
+		python3 -I tools/parity/diff.py $(1) $(2) "$$input" "$$dump"; echo '```'; } >> $(SUMMARY); \
+	done; \
+done; \
+exit $$status
+endef
+
 define same_graphs
 diff -rq -x runs.json -x result.json $(RESULT) $(RESULT)-seed1
 @echo "the graphs of hash seeds 0 and 1 are byte-identical"
@@ -88,7 +128,7 @@ endef
 
 .PHONY: setup test lint check format eval-inputs eval-inputs-build eval eval-record eval-diff eval-determinism \
 	eval-measure-pr eval-measure-seed1 eval-measure-base eval-gate eval-report eval-compare \
-	eval-same-graphs eval-labels eval-changes eval-scale eval-trace
+	eval-same-graphs eval-labels eval-changes eval-scale eval-scale-rust eval-trace eval-rust parity-oracle parity-key parity
 
 setup:
 	uv sync --locked
@@ -100,6 +140,7 @@ lint:
 	$(RUN) ruff check $(LINTED)
 	$(RUN) ruff format --check $(LINTED)
 	$(RUN) python tools/no_comments.py
+	$(RUN) python tools/sdist_check.py
 
 check:
 	$(RUN) python tools/check.py $(if $(FULL),--full) $(if $(BASE),--base $(BASE))
@@ -184,6 +225,14 @@ eval-compare: eval-inputs
 eval-same-graphs:
 	$(same_graphs)
 
+eval-rust: eval-inputs
+	$(rust_release)
+	$(measured)
+	$(SANDBOX) $(CURDIR)/evaluation/common/loop.py run --flavour rust --checkout $(CURDIR) \
+		--name $(notdir $(RUST_RESULT)) --hash-seed 0 --micro-jobs $(EVAL_JOBS) --out $(EVAL_OUT)
+	diff -rq -x runs.json -x result.json -x benchmark_sha256 $(RESULT) $(RUST_RESULT)
+	@echo "the graphs of the Rust and the Python flavours are byte-identical"
+
 eval-labels: eval-inputs
 	$(need_base)
 	git diff --no-renames --name-only $(BASE) HEAD > $(EVAL_OUT)/changed-$(COMMIT).txt
@@ -194,9 +243,18 @@ eval-labels: eval-inputs
 eval-scale: eval-inputs
 	$(need_name)
 	$(if $(BASE),$(measure_scale_base))
-	$(call measure_scale,$(CURDIR),$(SCALE_RESULT))
+	$(call measure_scale,$(CURDIR),$(SCALE_RESULT),new)
 	$(if $(BASE),$(SCALE_SANDBOX) $(SCALE_MEASURE) compare \
 		$(call scale_record,$(SCALE_BASE_RESULT)) $(call scale_record,$(SCALE_RESULT)))
+
+eval-scale-rust: eval-inputs
+	$(need_name)
+	$(rust_release)
+	$(call measure_scale,$(CURDIR),$(SCALE_RUST_RESULT),rust)
+	$(if $(wildcard $(call scale_record,$(SCALE_RESULT))),$(SCALE_SANDBOX) $(SCALE_MEASURE) compare \
+		$(call scale_record,$(SCALE_RESULT)) $(call scale_record,$(SCALE_RUST_RESULT)))
+	$(SCALE_SANDBOX) $(SCALE_MEASURE) summary $(SCALE_RUST_RESULT) \
+		$(if $(wildcard $(SCALE_RESULT)),--oracle $(SCALE_RESULT))
 
 eval-changes:
 	$(need_base)
@@ -207,3 +265,88 @@ eval-trace:
 	mkdir -p evaluation/results/trace
 	NAME=$(NAME) EVAL_UID=$$(id -u) EVAL_GID=$$(id -g) docker compose -f evaluation/compose.yaml \
 		run --rm trace $(if $(wildcard evaluation/macro-benchmark/dynamic/$(NAME).json),--compare)
+
+parity-oracle: eval-inputs
+	@test -z "$$(git status --porcelain -- $(PARITY_KEYED))" \
+		|| (echo "parity-oracle: commit $(PARITY_KEYED) first" && false)
+	@out=$(EVAL_OUT)/parity-oracle-$$($(parity_key)) && mkdir -p $$out && \
+	for set in $(PARITY_SETS); do \
+		if [ -f $$out/done-$$set ]; then echo "parity-oracle: $$set is cached in $$out"; \
+		else $(SANDBOX) $(PARITY_DUMP) oracle --checkout $(CURDIR) --out $$out \
+			--set $$set --jobs $(EVAL_JOBS) && touch $$out/done-$$set || exit 1; fi; \
+	done && echo "parity-oracle: $$out"
+
+parity-key:
+	@$(parity_key)
+
+parity:
+	@test -d $(PARITY_ORACLE)/seed-0 || \
+		(echo "parity: no oracle output at $(PARITY_ORACLE): run make parity-oracle" >&2 && false)
+	cargo build --release --locked
+	rm -rf $(PARITY_RUST)
+	mkdir -p $(PARITY_RUST)/run-1 $(PARITY_RUST)/run-2
+	@if [ -n "$(BASE)" ] && git cat-file -e $(BASE):tools/parity/differences.txt 2>/dev/null; then \
+		git show $(BASE):tools/parity/differences.txt > $(PARITY_RUST)/base-differences.txt; fi
+	@$(call parity_d1,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1)
+	@$(call parity_d1,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2)
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D2.jsonl | sort | while read -r dump; do \
+		input=$$(dirname "$$dump"); \
+		for run in run-1 run-2; do \
+			mkdir -p $(PARITY_RUST)/$$run/$$input && \
+			$(PARITY_BINARIES)/pycg-dump stubs "$$dump" \
+				> $(PARITY_RUST)/$$run/$$input/D2.jsonl \
+				|| { echo "parity: pycg-dump stubs $$dump failed on $$input" >&2; exit 1; }; \
+		done; \
+	done
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D3.jsonl | sort | while read -r dump; do \
+		input=$$(dirname "$$dump"); \
+		for run in run-1 run-2; do \
+			out=$(PARITY_RUST)/$$run/$$input && mkdir -p $$out && \
+			if $(PARITY_BINARIES)/pycg-dump solver "$$dump" > $$out/D3.jsonl 2> $$out/replay.txt; \
+			then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
+		done; \
+	done
+	@oracle=$(PARITY_ORACLE)/seed-0 && cd $$oracle && find . -name D4.jsonl | sort | while read -r dump; do \
+		input=$${dump%/D4.jsonl}; input=$${input#./}; \
+		set -- $$(python3 -I -c 'import json, sys; run = json.load(open(sys.argv[1])); print(run["package"], *run["entry_points"])' $$oracle/$$input/run.json); \
+		for run in run-1 run-2; do \
+			out=$(PARITY_RUST)/$$run/$$input && mkdir -p $$out && \
+			if (cd $(CURDIR) && $(PARITY_BINARIES)/pycg-dump d4 $$oracle/$$input/D4.jsonl $$out \
+				--package "$$@") 2> $$out/replay.txt; \
+			then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; fi; \
+		done; \
+	done
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D4.jsonl | sort | while read -r dump; do \
+		input=$$(dirname "$$dump"); \
+		out=$(PARITY_RUST)/engine/$$input && mkdir -p $$out && \
+		if $(PARITY_BINARIES)/pycg-dump engine "$$dump" $$out 2> $$out/replay.txt; \
+		then rm $$out/replay.txt; else mv $$out/replay.txt $$out/error.txt; \
+			echo "engine stops on $${input#./}: $$(grep -m1 '^not ported: ' $$out/error.txt \
+				|| grep -m1 -A1 'panicked at' $$out/error.txt | tail -n 1)"; fi; \
+	done
+	@cd $(PARITY_RUST)/engine && find . -name D6in.json | sort | while read -r inputs; do \
+		input=$$(dirname "$$inputs"); \
+		out=$(PARITY_RUST)/engine/$$input && \
+		(cd $(CURDIR) && $(PARITY_BINARIES)/pycg-dump document-build \
+			$(PARITY_ORACLE)/seed-0/$$input $$out/D6in.json $$out 2> $$out/build.txt) \
+		|| mv $$out/build.txt $$out/error.txt; \
+	done
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-1,$(PARITY_RUST)/oracle-run-1.txt)
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/run-2,$(PARITY_RUST)/oracle-run-2.txt)
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/engine,$(PARITY_RUST)/oracle-engine.txt,--dumps D3 D5 D6in D6 --run engine)
+	@cd $(PARITY_ORACLE)/seed-0 && find . -name D6in.json | sort | while read -r inputs; do \
+		input=$$(dirname "$$inputs"); \
+		out=$(PARITY_RUST)/document/$$input && mkdir -p $$out && \
+		(cd $(CURDIR) && $(PARITY_BINARIES)/pycg-dump document-build \
+			$(PARITY_ORACLE)/seed-0/$$input $(PARITY_ORACLE)/seed-0/$$input/D6in.json \
+			$$out 2> $$out/build.txt) \
+		|| mv $$out/build.txt $$out/error.txt; \
+	done
+	@$(call parity_compare,$(PARITY_ORACLE)/seed-0,$(PARITY_RUST)/document,$(PARITY_RUST)/oracle-document.txt,--dumps D6 --run document)
+	@$(PARITY_BINARIES)/pycg-dump document $(PARITY_ORACLE)/seed-0 > $(PARITY_RUST)/writer.txt; \
+	status=$$?; { echo '```'; cat $(PARITY_RUST)/writer.txt; echo '```'; } >> $(SUMMARY); \
+	exit $$status
+	@python3 -I tools/parity/program.py $(PARITY_ORACLE)/seed-0 \
+		$(PARITY_RUST)/program $(PARITY_BINARIES)/pycg > $(PARITY_RUST)/program.txt; \
+	status=$$?; { echo '```'; cat $(PARITY_RUST)/program.txt; echo '```'; } >> $(SUMMARY); \
+	exit $$status

@@ -1,0 +1,186 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "dataclasses.dataclass"
+       ],
+       "col": 1,
+       "end": [
+        7,
+        22
+       ],
+       "implicit": "decorator",
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.Named.__set_name__"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        19
+       ],
+       "implicit": "class",
+       "line": 8
+      },
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 4,
+       "end": [
+        17,
+        10
+       ],
+       "line": 17
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.Named.__get__"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        11
+       ],
+       "implicit": "attribute",
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.f"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        13
+       ],
+       "line": 13
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Named": {
+      "kind": "class",
+      "lines": [
+       4,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Named",
+       "<builtin>.object"
+      ]
+     },
+     "main.Named.__get__": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Named.__set_name__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Point": {
+      "kind": "class",
+      "lines": [
+       8,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Point",
+       "<builtin>.object"
+      ]
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       11,
+       15
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.dataclasses": [
+      "dataclasses"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "dataclasses.dataclass": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": null,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "dataclasses.dataclass": [],
+  "main": [
+   "dataclasses.dataclass",
+   "main.Named.__set_name__",
+   "main.use"
+  ],
+  "main.Named.__get__": [],
+  "main.Named.__set_name__": [],
+  "main.f": [],
+  "main.use": [
+   "main.Named.__get__",
+   "main.f"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

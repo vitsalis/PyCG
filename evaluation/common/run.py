@@ -629,7 +629,7 @@ def main(argv=None):
     parser.add_argument("--checkout", type=Path, required=True, help="a PyCG checkout")
     parser.add_argument(
         "--flavour",
-        choices=sorted(analyse.GENERATOR_BY_FLAVOUR),
+        choices=sorted(analyse.FLAVOURS),
         required=True,
         help="its API",
     )

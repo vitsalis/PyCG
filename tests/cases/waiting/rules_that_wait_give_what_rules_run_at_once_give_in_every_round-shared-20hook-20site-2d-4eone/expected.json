@@ -1,0 +1,136 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.str.format"
+       ],
+       "col": 9,
+       "end": [
+        7,
+        30
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.C.__getattribute__"
+       ],
+       "col": 9,
+       "end": [
+        7,
+        30
+       ],
+       "implicit": "attribute",
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.D.__format__"
+       ],
+       "col": 9,
+       "end": [
+        7,
+        30
+       ],
+       "implicit": "format",
+       "line": 7
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.__getattribute__": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.D": {
+      "kind": "class",
+      "lines": [
+       2,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.D",
+       "<builtin>.object"
+      ]
+     },
+     "main.D.__format__": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.str.format": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": null,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.str.format": [],
+  "main": [
+   "<builtin>.str.format",
+   "main.C.__getattribute__",
+   "main.D.__format__"
+  ],
+  "main.C.__getattribute__": [],
+  "main.D.__format__": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

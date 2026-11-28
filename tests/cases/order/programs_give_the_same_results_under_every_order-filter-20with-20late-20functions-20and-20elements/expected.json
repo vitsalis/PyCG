@@ -1,0 +1,238 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 0,
+       "end": [
+        17,
+        5
+       ],
+       "line": 17
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "<builtin>.filter",
+        "main.Item.keep"
+       ],
+       "col": 16,
+       "end": [
+        12,
+        39
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.Verdict.__bool__"
+       ],
+       "col": 16,
+       "end": [
+        12,
+        39
+       ],
+       "implicit": "truth",
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 23,
+       "end": [
+        12,
+        29
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.items"
+       ],
+       "col": 31,
+       "end": [
+        12,
+        38
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.Item.run"
+       ],
+       "col": 8,
+       "end": [
+        13,
+        18
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "<builtin>.filter"
+       ],
+       "col": 4,
+       "end": [
+        14,
+        29
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.items"
+       ],
+       "col": 20,
+       "end": [
+        14,
+        27
+       ],
+       "line": 14
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Item": {
+      "kind": "class",
+      "lines": [
+       4,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Item",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item.keep": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Item.run": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Verdict": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.Verdict",
+       "<builtin>.object"
+      ]
+     },
+     "main.Verdict.__bool__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.items": {
+      "kind": "function",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main"
+     },
+     "main.pick": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       11,
+       14
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.CHOSEN": [
+      "main.Item.keep"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.filter": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.filter": [],
+  "main": [
+   "main.use"
+  ],
+  "main.Item.keep": [],
+  "main.Item.run": [],
+  "main.Verdict.__bool__": [],
+  "main.items": [],
+  "main.pick": [],
+  "main.use": [
+   "<builtin>.filter",
+   "main.Item.keep",
+   "main.Item.run",
+   "main.Verdict.__bool__",
+   "main.items",
+   "main.pick"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

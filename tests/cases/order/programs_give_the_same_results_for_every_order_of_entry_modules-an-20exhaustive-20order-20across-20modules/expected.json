@@ -1,0 +1,216 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 8,
+       "end": [
+        5,
+        15
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 17,
+       "end": [
+        5,
+        24
+       ],
+       "line": 5
+      }
+     ]
+    },
+    "definitions": {
+     "a": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "a"
+     },
+     "a.A1": {
+      "kind": "class",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "a",
+      "mro": [
+       "a.A1",
+       "<builtin>.object"
+      ]
+     },
+     "a.A2": {
+      "kind": "class",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "a",
+      "mro": [
+       "a.A2",
+       "<builtin>.object"
+      ]
+     },
+     "a.A3": {
+      "kind": "class",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "a",
+      "mro": [
+       "a.A3",
+       "<builtin>.object"
+      ]
+     },
+     "b": {
+      "kind": "module",
+      "lines": [
+       1,
+       3
+      ],
+      "module": "b"
+     },
+     "b.B1": {
+      "kind": "class",
+      "lines": [
+       1,
+       1
+      ],
+      "module": "b",
+      "mro": [
+       "b.B1",
+       "<builtin>.object"
+      ]
+     },
+     "b.B2": {
+      "kind": "class",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "b",
+      "mro": [
+       "b.B2",
+       "<builtin>.object"
+      ]
+     },
+     "b.B3": {
+      "kind": "class",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "b",
+      "mro": [
+       "b.B3",
+       "<builtin>.object"
+      ]
+     },
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       5
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "a.A1",
+       "b.B1",
+       "<builtin>.object"
+      ]
+     },
+     "main.pick": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.A1": [
+      "a.A1"
+     ],
+     "main.A2": [
+      "a.A2"
+     ],
+     "main.A3": [
+      "a.A3"
+     ],
+     "main.B1": [
+      "b.B1"
+     ],
+     "main.B2": [
+      "b.B2"
+     ],
+     "main.B3": [
+      "b.B3"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "a": {
+      "file": "a.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "b": {
+      "file": "b.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "a": [],
+  "b": [],
+  "main": [
+   "main.pick"
+  ],
+  "main.pick": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

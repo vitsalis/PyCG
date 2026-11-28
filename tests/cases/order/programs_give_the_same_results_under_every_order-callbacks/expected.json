@@ -1,0 +1,289 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 12,
+       "end": [
+        8,
+        29
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 12,
+       "end": [
+        11,
+        31
+       ],
+       "line": 11
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "lib.Registry.__init__"
+       ],
+       "col": 15,
+       "end": [
+        18,
+        25
+       ],
+       "line": 18
+      },
+      {
+       "callees": [
+        "lib.Signal.__init__"
+       ],
+       "col": 4,
+       "end": [
+        20,
+        12
+       ],
+       "line": 20
+      },
+      {
+       "callees": [
+        "lib.register"
+       ],
+       "col": 4,
+       "end": [
+        23,
+        24
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "lib.Future.__init__"
+       ],
+       "col": 17,
+       "end": [
+        23,
+        23
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "<builtin>.list"
+       ],
+       "col": 4,
+       "end": [
+        24,
+        27
+       ],
+       "line": 24
+      },
+      {
+       "callees": [
+        "<builtin>.map",
+        "main.handler"
+       ],
+       "col": 9,
+       "end": [
+        24,
+        26
+       ],
+       "line": 24
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       24
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       7,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.__call__": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.D": {
+      "kind": "class",
+      "lines": [
+       10,
+       12
+      ],
+      "module": "main",
+      "mro": [
+       "main.D",
+       "<builtin>.object"
+      ]
+     },
+     "main.D.__call__": {
+      "kind": "function",
+      "lines": [
+       12,
+       12
+      ],
+      "module": "main"
+     },
+     "main.Registry": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Registry",
+       "lib.Registry"
+      ]
+     },
+     "main.Signal": {
+      "kind": "class",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Signal",
+       "lib.Signal"
+      ]
+     },
+     "main.Task": {
+      "kind": "class",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main",
+      "mro": [
+       "main.Task",
+       "lib.Future"
+      ]
+     },
+     "main.handler": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.listener": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       17,
+       24
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.lib": [
+      "lib"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.list": {
+      "known": "stub"
+     },
+     "<builtin>.map": {
+      "known": "stub"
+     },
+     "<builtin>.property": {
+      "known": "stub"
+     },
+     "lib.Future.__init__": {
+      "known": "name"
+     },
+     "lib.Registry.__init__": {
+      "known": "name"
+     },
+     "lib.Signal.__init__": {
+      "known": "name"
+     },
+     "lib.register": {
+      "known": "name"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.list": [],
+  "<builtin>.map": [],
+  "<builtin>.property": [],
+  "lib.Future.__init__": [],
+  "lib.Registry.__init__": [],
+  "lib.Signal.__init__": [],
+  "lib.register": [],
+  "main": [
+   "<builtin>.property"
+  ],
+  "main.C.__call__": [],
+  "main.D.__call__": [],
+  "main.handler": [],
+  "main.listener": [],
+  "main.use": [
+   "<builtin>.list",
+   "<builtin>.map",
+   "lib.Future.__init__",
+   "lib.Registry.__init__",
+   "lib.Signal.__init__",
+   "lib.register",
+   "main.handler"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

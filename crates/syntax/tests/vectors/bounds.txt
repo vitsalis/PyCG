@@ -1,0 +1,28 @@
+python 3.14.10
+unary	78203d20	2d	31		0a	5966	ok	-
+unary	78203d20	2d	31		0a	5967	failed	MemoryError
+not	78203d20	6e6f7420	61		0a	5967	ok	-
+not	78203d20	6e6f7420	61		0a	5968	failed	MemoryError
+conditional	78203d20	61206966206220656c736520	63		0a	5967	ok	-
+conditional	78203d20	61206966206220656c736520	63		0a	5968	failed	MemoryError
+elif	696620613a0a20202020706173730a	656c696620613a0a20202020706173730a				5962	ok	-
+elif	696620613a0a20202020706173730a	656c696620613a0a20202020706173730a				5963	failed	MemoryError
+lambda	78203d20	6c616d6264613a20	4e6f6e65		0a	2983	ok	-
+lambda	78203d20	6c616d6264613a20	4e6f6e65		0a	2984	failed	MemoryError
+power	78203d20	61202a2a20	62		0a	2983	ok	-
+power	78203d20	61202a2a20	62		0a	2984	failed	MemoryError
+and	78203d20	286120616e6420	62	29	0a	199	ok	-
+and	78203d20	286120616e6420	62	29	0a	200	failed	MemoryError
+attribute	78203d2061	2e62			0a	43380	ok	-
+attribute	78203d2061	2e62			0a	43580	failed	RecursionError
+subscript	78203d2061	5b305d			0a	43380	ok	-
+subscript	78203d2061	5b305d			0a	43580	failed	RecursionError
+method-chain	78203d2061	2e622829			0a	21690	ok	-
+method-chain	78203d2061	2e622829			0a	21790	failed	RecursionError
+sum	78203d2061	202b2061			0a	43380	ok	-
+sum	78203d2061	202b2061			0a	43580	failed	RecursionError
+attribute-in-def	646566206628293a0a2020202078203d2061	2e62			0a	43380	ok	-
+attribute-in-def	646566206628293a0a2020202078203d2061	2e62			0a	43580	failed	RecursionError
+deep-lambda	78203d20	6c616d6264613a20	4e6f6e65		0a	20000	failed	MemoryError
+deep-unary	78203d20	2d	31		0a	100000	failed	MemoryError
+deep-attribute	78203d2061	2e62			0a	200000	failed	RecursionError

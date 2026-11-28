@@ -1,0 +1,5 @@
+allow-unwrap-in-tests = true
+disallowed-types = [
+    { path = "std::collections::HashMap", reason = "seeded at random; use rustc_hash::FxHashMap" },
+    { path = "std::collections::HashSet", reason = "seeded at random; use rustc_hash::FxHashSet" },
+]

@@ -1,0 +1,301 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.first"
+       ],
+       "col": 0,
+       "end": [
+        22,
+        7
+       ],
+       "line": 22
+      }
+     ],
+     "main.dispatch": [
+      {
+       "callees": [
+        "main.on_close",
+        "main.on_open",
+        "main.unknown"
+       ],
+       "col": 4,
+       "end": [
+        16,
+        28
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "<builtin>.dict.get"
+       ],
+       "col": 4,
+       "end": [
+        17,
+        37
+       ],
+       "line": 17
+      },
+      {
+       "callees": [
+        "main.fallback",
+        "main.unknown"
+       ],
+       "col": 4,
+       "end": [
+        17,
+        39
+       ],
+       "line": 17
+      }
+     ],
+     "main.fill": [
+      {
+       "callees": [
+        "main.k1"
+       ],
+       "col": 10,
+       "end": [
+        12,
+        14
+       ],
+       "line": 12
+      }
+     ],
+     "main.first": [
+      {
+       "callees": [
+        "main.dispatch"
+       ],
+       "col": 4,
+       "end": [
+        19,
+        27
+       ],
+       "line": 19
+      },
+      {
+       "callees": [
+        "main.second"
+       ],
+       "col": 13,
+       "end": [
+        19,
+        21
+       ],
+       "line": 19
+      }
+     ],
+     "main.k1": [
+      {
+       "callees": [
+        "main.k2"
+       ],
+       "col": 17,
+       "end": [
+        8,
+        21
+       ],
+       "line": 8
+      }
+     ],
+     "main.k2": [
+      {
+       "callees": [
+        "main.k3"
+       ],
+       "col": 17,
+       "end": [
+        9,
+        21
+       ],
+       "line": 9
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       22
+      ],
+      "module": "main"
+     },
+     "main.dispatch": {
+      "kind": "function",
+      "lines": [
+       15,
+       17
+      ],
+      "module": "main"
+     },
+     "main.fallback": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.fill": {
+      "kind": "function",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main"
+     },
+     "main.first": {
+      "kind": "function",
+      "lines": [
+       18,
+       19
+      ],
+      "module": "main"
+     },
+     "main.k1": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.k2": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.k3": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.on_close": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.on_open": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.other": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.put": {
+      "kind": "function",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main"
+     },
+     "main.second": {
+      "kind": "function",
+      "lines": [
+       20,
+       21
+      ],
+      "module": "main"
+     },
+     "main.unknown": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.dict.get": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.dict.get": [],
+  "main": [
+   "main.first"
+  ],
+  "main.dispatch": [
+   "<builtin>.dict.get",
+   "main.fallback",
+   "main.on_close",
+   "main.on_open",
+   "main.unknown"
+  ],
+  "main.fallback": [],
+  "main.fill": [
+   "main.k1"
+  ],
+  "main.first": [
+   "main.dispatch",
+   "main.second"
+  ],
+  "main.k1": [
+   "main.k2"
+  ],
+  "main.k2": [
+   "main.k3"
+  ],
+  "main.k3": [],
+  "main.on_close": [],
+  "main.on_open": [],
+  "main.other": [],
+  "main.put": [],
+  "main.second": [],
+  "main.unknown": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

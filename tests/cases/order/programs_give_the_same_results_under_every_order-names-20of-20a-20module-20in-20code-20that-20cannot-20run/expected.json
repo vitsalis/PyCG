@@ -1,0 +1,215 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "lib.__getattr__"
+       ],
+       "col": 0,
+       "end": [
+        3,
+        10
+       ],
+       "implicit": "attribute",
+       "line": 3
+      },
+      {
+       "callees": [
+        "lib.actual"
+       ],
+       "col": 0,
+       "end": [
+        3,
+        12
+       ],
+       "line": 3
+      },
+      {
+       "callees": [
+        "lib.__getattr__"
+       ],
+       "col": 0,
+       "end": [
+        4,
+        12
+       ],
+       "implicit": "attribute",
+       "line": 4
+      },
+      {
+       "callees": [
+        "lib.actual"
+       ],
+       "col": 0,
+       "end": [
+        4,
+        14
+       ],
+       "line": 4
+      },
+      {
+       "callees": [
+        "facade.__getattr__"
+       ],
+       "col": 0,
+       "end": [
+        5,
+        13
+       ],
+       "implicit": "attribute",
+       "line": 5
+      },
+      {
+       "callees": [
+        "facade.other"
+       ],
+       "col": 0,
+       "end": [
+        5,
+        15
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "lib.actual"
+       ],
+       "col": 0,
+       "end": [
+        6,
+        15
+       ],
+       "line": 6
+      }
+     ]
+    },
+    "definitions": {
+     "facade": {
+      "kind": "module",
+      "lines": [
+       1,
+       5
+      ],
+      "module": "facade"
+     },
+     "facade.__getattr__": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "facade"
+     },
+     "facade.other": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "facade"
+     },
+     "lib": {
+      "kind": "module",
+      "lines": [
+       1,
+       9
+      ],
+      "module": "lib"
+     },
+     "lib.__getattr__": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "lib"
+     },
+     "lib.actual": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "lib"
+     },
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       6
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "facade.TYPE_CHECKING": [
+      "typing.TYPE_CHECKING"
+     ],
+     "facade.actual": [
+      "lib.actual"
+     ],
+     "lib.TYPE_CHECKING": [
+      "typing.TYPE_CHECKING"
+     ],
+     "main.facade": [
+      "facade"
+     ],
+     "main.lib": [
+      "lib"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "facade": {
+      "file": "facade.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "lib": {
+      "file": "lib.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "facade": [],
+  "facade.__getattr__": [],
+  "facade.other": [],
+  "lib": [],
+  "lib.__getattr__": [],
+  "lib.actual": [],
+  "main": [
+   "facade.__getattr__",
+   "facade.other",
+   "lib.__getattr__",
+   "lib.actual"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

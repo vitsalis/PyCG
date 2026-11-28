@@ -1,0 +1,135 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 0,
+       "end": [
+        8,
+        13
+       ],
+       "line": 8
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "<builtin>.map",
+        "main.second"
+       ],
+       "col": 13,
+       "end": [
+        6,
+        36
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "main.f",
+        "main.g"
+       ],
+       "col": 8,
+       "end": [
+        7,
+        11
+       ],
+       "line": 7
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       8
+      ],
+      "module": "main"
+     },
+     "main.f": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main"
+     },
+     "main.g": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       5,
+       7
+      ],
+      "module": "main"
+     },
+     "main.second": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.map": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.map": [],
+  "main": [
+   "main.run"
+  ],
+  "main.f": [],
+  "main.g": [],
+  "main.run": [
+   "<builtin>.map",
+   "main.f",
+   "main.g",
+   "main.second"
+  ],
+  "main.second": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

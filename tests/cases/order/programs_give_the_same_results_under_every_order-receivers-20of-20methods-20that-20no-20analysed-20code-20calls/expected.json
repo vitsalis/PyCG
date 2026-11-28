@@ -1,0 +1,169 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.Base.helper"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        15
+       ],
+       "line": 13
+      }
+     ],
+     "main.Base.helper": [
+      {
+       "callees": [
+        "main.Base.step"
+       ],
+       "col": 8,
+       "end": [
+        7,
+        22
+       ],
+       "line": 7
+      }
+     ],
+     "main.Base.run": [
+      {
+       "callees": [
+        "main.Base.step",
+        "main.Child.step"
+       ],
+       "col": 8,
+       "end": [
+        4,
+        19
+       ],
+       "line": 4
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       13
+      ],
+      "module": "main"
+     },
+     "main.Base": {
+      "kind": "class",
+      "lines": [
+       2,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Base.helper": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.Base.run": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Base.step": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.Child": {
+      "kind": "class",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Child",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Child.step": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Other": {
+      "kind": "class",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Other",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.Base.helper"
+  ],
+  "main.Base.helper": [
+   "main.Base.step"
+  ],
+  "main.Base.run": [
+   "main.Base.step",
+   "main.Child.step"
+  ],
+  "main.Base.step": [],
+  "main.Child.step": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

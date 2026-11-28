@@ -1,0 +1,260 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 11,
+       "end": [
+        14,
+        17
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "<builtin>.classmethod"
+       ],
+       "col": 5,
+       "end": [
+        18,
+        16
+       ],
+       "implicit": "decorator",
+       "line": 18
+      }
+     ],
+     "main.Holder.__init__": [
+      {
+       "callees": [
+        "<builtin>.list"
+       ],
+       "col": 36,
+       "end": [
+        5,
+        47
+       ],
+       "line": 5
+      }
+     ],
+     "main.Holder.go": [
+      {
+       "callees": [
+        "main.Fast.run",
+        "main.Kind.run"
+       ],
+       "col": 12,
+       "end": [
+        9,
+        22
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.Kind.make"
+       ],
+       "col": 8,
+       "end": [
+        10,
+        24
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.Fast.run",
+        "main.Kind.run"
+       ],
+       "col": 8,
+       "end": [
+        11,
+        21
+       ],
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       24
+      ],
+      "module": "main"
+     },
+     "main.Fast": {
+      "kind": "class",
+      "lines": [
+       20,
+       21
+      ],
+      "module": "main",
+      "mro": [
+       "main.Fast",
+       "main.Kind",
+       "collections.abc.Sequence"
+      ]
+     },
+     "main.Fast.run": {
+      "kind": "function",
+      "lines": [
+       21,
+       21
+      ],
+      "module": "main"
+     },
+     "main.Holder": {
+      "kind": "class",
+      "lines": [
+       3,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Holder",
+       "<builtin>.object"
+      ]
+     },
+     "main.Holder.__init__": {
+      "kind": "function",
+      "lines": [
+       4,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Holder.go": {
+      "kind": "function",
+      "lines": [
+       7,
+       11
+      ],
+      "module": "main"
+     },
+     "main.Kind": {
+      "kind": "class",
+      "lines": [
+       14,
+       19
+      ],
+      "module": "main",
+      "mro": [
+       "main.Kind",
+       "collections.abc.Sequence"
+      ]
+     },
+     "main.Kind.__getitem__": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Kind.__len__": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Kind.make": {
+      "kind": "function",
+      "lines": [
+       19,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Kind.run": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       12,
+       13
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.BASE": [
+      "typing.Sequence"
+     ],
+     "main.KindT": [
+      "main.Kind"
+     ],
+     "main.typing": [
+      "typing"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.classmethod": {
+      "known": "stub"
+     },
+     "<builtin>.list": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.classmethod": [],
+  "<builtin>.list": [],
+  "main": [
+   "<builtin>.classmethod",
+   "main.base"
+  ],
+  "main.Fast.run": [],
+  "main.Holder.__init__": [
+   "<builtin>.list"
+  ],
+  "main.Holder.go": [
+   "main.Fast.run",
+   "main.Kind.make",
+   "main.Kind.run"
+  ],
+  "main.Kind.__getitem__": [],
+  "main.Kind.__len__": [],
+  "main.Kind.make": [],
+  "main.Kind.run": [],
+  "main.base": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

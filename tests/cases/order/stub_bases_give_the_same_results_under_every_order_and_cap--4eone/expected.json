@@ -1,0 +1,353 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 11,
+       "end": [
+        7,
+        17
+       ],
+       "line": 7
+      },
+      {
+       "callees": [
+        "main.run"
+       ],
+       "col": 4,
+       "end": [
+        24,
+        16
+       ],
+       "line": 24
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "main.h0",
+        "main.h1",
+        "main.h2",
+        "main.h3",
+        "main.h4"
+       ],
+       "col": 4,
+       "end": [
+        22,
+        13
+       ],
+       "line": 22
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.Late.ping",
+        "main.Later.ping",
+        "mod.Peek.ping",
+        "mod.Wide.ping"
+       ],
+       "col": 4,
+       "end": [
+        13,
+        16
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "mod.Measured.ping",
+        "mod.Wide.ping"
+       ],
+       "col": 4,
+       "end": [
+        14,
+        16
+       ],
+       "line": 14
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       24
+      ],
+      "module": "main"
+     },
+     "main.Late": {
+      "kind": "class",
+      "lines": [
+       7,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Late",
+       "collections.abc.Iterator"
+      ]
+     },
+     "main.Late.__next__": {
+      "kind": "function",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Late.ping": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Later": {
+      "kind": "class",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Later",
+       "main.Late",
+       "collections.abc.Iterator"
+      ]
+     },
+     "main.Later.ping": {
+      "kind": "function",
+      "lines": [
+       11,
+       11
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.h0": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.h1": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.h2": {
+      "kind": "function",
+      "lines": [
+       18,
+       18
+      ],
+      "module": "main"
+     },
+     "main.h3": {
+      "kind": "function",
+      "lines": [
+       19,
+       19
+      ],
+      "module": "main"
+     },
+     "main.h4": {
+      "kind": "function",
+      "lines": [
+       20,
+       20
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       21,
+       22
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       12,
+       14
+      ],
+      "module": "main"
+     },
+     "mod": {
+      "kind": "module",
+      "lines": [
+       1,
+       6
+      ],
+      "module": "mod"
+     },
+     "mod.Measured": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "mod",
+      "mro": [
+       "mod.Measured",
+       "<builtin>.object"
+      ]
+     },
+     "mod.Measured.ping": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "mod"
+     },
+     "mod.Peek": {
+      "kind": "class",
+      "lines": [
+       1,
+       2
+      ],
+      "module": "mod",
+      "mro": [
+       "mod.Peek",
+       "<builtin>.object"
+      ]
+     },
+     "mod.Peek.ping": {
+      "kind": "function",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "mod"
+     },
+     "mod.Wide": {
+      "kind": "class",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "mod",
+      "mro": [
+       "mod.Wide",
+       "<builtin>.object"
+      ]
+     },
+     "mod.Wide.ping": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "mod"
+     }
+    },
+    "exports": {
+     "main.BASE": [
+      "collections.abc.Iterator"
+     ],
+     "main.collections": [
+      "collections"
+     ],
+     "main.handler": [
+      "main.h0",
+      "main.h1",
+      "main.h2",
+      "main.h3",
+      "main.h4"
+     ],
+     "main.mod": [
+      "mod"
+     ],
+     "main.typing": [
+      "typing"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "mod": {
+      "file": "mod.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": null,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.base",
+   "main.run"
+  ],
+  "main.Late.__next__": [],
+  "main.Late.ping": [],
+  "main.Later.ping": [],
+  "main.base": [],
+  "main.h0": [],
+  "main.h1": [],
+  "main.h2": [],
+  "main.h3": [],
+  "main.h4": [],
+  "main.run": [
+   "main.h0",
+   "main.h1",
+   "main.h2",
+   "main.h3",
+   "main.h4"
+  ],
+  "main.use": [
+   "main.Late.ping",
+   "main.Later.ping",
+   "mod.Measured.ping",
+   "mod.Peek.ping",
+   "mod.Wide.ping"
+  ],
+  "mod": [],
+  "mod.Measured.ping": [],
+  "mod.Peek.ping": [],
+  "mod.Wide.ping": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

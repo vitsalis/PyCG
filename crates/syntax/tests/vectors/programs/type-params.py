@@ -1,0 +1,3 @@
+type A[T: int = str, *Ts, **P] = list[T]
+def f[T](x: T) -> T: ...
+class G[T]: pass

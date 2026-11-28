@@ -1,0 +1,132 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "concurrent.futures._base.Future.done"
+       ],
+       "col": 0,
+       "end": [
+        8,
+        13
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "multiprocessing.reduction.AbstractReducer.__init__"
+       ],
+       "col": 0,
+       "end": [
+        9,
+        9
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "multiprocessing.reduction.AbstractReducer.dump"
+       ],
+       "col": 0,
+       "end": [
+        9,
+        17
+       ],
+       "line": 9
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Reducer": {
+      "kind": "class",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Reducer",
+       "multiprocessing.reduction.AbstractReducer",
+       "multiprocessing.reduction.AbstractReducer.ForkingPickler"
+      ]
+     },
+     "main.Task": {
+      "kind": "class",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Task",
+       "concurrent.futures._base.Future"
+      ]
+     }
+    },
+    "exports": {
+     "main.concurrent": [
+      "concurrent"
+     ],
+     "main.multiprocessing": [
+      "multiprocessing"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "concurrent.futures._base.Future.done": {
+      "known": "stub"
+     },
+     "multiprocessing.reduction.AbstractReducer.__init__": {
+      "known": "stub"
+     },
+     "multiprocessing.reduction.AbstractReducer.dump": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "concurrent.futures._base.Future.done": [],
+  "main": [
+   "concurrent.futures._base.Future.done",
+   "multiprocessing.reduction.AbstractReducer.__init__",
+   "multiprocessing.reduction.AbstractReducer.dump"
+  ],
+  "multiprocessing.reduction.AbstractReducer.__init__": [],
+  "multiprocessing.reduction.AbstractReducer.dump": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

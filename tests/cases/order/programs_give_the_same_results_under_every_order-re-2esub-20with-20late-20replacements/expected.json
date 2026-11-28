@@ -1,0 +1,231 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "re.compile"
+       ],
+       "col": 10,
+       "end": [
+        16,
+        25
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "main.use"
+       ],
+       "col": 0,
+       "end": [
+        17,
+        5
+       ],
+       "line": 17
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.<lambda1>",
+        "main.Replacer.method",
+        "re.sub"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        30
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 16,
+       "end": [
+        10,
+        22
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.pattern"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        13
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.<lambda1>",
+        "main.Replacer.method",
+        "re.Pattern.subn"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        45
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 24,
+       "end": [
+        11,
+        30
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "re.sub"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        30
+       ],
+       "line": 12
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       17
+      ],
+      "module": "main"
+     },
+     "main.<lambda1>": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Replacer": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Replacer",
+       "<builtin>.object"
+      ]
+     },
+     "main.Replacer.method": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.pattern": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.pick": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       9,
+       12
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.CHOSEN": [
+      "main.<lambda1>"
+     ],
+     "main.re": [
+      "re"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "re.Pattern.subn": {
+      "known": "stub"
+     },
+     "re.compile": {
+      "known": "stub"
+     },
+     "re.sub": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.use",
+   "re.compile"
+  ],
+  "main.<lambda1>": [],
+  "main.Replacer.method": [],
+  "main.pattern": [],
+  "main.pick": [],
+  "main.use": [
+   "main.<lambda1>",
+   "main.Replacer.method",
+   "main.pattern",
+   "main.pick",
+   "re.Pattern.subn",
+   "re.sub"
+  ],
+  "re.Pattern.subn": [],
+  "re.compile": [],
+  "re.sub": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

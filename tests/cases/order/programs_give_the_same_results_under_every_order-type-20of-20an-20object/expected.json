@@ -1,0 +1,296 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 0,
+       "end": [
+        19,
+        6
+       ],
+       "line": 19
+      },
+      {
+       "callees": [
+        "main.Base.copy"
+       ],
+       "col": 0,
+       "end": [
+        19,
+        13
+       ],
+       "line": 19
+      }
+     ],
+     "main.Base.copy": [
+      {
+       "callees": [
+        "<builtin>.type"
+       ],
+       "col": 15,
+       "end": [
+        8,
+        25
+       ],
+       "line": 8
+      }
+     ],
+     "main.late": [
+      {
+       "callees": [
+        "main.Child.__init__"
+       ],
+       "col": 11,
+       "end": [
+        12,
+        18
+       ],
+       "line": 12
+      }
+     ],
+     "main.run": [
+      {
+       "callees": [
+        "<builtin>.type"
+       ],
+       "col": 4,
+       "end": [
+        14,
+        16
+       ],
+       "line": 14
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        14,
+        27
+       ],
+       "line": 14,
+       "unresolved": "no value"
+      },
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 9,
+       "end": [
+        14,
+        15
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "<builtin>.type"
+       ],
+       "col": 4,
+       "end": [
+        15,
+        14
+       ],
+       "line": 15
+      },
+      {
+       "callees": [],
+       "col": 4,
+       "end": [
+        15,
+        24
+       ],
+       "line": 15,
+       "unresolved": "outside value"
+      },
+      {
+       "callees": [
+        "<builtin>.type"
+       ],
+       "col": 4,
+       "end": [
+        16,
+        27
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "<builtin>.type"
+       ],
+       "col": 8,
+       "end": [
+        18,
+        19
+       ],
+       "line": 18
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Base": {
+      "kind": "class",
+      "lines": [
+       5,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Base.__init__": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Base.copy": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Child": {
+      "kind": "class",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Child",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Child.__init__": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.Meta": {
+      "kind": "class",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Meta",
+       "<builtin>.type"
+      ]
+     },
+     "main.Meta.describe": {
+      "kind": "function",
+      "lines": [
+       4,
+       4
+      ],
+      "module": "main"
+     },
+     "main.late": {
+      "kind": "function",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main"
+     },
+     "main.run": {
+      "kind": "function",
+      "lines": [
+       13,
+       18
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.Sequence": [
+      "typing.Sequence"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.type": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.type": [],
+  "main": [
+   "main.Base.copy",
+   "main.late"
+  ],
+  "main.Base.__init__": [],
+  "main.Base.copy": [
+   "<builtin>.type"
+  ],
+  "main.Child.__init__": [],
+  "main.Meta.describe": [],
+  "main.late": [
+   "main.Child.__init__"
+  ],
+  "main.run": [
+   "<builtin>.type",
+   "main.late"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.run",
+   "main:14:4#14:27",
+   "no value"
+  ],
+  [
+   "main.run",
+   "main:15:4#15:24",
+   "outside value"
+  ]
+ ],
+ "warnings": []
+}

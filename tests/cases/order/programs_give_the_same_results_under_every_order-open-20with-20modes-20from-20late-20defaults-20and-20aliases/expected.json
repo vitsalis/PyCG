@@ -1,0 +1,282 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        22
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.C.run"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        24
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.method"
+       ],
+       "col": 13,
+       "end": [
+        13,
+        21
+       ],
+       "line": 13
+      }
+     ],
+     "main.C.run": [
+      {
+       "callees": [
+        "<builtin>.open"
+       ],
+       "col": 8,
+       "end": [
+        5,
+        29
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "io.FileIO.close"
+       ],
+       "col": 8,
+       "end": [
+        5,
+        37
+       ],
+       "line": 5
+      },
+      {
+       "callees": [
+        "<builtin>.open"
+       ],
+       "col": 8,
+       "end": [
+        6,
+        25
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "io.BufferedWriter.close"
+       ],
+       "col": 8,
+       "end": [
+        6,
+        33
+       ],
+       "line": 6
+      }
+     ],
+     "main.empty": [
+      {
+       "callees": [
+        "<builtin>.open"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        19
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "io.BufferedRandom.flush",
+        "io.BufferedReader.flush",
+        "io.BufferedWriter.flush",
+        "io.TextIOWrapper.flush"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        27
+       ],
+       "line": 12
+      }
+     ],
+     "main.uncalled": [
+      {
+       "callees": [
+        "<builtin>.open"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        19
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "io.BufferedRandom.close"
+       ],
+       "col": 4,
+       "end": [
+        10,
+        27
+       ],
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       13
+      ],
+      "module": "main"
+     },
+     "main.C": {
+      "kind": "class",
+      "lines": [
+       2,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.C",
+       "<builtin>.object"
+      ]
+     },
+     "main.C.run": {
+      "kind": "function",
+      "lines": [
+       4,
+       6
+      ],
+      "module": "main"
+     },
+     "main.empty": {
+      "kind": "function",
+      "lines": [
+       11,
+       12
+      ],
+      "module": "main"
+     },
+     "main.method": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.uncalled": {
+      "kind": "function",
+      "lines": [
+       9,
+       10
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     },
+     "<builtin>.open": {
+      "known": "stub"
+     },
+     "io.BufferedRandom.close": {
+      "known": "stub"
+     },
+     "io.BufferedRandom.flush": {
+      "known": "stub"
+     },
+     "io.BufferedReader.flush": {
+      "known": "stub"
+     },
+     "io.BufferedWriter.close": {
+      "known": "stub"
+     },
+     "io.BufferedWriter.flush": {
+      "known": "stub"
+     },
+     "io.FileIO.close": {
+      "known": "stub"
+     },
+     "io.TextIOWrapper.flush": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "<builtin>.open": [],
+  "io.BufferedRandom.close": [],
+  "io.BufferedRandom.flush": [],
+  "io.BufferedReader.flush": [],
+  "io.BufferedWriter.close": [],
+  "io.BufferedWriter.flush": [],
+  "io.FileIO.close": [],
+  "io.TextIOWrapper.flush": [],
+  "main": [
+   "<builtin>.getattr",
+   "main.C.run",
+   "main.method"
+  ],
+  "main.C.run": [
+   "<builtin>.open",
+   "io.BufferedWriter.close",
+   "io.FileIO.close"
+  ],
+  "main.empty": [
+   "<builtin>.open",
+   "io.BufferedRandom.flush",
+   "io.BufferedReader.flush",
+   "io.BufferedWriter.flush",
+   "io.TextIOWrapper.flush"
+  ],
+  "main.method": [],
+  "main.uncalled": [
+   "<builtin>.open",
+   "io.BufferedRandom.close"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

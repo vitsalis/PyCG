@@ -1,0 +1,400 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.staticmethod"
+       ],
+       "col": 5,
+       "end": [
+        14,
+        17
+       ],
+       "implicit": "decorator",
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.base"
+       ],
+       "col": 12,
+       "end": [
+        16,
+        18
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "main.a"
+       ],
+       "col": 30,
+       "end": [
+        16,
+        33
+       ],
+       "line": 16
+      },
+      {
+       "callees": [
+        "<builtin>.staticmethod"
+       ],
+       "col": 5,
+       "end": [
+        23,
+        17
+       ],
+       "implicit": "decorator",
+       "line": 23
+      },
+      {
+       "callees": [
+        "main.SubMeta.describe"
+       ],
+       "col": 0,
+       "end": [
+        27,
+        23
+       ],
+       "line": 27
+      },
+      {
+       "callees": [
+        "main.BaseMeta.create"
+       ],
+       "col": 0,
+       "end": [
+        28,
+        13
+       ],
+       "line": 28
+      },
+      {
+       "callees": [
+        "main.BaseMeta.describe",
+        "main.SubMeta.describe"
+       ],
+       "col": 0,
+       "end": [
+        29,
+        17
+       ],
+       "line": 29
+      }
+     ],
+     "main.BaseMeta.create": [
+      {
+       "callees": [
+        "main.Leaf.__init__"
+       ],
+       "col": 15,
+       "end": [
+        4,
+        20
+       ],
+       "line": 4
+      }
+     ],
+     "main.BaseMeta.describe": [
+      {
+       "callees": [
+        "main.Picked.hook",
+        "main.Root.hook"
+       ],
+       "col": 8,
+       "end": [
+        6,
+        18
+       ],
+       "line": 6
+      }
+     ],
+     "main.SubMeta.describe": [
+      {
+       "callees": [
+        "<builtin>.super"
+       ],
+       "col": 8,
+       "end": [
+        9,
+        15
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.BaseMeta.describe"
+       ],
+       "col": 8,
+       "end": [
+        9,
+        26
+       ],
+       "line": 9
+      }
+     ],
+     "main.a": [
+      {
+       "callees": [
+        "main.b"
+       ],
+       "col": 16,
+       "end": [
+        10,
+        19
+       ],
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       29
+      ],
+      "module": "main"
+     },
+     "main.BaseMeta": {
+      "kind": "class",
+      "lines": [
+       2,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.BaseMeta",
+       "<builtin>.type"
+      ]
+     },
+     "main.BaseMeta.create": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     },
+     "main.BaseMeta.describe": {
+      "kind": "function",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Leaf": {
+      "kind": "class",
+      "lines": [
+       25,
+       26
+      ],
+      "module": "main",
+      "mro": [
+       "main.Leaf",
+       "main.Model",
+       "main.Root",
+       "<builtin>.object"
+      ]
+     },
+     "main.Leaf.__init__": {
+      "kind": "function",
+      "lines": [
+       26,
+       26
+      ],
+      "module": "main"
+     },
+     "main.Model": {
+      "kind": "class",
+      "lines": [
+       16,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Model",
+       "main.Root",
+       "<builtin>.object"
+      ]
+     },
+     "main.Model.__init__": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Picked": {
+      "kind": "class",
+      "lines": [
+       22,
+       24
+      ],
+      "module": "main",
+      "mro": [
+       "main.Picked",
+       "<builtin>.object"
+      ]
+     },
+     "main.Picked.hook": {
+      "kind": "function",
+      "lines": [
+       24,
+       24
+      ],
+      "module": "main"
+     },
+     "main.Root": {
+      "kind": "class",
+      "lines": [
+       13,
+       15
+      ],
+      "module": "main",
+      "mro": [
+       "main.Root",
+       "<builtin>.object"
+      ]
+     },
+     "main.Root.hook": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.SubMeta": {
+      "kind": "class",
+      "lines": [
+       7,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.SubMeta",
+       "main.BaseMeta",
+       "<builtin>.type"
+      ]
+     },
+     "main.SubMeta.describe": {
+      "kind": "function",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main"
+     },
+     "main.a": {
+      "kind": "function",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main"
+     },
+     "main.b": {
+      "kind": "function",
+      "lines": [
+       11,
+       11
+      ],
+      "module": "main"
+     },
+     "main.base": {
+      "kind": "function",
+      "lines": [
+       12,
+       12
+      ],
+      "module": "main"
+     },
+     "main.choose": {
+      "kind": "function",
+      "lines": [
+       19,
+       21
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.Chosen": [
+      "main.BaseMeta",
+      "main.SubMeta"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.staticmethod": {
+      "known": "stub"
+     },
+     "<builtin>.super": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.staticmethod": [],
+  "<builtin>.super": [],
+  "main": [
+   "<builtin>.staticmethod",
+   "main.BaseMeta.create",
+   "main.BaseMeta.describe",
+   "main.SubMeta.describe",
+   "main.a",
+   "main.base"
+  ],
+  "main.BaseMeta.create": [
+   "main.Leaf.__init__"
+  ],
+  "main.BaseMeta.describe": [
+   "main.Picked.hook",
+   "main.Root.hook"
+  ],
+  "main.Leaf.__init__": [],
+  "main.Model.__init__": [],
+  "main.Picked.hook": [],
+  "main.Root.hook": [],
+  "main.SubMeta.describe": [
+   "<builtin>.super",
+   "main.BaseMeta.describe"
+  ],
+  "main.a": [
+   "main.b"
+  ],
+  "main.b": [],
+  "main.base": [],
+  "main.choose": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

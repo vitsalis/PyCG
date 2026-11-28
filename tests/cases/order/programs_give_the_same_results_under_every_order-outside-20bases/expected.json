@@ -1,0 +1,359 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "<builtin>.dict.__init__"
+       ],
+       "col": 0,
+       "end": [
+        23,
+        15
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "<builtin>.dict.get"
+       ],
+       "col": 0,
+       "end": [
+        23,
+        27
+       ],
+       "line": 23
+      },
+      {
+       "callees": [
+        "collections.abc.MutableMapping.popitem"
+       ],
+       "col": 0,
+       "end": [
+        24,
+        17
+       ],
+       "line": 24
+      },
+      {
+       "callees": [
+        "main.Request.__init__"
+       ],
+       "col": 0,
+       "end": [
+        25,
+        9
+       ],
+       "line": 25
+      },
+      {
+       "callees": [
+        "main.Task.run"
+       ],
+       "col": 0,
+       "end": [
+        25,
+        15
+       ],
+       "line": 25
+      },
+      {
+       "callees": [
+        "main.Mixin.helper"
+       ],
+       "col": 0,
+       "end": [
+        25,
+        24
+       ],
+       "line": 25
+      }
+     ],
+     "main.Request.__init__": [
+      {
+       "callees": [
+        "<builtin>.super"
+       ],
+       "col": 8,
+       "end": [
+        20,
+        15
+       ],
+       "line": 20
+      },
+      {
+       "callees": [
+        "abc.ABC.__init__"
+       ],
+       "col": 8,
+       "end": [
+        20,
+        26
+       ],
+       "line": 20
+      }
+     ],
+     "main.Task.run": [
+      {
+       "callees": [],
+       "col": 8,
+       "end": [
+        9,
+        20
+       ],
+       "line": 9,
+       "unresolved": "no value"
+      },
+      {
+       "callees": [
+        "main.Mixin.helper"
+       ],
+       "col": 8,
+       "end": [
+        10,
+        21
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.Request.__init__"
+       ],
+       "col": 15,
+       "end": [
+        11,
+        31
+       ],
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       25
+      ],
+      "module": "main"
+     },
+     "main.Mixin": {
+      "kind": "class",
+      "lines": [
+       5,
+       6
+      ],
+      "module": "main",
+      "mro": [
+       "main.Mixin",
+       "<builtin>.object"
+      ]
+     },
+     "main.Mixin.helper": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.Options": {
+      "kind": "class",
+      "lines": [
+       21,
+       22
+      ],
+      "module": "main",
+      "mro": [
+       "main.Options",
+       "<builtin>.dict"
+      ]
+     },
+     "main.Request": {
+      "kind": "class",
+      "lines": [
+       18,
+       20
+      ],
+      "module": "main",
+      "mro": [
+       "main.Request",
+       "main.Task",
+       "abc.ABC",
+       "main.Mixin"
+      ]
+     },
+     "main.Request.__init__": {
+      "kind": "function",
+      "lines": [
+       19,
+       20
+      ],
+      "module": "main"
+     },
+     "main.Store": {
+      "kind": "class",
+      "lines": [
+       12,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Store",
+       "collections.abc.MutableMapping"
+      ]
+     },
+     "main.Store.__delitem__": {
+      "kind": "function",
+      "lines": [
+       15,
+       15
+      ],
+      "module": "main"
+     },
+     "main.Store.__getitem__": {
+      "kind": "function",
+      "lines": [
+       13,
+       13
+      ],
+      "module": "main"
+     },
+     "main.Store.__iter__": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Store.__len__": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Store.__setitem__": {
+      "kind": "function",
+      "lines": [
+       14,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Task": {
+      "kind": "class",
+      "lines": [
+       7,
+       11
+      ],
+      "module": "main",
+      "mro": [
+       "main.Task",
+       "abc.ABC",
+       "main.Mixin"
+      ]
+     },
+     "main.Task.run": {
+      "kind": "function",
+      "lines": [
+       8,
+       11
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.abc": [
+      "abc"
+     ],
+     "main.collections": [
+      "collections"
+     ],
+     "main.typing": [
+      "typing"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.dict.__init__": {
+      "known": "stub"
+     },
+     "<builtin>.dict.get": {
+      "known": "stub"
+     },
+     "<builtin>.super": {
+      "known": "stub"
+     },
+     "abc.ABC.__init__": {
+      "known": "stub"
+     },
+     "collections.abc.MutableMapping.popitem": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.dict.__init__": [],
+  "<builtin>.dict.get": [],
+  "<builtin>.super": [],
+  "abc.ABC.__init__": [],
+  "collections.abc.MutableMapping.popitem": [],
+  "main": [
+   "<builtin>.dict.__init__",
+   "<builtin>.dict.get",
+   "collections.abc.MutableMapping.popitem",
+   "main.Mixin.helper",
+   "main.Request.__init__",
+   "main.Task.run"
+  ],
+  "main.Mixin.helper": [],
+  "main.Request.__init__": [
+   "<builtin>.super",
+   "abc.ABC.__init__"
+  ],
+  "main.Store.__delitem__": [],
+  "main.Store.__getitem__": [],
+  "main.Store.__iter__": [],
+  "main.Store.__len__": [],
+  "main.Store.__setitem__": [],
+  "main.Task.run": [
+   "main.Mixin.helper",
+   "main.Request.__init__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.Task.run",
+   "main:9:8#9:20",
+   "no value"
+  ]
+ ],
+ "warnings": []
+}

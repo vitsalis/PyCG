@@ -1,0 +1,369 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.meta"
+       ],
+       "col": 21,
+       "end": [
+        6,
+        27
+       ],
+       "line": 6
+      },
+      {
+       "callees": [
+        "abc.abstractmethod"
+       ],
+       "col": 5,
+       "end": [
+        12,
+        23
+       ],
+       "implicit": "decorator",
+       "line": 12
+      },
+      {
+       "callees": [
+        "main.pick"
+       ],
+       "col": 13,
+       "end": [
+        22,
+        23
+       ],
+       "line": 22
+      },
+      {
+       "callees": [
+        "main.Base.__init__",
+        "main.Base.__new__",
+        "main.Either.__init__"
+       ],
+       "col": 4,
+       "end": [
+        28,
+        10
+       ],
+       "line": 28
+      },
+      {
+       "callees": [
+        "main.Base.step",
+        "main.Concrete.step",
+        "main.Leaf.step"
+       ],
+       "col": 4,
+       "end": [
+        28,
+        17
+       ],
+       "line": 28
+      }
+     ],
+     "main.Base.__new__": [
+      {
+       "callees": [
+        "<builtin>.super"
+       ],
+       "col": 15,
+       "end": [
+        8,
+        22
+       ],
+       "line": 8
+      },
+      {
+       "callees": [
+        "<builtin>.object.__new__"
+       ],
+       "col": 15,
+       "end": [
+        8,
+        35
+       ],
+       "line": 8
+      }
+     ],
+     "main.Base.run": [
+      {
+       "callees": [
+        "main.Base.step",
+        "main.Concrete.step",
+        "main.Leaf.step"
+       ],
+       "col": 8,
+       "end": [
+        11,
+        19
+       ],
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       28
+      ],
+      "module": "main"
+     },
+     "main.Base": {
+      "kind": "class",
+      "lines": [
+       6,
+       13
+      ],
+      "module": "main",
+      "mro": [
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Base.__init__": {
+      "kind": "function",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main"
+     },
+     "main.Base.__new__": {
+      "kind": "function",
+      "lines": [
+       7,
+       8
+      ],
+      "module": "main"
+     },
+     "main.Base.run": {
+      "kind": "function",
+      "lines": [
+       10,
+       11
+      ],
+      "module": "main"
+     },
+     "main.Base.step": {
+      "kind": "function",
+      "lines": [
+       13,
+       13
+      ],
+      "module": "main"
+     },
+     "main.Concrete": {
+      "kind": "class",
+      "lines": [
+       18,
+       19
+      ],
+      "module": "main",
+      "mro": [
+       "main.Concrete",
+       "abc.ABC"
+      ]
+     },
+     "main.Concrete.step": {
+      "kind": "function",
+      "lines": [
+       19,
+       19
+      ],
+      "module": "main"
+     },
+     "main.Either": {
+      "kind": "class",
+      "lines": [
+       22,
+       23
+      ],
+      "module": "main",
+      "mro": [
+       "main.Either",
+       "main.Base",
+       "main.Concrete",
+       "abc.ABC"
+      ]
+     },
+     "main.Either.__init__": {
+      "kind": "function",
+      "lines": [
+       23,
+       23
+      ],
+      "module": "main"
+     },
+     "main.Leaf": {
+      "kind": "class",
+      "lines": [
+       16,
+       17
+      ],
+      "module": "main",
+      "mro": [
+       "main.Leaf",
+       "main.Middle",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Leaf.step": {
+      "kind": "function",
+      "lines": [
+       17,
+       17
+      ],
+      "module": "main"
+     },
+     "main.Middle": {
+      "kind": "class",
+      "lines": [
+       14,
+       15
+      ],
+      "module": "main",
+      "mro": [
+       "main.Middle",
+       "main.Base",
+       "<builtin>.object"
+      ]
+     },
+     "main.Partial": {
+      "kind": "class",
+      "lines": [
+       24,
+       26
+      ],
+      "module": "main",
+      "mro": [
+       "main.Partial",
+       "collections.abc.Mapping"
+      ]
+     },
+     "main.Partial.__getitem__": {
+      "kind": "function",
+      "lines": [
+       26,
+       26
+      ],
+      "module": "main"
+     },
+     "main.Partial.__init__": {
+      "kind": "function",
+      "lines": [
+       25,
+       25
+      ],
+      "module": "main"
+     },
+     "main.meta": {
+      "kind": "function",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main"
+     },
+     "main.pick": {
+      "kind": "function",
+      "lines": [
+       20,
+       21
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.Mapping": [
+      "collections.abc.Mapping"
+     ],
+     "main.abc": [
+      "abc"
+     ],
+     "main.kind": [
+      "main.Base",
+      "main.Either",
+      "main.Leaf",
+      "main.Middle",
+      "main.Partial"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.object.__new__": {
+      "known": "stub"
+     },
+     "<builtin>.super": {
+      "known": "stub"
+     },
+     "abc.abstractmethod": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.object.__new__": [],
+  "<builtin>.super": [],
+  "abc.abstractmethod": [],
+  "main": [
+   "abc.abstractmethod",
+   "main.Base.__init__",
+   "main.Base.__new__",
+   "main.Base.step",
+   "main.Concrete.step",
+   "main.Either.__init__",
+   "main.Leaf.step",
+   "main.meta",
+   "main.pick"
+  ],
+  "main.Base.__init__": [],
+  "main.Base.__new__": [
+   "<builtin>.object.__new__",
+   "<builtin>.super"
+  ],
+  "main.Base.run": [
+   "main.Base.step",
+   "main.Concrete.step",
+   "main.Leaf.step"
+  ],
+  "main.Base.step": [],
+  "main.Concrete.step": [],
+  "main.Either.__init__": [],
+  "main.Leaf.step": [],
+  "main.Partial.__getitem__": [],
+  "main.Partial.__init__": [],
+  "main.meta": [],
+  "main.pick": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

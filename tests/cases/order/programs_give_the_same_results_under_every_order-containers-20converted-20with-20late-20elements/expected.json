@@ -1,0 +1,223 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 7,
+       "end": [
+        12,
+        13
+       ],
+       "line": 12
+      },
+      {
+       "callees": [
+        "<builtin>.list.append"
+       ],
+       "col": 0,
+       "end": [
+        13,
+        15
+       ],
+       "line": 13
+      },
+      {
+       "callees": [
+        "main.show"
+       ],
+       "col": 0,
+       "end": [
+        14,
+        9
+       ],
+       "line": 14
+      },
+      {
+       "callees": [
+        "main.show"
+       ],
+       "col": 0,
+       "end": [
+        15,
+        24
+       ],
+       "line": 15
+      },
+      {
+       "callees": [
+        "main.late"
+       ],
+       "col": 14,
+       "end": [
+        15,
+        20
+       ],
+       "line": 15
+      }
+     ],
+     "main.show": [
+      {
+       "callees": [
+        "<builtin>.repr",
+        "main.Item.__repr__",
+        "main.Key.__repr__"
+       ],
+       "col": 4,
+       "end": [
+        9,
+        12
+       ],
+       "line": 9
+      },
+      {
+       "callees": [
+        "main.Item.__repr__",
+        "main.Key.__repr__"
+       ],
+       "col": 6,
+       "end": [
+        10,
+        10
+       ],
+       "implicit": "format",
+       "line": 10
+      },
+      {
+       "callees": [
+        "main.Item.__repr__",
+        "main.Key.__repr__"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        16
+       ],
+       "implicit": "format",
+       "line": 11
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       16
+      ],
+      "module": "main"
+     },
+     "main.Item": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.Item",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item.__repr__": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.Key": {
+      "kind": "class",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Key",
+       "<builtin>.object"
+      ]
+     },
+     "main.Key.__repr__": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.late": {
+      "kind": "function",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main"
+     },
+     "main.show": {
+      "kind": "function",
+      "lines": [
+       8,
+       11
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.list.append": {
+      "known": "stub"
+     },
+     "<builtin>.repr": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.list.append": [],
+  "<builtin>.repr": [],
+  "main": [
+   "<builtin>.list.append",
+   "main.late",
+   "main.show"
+  ],
+  "main.Item.__repr__": [],
+  "main.Key.__repr__": [],
+  "main.late": [],
+  "main.show": [
+   "<builtin>.repr",
+   "main.Item.__repr__",
+   "main.Key.__repr__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

@@ -1,0 +1,42 @@
+{
+ "documents": [],
+ "edges": {
+  "<builtin>.classmethod": [],
+  "<builtin>.object.__getattribute__": [],
+  "<builtin>.super": [],
+  "main": [
+   "<builtin>.classmethod"
+  ],
+  "main.App.made": [],
+  "main.App.used": [],
+  "main.Child.run": [
+   "<builtin>.super",
+   "main.Hook.__get__"
+  ],
+  "main.Hook.__get__": [
+   "main.Hooked.__getattribute__"
+  ],
+  "main.Hooked.__getattribute__": [
+   "<builtin>.object.__getattribute__",
+   "main.Hook.__get__"
+  ],
+  "main.f": [],
+  "main.use": [
+   "main.Hooked.__getattribute__"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [
+  [
+   "main.Hook.__get__",
+   "main:5:8#5:20",
+   "no value"
+  ],
+  [
+   "main.Hook.__get__",
+   "main:6:8#6:18",
+   "outside value"
+  ]
+ ],
+ "warnings": []
+}

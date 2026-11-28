@@ -1,0 +1,150 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.Needle.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        11,
+        33
+       ],
+       "implicit": "operator",
+       "line": 11
+      },
+      {
+       "callees": [
+        "<builtin>.getattr"
+       ],
+       "col": 12,
+       "end": [
+        11,
+        33
+       ],
+       "line": 11
+      }
+     ],
+     "main.Needle.__eq__": [
+      {
+       "callees": [
+        "main.Item.touch"
+       ],
+       "col": 8,
+       "end": [
+        6,
+        21
+       ],
+       "line": 6
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       11
+      ],
+      "module": "main"
+     },
+     "main.Holder": {
+      "kind": "class",
+      "lines": [
+       8,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Holder",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item": {
+      "kind": "class",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.Item",
+       "<builtin>.object"
+      ]
+     },
+     "main.Item.touch": {
+      "kind": "function",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main"
+     },
+     "main.Needle": {
+      "kind": "class",
+      "lines": [
+       4,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Needle",
+       "<builtin>.object"
+      ]
+     },
+     "main.Needle.__eq__": {
+      "kind": "function",
+      "lines": [
+       5,
+       7
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.getattr": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.getattr": [],
+  "main": [
+   "<builtin>.getattr",
+   "main.Needle.__eq__"
+  ],
+  "main.Item.touch": [],
+  "main.Needle.__eq__": [
+   "main.Item.touch"
+  ]
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

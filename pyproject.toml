@@ -15,7 +15,6 @@ dependencies = []
 
 [project.scripts]
 pycg = "pycg.__main__:main"
-pycg-view = "pycg.view:main"
 
 [project.urls]
 Homepage = "https://github.com/vitsalis/PyCG"
@@ -33,7 +32,15 @@ build-backend = "hatchling.build"
 path = "pycg/__init__.py"
 
 [tool.hatch.build.targets.sdist]
-exclude = ["/evaluation/**", "!/evaluation/micro-benchmark/**"]
+exclude = [
+    "/evaluation/**",
+    "!/evaluation/micro-benchmark/**",
+    "/Cargo.toml",
+    "/Cargo.lock",
+    "/clippy.toml",
+    "/rust-toolchain.toml",
+    "/crates/**",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests", "evaluation/tests"]
@@ -46,6 +53,7 @@ line-length = 88
 extend-exclude = [
     "evaluation/micro-benchmark/snippets",
     "tests/fixtures",
+    "tests/cases",
     "evaluation/macro-benchmark/projects",
     "evaluation/macro-benchmark/selection/*/audits",
 ]

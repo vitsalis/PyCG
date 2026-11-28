@@ -1,0 +1,191 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main.use": [
+      {
+       "callees": [
+        "model.C.__setattr__"
+       ],
+       "col": 4,
+       "end": [
+        4,
+        11
+       ],
+       "implicit": "attribute",
+       "line": 4
+      }
+     ],
+     "model": [
+      {
+       "callees": [
+        "<builtin>.property"
+       ],
+       "col": 5,
+       "end": [
+        4,
+        13
+       ],
+       "implicit": "decorator",
+       "line": 4
+      },
+      {
+       "callees": [
+        "<builtin>.property.setter"
+       ],
+       "col": 5,
+       "end": [
+        6,
+        17
+       ],
+       "implicit": "decorator",
+       "line": 6
+      }
+     ],
+     "model.C.__setattr__": [
+      {
+       "callees": [
+        "model.C.value"
+       ],
+       "col": 4,
+       "end": [
+        3,
+        45
+       ],
+       "implicit": "attribute",
+       "line": 2
+      },
+      {
+       "callees": [
+        "<builtin>.object.__setattr__"
+       ],
+       "col": 8,
+       "end": [
+        3,
+        45
+       ],
+       "line": 3
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       4
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       2,
+       4
+      ],
+      "module": "main"
+     },
+     "model": {
+      "kind": "module",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "model"
+     },
+     "model.C": {
+      "kind": "class",
+      "lines": [
+       1,
+       7
+      ],
+      "module": "model",
+      "mro": [
+       "model.C",
+       "<builtin>.object"
+      ]
+     },
+     "model.C.__setattr__": {
+      "kind": "function",
+      "lines": [
+       2,
+       3
+      ],
+      "module": "model"
+     },
+     "model.C.value": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "model"
+     }
+    },
+    "exports": {
+     "main.C": [
+      "model.C"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     },
+     "model": {
+      "file": "model.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.object.__setattr__": {
+      "known": "stub"
+     },
+     "<builtin>.property": {
+      "known": "stub"
+     },
+     "<builtin>.property.setter": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.object.__setattr__": [],
+  "<builtin>.property": [],
+  "<builtin>.property.setter": [],
+  "main": [],
+  "main.use": [
+   "model.C.__setattr__"
+  ],
+  "model": [
+   "<builtin>.property",
+   "<builtin>.property.setter"
+  ],
+  "model.C.__setattr__": [
+   "<builtin>.object.__setattr__",
+   "model.C.value"
+  ],
+  "model.C.value": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

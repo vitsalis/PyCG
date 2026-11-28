@@ -1,0 +1,141 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.Needle.__eq__"
+       ],
+       "col": 0,
+       "end": [
+        10,
+        29
+       ],
+       "implicit": "operator",
+       "line": 10
+      },
+      {
+       "callees": [
+        "<builtin>.list",
+        "main.Seq.__getitem__"
+       ],
+       "col": 12,
+       "end": [
+        10,
+        29
+       ],
+       "line": 10
+      },
+      {
+       "callees": [
+        "<builtin>.iter"
+       ],
+       "col": 17,
+       "end": [
+        10,
+        28
+       ],
+       "line": 10
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       10
+      ],
+      "module": "main"
+     },
+     "main.Needle": {
+      "kind": "class",
+      "lines": [
+       2,
+       4
+      ],
+      "module": "main",
+      "mro": [
+       "main.Needle",
+       "<builtin>.object"
+      ]
+     },
+     "main.Needle.__eq__": {
+      "kind": "function",
+      "lines": [
+       3,
+       4
+      ],
+      "module": "main"
+     },
+     "main.Seq": {
+      "kind": "class",
+      "lines": [
+       5,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Seq",
+       "<builtin>.object"
+      ]
+     },
+     "main.Seq.__getitem__": {
+      "kind": "function",
+      "lines": [
+       6,
+       9
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {},
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "<builtin>.iter": {
+      "known": "stub"
+     },
+     "<builtin>.list": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "<builtin>.iter": [],
+  "<builtin>.list": [],
+  "main": [
+   "<builtin>.iter",
+   "<builtin>.list",
+   "main.Needle.__eq__",
+   "main.Seq.__getitem__"
+  ],
+  "main.Needle.__eq__": [],
+  "main.Seq.__getitem__": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

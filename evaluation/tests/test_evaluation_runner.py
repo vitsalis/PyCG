@@ -34,6 +34,40 @@ def test_a_crash_is_recorded_with_the_error_and_where_it_happened(tmp_path):
     assert not graph_path.exists()
 
 
+def test_the_rust_flavour_runs_the_built_binary_and_reads_its_document(tmp_path):
+    job, fake = project(tmp_path, "ok"), tool(tmp_path, "rust")
+    graph_path = tmp_path / "out" / "graph.json"
+
+    record = run.run_job(fake, job, graph_path, timeout_seconds=60)
+
+    assert record["status"] == "ok" and record["peak_rss_mib"] > 0
+    assert json.loads(graph_path.read_text()) == {
+        "main": ["main.a", "os.getcwd"],
+        "main.a": [],
+        "os.getcwd": [],
+    }
+    seen = json.loads((job.package / "seen.json").read_text())
+    assert seen["arguments"][:2] == ["--package", str(job.package.resolve())]
+    assert seen["arguments"][2:-2] == [str(job.entry_points[0].resolve())]
+    assert seen["arguments"][-2] == "-o"
+    assert set(seen["environment"]) - {"LC_CTYPE"} == set()
+    assert Path(seen["cwd"]).name.startswith("pycg-run-")
+    assert not (job.package / "main.py.ran").exists()
+
+
+def test_the_rust_flavour_records_the_last_error_line_as_a_crash(tmp_path):
+    job, fake = project(tmp_path, "not ported"), tool(tmp_path, "rust")
+    graph_path = tmp_path / "graph.json"
+
+    record = run.run_job(fake, job, graph_path, timeout_seconds=60)
+
+    assert record["status"] == "crash"
+    assert record["error"] == "pycg: not ported: outside attributes"
+    assert record["where"] == "target/release/pycg (exit 3)"
+    assert record["exit_status"] == 3
+    assert not graph_path.exists()
+
+
 @pytest.mark.parametrize("flavour", ["new", "original"])
 def test_an_analysis_runs_isolated_and_never_runs_the_analysed_source(
     tmp_path, flavour

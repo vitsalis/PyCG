@@ -1,0 +1,220 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "main.A.m"
+       ],
+       "col": 0,
+       "end": [
+        11,
+        7
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.P.p"
+       ],
+       "col": 0,
+       "end": [
+        20,
+        7
+       ],
+       "line": 20
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       20
+      ],
+      "module": "main"
+     },
+     "main.A": {
+      "kind": "class",
+      "lines": [
+       2,
+       2
+      ],
+      "module": "main",
+      "mro": [
+       "main.A",
+       "<builtin>.object"
+      ]
+     },
+     "main.A.m": {
+      "kind": "function",
+      "lines": [
+       6,
+       6
+      ],
+      "module": "main"
+     },
+     "main.B": {
+      "kind": "class",
+      "lines": [
+       3,
+       3
+      ],
+      "module": "main",
+      "mro": [
+       "main.B",
+       "<builtin>.object"
+      ]
+     },
+     "main.P": {
+      "kind": "class",
+      "lines": [
+       13,
+       14
+      ],
+      "module": "main",
+      "mro": [
+       "main.P",
+       "main.Q",
+       "<builtin>.object"
+      ]
+     },
+     "main.P.p": {
+      "kind": "function",
+      "lines": [
+       14,
+       14
+      ],
+      "module": "main"
+     },
+     "main.Q": {
+      "kind": "class",
+      "lines": [
+       15,
+       16
+      ],
+      "module": "main",
+      "mro": [
+       "main.Q",
+       "main.P",
+       "<builtin>.object"
+      ]
+     },
+     "main.Q.q": {
+      "kind": "function",
+      "lines": [
+       16,
+       16
+      ],
+      "module": "main"
+     },
+     "main.X": {
+      "kind": "class",
+      "lines": [
+       8,
+       8
+      ],
+      "module": "main",
+      "mro": [
+       "main.X",
+       "main.A",
+       "main.A",
+       "main.B",
+       "<builtin>.object"
+      ]
+     },
+     "main.Y": {
+      "kind": "class",
+      "lines": [
+       9,
+       9
+      ],
+      "module": "main",
+      "mro": [
+       "main.Y",
+       "main.B",
+       "main.A",
+       "main.A",
+       "<builtin>.object"
+      ]
+     },
+     "main.Z": {
+      "kind": "class",
+      "lines": [
+       10,
+       10
+      ],
+      "module": "main",
+      "mro": [
+       "main.Z",
+       "main.X",
+       "main.A",
+       "main.A",
+       "main.B",
+       "main.Y",
+       "<builtin>.object"
+      ]
+     },
+     "main.swap": {
+      "kind": "function",
+      "lines": [
+       17,
+       19
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.Base": [
+      "main.A"
+     ],
+     "main.Left": [
+      "<builtin>.object",
+      "main.P"
+     ],
+     "main.Right": [
+      "<builtin>.object",
+      "main.Q"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {},
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "main.A.m",
+   "main.P.p"
+  ],
+  "main.A.m": [],
+  "main.P.p": [],
+  "main.Q.q": [],
+  "main.swap": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

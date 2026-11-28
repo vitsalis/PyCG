@@ -1,0 +1,3 @@
+from shapes import Shape
+from extra import Extra
+def report(shape: Shape, other: Extra): ...

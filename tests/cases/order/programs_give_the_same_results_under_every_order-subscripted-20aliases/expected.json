@@ -1,0 +1,166 @@
+{
+ "documents": [
+  {
+   "document": {
+    "calls": {
+     "main": [
+      {
+       "callees": [
+        "typing.TypeVar"
+       ],
+       "col": 4,
+       "end": [
+        3,
+        16
+       ],
+       "line": 3
+      }
+     ],
+     "main.use": [
+      {
+       "callees": [
+        "main.Bag.run",
+        "main.Box.run"
+       ],
+       "col": 4,
+       "end": [
+        11,
+        13
+       ],
+       "line": 11
+      },
+      {
+       "callees": [
+        "main.Bag.run"
+       ],
+       "col": 4,
+       "end": [
+        12,
+        13
+       ],
+       "line": 12
+      }
+     ]
+    },
+    "definitions": {
+     "main": {
+      "kind": "module",
+      "lines": [
+       1,
+       12
+      ],
+      "module": "main"
+     },
+     "main.Bag": {
+      "kind": "class",
+      "lines": [
+       6,
+       7
+      ],
+      "module": "main",
+      "mro": [
+       "main.Bag",
+       "typing.Generic"
+      ]
+     },
+     "main.Bag.run": {
+      "kind": "function",
+      "lines": [
+       7,
+       7
+      ],
+      "module": "main"
+     },
+     "main.Box": {
+      "kind": "class",
+      "lines": [
+       4,
+       5
+      ],
+      "module": "main",
+      "mro": [
+       "main.Box",
+       "typing.Generic"
+      ]
+     },
+     "main.Box.run": {
+      "kind": "function",
+      "lines": [
+       5,
+       5
+      ],
+      "module": "main"
+     },
+     "main.use": {
+      "kind": "function",
+      "lines": [
+       10,
+       12
+      ],
+      "module": "main"
+     }
+    },
+    "exports": {
+     "main.AnyBox": [
+      "typing.Union"
+     ],
+     "main.Generic": [
+      "typing.Generic"
+     ],
+     "main.Optional": [
+      "typing.Optional"
+     ],
+     "main.Rec": [
+      "typing.Union"
+     ],
+     "main.TypeVar": [
+      "typing.TypeVar"
+     ],
+     "main.Union": [
+      "typing.Union"
+     ]
+    },
+    "format": "pycg/1",
+    "modules": {
+     "main": {
+      "file": "main.py",
+      "kind": "source",
+      "status": "analysed"
+     }
+    },
+    "outside": {
+     "typing.TypeVar": {
+      "known": "stub"
+     }
+    },
+    "package": {
+     "name": null,
+     "version": null
+    },
+    "tool": {
+     "cap": 5000,
+     "name": "pycg",
+     "typeshed": "98ab14707e0d52deabd05161328f4cfce3869d34",
+     "version": "2.0.0"
+    }
+   },
+   "package_name": null,
+   "package_version": null
+  }
+ ],
+ "edges": {
+  "main": [
+   "typing.TypeVar"
+  ],
+  "main.Bag.run": [],
+  "main.Box.run": [],
+  "main.use": [
+   "main.Bag.run",
+   "main.Box.run"
+  ],
+  "typing.TypeVar": []
+ },
+ "points_to": {},
+ "unresolved": [],
+ "warnings": []
+}

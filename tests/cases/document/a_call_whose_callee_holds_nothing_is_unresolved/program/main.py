@@ -1,0 +1,2 @@
+def run(callback):
+    callback()

@@ -131,21 +131,6 @@ All entry points are not known, and the package is named in the document:
         $(find django -type f -name "*.py") -o django.json
 ```
 
-# Viewing a call graph
-
-`pycg-view` writes a call graph document as one HTML page. Open the page in
-a browser: it needs no server and makes no network request.
-```
-~ >>> pycg-view cg.json -o cg.html
-```
-Without `-o`, the page goes next to the document (`cg.html`). The page shows
-the callers and callees of each function, which you expand in place, and a
-map of the calls between the modules. Press `/` to search. The search
-ignores case and lists the whole name first, then a dotted tail (the last
-part, or `Class.method`), the start of the last part, the start of any
-part, and then any substring. The address names the shown node, so Back
-returns to the last one.
-
 # Development
 
 Install [uv](https://docs.astral.sh/uv/). Then, from the root directory:
