@@ -26,13 +26,13 @@ flowchart LR
 
 ## Results
 
-Measured by CI on main at commit 882960f6:
+Measured by CI on main at commit 41db742d:
 
 | Set | Precision | Recall |
 |---|---|---|
 | Micro-benchmark, all edges | 0.952 | 0.951 |
 | Macro-benchmark, inside the package | 0.931 | 0.881 |
-| Macro-benchmark, outside the package | 0.945 | 0.821 |
+| Macro-benchmark, outside the package | 0.946 | 0.821 |
 
 The micro-benchmark has one small program per language feature; the
 macro-benchmark has 60 real packages with hand-written call graphs.
