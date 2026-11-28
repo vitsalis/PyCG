@@ -8,7 +8,6 @@ use crate::engine::hierarchy::{BUILTIN_TYPE, LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Kind, Literal, Object, kinds_mask};
 use crate::engine::outside::outside_name;
 use crate::engine::rules::{Rule, RuleId};
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State};
 
 const TYPE_PATH: &str = "builtins.type";
@@ -116,20 +115,6 @@ pub(crate) enum ClassTestRule {
 }
 
 impl ClassTestRule {
-    pub(crate) fn key(&self) -> &'static str {
-        match self {
-            ClassTestRule::CallableValue { .. } => "Each:ClassTests._callable_value",
-            ClassTestRule::PassCallable { .. } => "Each:ClassTests._pass_callable",
-            ClassTestRule::TestedTuple { .. } => "Each:ClassTests._tested_tuple",
-            ClassTestRule::Value(_) => "Each:ClassTests._value",
-            ClassTestRule::Alternative(_) => "Each:ClassTests._alternative",
-            ClassTestRule::PositionClass { .. } => "Each:ClassTests._position_class",
-            ClassTestRule::Metaclass { .. } => "Each:ClassTests._metaclass",
-            ClassTestRule::NotNominal { .. } => "Each:ClassTests._not_nominal",
-            ClassTestRule::Related { .. } => "Each:ClassTests._related",
-        }
-    }
-
     pub(crate) fn captured(&self) -> Vec<ObjId> {
         match *self {
             ClassTestRule::PassCallable { object, .. } => vec![object],
@@ -150,7 +135,7 @@ fn next_id(length: usize) -> u32 {
     u32::try_from(length).expect("fewer than 2^32 class tests")
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn class_test_rule(&mut self, rule: ClassTestRule) -> RuleId {
         self.rule(Rule::ClassTest(Box::new(rule)))
     }

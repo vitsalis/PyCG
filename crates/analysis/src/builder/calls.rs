@@ -268,8 +268,6 @@ pub trait Analysis {
     fn add_handler(&mut self, types: Option<NodeId>, dst: NodeId);
 
     fn imports(&mut self) -> &mut ImportManager;
-    fn begin_module(&mut self, _name: &str) {}
-    fn end_module(&mut self, _name: &str, _analysed: bool) {}
     fn handle_import(&mut self, name: &str, level: u32, record: bool) -> Option<String> {
         self.imports().handle_import(name, level, record)
     }

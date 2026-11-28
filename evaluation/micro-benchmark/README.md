@@ -227,7 +227,8 @@ the validator is not run. The validator reports it as `skipped`.
 | `missing node` | A module, function or callee of the run is not a key |
 | `unexpected node` | A key is not a module, function or callee of the run |
 
-`tests/test_benchmark_validator.py` runs the validator on the whole benchmark.
+`evaluation/tests/test_benchmark_validator.py` runs the validator on the
+whole benchmark.
 The validator needs Python 3.14 or later and is tested on Python 3.15.
 
 ### How the validator observes calls
@@ -386,9 +387,11 @@ needs a manual check.
    branch that is never taken). The case `README.md` names that code.
 3. Make sure that the program runs to completion without an uncaught
    exception.
-4. If the program needs a Python version newer than 3.12, the oldest supported
-   version, write that version (e.g., `3.14`) in a file `requires-python`. The
-   test suite and the validator skip the case on older interpreters.
+4. If the program needs a Python version newer than 3.12, the oldest that
+   the analysis models, write that version (e.g., `3.14`) in a file
+   `requires-python`. The validator skips the case on older interpreters,
+   and the case harness skips it when it is newer than the syntax that PyCG
+   reads (Python 3.14).
 5. Write `callgraph.json` by hand from Python semantics and the conventions
    above.
 6. Run the validator on the case and fix the case until it reports `ok`:

@@ -6,7 +6,6 @@ use crate::engine::objects::{Kind, Literal, Object};
 use crate::engine::rules::{Rule, WaitingRule};
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, OrderedSet, State};
 use crate::models::STUB_RESULTS;
 
@@ -104,7 +103,7 @@ pub struct Deliveries {
     pub loads: Vec<AccessId>,
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn new_access(
         &mut self,
         kind: AccessKind,
@@ -1005,10 +1004,6 @@ impl<T: Trace> State<T> {
                 self.deliver(graph, object, receiver, load, hook);
             }
         }
-    }
-
-    pub(super) fn deliveries_receiver(&self, deliveries: DeliveriesId) -> ObjId {
-        self.deliveries[deliveries.0 as usize].receiver
     }
 
     pub(super) fn deliveries_results(&self, deliveries: DeliveriesId) -> Vec<NodeId> {

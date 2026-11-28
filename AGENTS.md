@@ -7,29 +7,36 @@ It never imports or executes the code it analyses. Keep it that way.
 
 | Path | Content |
 |---|---|
-| `pycg/` | The tool. `__main__.py` is the CLI, `pycg.py` the `CallGraphGenerator` entry point, `formats/` the output format (docs/format.md) |
-| `pycg/analysis/` | The analysis: the builder that turns the AST into constraints, the rules, and the solver |
-| `tests/` | The engine's tests: programs and the call graph PyCG gives for them (`tests/programs.py`) |
-| `tests/test_micro_benchmark.py` | Runs every micro-benchmark case against its expected call graph |
-| `evaluation/micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json` |
+| `crates/syntax/` | `pycg-syntax`: reading and parsing a file, the scope pass |
+| `crates/stubs/` | `pycg-stubs`: the stub data (`stub_data/`) and its queries |
+| `crates/solver/` | `pycg-solver`: the worklist, the sets and the rounds |
+| `crates/analysis/` | `pycg-analysis`: module discovery, the builder that turns the AST into constraints, and the rules |
+| `crates/document/` | `pycg-document`: the output format (docs/format.md) |
+| `crates/pycg/` | `pycg`: the command line, and the tests of the whole tool (`tests/`) |
+| `tests/cases/<family>/<name>/` | A program (`program/`), its request (`case.json`) and the document PyCG gives for it (`expected.json`) |
+| `tests/known_failures.txt`, `tests/triage.py` | The micro-benchmark cases that the analysis fails, and the script that writes the list |
+| `evaluation/micro-benchmark/snippets/<category>/<case>/` | One small program per language feature, with its ground truth in `callgraph.json`; the case harness runs each against it |
 | `docs/design.md` | The design of the analysis: what it models, its rules, termination, open problems |
 | `evaluation/` | Measures PyCG: the runner, the scorer and their tests (`evaluation/README.md`) |
 | `evaluation/macro-benchmark/` | 60 real packages with hand-written ground truths and traces |
+| `tools/` | The repository's tools in Python, with their tests (`tools/tests/`) |
 
 ## Commands
 
 ```
-make setup              # create the environment (uv sync --locked)
+make setup              # create the environment of the harness and tools (uv sync --locked)
 make check              # before pushing: lint, and the tests of what the change touches
 make check FULL=1       # every check, as make lint and make test
-make test               # all tests: the engine's and the evaluation's
-make lint               # ruff check, format check, no comments
-make format             # apply formatting
-uv run pytest -k classes/call   # one benchmark case
+make test               # all tests: cargo test, then the harness's and the tools'
+make lint               # ruff, no comments, cargo fmt --check, cargo clippy
+make format             # apply formatting (ruff, cargo fmt)
+cargo test -p pycg --test cases -- micro/classes/call   # the cases whose name contains the filter
 ```
 
-Supported Python versions: 3.12 to 3.15. The runtime has no dependencies; do
-not add one without discussion.
+The tool reads Python 3.14 syntax (`pycg_syntax::parse::TARGET_VERSION`)
+and runs no Python. The harness and the tools need Python 3.14 or later.
+Crate dependencies are pinned to exact versions; do not add one without
+approval.
 
 ## Rules
 
@@ -41,14 +48,15 @@ not add one without discussion.
   failures. `tests/triage.py` holds the causes and regenerates the file: run
   it after a change, and give a new failing case its cause there.
 - **Results are deterministic.** The same input gives the same output on
-  every run and every supported Python version, whatever the hash seed, the
-  order of the files or the order in which the solver meets its work.
+  every run and platform, whatever the order of the files or the order in
+  which the solver meets its work.
 - **Replace, do not deprecate.** Remove code that a change makes obsolete.
-- **No comments or docstrings.** Names and types carry the meaning; the why
-  goes to `docs/design.md` and to commit messages. Only licence headers and
-  the pragmas that tools read (`# noqa`, `# type:`, `# shellcheck`) stay; the
-  analysed programs and test data are data, not code. `make lint` runs
-  `tools/no_comments.py`, which enforces this.
+- **No comments or docstrings** in Python, shell and Rust code. Names and
+  types carry the meaning; the why goes to `docs/design.md` and to commit
+  messages. Only licence headers and the pragmas that tools read (`# noqa`,
+  `# type:`, `# shellcheck`) stay; the analysed programs and test data are
+  data, not code. `make lint` runs `tools/no_comments.py`, which enforces
+  this.
 - **Docs describe what exists now.** No decision logs, status, plan or
   results documents: the commit message is the record, and history is in
   git. Update a document in the change that makes it untrue.
@@ -93,14 +101,13 @@ order:
 
 1. **End to end.** A program and the call graph Python produces for it: a
    micro-benchmark case, checked by `evaluation/micro-benchmark/validate.py`,
-   or a test that analyses a program through `tests/programs.py`. A new
-   rule comes with one.
+   or a case under `tests/cases/`. A new rule comes with one.
 2. **The benchmarks.** The micro-benchmark and the macro-benchmark's real
    packages are the system test; CI's gate measures every change against
    them.
 3. **Simulation.** Properties that must hold for every run are checked by
    running the solver under many orders chosen by a seed (as in
-   `tests/test_order_independence.py`): the same result, termination, the
+   `crates/pycg/tests/properties/`): the same result, termination, the
    bounds of `docs/design.md`. A new invariant comes with a planted bug
    that the check catches.
 4. **Fuzzing.** Generated programs must not crash or hang PyCG and must
@@ -117,7 +124,8 @@ a bug. Tests use no network and no sleeps.
 `evaluation/README.md` says why the evaluation exists, what its sets are
 and their results; the README of each set (`evaluation/micro-benchmark/`,
 `evaluation/macro-benchmark/`, `evaluation/scale/`) has its internals. The
-`make` targets run in Docker. A result goes to `$EVAL_OUT/pycg-<commit>/`
+`make` targets run in Docker; the measuring ones build the Rust binary
+there first. A result goes to `$EVAL_OUT/pycg-<commit>/`
 (`EVAL_OUT` defaults to `$TMPDIR/pycg-evaluation`): a call graph per micro
 case and per project, `runs.json` (status, time and peak memory of each
 run), `result.json` (the scores) and `benchmark_sha256`.
@@ -126,23 +134,19 @@ run), `result.json` (the scores) and `benchmark_sha256`.
 make eval               # measure this commit on both benchmarks, report it against the bests
 make eval-record        # write evaluation/metrics.json from the measured values (rule 3 below)
 make eval-diff BASE=<ref>        # measure BASE too and list the edges and cases that changed
-make eval-determinism   # measure again with hash seed 1; fails unless every graph is identical
-make eval-rust          # build the Rust pycg and measure it; fails unless its graphs equal this commit's
 make eval-scale NAME=<package> [BASE=<ref>] [SCALE_MEMORY_MIB=<MiB>]
                         # time, peak memory and graph SHA-256 on one package of the scale set
-make eval-scale-rust NAME=<package>   # the same for the Rust pycg, against this commit's record if measured
-python -I evaluation/scale/measure.py summary RESULT [--oracle ORACLE]   # one row per package measured
+python -I evaluation/scale/measure.py summary RESULT [--base BASE]   # one row per package measured
 make eval-inputs        # pull (or build) the inputs images and link their sources here
 make eval-inputs-build  # build the inputs images locally
 python -I evaluation/common/loop.py compare OLD NEW   # what changed between two results
 make eval-trace NAME=<project>   # record one project's trace, compared with the committed one
 ```
 
-CI runs the pieces of these targets in separate jobs: `eval-measure-pr`,
-`eval-measure-seed1` and `eval-measure-base` measure, then `eval-gate`,
-`eval-compare`, `eval-same-graphs` and `eval-labels` check, and
-`eval-report` reports a push to main against the bests. `make eval`
-refuses a checkout with uncommitted changes.
+CI runs the pieces of these targets in separate jobs: `eval-measure-pr`
+and `eval-measure-base` measure, then `eval-gate`, `eval-compare` and
+`eval-labels` check, and `eval-report` reports a push to main against the
+bests. `make eval` refuses a checkout with uncommitted changes.
 
 The gate compares a pull request with its base, each measured on its own
 benchmark: the projects and pins, ground truths, traces,
@@ -227,20 +231,20 @@ and the measurements behind the change. No attribution to an agent or a
 tool anywhere: no `Co-Authored-By` trailer and no "Generated with" line in
 a commit, a pull request, an issue or a comment.
 
-While developing, run the narrowest tests that cover the change (`uv run
-pytest tests/test_x.py -k name`). Before pushing, run `make check` and
-nothing more. Then push the branch and open a draft pull request at once.
-CI runs the full tests on every supported Python and, when the diff touches
-a path that can move the metrics (`EVAL_PATHS` of `tools/check.py`), the
-gate (the pull request against its base) and the determinism check; do
+While developing, run the narrowest tests that cover the change (`cargo
+test -p <crate> <name>`, or `cargo test -p pycg --test cases -- <filter>`
+for cases). Before pushing, run `make check` and nothing more. Then push
+the branch and open a draft pull request at once. CI runs the full tests
+and, when the diff touches a path that can move the metrics (`EVAL_PATHS`
+of `tools/check.py`), the gate (the pull request against its base); do
 not run them locally as well. Run `make eval` or `make eval-diff` locally
 only to investigate a metrics change.
 
 Mark a pull request ready only when CI is green for its exact current
-commit: lint, tests, the gate (no value below its floor, no failed run) and
-the determinism check. Its description carries the metrics table of the job
-summary of CI. When a value rose above the base's or the benchmark
-changed, say so; do not run `make eval-record`: after the merge, the
-report of CI on main gives the new `evaluation/metrics.json` (rule 3).
+commit: lint, tests and the gate (no value below its floor, no failed
+run). Its description carries the metrics table of the job summary of CI.
+When a value rose above the base's or the benchmark changed, say so; do
+not run `make eval-record`: after the merge, the report of CI on main
+gives the new `evaluation/metrics.json` (rule 3).
 
 Nothing lives only on one machine: push what you have before you stop.

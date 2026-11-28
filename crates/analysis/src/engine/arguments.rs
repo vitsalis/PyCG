@@ -7,7 +7,6 @@ use crate::engine::hierarchy::Unless;
 use crate::engine::objects::{Literal, Passthrough};
 use crate::engine::semantics::{CallId, Origin};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -77,7 +76,7 @@ fn spread_index(spread: SpreadId) -> usize {
     spread.0 as usize
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn bind_arguments(
         &mut self,
         graph: &mut Graph,

@@ -4,7 +4,7 @@ target=${CARGO_TARGET_DIR:-target}
 out=$target/packaged
 rm -rf "$target/package" "$out"
 mkdir -p "$out/vendor" "$out/root"
-cargo package --workspace --exclude pycg-dump --locked --no-verify
+cargo package --workspace --locked --no-verify
 cargo vendor --locked --versioned-dirs "$out/vendor" > /dev/null
 for crate in "$target"/package/*.crate; do
   tar -xzf "$crate" -C "$out/vendor"

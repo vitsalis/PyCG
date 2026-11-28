@@ -72,9 +72,24 @@ rule says so in its commit message, with why and what bounds it.
 
 ## Dependencies
 
-- The runtime has none. A pull request that adds one states its cost and
-  why the standard library does not do, and needs approval first.
-- Tools and test dependencies are pinned to exact versions.
+- Every dependency is pinned to an exact version (`=x.y.z`), and
+  `Cargo.lock` is committed. A pull request that adds a dependency states
+  its cost and why the standard library does not do, and needs approval
+  first.
+- The tool depends on these crates:
+
+  | Crate | Version | Used by |
+  |---|---|---|
+  | `ruff_python_parser` | 0.0.22 | `pycg-syntax` |
+  | `ruff_python_ast`, `ruff_source_file`, `ruff_text_size` | 0.0.22 | `pycg-syntax`, `pycg-analysis` |
+  | `indexmap` | 2.14.2 | `pycg-syntax`, `pycg-solver`, `pycg-analysis` |
+  | `num-bigint` | 0.4.8 | `pycg-syntax`, `pycg-analysis`, `pycg-document`, `pycg` |
+  | `rustc-hash` | 2.1.3 | `pycg-syntax`, `pycg-stubs`, `pycg-solver`, `pycg-analysis` |
+  | `serde_json` | 1.0.154 | `pycg-stubs`, and the tests of `pycg-analysis` and `pycg` |
+  | `libc` | 0.2.191 | `pycg-syntax`, on Unix only |
+
+- The Python dependencies of the harness and the tools are locked in
+  `uv.lock`.
 
 ## Naming
 

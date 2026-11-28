@@ -25,9 +25,12 @@ INTERPRETER_FLAGS_ISOLATED = ("-S", "-s", "-P", "-B")
 DESCRIPTION = """Runs a PyCG checkout on the micro- and macro-benchmark and keeps its
 call graphs in OUT/NAME/.
 
-    python -I evaluation/common/run.py --flavour original --checkout PATH --name NAME
-    python -I evaluation/common/run.py --flavour new --checkout PATH --name NAME \\
-        --benchmark macro --timeout 1800"""
+    python -I evaluation/common/run.py --checkout PATH --name NAME
+    python -I evaluation/common/run.py --checkout PATH --name NAME \\
+        --benchmark macro --timeout 1800
+
+The checkout's program, target/release/pycg, analyses each job; build it
+first (cargo build --release)."""
 
 
 def load_sibling(name, path):
@@ -44,10 +47,8 @@ SNIPPETS = projects.MICRO_BENCHMARK / "snippets"
 
 class Tool(NamedTuple):
     name: str
-    flavour: str
     checkout: Path
     python: str
-    hash_seed: int = 0
 
 
 class Job(NamedTuple):
@@ -64,7 +65,6 @@ def run_job(tool, job, graph_path, timeout_seconds, memory_limit_mib=None):
         scratch = os.path.realpath(scratch)
         request = {
             "checkout": os.path.realpath(tool.checkout),
-            "flavour": tool.flavour,
             "entry_points": [_path_with_real_directory(p) for p in job.entry_points],
             "package": os.path.realpath(job.package),
             "graph": str(graph_path),
@@ -82,7 +82,7 @@ def run_job(tool, job, graph_path, timeout_seconds, memory_limit_mib=None):
             child = subprocess.Popen(
                 command,
                 cwd=scratch,
-                env={"PYTHONHASHSEED": str(tool.hash_seed)},
+                env={},
                 stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=stderr,
@@ -203,7 +203,7 @@ def kill_active():
         for child in _active_children:
             try:
                 os.killpg(child.pid, signal.SIGKILL)
-            except (ProcessLookupError, PermissionError):
+            except ProcessLookupError, PermissionError:
                 pass
 
 
@@ -320,7 +320,7 @@ def _ended(pid):
     if sys.platform.startswith("linux"):
         try:
             stat = Path(f"/proc/{pid}/stat").read_bytes()
-        except (FileNotFoundError, ProcessLookupError):
+        except FileNotFoundError, ProcessLookupError:
             return True
         state = stat[stat.rindex(b")") + 2 :].split()[0]
         return state == b"Z"
@@ -363,7 +363,7 @@ def _group_pids(pgid):
                 continue
             try:
                 stat = Path(f"/proc/{entry}/stat").read_bytes()
-            except (FileNotFoundError, ProcessLookupError):
+            except FileNotFoundError, ProcessLookupError:
                 continue
             except OSError as error:
                 raise MemoryUnmeasured(
@@ -420,7 +420,7 @@ def _process_resident_mib(pid):
     if sys.platform.startswith("linux"):
         try:
             pages = int(Path(f"/proc/{pid}/statm").read_bytes().split()[1])
-        except (OSError, IndexError, ValueError):
+        except OSError, IndexError, ValueError:
             return None
         return round(pages * os.sysconf("SC_PAGE_SIZE") / (1 << 20), 1)
     if sys.platform == "darwin":
@@ -585,10 +585,9 @@ def run(
             counts[record["status"]] = counts.get(record["status"], 0) + 1
         progress(f"{tool.name} micro: {counts}")
     data = {
-        "tool": {"name": tool.name, "flavour": tool.flavour, **version},
+        "tool": {"name": tool.name, **version},
         "benchmark": {"name": benchmark, **git_version(REPOSITORY)},
         "python": ".".join(map(str, python_version(tool.python))),
-        "hash_seed": tool.hash_seed,
         "timeout": timeout_seconds,
         "memory_limit_mib": memory_limit_mib,
         "workers": workers,
@@ -627,12 +626,6 @@ def main(argv=None):
         description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--checkout", type=Path, required=True, help="a PyCG checkout")
-    parser.add_argument(
-        "--flavour",
-        choices=sorted(analyse.FLAVOURS),
-        required=True,
-        help="its API",
-    )
     parser.add_argument("--name", required=True, help="name of the results")
     parser.add_argument(
         "--benchmark",
@@ -648,19 +641,16 @@ def main(argv=None):
         "--python", default=sys.executable, help="interpreter of the analyses"
     )
     parser.add_argument(
-        "--hash-seed", type=int, default=0, help="PYTHONHASHSEED of the analyses"
-    )
-    parser.add_argument(
         "--allow-dirty",
         action="store_true",
         help="run a checkout with changes, or not under git (recorded)",
     )
     args = parser.parse_args(argv)
-    if not (args.checkout / "pycg").is_dir():
-        parser.error(f"{args.checkout} has no pycg package")
-    tool = Tool(
-        args.name, args.flavour, args.checkout.resolve(), args.python, args.hash_seed
-    )
+    if not (args.checkout / analyse.PROGRAM).is_file():
+        parser.error(
+            f"{args.checkout} has no {analyse.PROGRAM}: run cargo build --release"
+        )
+    tool = Tool(args.name, args.checkout.resolve(), args.python)
     jobs_and_skipped_by_benchmark = {}
     for benchmark in args.benchmark or ["micro", "macro"]:
         if benchmark == "micro":

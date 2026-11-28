@@ -14,7 +14,6 @@ const CASES: &str = "tests/cases";
 const CASE: &str = "case.json";
 const EXPECTED: &str = "expected.json";
 const PROGRAM: &str = "program";
-const PENDING: &str = "tests/cases/pending.txt";
 const SNIPPETS: &str = "evaluation/micro-benchmark/snippets";
 const MICRO_PREFIX: &str = "micro";
 const MICRO_ENTRY: &str = "main.py";
@@ -76,7 +75,7 @@ struct Requested {
 }
 
 enum Kind {
-    Oracle {
+    Expected {
         expected: Expected,
         focus: Vec<String>,
     },
@@ -106,15 +105,8 @@ fn main() -> ExitCode {
         .join("../..")
         .canonicalize()
         .expect("the root of the repository");
-    let mut cases = oracle_cases(&root.join(CASES));
+    let mut cases = expected_cases(&root.join(CASES));
     cases.extend(micro_cases(&root));
-    let pending = read_pending(&root.join(PENDING));
-    for name in pending.keys() {
-        assert!(
-            cases.iter().any(|case| &case.name == name),
-            "{PENDING} names {name}, which is no case"
-        );
-    }
     let arguments: Vec<String> = std::env::args().skip(1).collect();
     let selection = match selection(&arguments) {
         Ok(selection) => selection,
@@ -155,17 +147,11 @@ fn main() -> ExitCode {
         *PANIC.lock().expect("the panic message is free") = Some(message);
     }));
     let mut passed = 0;
-    let mut waiting = 0;
     let mut wrong = Vec::new();
     for case in &cases {
-        match (problems(case), pending.get(&case.name)) {
-            (None, None) => passed += 1,
-            (Some(_), Some(_)) => waiting += 1,
-            (None, Some(cause)) => wrong.push(format!(
-                "{}: passes, but {PENDING} lists it ({cause}): remove its line",
-                case.name
-            )),
-            (Some(problems), None) => wrong.push(format!("{}\t{problems}", case.name)),
+        match problems(case) {
+            None => passed += 1,
+            Some(problems) => wrong.push(format!("{}\t{problems}", case.name)),
         }
     }
     let _ = panic::take_hook();
@@ -173,7 +159,7 @@ fn main() -> ExitCode {
         println!("{line}");
     }
     println!(
-        "cases: {passed} pass, {waiting} pending, {} fail, of {}{filtered_out}",
+        "cases: {passed} pass, {} fail, of {}{filtered_out}",
         wrong.len(),
         cases.len()
     );
@@ -274,7 +260,7 @@ fn value(
     }
 }
 
-fn oracle_cases(directory: &Path) -> Vec<Case> {
+fn expected_cases(directory: &Path) -> Vec<Case> {
     let mut cases = Vec::new();
     for family in sorted_directories(directory) {
         for directory in sorted_directories(&family) {
@@ -320,7 +306,7 @@ fn oracle_cases(directory: &Path) -> Vec<Case> {
             cases.push(Case {
                 name: format!("{}/{}", file_name(&family), file_name(&directory)),
                 run,
-                kind: Kind::Oracle {
+                kind: Kind::Expected {
                     expected,
                     focus: list(&case["focus"]).iter().map(text).collect(),
                 },
@@ -397,26 +383,6 @@ fn read_known_failures(path: &Path) -> BTreeSet<String> {
         .collect()
 }
 
-fn read_pending(path: &Path) -> BTreeMap<String, String> {
-    let text =
-        std::fs::read_to_string(path).unwrap_or_else(|error| panic!("{}: {error}", path.display()));
-    let mut pending = BTreeMap::new();
-    let mut previous: Option<&str> = None;
-    for line in text.lines() {
-        let (name, cause) = line
-            .split_once('\t')
-            .unwrap_or_else(|| panic!("{PENDING}: {line:?} is not <case>\\t<cause>"));
-        assert!(!cause.is_empty(), "{PENDING}: {name} has no cause");
-        assert!(
-            previous.is_none_or(|previous| previous < name),
-            "{PENDING} is not sorted, or lists {name} twice"
-        );
-        previous = Some(name);
-        pending.insert(name.to_owned(), cause.to_owned());
-    }
-    pending
-}
-
 fn problems(case: &Case) -> Option<String> {
     let found = match panic::catch_unwind(AssertUnwindSafe(|| analyse(case))) {
         Ok(Ok(found)) => found,
@@ -442,11 +408,11 @@ fn problems(case: &Case) -> Option<String> {
                 (false, true) | (true, false) => None,
                 (false, false) => Some(differences.join("; ")),
                 (true, true) => Some(format!(
-                    "passes, but {KNOWN_FAILURES} lists it: the oracle fails it"
+                    "passes, but {KNOWN_FAILURES} lists it as a known failure"
                 )),
             }
         }
-        Kind::Oracle { expected, focus } => {
+        Kind::Expected { expected, focus } => {
             let mut problems = edge_differences(&expected.edges, &found.edges);
             for entry in expected.unresolved.difference(&found.unresolved) {
                 problems.push(format!("lost unresolved {entry:?}"));
@@ -535,7 +501,7 @@ fn analyse(case: &Case) -> Result<Found, pycg_analysis::Error> {
         serde_json::from_str(&dumps(&document)).expect("the document is JSON")
     };
     let documents = match &case.kind {
-        Kind::Oracle { expected, .. } => expected
+        Kind::Expected { expected, .. } => expected
             .documents
             .iter()
             .map(|requested| {
@@ -575,7 +541,7 @@ fn analyse(case: &Case) -> Result<Found, pycg_analysis::Error> {
         })
         .collect();
     let mut points_to = BTreeMap::new();
-    if let Kind::Oracle { expected, .. } = &case.kind {
+    if let Kind::Expected { expected, .. } = &case.kind {
         let engine = &mut program.analysis;
         let saturated = engine.saturated();
         let mut held: BTreeMap<String, Vec<String>> = BTreeMap::new();

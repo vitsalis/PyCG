@@ -1,4 +1,5 @@
 import argparse
+import importlib.util
 import json
 import subprocess
 import sys
@@ -6,19 +7,26 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
+EDGES = ROOT / "evaluation" / "common" / "edges.py"
 
-from pycg.formats import edges  # noqa: E402
+
+def load_edges():
+    spec = importlib.util.spec_from_file_location("document_edges", EDGES)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.edges
+
+
+edges = load_edges()
 
 DESCRIPTION = """\
 Runs a release program on every micro-benchmark case and compares its call
-graph with the case's callgraph.json, as tests/test_micro_benchmark.py
-compares the Python engine's: the program analyses main.py with the case's
-directory as the package root, and the edges of its document
-(pycg.formats.edges, what CallGraphGenerator.output gives) must equal the
-expected graph. A case of tests/known_failures.txt must differ; a case whose
-requires-python is newer than the grammar the program parses
-(PROGRAM_GRAMMAR, the Rust parser's target version) is skipped and named.
+graph with the case's callgraph.json: the program analyses main.py with the
+case's directory as the package root, and the edges of its document
+(evaluation/common/edges.py) must equal the expected graph. A case of
+tests/known_failures.txt must differ; a case whose requires-python is newer
+than the grammar the program parses (PROGRAM_GRAMMAR, the Rust parser's
+target version) is skipped and named.
 Prints one line per skipped case and per failure, then a summary, and exits
 1 when a case that should agree differs, a known failure agrees, or the
 program fails on a case.

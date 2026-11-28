@@ -13,7 +13,6 @@ use crate::engine::protocols::{Conversion, OperatorCall};
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State, not_ported};
 use crate::model::BUILTIN_MODULE;
 use crate::models::{
@@ -68,7 +67,7 @@ pub enum PropertyRule {
     },
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn apply_rule(
         &mut self,
         graph: &mut Graph,
@@ -819,7 +818,7 @@ pub struct DynamicAccess {
     done: Vec<Sym>,
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn rule_getattr(&mut self, graph: &mut Graph, call: CallId, args: BoundId, builtin: &str) {
         let (dst, object) = if builtin == "getattr" {
             let dst = match self.calls[call.index()].dst {

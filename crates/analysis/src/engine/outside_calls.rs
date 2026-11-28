@@ -12,7 +12,6 @@ use crate::engine::outside_types::TypeContext;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{Call, CallId, GroupId, Prefix, Receivers, Role, SiteKey};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State};
 use crate::model::Signature;
 use crate::models::{
@@ -195,7 +194,7 @@ fn parameter_classes(reduced: &Type, classes: &mut Vec<String>) {
     }
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn call_external(&mut self, graph: &mut Graph, external: ObjId, call: CallId) {
         if let Some(definitions) = self.stub_definitions(external) {
             self.call_outside(graph, external, &definitions, call);

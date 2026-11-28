@@ -85,7 +85,7 @@ fn check_parsed(case: &Case, parsed: &Parsed) -> Result<(), String> {
     let program = pycg::program_name(OsStr::from_bytes(case.program));
     let arguments: Vec<OsString> = case.arguments.iter().map(|a| os_string(a)).collect();
     let pycg::Outcome::Run(options) = pycg::parse(&program, &arguments, PARSED_WIDTH) else {
-        return Err("the oracle parsed the arguments, the port did not".to_owned());
+        return Err("the expected outcome parsed the arguments, the program did not".to_owned());
     };
     let entry_points: Vec<OsString> = parsed.entry_points.iter().map(|a| os_string(a)).collect();
     let expected = (
@@ -105,7 +105,7 @@ fn check_parsed(case: &Case, parsed: &Parsed) -> Result<(), String> {
         options.output,
     );
     if actual != expected {
-        return Err(format!("parsed {actual:?}, the oracle {expected:?}"));
+        return Err(format!("parsed {actual:?}, expected {expected:?}"));
     }
     Ok(())
 }
@@ -114,18 +114,18 @@ fn check_exit(case: &Case, status: i32, stdout: &[u8], stderr: &[u8]) -> Result<
     let (ran_status, ran_stdout, ran_stderr) = run_binary(case);
     let mut differences = Vec::new();
     if ran_status != status {
-        differences.push(format!("status {ran_status}, the oracle {status}"));
+        differences.push(format!("status {ran_status}, expected {status}"));
     }
     if ran_stdout != stdout {
         differences.push(format!(
-            "stdout\n{}\nthe oracle\n{}",
+            "stdout\n{}\nexpected\n{}",
             shown(&ran_stdout),
             shown(stdout)
         ));
     }
     if ran_stderr != stderr {
         differences.push(format!(
-            "stderr\n{}\nthe oracle\n{}",
+            "stderr\n{}\nexpected\n{}",
             shown(&ran_stderr),
             shown(stderr)
         ));
@@ -158,7 +158,7 @@ fn every_case_gives_what_python_gives() {
     }
     assert!(
         failures.is_empty(),
-        "{} of {} cases differ from the oracle:\n\n{}",
+        "{} of {} cases differ from their expected outcome:\n\n{}",
         failures.len(),
         vectors::CASES.len(),
         failures.join("\n\n")

@@ -20,7 +20,6 @@ use crate::engine::protocols::ProtocolRule;
 use crate::engine::reflection::{DefaultAction, GetmembersId};
 use crate::engine::semantics::{CallId, ReturnedId, SharedId};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::{RuleInfo, Trace};
 use crate::engine::{Graph, OrderedMap, State};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -329,89 +328,6 @@ const CALLED_BACK_KINDS: &[Kind] = &[Kind::Function, Kind::BoundMethod, Kind::In
 const SPECIAL_METHOD_KINDS: &[Kind] = &[Kind::Instance, Kind::Typed];
 
 impl Rule {
-    fn key(&self) -> &'static str {
-        match self {
-            Rule::Call(_) => "Call",
-            Rule::Bases { .. } => "_Bases",
-            Rule::Bind { .. } => "_Bind",
-            Rule::Binds(_) => "_Binds",
-            Rule::KeywordCandidate { .. } => "Each:Hierarchy._keyword_candidate",
-            Rule::MemberOfMetaclass { .. } => "Each:Hierarchy._member_of_metaclass",
-            Rule::BindFallback { .. } => "Each:Hierarchy._bind_fallback",
-            Rule::WrapFallback { .. } => "Each:Hierarchy._wrap_fallback",
-            Rule::PythonNew { .. } => "Each:Analysis._python_new",
-            Rule::PythonInstance { .. } => "Each:Analysis._python_instance",
-            Rule::New { .. } => "Each:Analysis._new",
-            Rule::ReturnedOfClass(_) => "Each:Analysis._of_class",
-            Rule::Shared(_) => "Shared",
-            Rule::ReturnedByItsNew(_) => "Each:_Returned.by_its_new",
-            Rule::ReturnedRelease(_) => "Each:_Returned.release",
-            Rule::ReturnedByNew(_) => "Each:_Returned.by_new",
-            Rule::TypeMethod { .. } => "Each:Analysis._type_method",
-            Rule::SetName { .. } => "Each:Analysis._set_name",
-            Rule::CallMetaclass { .. } => "Each:Analysis._call_metaclass",
-            Rule::AnalysedHook { .. } => "Each:Attributes._call_analysed_hook",
-            Rule::InitStatementClass { .. } => "Each:Analysis._init_statement_class",
-            Rule::StatementNew { .. } => "Each:Analysis._statement_new",
-            Rule::StatementMade => "Each:Analysis._statement_made",
-            Rule::AddInexact { .. } => "Each:Containers._add_inexact",
-            Rule::Container(rule) => rule.key(),
-            Rule::Protocol(rule) => rule.key(),
-            Rule::Pattern(rule) => rule.key(),
-            Rule::Outside(rule) => rule.key(),
-            Rule::Annotation(rule) => rule.key(),
-            Rule::OutsideResult(rule) => rule.key(),
-            Rule::Library(rule) => rule.key(),
-            Rule::ClassTest(rule) => rule.key(),
-            Rule::Access(_) => "Access",
-            Rule::Deliver { .. } => "_Deliver",
-            Rule::Deliveries(_) => "_Deliveries",
-            Rule::AccessorHooks(_) => "_AccessorHooks",
-            Rule::Accessors { .. } => "_Accessors",
-            Rule::FieldWrites(_) => "_FieldWrites",
-            Rule::HookCalls(_) => "_HookCalls",
-            Rule::Itself { .. } => "Each:Attributes._itself",
-            Rule::ClassGet { .. } => "Each:Attributes._class_get",
-            Rule::ClassAttribute { .. } => "Each:Attributes._class_attribute",
-            Rule::ModuleGetattr { .. } => "Each:Attributes._module_getattr",
-            Rule::StorePast { .. } => "Each:Attributes._store_past",
-            Rule::DeliverStore { .. } => "Each:Attributes._deliver_store",
-            Rule::DeliverDelete { .. } => "Each:Attributes._deliver_delete",
-            Rule::CallBackObject { .. } => "Each:Analysis._call_back_object",
-            Rule::SpecialMethodOf { .. } => "Each:BuiltinRules._special_method_of",
-            Rule::CallProtocol { .. } => "Each:Outside._call_protocol",
-            Rule::SequenceLength { .. } => "Each:BuiltinRules._sequence_length",
-            Rule::Reversed { .. } => "Each:BuiltinRules._reversed",
-            Rule::ReversedSequence { .. } => "Each:BuiltinRules._reversed_sequence",
-            Rule::ReverseSequence { .. } => "Each:BuiltinRules._reverse_sequence",
-            Rule::WhenDefaultMemberOnType { .. } => "Each:Reflection._when_default_member_on_type",
-            Rule::RunDefaultAction { .. } => "Each:Reflection._run_default_action",
-            Rule::NamespaceElement { .. } => "Each:Reflection._namespace_element",
-            Rule::AddNamespace { .. } => "Each:Reflection.add_namespace",
-            Rule::MembersOf { .. } => "Each:Reflection._members_of",
-            Rule::LoadMember { .. } => "Each:Reflection._load_member",
-            Rule::MemberField { .. } => "Each:Reflection._member_field",
-            Rule::MetaclassProtocol { .. } => "Each:Outside._metaclass_protocol",
-            Rule::CallEach { .. } => "Each:Analysis.call",
-            Rule::ImplicitMethod { .. } => "Each:BuiltinRules._implicit_method",
-            Rule::PropertyReceiver { .. } => "Each:BuiltinRules._property_receiver",
-            Rule::DerivedProperty { .. } => "Each:BuiltinRules._derived_property",
-            Rule::BindClass { .. } => "Each:BuiltinRules._bind_class",
-            Rule::BindType { .. } => "Each:BuiltinRules._bind_type",
-            Rule::BindTo { .. } => "Each:Hierarchy._bind_to",
-            Rule::LoadByPattern(_) => "Each:Patterns.load_by_pattern",
-            Rule::SuperClass { .. } => "Each:BuiltinRules._super_class",
-            Rule::SuperAfterOutside { .. } => "Each:BuiltinRules._super_after_outside",
-            Rule::SuperObject { .. } => "Each:BuiltinRules._super_object",
-            Rule::SuperGiven { .. } => "Each:BuiltinRules._super_given",
-            Rule::SuperAcceptedBy { .. } => "Each:BuiltinRules._super_accepted_by",
-            Rule::TypeBases { .. } => "Each:BuiltinRules._type_bases",
-            Rule::TypeBase { .. } => "Each:BuiltinRules._type_base",
-            Rule::CallTypeMetaclass { .. } => "Each:BuiltinRules._call_type_metaclass",
-            Rule::SuperMetaclass { .. } => "Each:Attributes._super_metaclass",
-        }
-    }
-
     fn each(&self) -> bool {
         if let Rule::Container(rule) = self {
             return rule.each();
@@ -557,32 +473,9 @@ impl Rule {
     }
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn rule(&mut self, rule: Rule) -> RuleId {
         let id = RuleId(u32::try_from(self.rules.len()).expect("fewer than 2^32 rules"));
-        if T::RECORDS {
-            let key = match rule {
-                Rule::Call(call) => {
-                    format!("Call:{}", self.symbols.text(self.calls[call.index()].site))
-                }
-                Rule::Access(access) => self.access(access).kind.name().to_string(),
-                _ => rule.key().to_string(),
-            };
-            let captured = match rule {
-                Rule::Deliveries(id) => vec![self.deliveries_receiver(id)],
-                Rule::Shared(shared) => self.shared_captured(shared),
-                _ => rule.captured(),
-            };
-            self.trace.rule(
-                id,
-                &RuleInfo {
-                    key: &key,
-                    kinds: rule.kinds(),
-                    each: rule.each(),
-                    captured: &captured,
-                },
-            );
-        }
         self.rules.push(rule);
         id
     }
@@ -899,30 +792,24 @@ impl<T: Trace> State<T> {
     }
 }
 
-impl<T: Trace> Rules<RuleId> for State<T> {
+impl Rules<RuleId> for State {
     fn apply(&mut self, graph: &mut Graph, rule: RuleId, objects: &[ObjId]) {
         let found = self.rules[rule.index()].clone();
         if let Rule::Deliveries(id) = found {
-            self.trace.apply(rule, objects);
             self.deliveries_apply(graph, id, objects);
-            self.trace.applied();
             return;
         }
         if let Rule::Container(container) = &found
             && container.batches()
             && objects.len() > 1
         {
-            self.trace.apply(rule, objects);
             self.container_apply_each(graph, container, objects);
-            self.trace.applied();
             return;
         }
         if !found.each() {
-            self.trace.apply(rule, objects);
             for &object in objects {
                 self.apply_one(graph, &found, object);
             }
-            self.trace.applied();
             return;
         }
         let mask = found.kinds().map(kinds_mask);
@@ -932,14 +819,11 @@ impl<T: Trace> Rules<RuleId> for State<T> {
             {
                 continue;
             }
-            self.trace.apply(rule, &[object]);
             self.apply_one(graph, &found, object);
-            self.trace.applied();
         }
     }
 
     fn saturate(&mut self, graph: &mut Graph, rule: RuleId) {
-        self.trace.saturate(rule);
         let found = self.rules[rule.index()].clone();
         match found {
             Rule::AccessorHooks(id) => self.hooks_saturate(id),
@@ -951,7 +835,6 @@ impl<T: Trace> Rules<RuleId> for State<T> {
         for dst in self.results(&found) {
             self.add_object(graph, dst, saturated);
         }
-        self.trace.saturated();
     }
 
     fn kinds(&self, rule: RuleId) -> Option<KindMask> {
@@ -973,14 +856,10 @@ impl<T: Trace> Rules<RuleId> for State<T> {
     }
 
     fn between_rounds(&mut self, graph: &mut Graph) -> bool {
-        self.trace.between_rounds();
-        let (answer, unknown) = self.unknown_classes(graph);
-        self.trace.between_rounds_done(answer, &unknown);
-        answer
+        self.unknown_classes(graph)
     }
 
     fn wake(&mut self, graph: &mut Graph, watch: WatchId) {
-        self.trace.wake(watch);
         let waiting = self.waiting.remove(&watch).unwrap_or_default();
         let mut receivers_by_rule: OrderedMap<u32, Vec<ObjId>> = OrderedMap::default();
         for (rule, receiver) in waiting {
@@ -992,12 +871,9 @@ impl<T: Trace> Rules<RuleId> for State<T> {
                 self.run_waiting(graph, rule.clone(), receiver);
             }
         }
-        self.trace.woken();
     }
 
-    fn firing(&mut self, graph: &mut Graph) {
-        self.trace.fire(graph, &self.named_nodes);
-    }
+    fn firing(&mut self, _graph: &mut Graph) {}
 }
 
 const _: () = assert!(std::mem::size_of::<Rule>() == 24);

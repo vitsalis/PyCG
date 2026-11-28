@@ -1,49 +1,16 @@
 [project]
-name = "pycg"
-dynamic = ["version"]
-description = "Practical Python Call Graphs"
-readme = "README.md"
-requires-python = ">=3.12"
-license = "Apache-2.0"
-license-files = ["LICENCE"]
-authors = [{ name = "Vitalis Salis", email = "vitsalis@gmail.com" }]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-]
-dependencies = []
+name = "pycg-harness"
+version = "0"
+requires-python = ">=3.14"
 
-[project.scripts]
-pycg = "pycg.__main__:main"
-
-[project.urls]
-Homepage = "https://github.com/vitsalis/PyCG"
-"Bug Tracker" = "https://github.com/vitsalis/PyCG/issues"
+[tool.uv]
+package = false
 
 [dependency-groups]
 dev = ["hypothesis==6.170.12", "pytest>=9.2", "ruff==0.17.4"]
 
-[build-system]
-requires = ["hatchling>=1.27"]
-build-backend = "hatchling.build"
-
-# The version is `__version__` in pycg/__init__.py, its one source.
-[tool.hatch.version]
-path = "pycg/__init__.py"
-
-[tool.hatch.build.targets.sdist]
-exclude = [
-    "/evaluation/**",
-    "!/evaluation/micro-benchmark/**",
-    "/Cargo.toml",
-    "/Cargo.lock",
-    "/clippy.toml",
-    "/rust-toolchain.toml",
-    "/crates/**",
-]
-
 [tool.pytest.ini_options]
-testpaths = ["tests", "evaluation/tests"]
+testpaths = ["evaluation/tests", "tools/tests"]
 markers = ["slow: a module that takes seconds; make check leaves it out"]
 filterwarnings = ["error"]
 empty_parameter_set_mark = "fail_at_collect"
@@ -52,7 +19,7 @@ empty_parameter_set_mark = "fail_at_collect"
 line-length = 88
 extend-exclude = [
     "evaluation/micro-benchmark/snippets",
-    "tests/fixtures",
+    "tools/tests/fixtures",
     "tests/cases",
     "evaluation/macro-benchmark/projects",
     "evaluation/macro-benchmark/selection/*/audits",

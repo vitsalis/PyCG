@@ -12,7 +12,6 @@ use crate::engine::protocols::reflected_comparison;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State};
 use crate::models::{
     GROUPER, HASHED_ARGUMENTS, IterationMode, KEYED_OPERATIONS, LENGTH_HINT, LIBRARY_ITERATION,
@@ -67,14 +66,6 @@ pub(crate) enum LibraryRule {
 }
 
 impl LibraryRule {
-    pub(crate) fn key(&self) -> &'static str {
-        match self {
-            LibraryRule::Iterator { .. } => "Each:Containers.iterator",
-            LibraryRule::IteratorOf { .. } => "Each:BuiltinRules._iterator_of",
-            LibraryRule::Consume { .. } => "Each:LibraryIteration._consume_library",
-        }
-    }
-
     pub(crate) fn kinds(&self) -> Option<&'static [Kind]> {
         match self {
             LibraryRule::Iterator { .. } => None,
@@ -180,7 +171,7 @@ fn again(role: LibraryRole) -> LibraryRole {
     }
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn operation(&self, id: OperationId) -> &Operation {
         &self.library.operations[id.0 as usize]
     }

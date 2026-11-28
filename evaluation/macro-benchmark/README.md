@@ -1554,7 +1554,7 @@ benchmark changes nothing in Flit). The checks of each trace image before
 its first trace are with the record of the selection stage.
 
 **typeshed's stub of m3u8.** The frozen engine (PyCG `2372b60`) holds
-typeshed's stub data of m3u8 6.0.* (`pycg/analysis/stub_data/third_party/
+typeshed's stub data of m3u8 6.0.* (`crates/stubs/stub_data/third_party/
 m3u8.json`, and a row of `stub_data/README.md`), generated from one commit
 of typeshed for all stubs, before batch 8 was drawn; nothing in it was
 written for the benchmark. The analysed package wins over a stub of its

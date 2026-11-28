@@ -12,7 +12,7 @@ use crate::{Text, Value};
 
 pub const FORMAT: &str = "pycg/1";
 pub const TOOL_NAME: &str = "pycg";
-pub const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/version.txt"));
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 const BUILTIN_OBJECT: &str = "<builtin>.object";
 
 #[derive(Clone, Debug, PartialEq, Eq)]

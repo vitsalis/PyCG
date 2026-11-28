@@ -13,7 +13,6 @@ use crate::engine::outside_calls::{BoundId, Param};
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State};
 use crate::models::{
     CONCRETE_CLASSES, CONTAINER_CLASSES, STUB_RESULTS, VARIABLE_TYPES, builtin_kind, lookup,
@@ -135,13 +134,6 @@ pub(crate) enum OutsideRule {
 }
 
 impl OutsideRule {
-    pub(crate) fn key(&self) -> &'static str {
-        match self {
-            OutsideRule::AddConstraint { .. } => "Each:Outside._add_constraint",
-            OutsideRule::AddInstancesOf { .. } => "Each:Outside._add_instances_of",
-        }
-    }
-
     pub(crate) fn results(&self) -> Vec<NodeId> {
         match *self {
             OutsideRule::AddConstraint { dst, .. } | OutsideRule::AddInstancesOf { dst } => {
@@ -272,7 +264,7 @@ fn extended(position: &[u32], index: usize) -> Box<[u32]> {
     extended.into()
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn variable_type(&self, definition: &Definition) -> Type {
         if let Some(&(_, class)) = VARIABLE_TYPES
             .iter()

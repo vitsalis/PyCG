@@ -7,7 +7,6 @@ use crate::engine::outside_calls::BoundId;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State};
 use crate::models::{LENGTH_HINT, LengthPlan, REVERSED_LENGTH, SEQUENCE_LENGTH};
 
@@ -24,7 +23,7 @@ pub enum Iterated {
     Filter(CallId),
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn caller_site(&self, call: CallId) -> (Sym, Sym) {
         let details = &self.calls[call.index()];
         (details.caller, details.site)

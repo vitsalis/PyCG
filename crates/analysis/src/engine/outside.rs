@@ -6,7 +6,6 @@ use pycg_stubs::{Decorator, Definition, DefinitionKind, Entry};
 use crate::engine::objects::{Container, Object};
 use crate::engine::outside_types::{TypeContext, named};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{EXTERNAL_STEPS_PAST_ROOT_MAX, Graph, State};
 use crate::model::BUILTIN_MODULE;
 use crate::models::{CONCRETE_CLASSES, VARIABLE_FUNCTIONS};
@@ -50,7 +49,7 @@ pub fn outside_name(path: &str) -> String {
     path.to_string()
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn stub_definitions(&mut self, external: ObjId) -> Option<Arc<[Definition]>> {
         let (name, unknown) = match self.objects.get(external) {
             Object::External(found) => (found.name, false),

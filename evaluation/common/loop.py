@@ -9,7 +9,7 @@ DESCRIPTION = """The two steps of an optimisation iteration (AGENTS.md,
 "Evaluation"): `run` measures and scores a checkout, `compare` lists what
 changed between two results.
 
-    python -I evaluation/common/loop.py run --flavour new --checkout PATH --name NAME
+    python -I evaluation/common/loop.py run --checkout PATH --name NAME
     python -I evaluation/common/loop.py compare OLD_DIR NEW_DIR"""
 
 
@@ -197,9 +197,6 @@ def main(argv=None):
     commands = parser.add_subparsers(dest="command", required=True)
     measure_parser = commands.add_parser("run", help="run and score a checkout")
     measure_parser.add_argument("--checkout", type=Path, required=True)
-    measure_parser.add_argument(
-        "--flavour", choices=sorted(run.analyse.FLAVOURS), required=True
-    )
     measure_parser.add_argument("--name", required=True)
     measure_parser.add_argument("--out", type=Path, default=run.OUT_DEFAULT)
     measure_parser.add_argument(
@@ -209,7 +206,6 @@ def main(argv=None):
         help="seconds per job",
     )
     measure_parser.add_argument("--python", default=sys.executable)
-    measure_parser.add_argument("--hash-seed", type=int, default=0)
     measure_parser.add_argument("--allow-dirty", action="store_true")
     measure_parser.add_argument(
         "--micro-jobs", type=int, default=1, help="micro-benchmark cases at a time"
@@ -220,13 +216,10 @@ def main(argv=None):
     compare_parser.add_argument("--json", action="store_true", help="print JSON")
     args = parser.parse_args(argv)
     if args.command == "run":
-        tool = run.Tool(
-            args.name,
-            args.flavour,
-            args.checkout.resolve(),
-            args.python,
-            args.hash_seed,
-        )
+        if not (args.checkout / run.analyse.PROGRAM).is_file():
+            program = run.analyse.PROGRAM
+            parser.error(f"{args.checkout} has no {program}: run cargo build --release")
+        tool = run.Tool(args.name, args.checkout.resolve(), args.python)
         try:
             data = measure(
                 tool,
