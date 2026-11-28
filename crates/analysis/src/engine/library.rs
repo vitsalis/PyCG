@@ -24,6 +24,7 @@ const TUPLE_STORAGE_LENGTH_HINT: LengthPlan = &[
     ("__len__", &[TUPLE_STORAGE]),
     ("__length_hint__", &["__len__", TUPLE_STORAGE]),
 ];
+const MIXIN_LOOP_METHOD: &str = "__iter__";
 const CONSUMED_KINDS: &[Kind] = &[Kind::Container];
 const ITERATOR_OF_KINDS: &[Kind] = &[Kind::Instance, Kind::Class, Kind::Container];
 
@@ -1183,11 +1184,33 @@ impl State {
     ) {
         let details = &self.calls[call.index()];
         let (caller, site) = (details.caller, details.site);
+        let mut looping = None;
         for &receiver in receivers {
             if !matches!(self.objects.get(receiver), Object::Instance { .. }) {
                 continue;
             }
             for &name in names {
+                if name == MIXIN_LOOP_METHOD {
+                    let iteration = match looping {
+                        Some(iteration) => iteration,
+                        None => {
+                            let dst = self.node(graph, None);
+                            let iteration = self.new_iteration(
+                                graph,
+                                dst,
+                                caller,
+                                site,
+                                false,
+                                Unless::Nothing,
+                                "mixin",
+                            );
+                            looping = Some(iteration);
+                            iteration
+                        }
+                    };
+                    self.iterate(graph, receiver, iteration);
+                    continue;
+                }
                 let symbol = self.symbols.intern(name);
                 let key = self.site_key(caller, site, Role::Special(symbol));
                 let back = self.site_call(graph, key, &[], None, None);
