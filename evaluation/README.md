@@ -61,5 +61,5 @@ Measured by CI on main at commit 41db742d:
 | Macro-benchmark, inside the package | 0.931 | 0.881 |
 | Macro-benchmark, outside the package | 0.946 | 0.821 |
 
-On the scale set, PyCG finishes 19 of the 20 packages, each in under
-4 minutes and 8 GiB ([scale/README.md](scale/README.md)).
+On the scale set, PyCG finishes all 20 packages, each in under 4 minutes
+and 7 GiB ([scale/README.md](scale/README.md)).
