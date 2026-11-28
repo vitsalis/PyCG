@@ -323,13 +323,6 @@ impl<A: Analysis + Send> Program<A> {
     }
 
     fn build(&mut self, name: &str, path: &Path) {
-        self.analysis.begin_module(name);
-        self.build_module(name, path);
-        let analysed = self.modules[name].status != Status::Failed;
-        self.analysis.end_module(name, analysed);
-    }
-
-    fn build_module(&mut self, name: &str, path: &Path) {
         let imports = self.analysis.imports();
         if !imports.has_node(name) {
             imports.create_node(name);

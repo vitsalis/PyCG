@@ -11,7 +11,6 @@ use crate::engine::library::{LibraryRole, Position};
 use crate::engine::objects::Object;
 use crate::engine::outside_calls::Known;
 use crate::engine::semantics::{Construct, Role};
-use crate::engine::trace::Trace;
 use crate::engine::{Engine, Graph, State};
 use crate::results::{
     AnalysisPart, ClassDefinition, Construct as DocumentConstruct, FunctionDefinition, MroBase,
@@ -23,13 +22,13 @@ const COMPUTED_NAME: &str = "computed name";
 const OUTSIDE_VALUE: &str = "outside value";
 const NO_VALUE: &str = "no value";
 
-impl<T: Trace> Engine<T> {
+impl Engine {
     pub fn results(&mut self, modules: &[String]) -> AnalysisPart {
         self.state.analysis_part(&mut self.graph, modules)
     }
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn analysis_part(&mut self, graph: &mut Graph, modules: &[String]) -> AnalysisPart {
         AnalysisPart {
             cap: graph.cap().map(BigInt::from),

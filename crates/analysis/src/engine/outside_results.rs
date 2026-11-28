@@ -9,7 +9,6 @@ use crate::engine::outside_types::TypeContext;
 use crate::engine::rules::{Rule, RuleId};
 use crate::engine::semantics::CallId;
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State};
 use crate::models::{DECORATING_CLOSURES, opened_class};
 
@@ -47,17 +46,6 @@ pub(crate) enum OutsideResultRule {
 }
 
 impl OutsideResultRule {
-    pub(crate) fn key(&self) -> &'static str {
-        match self {
-            OutsideResultRule::MethodFunction { .. } => "Each:Outside._method_function",
-            OutsideResultRule::BoundTo { .. } => "Each:Outside._bound_to",
-            OutsideResultRule::NewInstance { .. } => "Each:Outside._new_instance",
-            OutsideResultRule::MadeInstance { .. } => "Each:Outside._made_instance",
-            OutsideResultRule::OpenMode { .. } => "Each:Outside._open_mode",
-            OutsideResultRule::OpenBuffering { .. } => "Each:Outside._open_buffering",
-        }
-    }
-
     pub(crate) fn kinds(&self) -> Option<&'static [Kind]> {
         match self {
             OutsideResultRule::MethodFunction { .. } => Some(FUNCTION_KINDS),
@@ -93,7 +81,7 @@ pub(crate) struct OutsideResults {
     open_modes: FxHashSet<(CallId, Box<[u32]>)>,
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn result_rule(&mut self, rule: OutsideResultRule) -> RuleId {
         self.rule(Rule::OutsideResult(Box::new(rule)))
     }

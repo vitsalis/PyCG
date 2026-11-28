@@ -3,10 +3,9 @@ use rustc_hash::FxHashSet;
 
 use crate::engine::objects::Object;
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State};
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn solve(&mut self, graph: &mut Graph) {
         self.freeze_module_names();
         let mut read = FxHashSet::default();
@@ -24,9 +23,7 @@ impl<T: Trace> State<T> {
     }
 
     fn solve_round(&mut self, graph: &mut Graph) {
-        self.trace.solve();
         graph.solve(self);
-        self.trace.solved(graph.phase);
     }
 
     fn complete(&mut self, graph: &mut Graph) -> bool {

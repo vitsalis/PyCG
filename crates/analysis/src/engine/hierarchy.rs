@@ -9,7 +9,6 @@ use crate::builder::calls::{Allocator, NewClass};
 use crate::engine::objects::{Class, Object};
 use crate::engine::outside::{OutsideGives, outside_name};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, OrderedSet, Rule, State, WaitingRule};
 use crate::model::BUILTIN_MODULE;
 use crate::models::{DEFINES_MARKERS, TUPLE_STORAGE};
@@ -78,7 +77,7 @@ pub(super) enum BaseOrder {
 
 type Shape = (bool, Vec<Vec<ObjId>>);
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn unless_id(&mut self, unless: Unless) -> UnlessId {
         let (index, _) = self.unlesses.insert_full(unless);
         UnlessId(u32::try_from(index).expect("fewer than 2^32 exclusions"))
@@ -89,7 +88,7 @@ impl<T: Trace> State<T> {
     }
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn new_class(&mut self, graph: &mut Graph, new: &NewClass<'_>) -> ObjId {
         let instances = self.node(graph, None);
         let metaclass = self.node(graph, None);
@@ -502,7 +501,7 @@ impl<T: Trace> State<T> {
         };
         let after = key.after;
         let receiver = key.receiver;
-        let attr_name = |state: &State<T>| match key.attr {
+        let attr_name = |state: &State| match key.attr {
             LookupAttr::Name(name) => state.symbols.text(name).to_string(),
             LookupAttr::Object(_) => panic!("a lookup of a name"),
         };
@@ -1557,10 +1556,9 @@ impl<T: Trace> State<T> {
         }
     }
 
-    pub(super) fn unknown_classes(&mut self, graph: &mut Graph) -> (bool, Vec<ObjId>) {
-        let mut unknown = Vec::new();
+    pub(super) fn unknown_classes(&mut self, graph: &mut Graph) -> bool {
         if !graph.has_absorbed() {
-            return (false, unknown);
+            return false;
         }
         let mut added = false;
         let mut changed = true;
@@ -1602,7 +1600,6 @@ impl<T: Trace> State<T> {
                 }
                 self.objects.class_mut(class).unknown = true;
                 changed = true;
-                unknown.push(class);
                 graph.enable_opacity();
                 let lookups: Vec<NodeId> = self
                     .objects
@@ -1618,7 +1615,7 @@ impl<T: Trace> State<T> {
                 }
             }
         }
-        (added, unknown)
+        added
     }
 
     fn python_may_define(&self, class: ObjId, name: Sym) -> bool {

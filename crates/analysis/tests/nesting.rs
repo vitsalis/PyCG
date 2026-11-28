@@ -7,12 +7,12 @@ mod vectors {
 }
 
 #[test]
-fn the_nesting_bound_is_the_oracles() {
+fn the_nesting_bound_is_the_recorded_one() {
     assert_eq!(NESTING_MAX, vectors::NESTING_MAX);
 }
 
 #[test]
-fn a_statement_nests_as_the_oracle_counts_it() {
+fn a_statement_nests_as_recorded() {
     for (source, expected) in vectors::NESTING {
         let found: Vec<usize> = with_parsed(source, |parsed| {
             let parsed = parsed.expect("a vector parses");

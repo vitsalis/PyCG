@@ -21,42 +21,45 @@ run, project, tool, fake_checkout = (
 )
 
 
-def test_a_crash_is_recorded_with_the_error_and_where_it_happened(tmp_path):
+def test_a_crash_is_recorded_with_the_last_error_line_and_the_exit_status(tmp_path):
     job = project(tmp_path, "crash")
     graph_path = tmp_path / "graph.json"
     graph_of_earlier_run = "{}"
     graph_path.write_text(graph_of_earlier_run)
     record = run.run_job(tool(tmp_path), job, graph_path, timeout_seconds=60)
     assert record["status"] == "crash"
-    assert record["error"].startswith("JSONDecodeError: Expecting property name")
-    assert record["where"].startswith("pycg/pycg.py:")
-    assert record["where"].endswith(" in analyze")
+    assert record["error"] == "pycg: internal error at crates/a.rs:1:2: a message"
+    assert record["where"] == "target/release/pycg (exit 101)"
+    assert record["exit_status"] == 101
     assert not graph_path.exists()
 
 
-def test_the_rust_flavour_runs_the_built_binary_and_reads_its_document(tmp_path):
-    job, fake = project(tmp_path, "ok"), tool(tmp_path, "rust")
+def test_the_program_of_the_checkout_runs_isolated_and_its_document_is_read(tmp_path):
+    job, fake = project(tmp_path, "ok"), tool(tmp_path)
     graph_path = tmp_path / "out" / "graph.json"
 
     record = run.run_job(fake, job, graph_path, timeout_seconds=60)
 
-    assert record["status"] == "ok" and record["peak_rss_mib"] > 0
+    assert record["status"] == "ok"
+    assert record["files"] == 1 and record["peak_rss_mib"] > 0
     assert json.loads(graph_path.read_text()) == {
-        "main": ["main.a", "os.getcwd"],
+        "main": ["main.a", "main.b", "os.getcwd"],
         "main.a": [],
+        "main.b": [],
         "os.getcwd": [],
     }
     seen = json.loads((job.package / "seen.json").read_text())
     assert seen["arguments"][:2] == ["--package", str(job.package.resolve())]
     assert seen["arguments"][2:-2] == [str(job.entry_points[0].resolve())]
     assert seen["arguments"][-2] == "-o"
+    assert seen["found"] == [True]
     assert set(seen["environment"]) - {"LC_CTYPE"} == set()
     assert Path(seen["cwd"]).name.startswith("pycg-run-")
     assert not (job.package / "main.py.ran").exists()
 
 
-def test_the_rust_flavour_records_the_last_error_line_as_a_crash(tmp_path):
-    job, fake = project(tmp_path, "not ported"), tool(tmp_path, "rust")
+def test_a_part_that_is_not_ported_is_recorded_as_a_crash(tmp_path):
+    job, fake = project(tmp_path, "not ported"), tool(tmp_path)
     graph_path = tmp_path / "graph.json"
 
     record = run.run_job(fake, job, graph_path, timeout_seconds=60)
@@ -66,29 +69,6 @@ def test_the_rust_flavour_records_the_last_error_line_as_a_crash(tmp_path):
     assert record["where"] == "target/release/pycg (exit 3)"
     assert record["exit_status"] == 3
     assert not graph_path.exists()
-
-
-@pytest.mark.parametrize("flavour", ["new", "original"])
-def test_an_analysis_runs_isolated_and_never_runs_the_analysed_source(
-    tmp_path, flavour
-):
-    job, fake = project(tmp_path, "ok"), tool(tmp_path, flavour)
-    graph_path = tmp_path / "out" / "graph.json"
-    record = run.run_job(fake, job, graph_path, timeout_seconds=60)
-    assert record["status"] == "ok"
-    assert record["files"] == 1 and record["peak_rss_mib"] > 0
-    graph = json.loads(graph_path.read_text())
-    assert graph["main"] == ["main.a", "main.b"]
-    assert graph["rest"] == (["-1", "call-graph"] if flavour == "original" else [])
-    assert set(graph["environment"]) - {"LC_CTYPE"} == {"PYTHONHASHSEED"}
-    assert graph["found"] == ["True"]
-    assert str((tmp_path / "fake-pycg").resolve()) in graph["path"]
-    assert str(job.package.resolve()) not in graph["path"]
-    assert Path(graph["cwd"][0]).name.startswith("pycg-run-")
-    assert not (job.package / "main.py.ran").exists()
-    again = tmp_path / "again.json"
-    run.run_job(fake, job, again, timeout_seconds=60)
-    assert json.loads(again.read_text())["hash"] == graph["hash"]
 
 
 @pytest.mark.skipif(not sys.platform.startswith("linux"), reason="VmHWM is Linux")
@@ -137,8 +117,8 @@ def test_a_child_that_dies_without_a_result_is_a_crash(tmp_path):
         tool(tmp_path), job, tmp_path / "graph.json", timeout_seconds=60
     )
     assert record["status"] == "crash"
-    assert record["error"].startswith("exit status 3")
-    assert record["exit_status"] == 3
+    assert record["error"].startswith("exit status 1: json.decoder.JSONDecodeError")
+    assert record["exit_status"] == 1
 
 
 def test_the_jobs_of_a_benchmark_run_k_at_a_time_each_with_its_limits(tmp_path):
@@ -208,8 +188,13 @@ def test_the_runner_runs_the_projects_of_the_macro_benchmark(tmp_path, monkeypat
     )
     checkout = fake_checkout(tmp_path)
     out = tmp_path / "out"
-    argv = ["--flavour", "new", "--checkout", str(checkout), "--name", "t"]
+    argv = ["--checkout", str(checkout), "--name", "t"]
     argv += ["--benchmark", "macro", "--allow-dirty", "--out", str(out)]
     assert run.main(argv) == 0
     runs = json.loads((out / "t" / "macro" / "runs.json").read_text())
     assert runs["runs"]["macro/demo"]["status"] == "ok"
+
+
+def test_a_checkout_without_its_program_is_refused(tmp_path):
+    with pytest.raises(SystemExit):
+        run.main(["--checkout", str(tmp_path), "--name", "t", "--allow-dirty"])

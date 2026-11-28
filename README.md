@@ -42,21 +42,22 @@ In _43rd International Conference on Software Engineering, ICSE '21_,
 
 # Installation
 
-PyCG requires Python 3.12 or later and has no runtime dependencies.
+PyCG is one binary, `pycg`, written in Rust. It needs no Python to run and
+reads Python 3.14 syntax. Install it with Cargo from this repository:
+```
+cargo install --git https://github.com/vitsalis/PyCG --locked pycg
+```
 
-This version is not on PyPI yet (`pip install pycg` gives the 2021
-version). Install it from a checkout of this repository:
+Or from a checkout of it:
 ```
 git clone https://github.com/vitsalis/PyCG
 cd PyCG
-pip install .
+cargo install --path crates/pycg --locked
 ```
 
-Or run it from the checkout without installing it:
-```
-python -m pycg --help            # from the root of the checkout
-uv run pycg --help               # with uv, which also makes the environment
-```
+Releases, on crates.io and as archives for each platform, come later.
+
+The package `pycg` on PyPI is the 2021 version.
 
 # Usage
 
@@ -92,9 +93,9 @@ options:
 A module that cannot be read or parsed is reported as failed, with a
 warning, and analysed as an empty module.
 
-`--cap` (`cap=` of `CallGraphGenerator`) is the one setting of the
-analysis; the document records it. `--cap none` gives the analysis
-without a cap, which may not finish on large inputs.
+`--cap` is the one setting of the analysis; the document records it.
+`--cap none` gives the analysis without a cap, which may not finish on
+large inputs.
 
 # Output
 
@@ -105,10 +106,11 @@ names that the code calls, and the call sites of each caller: the position
 of each call, what it may call, the implicit calls (`for`, `with`,
 operators, properties and others) by construct, and the calls whose callee
 is not known, with the cause. The document is deterministic: the same
-input gives the same bytes on every run and every supported Python version.
+input gives the same bytes on every run and platform.
 
-`pycg.formats.edges(document)` gives the classic call graph: each node
-mapped to the sorted names it calls.
+The classic call graph maps each node to the sorted names that it calls:
+each definition that is not a class, and each outside name, is a node, and
+a caller's callees are the union of the callees of its sites.
 
 ```
 {
@@ -133,26 +135,35 @@ All entry points are not known, and the package is named in the document:
 
 # Development
 
-Install [uv](https://docs.astral.sh/uv/). Then, from the root directory:
+Install [Rust](https://rustup.rs/) (`rust-toolchain.toml` pins the
+toolchain) and [uv](https://docs.astral.sh/uv/), which runs the Python of
+the evaluation harness and the repository's tools. Then, from the root
+directory:
 ```
-uv run make test    # unit tests, the micro-benchmark and its validator
-uv run make lint    # ruff check, ruff format --check, no comments
-uv run make format  # sort imports and format the code
+make setup    # the environment of the harness and tools (uv sync --locked)
+make test     # cargo test --locked, then the tests of the harness and tools
+make lint     # ruff, no comments, cargo fmt --check, cargo clippy
+make format   # ruff and cargo fmt
+make check    # before pushing: lint, and the tests of what the change touches
 ```
 
-Each micro-benchmark case is a directory
+The case harness checks the cases of `tests/cases/<family>/<name>/` (a
+program, its request and the expected document) and every micro-benchmark
+case. Each micro-benchmark case is a directory
 `evaluation/micro-benchmark/snippets/<category>/<name>/` that contains a
-`main.py` and the expected `callgraph.json`. The tests find new case
-directories automatically.
-To run one case:
+`main.py` and the expected `callgraph.json`; the harness finds new case
+directories automatically and names them `micro/<category>/<name>`. A
+filter runs the cases whose name contains it, and `--exact` the one case of
+that name:
 ```
-uv run pytest "tests/test_micro_benchmark.py::test_call_graph[classes/call]"
+cargo test -p pycg --test cases -- --exact micro/classes/call
 ```
 
 The cases that the analysis fails are listed, each with its cause, in
 `tests/known_failures.txt`, as strict expected failures. After a change to
-the analysis, regenerate the list with `uv run python tests/triage.py`,
-which holds the causes. It removes the cases that pass now and never adds a
-case by itself: a failing case that is not in the list is a regression or a
-new case, and the tool reports it and fails. Give such a case a cause in
-`tests/triage.py` and add it with `--readmit <category>/<case>`.
+the analysis, build the binary with `cargo build --release` and regenerate
+the list with `python tests/triage.py`, which holds the causes. It removes
+the cases that pass now and never adds a case by itself: a failing case
+that is not in the list is a regression or a new case, and the tool
+reports it and fails. Give such a case a cause in `tests/triage.py` and
+add it with `--readmit <category>/<case>`.

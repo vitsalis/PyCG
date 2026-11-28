@@ -13,7 +13,6 @@ use crate::engine::hierarchy::{LookupAttr, LookupKey, Unless};
 use crate::engine::objects::{Literal, Object};
 use crate::engine::outside_calls::Known;
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, MethodKind, OrderedSet, Rule, RuleId, State, WaitingRule};
 use crate::models::RETURNED_DECORATOR;
 
@@ -242,7 +241,7 @@ pub struct Call {
     pub rule: RuleId,
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn new_call(&mut self, mut call: Call, origin: Option<Origin>) -> CallId {
         let id = CallId(u32::try_from(self.calls.len()).expect("fewer than 2^32 calls"));
         call.origin = origin.unwrap_or(Origin::Call(id));

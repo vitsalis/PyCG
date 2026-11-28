@@ -86,7 +86,7 @@ def _parse_ignoring_syntax_warnings(path):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", SyntaxWarning)
             return ast.parse(Path(path).read_bytes())
-    except (SyntaxError, ValueError):
+    except SyntaxError, ValueError:
         return None
 
 
@@ -583,10 +583,7 @@ def failed_runs(data):
 
 
 def _run_records(runs, every_record):
-    result = {
-        key: runs.get(key)
-        for key in ("tool", "benchmark", "python", "hash_seed", "timeout")
-    }
+    result = {key: runs.get(key) for key in ("tool", "benchmark", "python", "timeout")}
     records = runs["runs"]
     if every_record:
         return result | {"runs": records}

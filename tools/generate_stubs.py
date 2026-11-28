@@ -86,7 +86,7 @@ GENERIC_ARGUMENT_DEPTH_MAX = 2
 THIRD_PARTY_DIRECTORY_NAME = "third_party"
 BINDING_NOT_FROM_EXTENSION = "<not from an extension module>"
 OUTPUT_DIRECTORY_DEFAULT = Path(__file__).resolve().parent.parent / (
-    "pycg/analysis/stub_data"
+    "crates/stubs/stub_data"
 )
 
 
@@ -122,7 +122,7 @@ def main():
         type=Path,
         nargs="?",
         default=OUTPUT_DIRECTORY_DEFAULT,
-        help="output directory (default: pycg/analysis/stub_data/)",
+        help="output directory (default: crates/stubs/stub_data/)",
     )
     arguments = parser.parse_args()
     cpython_libraries = [

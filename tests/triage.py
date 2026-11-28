@@ -1,14 +1,25 @@
 import argparse
+import importlib.util
 import json
 import sys
+import tempfile
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
+MICRO = ROOT / "tools" / "release" / "micro.py"
+PROGRAM = ROOT / "target" / "release" / "pycg"
 
-from pycg.pycg import CallGraphGenerator  # noqa: E402
+
+def load_micro():
+    spec = importlib.util.spec_from_file_location("release_micro", MICRO)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+micro = load_micro()
 
 DESCRIPTION = """Triage of the micro-benchmark cases that the engine fails.
 
@@ -18,9 +29,10 @@ rule. The streams are the work queue: `flow` (flow and reachability),
 `outside` (typed outside code), `language` (language features not modelled)
 and `dynamic` (code built at run time, and context).
 
-    uv run python tests/triage.py
+    cargo build --release && python3 tests/triage.py
 
-analyses every case with the engine of this checkout and rewrites
+analyses every case with the program of this checkout (target/release/pycg,
+or --program), as tools/release/micro.py runs it, and rewrites
 tests/known_failures.txt: one `<case id>: <group>: <reason>` line per case
 that fails and is already in the file. A case that passes loses its line.
 The tool never adds a line by itself, because a case that passed before and
@@ -30,9 +42,9 @@ reason here. To list a case that is known to fail (a new case of the
 benchmark, or a regression that was looked at and accepted), give it a
 reason in `CASES` and name it:
 
-    uv run python tests/triage.py --readmit <category>/<case>
+    python3 tests/triage.py --readmit <category>/<case>
 
-The benchmark test (tests/test_micro_benchmark.py) reads the file.
+The case harness (cargo test -p pycg --test cases) reads the file.
 """
 
 SNIPPETS = ROOT / "evaluation" / "micro-benchmark" / "snippets"
@@ -824,22 +836,14 @@ CASES = {
 
 
 def runs(case):
-    path = case / "requires-python"
-    if not path.is_file():
-        return True
-    version = tuple(int(part) for part in path.read_text().strip().split("."))
-    return sys.version_info >= version
+    version = micro.required_python(case)
+    return version is None or version <= micro.PROGRAM_GRAMMAR
 
 
-def fails(case):
-    generator = CallGraphGenerator([str(case / "main.py")], str(case))
-    generator.analyze()
-    expected = json.loads((case / "callgraph.json").read_text())
-
-    def edges(graph):
-        return {node: sorted(targets) for node, targets in graph.items()}
-
-    return edges(generator.output()) != edges(expected)
+def fails(program, case, document):
+    found = micro.program_graph(program, case, document)
+    expected = json.loads((case / "callgraph.json").read_text(encoding="utf-8"))
+    return micro.sorted_edges(found) != micro.sorted_edges(expected)
 
 
 @dataclass
@@ -891,16 +895,21 @@ def main(argv=None):
         metavar="CASE",
         help="a failing case that may be added to the file (repeatable)",
     )
+    parser.add_argument("--program", type=Path, default=PROGRAM)
     args = parser.parse_args(argv)
+    if not args.program.is_file():
+        parser.error(f"{args.program} is no program: run cargo build --release")
 
     cases = sorted(path for path in SNIPPETS.glob("*/*") if path.is_dir())
     failing, not_run = [], []
-    for case in cases:
-        case_id = f"{case.parent.name}/{case.name}"
-        if not runs(case):
-            not_run.append(case_id)
-        elif fails(case):
-            failing.append(case_id)
+    with tempfile.TemporaryDirectory() as scratch:
+        document = Path(scratch) / "document.json"
+        for case in cases:
+            case_id = f"{case.parent.name}/{case.name}"
+            if not runs(case):
+                not_run.append(case_id)
+            elif fails(args.program, case, document):
+                failing.append(case_id)
     selection = select(
         failing, not_run, read_listed(KNOWN_FAILURES), CASES, set(args.readmit)
     )

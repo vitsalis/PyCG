@@ -8,24 +8,26 @@ import tokenize
 from pathlib import Path
 
 DESCRIPTION = """\
-Fails on a comment or a docstring in the repository's own code: the Python
-and shell files of SCANNED_DIRECTORIES, but the analysed programs and the
-data of NOT_SCANNED_DIRECTORIES. Allowed: a shebang, an encoding line, the
+Fails on a comment or a docstring in the repository's own code: the Python,
+shell and Rust files of SCANNED_DIRECTORIES, but the analysed programs and
+the data of NOT_SCANNED_DIRECTORIES. Allowed: a shebang, an encoding line, the
 licence header block at the top of a file, and the pragmas that tools read
 (TOOL_PRAGMA_PREFIXES). Prints one line per finding, `path:line: text`.
 """
 
 ROOT = Path(__file__).resolve().parents[1]
-SCANNED_DIRECTORIES = ("pycg/", "tests/", "tools/", "evaluation/")
+SCANNED_DIRECTORIES = ("crates/", "tests/", "tools/", "evaluation/")
 NOT_SCANNED_DIRECTORIES = (
     "evaluation/micro-benchmark/snippets/",
     "evaluation/macro-benchmark/projects/",
     "evaluation/scale/projects/",
     "evaluation/macro-benchmark/selection/",
-    "tests/fixtures/",
+    "tools/tests/fixtures/",
     "tests/cases/",
+    "crates/pycg/tests/termination/",
+    "crates/syntax/tests/vectors/",
 )
-SCANNED_SUFFIXES = (".py", ".sh")
+SCANNED_SUFFIXES = (".py", ".sh", ".rs")
 TOOL_PRAGMA_PREFIXES = (
     "# noqa",
     "# type:",
@@ -122,6 +124,71 @@ def shell_findings(text):
     return findings
 
 
+def rust_comments(text):
+    found = []
+    index, line, length = 0, 1, len(text)
+
+    def advance(to):
+        nonlocal index, line
+        line += text.count("\n", index, to)
+        index = to
+
+    while index < length:
+        character = text[index]
+        rest = text[index : index + 2]
+        before = text[index - 1] if index else " "
+        if rest == "//":
+            end = text.find("\n", index)
+            end = length if end == -1 else end
+            found.append((line, text[index:end]))
+            advance(end)
+        elif rest == "/*":
+            start_line, depth, scan = line, 1, index + 2
+            while depth and scan < length:
+                if text.startswith("/*", scan):
+                    depth, scan = depth + 1, scan + 2
+                elif text.startswith("*/", scan):
+                    depth, scan = depth - 1, scan + 2
+                else:
+                    scan += 1
+            found.append((start_line, text[index:scan].splitlines()[0]))
+            advance(scan)
+        elif character in "rb" and not (before.isalnum() or before == "_"):
+            prefix = "br" if text.startswith("br", index) else character
+            hashes = len(text[index + len(prefix) :]) - len(
+                text[index + len(prefix) :].lstrip("#")
+            )
+            opening = index + len(prefix) + hashes
+            if "r" in prefix and text.startswith('"', opening):
+                closing = text.index('"' + "#" * hashes, opening + 1)
+                advance(closing + 1 + hashes)
+            else:
+                advance(index + 1)
+        elif character == '"':
+            scan = index + 1
+            while text[scan] != '"':
+                scan += 2 if text[scan] == "\\" else 1
+            advance(scan + 1)
+        elif character == "'":
+            if text.startswith("\\", index + 1):
+                advance(text.index("'", index + 3) + 1)
+            elif index + 2 < length and text[index + 2] == "'":
+                advance(index + 3)
+            else:
+                advance(index + 1)
+        else:
+            advance(index + 1)
+    return found
+
+
+def rust_findings(text):
+    return [
+        (line_number, comment)
+        for line_number, comment in rust_comments(text)
+        if not is_tool_pragma(comment)
+    ]
+
+
 def scanned_paths(root):
     listing = subprocess.run(
         ["git", "-C", str(root), "ls-files", "--cached", "--others"]
@@ -142,6 +209,8 @@ def scanned_paths(root):
 def findings_of(path, text):
     if path.endswith(".sh"):
         return shell_findings(text)
+    if path.endswith(".rs"):
+        return rust_findings(text)
     return python_findings(text)
 
 

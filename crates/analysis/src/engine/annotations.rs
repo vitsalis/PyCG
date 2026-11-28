@@ -10,7 +10,6 @@ use crate::engine::objects::{Kind, Object};
 use crate::engine::outside_types::{TypeContext, TypeOrigin};
 use crate::engine::rules::{Rule, RuleId};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State};
 use crate::model::{BUILTIN_MODULE, site_name};
 use crate::models::builtin_kind;
@@ -145,22 +144,6 @@ pub(crate) enum AnnotationRule {
 }
 
 impl AnnotationRule {
-    pub(crate) fn key(&self) -> &'static str {
-        match self {
-            AnnotationRule::AnnotatedObject { .. } => "Each:Annotations._annotated_object",
-            AnnotationRule::AnnotatedSubscript { .. } => "Each:Annotations._annotated_subscript",
-            AnnotationRule::StubBase { .. } => "Each:Annotations._stub_base",
-            AnnotationRule::TypeOperand { .. } => "Each:Annotations._type_operand",
-            AnnotationRule::DataclassDecorator { .. } => "Each:Annotations._dataclass_decorator",
-            AnnotationRule::DataclassBase { .. } => "Each:Annotations._dataclass_base",
-            AnnotationRule::StructureBase { .. } => "Each:Annotations._structure_base",
-            AnnotationRule::NativeField { .. } => "Each:Annotations._native_field",
-            AnnotationRule::FieldValues { .. } => "Each:Annotations._field_values",
-            AnnotationRule::NameLookup { .. } => "Each:Attributes._name_lookup",
-            AnnotationRule::DefinedName { .. } => "Each:Attributes._defined_name",
-        }
-    }
-
     pub(crate) fn kinds(&self) -> Option<&'static [Kind]> {
         match self {
             AnnotationRule::StubBase { .. } => Some(EXTERNAL_KINDS),
@@ -217,7 +200,7 @@ fn constructor_kind(constructor: &str) -> Option<&'static str> {
         .map(|&(_, kind)| kind)
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn annotation_rule(&mut self, rule: AnnotationRule) -> RuleId {
         self.rule(Rule::Annotation(Box::new(rule)))
     }

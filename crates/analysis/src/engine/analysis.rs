@@ -13,13 +13,12 @@ use crate::engine::objects::{self, Literal, Object};
 use crate::engine::protocols::{Conversion, OperatorCall};
 use crate::engine::semantics::{Role, SiteKey};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{BuilderFields, Engine, containers, not_ported};
 use crate::model::Signature;
 use crate::models::LENGTH_HINT;
 use crate::program::imports::ImportManager;
 
-impl<T: Trace> Engine<T> {
+impl Engine {
     fn caller_site(&mut self, caller: &str, site: &str) -> (Sym, Sym) {
         (
             self.state.symbols.intern(caller),
@@ -188,7 +187,7 @@ fn literal(value: &Constant) -> Literal {
     }
 }
 
-impl<T: Trace> Analysis for Engine<T> {
+impl Analysis for Engine {
     fn node(&mut self, label: Option<&str>) -> NodeId {
         self.sync();
         self.state.node(&mut self.graph, label)
@@ -445,14 +444,6 @@ impl<T: Trace> Analysis for Engine<T> {
 
     fn imports(&mut self) -> &mut ImportManager {
         &mut self.state.imports
-    }
-
-    fn begin_module(&mut self, name: &str) {
-        self.state.trace.module(Some(name));
-    }
-
-    fn end_module(&mut self, _name: &str, _analysed: bool) {
-        self.state.trace.module(None);
     }
 
     fn function_fields(&mut self, function: ObjId) -> &mut FunctionFields {

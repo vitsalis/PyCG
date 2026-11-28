@@ -297,7 +297,7 @@ class Tracer:
             value = _value_loaded_again(before[-1], frame)
             for attribute in attributes:
                 value = inspect.getattr_static(value, attribute)
-        except (KeyError, AttributeError):
+        except KeyError, AttributeError:
             return False
         return value is cls
 

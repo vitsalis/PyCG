@@ -9,39 +9,51 @@ The checks before pushing, scoped to what a change touches.
 
 The change is the diff of the working tree, untracked files included,
 against the merge base of REF (default origin/main) and HEAD. `lint` always
-runs; `engine`, `micro` and `evaluation` run when the change touches one of
-their TRIGGERS. A check prints one line, its name, `pass` or `FAIL` and its
-seconds, and the output of a failed check follows. The exit status is 1 if a
-check failed. --full runs `make lint` and `make test` whatever the change.
-A diff that cannot be read runs every scoped check.
+runs; `rust`, `tools`, `micro` and `evaluation` run when the change touches
+one of their TRIGGERS outside their EXCLUDED. A check prints one line, its
+name, `pass` or `FAIL` and its seconds, and the output of a failed check
+follows. The exit status is 1 if a check failed. --full runs `make lint`
+and `make test` whatever the change. A diff that cannot be read runs every
+scoped check.
 
 --detect-eval decides whether CI measures a pull request: it appends
 `eval=true` or `eval=false` to OUTPUTS (the format of $GITHUB_OUTPUT) and
 prints the reason as Markdown. It is true when the change touches
 EVAL_PATHS outside EVAL_EXCLUDED, and when the diff cannot be read: the
-evaluation reads nothing of tools/parity/, the Rust port's parity check.
+evaluation builds the program from the crates and runs it with the harness
+of evaluation/ and the Makefile.
 """
 
 ROOT = Path(__file__).resolve().parents[1]
-MICRO_TESTS = ("tests/test_micro_benchmark.py", "tests/test_benchmark_validator.py")
+VALIDATOR_TEST = "evaluation/tests/test_benchmark_validator.py"
 PYTEST = (sys.executable, "tools/test.py", "-q")
 CHECKS = {
     "lint": ("make", "lint"),
-    "engine": (*PYTEST, "tests", "-m", "not slow"),
-    "micro": (*PYTEST, *MICRO_TESTS),
+    "rust": ("cargo", "test", "--locked"),
+    "tools": (*PYTEST, "tools/tests", "-m", "not slow"),
+    "micro": (*PYTEST, VALIDATOR_TEST),
     "evaluation": (*PYTEST, "evaluation/tests", "-m", "not slow"),
 }
 FULL = {"lint": ("make", "lint"), "test": ("make", "test")}
 TRIGGERS = {
-    "engine": (
-        "pycg/",
+    "rust": (
+        "crates/",
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        "clippy.toml",
+        "tests/cases/",
+        "tests/known_failures.txt",
+        "evaluation/micro-benchmark/snippets/",
+    ),
+    "tools": (
         "tools/",
-        "tests/",
+        "tests/triage.py",
         "conftest.py",
         "pyproject.toml",
         "uv.lock",
     ),
-    "micro": ("evaluation/micro-benchmark/", "conftest.py", *MICRO_TESTS),
+    "micro": ("evaluation/micro-benchmark/", "conftest.py", VALIDATOR_TEST),
     "evaluation": (
         "evaluation/",
         "AGENTS.md",
@@ -51,23 +63,24 @@ TRIGGERS = {
     ),
 }
 EXCLUDED = {
-    "engine": MICRO_TESTS,
     "evaluation": (
         "evaluation/micro-benchmark/snippets/",
         "evaluation/micro-benchmark/README.md",
+        VALIDATOR_TEST,
     ),
 }
 EVAL_PATHS = (
-    "pycg/",
+    "crates/",
+    "Cargo.toml",
+    "Cargo.lock",
+    "rust-toolchain.toml",
     "evaluation/",
     "tools/",
     "tests/known_failures.txt",
-    "pyproject.toml",
-    "uv.lock",
     "Makefile",
     ".github/",
 )
-EVAL_EXCLUDED = ("tools/parity/",)
+EVAL_EXCLUDED = ("tools/tests/", "tools/data/")
 
 
 def under(path, patterns):

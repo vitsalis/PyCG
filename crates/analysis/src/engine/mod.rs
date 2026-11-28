@@ -21,7 +21,6 @@ mod results;
 mod rules;
 mod semantics;
 pub mod symbols;
-pub mod trace;
 
 use std::sync::Arc;
 
@@ -49,7 +48,6 @@ use semantics::{
     BoundGroup, Call, Construct, GroupId, Origin, Prefix, Receivers, Returned, ReturnedId, SiteKey,
 };
 use symbols::{Sym, Symbols};
-use trace::{Opacity, Trace};
 
 pub(crate) type OrderedMap<K, V> = IndexMap<K, V, FxBuildHasher>;
 pub(crate) type OrderedSet<K> = IndexSet<K, FxBuildHasher>;
@@ -73,13 +71,12 @@ pub fn not_ported(feature: &str) -> ! {
     std::panic::panic_any(NotPorted(feature.to_owned()))
 }
 
-pub struct Engine<T: Trace> {
+pub struct Engine {
     graph: Graph,
-    state: State<T>,
+    state: State,
 }
 
-struct State<T: Trace> {
-    trace: T,
+struct State {
     symbols: Symbols,
     objects: Objects,
     saturated: ObjId,
@@ -209,10 +206,9 @@ struct State<T: Trace> {
     class_tests: narrowing::ClassTests,
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn table_sizes(&self) -> Vec<(&'static str, usize)> {
         let State {
-            trace: _,
             symbols: _,
             objects: _,
             saturated: _,
@@ -379,16 +375,15 @@ impl<T: Trace> State<T> {
     }
 }
 
-impl<T: Trace> Engine<T> {
+impl Engine {
     pub fn table_sizes(&self) -> Vec<(&'static str, usize)> {
         self.state.table_sizes()
     }
 
-    pub fn new(cap: Option<u32>, order: Order, trace: T) -> Engine<T> {
+    pub fn new(cap: Option<u32>, order: Order) -> Engine {
         let mut objects = Objects::default();
         let saturated = objects.push(Object::Saturated);
         let mut state = State {
-            trace,
             symbols: Symbols::default(),
             objects,
             saturated,
@@ -517,14 +512,7 @@ impl<T: Trace> Engine<T> {
             class_tests: narrowing::ClassTests::default(),
             tables: BuilderTables::default(),
         };
-        state.trace.object(
-            saturated,
-            Kind::Saturated,
-            "<saturated>",
-            Opacity::Saturated,
-        );
         let mut graph = Solver::new(saturated, Kind::Saturated.mask(), cap, order);
-        state.trace.solver(cap, saturated, graph.saturated_node());
         let name = state.symbols.intern("<unknown>");
         state.unknown_external = state.new_object(
             &mut graph,
@@ -535,19 +523,6 @@ impl<T: Trace> Engine<T> {
             }),
         );
         Engine { graph, state }
-    }
-
-    pub fn builder_call_rule(&self, call: crate::builder::calls::CallId) -> RuleId {
-        let call = self.state.builder_calls[call.0 as usize];
-        self.state.calls[call.index()].rule
-    }
-
-    pub fn trace(&self) -> &T {
-        &self.state.trace
-    }
-
-    pub fn trace_mut(&mut self) -> &mut T {
-        &mut self.state.trace
     }
 
     pub fn intern(&mut self, text: &str) -> Sym {
@@ -582,10 +557,6 @@ impl<T: Trace> Engine<T> {
         self.graph.objects(node)
     }
 
-    pub fn held_saturated(&mut self, node: NodeId) -> bool {
-        self.graph.is_saturated(node)
-    }
-
     pub fn absorbed(&self) -> Vec<ObjId> {
         self.graph.absorbed()
     }
@@ -604,26 +575,11 @@ impl<T: Trace> Engine<T> {
     }
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn new_object(&mut self, graph: &mut Graph, object: Object) -> ObjId {
         let kind = object.kind();
         let id = self.objects.push(object);
         graph.declare(id, kind.mask());
-        if T::RECORDS {
-            let name = self.objects.name(id, &self.symbols);
-            let opacity = match self.objects.get(id) {
-                Object::Saturated => Opacity::Saturated,
-                Object::Class(_) => Opacity::Class(id),
-                &Object::Instance { class, .. } => Opacity::Class(class),
-                &Object::Fallback { method } => match self.objects.get(method) {
-                    &Object::Instance { class, .. } => Opacity::Class(class),
-                    Object::Class(_) => Opacity::Class(method),
-                    _ => Opacity::Never,
-                },
-                _ => Opacity::Never,
-            };
-            self.trace.object(id, kind, &name, opacity);
-        }
         id
     }
 
@@ -633,37 +589,28 @@ impl<T: Trace> State<T> {
             self.labels.insert(node, label.into());
             self.named_nodes.push(node);
         }
-        self.trace.node(node, label);
         node
     }
 
     fn witness(&mut self, graph: &mut Graph, watch: WatchId) -> NodeId {
         let node = graph.witness(watch);
         self.watch_of_witness.insert(node, watch);
-        self.trace.witness(node, watch);
         node
     }
 
     fn objects_of(&mut self, graph: &mut Graph, node: NodeId) -> Vec<ObjId> {
-        let objects = graph.objects(node);
-        self.trace.objects(node, &objects);
-        objects
+        graph.objects(node)
     }
 
     fn follower(&mut self, graph: &mut Graph, source: NodeId, since: u32) -> NodeId {
-        let node = graph.follower(self, source, since);
-        self.trace.follower(source, since, node);
-        node
+        graph.follower(self, source, since)
     }
 
     fn is_saturated(&mut self, graph: &mut Graph, node: NodeId) -> bool {
-        let answer = graph.is_saturated(node);
-        self.trace.is_saturated(node, answer);
-        answer
+        graph.is_saturated(node)
     }
 
     fn apply_now(&mut self, graph: &mut Graph, node: NodeId, rule: RuleId) {
-        self.trace.apply_now(node, rule);
         graph.apply_now(self, node, rule);
     }
 
@@ -688,9 +635,7 @@ impl<T: Trace> State<T> {
     }
 
     fn holds(&mut self, graph: &mut Graph, node: NodeId, object: ObjId) -> bool {
-        let answer = graph.holds(node, object);
-        self.trace.holds(node, object, answer);
-        answer
+        graph.holds(node, object)
     }
 
     fn object_name(&self, object: ObjId) -> String {
@@ -702,23 +647,19 @@ impl<T: Trace> State<T> {
             return node;
         }
         let node = graph.constant(object);
-        self.trace.constant(object, node);
         self.constants.insert(object, node);
         node
     }
 
     fn add_object(&mut self, graph: &mut Graph, node: NodeId, object: ObjId) {
-        self.trace.add_object(node, object);
         graph.add_object(self, node, object);
     }
 
     fn add_edge(&mut self, graph: &mut Graph, source: NodeId, target: NodeId) {
-        self.trace.add_edge(source, target);
         graph.add_edge(self, source, target);
     }
 
     fn attach(&mut self, graph: &mut Graph, node: NodeId, rule: RuleId) {
-        self.trace.attach(node, rule);
         graph.attach(self, node, rule);
     }
 

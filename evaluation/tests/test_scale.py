@@ -276,34 +276,31 @@ NOT_PORTED = {"status": "crash", "exit_status": 3}
 
 
 @pytest.mark.parametrize(
-    ("record", "flavour", "after", "outcome"),
+    ("record", "after", "outcome"),
     [
-        ({"status": "ok"}, "new", EVENTS, "finished"),
-        ({"status": "memory"}, "new", EVENTS, "killed by the cap"),
+        ({"status": "ok"}, EVENTS, "finished"),
+        ({"status": "memory"}, EVENTS, "killed by the cap"),
         (
             KILLED,
-            "new",
             EVENTS | {"oom": 2, "oom_kill": 2},
             "killed: the container ran out of memory",
         ),
         (
             KILLED,
-            "new",
             EVENTS | {"oom_kill": 2},
             "killed: the machine ran out of memory",
         ),
-        (KILLED, "new", EVENTS, "killed by SIGKILL"),
-        (KILLED, "rust", None, "killed by SIGKILL"),
-        ({"status": "crash", "exit_status": 1}, "new", EVENTS, "crash"),
-        ({"status": "timeout"}, "new", EVENTS, "timeout"),
-        (NOT_PORTED, "rust", EVENTS, "not ported"),
-        (NOT_PORTED, "new", EVENTS, "crash"),
-        ({"status": "crash", "exit_status": 101}, "rust", EVENTS, "crash"),
+        (KILLED, EVENTS, "killed by SIGKILL"),
+        (KILLED, None, "killed by SIGKILL"),
+        ({"status": "crash", "exit_status": 1}, EVENTS, "crash"),
+        ({"status": "timeout"}, EVENTS, "timeout"),
+        (NOT_PORTED, EVENTS, "not ported"),
+        ({"status": "crash", "exit_status": 101}, EVENTS, "crash"),
     ],
 )
-def test_the_outcome_of_a_run(record, flavour, after, outcome):
+def test_the_outcome_of_a_run(record, after, outcome):
     before = None if after is None else EVENTS
-    assert measure.outcome_of(record, flavour, before, after) == outcome
+    assert measure.outcome_of(record, before, after) == outcome
 
 
 def test_the_memory_events_of_the_container_are_read(tmp_path):
@@ -313,8 +310,8 @@ def test_the_memory_events_of_the_container_are_read(tmp_path):
     assert measure.memory_events(tmp_path / "absent") is None
 
 
-def committed_checkout(tmp_path, rust=False):
-    checkout = fakes.fake_checkout(tmp_path, rust=rust)
+def committed_checkout(tmp_path):
+    checkout = fakes.fake_checkout(tmp_path)
     fakes_git = load("evaluation_test_fetch", EVALUATION / "tests" / "test_fetch.py")
     git = fakes_git.git_without_user_configuration
     git(checkout, "init", "--quiet")
@@ -336,14 +333,13 @@ def test_a_measurement_records_the_outcome_and_the_sha256_of_the_graph(tmp_path)
     checkout = committed_checkout(tmp_path)
     project = demo_project(tmp_path)
     out = tmp_path / "out"
-    result = measure.measure(
-        checkout, "this", project, out, 1024, 60, sys.executable, "new"
-    )
+    result = measure.measure(checkout, "this", project, out, 1024, 60, sys.executable)
     graph = out / "this" / "scale" / "demo.json"
     assert result["outcome"] == "finished"
     assert result["graph_sha256"] == hashlib.sha256(graph.read_bytes()).hexdigest()
     assert result["files"] == 1
-    assert result["flavour"] == "new"
+    seen = json.loads((project.directory / "seen.json").read_text())
+    assert seen["arguments"][:2] == ["--package", str(project.root)]
     record = measure.record_path(out, "this", "demo")
     assert json.loads(record.read_text()) == result
     text = measure.comparison(result, result)
@@ -351,28 +347,12 @@ def test_a_measurement_records_the_outcome_and_the_sha256_of_the_graph(tmp_path)
     assert "| outcome | finished | finished |" in text
 
 
-def test_the_rust_flavour_measures_the_program_of_the_checkout(tmp_path):
-    checkout = committed_checkout(tmp_path, rust=True)
-    project = demo_project(tmp_path)
-    out = tmp_path / "out"
-    result = measure.measure(
-        checkout, "rust", project, out, 1024, 60, sys.executable, "rust"
-    )
-    graph = out / "rust" / "scale" / "demo.json"
-    assert result["outcome"] == "finished"
-    assert result["flavour"] == "rust"
-    assert result["graph_sha256"] == hashlib.sha256(graph.read_bytes()).hexdigest()
-    seen = json.loads((project.directory / "seen.json").read_text())
-    assert seen["arguments"][:2] == ["--package", str(project.root)]
-    assert "flavour rust" in measure.report(result)
-
-
-def test_a_rust_stop_keeps_its_error_line_in_the_record(tmp_path):
-    checkout = committed_checkout(tmp_path, rust=True)
+def test_a_part_that_is_not_ported_keeps_its_error_line_in_the_record(tmp_path):
+    checkout = committed_checkout(tmp_path)
     project = demo_project(tmp_path)
     (project.directory / "BEHAVIOUR").write_text("not ported")
     result = measure.measure(
-        checkout, "rust", project, tmp_path / "out", 1024, 60, sys.executable, "rust"
+        checkout, "this", project, tmp_path / "out", 1024, 60, sys.executable
     )
     assert result["outcome"] == "not ported"
     assert result["graph_sha256"] is None
@@ -393,7 +373,7 @@ def test_a_run_over_the_cap_is_recorded_as_killed_by_the_cap(tmp_path):
     out = tmp_path / "out"
 
     result = measure.measure(
-        checkout, "this", project, out, 200, 60, sys.executable, "new", container
+        checkout, "this", project, out, 200, 60, sys.executable, container
     )
 
     assert result["outcome"] == "killed by the cap"
@@ -421,7 +401,6 @@ def test_a_run_that_the_machine_kills_is_not_killed_by_the_cap(tmp_path):
         1024,
         60,
         sys.executable,
-        "new",
         tmp_path / "no-limit",
         events,
         meminfo,
@@ -474,7 +453,7 @@ def test_a_container_without_headroom_above_the_cap_is_refused(tmp_path, limit_m
         measure.MeasureError, match=f"needs {measure.RUNNER_HEADROOM_MIB} MiB"
     ):
         measure.measure(
-            tmp_path, "this", None, tmp_path, 1024, 60, "python3", "new", container
+            tmp_path, "this", None, tmp_path, 1024, 60, "python3", container
         )
 
 
@@ -493,7 +472,7 @@ def test_the_container_has_the_cap_and_the_headroom_of_the_runner(capsys):
 
 def test_a_checkout_with_changes_is_not_measured(tmp_path):
     checkout = committed_checkout(tmp_path)
-    (checkout / "pycg" / "new.py").write_text("")
+    (checkout / "new.py").write_text("")
     with pytest.raises(measure.MeasureError, match="has changes"):
         measure.measure(
             checkout,
@@ -503,7 +482,6 @@ def test_a_checkout_with_changes_is_not_measured(tmp_path):
             1024,
             60,
             "python3",
-            "new",
         )
 
 
@@ -513,7 +491,6 @@ def result_of(outcome, graph_sha256, seconds):
         "version": "1.0",
         "archive_sha256": "0" * 64,
         "tool": {"commit": "a" * 40},
-        "flavour": "new",
         "python": "3.14.0",
         "memory_cap_mib": 4096,
         "files": 3,
@@ -552,26 +529,26 @@ def write_result(directory, results):
     return directory
 
 
-def test_a_summary_has_one_row_per_package_against_the_oracle(tmp_path, capsys):
+def test_a_summary_has_one_row_per_package_against_a_base(tmp_path, capsys):
     finished = result_of("finished", "1" * 64, 1.0) | {"package": "fast"}
     stopped = result_of("crash", None, 0.5) | {
         "package": "stopped",
         "run": {"error": "pycg: not ported: outside attributes"},
     }
     alone = result_of("finished", "2" * 64, 3.0) | {"package": "alone"}
-    rust = write_result(tmp_path / "rust", [finished, stopped, alone])
-    oracle_fast = result_of("finished", "1" * 64, 4.0) | {
+    this = write_result(tmp_path / "this", [finished, stopped, alone])
+    base_fast = result_of("finished", "1" * 64, 4.0) | {
         "package": "fast",
         "peak_rss_mib": 400.0,
     }
-    oracle_stopped = result_of("finished", "3" * 64, 2.0) | {"package": "stopped"}
-    oracle = write_result(tmp_path / "oracle", [oracle_fast, oracle_stopped])
+    base_stopped = result_of("finished", "3" * 64, 2.0) | {"package": "stopped"}
+    base = write_result(tmp_path / "base", [base_fast, base_stopped])
 
-    assert measure.main(["summary", str(rust), "--oracle", str(oracle)]) == 0
+    assert measure.main(["summary", str(this), "--base", str(base)]) == 0
 
     assert capsys.readouterr().out.splitlines() == [
-        "| package | outcome | seconds | peak MiB | oracle outcome | oracle seconds"
-        " | time ratio | oracle peak MiB | memory ratio | graphs | error |",
+        "| package | outcome | seconds | peak MiB | base outcome | base seconds"
+        " | time ratio | base peak MiB | memory ratio | graphs | error |",
         "|---|---|---|---|---|---|---|---|---|---|---|",
         "| alone | finished | 3.0 | 100.0 | not measured | - | - | - | - | - |  |",
         "| fast | finished | 1.0 | 100.0 | finished | 4.0 | 0.250 | 400.0 | 0.250"
@@ -581,11 +558,11 @@ def test_a_summary_has_one_row_per_package_against_the_oracle(tmp_path, capsys):
     ]
 
 
-def test_a_summary_without_an_oracle_lists_the_runs(tmp_path):
-    rust = write_result(
-        tmp_path / "rust", [result_of("timeout", None, None) | {"package": "slow"}]
+def test_a_summary_without_a_base_lists_the_runs(tmp_path):
+    this = write_result(
+        tmp_path / "this", [result_of("timeout", None, None) | {"package": "slow"}]
     )
-    assert measure.summary(rust).splitlines() == [
+    assert measure.summary(this).splitlines() == [
         "| package | outcome | seconds | peak MiB | error |",
         "|---|---|---|---|---|",
         "| slow | timeout | - | 100.0 |  |",

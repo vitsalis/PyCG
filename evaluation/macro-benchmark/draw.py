@@ -133,7 +133,7 @@ def rate_limit_reset_epoch_seconds(status, headers, now):
             return now + int(headers["retry-after"])
         if headers.get("x-ratelimit-remaining") == "0":
             return int(headers["x-ratelimit-reset"])
-    except (KeyError, ValueError):
+    except KeyError, ValueError:
         return None
     return None
 
@@ -735,7 +735,7 @@ def compare_marker_values(left, operator, right):
 def code_lines(data):
     try:
         tokens = list(tokenize.tokenize(io.BytesIO(data).readline))
-    except (tokenize.TokenError, SyntaxError, UnicodeDecodeError):
+    except tokenize.TokenError, SyntaxError, UnicodeDecodeError:
         text = data.decode("utf-8", "replace")
         return sum(1 for line in text.splitlines() if line.strip())
     skipped = (

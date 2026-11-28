@@ -49,7 +49,7 @@ def test_a_protected_path_is_protected(path):
 @pytest.mark.parametrize(
     "path",
     [
-        "pycg/pycg.py",
+        "crates/pycg/src/main.rs",
         "evaluation/micro-benchmark/snippets/classes/call/main.py",
         "evaluation/micro-benchmark/callgraph.json",
         "evaluation/macro-benchmark/projects.py",
@@ -91,7 +91,11 @@ def test_a_changed_count_changes_the_metrics(changed, name):
 
 
 def test_only_protected_paths_of_the_diff_are_listed():
-    changed = ["pycg/pycg.py", "evaluation/metrics.json", ".github/CODEOWNERS"]
+    changed = [
+        "crates/pycg/src/main.rs",
+        "evaluation/metrics.json",
+        ".github/CODEOWNERS",
+    ]
     _, touched = labels.decide(result(), result(), changed)
     assert touched == [".github/CODEOWNERS", "evaluation/metrics.json"]
 
@@ -102,7 +106,7 @@ def test_the_command_writes_the_outputs_and_the_markdown(tmp_path, capsys):
         paths[name] = tmp_path / f"{name}.json"
         paths[name].write_text(json.dumps(data))
     changed = tmp_path / "changed.txt"
-    changed.write_text("pycg/pycg.py\n")
+    changed.write_text("crates/pycg/src/main.rs\n")
     outputs = tmp_path / "outputs"
     argv = [str(paths["pr"]), str(paths["base"]), str(changed), str(outputs)]
     assert labels.main(argv) == 0

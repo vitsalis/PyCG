@@ -11,7 +11,6 @@ use crate::engine::outside_types::TypeOrigin;
 use crate::engine::rules::{Rule, RuleId};
 use crate::engine::semantics::{CallId, Role, SiteKey};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State};
 use crate::models::{CONTAINER_CLASSES, LENGTH_HINT, builtin_kind};
 
@@ -265,29 +264,6 @@ pub(crate) struct OperatorCall<'a> {
 }
 
 impl ProtocolRule {
-    pub(crate) fn key(&self) -> &'static str {
-        match self {
-            ProtocolRule::Operand { .. } => "_Operand",
-            ProtocolRule::SearchedType(_) => "Each:Protocols._searched_type",
-            ProtocolRule::PythonContains(_) => "Each:Protocols._python_contains",
-            ProtocolRule::CompareMember(_) => "Each:Protocols.compare_member",
-            ProtocolRule::CallEq(_) => "Each:Protocols._call_eq",
-            ProtocolRule::CompareProtocol { .. } => "Each:Outside._call_protocol",
-            ProtocolRule::Arrive { .. } => "Each:_ElementComparison.arrive",
-            ProtocolRule::ConvertContainer { .. } => "Each:Protocols._convert_container",
-            ProtocolRule::ReachNested(_) => "Each:Protocols._reach_nested",
-            ProtocolRule::PercentFormat { .. } => "Each:Protocols._percent_format",
-            ProtocolRule::Percent { .. } => "Each:Protocols._percent",
-            ProtocolRule::Finished(_) => "Each:Protocols._finished",
-            ProtocolRule::Await { .. } => "Each:Protocols._await",
-            ProtocolRule::AwaitType { .. } => "Each:Protocols._await_type",
-            ProtocolRule::AwaitedItself { .. } => "Each:Protocols._awaited_itself",
-            ProtocolRule::With { .. } => "Each:Protocols._with",
-            ProtocolRule::Raise(_) => "Each:Protocols._raise",
-            ProtocolRule::Handler(_) => "Each:Protocols._handler",
-        }
-    }
-
     pub(crate) fn each(&self) -> bool {
         !matches!(self, ProtocolRule::Operand { .. })
     }
@@ -352,7 +328,7 @@ fn index_of(id: u32) -> usize {
     id as usize
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn protocol_rule(&mut self, rule: ProtocolRule) -> RuleId {
         self.rule(Rule::Protocol(Box::new(rule)))
     }

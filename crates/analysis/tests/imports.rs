@@ -106,7 +106,7 @@ fn replay(manager: &mut ImportManager, operation: &Value, root: &Path) -> Value 
 }
 
 #[test]
-fn the_import_manager_answers_what_the_oracle_answered_in_each_layout() {
+fn the_import_manager_gives_the_recorded_answers_in_each_layout() {
     let text = std::fs::read_to_string(VECTORS).expect("the import vectors");
     let sessions: Vec<Value> = serde_json::from_str(&text).expect("the import vectors are JSON");
     assert!(!sessions.is_empty());

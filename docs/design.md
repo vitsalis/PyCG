@@ -177,124 +177,120 @@ its own `__iter__` makes one instance per loop.
 # Part 2: Reference
 
 The rules in full, under the five ideas and then by language feature.
-Each rule is followed by its limits. A limit that a test pins names the
-test.
+Each rule is followed by its limits. A limit that a case pins names the
+case, a directory `tests/cases/<family>/<name>/`.
 
-A test of a limit asserts the edge that the analysis keeps although Python
-makes no such call, so that a change which removes the edge, and with it
-real calls of other programs, fails that test.
+The case of a limit expects the edge that the analysis keeps although
+Python makes no such call, so that a change which removes the edge, and
+with it real calls of other programs, fails that case.
 
 ## Pipeline and modules
 
-1. **Module discovery** (`program.py`, `imports.py`). Start from the entry
-   modules and resolve each import against the package root on the file system.
-   Modules inside the root are analysed; every other module is outside code. The
-   package root is `--package`, or else the deepest directory that contains
-   every entry module; module names are relative to it. A module that cannot be
-   read or parsed is analysed as an empty module, and the output reports it as
-   failed; the warnings that Python gives about the analysed code as it parses
-   it (an invalid escape sequence) are not the analysis' concern and are
-   silenced. An import that finds a binary module file under the root (an
-   extension module) gives the outside module of that name. Of several files of
-   one module name, one rule picks the module, for imports and entry points
-   alike, whatever their order: the package, then the module file, then the
-   binaries (`imports._candidates`), then the files that only entry points name
-   (`a.pyw`, a script without a suffix), by path; the output lists the others as
-   shadowed. The stub `x.pyi` beside a module file `x.py` is read for
-   annotations and for the bases of its classes only (see *A module's own
-   stub*); a stub is never a module. The other rules of imports are under
-   *Imports*.
-2. **Scopes** (`scopes.py`). A light pass over each AST decides which scope
-   binds each name, by Python's rules computed from the AST (not from
-   `symtable`, whose tables differ between versions), iteratively, so
-   deeply nested code does not exhaust the Python stack. An annotation
-   without a value (`x: int`) makes a name local but gives it no value, so
-   a class body with only `x: int` has no attribute `x`. It names every scope
-   and marks generator functions. It also records what the builder needs
-   to follow names by definition: the names that other code rebinds, the
-   names that each loop binds on its iterations, and the lazy imports
-   whose names the module never reads.
-3. **Builder** (`builder.py`, `expressions.py`, `flow.py`, `matching.py`,
-   `patterns.py`, `annotations.py`). Walk each module's AST once, in
-   statement order. Emit nodes and constraints, and carry the definitions
-   of the names that it follows (idea 2). The builder never reads a
-   points-to set. It walks constructs that it does not model, so the calls
-   inside them are found; it does not walk code that cannot run. Long
-   chains (`a + b + c + ...`, which nest on the left, and `elif` chains)
-   are walked in a loop, so they do not exhaust the Python stack. Other
-   nesting is bounded: the builder stops before the first top-level
-   statement that nests deeper than `NESTING_MAX` (247) levels, and the
-   module is `partial`. A statement is level 1 and each child one level
-   deeper, except the left operand of a binary operation and the `elif`
-   of an `if`, which are at their parent's level; contexts and operators
-   do not count. 247 is the deepest nesting that the most stack-hungry
-   construct measured still builds from the command line at Python's
-   default recursion limit of 1,000, on CPython 3.14.10: conditional
-   expressions nested in their `else` (`a if b else a if b else ...`),
-   245 of them in an assignment. Of 22 constructs, the others either
-   build deeper (subscripts 329 levels; attributes, method chains,
-   lambdas, unary operators, `not` and `**` about 493) or are stopped
-   earlier by the parser (100 levels of indentation, 200 nested brackets,
-   150 nested f-strings). So every module that builds today at that
-   limit still builds, and where the analysis stops no longer depends on
-   the stack. So that this holds whoever calls PyCG, `Program.analyse`
-   raises the recursion limit during the analysis to the caller's stack
-   depth plus `NESTING_STACK_FRAMES` (1,000, the limit of the
-   measurement) and restores it afterwards. The deepest statement of the micro, macro and scale sets
-   (11,109 modules) is 31 levels.
+The tool is a Cargo workspace of six crates: `pycg-syntax` (reading and
+parsing a file, the scope pass), `pycg-stubs` (the stub data and its
+queries), `pycg-solver` (the worklist), `pycg-analysis` (module discovery,
+the builder and the rules), `pycg-document` (the document) and `pycg`
+(the command line). A module path without a crate name below is a module
+of `pycg_analysis`.
+
+1. **Module discovery** (`program`, `program::imports`). Start from the
+   entry modules and resolve each import against the package root on the
+   file system. Modules inside the root are analysed; every other module
+   is outside code. The package root is `--package`, or else the deepest
+   directory that contains every entry module; module names are relative
+   to it. A module that cannot be read or parsed is analysed as an empty
+   module, and the output reports it as failed; the warnings that Python
+   gives about code as it parses it (an invalid escape sequence) are not
+   the analysis' concern, and the analysis gives none. An import that
+   finds a binary module file under the root (an extension module) gives
+   the outside module of that name. Of several files of one module name,
+   one rule picks the module, for imports and entry points alike, whatever
+   their order: the package, then the module file, then the binaries
+   (`ImportManager::candidates`), then the files that only entry points
+   name (`a.pyw`, a script without a suffix), by path; the output lists the
+   others as shadowed. The stub `x.pyi` beside a module file `x.py` is read
+   for annotations and for the bases of its classes only (see *A module's
+   own stub*); a stub is never a module. The other rules of imports are
+   under *Imports*.
+2. **Scopes** (`pycg_syntax::scopes`). A light pass over each AST decides
+   which scope binds each name, by Python's rules computed from the AST
+   (not from `symtable`, whose tables differ between versions),
+   iteratively, so deeply nested code does not exhaust the stack. An
+   annotation without a value (`x: int`) makes a name local but gives it no
+   value, so a class body with only `x: int` has no attribute `x`. It names
+   every scope and marks generator functions. It also records what the
+   builder needs to follow names by definition: the names that other code
+   rebinds, the names that each loop binds on its iterations, and the lazy
+   imports whose names the module never reads.
+3. **Builder** (`builder` and its modules `statements`, `expressions`,
+   `flow`, `matching`, `narrowing`, `patterns`, `annotations`). Walk each
+   module's AST once, in statement order. Emit nodes and constraints, and
+   carry the definitions of the names that it follows (idea 2). The
+   builder never reads a points-to set. It walks constructs that it does
+   not model, so the calls inside them are found; it does not walk code
+   that cannot run. Long chains (`a + b + c + ...`, which nest on the left,
+   and `elif` chains) are walked in a loop. Other nesting is bounded: the
+   builder stops before the first top-level statement that nests deeper
+   than `NESTING_MAX` (247) levels, and the module is `partial`. A
+   statement is level 1 and each child one level deeper, except the left
+   operand of a binary operation and the `elif` of an `if`, which are at
+   their parent's level; contexts and operators do not count. 247 is the
+   deepest nesting that the most stack-hungry construct measured built in
+   a recursive walk of the AST at Python's default recursion limit of
+   1,000, on CPython 3.14.10: conditional expressions nested in their
+   `else` (`a if b else a if b else ...`), 245 of them in an assignment. Of
+   22 constructs, the others either build deeper (subscripts 329 levels;
+   attributes, method chains, lambdas, unary operators, `not` and `**`
+   about 493) or are stopped earlier by the parser (100 levels of
+   indentation, 200 nested brackets, 150 nested f-strings). Where the
+   analysis stops does not depend on the stack: the parse, the scope pass
+   and the builder of a module run on a stack of their own, sized from the
+   length of its source (`pycg_syntax::parse`). The deepest statement of
+   the micro, macro and scale sets (11,109 modules) is 31 levels.
 4. **Linking**. When all modules are built, make each module a field of its
    package (also the packages of an entry module that no import names,
    without analysing their source, as far as an import resolves them as
    packages: a module `ns.py` wins over a namespace directory `ns/`, so
    the entry `ns/a/b.py` is then not under `ns`) and copy the exported
    names of star-imported modules, transitively (see *Imports*).
-5. **Solver** (`solver.py`, `semantics.py` and its parts). Propagate objects
+5. **Solver** (`pycg-solver`, `engine` and its parts). Propagate objects
    along the constraints with a worklist until nothing changes. Then run
    the fixpoint steps (see Part 3), which add what the solve cannot find
    alone, and solve again. Calls are resolved and call edges emitted here.
-6. **Output** (`pycg.py`, `formats/document.py`).
-   `CallGraphGenerator.document()` builds the document of
-   `docs/format.md`. Every part is sorted, so the document does not depend
-   on the order of the analysis. `output()` is its classic call graph
-   (`pycg.formats.edges`). `output_points_to()` is the assignment graph,
-   for tests only: each variable, field and return value with the sorted
-   names of the objects that it may hold; a saturated node holds none that
-   it can name.
+6. **Output** (`pycg-document`). `pycg_document::build` builds the
+   document of `docs/format.md`. Every part is sorted, so the document
+   does not depend on the order of the analysis. `docs/format.md` derives
+   the classic call graph from it.
 
-   A built-in or frozen module of the running Python wins over any file of
-   its name under the root, and so does a frozen submodule of a package that
-   is not frozen: `importlib` is not frozen but `importlib.util` is, so
-   `import importlib.util` runs a local `importlib/__init__.py` and then
-   imports the frozen `importlib.util`. Submodules that are not frozen stay
-   local, and a relative import of a frozen name (`from . import util` in
-   that package) is local too. An import that fails still adds to the import
-   graph the packages and modules that Python ran before it failed: for
-   `import pkg.missing.sub`, Python runs `pkg/__init__.py` first, so `pkg`
-   is analysed.
+   A module that is built-in or frozen in every supported Python (see
+   *Imports*) wins over any file of its name under the root, and so does a
+   frozen submodule of a package that is not frozen: `importlib` is not
+   frozen but `importlib.util` is, so `import importlib.util` runs a local
+   `importlib/__init__.py` and then imports the frozen `importlib.util`.
+   Submodules that are not frozen stay local, and a relative import of a
+   frozen name (`from . import util` in that package) is local too. An
+   import that fails still adds to the import graph the packages and
+   modules that Python ran before it failed: for `import pkg.missing.sub`,
+   Python runs `pkg/__init__.py` first, so `pkg` is analysed.
 
 The AST is never walked again after the builder, and there is no cap on
-iterations.
+iterations. A scope does not refer to itself (its `owner` and `caller` are
+derived from its parents), so a module's tree and scopes go as soon as its
+build ends; the nodes, objects and constraints that the builder and the
+solver make live until the analysis ends.
 
-The analysis frees what it no longer needs by reference counting alone, so
-it runs with Python's cyclic garbage collector off (`Program.analyse`) and
-leaves the collector as it found it. A scope does not refer to itself (its
-`owner` and `caller` are derived from its parents), so a module's tree and
-scopes go as soon as its build ends; the nodes, objects and constraints
-that the builder and the solver make live until the analysis ends. The
-collector would only scan them again and again: on sympy and scipy it took
-a third and a fifth of the run and found next to no garbage.
-
-`semantics.py` holds `Analysis`, the program-wide state and the rules of
-loads, stores and calls. Its parts are modules of their own: attribute
-loads, stores and descriptors (`attributes.py`), class hierarchies,
-lookups and metaclasses (`hierarchy.py`), argument binding
-(`arguments.py`), containers, constants and iteration (`containers.py`),
-special methods of statements and operators (`protocols.py`), the rules of
-modelled builtins (`builtin_rules.py`), namespaces read by reflection
-(`reflection.py`), outside values typed from the stubs
-(`outside.py`, `stubs.py`), and the reading of annotations
-(`annotations.py`). What the analysis knows of the builtins beyond the
-stubs is one table, `builtin_models.py`.
+`engine` holds `State`, the program-wide state, and the rules of loads,
+stores and calls. Its parts are modules of their own: attribute loads,
+stores and descriptors (`engine::attributes`), class hierarchies, lookups
+and metaclasses (`engine::hierarchy`), argument binding
+(`engine::arguments`), containers, constants and iteration
+(`engine::containers`), special methods of statements and operators
+(`engine::protocols`), the rules of modelled builtins
+(`engine::builtin_rules`), namespaces read by reflection
+(`engine::reflection`), outside values typed from the stubs
+(`engine::outside` and `pycg-stubs`), and the reading of annotations
+(`engine::annotations`). What the analysis knows of the builtins beyond
+the stubs is one module of tables, `models`.
 
 ## The assignment graph (idea 1)
 
@@ -350,7 +346,7 @@ and computes its name when asked.
 - A name that the module does not bind and that is a builtin (a name of
   the builtins stub, in any version and on any platform, but its private
   helpers and the classes that exist only in stubs, so that the result does
-  not depend on the interpreter that runs the analysis; or a name that the
+  not depend on a version or a platform; or a name that the
   interpreter gives every module and the stubs do not list, `__name__`,
   `__doc__`, `__spec__`, `__loader__`, `__package__`, `__debug__`) reads
   the module field (a star import may set it) and what `builtins.name`
@@ -417,7 +413,7 @@ A call acts on each object of its callee:
 - `Instance`: look up `__call__` and call it.
 - `Wrapper` of a static method: call the function it wraps.
 - `BuiltinMethod` and modelled builtins: emit the edge to the builtin's
-  name and apply its rule from `builtin_models.py`. The arguments bind to
+  name and apply its rule from `models`. The arguments bind to
   the signature that the table declares, as for a function, so unpacked
   and keyword arguments reach the rule.
 - `Typed`: call the `__call__` of its class (`functools.partial.__call__`).
@@ -510,8 +506,8 @@ whose stub has the form `(x: T) -> T` (`typing.final`,
 decorates. Four library callables return their argument where their stubs
 do not say so: `functools.wraps`, `functools.update_wrapper`,
 `dataclasses.dataclass` and `typing.cast` (whose stub gives the declared
-type, not the value). `builtin_models.py` lists them, and they are
-modelled so whether they are analysed or outside code. The decorator that
+type, not the value). `RETURNS_ARGUMENT` of `models` lists them, and they
+are modelled so whether they are analysed or outside code. The decorator that
 one returns is named as it runs (`dataclasses.dataclass.wrap` for
 `@dataclass(frozen=True)`, `functools.partial.__call__` for
 `@functools.wraps(f)`). The model replaces the body of an analysed one,
@@ -520,7 +516,7 @@ is no outside callee.
 
 Three decorators of the standard library return a closure that CPython
 defines inside them, where their stubs give only a callable type
-(`builtin_models.py`, `CLOSURES`): `contextlib.contextmanager` and
+(`models`, `CLOSURES`): `contextlib.contextmanager` and
 `contextlib.asynccontextmanager` return `helper`, which makes a
 `_GeneratorContextManager` or `_AsyncGeneratorContextManager`, and
 `functools.lru_cache` given an int or None returns `decorating_function`,
@@ -545,14 +541,14 @@ values*).
   (`cache = lru_cache(16)`, then `cache(f)`) does not hold `f`; reading it
   there would also apply the closure that a bare `@lru_cache` leaves on the
   decorated name (below) to each call's argument
-  (`test_limit_a_stored_lru_cache_decorator_does_not_wrap_what_it_gets`).
+  (`limit_a_stored_lru_cache_decorator_does_not_wrap_what_it_gets`).
 
 - Limit: the overloads of `lru_cache` are not selected by the class of the
   argument (see *Typed outside values*), and both fit `@lru_cache` and
   `@lru_cache(maxsize=32)`. So a function decorated by a bare `@lru_cache`
   also holds `decorating_function`, which its calls name, and the
   application of `lru_cache(maxsize=32)` also calls the wrapper
-  (`test_limit_lru_cache_is_not_selected_by_the_class_of_its_argument`).
+  (`limit_lru_cache_is_not_selected_by_the_class_of_its_argument`).
 - Limit: the context manager is not run, only made. The site that calls
   the decorated function gets the edges of the closure and of the
   generator function (a generator function is a callee of the site that
@@ -561,17 +557,17 @@ values*).
   through the context manager (a typed value drops its type argument), so
   `with managed() as value` gives `value` an unknown value, without what
   the generator yields
-  (`test_limit_a_context_manager_is_made_where_it_is_called_and_yields_nothing`).
+  (`limit_a_context_manager_is_made_where_it_is_called_and_yields_nothing`).
 - Limit: the decorated name holds the function whatever it is. Stacked over
   a class method (`@contextmanager` then `@classmethod`), the helper calls
   an object that is not callable and Python raises `TypeError`; the
   analysis still calls the function and gives the context manager
-  (`test_limit_a_context_manager_of_a_class_method_object`).
+  (`limit_a_context_manager_of_a_class_method_object`).
 - Limit: the closure adds values to the decorated name (the wrapper, and
   the unknown result of the overload that does not apply), so a name can
   reach the cap where it did not before (see *The solver*): at a cap of 2,
   `@lru_cache(maxsize=32) def f` makes `f()` lose its edge to `f`
-  (`test_limit_at_a_low_cap_the_closure_values_saturate_the_decorated_name`).
+  (`limit_at_a_low_cap_the_closure_values_saturate_the_decorated_name`).
   At the default cap of 5,000 no measured package lost an edge.
 
 A function that returns a parameter, where the parameter's own definition
@@ -597,7 +593,7 @@ positions are not known). A call with too few arguments gets nothing.
 - Limit: a negative index (`args[-1]`) depends on the number of arguments,
   and `kwargs["key"]` reads a dict that the function or its callees may
   change: neither passes through, so each call gets what every call binds
-  there (`test_limit_a_negative_index_or_kwargs_merges_the_results_of_every_call`).
+  there (`limit_a_negative_index_or_kwargs_merges_the_results_of_every_call`).
 - Limit: a parameter in an inner `and`/`or` passes through even where the
   outer one discards that operand (`return (candidate and enabled) or
   default` with `enabled = False` passes `candidate` too).
@@ -614,8 +610,8 @@ types, and the dotted path of an outside name. A re-exported function
 keeps one name. The nodes of the call graph are the analysed modules,
 every function and lambda they define, and every callee; classes are not
 nodes of it. Constants, and the fields of containers that they select,
-are named with `ascii()`, so the assignment graph does not depend on the
-Unicode database of the running Python. An int of more than 640 digits is
+are named with `ascii()`, so the assignment graph does not depend on a
+Unicode database. An int of more than 640 digits is
 named in hexadecimal: Python may be set to refuse a longer decimal
 conversion (`sys.set_int_max_str_digits`), and the names do not depend on
 that setting.
@@ -649,7 +645,7 @@ an `AbstractEventLoop` gives a future, whose `cancel` is an edge), and
 
 ### The solver
 
-A worklist with difference propagation (`solver.py`), in rounds: each
+A worklist with difference propagation (`pycg-solver`), in rounds: each
 round propagates along the subset edges to a fixpoint, then applies the
 constraints of every node whose set grew to its new objects.
 
@@ -679,7 +675,7 @@ the rest in later rounds. The objects that the constraints add are
 collected and reach each node as one set.
 
 **Saturation.** A node that would hold more objects than the cap (5,000
-by default, `DEFAULT_CAP`; see *Bounds*), or that receives the saturated
+by default, `CAP_DEFAULT_OBJECTS`; see *Bounds*), or that receives the saturated
 value,
 holds the saturated value only (Wimmer et al., PLDI 2024, saturate type
 flows in the same way). Its successors receive it; what its constraints did
@@ -687,7 +683,7 @@ with the objects of earlier rounds stays. The saturated value stands for
 the objects that the analysis no longer tracks there. It is not an outside
 value, and no rule ever sees it: when a node saturates, each of its
 constraints gives the saturated value to the nodes where it puts what it
-finds (`Constraint.results`: the result of a call, a load, a subscript, an
+finds (`State::results`: the result of a call, a load, a subscript, an
 iteration, an `await`, a `with`, an operator, an `except`, an annotation)
 and does nothing else. So the saturated value itself causes no edge, no object and no
 constraint, and no rule asks what it is (a class? a constant key? a type?)
@@ -700,7 +696,7 @@ to take a branch for it. In particular:
   truth test, a format or a hash of it does nothing.
 - A class is unknown when the set of one of its base expressions or of
   its metaclass (written in `metaclass=` or inferred) holds the saturated
-  value or an unknown class (`Hierarchy.unknown_classes`). Nothing about it
+  value or an unknown class (`State::unknown_classes`). Nothing about it
   is known, its own members included: the class and its instances are, to
   every rule, the saturated value (`opaque`, tested where the saturated
   value is), every lookup on it gives the saturated value, and no fixpoint
@@ -715,13 +711,13 @@ to take a branch for it. In particular:
   the class only.
 - The dispatch never hands a rule the saturated value, an unknown class
   or an instance of one: neither as the object that a constraint applies
-  to, nor as an object that the constraint holds (`Constraint.captured`:
-  the arguments of an `Each`, the receiver of a binding or a delivery, the
+  to, nor as an object that the constraint holds (`Rule::captured`:
+  the arguments of a rule, the receiver of a binding or a delivery, the
   class whose bases it collects), nor as the method of a `__getattr__`
   that a lookup gave earlier (a `Fallback`); a rule that comes back to an
   object it remembered (the instances that a pattern of attribute names
-  reached, the keys stored in a dict) goes through the same test
-  (`Solver.revisit`); a rule that waits for the class of an instance runs
+  reached, the keys stored in a dict) goes through the same test;
+  a rule that waits for the class of an instance runs
   before the class becomes unknown (see *Rules that wait*); and a
   hierarchy update skips an unknown class. What
   earlier rounds derived from an object before its class became unknown
@@ -814,11 +810,13 @@ not called, `name` holds `"a"` only, and the analysis reports
 `main -> C.a`. One case is avoided: the functions that reached a
 saturated node themselves (bound, wrapped, or as methods of a class or
 instance that did) may be what a call of the saturated value runs, so they
-count as called (`Solver.absorbed`). Without the steps at a fixpoint, every
+count as called (`Solver::absorbed`). Without the steps at a fixpoint, every
 rule only adds and none sees the saturated value, so a cap only takes edges
-away; `tests/test_saturation.py` checks that for each protocol and every
-case of the micro-benchmark, and pins the edges that the steps add for the
-programs of the review.
+away; the property `a_small_cap_adds_no_edge_to_a_micro_case`
+(`crates/pycg/tests/properties/`) checks that on every case of the
+micro-benchmark, and the cases of `tests/cases/saturation/` pin it for
+each protocol and pin the edges that the steps add for the programs of the
+review.
 
 A saturated node costs one application of each of its constraints, where a
 hub of generic code (a parameter that every strategy of a library reaches,
@@ -830,10 +828,10 @@ A hub is generic code that calls every callable with every argument, such as
 `func(*args, **kwds)` in `contextlib`: without context, each callable gets
 each argument, so a solver that keeps a private copy of a set per node and
 moves objects one at a time does work quadratic in the size of the hub.
-`tests/test_scaling.py` measures the work of the solver without a clock, as
-the objects written into sets, the constraint applications and the subset
-edges that `Solver.work` counts, and checks that it grows about linearly
-with the size of a hub.
+`crates/pycg/tests/scaling.rs` measures the work of the solver without a
+clock, as the objects written into sets, the constraint applications and
+the subset edges that `Solver::work` counts, and checks that it grows about
+linearly with the size of a hub.
 
 Two mechanisms keep the cost close to the size of the result:
 
@@ -845,13 +843,13 @@ Two mechanisms keep the cost close to the size of the result:
   receive the same delta, they share one union. The table is rebuilt from
   the sets that nodes hold when the sets created since the last rebuild
   hold more objects than those that survived it, and at the earliest when
-  they hold 2^20 objects (`_SWEEP_NEW_OBJECTS_MIN`). Many nodes hold and
+  they hold 2^20 objects (`SWEEP_NEW_OBJECTS_MIN`). Many nodes hold and
   receive the same sets, so the order of the objects of a set is kept with
   it; and many constraints that act on a few kinds of objects
-  (`Constraint.kinds`) are applied to the same large sets (each lookup in
+  (`Rule::kinds`) are applied to the same large sets (each lookup in
   a dict reads the keys of the dict for the instances among them), so the
   objects of those kinds are selected once and kept, for a set of at
-  least 32 objects (`_KIND_SELECTION_OBJECTS_MIN`): for a smaller one,
+  least 32 objects (`KIND_SELECTION_OBJECTS_MIN`): for a smaller one,
   looking the selection up costs more than the constraint's own test of
   each object.
 - **Cycle collapsing.** The nodes of a cycle of subset edges hold the same
@@ -874,7 +872,7 @@ Two mechanisms keep the cost close to the size of the result:
   search per fixpoint let the objects that wait in a known cycle go round
   it, copied to every node; counting only the nodes of a search let it
   walk a dense part of the graph after every few processed nodes
-  (`test_scaling.py`, `test_solver.py`). When nodes merge, each one's
+  (`crates/pycg/tests/scaling.rs`). When nodes merge, each one's
   successors outside the cycle catch up on the objects that the others
   saw, and its constraints in the next round, so every constraint still
   sees every object once. An edge that a constraint adds between two
@@ -885,12 +883,11 @@ and never gets another; edges and constraints on it act at once and are
 not kept. Its set stays in the table of sets. A program has many of them
 (pygments: 116k), so a constant keeps only its set. A program has
 millions of nodes with a successor, and most have one: a node keeps its
-one successor itself, and a dict (successor to whether the edge started a
-search for cycles) only for more. It has millions of `Each` constraints
-too: of a bound method one keeps the function and the object, not the
-method that Python makes for each use, and of one result node the node,
-not a tuple. The solver counts its work in measures that do not depend on
-the machine (`Solver.work`): objects written into new sets (a set that is
+one successor itself, and a map (successor to whether the edge started a
+search for cycles) only for more. It has millions of rules too: a rule is
+a variant of `Rule` that keeps its arguments as ids. The solver counts its
+work in measures that do not depend on
+the machine (`Solver::work`): objects written into new sets (a set that is
 reused copies nothing), constraint applications, subset edges, nodes
 processed, nodes merged, and nodes and edges walked by searches for
 cycles. A chain of constraints that
@@ -911,7 +908,7 @@ pattern) copies every dict of its source node into every dict of its target,
 fields times sources times targets: on cerberus one site pairs 980 dicts
 with 980 (162 million field copies). So from the second dict that reaches a
 source node, the node's dicts are copied once into an intermediate dict that
-no node holds (`_DictHub`), and it once into every target: fields times
+no node holds (`DictHub`), and it once into every target: fields times
 sources plus targets. Each field of a target gets the union of that field
 over the source dicts either way, and every source dict meets every target,
 so the result is the same; the `__hash__` and key-comparison calls of each
@@ -929,7 +926,7 @@ every container of their base node at every site: containers times keys
 times sites. On scikit-learn hundreds of sites read about 2,900 containers
 that reach their nodes together, and on numpy hundreds of sites read the
 same 650. So the containers that reach a site's node in one step of the
-solve are read as a group (`_ContainerGroup`, one per set of containers,
+solve are read as a group (`ContainerGroup`, one per set of containers,
 whichever sites receive it): the group reads each key once into a node of
 its own, which the site's result node then gets. A key's node holds the
 union of what `read_key` gives for each container of the group, which is
@@ -938,17 +935,16 @@ same; a node only holds more objects past the cap, and the result node
 holds at least as many, so it saturates whenever the group's node does. A
 lone container is still read directly.
 
-A program has millions of `Each` constraints and of nodes with a successor.
-An `Each` keeps its function and the function's owner, not a bound method
-(64 bytes), and its one result node itself, not a tuple of one (56 bytes).
-Most nodes with a successor have exactly one, and a node keeps that one
-successor itself, without a dict. The records that the analysis keeps for
+A program has millions of rules and of nodes with a successor. A rule is a
+variant of `Rule` with its arguments as ids. Most nodes with a successor
+have exactly one, and a node keeps that one successor itself, without a
+map. The records that the analysis keeps for
 each pair of an object and a site (the parameters that a call supplies, the
 set of instances that the calls of a class make, an attached special-method
 call) are shared between pairs where they hold nothing of the pair: on large
 programs these records are most of the memory, millions of bindings and
 implicit calls. An implicit special-method call keeps the objects that it
-was attached for (`_dunder_owners`): the first one itself, and a set from
+was attached for (`dunder_owners`): the first one itself, and a set from
 the second one on, which answers whether an object is new as the set
 would.
 
@@ -968,7 +964,7 @@ signature that it fits, and no rule reads most of those parameters (on sphinx,
 1.2 million bindings, of whose parameters the rules read 12 %). For a plain
 call to a plain signature (no `*` or `**` in either, no argument passed twice),
 where a parameter has one source, the node of a parameter is made when a rule
-first reads it, in the state that it would have had (`Solver.follower`). The
+first reads it, in the state that it would have had (`Solver::follower`). The
 rules run only between propagations, and a propagation ends at its fixpoint: a
 node bound in an earlier phase holds what its source holds (the same set, or
 the saturated value with it), and a node bound in the same phase still waits
@@ -989,7 +985,7 @@ solver numbers objects in the order in which their nodes are made.
 
 A name that only its own scope's statements bind gets the values of the
 definitions that reach each read, not every value it ever holds
-(`flow.py`; static single assignment for structured code). The builder
+(`builder::flow`; static single assignment for structured code). The builder
 walks the statements of a scope in order and carries a state: for each
 name, the node of the value of the definitions that reach the point, and
 whether the name may be unbound there. A definition stores the node of the
@@ -1130,7 +1126,7 @@ truth of a literal or of a tuple display; that of another name read in
 order; and that of `not`, `and`, `or` and conditional expressions of
 those. A list, set or dict display has none, because the container may
 change; a decorated definition, a loop head and the value of a call have
-none either. A truth is two bits (`TRUE`, `FALSE` in `flow.py`): the
+none either. A truth is two bits (`TRUE`, `FALSE` in `builder::flow`): the
 value may be true, it may be false; a definition with no value has
 neither, and one whose truth is not known has both. Definitions that meet
 join their truths. `a or b` gives `a`
@@ -1197,10 +1193,10 @@ C): return` (or `raise`, `break`, `continue`) gives the test to the
 statements after it.
 
 The value that the test gives is a definition of `x` that only the reads in
-the branch see. The flow state keeps it beside the definitions
-(`State.narrowed`), for as long as the definition that the test read still
-reaches the read. Joins, loop heads, jumps, handlers, the end of a class
-body and the variable get the definitions only. So a read after the
+the branch see. The flow state keeps it beside the definitions (`narrowed`
+of a `builder::flow` state), for as long as the definition that the test
+read still reaches the read. Joins, loop heads, jumps, handlers, the end
+of a class body and the variable get the definitions only. So a read after the
 branch, or after a statement in the branch that rebinds `x`, sees every
 value of `x` and nothing that the test added; so does a function or
 generator expression nested in the branch, which reads the variable. A
@@ -1208,7 +1204,7 @@ list, set or dict comprehension in the branch, which runs in statement
 order, sees the branch's value.
 
 What the analysis knows of the class of a value decides whether it may
-pass (`narrowing.py`):
+pass (`engine::narrowing`):
 
 | Value | Its class |
 |---|---|
@@ -1224,7 +1220,7 @@ pass (`narrowing.py`):
 generator or coroutine is exactly of its class from where the analysed
 code makes it. It stops being exact where another object may stand for
 it, and from there on the analysis passes its one alias, which is not
-exact (`Containers.inexact`): the same elements (the same nodes),
+exact (`State::inexact_object`): the same elements (the same nodes),
 function or literal value, and the same name. Three rules treat it
 otherwise: class tests; the rules that make or change a pattern, which
 give any value for it (see *Computed attribute names*); and a pattern
@@ -1244,11 +1240,11 @@ value:
   the result of `+` and `*` never is (the right operand may be a subclass
   whose `__radd__` runs first);
 - the class taken from a value that is not exact (`x.__class__`,
-  `Outside._class_object`): it names its kind's class for the methods but
+  `State::class_object`): it names its kind's class for the methods but
   is marked inexact, so as a tested class it lets every value pass,
   `issubclass` does not know it, and a constructor called through it
   makes a container that is not exact. As a base or a metaclass it is
-  the class itself (`Analysis.same_class`): C3 sees one class.
+  the class itself (`State::same_class`): C3 sees one class.
 
 `iter()` of an exact collection is another object of a class of its own
 (see *Iteration*): exactly `list_iterator` and so on, a builtin class below
@@ -1280,7 +1276,7 @@ class of the stubs exactly, anything else not known.
   because a metaclass's `__instancecheck__` and `__subclasscheck__` may
   answer anything (an ABC answers for the classes registered with it and
   by `__subclasshook__`, a runtime-checkable protocol by the members of
-  the value). Such a class is (`Hierarchy.nominal_outside`):
+  the value). Such a class is (`State::nominal_outside`):
   - a class of the stubs of `builtins`, or `Generic`;
   - a class of the stubs whose stub MRO has no class that declares a
     metaclass other than `type` (`IntEnum`: `int`, then `Enum` of
@@ -1307,7 +1303,7 @@ class of the stubs exactly, anything else not known.
 The decisions only let values through, and each looks at what only grows:
 the values, the classes, and the MROs and metaclasses of an analysed
 class, for which a decision waits as a lookup does and is redone when they
-grow (`Hierarchy.relation`); it asks whether some hierarchy allows the
+grow (`State::may_relate`); it asks whether some hierarchy allows the
 value, which only turns from no to yes. An empty class expression is
 decided at a fixpoint, and only adds (see *The fixpoint steps*). So the
 result does not depend on the order of the solve.
@@ -1323,11 +1319,11 @@ that a decision asks of a hierarchy is one node per (class, tested class)
 that every test shares. Each node of a class expression or of a position of
 a tuple of classes is subscribed at most once per test, so a tuple that
 contains itself, or tuples that share their elements, end
-(`tests/test_scaling.py`, `tests/test_termination.py`). Once every value
-passes a position, a value that is not a class can add nothing there, so
-it stops at once; a class goes on, since its metaclass and its hierarchy
-may saturate the result. A hub of values at a position of many tests ends
-there (hypothesis: 5.8 of 7.2 million values).
+(`crates/pycg/tests/scaling.rs`, `crates/pycg/tests/termination/`). Once
+every value passes a position, a value that is not a class can add nothing
+there, so it stops at once; a class goes on, since its metaclass and its
+hierarchy may saturate the result. A hub of values at a position of many
+tests ends there (hypothesis: 5.8 of 7.2 million values).
 
 - Limit: only the builtin `isinstance` and `issubclass`, with a name as the
   first argument and, as the second, a name, an attribute path or a tuple
@@ -1363,7 +1359,7 @@ there (hypothesis: 5.8 of 7.2 million values).
   default interpreter, where asserts run. Under `python -O` an assert does
   not run, so the statements after `assert isinstance(x, C)` also run with
   values of `x` that are not instances of `C`, and the analysis misses the
-  calls on them (`test_limit_an_assert_narrows_as_if_it_always_runs`). On
+  calls on them (`limit_an_assert_narrows_as_if_it_always_runs`). On
   the 30 benchmark packages this misses 4 edges, all in h11, whose ground
   truth also counts runs under `-O`: `normalize_and_validate` and
   `get_comma_header` call `str.lower` and `str.split`.
@@ -1391,7 +1387,7 @@ function defined there is not a node), and its imports import nothing.
   there. This is decided while building, so only where the callee is
   known from the syntax: a name whose one binding in its scope is a `def`
   without decorators outside a class body
-  (`ModuleScopes.function_definition`), and a call without `*` or `**`
+  (`ModuleScopes::definition`), and a call without `*` or `**`
   arguments (`warn(0, 13, msg)` for `def warn(major, minor, cause,
   fix)`).
 
@@ -1412,12 +1408,12 @@ function defined there is not a node), and its imports import nothing.
   as t`), so the block under `if TYPE_CHECKING:` cannot run. A function
   reads a module name at times that the module's statements do not decide,
   but a name that every binding statement of the module binds to the same
-  import (see `ModuleScopes.imported`) holds that import whenever it is
+  import (see `ModuleScopes::imported`) holds that import whenever it is
   bound, so this holds in functions too. The block's imports import
   nothing and bind nothing at run time; the builder records what they
-  would bind in `ModuleBuilder.type_only_names` (from the block of a test
-  that is `TYPE_CHECKING`, or the `else` block of `not TYPE_CHECKING`), for
-  the reading of annotations and nothing else.
+  would bind in the `type_only_names` of the module builder (from the
+  block of a test that is `TYPE_CHECKING`, or the `else` block of `not
+  TYPE_CHECKING`), for the reading of annotations and nothing else.
 - A module or a class body binds the names that it may bind at its end
   (and a module those that its functions bind through `global`): a name
   defined only under `if TYPE_CHECKING:` (a stub for a type checker), or
@@ -1469,7 +1465,7 @@ not be bound yet, the module's and the builtin's.
   Python, and an `Enum` member wraps its value; a load (`T.field()`) and
   the class namespace (`T.__dict__["field"]()`) both call the default
   value, where Python raises `TypeError`
-  (`test_limit_transformed_class_fields_are_the_values_as_a_load_gives`).
+  (`limit_transformed_class_fields_are_the_values_as_a_load_gives`).
 
 ### In the assignment graph
 
@@ -1480,16 +1476,16 @@ name, fed by the parameter, so the output shows the union under one name.
 Join and loop-head nodes have no name. A class field shows what reaches the
 end of the class body.
 
-For the other parts of the builder: a construct binds a name with `_bind`
-(None for an untracked value) and reads it with `_load_name`; a new
-branching construct forks with `Flow.branch` and joins with `Flow.merge`.
+For the other parts of the builder: a construct binds a name with `bind`
+(None for an untracked value) and reads it with `load_name`; a new
+branching construct forks with `Flow::branch` and joins with `Flow::merge`.
 
 ## Outside code (idea 3)
 
 When the stubs have the top-level module of an outside name (the builtins,
 the standard library, and the third-party libraries that typeshed has
 stubs for), what the analysis knows about it comes from them
-(`outside.py`, *Typed outside values*). Code without stubs (other
+(`engine::outside`, *Typed outside values*). Code without stubs (other
 third-party packages, missing modules) keeps the path names of *External
 names*. The analysed package wins: a module under the package root is
 analysed and never read from a stub, also when a stub has its name (a
@@ -1509,16 +1505,17 @@ tool that is not installed and uses the standard library only, reads the stubs
 of one pinned typeshed commit with `ast`, importing and executing none: the
 standard library (`stdlib/`) and every third-party distribution (`stubs/`, all
 of them: 201 at the pinned commit). It writes one JSON file per top-level module
-into `pycg/analysis/stub_data/`, those of the distributions into its
+into `crates/stubs/stub_data/`, those of the distributions into its
 `third_party/` directory, with the commit, each distribution's version and
-typeshed's licence (Apache-2.0). `pycg/analysis/stubs.py` reads a file when the
-analysis first asks for one of its modules, once per process (the format is
-under *Format of the stub data*); a program that imports no third-party module
-reads no third-party data. The rules ask the same questions of the data (a
-module, a definition, a member of a class) at every object and site, and the
-data does not change, so `Stubs` finds each answer once and shares it: a caller
-does not change it. Nothing is imported, and the data depends neither on the
-running Python nor on what is installed where the tool runs.
+typeshed's licence (Apache-2.0). `pycg-stubs` embeds the files in the binary
+and decodes one when the analysis first asks for one of its modules, once
+per process (the format is under *Format of the stub data*); a program that
+imports no third-party module decodes no third-party data. The rules ask the
+same questions of the data (a module, a definition, a member of a class) at
+every object and site, and the data does not change, so `Stubs` finds each
+answer once and shares it: a caller does not change it. Nothing is
+imported, and the data does not depend on what is installed where the tool
+runs.
 
 Which stub gives a module:
 
@@ -1649,7 +1646,7 @@ One fact of Python corrects the data: the two mixin methods of
 `AsyncIterator.__aiter__`, return the receiver, where typeshed declares a
 new `Iterator[T]` or `AsyncIterator[T]`; `Generator.__iter__` too, which
 Python inherits from `Iterator` and typeshed restates as `Generator[Y, S,
-R]`. `stubs.py` reads their result as `Self` (`RETURNS_SELF`), so a `for`
+R]`. `pycg-stubs` reads their result as `Self` (`RETURNS_SELF`), so a `for`
 over an instance of a class that inherits `__iter__` from `Iterator` calls
 the class's `__next__`, and an `async for` the `__anext__` of a class that
 inherits `__aiter__` from `AsyncIterator`. The other mixin methods that
@@ -1728,7 +1725,7 @@ or a list:
 - **Standard streams.** `sys.stdout`, `sys.stderr` and `sys.stdin` are
   `io.TextIOWrapper` objects, which the interpreter makes at start-up; the
   stubs type them as the abstract `TextIO`, whose methods give no edge
-  (`builtin_models.py`, `VARIABLE_TYPES`). So `sys.stdout.write(s)`, also
+  (`models`, `VARIABLE_TYPES`). So `sys.stdout.write(s)`, also
   through a parameter whose default is `sys.stdout`, calls
   `io.TextIOWrapper.write`.
   - Limit: a program that replaces a stream (`sys.stdout = StringIO()`,
@@ -1738,7 +1735,7 @@ or a list:
 - **Functions declared as variables.** Two stub variables of callable
   types hold a known function in CPython: `timeit.default_timer` is
   `time.perf_counter`, and `shutil.rmtree` is a function that the stubs
-  type as the protocol `_RmtreeType` (`builtin_models.py`,
+  type as the protocol `_RmtreeType` (`models`,
   `VARIABLE_FUNCTIONS`). A load of either gives that function, so a call
   names it.
   - Limit: the other callable variables of the stubs (`sys.excepthook`,
@@ -1747,7 +1744,7 @@ or a list:
 - **Foreign functions.** `ctypes.CDLL.__getattr__` and `__getitem__`
   return an instance of the class `_FuncPtr` that `CDLL.__init__` defines
   for the library, where the stubs give the stub-only `_NamedFuncPointer`
-  (`builtin_models.py`, `STUB_RESULTS`). A name that a `CDLL` lacks, and a
+  (`models`, `STUB_RESULTS`). A name that a `CDLL` lacks, and a
   subscript of one, give a typed value of `_ctypes.CFuncPtr` named after
   that definition site, `ctypes.CDLL.__init__._FuncPtr`
   (`CONCRETE_CLASSES`), so `lib.free(p)` calls
@@ -1755,7 +1752,7 @@ or a list:
   - Limit: the stub `__getattr__` of other classes is not read, so a name
     that they give that way gives nothing: `ctypes.cdll.libc` (a
     `LibraryLoader`), the methods of `xmlrpc.client.ServerProxy`
-    (`test_limit_a_stub_getattr_of_another_class_gives_nothing`). Reading
+    (`limit_a_stub_getattr_of_another_class_gives_nothing`). Reading
     every stub `__getattr__` adds 83% to the time of hypothesis.
   - Limit: the `restype` that a program stores on a foreign function is
     not read: a call gives what the stub of `__call__` gives.
@@ -1768,7 +1765,7 @@ or a list:
   is decorated with `functools.lru_cache`, so its module attribute is an
   `_lru_cache_wrapper`; the stubs describe the plain function, as it is on
   3.10. As every Python version counts, a call of it names both the
-  function and the wrapper's `__call__` (`builtin_models.py`,
+  function and the wrapper's `__call__` (`models`,
   `CACHED_FUNCTIONS`; the only public function of the standard library
   that 3.12 to 3.15 decorate so).
   - Limit: the analysis does not read a package's minimum Python
@@ -1777,7 +1774,7 @@ or a list:
 - **Opened files.** `open`, `io.open`, `os.fdopen` and `pathlib.Path.open`
   give the class that `io.open` makes for their mode and buffering, where
   the stubs give one overload per kind of mode (their `Literal` modes
-  reduce to `str` in the data; `builtin_models.py`, `opened_class`): a
+  reduce to `str` in the data; `models`, `opened_class`): a
   text mode, or none, gives `io.TextIOWrapper`; a binary mode gives
   `io.FileIO` with `buffering=0`, else `io.BufferedRandom` with `+`,
   `io.BufferedReader` for `r`, `io.BufferedWriter` for `w`, `a` and `x`.
@@ -1893,7 +1890,7 @@ Limits:
   the standard streams, would find 0 / 1 / 12 missed edges on the
   macro-benchmark's batches 1, 2 and 3 (counted by reading), but none of its entries is a class that CPython
   always makes, so it is not built
-  (`test_limit_a_result_whose_class_python_chooses_at_run_time_keeps_its_stub_type`).
+  (`limit_a_result_whose_class_python_chooses_at_run_time_keeps_its_stub_type`).
 - A typed value drops its type arguments, so `Match[str]` is `Match`, and
   `map()` and `zip()` give no elements. A future that outside code returns
   (`Future[T]`) is a typed value without its type argument, so awaiting it
@@ -1974,7 +1971,7 @@ instance from the caller, with no arguments
 "Callbacks"); these calls are implicit. Classes are not instantiated. All
 calls with one origin share one call back, and each passes its arguments
 to it. `isinstance(f, C)` and `list.append(f)` call nothing. The builtins
-with a hand rule (`builtin_models.py`) decide for themselves, and so do
+with a hand rule (`models`) decide for themselves, and so do
 the builtins that compare, which call their key on their items
 (`sorted(xs, key=f)`, `min`, `max`, `list.sort`; see *Methods that
 builtins call on their arguments*). One callable of `collections` is
@@ -1983,7 +1980,7 @@ containers of `collections`*).
 
 The second exception is the replacement of `re.sub` and `re.subn`, and of
 the methods `sub` and `subn` of `re.Pattern` (`CALLS_BACK` in
-`builtin_models.py`). Like the builtins, they are C code with a
+`models`). Like the builtins, they are C code with a
 documented call: a callable replacement is called with each match. So a
 function, bound method or callable instance that the call binds to
 `repl`, by position or keyword, is called from the scope of the call, as
@@ -1992,7 +1989,7 @@ calls nothing. The call back is implicit and passes one argument, the
 match, which holds no value.
 
 The third exception is the key functions of `heapq` and `bisect`
-(`KEYED_OPERATIONS` and `KEYED_SEQUENCES` in `builtin_models.py`), and
+(`KEYED_OPERATIONS` and `KEYED_SEQUENCES` in `models`), and
 the function that `functools.cmp_to_key` wraps (`KEY_WRAPPERS`). Like
 `sorted`, they call their key on the items that they take, from the scope
 that takes them, implicitly and with the item: `heapq.nsmallest` and
@@ -2084,10 +2081,10 @@ calls no method of the analysed objects it gets (`Thread.start` and `run`,
   also iterates `a`.
 - Limit: a `copy.replace` that unpacks its positional arguments
   (`copy.replace(*args)`) calls nothing
-  (`test_limit_copy_replace_of_an_unpacked_argument_calls_nothing`).
+  (`limit_copy_replace_of_an_unpacked_argument_calls_nothing`).
 - Limit: the `__replace__` that a dataclass or a named tuple gets from
   Python 3.13 is not made, so replacing one gives no value
-  (`test_limit_the_replace_of_a_dataclass_is_not_made`).
+  (`limit_the_replace_of_a_dataclass_is_not_made`).
 
 ### Selected standard-library operations
 
@@ -2165,7 +2162,7 @@ iterate their arguments, and `map` and `filter` call their function, where
 they are made (an approximation, C26), so a lazy object that one of them
 gets is advanced there.
 
-Limits, each pinned by a test:
+Limits, each pinned by a case:
 
 - The callbacks of these operations (`starmap`'s function, the predicates
   of `takewhile`, `dropwhile`, `filterfalse`, `groupby`'s key,
@@ -2173,11 +2170,11 @@ Limits, each pinned by a test:
   functions of `heapq` are (see *Call backs*).
 - Counts are not read: `tee(x, 0)` and `product(x, repeat=0)` iterate and
   `islice(x, 0)` advances, where Python does not
-  (`test_limit_a_count_of_zero_still_iterates`); `nlargest(1, x)` asks the
-  length, which its shortcut does not (`test_limit_nlargest_of_one_asks_the_length`).
+  (`limit_a_count_of_zero_still_iterates`); `nlargest(1, x)` asks the
+  length, which its shortcut does not (`limit_nlargest_of_one_asks_the_length`).
 - `heapq.merge` reads `__next__` by an ordinary attribute lookup, so an
   instance attribute wins in Python; the analysis calls the class's method
-  (`test_limit_merge_advances_by_the_special_method`).
+  (`limit_merge_advances_by_the_special_method`).
 - A `groupby` key that a variable gives is taken as a key function, also
   where the variable may hold `None`.
 - `Counter(mapping)` counts the keys of a mapping, and a deque that
@@ -2222,7 +2219,7 @@ function:
 - Limit: a subclass that binds the method under another binding mode
   (`run = classmethod(Base.run)`) passes its class, not its instances;
   the analysis gives the instances
-  (`test_limit_a_class_method_alias_keeps_the_instances`). An instance of a
+  (`limit_a_class_method_alias_keeps_the_instances`). An instance of a
   subclass that overrides `m` reaches `C.m` only through `super().m()` or
   `C.m(self)`, which are analysed calls that value flow follows. Each
   fixpoint checks the instances again, so an instance or a hierarchy that
@@ -2249,22 +2246,22 @@ Python certainly makes no object of it (see *Classes that Python does not
 instantiate*): Protocol's initializer or `object.__new__` refuses it. A class whose MROs all derive from `type` is a metaclass and has
 none either: its objects are classes.
 
-Limits, each pinned by a test:
+Limits, each pinned by a case:
 
 - A wrapper that a decorator returns (`def wrapper(*args)`) is no function
   of the class body and gets no receiver
-  (`test_limit_a_decorators_wrapper_gets_no_receiver`).
+  (`limit_a_decorators_wrapper_gets_no_receiver`).
 - A method that analysed code calls on one receiver does not get the
   others, although outside code could pass them
-  (`test_limit_a_method_that_analysed_code_calls_keeps_those_receivers`).
+  (`limit_a_method_that_analysed_code_calls_keeps_those_receivers`).
 - An outside base between the subclass and the method's class may define
   the name; the subclass is taken to inherit the method.
 - A function gets no arguments from callers that the analysis does not see
-  (`test_limit_no_arguments_from_callers_that_the_analysis_does_not_see`).
+  (`limit_no_arguments_from_callers_that_the_analysis_does_not_see`).
 
 ### Annotations
 
-The annotation of a parameter names (`annotations.py`):
+The annotation of a parameter names (`engine::annotations`):
 
 - an analysed class `C`: every instance of `C` and of its subclasses; for
   `type[C]` (`typing.Type`), `C` and its subclasses;
@@ -2317,7 +2314,7 @@ evaluates a string annotation, so an attribute in one is looked up as a
 name, without running a hook: what a module binds, what a class defines in
 its MROs, the name of an outside object; no `__getattr__` runs and no
 descriptor, so a name that only a hook gives names nothing
-(`test_a_string_annotation_runs_no_attribute_hook`). A shape that names
+(`a_string_annotation_runs_no_attribute_hook`). A shape that names
 no type (a call, a lambda, a comprehension) gives nothing.
 
 `tuple[()]`, the annotation of the empty tuple, is a subscript with no
@@ -2357,7 +2354,7 @@ class and of its subclasses holds what its annotation names. A class-level
 annotation without a value of any other class names nothing (with a value
 it is an annotated assignment, below); a `TypedDict` value is a
 dict, read by subscript, so its annotations are no fields
-(`test_a_typed_dict_gives_no_attributes`).
+(`a_typed_dict_gives_no_attributes`).
 
 A class whose base is `ctypes.Structure` or `ctypes.Union` and whose body
 binds `_fields_` to a literal sequence of `(name, type)` pairs declares a
@@ -2395,13 +2392,13 @@ the declared values as before, since outside code may have stored by then.
 
 - Limit: a base whose definitions join (an annotated assignment in each
   branch of an `if`) gets the declared values
-  (`test_limit_a_base_read_through_a_join_keeps_the_declared_values`).
+  (`limit_a_base_read_through_a_join_keeps_the_declared_values`).
 
 **Analysed classes below an outside class.** An annotation that names an
 outside class names the analysed classes below it only when that class is
 abstract. Abstract means that the class cannot be instantiated as it is: a
 protocol, a class that exists only in the stubs, or a class whose MRO has
-an abstract method that no class before it implements (`Stubs.abstract`).
+an abstract method that no class before it implements (`Stubs::is_abstract`).
 For a concrete outside class (`list`, `dict`, `BaseException`, `Enum`,
 `object`, `type`, `Any`) the annotation already names a value, an instance
 of that class, so its analysed subclasses are as unlikely as any other
@@ -2409,7 +2406,7 @@ value. The protocols that the builtin types implement, `Iterable`,
 `Iterator`, `Collection`, `Container`, `Sized`, `Hashable` and
 `Reversible` (of `typing` and `collections.abc`), name a class below them
 only through abstract classes: some outside base of the class reaches the
-protocol by stub bases that are all abstract (`Stubs.abstract_reach`;
+protocol by stub bases that are all abstract (`Stubs::abstract_reach`;
 `class Line(Sequence)` and `class Countdown(Iterator)` count, a subclass of
 `list`, `str`, `tuple`, `dict` or `NamedTuple` does not, nor does a class
 of the stub-only base `tokenize._TokenInfo`, abstract itself but a
@@ -2479,7 +2476,7 @@ of the scope that binds it, once, so a recursive alias ends. A name that
 one assignment binds to another name of the stub (`batched = _batched`)
 also gives the source function of its path the parameter annotations of
 every function that the other name is, or is in turn bound to
-(`test_a_stub_name_bound_to_a_stub_function_takes_its_parameter_annotations`).
+(`a_stub_name_bound_to_a_stub_function_takes_its_parameter_annotations`).
 
 The bases that the stub declares for a class count for what an annotation
 names, and for nothing else: the source's class definitions of the same
@@ -2497,7 +2494,7 @@ bases are one node per class statement. When it saturates, as any node
 past the cap does, it admits nothing more: the classes that it already put
 the class below stay (rules only add), those that would arrive later are
 lost, and the source's hierarchy is untouched
-(`test_a_stub_base_node_that_saturates_late_keeps_what_it_admitted`).
+(`a_stub_base_node_that_saturates_late_keeps_what_it_admitted`).
 
 Nothing else of the stub is used: it defines no function, class or
 variable, a name that only it defines is ignored (but for what an alias
@@ -2511,11 +2508,11 @@ B4).
 Limits:
 
 - An annotation is believed even when the calls pass something else
-  (`test_limit_an_annotation_is_believed_when_the_calls_pass_something_else`).
+  (`limit_an_annotation_is_believed_when_the_calls_pass_something_else`).
 - Python never evaluates the annotation of an assignment in a function,
   but its names are read as every annotation's are, so an attribute hook
   that one would run (a module's `__getattr__`) is an edge of the function
-  (`test_limit_the_annotation_of_a_local_assignment_is_read_as_if_evaluated`).
+  (`limit_the_annotation_of_a_local_assignment_is_read_as_if_evaluated`).
 - Annotations name values only for parameters, the targets of annotated
   assignments and the fields of dataclass-like classes, and only analysed
   classes and classes of the
@@ -2523,7 +2520,7 @@ Limits:
   level of containers.
 - A `Protocol`, analysed or outside, and an outside abstract class name
   their analysed subclasses, not the classes that match them structurally
-  (`test_limit_an_outside_class_does_not_name_a_class_that_only_fits`).
+  (`limit_an_outside_class_does_not_name_a_class_that_only_fits`).
 - An annotation of an abstract outside class names every analysed class
   below it, also where the package does not play that role (a set-like
   class for a parameter annotated `AbstractSet[str]` that is only ever
@@ -2532,7 +2529,7 @@ Limits:
   it, and one of a protocol of the builtin types none that reaches it only
   through a concrete class, also where the package passes one: an analysed
   exception for `BaseException`, a subclass of `list` for `Iterable`
-  (`test_limit_a_builtin_protocol_names_no_class_below_it_through_a_concrete_class`).
+  (`limit_a_builtin_protocol_names_no_class_below_it_through_a_concrete_class`).
 - The admission through abstract classes, with the stubs' bases, has a
   measured cost. On the 40 development packages, the 30 older ones get 41
   false edges inside the package and no true one (cachetools 20,
@@ -2545,18 +2542,18 @@ Limits:
   does, and classes are compared by their stub definitions: a subclass of
   `Sequence` is not below `Sized`.
 - A stub base that names an analysed class adds nothing
-  (`test_limit_a_stub_base_that_names_an_analysed_class_adds_nothing`).
+  (`limit_a_stub_base_that_names_an_analysed_class_adds_nothing`).
 - A stub annotation's attribute chain must start at a name that the stub
   imports: `Outer.Inner` for a class nested in the module's class names
   nothing
-  (`test_limit_a_stub_attribute_chain_must_start_at_a_stub_import`).
+  (`limit_a_stub_attribute_chain_must_start_at_a_stub_import`).
 - A stub name bound to a function that the stub imports gives no parameter
   annotations: only the stub's own functions are read
-  (`test_limit_a_stub_name_bound_to_an_imported_function_takes_no_annotations`).
+  (`limit_a_stub_name_bound_to_an_imported_function_takes_no_annotations`).
 - A stub with a `global` or `nonlocal` statement is not read at all: the
   module is analysed as if it had no stub, so its annotations are lost.
   The stub reader does not model these scope declarations, which stubs do
-  not use (`test_limit_a_stub_with_a_scope_declaration_is_not_read`). A
+  not use (`limit_a_stub_with_a_scope_declaration_is_not_read`). A
   stub annotation never makes a dataclass field: the library reads the
   annotations of the source.
 
@@ -2600,7 +2597,7 @@ other form, defines no names.
   which calls `__getattr__`; the analysis calls none for a slot.
 - Limit: stores are not restricted. Python refuses a store of a name that
   is no slot when no class of the MRO gives a `__dict__`; the analysis
-  keeps the stored value (`test_limit_stores_are_not_restricted_by_slots`).
+  keeps the stored value (`limit_stores_are_not_restricted_by_slots`).
 
 #### Alternative hierarchies
 
@@ -2701,7 +2698,7 @@ C.attr
   are named through `collections.abc` (`collections.abc.Set.isdisjoint`
   for `class S(typing.AbstractSet)`). The stubs say which names these are
   the other way round: typeshed defines the classes in `typing`, and
-  `collections.abc` re-exports them (`Stubs.abc_name`).
+  `collections.abc` re-exports them (`Stubs::abc_name`).
   - Limit: the other aliases of `typing` (`List`, `Deque`, `DefaultDict`,
     `ContextManager`, `AsyncContextManager`) are not replaced: the stubs
     declare the first ones as values of a stub-only class, which names no
@@ -2732,7 +2729,7 @@ On a chain of n classes, each class looks a name up through an MRO of up to
 n classes: n² steps in all. The step that asks whether the receiver derives
 from a class of the MRO, the C3 merge and the reported MRO look classes up
 in a set or a dict; searching a list of the classes placed so far made each
-of them cubic (`tests/test_scaling.py`).
+of them cubic (`crates/pycg/tests/scaling.rs`).
 
 #### Lookup through an instance
 
@@ -2767,7 +2764,7 @@ obj.attr  =  Field(obj, attr)                the instance's own field
   `AttributeError`, Python then calls the class's `__getattr__` with the
   name. The analysis calls `__getattr__` only where no class of the MRO
   defines the name, so that call, and what it calls, are missing
-  (`test_limit_a_getter_that_raises_attribute_error_does_not_call_getattr`).
+  (`limit_a_getter_that_raises_attribute_error_does_not_call_getattr`).
   On the 30 benchmark packages, 32 missed edges have this cause (bottle
   19, structlog 8, anytree 4, asyncstdlib 1). A rule that makes each load
   of a name bound to a property or a descriptor also call the class's
@@ -2779,7 +2776,7 @@ obj.attr  =  Field(obj, attr)                the instance's own field
 only; only what the class gives is bound to the instance. So a rule that
 looks a name up on the class of an instance, and acts only on what the
 lookup finds, is applied for that instance once the class may have the
-name (`Hierarchy.later`): the class side of a load and of a store (for a
+name (`State::later`): the class side of a load and of a store (for a
 store, its accessor and whether a property or a descriptor that the
 lookup finds takes the store from the field; the field and the decision
 of the class whether the store writes it are made at the store), the
@@ -2789,9 +2786,9 @@ The first lookup of the name through an instance of the class is the
 entry in a list of the class and the name, with its instance; then the
 rules of the list run, and make the lookups and constraints that they
 would have made at once, which had nothing to act on before. An entry is
-two slots of the list (`Watch`), the rule and the instance; the rule,
-with its arguments, is one tuple that every class waiting on it shares
-(`Analysis._waiting_rules`), and the rules run grouped by rule in the
+a pair in the list of the watch, the rule and the instance; the rule,
+with its arguments, is one value that every class waiting on it shares
+(`waiting_rules` of `State`), and the rules run grouped by rule in the
 order in which each first waited, so each runs with the receivers, and in
 the order, that a list per rule would give. On
 openai, 2.75 million entries wait at the end of the solve, a site times
@@ -2801,12 +2798,12 @@ entry made 658 MiB of the peak. On matplotlib, four lookups through an
 instance in five never get an object (an attribute that the instance
 itself has, `self.x`, or a special method that no class defines), and
 their records are not made. Likewise, the node of an attribute of an
-instance is made at its first write (`Analysis.field`: a store, `setattr`,
+instance is made at its first write (`State::field`: a store, `setattr`,
 a write to `__dict__`); until then a load of it is an entry in a list of
 the class and the name (`read_field`), which the write connects. On
-matplotlib 88 % of those nodes stayed empty. So the assignment graph for
-tests (`output_points_to`) lists no attribute of an instance that nothing
-stores. The other lookups through an instance are made at once: a
+matplotlib 88 % of those nodes stayed empty. So no attribute of an
+instance that nothing stores has a node. The other lookups through an
+instance are made at once: a
 deletion, a load through `super()`, the special methods of a descriptor
 and the hook of its accessor (made only once the class has answered), and
 the `__getitem__` of the sequence protocol. Waiting would save little
@@ -2816,11 +2813,11 @@ pylint, matplotlib and pydantic, 0.5 % for `super()` on matplotlib
 not change.
 
 The loads that reach an instance through one lookup of a name are one
-record on that lookup (`_Deliveries`), with the instance and the hook
+record on that lookup (`Deliveries`), with the instance and the hook
 (`__getattribute__`, or none through `super()`): a lookup node has one
 receiver, so one instance and one hook. Each value that the lookup gets
 is delivered to every load of the record, and a load that joins later
-gets the values that the lookup holds at once (`Solver.apply_now`, which
+gets the values that the lookup holds at once (`Solver::apply_now`, which
 defers past the bound of nested attachments as an attachment does), as a
 constraint attached to it then would, the saturated value included; an
 opaque value saturates every load. A value that the lookup held
@@ -2871,11 +2868,11 @@ comes after the instances of the class saturated: it then sees none.
 Likewise the calls of one class wait on its nodes (its `__new__`, whether
 Python's own runs, its instances, whether it is instantiable) as one
 record per node and rule that keeps the list of its calls
-(`Solver.share`), instead of one constraint per call (pandas: 1.5
+(`State::share`), instead of one constraint per call (pandas: 1.5
 million calls of a class at a site, 69 classes per site on average). Each
 object that the node gets reaches every call of the record, and a call
 that joins later gets the node's objects at once, as a constraint
-attached then would (`Solver.apply_now`), the saturated value included.
+attached then would (`Solver::apply_now`), the saturated value included.
 An object that the node held but had not yet given the record reaches the
 new call twice: its rules make the same instance, call and edges again,
 which changes nothing.
@@ -2909,7 +2906,7 @@ although Python's `object.__new__(cls)` makes an instance of exactly
    `object.__new__` or to the end, defines one that allocates, and every
    outside class on the way is described by the stubs, derives from no
    builtin type but `object` and has no `__new__` of its own
-   (`Hierarchy.new_may_give_another`).
+   (`State::new_may_give_another`).
 3. A call of such a class keeps, of what `__new__` returns, only the
    instances of the called class (and every object that is not an
    instance of an analysed class); `__init__` runs on those.
@@ -2923,16 +2920,16 @@ the builder. The call holds back the instances of other classes until
 then and gives them when the decision turns, so the instances that it
 gives in the end do not depend on the order in which the instances, the
 bases and the decision arrive
-(`tests/test_order_independence.py`, "a late base whose new gives another
+(`tests/cases/order/`, "a late base whose new gives another
 object").
 
 - Limit: a builtin base other than `object` (`str`, `tuple`, `type`)
   allocates in C, and the stubs do not say that its `__new__` gives an
   instance of exactly `cls`, so such a class is not decided and keeps every
-  result (`test_limit_a_new_that_allocates_through_a_builtin_base_is_not_decided`).
+  result (`limit_a_new_that_allocates_through_a_builtin_base_is_not_decided`).
 - Limit: a store of `__class__` outside `__new__` changes the class of the
   instance after the call; the analysis keeps the class that the call made
-  (`test_limit_a_store_of_class_outside_new_is_not_seen`).
+  (`limit_a_store_of_class_outside_new_is_not_seen`).
 
 #### Classes that Python does not instantiate
 
@@ -2999,28 +2996,28 @@ only for a name that a class before it in the order makes abstract.
   an abstract method after a subclass is made does not make that subclass
   concrete; the analysis, which has no order of statements in the heap,
   makes it concrete. Any store of the name counts, even `C.f = C.f`
-  (`test_limit_a_store_on_a_class_counts_as_a_new_binding`).
+  (`limit_a_store_on_a_class_counts_as_a_new_binding`).
 - Limit: a class body that only reads its namespace (`snapshot =
   locals()`) binds nothing through it, so Python still refuses the class;
   the analysis does not tell a read from a write and makes its instance
-  (`test_limit_a_body_that_only_reads_its_namespace_is_not_refused`).
+  (`limit_a_body_that_only_reads_its_namespace_is_not_refused`).
 - Limit: a name that an `ABCMeta` base obliges stays abstract where the
   method selected for it comes from a class that `ABCMeta` does not make
   and is abstract itself; the analysis takes it as concrete
-  (`test_limit_an_abstract_name_selected_from_a_mixin_without_abcmeta`).
+  (`limit_an_abstract_name_selected_from_a_mixin_without_abcmeta`).
 - Limit: an abstract property whose final binding is a concrete accessor
   (`@f.setter`) stays abstract; the analysis reads only the final `def`
-  (`test_limit_an_abstract_property_with_a_concrete_setter`).
+  (`limit_an_abstract_property_with_a_concrete_setter`).
 - Limit: a Protocol class that binds `__init__` to Protocol's own
   initializer is still refused; the analysis sees a body that defines
-  `__init__` (`test_limit_a_protocol_that_binds_protocols_own_initializer`).
+  `__init__` (`limit_a_protocol_that_binds_protocols_own_initializer`).
 - Limit: an explicit `object.__new__(cls)` on a class whose builtin base
   allocates otherwise is refused; the gate is per class, not per
-  allocator (`test_limit_a_builtin_base_with_an_explicit_object_new`).
+  allocator (`limit_a_builtin_base_with_an_explicit_object_new`).
 - Limit: an outside metaclass's `__call__` (an `Enum` whose metaclass also
   derives from `ABCMeta`) may return an object without `__init__`; the
   analysis makes the instance as `type.__call__` does
-  (`test_limit_an_enum_whose_metaclass_derives_from_abcmeta`).
+  (`limit_an_enum_whose_metaclass_derives_from_abcmeta`).
 - Limit: a value of `Self` that a stub method gives through a class
   (`C.create()` with an outside class method) is the abstract instance of
   that class, made for any class.
@@ -3050,7 +3047,7 @@ hook, see *Attribute hooks*), and the access gets the result:
 
 A *property* is the engine's own (`property(...)`, `@property`) or an
 instance of an analysed class that may derive from the builtin `property`
-(`Hierarchy.relation`, so a base that comes late counts; an analysed class
+(`State::may_relate`, so a base that comes late counts; an analysed class
 that is itself named `property` and derives from nothing is an ordinary
 class). Such an instance keeps the accessors that a valid call of the
 resolved builtin `property.__init__` passes: the inherited `__init__` of
@@ -3066,7 +3063,7 @@ is called by its stub, with a typed result, and the descriptor is also the
 value of the load; an outside base without stubs gives an external that is
 not called, and the descriptor is the value. Where no class resolves
 `__get__` (`object` has none), the instance is itself the value (decided
-like a lookup: `Hierarchy.descriptor_itself`).
+like a lookup: `Unless::DescriptorItself`).
 
 A load through the class runs `__get__` with no value for the instance and
 the class: a property is then itself (property's own `__get__` is not
@@ -3081,12 +3078,12 @@ in each of its MROs (to an analysed method, or through the builtin
 outside base, a name that no class binds and any other member value leave
 the store to the field, as does every name of a class whose MROs are the
 exhaustive order (see *Alternative hierarchies*). The decision is made like
-a lookup (`Hierarchy.instance_dict_written` and `not_data_descriptor`): it
+a lookup (`Unless::DescriptorDecides` and `Unless::DataDescriptor`): it
 waits for complete hierarchies, is made again as MROs grow, and only ever
 adds the write, so it does not depend on the order of the solve. Each
-decision (the node of `instance_dict_written` for the class and name at
-the store, or of `not_data_descriptor` for the class of a member that is
-an instance) is one record (`_FieldWrites`), which keeps each write, a
+decision (the node of the `DescriptorDecides` lookup for the class and name at
+the store, or of the `DataDescriptor` lookup for the class of a member that is
+an instance) is one record (`FieldWrites`), which keeps each write, a
 stored value and a field, once, and acts on the first object of its
 node, as later ones decide nothing more: the store of a field meets every
 instance that the member holds, and those instances share a class and so
@@ -3109,7 +3106,7 @@ engine's `staticmethod` gives the function it wraps; of a `classmethod`,
 its function bound to each class that the owner may hold (analysed or
 outside), and, where the owner may be absent (an unpacking may omit it) or
 is the literal `None`, to the class of the instance, or to the metaclasses
-of a class (see `Hierarchy.bind`). A call of these methods is valid if it
+of a class (see `State::bind`). A call of these methods is valid if it
 passes no keyword and a number of positional arguments in the range of the
 signature (`(instance, owner=None, /)`), or an unpacking that may fill it
 (a call with `**` is not valid, even `**{}`: a restriction of the analysis);
@@ -3117,7 +3114,7 @@ signature (`(instance, owner=None, /)`), or an unpacking that may fill it
 raises. "The literal `None`" is what the source writes: the builder
 records the positions at which a call expression passes `None` (before any
 unpacking), and the calls that copy it keep them, with bound receivers
-before them (`Analysis.literal_none`). An argument without a value is not
+before them (`State::literal_none`). An argument without a value is not
 `None` (`False` and `1.5` have none either), and a node that holds nothing
 decides nothing.
 
@@ -3131,11 +3128,11 @@ decides nothing.
 - Limit: a member whose value the analysis does not see (a class body that
   binds a parameter that holds nothing) takes the store, as if it were a
   data descriptor
-  (`test_limit_a_member_whose_value_the_analysis_does_not_see_takes_the_store`).
+  (`limit_a_member_whose_value_the_analysis_does_not_see_takes_the_store`).
 - Limit: a property stored on the class after its body (`C.x =
   property(...)`) is not a binding of the class for this decision, so a
   store through an instance also writes the field
-  (`test_limit_a_property_stored_on_the_class_after_its_body_lets_the_store_write`).
+  (`limit_a_property_stored_on_the_class_after_its_body_lets_the_store_write`).
 - Limit: a known `None` flows only as a literal argument: a subclass
   `__get__(self, obj, owner=None)` that forwards to `super().__get__(obj,
   owner)` calls the getter on a load through the class
@@ -3182,7 +3179,7 @@ CPython. An outside hook (`__setattr__ = object.__setattr__`) is Python's
 own, which is not called. The instance's fields are read and written in
 every case, and an explicit `object.__setattr__(self, name, value)` is not
 a store. The calls of a hook at the sites that one instance reaches are one
-record on the instance's lookup of the hook (`_HookCalls`; xarray: 3.3
+record on the instance's lookup of the hook (`HookCalls`; xarray: 3.3
 million calls of instances and sites): each hook value that the lookup gets
 is called at every site of the record, and a site that joins later calls
 the values that the lookup holds, as a constraint attached to it then
@@ -3205,7 +3202,7 @@ defines the hook before an outside class (decided like a lookup);
 flow-insensitively, a hook assigned to such a class later runs as well, so
 its accessor is called from both.
 
-The accessor calls of one class and hook are one record (`_AccessorHooks`),
+The accessor calls of one class and hook are one record (`AccessorHooks`),
 attached to Python's own hook of the class and to the lookup of the hook
 through each of its receivers, once per lookup. Through the first receiver
 alone, the record would act in the round in which that receiver's lookup fills:
@@ -3220,7 +3217,7 @@ give (the hook's function, or the access itself): a caller that arrives calls
 every accessor with every receiver, and a receiver or an accessor that arrives
 is called from every caller seen. The value of a hook gives only its caller,
 which is the same for every instance of the class. The calls of one accessor
-from one caller are one record (`_Accessors`, by accessor, call, kinds and
+from one caller are one record (`Accessors`, by accessor, call, kinds and
 width), which binds each receiver as its own call did (the instance, or the
 instance and its class); a receiver that arrives gets every method of the
 accessor seen. Once one of the nodes of the record holds the saturated value,
@@ -3235,11 +3232,11 @@ an accessor that arrives saturates its result.
   whose native slot a hook is (they give `type.__setattr__` and
   `super.__getattribute__` as object's), nor always that the name
   `object` is the builtin (a star import may supply it)
-  (`test_limit_object_hooks_by_name_run_no_descriptor`, the
+  (`limit_object_hooks_by_name_run_no_descriptor`, the
   micro-benchmark case `descriptors/object_setattr_runs_set`).
 - Limit: `functools.partial` is outside code, so a partial hook is not
   called: neither the access nor making the partial calls its function
-  (`test_limit_a_partial_hook_is_not_called`).
+  (`limit_a_partial_hook_is_not_called`).
 
 ### Computed attribute names
 
@@ -3270,13 +3267,13 @@ source, so the count still grows only as the name node grows.
 - Limit: the exemption follows the name, not where it comes from: once the
   code reads `C.__dict__`, a load by a name that holds five names of `C`
   loads them all, whatever produced them
-  (`test_limit_a_read_namespace_exempts_its_names_from_any_origin`).
+  (`limit_a_read_namespace_exempts_its_names_from_any_origin`).
 - Limit: a namespace read through any other expression (`type(self).__dict__`,
   `self.__class__.__dict__`, `module.C.__dict__`) exempts nothing, and a
   store or a deletion counts every name.
 
 A str that the code builds from a constant part and another value is a
-`Pattern` of its constant prefix and suffix (`patterns.py`): `"visit_" +
+`Pattern` of its constant prefix and suffix (`engine::patterns`): `"visit_" +
 kind`, `"visit_%s" % kind`, `"visit_{}".format(kind)`, `f"visit_{kind}"`,
 and the same with a constant suffix. It needs a non-empty constant part,
 and it flows like a str constant. An f-string of more than one part and
@@ -3334,7 +3331,7 @@ value.
   syntax, so a constant prefix that a name holds makes none: `prefix +
   kind` is a str of unknown value, and a dict read by it reads every
   element
-  (`test_limit_a_key_built_from_a_name_of_a_constant_reads_every_entry`).
+  (`limit_a_key_built_from_a_name_of_a_constant_reads_every_entry`).
 `getattr` and `hasattr` with a pattern
 load every attribute of the object whose name matches: on an instance, the
 names that the class bodies of its MRO define or that stores assign on
@@ -3352,11 +3349,11 @@ member, whose class may define the method), they also give any value
 gives, as an operand that is an alias does to `+` and `%`. Python looks up the converted
 name, so `getattr(self, f"visit_{kind}".lower())` loads `visit_field` and
 not `visit_Field`. The analysis converts ASCII only, as the case of other
-characters depends on the Unicode database of the running Python: a
-pattern with a constant part that is not ASCII gives a str of unknown
-value, and a case pattern matches every name with a character that is not
-ASCII and with its prefix and suffix (`visit_é`, which `lower()` gives for
-`É`, and `visit_É` too). On ASCII,
+characters depends on the Unicode version of the Python that runs the
+program: a pattern with a constant part that is not ASCII gives a str of
+unknown value, and a case pattern matches every name with a character that
+is not ASCII and with its prefix and suffix (`visit_é`, which `lower()`
+gives for `É`, and `visit_É` too). On ASCII,
 `casefold()` is `lower()`, and converting a converted pattern gives what
 converting the first pattern gives, so a pattern gives at most two others. The other
 methods of `str` give a str of unknown value, also for a pattern
@@ -3388,7 +3385,7 @@ and a suffix cannot state) and for a str constant (`"Visit".lower()`).
   operand a str constant, since rules only add. A dict read by such a result
   reads every element, though Python, where no key matches the pattern,
   raises `KeyError`, and what the widened read gives flows on
-  (`test_limit_an_operand_that_only_the_completion_fills_stays_unknown`).
+  (`limit_an_operand_that_only_the_completion_fills_stays_unknown`).
 
 ### Namespaces read by reflection
 
@@ -3409,7 +3406,7 @@ names*), a subscript with a constant name and the unpacking in `for name, member
 in vars(C).items()` work on it. It is not exact for class tests, since Python
 gives a `mappingproxy` for a class. The rule applies where the `__dict__` that
 Python finds on a metaclass of the class may be the default one, `type`'s
-(`Hierarchy.default_member`). The walk follows each candidate MRO of the
+(`Unless::DefaultMember`). The walk follows each candidate MRO of the
 metaclass, and the first class that defines `__dict__` decides: `type` means the
 default; an analysed class whose body binds the name, or an outside class whose
 stub class defines it before its stub MRO reaches `type`, means another
@@ -3421,7 +3418,7 @@ own `__dir__`, which the stubs leave to `object`), and `object` supplies
 type)` does not. As for a lookup, the rule applies if some candidate MRO reaches
 the default first: the answer only turns from no to yes as MROs are added, as
 the solve needs, and a hierarchy that Python does not build may add members
-(`test_any_candidate_mro_that_reaches_the_default_applies_the_rule`). A
+(`any_candidate_mro_that_reaches_the_default_applies_the_rule`). A
 metaclass that defines its own `__dict__` gives that attribute instead, and the
 rule adds nothing; a class body's own `__dict__` is not in the way, since the
 descriptor of the metaclass wins. Of the common outside metaclasses, `type`,
@@ -3451,38 +3448,38 @@ Each member is loaded once per object that `getmembers` reaches, and is one
 field of one namespace dict, whatever the loops that read it. Each receiver
 is read once per site that reaches it, so many classes read at sites of
 their own and at one shared site cost the sum of the two
-(`tests/test_scaling.py`).
+(`crates/pycg/tests/scaling.rs`).
 
 - Limit: neither the predicate of `getmembers` nor a test on the name
   (`if name.startswith("_func_")`) is evaluated: every member is called
-  (`test_limit_a_filter_on_the_name_is_not_evaluated`).
+  (`limit_a_filter_on_the_name_is_not_evaluated`).
 - Limit: a `__dir__` other than the default one, analysed or outside, is
   not evaluated: `getmembers` of an object whose class (metaclass, for a
   class) defines it gives the stubs' result, so edges may be lost and none
-  are added (`test_limit_an_analysed_dir_leaves_getmembers_to_the_stubs`,
-  `test_an_outside_dir_leaves_getmembers_to_the_stubs`).
+  are added (`limit_an_analysed_dir_leaves_getmembers_to_the_stubs`,
+  `an_outside_dir_leaves_getmembers_to_the_stubs`).
 - Limit: the pairs of `getmembers` are one pair whose name is every name
   and whose value is every value, as for any list of pairs: a dict made of
   them (`dict(inspect.getmembers(C))["x"]`) gives every member
-  (`test_limit_the_pairs_of_getmembers_do_not_keep_names_apart`).
+  (`limit_the_pairs_of_getmembers_do_not_keep_names_apart`).
 - Limit: the names that Python adds to a namespace (`__module__`,
   `__qualname__`, `__doc__`, `__dict__`) and the members of outside bases
   (those of `object`) are not there
-  (`test_limit_names_that_python_adds_and_outside_members_are_absent`). The
+  (`limit_names_that_python_adds_and_outside_members_are_absent`). The
   namespace of a class names its methods as a dict's
   (`<builtin>.dict.items`), where Python names them as the mappingproxy's
   (`types.MappingProxyType.items`;
-  `test_limit_the_methods_of_a_class_namespace_are_named_as_a_dicts`).
+  `limit_the_methods_of_a_class_namespace_are_named_as_a_dicts`).
 - Limit: a write through the namespace of a class (`d = C.__dict__; d["x"]
   = f`) goes to the dict, which later reads of that dict see, and not to
   the class, whose loads do not; Python's mappingproxy refuses it
-  (`test_limit_a_write_through_the_class_namespace_stays_in_the_dict`).
+  (`limit_a_write_through_the_class_namespace_stays_in_the_dict`).
 - Limit: an element of the namespace is the value that the body binds, as
   a load takes it, also where the class machinery replaces it (see the
   limit in *Class bodies*).
 - Limit: the namespace of an instance (`obj.__dict__`, `vars(obj)`) is what
   the stubs say, a dict of unknown values
-  (`test_limit_the_dict_of_an_instance_is_what_the_stubs_say`). Code writes
+  (`limit_the_dict_of_an_instance_is_what_the_stubs_say`). Code writes
   it (`self.__dict__.update(kw)`, `self.__dict__[name] = value`), which the
   analysis does not store on the object, and reads it with computed keys
   (`d["cached_" + name]`), which read every element when this was measured
@@ -3496,7 +3493,7 @@ their own and at one shared site cost the sum of the two
   so `getattr(x, name)` for each name loads nothing. A module's `__dict__`,
   `getmembers` of a module and `vars()` without an argument (see *Which
   names*) give what the stubs say
-  (`test_limit_dir_modules_and_vars_without_an_argument`).
+  (`limit_dir_modules_and_vars_without_an_argument`).
 
 `C.__subclasses__()` of an analysed class gives a list whose element holds
 the classes that have `C` among their candidate bases, a class that gets
@@ -3504,7 +3501,7 @@ the classes that have `C` among their candidate bases, a class that gets
 names `C` itself.
 
 - Limit: a subclass whose class statement has not run yet is listed
-  (`test_limit_a_subclass_defined_after_the_call_is_listed`).
+  (`limit_a_subclass_defined_after_the_call_is_listed`).
 
 ### Metaclasses
 
@@ -3519,7 +3516,7 @@ expression's candidates: the most derived of some choice. That only grows
 as candidates arrive, so it does not depend on their order. The class
 waits for its `metaclass=` expression as for its bases, and the decision
 is redone when its MROs or its bases' metaclasses grow
-(`Hierarchy._decide_metaclasses`).
+(`State::decide_metaclasses`).
 
 - A class is among the instances of each analysed metaclass of it, and a
   metaclass has no abstract instance (see *Entry points*).
@@ -3558,7 +3555,8 @@ is redone when its MROs or its bases' metaclasses grow
 
   The metaclass's `__init__` still runs on the class of its own statement
   only, not on every class that `type.__new__` gives there, so the
-  statements of one metaclass cost their number (`tests/test_scaling.py`).
+  statements of one metaclass cost their number
+  (`crates/pycg/tests/scaling.rs`).
 
 Limits:
 
@@ -3577,7 +3575,7 @@ Limits:
 - Limit: the `__init_subclass__` that Python calls on the new class is not
   called: the new class, whose namespace may override what the hook finds
   through `cls`, is not modelled, and the written base does not stand for
-  it (`test_limit_the_hook_of_the_new_class_is_not_called`). Its
+  it (`limit_the_hook_of_the_new_class_is_not_called`). Its
   namespace's functions are not methods of anything either, so loads and
   calls through the made class give no edges (a new class at solve time
   would be needed: a class object per call site, with the namespace's keys
@@ -3601,9 +3599,9 @@ of each side (`__lt__`, the reflected `__gt__`) and gives what it returns,
 which need not be a bool; `!=` also calls `__eq__` where no class defines
 `__ne__` (`object.__ne__` does). A unary operator calls `__neg__`,
 `__pos__` or `__invert__`. Each operand of an operator is one constraint
-(`_Operand`) that keeps the operator, its side and one of four shared sets
-of the kinds that it acts on; the operator makes its calls, and the
-classes that it tests, when it first needs them.
+(`ProtocolRule::Operand`) that keeps the operator, its side and one of
+four shared sets of the kinds that it acts on; the operator makes its
+calls, and the classes that it tests, when it first needs them.
 
 **Comparisons of containers.** Two containers that the analysis tracks
 compare their elements within one family, the pairs of kinds for which
@@ -3660,7 +3658,7 @@ up by a subscript read and `del`, `get`, `pop`, `setdefault`,
 `OrderedDict.move_to_end`, `in`, `set.remove`, `set.discard`, and by the
 set methods that take iterables (`union`, `intersection`, `difference`,
 `symmetric_difference` and their `_update` forms, `issubset`, `issuperset`,
-`isdisjoint`, `builtin_models.py`, `HASHED_ARGUMENTS`), which hash their
+`isdisjoint`, `models`, `HASHED_ARGUMENTS`), which hash their
 elements. The analysis does not hash again the keys that come from some
 containers, whose stored hashes CPython reuses in the common cases: a set,
 a frozenset or a dict of exactly that class, for a set, a set method and
@@ -3675,7 +3673,7 @@ function), with each stored key that is another object (the stored key's
 where the hashes are equal; the same object is found by identity). The
 stored keys of a set method that takes iterables include their elements,
 which Python puts in a new set. The comparisons of a site are one record
-(`_KeyLookup`), which every stored key reaches once per container that
+(`KeyLookup`), which every stored key reaches once per container that
 holds it. Until the first key arrives, it keeps each stored key once;
 from then on it compares each stored key but the first as it arrives, so
 it keeps only whether the first key was stored, to compare it when a
@@ -3952,15 +3950,15 @@ from values that the analysis does not see (`i + 1`, an argument from
 outside): the completion (Part 3) then reads every element or writes to
 `unknown`.
 
-A subscript site is one constraint on its container node (`_Subscript`)
-and, for reads and for writes, one on its key node (`_KeyedGroup`), which
+A subscript site is one constraint on its container node (`Subscript`)
+and, for reads and for writes, one on its key node (`KeyedGroup`), which
 keeps the containers and keys that reach the site: a key that arrives
 meets every container seen so far, and a container every key seen, each
 pair once. Of the keys that are not a constant or a pattern only the first
 is applied to a container, since each of them reads or writes every
 element of it; a type form is no key. What the key of a site hashes and
 compares (see *Hashing*) is one lookup per key node, scope and site
-(`_subscript_keys`), which each dict that the site reaches joins: whether
+(`subscript_keys`), which each dict that the site reaches joins: whether
 a stored key is compared depends on the key, not on the dict.
 
 - Limit: `insert`, `pop(0)` and `sort` do not shift positions.
@@ -3976,7 +3974,7 @@ key: as the lookup key, it reads every element.
 The pattern read is the subscript load `d[k]` and the
 lookups `get`, `pop` and `setdefault`, which read as it does, of a dict
 or a dict of `collections` (`OrderedDict`, `defaultdict`, `Counter`). It
-uses the matching of `getattr` (`Pattern.matches`), and a field that a
+uses the matching of `getattr` (`State::pattern_matches`), and a field that a
 store adds later is matched when it appears. A key that holds a pattern
 and other objects reads what each of them reads: a constant its field, a
 str of unknown value or any other object every element, so the read is
@@ -4017,7 +4015,7 @@ the keys.
 **The containers of `collections`.** `OrderedDict`, `defaultdict` and
 `Counter` are dicts, and `deque` is a list: a call of one of these classes
 makes a container as a call of `dict` or `list` does, and so does a value
-that the stubs or an annotation type as one of them (`builtin_models.py`,
+that the stubs or an annotation type as one of them (`models`,
 `CONTAINER_CLASSES`). It keeps its elements as its builtin type does
 (the keys of a dict, which iteration gives and lookups hash), but a
 `deque` keeps no positions, since `appendleft` and `popleft` move them:
@@ -4055,7 +4053,7 @@ so the calls, and what the factories make (a copy of the dict, another
 - Limit: `+` on an instance of a subclass of `list` copies the list's
   storage in Python and calls no `__iter__`; the analysis iterates the
   operand, so the subclass's `__iter__` gets an edge
-  (`test_limit_list_concatenation_iterates_a_list_subclass`).
+  (`limit_list_concatenation_iterates_a_list_subclass`).
 
 #### Iteration
 
@@ -4071,7 +4069,7 @@ analysed class and no builtin class (`list`) of its type defines `__iter__` but
 one defines `__getitem__`, `iter()` gives an iterator whose `next()` calls
 `__getitem__` with an index that is not known (the sequence protocol), from the
 scope that iterates. That fallback is one record per class, kind of the
-iterated object, iteration and result (`_Sequences`), attached to the lookup of
+iterated object, iteration and result (`Sequences`), attached to the lookup of
 `__getitem__` through each object that it is given: the rule reads only
 whether a lookup finds a method, and the objects of one kind and class find the
 same, but not in the same round. The record keeps no set of the lookups that it
@@ -4099,7 +4097,7 @@ it.
 
 A `match` statement runs each case where the cases before it did not match
 (see *Paths, joins and loops*), and a capture binds what its position in
-the pattern holds (`matching.py`, from the language reference):
+the pattern holds (`builder::matching`, from the language reference):
 
 - a capture of the whole pattern (`case x:`, `case p as x`) binds the
   subject;
@@ -4159,8 +4157,8 @@ an async generator, and so does a generator expression that has an `async
 for` or an `await` outside its first iterable (the first iterable runs in
 the enclosing scope), also inside a list, set or dict comprehension in it,
 which the generator expression awaits; not inside a nested generator
-expression or lambda, which is a scope of its own (`scopes.py` marks these
-expressions). `async for` gives what it yields, as `for` does for a
+expression or lambda, which is a scope of its own (`pycg_syntax::scopes`
+marks these expressions). `async for` gives what it yields, as `for` does for a
 generator. Its other methods are those of `types.AsyncGeneratorType` in the
 stubs, named by that path: `__aiter__` returns the generator itself (the
 stub's `Self`), and `__anext__`, `asend`, `athrow` and `aclose` give what
@@ -4188,21 +4186,19 @@ imported even when the module is missing, since Python runs them before
 the import fails. A relative import that goes beyond the top-level
 package imports nothing: the package root is not a package. In an
 absolute import, the modules that are built-in or frozen in every
-supported Python (`BUILTIN_OR_FROZEN_MODULES` of `imports.py`: the
+supported Python (`BUILTIN_OR_FROZEN_MODULES` of `program::imports`: the
 intersection of `sys.builtin_module_names` and
 `_imp._frozen_module_names()` over 3.12 to 3.15, static and shared builds,
 computed once) come before any file, as in Python, also for submodules
 (`importlib` is not frozen, `importlib.util` is): such a module is outside
 code, and no absolute import reaches an analysed module of that name. The
-set is a constant, so the result does not depend on the Python that runs
-the analysis.
+set is a constant.
 
 Python imports a builtin or frozen module before any file on the path, so an
 analysed module of the same name (`os.py`) is not what an absolute import
 gives. The analysis applies this only to the modules that are builtin or
 frozen in every supported Python and build (`os` is frozen in all of them);
-a module that is builtin only in some builds (`math`) is the analysed file,
-so the result is the same on every Python that runs the analysis.
+a module that is builtin only in some builds (`math`) is the analysed file.
 
 **Literal imports.** `importlib.import_module("a.b")` and `__import__("a.b")`
 with a str literal are imports too, where the called name is, in the scope
@@ -4210,13 +4206,13 @@ that reads it, the module's import of that function or the builtin (a
 parameter of that name is not it). The call gives the module only if its
 callee is that function, and `__import__` gives the top-level package
 unless `fromlist` is a non-empty literal. The literal must be dotted
-identifiers, as `str.isidentifier` says, whose Unicode tables follow the
-running Python, so a name with characters that only a newer Unicode
-version classes as letters is followed only there.
+identifiers, as `str.isidentifier` says with the Unicode 16.0.0 tables of
+CPython 3.14 (`pycg_syntax::names`), so a name with characters that only a
+newer Unicode version classes as letters is not followed.
 
 - Limit: a name that is no literal imports nothing.
 - Limit: a relative name (`import_module(".alpha", "pkg")`) is not followed
-  (`test_limit_a_relative_literal_import_is_not_followed`).
+  (`limit_a_relative_literal_import_is_not_followed`).
 
 **`sys.modules`.** A read `sys.modules["a.b"]` with a str literal of dotted
 identifiers, where `sys` is the module's import of `sys`, also gives the
@@ -4299,21 +4295,21 @@ package supplies a name:
   of `from p.n import T` is the module `p.n` itself, as in CPython.
 - Limit: a submodule that a package attribute shadows is analysed, and its
   calls count, where Python never imports it
-  (`test_limit_a_submodule_that_a_package_attribute_shadows_is_analysed`,
+  (`limit_a_submodule_that_a_package_attribute_shadows_is_analysed`,
   the micro-benchmark case `imports/package_attribute_shadows_submodule`).
 - Limit: in a module's own stub, an attribute chain after an imported
   name (`from p import X`, then `X.T`; or `p.X.T`) is joined into one
   dotted name (`p.X.T`) and resolved on the file system. Where the
   package binds `X` to something else and a file `p/X.py` exists, Python
   names the package's `X.T`; the analysis names the file's
-  (`test_limit_a_stub_attribute_chain_reads_a_submodule_file`). In the
+  (`limit_a_stub_attribute_chain_reads_a_submodule_file`). In the
   source, such an annotation reads the attributes and names the
   package's.
 - Limit: `import p.n as c` binds the module `p.n`. CPython reads the
   attribute `n` of `p` after the import (and so on for each part of a
   longer name), which is another value where the package rebinds `n`
   after it imported the submodule
-  (`test_limit_import_as_binds_the_submodule_not_the_package_attribute`).
+  (`limit_import_as_binds_the_submodule_not_the_package_attribute`).
   Reading the parts at the import would be wrong for a lazy import, whose
   parts are read where its name is first read.
 
@@ -4349,7 +4345,7 @@ that the coroutine type does not have, where Python raises
 outside code. A fix that prunes the names outside the stubs was built and
 measured; it leaves a receiver empty where the wrong name was, and the
 receiver completion then adds an edge that the engine did not have. The
-maintainer left it out (2026-11-15); a test pins the limit.
+maintainer left it out (2026-11-15); a case pins the limit.
 
 **Hubs reach class hierarchies.** `unittest`'s skip decorators rebind their
 argument, so every name that they decorate holds every item that they
@@ -4392,17 +4388,18 @@ values*).
 
 ## Order independence
 
-The solver takes its processing order from `Solver.order`, first in, first
-out. Other orders (last in, first out; reversed; seeded random) exist only
-as a test hook: `tests/test_order_independence.py` checks under five orders
-that the results do not depend on the order. It also checks that they do
+The solver takes its processing order from `pycg_solver::Order`, first in,
+first out. Other orders (last in, first out; reversed; seeded random) exist
+only as a test hook: `crates/pycg/tests/properties/` checks under five
+orders, on every case and micro case, that the results do not depend on
+the order. It also checks that they do
 not depend on the order of the entry modules, which decides the order in
 which modules are built, and so the order in which classes are made: no
 rule orders classes by when they were made across modules.
 
 Objects are numbered in the order in which they first reach a node.
 Constraints see new objects in that order, and readers of a points-to set
-(`Solver.objects`, which includes what the constraints being applied have
+(`Solver::objects`, which includes what the constraints being applied have
 added) get it in that order. The output is sorted. So results do not
 depend on object identity or hashing.
 
@@ -4418,11 +4415,11 @@ reads only constant nodes. Class lookups wait for complete hierarchies
 not fixpoint steps: whether Python's own special method may run
 (`__contains__`, an attribute hook, `__new__`, `__get__`, `__await__`,
 `__class_getitem__`, a metaclass's `__getitem__`) is decided like a lookup
-(`Hierarchy.python_method`, and `Hierarchy.descriptor_itself` for whether a
+(`State::python_method`, and `Unless::DescriptorItself` for whether a
 descriptor is itself the value of a load), when the class is ready and
 again when its MROs grow, and so is whether a class may derive from
 another, or may not, for a class test and for a property
-(`Hierarchy.relation`).
+(`State::may_relate`).
 
 ### Saturation and the rounds
 
@@ -4447,27 +4444,26 @@ from what is not:
   constraints add (edges, objects, constraints, call edges) waits for the
   next propagation. Which classes are unknown is decided from that
   fixpoint before the constraints apply, so the constraints of one round
-  see one answer, for the objects they apply to and those they hold. Additions commute, and a constraint attached in the
+  see one answer, for the objects they apply to and those they hold.
+  Additions commute, and a constraint attached in the
   round sees the node's set at that fixpoint, so the state after the round
   does not depend on the order in which the constraints were applied.
 
 So the state after each round is a function of the state before it, and by
 induction a function of the program and the cap. The fixpoint steps below
-run when a round adds nothing, as before. `tests/test_order_independence.py`
-runs programs that saturate under five orders and every order of their
-entry modules, and `tests/unit/test_solver_properties.py` compares the
-solver with a cap of two to a reference that implements the rounds by
-brute force.
+run when a round adds nothing, as before. `crates/pycg/tests/properties/`
+runs every case and micro case at caps of 1, 2 and 3 under five orders,
+and `crates/solver/tests/properties.rs` compares the solver, with a cap of
+two and without one, in every order to a reference that implements the
+rounds by brute force.
 
 ### Rules that wait
 
 A rule that waits for the class of an instance (see *Records on demand*)
 must do what it would have done at once, in the same round, since what
 the constraints of a saturated node saw depends on the rounds (above).
-Three invariants make it so. `tests/test_waiting_lookups.py` checks them:
-on programs that saturate, it compares the document, and the round in
-which each object first reaches each node, with the same analysis whose
-rules run at once.
+Three invariants make it so. The cases of `tests/cases/waiting/` pin the
+documents of programs whose rules wait.
 
 1. **A waiting rule acts only through its lookup.** Until its lookup gets
    an object, nothing that the rule makes has an effect: its constraints
@@ -4481,7 +4477,7 @@ rules run at once.
 2. **The lookups of one name on one class through its instances get their
    first object in the same round.** The walk of the MROs subscribes each
    of them to the same class attributes, and the rules wake inside
-   `Solver.add_object` and `add_edge`, before the object or the edge
+   `Solver::add_object` and `add_edge`, before the object or the edge
    arrives, so a wake costs no round. A lookup that fills through a node
    of its own per instance gets its object a round after the walk; the
    `__getattr__` fallback is the one such case, and it wakes the waiting
@@ -4489,14 +4485,13 @@ rules run at once.
 3. **No waiting rule sees an opaque object.** A class that becomes unknown
    first wakes the rules that wait for it, while its instances are not
    opaque yet; then all its lookups get the saturated value, as those of
-   the rules run at once would. The audit of the saturation tests checks
-   each receiver as its rule wakes.
+   the rules run at once would.
 
 ### The fixpoint steps
 
 The solver reaches a fixpoint; then the steps below run in this order,
 each only if the step before it added nothing, and the solve continues,
-until no step adds anything (`Analysis.solve`):
+until no step adds anything (`State::solve`):
 
 1. **Decide the class hierarchies that still wait.** A base expression that
    holds nothing holds no base; classes that still wait after that are on
@@ -4602,7 +4597,7 @@ itself be such a copy (an instance whose `__call__` is another instance):
 copies are keyed by the call at the root of that chain, which is finite,
 not by the call that each extends, which would make a new key for each
 link. The instances of a class share one call of each special method at a
-root (`_dunder_calls`, keyed as in the table: nothing for an instance), and
+root (`dunder_calls`, keyed as in the table: nothing for an instance), and
 each instance that asks for it attaches its own lookup of the method to it
 once, so each instance's method is still bound to that instance. Its
 result node is the union of what each instance's call gave, joined by an
@@ -4624,10 +4619,10 @@ that it was asked with the same, so a kind of call that broke the rule
 fails the tests instead of losing values.
 
 A plain stub method (a stub function with no rule of its own, that returns
-no argument, and that no table of `builtin_models.py` lists,
-`GROUP_EXCLUDED_PATHS`) called through bound methods of many receivers at
+no argument, and that no table of `models` lists, `group_excluded` of
+`engine::outside_calls`) called through bound methods of many receivers at
 one call is one call for all of them, up to the cap of receivers
-(`_BoundGroup`): a tuple of receivers goes to the group that holds it, else
+(`BoundGroup`): a tuple of receivers goes to the group that holds it, else
 to the last group while that holds fewer than the cap, else to a new one; a
 rule that observes a group sees every tuple of it, also those added before
 it. its receiver positions are nodes that hold the receivers, and its
@@ -4698,8 +4693,8 @@ them, so no kind of node keys another of its own kind:
 | What `repr()` of a builtin container reaches | container |
 | What a conversion converts with `repr()` | the conversion (made by the builder or by the rule that converts) |
 | Lookup | class, name, receiver, `after` and `unless` |
-| Rules that wait until a class may answer a name (`Hierarchy.later`) | class, name, `after` and `unless`; in it, one entry per rule with its arguments and receiver, which a constraint makes when it applies to an object |
-| Loads of an attribute that no instance has written yet (`Analysis.read_field`) | class and name; in it, the result node of each load with its instances, which a load makes when it applies to an instance |
+| Rules that wait until a class may answer a name (`State::later`) | class, name, `after` and `unless`; in it, one entry per rule with its arguments and receiver, which a constraint makes when it applies to an object |
+| Loads of an attribute that no instance has written yet (`State::read_field`) | class and name; in it, the result node of each load with its instances, which a load makes when it applies to an instance |
 | A class and the classes of its instances (a class method's receiver, `type[C]`) | class |
 | The names of a class or instance, and the members of a class (reflection) | class or instance |
 | The analysed classes below an outside class, or their instances (an annotation) | stub class and kind |
@@ -4707,60 +4702,59 @@ them, so no kind of node keys another of its own kind:
 | The mode and buffering of an opened file; the buffering that a constant mode reads | the call; the call and the mode, a str from the source |
 | Constant node | object |
 | What a construct iterates (`xs += ys`, slice store, `extend`) | the operator, the slice, or the arguments of the call bound to the model |
-| What an unpacked argument passes (`_Spread`), and its fields | call origin and argument; key of a field of the containers that it unpacks |
+| What an unpacked argument passes (`Spread`), and its fields | call origin and argument; key of a field of the containers that it unpacks |
 | Subscription of a lookup to a field, or to a class's `__getattr__` | field, receiver and lookup node |
 | `__getattr__` bound to a receiver, before it becomes a `Fallback` | receiver and lookup node |
 | Call back of an argument | call back and argument node |
 | Handler of a tuple of exception classes | tuple and handler node |
 | Subscription of the filter of a class test to a class expression or a position of a tuple of classes | node, filter (one per test and branch), alternative (one per value of the class expression) and position |
-| Hub of a dict update (`_DictHub`) | source node |
-| Key lookup of a subscript (`_subscript_keys`) | key node, scope and site |
-| Sequence fallback of an iteration (`_Sequences`) | class, kind of the iterated object, iteration and result node |
-| Hook calls of an instance (`_HookCalls`) | lookup node of the hook |
-| Accessor calls of a class (`_AccessorHooks`; `_Accessors`) | class and hook, or class, hook and entry for an entry met after a saturation; accessor node, call, kinds and width |
-| Field writes of a store decision (`_FieldWrites`) | decision node |
-| Loads through a lookup (`_Deliveries`) | lookup node |
-| Calls of a class waiting on one of its nodes (`Solver.share`) | node, rule and the rule's arguments other than the call |
-| Group of bound calls of a plain stub method (`_BoundGroup`) | the call that it extends, the method, the number of receivers and whether the class of the first is unknown; a list of groups of at most the cap of receivers |
+| Hub of a dict update (`DictHub`) | source node |
+| Key lookup of a subscript (`subscript_keys`) | key node, scope and site |
+| Sequence fallback of an iteration (`Sequences`) | class, kind of the iterated object, iteration and result node |
+| Hook calls of an instance (`HookCalls`) | lookup node of the hook |
+| Accessor calls of a class (`AccessorHooks`; `Accessors`) | class and hook, or class, hook and entry for an entry met after a saturation; accessor node, call, kinds and width |
+| Field writes of a store decision (`FieldWrites`) | decision node |
+| Loads through a lookup (`Deliveries`) | lookup node |
+| Calls of a class waiting on one of its nodes (`State::share`) | node, rule and the rule's arguments other than the call |
+| Group of bound calls of a plain stub method (`BoundGroup`) | the call that it extends, the method, the number of receivers and whether the class of the first is unknown; a list of groups of at most the cap of receivers |
 
 The other rules make nodes and constraints per call and object, or per
 constraint and object, and no rule makes a constraint whose application
 makes another of its kind without passing through a keyed call or object.
 
-No rule walks a hierarchy with a Python frame per class: lookups,
+No rule walks a hierarchy with a stack frame per class: lookups,
 `type[...]` and class annotations, `except` and class patterns walk a chain
-or a fan of classes iteratively, so the analysis needs a few dozen frames
-whatever the length or width of a hierarchy. The test analyses a chain and a
-fan of 300 classes with at most 200 frames above its own.
+or a fan of classes iteratively, so the stack that the analysis needs does
+not grow with the length or width of a hierarchy. The termination test
+analyses a chain and a fan of 300 classes.
 
-**The test.** `tests/test_termination.py` searches seeded random programs
-for a counterexample in five families: callables wrapped, bound and
-stored back in every order; special methods assigned classes and functions
-while iteration, calls, subscripts, `in`, `with`, operators and `yield
-from` feed their results back into the values they came from; classes
-whose bases are builtin and outside classes read from attributes that get
-more values later, with attribute hooks, accessed in every way; typed
-outside values fed back into the variable they came from; and classes
-whose `__new__`, `__call__` and `__init__` are other classes, callable
-instances, class methods and the builtins that call back or make tuples
-by arity (`map`, `filter`, `zip`, `sorted` with a key), so that receivers pile up
-before a call back that calls a class again. Programs
+**The test.** `crates/pycg/tests/termination/` searches seeded random
+programs for a counterexample in five families: callables wrapped, bound
+and stored back in every order; special methods assigned classes and
+functions while iteration, calls, subscripts, `in`, `with`, operators and
+`yield from` feed their results back into the values they came from;
+classes whose bases are builtin and outside classes read from attributes
+that get more values later, with attribute hooks, accessed in every way;
+typed outside values fed back into the variable they came from; and
+classes whose `__new__`, `__call__` and `__init__` are other classes,
+callable instances, class methods and the builtins that call back or make
+tuples by arity (`map`, `filter`, `zip`, `sorted` with a key), so that
+receivers pile up before a call back that calls a class again. Programs
 that once broke the analysis are fixed cases. A program fails the test by
-raising any error, by running past a time limit, or by making too many
-objects, calls, nodes and per-key constraints, counted over every table of
-what the analysis makes on demand; the test lists every table of the
-analysis as counted or not, so a new table cannot be left out. The fixed
-cases and the first 100 programs of each family must also give the same
-call graph when the solver takes its worklist last in, first out.
+panicking, or by making 5,000 or more objects, calls, nodes and per-key
+constraints, counted over every table of what the analysis makes on
+demand; one program must fill every counted table. The fixed cases and
+the first 100 programs of each family must also give the same document
+when the solver takes its worklist last in, first out.
 
 ## Bounds
 
 Seven cut-offs bound what the analysis makes. Six are constants of the
 code, the same for every program. The seventh, the cap on the objects of
 a node, is the one parameter of the analysis that its user sets
-(`CallGraphGenerator(..., cap=...)`, `--cap`): it trades precision and
-recall against cost, and what suits a small library does not suit a large
-closure of the standard library. The document records it (`tool.cap`).
+(`--cap`): it trades precision and recall against cost, and what suits a
+small library does not suit a large closure of the standard library. The
+document records it (`tool.cap`).
 
 | Bound | Value | Why | Past it |
 |---|---|---|---|
@@ -4769,10 +4763,10 @@ closure of the standard library. The document records it (`tool.cap`).
 | Steps of an outside name past its root (`EXTERNAL_STEPS_PAST_ROOT_MAX`) | 2; 3 for a member found in a stubbed outside base | Termination and precision: loads on generic values would make names without end, which no code calls; a stub class has finitely many members. Only attribute loads extend a name: the result of a call of code without stubs has none | One external without a name (see *External names*) |
 | Receivers that a call passes before its arguments (`RECEIVERS_PER_CALL_MAX`) | 3 | Termination: callables that pass receivers on add one at each step (`C.__new__ = D`, `D.__new__ = C`) | The outermost receivers are dropped (see *Termination*) |
 | Layers of generic arguments in the stub data (`GENERIC_ARGUMENT_DEPTH_MAX` of `tools/generate_stubs.py`) | 2 | Termination and size: the types of recursive aliases nest without end, and the containers of stubbed results are keyed by the position in the type | A deeper argument keeps its class without its type arguments (see *Stub data*) |
-| Nested attachments of constraints in the solver (`_ATTACH_NESTING_MAX`) | 50 | The Python stack: a chain of constraints that attach constraints to nodes that already hold objects would nest calls without end | The application waits for the solve; the result is the same (see *The solver*) |
-| Objects that a node holds (the cap, a parameter; `DEFAULT_CAP`) | 5,000 by default; any positive integer, or none | Cost and precision: a hub of generic code (a parameter that every strategy of a library reaches) costs its size times its constraints, and its calls are noise; real registries (the lexers of pygments) stay under it | The node holds the saturated value only: calls of it are unresolved (`saturated`), what it gives is saturated, stores into it are dropped. What it stood for is lost: code reached only through it is code that no analysed code calls, and a set it would have filled holds less, so a rule that depends on how much a set holds (nothing, or at most four computed names) may apply where it would not without the cap and add edges (`leaf -> fallback`, `main -> C.a` in *The solver*). The bound of hierarchies counts candidates too, but fewer candidates give a part of the hierarchies, which the exhaustive order over-approximates: it adds none; the bound of receivers counts the receivers that a call passes, not the objects of a set. A rule that widens a value adds one object (the pattern rule for a class member, see *Computed attribute names*), so a node saturates one object sooner: at a cap of 1 such a widening may lose a call that the analysis without it keeps |
+| Nested attachments of constraints in the solver (`ATTACH_NESTING_MAX`) | 50 | The stack: a chain of constraints that attach constraints to nodes that already hold objects would nest calls without end | The application waits for the solve; the result is the same (see *The solver*) |
+| Objects that a node holds (the cap, a parameter; `CAP_DEFAULT_OBJECTS`) | 5,000 by default; any positive integer, or none | Cost and precision: a hub of generic code (a parameter that every strategy of a library reaches) costs its size times its constraints, and its calls are noise; real registries (the lexers of pygments) stay under it | The node holds the saturated value only: calls of it are unresolved (`saturated`), what it gives is saturated, stores into it are dropped. What it stood for is lost: code reached only through it is code that no analysed code calls, and a set it would have filled holds less, so a rule that depends on how much a set holds (nothing, or at most four computed names) may apply where it would not without the cap and add edges (`leaf -> fallback`, `main -> C.a` in *The solver*). The bound of hierarchies counts candidates too, but fewer candidates give a part of the hierarchies, which the exhaustive order over-approximates: it adds none; the bound of receivers counts the receivers that a call passes, not the objects of a set. A rule that widens a value adds one object (the pattern rule for a class member, see *Computed attribute names*), so a node saturates one object sooner: at a cap of 1 such a widening may lose a call that the analysis without it keeps |
 
-Without a cap (`cap=None`, `--cap none`) no node saturates, and the
+Without a cap (`--cap none`) no node saturates, and the
 analysis is the one without saturation. It still ends in principle (see
 *Termination*: the cap only helps), but on inputs where many values meet
 (the closure of `json` in the standard library, the strategies of

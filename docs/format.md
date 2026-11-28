@@ -2,9 +2,9 @@
 
 PyCG writes one JSON document. It replaces the simple format, the FASTEN
 format and the assignment-graph dump. The document is deterministic: the
-same input gives the same bytes on every run and every supported Python
-version. Object keys are sorted, lists are sorted as stated below, and the
-text is compact (`json.dumps(..., sort_keys=True, separators=(",", ":"))`).
+same input gives the same bytes on every run and platform. Object keys are
+sorted, lists are sorted as stated below, and the text is compact, as
+`json.dumps(..., sort_keys=True, separators=(",", ":"))` writes it.
 
 ```json
 {
@@ -40,7 +40,7 @@ text is compact (`json.dumps(..., sort_keys=True, separators=(",", ":"))`).
 ## Parts
 
 **`format`** names this format and its version. A reader refuses a version
-that it does not know (`pycg.formats.edges` raises `ValueError`).
+that it does not know.
 
 **`tool`** is the version of PyCG, the typeshed commit of its stub data,
 and the cap of the analysis: the most values that it keeps for one node
@@ -263,5 +263,6 @@ directly, not every site that it affected.
 
 ## Reading the document
 
-`pycg.formats.edges(document)` returns the classic map from each node to
-the sorted names it calls.
+The classic call graph maps each node to the sorted names that it calls.
+Each definition that is not a class, and each outside name, is a node; a
+caller's callees are the union of the callees of its sites.

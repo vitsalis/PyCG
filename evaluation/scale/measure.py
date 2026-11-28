@@ -12,7 +12,7 @@ EVALUATION = SCALE.parent
 OUTCOME_FINISHED = "finished"
 OUTCOME_KILLED_BY_THE_CAP = "killed by the cap"
 OUTCOME_NOT_PORTED = "not ported"
-RUST_STATUS_NOT_PORTED = 3
+STATUS_NOT_PORTED = 3
 OUTCOME_CONTAINER_OUT_OF_MEMORY = "killed: the container ran out of memory"
 OUTCOME_MACHINE_OUT_OF_MEMORY = "killed: the machine ran out of memory"
 OUTCOME_KILLED = "killed by SIGKILL"
@@ -32,9 +32,9 @@ DESCRIPTION = """Measures a PyCG checkout on one package of the scale set
 (evaluation/scale/README.md).
 
     python3 -I evaluation/scale/measure.py run --checkout PATH --name NAME \\
-        --flavour new --package rich --out OUT --memory-mib 4096
+        --package rich --out OUT --memory-mib 4096
     python3 -I evaluation/scale/measure.py compare BASE_RECORD RECORD
-    python3 -I evaluation/scale/measure.py summary RESULT [--oracle ORACLE]
+    python3 -I evaluation/scale/measure.py summary RESULT [--base BASE]
     python3 -I evaluation/scale/measure.py container-mib 4096
 
 The container needs RUNNER_HEADROOM_MIB above the analysis's cap, so that
@@ -57,16 +57,12 @@ class MeasureError(Exception):
     pass
 
 
-def outcome_of(record, flavour, events_before, events_after):
+def outcome_of(record, events_before, events_after):
     if record["status"] == "ok":
         return OUTCOME_FINISHED
     if record["status"] == "memory":
         return OUTCOME_KILLED_BY_THE_CAP
-    if (
-        flavour == "rust"
-        and record["status"] == "crash"
-        and record.get("exit_status") == RUST_STATUS_NOT_PORTED
-    ):
+    if record["status"] == "crash" and record.get("exit_status") == STATUS_NOT_PORTED:
         return OUTCOME_NOT_PORTED
     if record["status"] == "crash" and record.get("exit_status") == -signal.SIGKILL:
         return killed_from_outside(events_before, events_after)
@@ -141,7 +137,6 @@ def measure(
     memory_mib,
     timeout_seconds,
     python,
-    flavour,
     cgroup_memory_max=CGROUP_MEMORY_MAX,
     cgroup_memory_events=CGROUP_MEMORY_EVENTS,
     meminfo=PROC_MEMINFO,
@@ -157,7 +152,7 @@ def measure(
         raise MeasureError(
             f"{project.directory} has no Python source: run make eval-inputs"
         )
-    tool = run.Tool(name, flavour, Path(checkout).resolve(), python)
+    tool = run.Tool(name, Path(checkout).resolve(), python)
     job = run.Job(f"scale/{project.name}", files, project.root)
     graph = run.graph_file(Path(out) / name, job.key)
     available = memory_available_mib(meminfo)
@@ -170,14 +165,12 @@ def measure(
         "version": project.version,
         "archive_sha256": project.sha256,
         "tool": version,
-        "flavour": flavour,
         "python": ".".join(map(str, run.python_version(python))),
-        "hash_seed": tool.hash_seed,
         "memory_cap_mib": memory_mib,
         "memory_available_mib": available,
         "timeout": timeout_seconds,
         "files": len(files),
-        "outcome": outcome_of(record, flavour, events_before, events_after),
+        "outcome": outcome_of(record, events_before, events_after),
         "seconds": record.get("seconds"),
         "wall_seconds": record.get("wall_seconds"),
         "peak_rss_mib": record.get("peak_rss_mib"),
@@ -216,8 +209,7 @@ MEASURED_ROWS = ("seconds", "wall seconds", "peak MiB")
 def heading(result):
     return (
         f"{result['package']} {result['version']}: {result['files']} files, "
-        f"cap {result['memory_cap_mib']} MiB, flavour {result['flavour']}, "
-        f"Python {result['python']}"
+        f"cap {result['memory_cap_mib']} MiB, Python {result['python']}"
     )
 
 
@@ -264,30 +256,30 @@ def records_in(result):
     return {record["package"]: record for record in map(read_record, found)}
 
 
-def ratio(now, oracle):
-    if now is None or oracle is None or oracle == 0:
+def ratio(now, base):
+    if now is None or base is None or base == 0:
         return "-"
-    return f"{now / oracle:.3f}"
+    return f"{now / base:.3f}"
 
 
-def graphs(now, oracle):
-    if now["graph_sha256"] is None or oracle["graph_sha256"] is None:
+def graphs(now, base):
+    if now["graph_sha256"] is None or base["graph_sha256"] is None:
         return "-"
-    return "identical" if now["graph_sha256"] == oracle["graph_sha256"] else "differ"
+    return "identical" if now["graph_sha256"] == base["graph_sha256"] else "differ"
 
 
-def summary(result, oracle=None):
+def summary(result, base_result=None):
     measured = records_in(result)
     if not measured:
         raise MeasureError(f"{result} has no records of the scale set")
-    oracles = {} if oracle is None else records_in(oracle)
+    bases = {} if base_result is None else records_in(base_result)
     columns = ["package", "outcome", "seconds", "peak MiB"]
-    if oracle is not None:
+    if base_result is not None:
         columns += [
-            "oracle outcome",
-            "oracle seconds",
+            "base outcome",
+            "base seconds",
             "time ratio",
-            "oracle peak MiB",
+            "base peak MiB",
             "memory ratio",
             "graphs",
         ]
@@ -303,8 +295,8 @@ def summary(result, oracle=None):
             shown(record["seconds"]),
             shown(record["peak_rss_mib"]),
         ]
-        if oracle is not None:
-            base = oracles.get(package)
+        if base_result is not None:
+            base = bases.get(package)
             if base is None:
                 cells += ["not measured", "-", "-", "-", "-", "-"]
             else:
@@ -329,9 +321,6 @@ def main(argv=None):
     measuring = commands.add_parser("run", help="measure one package")
     measuring.add_argument("--checkout", type=Path, required=True)
     measuring.add_argument("--name", required=True, help="name of the results")
-    measuring.add_argument(
-        "--flavour", choices=sorted(run.analyse.FLAVOURS), required=True
-    )
     measuring.add_argument("--package", required=True)
     measuring.add_argument("--out", type=Path, required=True)
     measuring.add_argument("--memory-mib", type=int, required=True)
@@ -344,7 +333,7 @@ def main(argv=None):
         "summary", help="one row for each package measured in a result"
     )
     summarising.add_argument("result", type=Path)
-    summarising.add_argument("--oracle", type=Path)
+    summarising.add_argument("--base", type=Path)
     sizing = commands.add_parser(
         "container-mib", help="the memory of the container for a cap"
     )
@@ -358,7 +347,7 @@ def main(argv=None):
             print(comparison(read_record(args.base), read_record(args.record)))
             return 0
         if args.command == "summary":
-            print(summary(args.result, args.oracle))
+            print(summary(args.result, args.base))
             return 0
         found = projects.load_projects()
         if args.package not in found:
@@ -373,7 +362,6 @@ def main(argv=None):
             args.memory_mib,
             args.timeout,
             args.python,
-            args.flavour,
         )
     except (MeasureError, ValueError, OSError) as error:
         print(f"measure.py: {error}", file=sys.stderr)

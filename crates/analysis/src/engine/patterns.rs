@@ -7,7 +7,6 @@ use crate::engine::objects::{Kind, Object};
 use crate::engine::rules::{Rule, RuleId};
 use crate::engine::semantics::CallId;
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State};
 
 const TYPED_CLASSES_KEEPING_PATTERNS: [&str; 2] = ["builtins.str", "builtins.bytes"];
@@ -48,14 +47,6 @@ pub(crate) enum PatternRule {
 }
 
 impl PatternRule {
-    pub(crate) fn key(&self) -> &'static str {
-        match self {
-            PatternRule::Operand(_) => "Each:Patterns._pattern_operand",
-            PatternRule::Target { .. } => "Each:Patterns._pattern_target",
-            PatternRule::ClassInstance { .. } => "Each:Patterns._pattern_class_instance",
-        }
-    }
-
     pub(crate) fn kinds(&self) -> Option<&'static [Kind]> {
         match self {
             PatternRule::Target { .. } => Some(TARGET_KINDS),
@@ -92,7 +83,7 @@ fn cased_points(points: &[u32], case: &str) -> Vec<u32> {
     cased(&text, case).chars().map(u32::from).collect()
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn pattern_rule(&mut self, rule: PatternRule) -> RuleId {
         self.rule(Rule::Pattern(rule))
     }

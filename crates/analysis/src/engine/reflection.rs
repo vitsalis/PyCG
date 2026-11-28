@@ -10,7 +10,6 @@ use crate::engine::outside_calls::BoundId;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::CallId;
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, State, not_ported};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -29,7 +28,7 @@ pub struct Getmembers {
     loaders: FxHashMap<Sym, AccessId>,
 }
 
-impl<T: Trace> State<T> {
+impl State {
     fn when_default_member(
         &mut self,
         graph: &mut Graph,

@@ -3,7 +3,6 @@ use std::path::{Path, PathBuf};
 
 use pycg_analysis::Order;
 use pycg_analysis::engine::Engine;
-use pycg_analysis::engine::trace::Untraced;
 use pycg_analysis::program::Program;
 
 struct Scratch(PathBuf);
@@ -27,7 +26,7 @@ fn scratch(name: &str, files: &[(&str, &str)]) -> Scratch {
 
 fn warnings(root: &Path, package: &str, entry_points: &[&str]) -> Vec<String> {
     let entry_points: Vec<PathBuf> = entry_points.iter().map(PathBuf::from).collect();
-    let engine = Engine::new(Some(5000), Order::Canonical, Untraced);
+    let engine = Engine::new(Some(5000), Order::Canonical);
     let mut program = Program::new(&entry_points, Some(Path::new(package)), root, engine)
         .expect("the paths are on one drive");
     program.build_modules().expect("the paths are on one drive");
@@ -45,7 +44,7 @@ fn warnings(root: &Path, package: &str, entry_points: &[&str]) -> Vec<String> {
 }
 
 #[test]
-fn a_skipped_entry_point_is_warned_as_the_oracle_warns() {
+fn a_skipped_entry_point_is_warned() {
     let files = [
         ("pkg/__init__.py", ""),
         ("pkg/a.py", "def f():\n    pass\n"),
@@ -77,7 +76,7 @@ fn a_skipped_entry_point_is_warned_as_the_oracle_warns() {
 }
 
 #[test]
-fn a_module_nested_too_deep_is_warned_as_the_oracle_warns() {
+fn a_module_nested_too_deep_is_warned() {
     let deep = format!("x = 1\ny = 2\nz = {}1\n", "-".repeat(300));
     let scratch = scratch("deep", &[("pkg/deep.py", &deep)]);
     let found = warnings(&scratch.0, "pkg", &["pkg/deep.py"]);

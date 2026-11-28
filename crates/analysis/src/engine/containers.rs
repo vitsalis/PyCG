@@ -16,7 +16,6 @@ use crate::engine::protocols::OperatorId;
 use crate::engine::rules::Rule;
 use crate::engine::semantics::{CallId, Origin, Role, SiteKey};
 use crate::engine::symbols::Sym;
-use crate::engine::trace::Trace;
 use crate::engine::{Graph, OrderedMap, State, not_ported};
 use crate::model::constant_name;
 use crate::models::{LENGTH_HINT, builtin_kind};
@@ -323,7 +322,7 @@ pub(super) fn is_sequence(kind: &str) -> bool {
     SEQUENCES.contains(&kind)
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn add_inexact(&mut self, graph: &mut Graph, source: NodeId, dst: NodeId) {
         let rule = self.rule(Rule::AddInexact { dst });
         self.attach(graph, source, rule);
@@ -2868,7 +2867,7 @@ impl ContainerRule {
     }
 }
 
-impl<T: Trace> State<T> {
+impl State {
     pub(super) fn container_rule(&mut self, rule: ContainerRule) -> crate::engine::rules::RuleId {
         self.rule(Rule::Container(rule))
     }
