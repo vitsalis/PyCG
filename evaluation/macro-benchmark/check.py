@@ -7,7 +7,7 @@ from collections import Counter
 from pathlib import Path
 
 DESCRIPTION = """Checks the hand-written ground truths of the macro-benchmark
-(evaluation/macro-benchmark/README.md, "Writing a ground truth"). The exit
+(evaluation/benchmark-rules.md, "Writing a ground truth"). The exit
 status is 1 if a check fails.
 
     cd evaluation/macro-benchmark

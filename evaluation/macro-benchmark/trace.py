@@ -23,7 +23,7 @@ import types
 from pathlib import Path
 
 DESCRIPTION = """Records the calls that a macro-benchmark package makes while its tests
-run, into dynamic/PROJECT.json (evaluation/macro-benchmark/README.md,
+run, into dynamic/PROJECT.json (evaluation/benchmark-rules.md,
 "Traces").
 
     python evaluation/macro-benchmark/trace.py --python ENV/bin/python PROJECT"""

@@ -9,8 +9,7 @@ worse, and on which kind of code.
 
 - **The micro-benchmark** isolates one language feature per program. A
   case that fails names the feature that PyCG gets wrong, which a large
-  program cannot do. It grew from the benchmark of PyCG's 2021 paper, so
-  the two analyses compare on it.
+  program cannot do. It grew from the benchmark of PyCG's 2021 paper.
 - **The macro-benchmark** is real code, where the features mix and most
   calls cross modules and classes. It shows how well PyCG does on the
   packages that people analyse, both on calls inside the package and on
@@ -42,7 +41,9 @@ the time and peak memory of an analysis are measured, and whether it
 finishes under a memory cap. They have no ground truth and are not
 scored.
 
-The directory of each set has a README with its internals.
+The directory of each set has a README with how it was built.
+[benchmark-rules.md](benchmark-rules.md) holds the rules by which the
+ground truths are written, audited and extended.
 
 ## Results
 
@@ -54,13 +55,16 @@ other packages, whose names depend on how a tool models code that it does
 not analyse. The macro-benchmark's values sum the counts over the 60
 packages.
 
-The best values that main has reached:
+Measured by CI on main at commit 4564f944:
 
 | Set | Precision | Recall |
 |---|---|---|
-| Micro-benchmark, all edges | 0.9525 | 0.9493 |
-| Macro-benchmark, inside the package | 0.9262 | 0.8799 |
-| Macro-benchmark, outside the package | 0.9374 | 0.8217 |
+| Micro-benchmark, all edges | 0.952 | 0.950 |
+| Macro-benchmark, inside the package | 0.926 | 0.880 |
+| Macro-benchmark, outside the package | 0.938 | 0.821 |
 
-Every change is measured against its base on these values, and none may
-fall more than 0.01 below the base's.
+Every change is measured against its base on these six measures, and none
+may fall more than 0.01 below the base's.
+
+On the scale set, PyCG finishes 19 of the 20 packages, each in under
+4 minutes and 8 GiB ([scale/README.md](scale/README.md)).

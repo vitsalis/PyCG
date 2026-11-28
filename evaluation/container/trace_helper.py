@@ -36,7 +36,7 @@ USAGE = """usage:
     trace_helper.py check-trace TRACE BENCHMARK_DIR NAME PYTHON_IMAGE
     trace_helper.py compare COMMITTED_TRACE NEW_TRACE
 
-The checks of container/trace.sh (evaluation/macro-benchmark/README.md,
+The checks of container/trace.sh (evaluation/benchmark-rules.md,
 "Recording traces in a container")."""
 
 

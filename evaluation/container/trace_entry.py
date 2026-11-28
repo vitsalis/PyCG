@@ -19,7 +19,7 @@ PROJECTS_READER = BENCHMARK / "projects.py"
 DESCRIPTION = """Records the trace of one macro-benchmark project inside the `trace`
 service of evaluation/compose.yaml, writes it to /results/trace/NAME.json
 and, with --compare, compares it with the committed trace
-(evaluation/macro-benchmark/README.md, "Re-recording a trace").
+(evaluation/benchmark-rules.md, "Re-recording a trace").
 
     make eval-trace NAME=jmespath"""
 

@@ -16,8 +16,7 @@ CPython's extension modules define come from the `Lib/` sources of CPython
 | 3.15.2 | `5e58eaad7c58df58dfa8ea549c87996e01dd1077` |
 
 Do not edit by hand: regenerate. typeshed is licensed under the Apache
-License 2.0; its licence is in `LICENSE`. `docs/design.md` describes the
-format (*Format of the stub data*).
+License 2.0; its licence is in `LICENSE`.
 
 ## Third-party distributions
 

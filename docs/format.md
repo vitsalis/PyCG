@@ -1,15 +1,15 @@
 # Output format
 
-PyCG writes one JSON document. It replaces the simple format, the FASTEN
-format and the assignment-graph dump. The document is deterministic: the
-same input gives the same bytes on every run and platform. Object keys are
-sorted, lists are sorted as stated below, and the text is compact, as
-`json.dumps(..., sort_keys=True, separators=(",", ":"))` writes it.
+PyCG writes one JSON document. The document is deterministic: the same
+input gives the same bytes on every run and platform. Object keys are
+sorted, lists are sorted as stated below, and the text is compact (no
+whitespace between tokens) and ASCII: every character past ASCII is
+escaped as `\uXXXX`.
 
 ```json
 {
   "format": "pycg/1",
-  "tool": {"name": "pycg", "version": "1.0.0", "typeshed": "<commit>", "cap": 5000},
+  "tool": {"name": "pycg", "version": "2.0.0", "typeshed": "<commit>", "cap": 5000},
   "package": {"name": "pkg", "version": "2.1.0"},
   "modules": {
     "pkg.mod": {"file": "pkg/mod.py", "kind": "source", "status": "analysed"},
@@ -91,8 +91,9 @@ when no file of it does.
   - `failed`: the file cannot be decoded or parsed. The module has no
     definitions but itself (with lines `[0, 0]`) and no calls;
   - `partial`: the analysis stopped before a top-level statement that
-    nests deeper than it follows (247 levels, `docs/design.md`), with the
-    cause `DeepNesting (line 3)`, the line of that statement. The
+    nests deeper than it follows (247 levels, see
+    [Bounds](design.md#bounds)), with the cause `DeepNesting (line 3)`, the
+    line of that statement. The
     definitions and calls of the statements before it are kept, and the
     module may call less than its code does.
 
@@ -100,8 +101,8 @@ when no file of it does.
   of the error, with its line or byte where Python gives one
   (`SyntaxError (line 3)`, `UnicodeDecodeError (byte 17)`, `SyntaxError`,
   `RecursionError`, `MemoryError` when the source is too complex for
-  Python's parser): not its message, so that it is the same on every
-  version of Python.
+  Python's parser): not its message, so that it is the same on every run
+  and platform.
 
 **`definitions`** has every module, class and function (lambdas included)
 that the analysed source defines, by qualified name: its `kind`, its
@@ -207,9 +208,10 @@ whose code holds it; such sites come after the others, by `module`.
 - `unresolved`, when present, says why a call expression has no callee at
   all: the site is unknown, not unreachable. The causes are below.
 
-The edges of the classic call graph are `caller -> callee` for each callee
-of each site. A caller with no call site is in `definitions` and not in
-`calls`.
+The classic call graph has a node for each definition that is not a class
+and each outside name; its edges are `caller -> callee` for each callee of
+each site, so a caller's callees are the union of the callees of its sites.
+A caller with no call site is in `definitions` and not in `calls`.
 
 ### Implicit constructs
 
@@ -251,7 +253,7 @@ A closed list:
   the analysis knows), or a value whose type is not known;
 - `saturated`: the called expression may hold more values than the
   analysis keeps for one node (the cap, 5,000 by default, `tool.cap`; see
-  *Saturation* in `docs/design.md`), so it holds a value about which
+  [Bounds](design.md#bounds)), so it holds a value about which
   nothing is known.
 
 The cause is that of the called expression itself. Saturation of another
@@ -260,9 +262,3 @@ through a saturated value has `no value`, and an attribute looked up by a
 computed name whose candidates were lost with the instances of a class has
 `computed name`. So `saturated` marks the sites where the cap applied
 directly, not every site that it affected.
-
-## Reading the document
-
-The classic call graph maps each node to the sorted names that it calls.
-Each definition that is not a class, and each outside name, is a node; a
-caller's callees are the union of the callees of its sites.

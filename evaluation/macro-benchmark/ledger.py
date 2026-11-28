@@ -237,7 +237,7 @@ def skeleton(source, title, defaults=None, header=None):
     if header is None:
         header = [
             f"# Call-site ledger of {title}.",
-            "# Decide every `undecided` line; see macro-benchmark/README.md.",
+            "# Decide every `undecided` line; see evaluation/benchmark-rules.md.",
         ]
     lines = list(header)
     by_scope = {}

@@ -10,7 +10,7 @@
 # `make eval-inputs` under their content key (tools/inputs_key.py), so
 # that `make eval` pulls them instead. No service has network, and nothing
 # runs on the host. A new trace goes to evaluation/results/trace/, the only host
-# path that a service writes. See evaluation/macro-benchmark/README.md
+# path that a service writes. See evaluation/benchmark-rules.md
 # ("Re-recording a trace").
 #
 # A service runs as user 1000:1000. If that is not your user on Linux:
@@ -43,7 +43,7 @@ services:
   # The sources of the macro-benchmark (container/Dockerfile.inputs),
   # fetched when the image is built. The trace image takes its project's
   # source from it. A run of it serves the commands of
-  # macro-benchmark/README.md that read the sources.
+  # benchmark-rules.md that read the sources.
   inputs:
     <<: *sealed
     image: pycg-inputs

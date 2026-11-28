@@ -495,4 +495,4 @@ def test_the_readme_records_the_cpython_commits(tmp_path, reader, data):
         "| 3.13.1 | `commit-3.13.1` |",
         "| 3.15.0 | `commit-3.15.0` |",
     ]
-    assert "`docs/design.md` describes the" in readme
+    assert "Do not edit by hand: regenerate." in readme
